@@ -1,0 +1,20 @@
+{
+    "name": "opla",
+    "private": true,
+    "scripts": {
+        "dev": "cd webapp && npm run dev",
+        "build": "cd webapp && npm run build",
+        "start": "cd webapp && npm run start",
+        "lint": "cd webapp && npm run lint",
+        "test": "cd webapp && npm run test",
+        "precommit-lint": "cd webapp && npm run precommit-lint",
+        "prepare": "husky install"
+    },
+    "workspaces": [
+        "webapp"
+    ],
+    "devDependencies": {
+        "husky": "^8.0.0",
+        "lint-staged": "^15.1.0"
+    }
+}
