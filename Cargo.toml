@@ -14,7 +14,6 @@ name = "opla-cli"
 [workspace]
 members = [
   "crates/api",
-  "crates/cli",
   "crates/core",
   "crates/engines",
   "crates/workflows",

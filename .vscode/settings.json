@@ -1,8 +1,4 @@
 {
-    "rust-analyzer.linkedProjects": [
-        "./crates/cli/Cargo.toml",
-        "./crates/cli/Cargo.toml"
-    ],
     "eslint.workingDirectories": [
         {
             "pattern": "./webapp"
