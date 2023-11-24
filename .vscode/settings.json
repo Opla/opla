@@ -1,0 +1,15 @@
+{
+    "rust-analyzer.linkedProjects": [
+        "./crates/cli/Cargo.toml",
+        "./crates/cli/Cargo.toml"
+    ],
+    "eslint.workingDirectories": [
+        {
+            "pattern": "./webapp"
+        }
+    ],
+    "[typescript][typescriptreact]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
+}

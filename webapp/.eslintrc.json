@@ -1,0 +1,17 @@
+{
+  "env": {
+    "es6": true,
+    "node": true,
+    "jest": true
+  },
+  "extends": ["airbnb", "airbnb-typescript", "airbnb/hooks", "next/core-web-vitals", "prettier"],
+  "plugins": ["react", "react-hooks", "@typescript-eslint", "prettier"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "tsconfig.json"
+  },
+  "ignorePatterns": ["./desktop/*"],
+  "rules": {
+    "react/require-default-props": "off"
+  }
+}
