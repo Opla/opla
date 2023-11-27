@@ -14,14 +14,8 @@
 
 'use client';
 
-import ToggleTheme from '@/components/ToggleTheme';
+import Providers from './Providers';
 
-export default function Settings() {
-  return (
-    <main className="flex h-screen flex-col items-center justify-center">
-      <h2 className="text-center text-gray-800">LIGHT MODE</h2>
-      <h2 className="text-center text-white">DARK MODE</h2>
-      <ToggleTheme />
-    </main>
-  );
+export default function DefaultProviders() {
+  return <Providers />;
 }

@@ -1308,10 +1308,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "inference-engines"
-version = "0.1.0"
-
-[[package]]
 name = "instant"
 version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1458,6 +1454,10 @@ name = "linux-raw-sys"
 version = "0.4.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "969488b55f8ac402214f3f5fd243ebb7206cf82de60d3172994707a4bcc2b829"
+
+[[package]]
+name = "llm-engines"
+version = "0.1.0"
 
 [[package]]
 name = "lock_api"

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+'use client';
+
 import { Message } from '@/types';
 import { BiBot, BiUser } from 'react-icons/bi';
 import { TbCursorText } from 'react-icons/tb';
@@ -42,7 +44,7 @@ function MessageComponent({ message }: { message: Message }) {
                   {!isUser && text === null ? (
                     <TbCursorText className="h-6 w-6 animate-pulse" />
                   ) : (
-                    <p>{text as string}</p>
+                    <p className="select-auto">{text as string}</p>
                   )}
                 </div>
               </div>

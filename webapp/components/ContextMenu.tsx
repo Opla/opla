@@ -16,6 +16,7 @@
 
 import { ContextMenuItem } from '@/types';
 import { useEffect, useRef } from 'react';
+import useTranslation from '@/hooks/useTranslation';
 
 function ContextMenu({
   menu,
@@ -26,8 +27,9 @@ function ContextMenu({
   data: string;
   children: React.ReactNode;
 }) {
-  const card = useRef<HTMLDivElement>(null);
+  const contextContainer = useRef<HTMLDivElement>(null);
   const contextMenu = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   const closeContextMenu = () => {
     contextMenu.current?.classList.add('hidden');
@@ -37,7 +39,7 @@ function ContextMenu({
   useEffect(() => {
     const handleRightClick = (e: MouseEvent) => {
       e.preventDefault();
-      if (contextMenu.current && card.current?.contains(e.target as Node)) {
+      if (contextMenu.current && contextContainer.current?.contains(e.target as Node)) {
         contextMenu.current.classList.remove('hidden');
         contextMenu.current.style.left = `${e.clientX}px`;
         contextMenu.current.style.top = `${e.clientY}px`;
@@ -65,7 +67,7 @@ function ContextMenu({
 
   return (
     <div className="">
-      <div ref={card}>{children}</div>
+      <div ref={contextContainer}>{children}</div>
       <div
         className="fixed z-10 hidden rounded-lg bg-gray-600 p-2 shadow-lg transition-all dark:bg-gray-900"
         ref={contextMenu}
@@ -84,7 +86,7 @@ function ContextMenu({
                 }}
                 type="button"
               >
-                {item.label}
+                {t(item.label)}
               </button>
             </ul>
           ))}

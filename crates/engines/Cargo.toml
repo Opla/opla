@@ -1,5 +1,5 @@
 [package]
-name = "inference-engines"
+name = "llm-engines"
 version = "0.1.0"
 edition = "2021"
 

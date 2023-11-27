@@ -11,14 +11,26 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+'use client';
+
+import { useEffect, useState } from 'react';
 import { AppProps } from 'next/app';
 import Layout from '@/components/Layout';
 import { ThemeProvider } from 'next-themes';
 import { AppWrapper } from '@/context';
 
 export default function App({ Component }: AppProps) {
+  // Dirty hack to fix hydration mismatch using i18n
+  const [initialRenderComplete, setInitialRenderComplete] = useState<boolean>(false);
+  useEffect(() => {
+    setInitialRenderComplete(true);
+  }, []);
+  if (!initialRenderComplete) return <div />;
+  // End of dirty hack...
+
   return (
-    <ThemeProvider forcedTheme={Component.theme || undefined} attribute="class">
+    <ThemeProvider attribute="class">
       <AppWrapper>
         <Layout>
           <Component />

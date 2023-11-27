@@ -65,6 +65,20 @@ export type Model = {
   metadata?: Metadata;
 };
 
+export type Provider = {
+  id: string;
+  name: string;
+  description: string;
+  createdAt: number;
+  updatedAt: number;
+  url: string;
+  docUrl?: string;
+  type: 'local' | 'api' | 'remote' | 'proxy';
+  disabled: boolean;
+  token: string;
+  metadata?: Metadata;
+};
+
 export type Plugin = {
   id: string;
   name: string;
