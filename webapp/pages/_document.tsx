@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Conversation from '@/components/Conversation';
-import Explorer from '@/components/Explorer';
+'use client';
 
-export default function Layout({ conversationId }: { conversationId?: string }) {
+import { Html, Head, Main, NextScript } from 'next/document';
+
+export default function Document() {
   return (
-    <div className="relative flex h-screen w-full overflow-hidden">
-      <div className="flex w-[260px] flex-col">
-        <div className="flex h-full min-h-0 flex-col ">
-          <Explorer conversationId={conversationId} />
-        </div>
-      </div>
-      <Conversation conversationId={conversationId} />
-    </div>
+    <Html>
+      <Head />
+      <body>
+        <Main />
+        <NextScript />
+      </body>
+    </Html>
   );
 }

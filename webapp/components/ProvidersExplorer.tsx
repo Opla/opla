@@ -17,20 +17,34 @@
 import { AppContext } from '@/context';
 import Link from 'next/link';
 import { useContext } from 'react';
-import { BiPlus } from 'react-icons/bi';
+import { BiPlus, BiSolidCircle } from 'react-icons/bi';
 import { ContextMenuItem } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import ContextMenu from './ContextMenu';
 
-export default function Explorer({ selectedConversationId }: { selectedConversationId?: string }) {
-  const { conversations } = useContext(AppContext);
+function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string }) {
+  const { providers } = useContext(AppContext);
   const { t } = useTranslation();
   const menu: ContextMenuItem[] = [
     {
-      label: t('Rename'),
+      label: t('Disable'),
       onClick: (data: string) => {
-        logger.info(`rename ${data}`);
+        logger.info(`disable ${data}`);
+      },
+    },
+    {
+      label: t('Delete'),
+      onClick: (data: string) => {
+        logger.info(`delete ${data}`);
+      },
+    },
+  ];
+  const menuDisabled: ContextMenuItem[] = [
+    {
+      label: t('Enable'),
+      onClick: (data: string) => {
+        logger.info(`enable ${data}`);
       },
     },
     {
@@ -46,28 +60,35 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
       <nav className="flex h-full flex-1 flex-col space-y-1 p-1">
         <div className="m-2 mb-1 flex flex-shrink-0 cursor-pointer items-center gap-2 rounded-md border px-4 py-1 text-sm text-gray-400 transition-colors duration-200 hover:bg-gray-500/10 hover:text-white dark:border-white/20 dark:text-gray-400 hover:dark:text-white">
           <BiPlus className="h-4 w-4" />
-          {t('New chat')}
+          {t('New API provider')}
         </div>
         <div className="flex-1 flex-col overflow-y-auto overflow-x-hidden dark:border-white/20">
           <div className="flex flex-col gap-2 pb-2 text-sm dark:text-gray-100">
             <div className="group relative flex flex-col gap-3 break-all rounded-md px-1 py-3">
-              <div className="p1 text-ellipsis break-all text-gray-600">{t('Recent')}</div>
+              <div className="p1 text-ellipsis break-all text-gray-600">{t('Providers')}</div>
               <li className="p1 flex flex-1 flex-col">
-                {conversations.map((conversation) => (
+                {providers.map((provider) => (
                   <ul
-                    key={conversation.id}
+                    key={provider.id}
                     className={`${
-                      selectedConversationId === conversation.id
+                      selectedProviderId === provider.id
                         ? 'text-black dark:text-white'
                         : 'text-gray-400 dark:text-gray-400'
                     } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-gray-500/10`}
                   >
-                    <ContextMenu data={conversation.id} menu={menu}>
-                      <Link href={`/threads/${conversation.id}`}>
+                    <ContextMenu data={provider.id} menu={provider.disabled ? menuDisabled : menu}>
+                      <Link href={`/providers/${provider.id}`}>
                         <div>
-                          <div className="flex cursor-pointer flex-row items-center break-all">
-                            <div className="relative max-h-5 flex-1 overflow-hidden text-ellipsis break-all">
-                              {conversation.name}
+                          <div className="flex cursor-pointer flex-row items-center">
+                            <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
+                              {provider.name}
+                            </div>
+                            <div
+                              className={`${
+                                provider.disabled ? 'text-red-500' : 'text-green-500'
+                              } `}
+                            >
+                              <BiSolidCircle />
                             </div>
                           </div>
                         </div>
@@ -83,3 +104,5 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
     </div>
   );
 }
+
+export default ProvidersExplorer;

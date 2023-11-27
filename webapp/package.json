@@ -13,12 +13,15 @@
   },
   "dependencies": {
     "framer-motion": "^10.16.5",
+    "i18next": "^23.7.6",
+    "i18next-browser-languagedetector": "^7.2.0",
     "next": "14.0.3",
     "next-themes": "^0.2.1",
     "pino": "^8.16.2",
     "pino-pretty": "^10.2.3",
     "react": "^18",
     "react-dom": "^18",
+    "react-i18next": "^13.5.0",
     "react-icons": "^4.12.0",
     "uuid": "^9.0.1"
   },

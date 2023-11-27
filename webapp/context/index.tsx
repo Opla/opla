@@ -15,12 +15,14 @@
 'use client';
 
 import { v4 as uuid } from 'uuid';
-import { Conversation } from '@/types';
+import { Conversation, Provider } from '@/types';
 import { SetStateAction, createContext, useState } from 'react';
 
 type Context = {
   conversations: Array<Conversation>;
+  providers: Array<Provider>;
   setConversations: (newConversations: SetStateAction<Conversation[]>) => void;
+  setProviders: (newConversations: SetStateAction<Provider[]>) => void;
 };
 
 const initialContext: Context = {
@@ -56,16 +58,43 @@ const initialContext: Context = {
     },
   ],
   setConversations: () => {},
+  providers: [
+    {
+      id: uuid(),
+      name: 'Test API',
+      type: 'local',
+      url: 'http://localhost:3000',
+      description: 'A local server for testing purposes. Compatible with OpenAI API.',
+      token: 'test',
+      disabled: false,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    },
+    {
+      id: uuid(),
+      name: 'OpenAI API',
+      type: 'api',
+      url: 'https://api.openai.com/v1',
+      description: 'You need an OpenAI API token to use it.',
+      docUrl: 'https://platform.openai.com/docs',
+      token: 'TODO',
+      disabled: true,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    },
+  ],
+  setProviders: () => {},
 };
 
 const AppContext = createContext(initialContext);
 
 function AppWrapper({ children }: { children: React.ReactNode }) {
   const [conversations, setConversations] = useState(initialContext.conversations);
+  const [providers, setProviders] = useState(initialContext.providers);
 
   return (
     // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <AppContext.Provider value={{ conversations, setConversations }}>
+    <AppContext.Provider value={{ conversations, setConversations, providers, setProviders }}>
       {children}
     </AppContext.Provider>
   );

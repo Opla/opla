@@ -25,11 +25,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+'use client';
+
 import { useRouter } from 'next/router';
-import Layout from './Layout';
+import Threads from './Threads';
 
 export default function ChatSelected() {
   const router = useRouter();
   const { id } = router.query;
-  return <Layout conversationId={id as string} />;
+  return <Threads selectedConversationId={id as string} />;
 }

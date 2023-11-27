@@ -12,16 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use client';
+import { useTranslation as useNextTranslation } from 'react-i18next';
+import initI18n from '@/i18n/config';
 
-import ToggleTheme from '@/components/ToggleTheme';
+const useTranslation = () => {
+  initI18n();
+  const { t, i18n } = useNextTranslation('translation');
+  return { t, i18n };
+};
 
-export default function Settings() {
-  return (
-    <main className="flex h-screen flex-col items-center justify-center">
-      <h2 className="text-center text-gray-800">LIGHT MODE</h2>
-      <h2 className="text-center text-white">DARK MODE</h2>
-      <ToggleTheme />
-    </main>
-  );
-}
+export default useTranslation;

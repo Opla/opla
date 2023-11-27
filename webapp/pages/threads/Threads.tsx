@@ -12,8 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Layout from './Layout';
+'use client';
 
-export default function Chats() {
-  return <Layout />;
+import Thread from '@/components/Thread';
+import Explorer from '@/components/Explorer';
+
+export default function Layout({ selectedConversationId }: { selectedConversationId?: string }) {
+  return (
+    <div className="relative flex h-screen w-full overflow-hidden">
+      <div className="flex w-[260px] flex-col">
+        <div className="flex h-full min-h-0 flex-col ">
+          <Explorer selectedConversationId={selectedConversationId} />
+        </div>
+      </div>
+      <Thread conversationId={selectedConversationId} />
+    </div>
+  );
 }

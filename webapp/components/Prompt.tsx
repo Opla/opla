@@ -11,8 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+'use client';
+
 import { ChangeEvent, useEffect, KeyboardEvent, MouseEvent } from 'react';
 import { BiSend } from 'react-icons/bi';
+import useTranslation from '@/hooks/useTranslation';
 import useAutoResizeTextArea from '@/hooks/useAutoResizeTextArea';
 
 export default function Prompt({
@@ -29,6 +33,7 @@ export default function Prompt({
   handleMessage: any;
 }) {
   const textAreaRef = useAutoResizeTextArea();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (textAreaRef.current) {
@@ -75,7 +80,7 @@ export default function Prompt({
                 maxHeight: '200px',
                 overflowY: 'hidden',
               }}
-              placeholder="Send a message..."
+              placeholder={t('Send a message...')}
               className="m-0 w-full resize-none border-0 bg-transparent p-0 pl-2 pr-7 focus:outline-none focus:ring-0 focus-visible:ring-0 dark:bg-transparent md:pl-0"
               onChange={handleUpdateMessage}
               onKeyDown={(e) => handleKeypress(e)}
@@ -83,7 +88,7 @@ export default function Prompt({
             <button
               disabled={isLoading || message?.length === 0}
               type="button"
-              aria-label="Send"
+              aria-label={t('Send')}
               onClick={handleSendMessage}
               className="rounded-md bg-gray-500 bg-transparent p-1 text-gray-400 hover:text-white disabled:bg-gray-500 disabled:opacity-40 disabled:hover:text-gray-400"
             >

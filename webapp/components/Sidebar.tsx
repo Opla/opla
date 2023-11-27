@@ -1,5 +1,3 @@
-'use client';
-
 // Copyright 2023 mik
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+'use client';
+
 import Image from 'next/image';
-import { BiChat, BiNetworkChart, BiCog, BiExtension, BiUserCircle } from 'react-icons/bi';
+import { BiChat, BiServer, BiNetworkChart, BiCog, BiExtension, BiUserCircle } from 'react-icons/bi';
 import Link from 'next/link';
 import { IconType } from 'react-icons';
 import { useRouter } from 'next/router';
+import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import Tooltip, { Orientation } from './Tooltip';
 
@@ -38,13 +39,18 @@ const sidebarItems: Array<Item> = [
     items: [
       {
         name: 'Chats',
-        href: '/chats',
+        href: '/threads',
         icon: BiChat,
       },
       {
         name: 'Models',
         href: '/models',
         icon: BiNetworkChart,
+      },
+      {
+        name: 'API Providers',
+        href: '/providers',
+        icon: BiServer,
       },
       {
         name: 'Plugins',
@@ -72,32 +78,31 @@ const sidebarItems: Array<Item> = [
   },
 ];
 
-const SidebarItems = ({ items, pathname }: { items: Array<Item>; pathname: string }) =>
+const SidebarItems = ({ items, pathname, t }: { items: Array<Item>; pathname: string; t: any }) =>
   items.map(({ name, flex, href, icon, items: subItems, hidden }) => {
     if (hidden) return null;
     const Icon = icon as IconType;
     return subItems ? (
       <li className={flex ? 'flex-1' : ''} key={name}>
         <ul className="flex flex-col items-center">
-          <SidebarItems items={subItems} pathname={pathname} />
+          <SidebarItems items={subItems} pathname={pathname} t={t} />
         </ul>
       </li>
     ) : (
       <li className="p-2" key={name}>
         <Link
           className={`flex h-7 w-7 rounded-md ${
-            pathname !== href
-              ? 'text-gray-400 dark:text-gray-500'
-              : 'text-gray-800 dark:text-gray-100'
+            href === pathname || (href && pathname.startsWith(href))
+              ? 'text-gray-800 dark:text-gray-100'
+              : 'text-gray-400 dark:text-gray-500'
           } dark:bg-gray-700`}
           href={href as string}
         >
-          <Tooltip message={name} orientation={Orientation.Right}>
+          <Tooltip message={t(name)} orientation={Orientation.Right}>
             <div className="h-7 w-7 hover:text-gray-800 dark:hover:text-gray-100">
               <Icon size="1.75rem" />
             </div>
           </Tooltip>
-          <div className="hidden">{name}</div>
         </Link>
       </li>
     );
@@ -107,19 +112,20 @@ function Sidebar() {
   const router = useRouter();
   const { pathname } = router;
   logger.info('pathname', pathname);
+  const { t } = useTranslation();
 
   return (
     <div className="h-full min-h-0">
       <aside className="flex h-full flex-col bg-gray-200 p-1 dark:bg-gray-700">
         <div className="flex items-center justify-center border-b border-gray-300 p-1 dark:border-gray-600">
           <Link className="mb-1 h-8 w-8" href="/">
-            <Tooltip message="Dashboard" orientation={Orientation.Right}>
+            <Tooltip message={t('Dashboard')} orientation={Orientation.Right}>
               <Image width={32} height={32} className="" src="/logo.png" alt="logo" />
             </Tooltip>
           </Link>
         </div>
         <ul className="p1 flex h-full flex-1 flex-col">
-          <SidebarItems items={sidebarItems} pathname={pathname} />
+          <SidebarItems items={sidebarItems} pathname={pathname} t={t} />
         </ul>
       </aside>
     </div>

@@ -14,14 +14,18 @@
 
 'use client';
 
-import ToggleTheme from '@/components/ToggleTheme';
+import Explorer from '@/components/ProvidersExplorer';
+import Provider from '@/components/Provider';
 
-export default function Settings() {
+export default function Providers({ selectedProviderId }: { selectedProviderId?: string }) {
   return (
-    <main className="flex h-screen flex-col items-center justify-center">
-      <h2 className="text-center text-gray-800">LIGHT MODE</h2>
-      <h2 className="text-center text-white">DARK MODE</h2>
-      <ToggleTheme />
-    </main>
+    <div className="relative flex h-screen w-full overflow-hidden">
+      <div className="flex w-[260px] flex-col">
+        <div className="flex h-full min-h-0 flex-col ">
+          <Explorer selectedProviderId={selectedProviderId} />
+        </div>
+      </div>
+      <Provider providerId={selectedProviderId} />
+    </div>
   );
 }
