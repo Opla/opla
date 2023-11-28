@@ -14,14 +14,22 @@
 
 'use client';
 
-import ToggleTheme from '@/components/ToggleTheme';
-
-export default function Settings() {
+export default function SettingItem({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+}) {
   return (
-    <main className="flex h-screen flex-col items-center justify-center">
-      <h2 className="text-center text-gray-800">LIGHT MODE</h2>
-      <h2 className="text-center text-white">DARK MODE</h2>
-      <ToggleTheme />
-    </main>
+    <div className="bb-1 flex w-full flex-row items-center border-b border-gray-100 pb-4 pt-3 dark:border-gray-800">
+      <div className="flex flex-1 flex-col justify-center">
+        <p className=" ">{title}</p>
+        <p className="text-sm text-gray-400">{subtitle}</p>
+      </div>
+      <div className="flex flex-row ">{children}</div>
+    </div>
   );
 }

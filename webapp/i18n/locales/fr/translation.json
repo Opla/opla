@@ -21,5 +21,22 @@
   "No plugins installed": "Pas d'extensions installées",
   "Chat with your local GPT": "discuter avec votre GPT en local",
   "New API provider": "Nouveau fournisseur d'API",
-  "Providers": "Fournisseurs"
+  "Providers": "Fournisseurs",
+  "Appearance": "Apparence",
+  "Storage": "Stockage",
+  "Color scheme": "Schema de couleurs",
+  "Choose Opla's color scheme": "Choisir le schema de couleurs d'Opla",
+  "Accent color": "La couleur d'accentuation",
+  "Choose the accent color used in app": "Choisir la couleur d'accentuation utilisée dans l'application",
+  "Theme": "Thème",
+  "Change the theme": "Pour changer le thème",
+  "Save data to": "Enregistrer les données avec",
+  "Choose how to save your data": "Choisir comment enregistrer vos données",
+  "Path": "Répertoire",
+  "Application path": "Répertoire de l'application",
+  "In this path all Opla's files are stored": "Dans ce répertoire, tous les fichiers d'Opla sont stockés",
+  "Backup data": "Sauvegarder les données",
+  "From ChatGPT or others": "Depuis Chat GPT ou autres",
+  "Import": "Import",
+  "Export": "Export"
 }

@@ -66,7 +66,7 @@ function ContextMenu({
   });
 
   return (
-    <div className="">
+    <>
       <div ref={contextContainer}>{children}</div>
       <div
         className="fixed z-10 hidden rounded-lg bg-gray-600 p-2 shadow-lg transition-all dark:bg-gray-900"
@@ -92,7 +92,7 @@ function ContextMenu({
           ))}
         </li>
       </div>
-    </div>
+    </>
   );
 }
 
