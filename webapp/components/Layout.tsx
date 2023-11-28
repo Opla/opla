@@ -16,12 +16,31 @@
 
 import '@/app/globals.css';
 import Sidebar from '@/components/Sidebar';
+import useToggle from '@/hooks/useToggle';
+import Settings from '@/modals/settings';
+import { useState } from 'react';
+import Portal from './Portal';
+import Modal from './Modal';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const [isModalOpen, onModalOpen, onModalClose] = useToggle(false);
+  const [settingTab, setSettingTab] = useState<string>();
+
+  const handleModalDisplay = () => {
+    onModalOpen();
+  };
+
   return (
     <div className="flex h-screen w-full select-none overflow-hidden">
-      <Sidebar />
+      <Sidebar onModal={handleModalDisplay} />
       {children}
+      <Portal>
+        {isModalOpen && (
+          <Modal onClose={onModalClose}>
+            <Settings tab={settingTab} onTabChanged={setSettingTab} />
+          </Modal>
+        )}
+      </Portal>
     </div>
   );
 }
