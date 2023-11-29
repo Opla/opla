@@ -12,10 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { IconType } from 'react-icons';
+
 // Ui types
-export type ContextMenuItem = {
+export type MenuItem = {
   label: string;
-  onClick: (data: string) => void;
+  value?: string;
+  icon?: IconType;
+  selected?: boolean;
+  onSelect?: (data: string) => void;
 };
 
 // Model types

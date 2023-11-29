@@ -14,7 +14,7 @@
 
 'use client';
 
-import { ContextMenuItem } from '@/types';
+import { MenuItem } from '@/types';
 import { useEffect, useRef } from 'react';
 import useTranslation from '@/hooks/useTranslation';
 
@@ -23,7 +23,7 @@ function ContextMenu({
   data,
   children,
 }: {
-  menu: ContextMenuItem[];
+  menu: MenuItem[];
   data: string;
   children: React.ReactNode;
 }) {
@@ -81,7 +81,7 @@ function ContextMenu({
               <button
                 onClick={(e) => {
                   e.preventDefault();
-                  item.onClick(data);
+                  if (item.onSelect) item.onSelect(data);
                   closeContextMenu();
                 }}
                 type="button"

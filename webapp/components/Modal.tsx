@@ -14,13 +14,6 @@
 import * as React from 'react';
 import { BiX } from 'react-icons/bi';
 
-// This is a reusable Modal container so that your
-// look and feel and interactions with the modal itself
-// are consistent throughout your app
-
-// Inline styles are used purely for illustration purposes
-// This can easily be refactored into a different system
-
 export default function Modal({
   onClose,
   children,
@@ -43,7 +36,7 @@ export default function Modal({
       <div
         role="button"
         tabIndex={0}
-        className="relative h-full w-full rounded-lg bg-white shadow-lg transition-all dark:bg-gray-900"
+        className="relative h-full w-full cursor-default rounded-lg bg-white shadow-lg transition-all dark:bg-gray-900"
         onKeyUp={(e) => {
           e.stopPropagation();
         }}

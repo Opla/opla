@@ -53,8 +53,8 @@ export default function SidebarItem({
           className={className}
           role="button"
           tabIndex={0}
-          onKeyUp={(e) => {
-            e.stopPropagation();
+          onKeyUp={() => {
+            // e.stopPropagation();
           }}
           onClick={(e) => {
             e.preventDefault();

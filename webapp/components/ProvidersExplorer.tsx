@@ -18,7 +18,7 @@ import { AppContext } from '@/context';
 import Link from 'next/link';
 import { useContext } from 'react';
 import { BiPlus, BiSolidCircle } from 'react-icons/bi';
-import { ContextMenuItem } from '@/types';
+import { MenuItem } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import ContextMenu from './ContextMenu';
@@ -26,30 +26,30 @@ import ContextMenu from './ContextMenu';
 function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string }) {
   const { providers } = useContext(AppContext);
   const { t } = useTranslation();
-  const menu: ContextMenuItem[] = [
+  const menu: MenuItem[] = [
     {
       label: t('Disable'),
-      onClick: (data: string) => {
+      onSelect: (data: string) => {
         logger.info(`disable ${data}`);
       },
     },
     {
       label: t('Delete'),
-      onClick: (data: string) => {
+      onSelect: (data: string) => {
         logger.info(`delete ${data}`);
       },
     },
   ];
-  const menuDisabled: ContextMenuItem[] = [
+  const menuDisabled: MenuItem[] = [
     {
       label: t('Enable'),
-      onClick: (data: string) => {
+      onSelect: (data: string) => {
         logger.info(`enable ${data}`);
       },
     },
     {
       label: t('Delete'),
-      onClick: (data: string) => {
+      onSelect: (data: string) => {
         logger.info(`delete ${data}`);
       },
     },
