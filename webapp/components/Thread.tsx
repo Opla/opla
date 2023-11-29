@@ -43,7 +43,7 @@ function Thread({ conversationId }: { conversationId?: string }) {
   const [showEmptyChat, setShowEmptyChat] = useState(messages.length < 1);
 
   logger.info(`${conversationId} ${messages.length}`);
-  const selectedModel = 'LLama2';
+  const selectedPreset = 'LLama2';
 
   const setMessages = (newMessages: Message[]) => {
     let newConversations = [...conversations];
@@ -79,7 +79,7 @@ function Thread({ conversationId }: { conversationId?: string }) {
       {
         id: `${Date.now()}`,
         content: '',
-        author: { role: 'system', name: selectedModel },
+        author: { role: 'system', name: selectedPreset },
         createdAt: Date.now(),
         updatedAt: Date.now(),
       },
@@ -100,7 +100,7 @@ function Thread({ conversationId }: { conversationId?: string }) {
       {
         id: `${Date.now()}`,
         content: 'What?',
-        author: { role: 'system', name: selectedModel },
+        author: { role: 'system', name: selectedPreset },
         createdAt: Date.now(),
         updatedAt: Date.now(),
       },
@@ -114,9 +114,9 @@ function Thread({ conversationId }: { conversationId?: string }) {
           <div className="flex flex-col items-center text-sm">
             <div className="justify-left flex w-full flex-row items-center gap-1 bg-gray-50 p-3 text-gray-500 dark:bg-gray-950 dark:text-gray-300">
               <div className="mx-3 flex h-7 flex-row items-center rounded-md border border-gray-600 px-2">
-                <span className="gap-1 py-1 text-gray-700 dark:text-gray-500">{t('Model')} :</span>
+                {/* <span className="gap-1 py-1 text-gray-700 dark:text-gray-500">{t('Model')} :</span> */}
                 <span className="items-center truncate truncate px-3 dark:text-gray-300">
-                  {selectedModel}
+                  {selectedPreset}
                 </span>
                 <span className="right-0 flex items-center pr-2">
                   <BiChevronDown className="h-4 w-4 text-gray-400" />
