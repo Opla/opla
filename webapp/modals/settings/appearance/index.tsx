@@ -14,17 +14,33 @@
 
 'use client';
 
+import useTheme from '@/hooks/useTheme';
 import useTranslation from '@/hooks/useTranslation';
 import SettingItem from '@/components/SettingItem';
 import SettingsContainer from '@/components/SettingsContainer';
-// import ToggleTheme from '@/components/ToggleTheme';
+import Dropdown from '@/components/Dropdown';
+import logger from '@/utils/logger';
+import { BiLaptop, BiMoon, BiSun } from 'react-icons/bi';
 
 export default function Appearance() {
   const { t } = useTranslation();
+  const { theme, setTheme, isSystem } = useTheme();
+
+  const colorSchemes = [
+    { label: 'System', value: 'system', icon: BiLaptop, selected: isSystem },
+    { label: 'Light', value: 'light', icon: BiSun, selected: !isSystem && theme === 'light' },
+    { label: 'Dark', value: 'dark', icon: BiMoon, selected: !isSystem && theme === 'dark' },
+  ];
+
+  const onSelectColorScheme = (value?: string, data?: string) => {
+    logger.info(`onSelectColorScheme ${value} ${data}`);
+    setTheme(value as string);
+  };
+
   return (
     <SettingsContainer>
       <SettingItem title={t('Color scheme')} subtitle={t("Choose Opla's color scheme")}>
-        Action
+        <Dropdown items={colorSchemes} onSelect={onSelectColorScheme} />
       </SettingItem>
       <SettingItem title={t('Accent color')} subtitle={t('Choose the accent color used in app')}>
         Action

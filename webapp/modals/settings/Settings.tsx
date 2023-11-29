@@ -44,7 +44,7 @@ export default function Settings({
   const { t } = useTranslation();
 
   return (
-    <div className="relative flex h-full w-full overflow-hidden">
+    <div className="relative flex h-full w-full">
       <div className="flex h-full w-[260px] flex-col">
         <div className="flex h-full min-h-0 flex-col ">
           <NavContainer>
