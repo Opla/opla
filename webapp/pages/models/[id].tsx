@@ -14,8 +14,11 @@
 
 'use client';
 
+import { useRouter } from 'next/router';
 import Models from './Models';
 
-export default function DefaultModels() {
-  return <Models />;
+export default function SelectedModels() {
+  const router = useRouter();
+  const { id } = router.query;
+  return <Models selectedModelId={id as string} />;
 }

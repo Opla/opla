@@ -14,8 +14,18 @@
 
 'use client';
 
-import Models from './Models';
+import Explorer from '@/components/ModelsExplorer';
+import Model from '@/components/Model';
 
-export default function DefaultModels() {
-  return <Models />;
+export default function Providers({ selectedModelId }: { selectedModelId?: string }) {
+  return (
+    <div className="relative flex h-screen w-full overflow-hidden">
+      <div className="flex w-[260px] flex-col">
+        <div className="flex h-full min-h-0 flex-col ">
+          <Explorer selectedModelId={selectedModelId} />
+        </div>
+      </div>
+      <Model modelId={selectedModelId} />
+    </div>
+  );
 }

@@ -15,14 +15,16 @@
 'use client';
 
 import { v4 as uuid } from 'uuid';
-import { Conversation, Provider } from '@/types';
+import { Conversation, Model, Provider } from '@/types';
 import { SetStateAction, createContext, useState } from 'react';
 
 type Context = {
   conversations: Array<Conversation>;
   providers: Array<Provider>;
+  models: Array<Model>;
   setConversations: (newConversations: SetStateAction<Conversation[]>) => void;
-  setProviders: (newConversations: SetStateAction<Provider[]>) => void;
+  setProviders: (newProviders: SetStateAction<Provider[]>) => void;
+  setModels: (newModels: SetStateAction<Model[]>) => void;
 };
 
 const initialContext: Context = {
@@ -84,6 +86,8 @@ const initialContext: Context = {
     },
   ],
   setProviders: () => {},
+  models: [],
+  setModels: () => {},
 };
 
 const AppContext = createContext(initialContext);
@@ -91,10 +95,13 @@ const AppContext = createContext(initialContext);
 function AppWrapper({ children }: { children: React.ReactNode }) {
   const [conversations, setConversations] = useState(initialContext.conversations);
   const [providers, setProviders] = useState(initialContext.providers);
+  const [models, setModels] = useState(initialContext.models);
 
   return (
-    // eslint-disable-next-line react/jsx-no-constructed-context-values
-    <AppContext.Provider value={{ conversations, setConversations, providers, setProviders }}>
+    <AppContext.Provider
+      // eslint-disable-next-line react/jsx-no-constructed-context-values
+      value={{ conversations, setConversations, providers, setProviders, models, setModels }}
+    >
       {children}
     </AppContext.Provider>
   );
