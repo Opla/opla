@@ -84,6 +84,15 @@ export type Provider = {
   metadata?: Metadata;
 };
 
+export type Preset = {
+  id: string;
+  name: string;
+  description: string;
+  createdAt: number;
+  updatedAt: number;
+  metadata?: Metadata;
+};
+
 export type Plugin = {
   id: string;
   name: string;
