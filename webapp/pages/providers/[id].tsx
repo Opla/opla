@@ -17,7 +17,7 @@
 import { useRouter } from 'next/router';
 import Providers from './Providers';
 
-export default function DefaultProviders() {
+export default function SelectedProviders() {
   const router = useRouter();
   const { id } = router.query;
   return <Providers selectedProviderId={id as string} />;

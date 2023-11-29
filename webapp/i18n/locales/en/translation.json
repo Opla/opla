@@ -38,5 +38,7 @@
   "Backup data": "Backup data",
   "From ChatGPT or others": "From ChatGPT or others",
   "Import": "Import",
-  "Export": "Export"
+  "Export": "Export",
+  "Add a model": "Add a model",
+  "Local models": "Local models"
 }
