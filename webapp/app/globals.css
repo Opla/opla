@@ -17,3 +17,9 @@ body.modalbox-open {
 body.modalbox-open .modalbox * {
   pointer-events: auto;
 }
+
+/* https://web.dev/articles/building/a-dialog-component */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
