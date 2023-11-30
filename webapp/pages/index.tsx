@@ -14,34 +14,96 @@
 
 'use client';
 
+import Card from '@/components/Card';
+import Searchbar from '@/components/Searchbar';
+import useTranslation from '@/hooks/useTranslation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { BiLogoDiscordAlt, BiLogoGithub } from 'react-icons/bi';
 
-export default function Home() {
+export default function Dashboard() {
+  const { t } = useTranslation();
+
   return (
-    <div className="w-full p-4">
-      <header className="w-full p-4">
-        <h1 className="w-full text-center text-2xl font-extrabold">Opla</h1>
-        <h2 className="w-full text-center text-xl">The ultimate Open-source generative AI App</h2>
-        <p className="w-full text-center text-sm font-light">
-          Run on your machine and prompt to any open LLMs & more.
-        </p>
-        <p className="mt-8 flex w-full justify-center">
-          <Image width={32} height={32} className="" src="/logo.png" alt="logo" />
-        </p>
+    <div className="relative flex h-screen w-full flex-col overflow-hidden">
+      <header className="flex w-full items-center gap-8 px-4 py-3">
+        <div className="h-center text-2xl font-extrabold">Opla</div>
+        <Searchbar />
+        <div className="flex w-full items-center gap-8">
+          <div>{t('Prompts')}</div>
+          <div>{t('Models')}</div>
+          <div className="truncate">{t('AI Providers')}</div>
+        </div>
+        <div className="mr-8 flex w-full flex-row-reverse items-center gap-4">
+          <a href="https://discord.gg/RJD4Xa2Y" target="_blank" className="" aria-label="Discord">
+            <BiLogoDiscordAlt />
+          </a>
+          <a href="https://github.com/Opla/opla" target="_blank" className="" aria-label="Github">
+            <BiLogoGithub />
+          </a>
+          <a href="https://opla.ai" target="_blank">
+            opla.ai
+          </a>
+        </div>
       </header>
-      <main className="w-full p-4 pt-10">
-        <p className="flex w-full justify-center p-4 pt-10 text-center">
+      <main className="h-full w-full flex-col overflow-y-auto p-4 pb-10">
+        <div className="m-4 flex h-[280px] flex-row rounded-lg bg-gray-100 p-3 dark:bg-gray-950">
+          <div className="flex flex-1 flex-col justify-center p-3">
+            <h1 className="w-full text-center text-xl">
+              {t('The ultimate Open-source generative AI App')}
+            </h1>
+            <h2 className="w-full text-center text-sm font-light">
+              {t('Run on your machine and prompt to any open LLMs & more.')}
+            </h2>
+            <p className="mt-8 flex w-full justify-center">
+              <Link
+                href="/threads"
+                className="mx-3 flex h-7 flex-row items-center rounded-md border border-gray-400 px-2 dark:border-gray-400 hover:dark:border-gray-100 "
+              >
+                <span className="items-center truncate truncate px-3 dark:text-gray-400 hover:dark:text-gray-100">
+                  {t('Ready to Prompt!')}
+                </span>
+              </Link>
+            </p>
+          </div>
+          <div className="flex flex-1 flex-col justify-center rounded-lg bg-gray-300 p-3 p-3 dark:bg-gray-800">
+            <p className="m-4 flex w-full justify-center">
+              <Image width={96} height={968} className="" src="/logo.png" alt="logo" />
+            </p>
+          </div>
+        </div>
+        <div className="p-4 pt-8">
+          <div className="h-center w-full text-xl font-extrabold">{t('Latest news')}</div>
+          <div className="flex flex-row flex-wrap justify-between gap-4">
+            <Card />
+            <Card />
+            <Card />
+            <Card />
+          </div>
+        </div>
+        <div className="p-4 pt-8">
+          <div className="h-center w-full text-xl font-extrabold">{t('Latest contributions')}</div>
+          <div className="flex flex-row flex-wrap justify-between gap-4">
+            <Card />
+            <Card />
+            <Card />
+            <Card />
+          </div>
+        </div>
+      </main>
+      <footer className="absolute bottom-0 flex w-full justify-between bg-gray-100 p-3 dark:bg-gray-950">
+        <p className="flex text-center">
           <a href="https://github.com/Opla/opla" target="_blank" className="flex items-center">
             <BiLogoGithub />
-            <span className="ml-2">Contribute on Github</span>
+            <span className="ml-2">{t('Contribute')}</span>
           </a>
           <a href="https://discord.gg/RJD4Xa2Y" target="_blank" className="ml-4 flex items-center">
             <BiLogoDiscordAlt />
-            <span className="ml-2">Discuss on Discord</span>
+            <span className="ml-2">{t('Community')}</span>
           </a>
         </p>
-      </main>
+        <p className="text-sm font-light">{t('Made with ❤️ by the Opla community')}</p>
+      </footer>
     </div>
   );
 }
