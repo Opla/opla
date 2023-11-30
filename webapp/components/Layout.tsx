@@ -21,6 +21,7 @@ import Settings from '@/modals/settings';
 import { useState } from 'react';
 import Portal from './Portal';
 import Modal from './Modal';
+// import Dialog from './Dialog';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isModalOpen, onModalOpen, onModalClose] = useToggle(false);
@@ -40,6 +41,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <Settings tab={settingTab} onTabChanged={setSettingTab} />
           </Modal>
         )}
+        {/* <Dialog open={isModalOpen} onClose={onModalClose}>
+          <Settings tab={settingTab} onTabChanged={setSettingTab} />
+      </Dialog> */}
       </Portal>
     </div>
   );
