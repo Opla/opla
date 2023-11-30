@@ -3,7 +3,7 @@
   "Tools": "Tools",
   "Chats": "Chats",
   "Models": "Models",
-  "API Providers": "API Providers",
+  "AI Providers": "AI Providers",
   "Plugins": "Plugins",
   "Config": "Config",
   "Profile": "Profile",
@@ -20,7 +20,7 @@
   "Model": "Model",
   "No plugins installed": "No plugins installed",
   "Chat with your local GPT": "Chat with your local GPT",
-  "New API provider": "New API Provider",
+  "New AI provider": "New AI Provider",
   "Providers": "Providers",
   "Appearance": "Appearance",
   "Storage": "Storage",
@@ -40,5 +40,13 @@
   "Import": "Import",
   "Export": "Export",
   "Add a model": "Add a model",
-  "Local models": "Local models"
+  "Local models": "Local models",
+  "The ultimate Open-source generative AI App": "The ultimate Open-source generative AI App",
+  "Run on your machine and prompt to any open LLMs & more.": "Run on your machine and prompt to any open LLMs & more.",
+  "Contribute": "Contribute",
+  "Community": "Community",
+  "Ready to Prompt!": "Ready to Prompt!",
+  "Made with ❤️ by the Opla community": "Made with ❤️ by the Opla community",
+  "Latest news": "Latest news",
+  "Latest contributions": "Latest contributions"
 }

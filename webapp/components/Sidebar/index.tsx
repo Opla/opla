@@ -40,7 +40,7 @@ const sidebarItems: Array<Item> = [
         icon: BiNetworkChart,
       },
       {
-        name: 'API Providers',
+        name: 'AI Providers',
         href: '/providers',
         icon: BiServer,
       },
