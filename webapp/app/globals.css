@@ -22,4 +22,3 @@ body.modalbox-open .modalbox * {
 html:has(dialog[open]) {
   overflow: hidden;
 }
-
