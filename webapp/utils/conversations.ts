@@ -15,7 +15,6 @@ import { v4 as uuid } from 'uuid';
 import { Author, Conversation, Message } from '@/types';
 
 const createdMessage = (author: Author, content: string) => {
-
   const message = {
     id: uuid(),
     author,
@@ -78,10 +77,14 @@ const updateConversation = (conversation: Conversation, conversations: Conversat
   return conversations.map((c) => (c.id === updatedConversation.id ? updatedConversation : c));
 };
 
-const updateConversationMessages = (conversationId: string | undefined, conversations: Conversation[], messages: Message[]) => {
+const updateConversationMessages = (
+  conversationId: string | undefined,
+  conversations: Conversation[],
+  messages: Message[],
+) => {
   let conversation = conversations.find((c) => c.id === conversationId);
   if (!conversation) {
-    const title: string = messages[0]?.content as string || "Conversation";
+    const title: string = (messages[0]?.content as string) || 'Conversation';
     conversation = createConversation(title.trim().substring(0, 20));
   }
   conversation.messages = mergeMessages(conversation.messages, messages);
@@ -91,6 +94,12 @@ const updateConversationMessages = (conversationId: string | undefined, conversa
   }
 
   return conversations.map((c) => (c.id === conversationId ? conversation : c)) as Conversation[];
-}
+};
 
-export { createdMessage, updateMessage, createConversation, updateConversation, updateConversationMessages };
+export {
+  createdMessage,
+  updateMessage,
+  createConversation,
+  updateConversation,
+  updateConversationMessages,
+};
