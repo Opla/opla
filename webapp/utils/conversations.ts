@@ -15,6 +15,7 @@ import { v4 as uuid } from 'uuid';
 import { Author, Conversation, Message } from '@/types';
 
 const createdMessage = (author: Author, content: string) => {
+
   const message = {
     id: uuid(),
     author,
@@ -48,6 +49,12 @@ const updateMessage = (message: Message, conversationId: string, conversations: 
   return conversations.map((c) => (c.id === conversationId ? newConversation : c));
 };
 
+const mergeMessages = (messages: Message[], newMessages: Message[]) => {
+  const newMessagesIds = newMessages.map((m) => m.id);
+  const oldMessages = messages.filter((m) => !newMessagesIds.includes(m.id));
+  return [...oldMessages, ...newMessages];
+};
+
 const createConversation = (name: string) => {
   const conversation = {
     id: uuid(),
@@ -71,4 +78,19 @@ const updateConversation = (conversation: Conversation, conversations: Conversat
   return conversations.map((c) => (c.id === updatedConversation.id ? updatedConversation : c));
 };
 
-export { createdMessage, updateMessage, createConversation, updateConversation };
+const updateConversationMessages = (conversationId: string | undefined, conversations: Conversation[], messages: Message[]) => {
+  let conversation = conversations.find((c) => c.id === conversationId);
+  if (!conversation) {
+    const title: string = messages[0]?.content as string || "Conversation";
+    conversation = createConversation(title.trim().substring(0, 20));
+  }
+  conversation.messages = mergeMessages(conversation.messages, messages);
+
+  if (!conversationId) {
+    return [...conversations, conversation];
+  }
+
+  return conversations.map((c) => (c.id === conversationId ? conversation : c)) as Conversation[];
+}
+
+export { createdMessage, updateMessage, createConversation, updateConversation, updateConversationMessages };
