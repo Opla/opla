@@ -14,11 +14,19 @@ body.modalbox-open {
   pointer-events: none;
 }
 
+body.modalbox-open dialog {
+  pointer-events: none;
+}
+
 body.modalbox-open .modalbox * {
   pointer-events: auto;
 }
 
-/* https://web.dev/articles/building/a-dialog-component */
-html:has(dialog[open]) {
-  overflow: hidden;
+.navSettings {
+  width: 20%;
+}
+
+.contentSettings {
+  min-width: 80%;
+  padding: 2rem;
 }

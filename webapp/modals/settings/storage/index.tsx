@@ -16,12 +16,11 @@
 
 import useTranslation from '@/hooks/useTranslation';
 import SettingItem from '@/components/SettingItem';
-import SettingsContainer from '@/components/SettingsContainer';
 
 export default function Storage() {
   const { t } = useTranslation();
   return (
-    <SettingsContainer>
+    <>
       <SettingItem title={t('Save data to')} subtitle={t('Choose how to save your data')}>
         Cache / File / Database
       </SettingItem>
@@ -36,6 +35,6 @@ export default function Storage() {
         <button type="button">{t('Import')}</button>
         <button type="button">{t('Export')}</button>
       </SettingItem>
-    </SettingsContainer>
+    </>
   );
 }

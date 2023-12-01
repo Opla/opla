@@ -10,50 +10,67 @@
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
+// limitations under the License.
 
 import * as React from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { BiX } from 'react-icons/bi';
 
 export default function Modal({
+  id,
+  open,
   onClose,
   children,
 }: {
+  id?: string;
+  open: boolean;
   onClose: () => void;
   children: React.ReactNode;
 }) {
+  const modalRef = useRef<HTMLDialogElement>(null);
+
+  const handleDialogClick = useCallback(
+    (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!document.body.classList.contains('modalbox-open') && target.nodeName === 'DIALOG') {
+        event.stopPropagation();
+        onClose();
+      }
+    },
+    [onClose],
+  );
+
+  useEffect(() => {
+    const dialog = modalRef;
+    dialog.current?.addEventListener('click', handleDialogClick);
+    if (open) {
+      dialog.current?.showModal();
+    } else {
+      dialog.current?.close();
+    }
+    return () => {
+      dialog.current?.removeEventListener('click', handleDialogClick);
+    };
+  }, [handleDialogClick, onClose, open]);
+
+  const size = 'w-[80%] h-[80%]';
+
   return (
-    <div
-      id="portal"
-      role="button"
-      tabIndex={0}
-      className="portal fixed left-0 top-0 flex h-screen w-full items-center justify-center bg-black bg-opacity-50 p-40"
-      onKeyUp={(e) => {
-        e.preventDefault();
-        if (e.key === 'Escape') onClose();
-      }}
-      onClick={onClose}
+    <dialog
+      id={id}
+      ref={modalRef}
+      onCancel={onClose}
+      className={`${size} relative rounded-lg bg-white shadow-lg transition-all backdrop:bg-gray-950/50 dark:bg-gray-900`}
     >
-      <div
-        role="button"
-        tabIndex={0}
-        className="relative h-full w-full cursor-default rounded-lg bg-white shadow-lg transition-all dark:bg-gray-900"
-        onKeyUp={(e) => {
-          e.stopPropagation();
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+      {children}
+      <button
+        aria-label="Close"
+        className="absolute right-0 top-0 m-2"
+        type="button"
+        onClick={onClose}
       >
-        {children}
-        <button
-          aria-label="Close"
-          className="absolute right-0 top-0 m-2"
-          type="button"
-          onClick={onClose}
-        >
-          <BiX className="h-6 w-6" />
-        </button>
-      </div>
-    </div>
+        <BiX className="h-6 w-6" />
+      </button>
+    </dialog>
   );
 }

@@ -12,12 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use client';
+import Modal from '@/components/Modal';
+import Settings from './settings';
 
-export default function SettingsContainer({ children }: { children: React.ReactNode }) {
+export default function SettingsModal({
+  visible,
+  settingTab,
+  onTabChanged,
+  onClose,
+}: {
+  visible: boolean;
+  settingTab?: string | undefined;
+  onTabChanged: (tab: string) => void | undefined;
+  onClose: () => void | undefined;
+}) {
   return (
-    <div className="scrollbar-trigger flex h-full w-full">
-      <div className="flex h-full flex-1 flex-col p-8">{children}</div>
-    </div>
+    <Modal id="settingsmodal" open={visible} onClose={onClose}>
+      <Settings tab={settingTab} onTabChanged={onTabChanged} />
+    </Modal>
   );
 }

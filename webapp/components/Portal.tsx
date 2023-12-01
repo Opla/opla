@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import { createPortal } from 'react-dom';
-// import usePortal from '../hooks/usePortal';
 
 export default function Portal({
   target,
