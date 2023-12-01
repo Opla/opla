@@ -17,11 +17,9 @@
 import '@/app/globals.css';
 import Sidebar from '@/components/Sidebar';
 import useToggle from '@/hooks/useToggle';
-import Settings from '@/modals/settings';
+import SettingsModal from '@/modals';
 import { useState } from 'react';
 import Portal from './Portal';
-import Modal from './Modal';
-// import Dialog from './Dialog';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isModalOpen, onModalOpen, onModalClose] = useToggle(false);
@@ -36,14 +34,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <Sidebar onModal={handleModalDisplay} />
       {children}
       <Portal>
-        {isModalOpen && (
-          <Modal onClose={onModalClose}>
-            <Settings tab={settingTab} onTabChanged={setSettingTab} />
-          </Modal>
-        )}
-        {/* <Dialog open={isModalOpen} onClose={onModalClose}>
-          <Settings tab={settingTab} onTabChanged={setSettingTab} />
-      </Dialog> */}
+        <SettingsModal
+          visible={isModalOpen}
+          settingTab={settingTab}
+          onTabChanged={setSettingTab}
+          onClose={onModalClose}
+        />
       </Portal>
     </div>
   );

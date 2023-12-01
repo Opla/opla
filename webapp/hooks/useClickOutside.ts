@@ -16,10 +16,14 @@ import { useEffect, useCallback, RefObject } from 'react';
 
 const useClickOutside = (target: RefObject<HTMLDivElement>, onClose = () => {}) => {
   useEffect(() => {
-    target.current?.classList.add('modalbox');
     const handleCloseModal = (e: MouseEvent) => {
-      if (target.current && !target.current.contains(e.target as Node)) {
+      if (
+        target.current &&
+        target.current?.classList.contains('modalbox') &&
+        !target.current.contains(e.target as Node)
+      ) {
         onClose();
+        target.current?.classList.remove('modalbox');
         document.body.classList.remove('modalbox-open');
       }
     };
@@ -29,14 +33,17 @@ const useClickOutside = (target: RefObject<HTMLDivElement>, onClose = () => {}) 
     };
   }, [target, onClose]);
   const openModal = useCallback(() => {
+    target.current?.classList.add('modalbox');
     document.body.classList.add('modalbox-open');
-  }, []);
+  }, [target]);
   const closeModal = useCallback(() => {
+    target.current?.classList.remove('modalbox');
     document.body.classList.remove('modalbox-open');
-  }, []);
+  }, [target]);
   const toggleModal = useCallback(() => {
+    target.current?.classList.toggle('modalbox');
     document.body.classList.toggle('modalbox-open');
-  }, []);
+  }, [target]);
   return { openModal, closeModal, toggleModal };
 };
 

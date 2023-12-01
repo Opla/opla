@@ -17,7 +17,6 @@
 import useTheme from '@/hooks/useTheme';
 import useTranslation from '@/hooks/useTranslation';
 import SettingItem from '@/components/SettingItem';
-import SettingsContainer from '@/components/SettingsContainer';
 import Dropdown from '@/components/Dropdown';
 import logger from '@/utils/logger';
 import { BiLaptop, BiMoon, BiSun } from 'react-icons/bi';
@@ -38,7 +37,7 @@ export default function Appearance() {
   };
 
   return (
-    <SettingsContainer>
+    <>
       <SettingItem title={t('Color scheme')} subtitle={t("Choose Opla's color scheme")}>
         <Dropdown items={colorSchemes} onSelect={onSelectColorScheme} />
       </SettingItem>
@@ -48,6 +47,6 @@ export default function Appearance() {
       <SettingItem title={t('Theme')} subtitle={t('Change the theme')}>
         Action
       </SettingItem>
-    </SettingsContainer>
+    </>
   );
 }

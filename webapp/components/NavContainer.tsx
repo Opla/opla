@@ -29,8 +29,8 @@
 
 export default function NavContainer({ children }: { children: React.ReactNode }) {
   return (
-    <div className="scrollbar-trigger flex h-full w-full flex-1 items-start rounded-l-lg bg-gray-100 dark:bg-gray-800">
-      <nav className="flex h-full flex-1 flex-col space-y-1 p-2 pt-4">{children}</nav>
+    <div className="h-full w-full bg-gray-100 dark:bg-gray-800">
+      <nav className="flex flex-col space-y-1 p-2 pt-4">{children}</nav>
     </div>
   );
 }

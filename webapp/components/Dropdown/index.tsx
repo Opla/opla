@@ -41,30 +41,29 @@ export default function Dropdown({
   }));
   const I = selectedItem?.icon as IconType;
   return (
-    <label className="relative" aria-label={selectedItem?.label}>
-      <input
-        ref={peer}
-        type="checkbox"
-        className="peer hidden"
-        onChange={() => {
-          toggleModal();
-        }}
-      />
-      <div className="flex cursor-pointer flex-row items-center rounded-md border border-gray-300 px-2 py-1 hover:border-gray-500 peer-checked:[&>*:nth-child(2)]:-rotate-180">
-        <div className="flex flex-1 flex-row items-center truncate pr-4 dark:text-gray-300">
-          {selectedItem?.icon && <I className="mr-2 h-4 w-4" />}
-          <p className="mr-4 flex-1 text-left">{selectedItem?.label || ' '}</p>
+    <div ref={target}>
+      <label className="relative" aria-label={selectedItem?.label}>
+        <input
+          ref={peer}
+          type="checkbox"
+          className="peer hidden"
+          onChange={() => {
+            toggleModal();
+          }}
+        />
+        <div className="flex cursor-pointer flex-row items-center rounded-md border border-gray-300 px-2 py-1 hover:border-gray-500 peer-checked:[&>*:nth-child(2)]:-rotate-180">
+          <div className="flex flex-1 flex-row items-center truncate pr-4 dark:text-gray-300">
+            {selectedItem?.icon && <I className="mr-2 h-4 w-4" />}
+            <p className="mr-4 flex-1 text-left">{selectedItem?.label || ' '}</p>
+          </div>
+          <div className="flex items-center transition-transform">
+            <BiChevronDown className="h-4 w-4 text-gray-400 " />
+          </div>
         </div>
-        <div className="flex items-center transition-transform">
-          <BiChevronDown className="h-4 w-4 text-gray-400 " />
+        <div className="z-200 pointer-events-none absolute left-0 top-8 rounded-lg bg-gray-300 p-2 opacity-0 shadow-lg transition-all peer-checked:pointer-events-auto peer-checked:opacity-100 dark:bg-gray-800">
+          <Menu items={itemsWithSelection} onClose={onClose} onSelect={onSelect} />
         </div>
-      </div>
-      <div
-        ref={target}
-        className="z-200 pointer-events-none absolute left-0 top-8 rounded-lg bg-gray-300 p-2 opacity-0 shadow-lg transition-all peer-checked:pointer-events-auto peer-checked:opacity-100 dark:bg-gray-800"
-      >
-        <Menu items={itemsWithSelection} onClose={onClose} onSelect={onSelect} />
-      </div>
-    </label>
+      </label>
+    </div>
   );
 }

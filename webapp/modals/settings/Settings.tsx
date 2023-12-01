@@ -44,49 +44,44 @@ export default function Settings({
   const { t } = useTranslation();
 
   return (
-    <div className="relative flex h-full w-full">
-      <div className="flex h-full w-[260px] flex-col">
-        <div className="flex h-full min-h-0 flex-col ">
-          <NavContainer>
-            <div className="p1 text-ellipsis break-all pb-2 text-sm text-gray-600">
-              {t('Settings')}
-            </div>
-            <li className="p1 flex flex-1 flex-col">
-              {menu.map((item) => (
-                <ul
-                  key={item.id}
-                  className={`${
-                    item.href === tab || item.hrefAlias === tab
-                      ? 'text-black dark:text-white'
-                      : 'text-gray-400 dark:text-gray-400'
-                  } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-gray-500/10`}
+    <div className="flex h-full w-full">
+      <div className="navSettings">
+        <NavContainer>
+          <div className="text-ellipsis break-all p-3 text-sm text-gray-600">{t('Settings')}</div>
+          <li className="flex flex-1 flex-col gap-1 p-1">
+            {menu.map((item) => (
+              <ul
+                key={item.id}
+                className={`${
+                  item.href === tab || item.hrefAlias === tab
+                    ? 'text-black dark:text-white'
+                    : 'text-gray-400 dark:text-gray-400'
+                } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-gray-500/10`}
+              >
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className="flex cursor-pointer flex-row items-center break-all"
+                  onKeyUp={(e) => {
+                    e.stopPropagation();
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onTabChanged(item.href as string);
+                  }}
                 >
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onKeyUp={(e) => {
-                      e.stopPropagation();
-                    }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onTabChanged(item.href as string);
-                    }}
-                  >
-                    <div>
-                      <div className="flex cursor-pointer flex-row items-center break-all">
-                        <div className="relative max-h-5 flex-1 overflow-hidden text-ellipsis break-all">
-                          {t(item.name)}
-                        </div>
-                      </div>
-                    </div>
+                  <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
+                    {t(item.name)}
                   </div>
-                </ul>
-              ))}
-            </li>
-          </NavContainer>
-        </div>
+                </div>
+              </ul>
+            ))}
+          </li>
+        </NavContainer>
       </div>
-      {children}
+      <div className="contentSettings h-full">
+        <div className="flex h-full flex-col">{children}</div>
+      </div>
     </div>
   );
 }
