@@ -15,42 +15,57 @@
 'use client';
 
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/router';
 import { BiChevronDown } from 'react-icons/bi';
 import { AppContext } from '@/context';
 import { Message } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
-import { updateMessage } from '@/utils/conversations';
+import { createdMessage, updateConversationMessages } from '@/utils/conversations';
 import MessageView from './Message';
 import Prompt from './Prompt';
 
 function Thread({ conversationId }: { conversationId?: string }) {
+  const router = useRouter();
   const { conversations, setConversations } = useContext(AppContext);
-  const initialConversation = conversations.find((c) => c.id === conversationId);
+  const selectedConversation = conversations.find((c) => c.id === conversationId);
+
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [message, setMessage] = useState('');
 
   const { t } = useTranslation();
 
-  logger.info(`${conversationId} ${initialConversation?.messages?.length}`);
+  logger.info(`${conversationId} ${selectedConversation?.messages?.length}`);
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
 
   const messages = useMemo(
-    () => initialConversation?.messages || [],
-    [initialConversation?.messages],
+    () => selectedConversation?.messages || [],
+    [selectedConversation?.messages],
   );
   const [showEmptyChat, setShowEmptyChat] = useState(messages.length < 1);
 
-  logger.info(`${conversationId} ${messages.length}`);
+  // logger.info(`${conversationId} ${messages.length}`);
   const selectedPreset = 'LLama2';
 
-  const setMessages = (newMessages: Message[]) => {
-    let newConversations = [...conversations];
-    newMessages.forEach((msg) => {
-      newConversations = updateMessage(msg, conversationId as string, newConversations);
-    });
+  const updateMessages = (
+    newMessages: Message[],
+    selectedConversationId = conversationId,
+    selectedConversations = conversations,
+  ) => {
+    const newConversations = updateConversationMessages(
+      selectedConversationId,
+      selectedConversations,
+      newMessages,
+    );
     setConversations(newConversations);
+
+    let newConversationId = selectedConversationId;
+    if (!newConversationId) {
+      newConversationId = newConversations[newConversations.length - 1].id;
+      router.push(`/threads/${newConversationId}`);
+    }
+    return { newConversationId, newConversations };
   };
 
   useEffect(() => {
@@ -68,65 +83,37 @@ function Thread({ conversationId }: { conversationId?: string }) {
 
     setIsLoading(true);
 
-    setMessages([
-      {
-        id: `${Date.now()}`,
-        content: message,
-        author: { role: 'user', name: 'you' },
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      },
-      {
-        id: `${Date.now()}`,
-        content: '',
-        author: { role: 'system', name: selectedPreset },
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      },
-    ]);
+    const toMessage = createdMessage({ role: 'user', name: 'you' }, message);
+    const fromMessage = createdMessage({ role: 'system', name: selectedPreset }, '...');
+    const { newConversationId, newConversations } = updateMessages([toMessage, fromMessage]);
 
     setMessage('');
     setShowEmptyChat(false);
 
-    setMessages([
-      ...messages,
-      {
-        id: `${Date.now()}`,
-        content: message,
-        author: { role: 'user', name: 'you' },
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      },
-      {
-        id: `${Date.now()}`,
-        content: 'What?',
-        author: { role: 'system', name: selectedPreset },
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      },
-    ]);
+    fromMessage.content = 'What?';
+    updateMessages([fromMessage], newConversationId, newConversations);
   };
 
   return (
-    <div className="flex max-w-full flex-1 flex-col dark:bg-gray-900">
-      <div className="transition-width relative flex h-full w-full flex-1 flex-col items-stretch overflow-hidden">
-        <div className="flex-1 overflow-hidden">
-          <div className="flex flex-col items-center text-sm">
-            <div className="justify-left flex w-full flex-row items-center gap-1 bg-gray-50 p-3 text-gray-500 dark:bg-gray-950 dark:text-gray-300">
-              <div className="mx-3 flex h-7 flex-row items-center rounded-md border border-gray-600 px-2">
-                {/* <span className="gap-1 py-1 text-gray-700 dark:text-gray-500">{t('Model')} :</span> */}
-                <span className="items-center truncate truncate px-3 dark:text-gray-300">
-                  {selectedPreset}
-                </span>
-                <span className="right-0 flex items-center pr-2">
-                  <BiChevronDown className="h-4 w-4 text-gray-400" />
-                </span>
-              </div>
-              <div className="hidden rounded-md border border-gray-600 px-3 py-1">
-                {t('No plugins installed')}
-              </div>
-            </div>
+    <div className="flex flex-1 flex-col dark:bg-gray-900">
+      <div className="flex flex-col items-center text-sm">
+        <div className="justify-left flex w-full flex-row items-center gap-1 bg-gray-50 p-3 text-gray-500 dark:bg-gray-950 dark:text-gray-300">
+          <div className="mx-3 flex h-7 flex-row items-center rounded-md border border-gray-600 px-2">
+            {/* <span className="gap-1 py-1 text-gray-700 dark:text-gray-500">{t('Model')} :</span> */}
+            <span className="items-center truncate truncate px-3 dark:text-gray-300">
+              {selectedPreset}
+            </span>
+            <span className="right-0 flex items-center pr-2">
+              <BiChevronDown className="h-4 w-4 text-gray-400" />
+            </span>
           </div>
+          <div className="hidden rounded-md border border-gray-600 px-3 py-1">
+            {t('No plugins installed')}
+          </div>
+        </div>
+      </div>
+      <div className="flex h-[80%] w-full flex-grow flex-col">
+        <div className="flex flex-col overflow-y-auto">
           {showEmptyChat ? (
             <div className="relative flex h-full w-full flex-col py-10">
               <h1 className="flex h-screen items-center justify-center gap-2 text-center text-2xl font-semibold text-gray-200 dark:text-gray-600">
@@ -138,20 +125,20 @@ function Thread({ conversationId }: { conversationId?: string }) {
               {messages.map((msg) => (
                 <MessageView key={msg.id} message={msg} />
               ))}
-              <div className="h-32 w-full flex-shrink-0 md:h-48" />
+              <div className="h-4 w-full flex-shrink-0" />
               <div ref={bottomOfChatRef} />
             </>
           )}
           <div className="flex flex-col items-center text-sm dark:bg-gray-900" />
         </div>
-        <Prompt
-          message={message}
-          isLoading={isLoading}
-          errorMessage={errorMessage}
-          handleMessage={sendMessage}
-          updateMessage={setMessage}
-        />
       </div>
+      <Prompt
+        message={message}
+        isLoading={isLoading}
+        errorMessage={errorMessage}
+        handleMessage={sendMessage}
+        updateMessage={setMessage}
+      />
     </div>
   );
 }

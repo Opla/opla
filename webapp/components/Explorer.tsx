@@ -44,10 +44,13 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
   return (
     <div className="scrollbar-trigger flex h-full w-full flex-1 items-start bg-gray-100 dark:bg-gray-800">
       <nav className="flex h-full flex-1 flex-col space-y-1 p-1">
-        <div className="m-2 mb-1 flex flex-shrink-0 cursor-pointer items-center gap-2 rounded-md border px-4 py-1 text-sm text-gray-400 transition-colors duration-200 hover:bg-gray-500/10 hover:text-white dark:border-white/20 dark:text-gray-400 hover:dark:text-white">
+        <Link
+          href="/threads"
+          className="m-2 mb-1 flex flex-shrink-0 cursor-pointer items-center gap-2 rounded-md border px-4 py-1 text-sm text-gray-400 transition-colors duration-200 hover:bg-gray-500/10 hover:text-white dark:border-white/20 dark:text-gray-400 hover:dark:text-white"
+        >
           <BiPlus className="h-4 w-4" />
           {t('New chat')}
-        </div>
+        </Link>
         <div className="flex-1 flex-col overflow-y-auto overflow-x-hidden dark:border-white/20">
           <div className="flex flex-col gap-2 pb-2 text-sm dark:text-gray-100">
             <div className="group relative flex flex-col gap-3 break-all rounded-md px-1 py-3">

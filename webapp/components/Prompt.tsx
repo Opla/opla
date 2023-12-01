@@ -60,7 +60,7 @@ export default function Prompt({
   };
 
   return (
-    <div className="absolute bottom-0 left-0 w-full !bg-transparent bg-white pt-2 dark:bg-gray-800">
+    <div className="bottom-0 left-0 w-full !bg-transparent bg-white pt-2 dark:bg-gray-800">
       <form className="stretch mx-2 flex flex-row gap-3 last:mb-2">
         <div className="relative flex h-full flex-1 flex-col items-stretch">
           {errorMessage ? (

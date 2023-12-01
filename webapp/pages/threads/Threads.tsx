@@ -17,7 +17,7 @@
 import Thread from '@/components/Thread';
 import Explorer from '@/components/Explorer';
 
-export default function Layout({ selectedConversationId }: { selectedConversationId?: string }) {
+export default function Threads({ selectedConversationId }: { selectedConversationId?: string }) {
   return (
     <div className="relative flex h-screen w-full overflow-hidden">
       <div className="flex w-[260px] flex-col">
