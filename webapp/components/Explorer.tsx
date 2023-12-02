@@ -16,28 +16,47 @@
 
 import { AppContext } from '@/context';
 import Link from 'next/link';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { BiPlus } from 'react-icons/bi';
-import { MenuItem } from '@/types';
+import { Conversation, MenuItem } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
+import { getConversation, updateConversation } from '@/utils/conversations';
 import ContextMenu from './ContextMenu';
+import EditableItem from './EditableItem';
 
 export default function Explorer({ selectedConversationId }: { selectedConversationId?: string }) {
-  const { conversations } = useContext(AppContext);
+  const { conversations, setConversations } = useContext(AppContext);
+  const [editableConversation, setEditableConversation] = useState<string | undefined>(undefined);
   const { t } = useTranslation();
+
+  const onRename = (data: string) => {
+    logger.info(`rename ${data}`);
+    setEditableConversation(data);
+  };
+
+  const onDelete = (data: string) => {
+    logger.info(`delete ${data}`);
+  };
+
+  const onChangeConversationName = (value: string, id: string) => {
+    const conversation = getConversation(id, conversations) as Conversation;
+    if (conversation) {
+      conversation.name = value;
+    }
+    const updatedConversations = updateConversation(conversation, conversations);
+    setConversations(updatedConversations);
+    logger.info(`onChangeConversationName ${editableConversation} ${value} ${id}`);
+  };
+
   const menu: MenuItem[] = [
     {
       label: t('Rename'),
-      onSelect: (data: string) => {
-        logger.info(`rename ${data}`);
-      },
+      onSelect: onRename,
     },
     {
       label: t('Delete'),
-      onSelect: (data: string) => {
-        logger.info(`delete ${data}`);
-      },
+      onSelect: onDelete,
     },
   ];
 
@@ -66,14 +85,17 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
                     } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-gray-500/10`}
                   >
                     <ContextMenu data={conversation.id} menu={menu}>
-                      <Link href={`/threads/${conversation.id}`}>
-                        <div>
-                          <div className="flex cursor-pointer flex-row items-center break-all">
-                            <div className="relative max-h-5 flex-1 overflow-hidden text-ellipsis break-all">
-                              {conversation.name}
-                            </div>
-                          </div>
-                        </div>
+                      <Link
+                        href={`/threads/${conversation.id}`}
+                        className="flex cursor-pointer flex-row items-center"
+                      >
+                        <EditableItem
+                          id={conversation.id}
+                          title={conversation.name}
+                          editable={conversation.id === selectedConversationId}
+                          className="relative max-h-5 flex-1 overflow-hidden text-ellipsis break-all"
+                          onChange={onChangeConversationName}
+                        />
                       </Link>
                     </ContextMenu>
                   </ul>
