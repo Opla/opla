@@ -21,10 +21,12 @@ export default function Modal({
   open,
   onClose,
   children,
+  size,
 }: {
   id?: string;
   open: boolean;
   onClose: () => void;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   children: React.ReactNode;
 }) {
   const modalRef = useRef<HTMLDialogElement>(null);
@@ -53,14 +55,31 @@ export default function Modal({
     };
   }, [handleDialogClick, onClose, open]);
 
-  const size = 'w-[80%] h-[80%]';
+  let cssSize;
+  switch (size) {
+    case 'sm':
+      cssSize = 'w-[30%] h-[30%]';
+      break;
+    case 'md':
+      cssSize = 'w-[50%] h-[50%]';
+      break;
+    case 'lg':
+      cssSize = 'w-[70%] h-[70%]';
+      break;
+    case 'xl':
+      cssSize = 'w-[80%] h-[80%]';
+      break;
+    default:
+      cssSize = ' ';
+      break;
+  }
 
   return (
     <dialog
       id={id}
       ref={modalRef}
       onCancel={onClose}
-      className={`${size} relative rounded-lg bg-white shadow-lg transition-all backdrop:bg-gray-950/50 dark:bg-gray-900`}
+      className={`${cssSize} relative rounded-lg bg-white shadow-lg transition-all backdrop:bg-gray-950/50 dark:bg-gray-900`}
     >
       {children}
       <button
