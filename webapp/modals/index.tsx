@@ -16,18 +16,18 @@ import Modal from '@/components/Modal';
 import Settings from './settings';
 
 export default function SettingsModal({
-  visible,
+  open,
   settingTab,
   onTabChanged,
   onClose,
 }: {
-  visible: boolean;
+  open: boolean;
   settingTab?: string | undefined;
   onTabChanged: (tab: string) => void | undefined;
   onClose: () => void | undefined;
 }) {
   return (
-    <Modal id="settingsmodal" open={visible} onClose={onClose}>
+    <Modal id="settingsmodal" size="xl" open={open} onClose={onClose}>
       <Settings tab={settingTab} onTabChanged={onTabChanged} />
     </Modal>
   );

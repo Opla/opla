@@ -20,6 +20,7 @@ import useToggle from '@/hooks/useToggle';
 import SettingsModal from '@/modals';
 import { useState } from 'react';
 import Portal from './Portal';
+import Dialog from './Dialog';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isModalOpen, onModalOpen, onModalClose] = useToggle(false);
@@ -35,11 +36,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {children}
       <Portal>
         <SettingsModal
-          visible={isModalOpen}
+          open={isModalOpen}
           settingTab={settingTab}
           onTabChanged={setSettingTab}
           onClose={onModalClose}
         />
+        <Dialog title="Welcome to Opla" actions={[{ label: 'Ok' }, { label: 'Cancel' }]}>
+          <div>An open-source app</div>
+        </Dialog>
       </Portal>
     </div>
   );
