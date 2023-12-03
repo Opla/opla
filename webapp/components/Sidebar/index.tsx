@@ -14,11 +14,13 @@
 
 'use client';
 
+import { useContext } from 'react';
 import Image from 'next/image';
 import { BiChat, BiServer, BiNetworkChart, BiCog, BiExtension, BiUserCircle } from 'react-icons/bi';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import useTranslation from '@/hooks/useTranslation';
+import { ModalsContext } from '@/utils/modalsProvider';
 import logger from '@/utils/logger';
 import Tooltip, { Orientation } from '../Tooltip';
 import SidebarItems from './SidebarItems';
@@ -71,11 +73,16 @@ const sidebarItems: Array<Item> = [
   },
 ];
 
-function Sidebar({ onModal }: { onModal: () => void }) {
+function Sidebar() {
   const router = useRouter();
   const { pathname } = router;
   logger.info('pathname', pathname);
   const { t } = useTranslation();
+  const { showModal } = useContext(ModalsContext);
+
+  const onModal = () => {
+    showModal('settings');
+  };
 
   return (
     <aside className="flex h-full flex-col bg-gray-200 p-1 dark:bg-gray-700">

@@ -14,34 +14,36 @@
 
 'use client';
 
-import { useState } from 'react';
 import { MenuItem } from '@/types';
 import Modal from './Modal';
 
 export default function Dialog({
   title,
+  visible,
   children,
   actions,
   onAction,
+  onClose,
 }: {
   title: string;
+  visible: boolean;
   children: React.ReactNode;
   actions?: MenuItem[];
   onAction?: () => void;
+  onClose?: () => void;
 }) {
-  const [open, setOpen] = useState(true);
   const onPreAction = (action: () => void) => {
     action?.();
-    setOpen(false);
+    onClose?.();
   };
 
   return (
     <Modal
       id="dialog"
-      open={open}
+      open={visible}
       size="sm"
       onClose={() => {
-        setOpen(false);
+        onClose?.();
       }}
     >
       <div className="flex h-full w-full flex-col gap-3 p-4">

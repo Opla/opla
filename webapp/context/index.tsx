@@ -14,9 +14,9 @@
 
 'use client';
 
+import { SetStateAction, createContext, useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import { Conversation, Model, Provider } from '@/types';
-import { SetStateAction, createContext, useState } from 'react';
 
 type Context = {
   conversations: Array<Conversation>;
@@ -92,7 +92,7 @@ const initialContext: Context = {
 
 const AppContext = createContext(initialContext);
 
-function AppWrapper({ children }: { children: React.ReactNode }) {
+function AppContextProvider({ children }: { children: React.ReactNode }) {
   const [conversations, setConversations] = useState(initialContext.conversations);
   const [providers, setProviders] = useState(initialContext.providers);
   const [models, setModels] = useState(initialContext.models);
@@ -107,4 +107,4 @@ function AppWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
-export { AppContext, AppWrapper };
+export { AppContext, AppContextProvider };

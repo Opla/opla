@@ -14,13 +14,49 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AppProps } from 'next/app';
 import Layout from '@/components/Layout';
 import { ThemeProvider } from 'next-themes';
-import { AppWrapper } from '@/context';
+import { AppContextProvider } from '@/context';
+import SettingsModal from '@/modals';
+import Dialog from '@/components/Dialog';
+import { ModalsProvider } from '../utils/modalsProvider';
 
 export default function App({ Component }: AppProps) {
+  const [settingTab, setSettingTab] = useState<string>();
+
+  const onModalsInit = useCallback(
+    ({ registerModal }: { registerModal: any }) => {
+      registerModal('settings', ({ visible = false, onClose = () => {} }) => (
+        <SettingsModal
+          key="settings"
+          open={visible}
+          settingTab={settingTab}
+          onTabChanged={setSettingTab}
+          onClose={onClose}
+        />
+      ));
+
+      registerModal(
+        'welcome',
+        ({ visible = false, onClose = () => {} }) => (
+          <Dialog
+            key="welcome"
+            title="Welcome to Opla"
+            actions={[{ label: 'Ok' }, { label: 'Cancel' }]}
+            visible={visible}
+            onClose={onClose}
+          >
+            <div>An open-source app</div>
+          </Dialog>
+        ),
+        true,
+      );
+    },
+    [/* isModalOpen, onModalClose, */ settingTab],
+  );
+
   // Dirty hack to fix hydration mismatch using i18n
   const [initialRenderComplete, setInitialRenderComplete] = useState<boolean>(false);
   useEffect(() => {
@@ -31,11 +67,13 @@ export default function App({ Component }: AppProps) {
 
   return (
     <ThemeProvider attribute="class">
-      <AppWrapper>
-        <Layout>
-          <Component />
-        </Layout>
-      </AppWrapper>
+      <AppContextProvider>
+        <ModalsProvider onInit={onModalsInit}>
+          <Layout>
+            <Component />
+          </Layout>
+        </ModalsProvider>
+      </AppContextProvider>
     </ThemeProvider>
   );
 }
