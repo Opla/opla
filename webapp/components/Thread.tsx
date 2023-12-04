@@ -43,7 +43,8 @@ function Thread({ conversationId }: { conversationId?: string }) {
     () => selectedConversation?.messages || [],
     [selectedConversation?.messages],
   );
-  const [showEmptyChat, setShowEmptyChat] = useState(messages.length < 1);
+
+  const showEmptyChat = messages.length < 1;
 
   // logger.info(`${conversationId} ${messages.length}`);
   const selectedPreset = 'LLama2';
@@ -88,7 +89,6 @@ function Thread({ conversationId }: { conversationId?: string }) {
     const { newConversationId, newConversations } = updateMessages([toMessage, fromMessage]);
 
     setMessage('');
-    setShowEmptyChat(false);
 
     fromMessage.content = 'What?';
     updateMessages([fromMessage], newConversationId, newConversations);
