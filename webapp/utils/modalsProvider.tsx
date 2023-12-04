@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import Portal from '@/components/Portal';
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useState } from 'react';
 
 type Context = {
   instances: {
@@ -40,13 +40,7 @@ const initialContext: Context = {
 
 const ModalsContext = createContext(initialContext);
 
-function ModalsProvider({
-  children,
-  onInit = () => {},
-}: {
-  children: React.ReactNode;
-  onInit?: (context: Context) => void;
-}) {
+function ModalsProvider({ children }: { children: React.ReactNode }) {
   const [modals, setModals] = useState(initialContext.instances);
 
   const registerModal = (
@@ -81,10 +75,6 @@ function ModalsProvider({
     }
   };
 
-  useEffect(() => {
-    onInit({ registerModal, showModal } as Context);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   return (
     <ModalsContext.Provider
       // eslint-disable-next-line react/jsx-no-constructed-context-values

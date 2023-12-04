@@ -14,78 +14,14 @@
 
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AppProps } from 'next/app';
 import Layout from '@/components/Layout';
 import { ThemeProvider } from 'next-themes';
 import { AppContextProvider } from '@/context';
-import SettingsModal from '@/modals';
-import Dialog from '@/components/Dialog';
-import { Conversation } from '@/types';
-import useTranslation from '@/hooks/useTranslation';
 import { ModalsProvider } from '../utils/modalsProvider';
 
 export default function App({ Component }: AppProps) {
-  const [settingTab, setSettingTab] = useState<string>();
-  const { t } = useTranslation();
-
-  const onModalsInit = useCallback(
-    ({ registerModal }: { registerModal: any }) => {
-      registerModal('settings', ({ visible = false, onClose = () => {} }) => (
-        <SettingsModal
-          key="settings"
-          open={visible}
-          settingTab={settingTab}
-          onTabChanged={setSettingTab}
-          onClose={onClose}
-        />
-      ));
-
-      registerModal(
-        'welcome',
-        ({ visible = false, onClose = () => {} }) => (
-          <Dialog
-            key="welcome"
-            id="welcome"
-            title={t('Welcome to Opla!')}
-            actions={[{ label: t("Let's go!") }]}
-            visible={visible}
-            onClose={onClose}
-          >
-            <div>{t('The ultimate Open-source generative AI App')}</div>
-          </Dialog>
-        ),
-        true,
-      );
-
-      registerModal(
-        'deletethread',
-        ({ visible = false, onClose = () => {}, data = undefined }) => {
-          const thread = (data as unknown as { conversation: Conversation })
-            ?.conversation as Conversation;
-          return (
-            <Dialog
-              key="deletethread"
-              id="deletethread"
-              title={t('Delete this conversation ?')}
-              actions={[
-                { label: t('Delete'), value: 'Delete' },
-                { label: t('Cancel'), value: 'Cancel' },
-              ]}
-              visible={visible}
-              onClose={onClose}
-              data={data}
-            >
-              <div>{thread?.name || ''}</div>
-            </Dialog>
-          );
-        },
-        false,
-      );
-    },
-    [settingTab, t],
-  );
-
   // Dirty hack to fix hydration mismatch using i18n
   const [initialRenderComplete, setInitialRenderComplete] = useState<boolean>(false);
   useEffect(() => {
@@ -97,7 +33,7 @@ export default function App({ Component }: AppProps) {
   return (
     <ThemeProvider attribute="class">
       <AppContextProvider>
-        <ModalsProvider onInit={onModalsInit}>
+        <ModalsProvider>
           <Layout>
             <Component />
           </Layout>
