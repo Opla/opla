@@ -14,10 +14,11 @@
 
 'use client';
 
-import { AppContext } from '@/context';
-import Link from 'next/link';
 import { useContext, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { BiPlus } from 'react-icons/bi';
+import { AppContext } from '@/context';
 import { Conversation, MenuItem } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
@@ -27,6 +28,8 @@ import ContextMenu from './ContextMenu';
 import EditableItem from './EditableItem';
 
 export default function Explorer({ selectedConversationId }: { selectedConversationId?: string }) {
+  const router = useRouter();
+
   const { conversations, setConversations } = useContext(AppContext);
   const [editableConversation, setEditableConversation] = useState<string | undefined>(undefined);
   const { t } = useTranslation();
@@ -44,6 +47,9 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
       if (action === 'Delete') {
         const updatedConversations = deleteConversation(conversation.id, conversations);
         setConversations(updatedConversations);
+        if (selectedConversationId && selectedConversationId === conversation.id) {
+          router.replace('/threads');
+        }
       }
     }
   };

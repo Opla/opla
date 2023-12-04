@@ -14,17 +14,18 @@
 
 'use client';
 
-import { SetStateAction, createContext, useState } from 'react';
+import { createContext } from 'react';
 import { v4 as uuid } from 'uuid';
 import { Conversation, Model, Provider } from '@/types';
+import useDataStorage from '@/hooks/useDataStorage';
 
 type Context = {
   conversations: Array<Conversation>;
   providers: Array<Provider>;
   models: Array<Model>;
-  setConversations: (newConversations: SetStateAction<Conversation[]>) => void;
-  setProviders: (newProviders: SetStateAction<Provider[]>) => void;
-  setModels: (newModels: SetStateAction<Model[]>) => void;
+  setConversations: (newConversations: Conversation[]) => void;
+  setProviders: (newProviders: Provider[]) => void;
+  setModels: (newModels: Model[]) => void;
 };
 
 const initialContext: Context = {
@@ -93,9 +94,12 @@ const initialContext: Context = {
 const AppContext = createContext(initialContext);
 
 function AppContextProvider({ children }: { children: React.ReactNode }) {
-  const [conversations, setConversations] = useState(initialContext.conversations);
-  const [providers, setProviders] = useState(initialContext.providers);
-  const [models, setModels] = useState(initialContext.models);
+  const [conversations, setConversations] = useDataStorage(
+    'conversations',
+    initialContext.conversations,
+  );
+  const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
+  const [models, setModels] = useDataStorage('models', initialContext.models);
 
   return (
     <AppContext.Provider
