@@ -27,7 +27,8 @@ export default function Parameter({
   type: 'text' | 'password' | 'large-text' | 'select' | 'switch';
   children?: React.ReactNode;
 }) {
-  const textCss = 'w-full bg-gray-200 p-2 dark:bg-gray-800 rounded-md border border-gray-600';
+  const textCss =
+    'w-full bg-gray-100 p-2 dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600';
 
   return (
     <div className="bb-1 flex w-full flex-row border-b border-gray-100 pb-4 pt-3 dark:border-gray-800">
