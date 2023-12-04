@@ -53,5 +53,12 @@
   "Ok": "Ok",
   "Cancel": "Cancel",
   "Let's go!": "Let's go!",
-  "Delete this conversation?": "Delete this conversation?"
+  "Delete this conversation?": "Delete this conversation?",
+  "Save": "Save",
+  "Name": "Name",
+  "Url": "Url",
+  "Token": "Token",
+  "Documentation": "Documentation",
+  "Disabled": "Disabled",
+  "Description": "Description"
 }
