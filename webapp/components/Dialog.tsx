@@ -18,32 +18,36 @@ import { MenuItem } from '@/types';
 import Modal from './Modal';
 
 export default function Dialog({
+  id,
   title,
   visible,
   children,
   actions,
   onAction,
   onClose,
+  data,
 }: {
+  id: string;
   title: string;
   visible: boolean;
   children: React.ReactNode;
   actions?: MenuItem[];
-  onAction?: () => void;
-  onClose?: () => void;
+  onAction?: (action: string, data: any) => void;
+  onClose?: (data: any) => void;
+  data?: any;
 }) {
-  const onPreAction = (action: () => void) => {
-    action?.();
-    onClose?.();
+  const onPreAction = (action: string, doAction: (action: string, data: any) => void) => {
+    doAction?.(action, data);
+    onClose?.(data);
   };
 
   return (
     <Modal
-      id="dialog"
+      id={id}
       open={visible}
       size="sm"
       onClose={() => {
-        onClose?.();
+        onClose?.(data);
       }}
     >
       <div className="flex h-full w-full flex-col gap-3 p-4">
@@ -57,7 +61,10 @@ export default function Dialog({
               className="rounded-md bg-gray-500 px-4 py-2 text-white"
               onClick={(e) => {
                 e.preventDefault();
-                onPreAction(onAction as () => void);
+                onPreAction(
+                  action.value || action.label,
+                  onAction || (data?.onAction as () => void),
+                );
               }}
             >
               {action.label}

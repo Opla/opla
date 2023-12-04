@@ -21,7 +21,8 @@ import { BiPlus } from 'react-icons/bi';
 import { Conversation, MenuItem } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
-import { getConversation, updateConversation } from '@/utils/conversations';
+import { getConversation, updateConversation, deleteConversation } from '@/utils/conversations';
+import { ModalsContext } from '@/utils/modalsProvider';
 import ContextMenu from './ContextMenu';
 import EditableItem from './EditableItem';
 
@@ -29,14 +30,28 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
   const { conversations, setConversations } = useContext(AppContext);
   const [editableConversation, setEditableConversation] = useState<string | undefined>(undefined);
   const { t } = useTranslation();
+  const { showModal } = useContext(ModalsContext);
 
   const onRename = (data: string) => {
     logger.info(`rename ${data}`);
     setEditableConversation(data);
   };
 
-  const onDelete = (data: string) => {
-    logger.info(`delete ${data}`);
+  const onDelete = (action: string, data: any) => {
+    const conversation = data?.conversation as Conversation;
+    logger.info(`delete ${action} ${data}`);
+    if (conversation) {
+      if (action === 'Delete') {
+        const updatedConversations = deleteConversation(conversation.id, conversations);
+        setConversations(updatedConversations);
+      }
+    }
+  };
+
+  const onToDelete = (data: string) => {
+    logger.info(`to delete ${data}`);
+    const conversation = getConversation(data, conversations) as Conversation;
+    showModal('deletethread', { conversation, onAction: onDelete });
   };
 
   const onChangeConversationName = (value: string, id: string) => {
@@ -56,7 +71,7 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
     },
     {
       label: t('Delete'),
-      onSelect: onDelete,
+      onSelect: onToDelete,
     },
   ];
 

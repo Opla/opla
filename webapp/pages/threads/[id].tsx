@@ -31,7 +31,7 @@
 import { useRouter } from 'next/router';
 import Threads from './Threads';
 
-export default function ChatSelected() {
+export default function ThreadSelected() {
   const router = useRouter();
   const { id } = router.query;
   return <Threads selectedConversationId={id as string} />;

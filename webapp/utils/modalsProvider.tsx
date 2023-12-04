@@ -18,12 +18,18 @@ import { createContext, useEffect, useState } from 'react';
 type Context = {
   instances: {
     [key: string]: {
-      render: (props: { name: string; visible: boolean; onClose: () => void }) => React.ReactNode;
+      render: (props: {
+        name: string;
+        visible: boolean;
+        onClose: () => void;
+        data: any;
+      }) => React.ReactNode;
       visible: boolean;
+      data: any;
     };
   };
-  registerModal: (name: string, render: any, visible?: boolean) => void;
-  showModal: (modalName: string) => void;
+  registerModal: (name: string, render: any, visible?: boolean, data?: any) => void;
+  showModal: (modalName: string, data?: any) => void;
 };
 
 const initialContext: Context = {
@@ -43,16 +49,25 @@ function ModalsProvider({
 }) {
   const [modals, setModals] = useState(initialContext.instances);
 
-  const registerModal = (name: string, render: () => React.ReactNode, visible = false) => {
+  const registerModal = (
+    name: string,
+    render: () => React.ReactNode,
+    visible = false,
+    data = undefined,
+  ) => {
     if (!modals[name]) {
-      setModals((prevModals) => ({ ...prevModals, ...{ [name]: { render, visible } } }));
+      setModals((prevModals) => ({ ...prevModals, ...{ [name]: { render, visible, data } } }));
     }
   };
 
-  const showModal = (name: string) => {
+  const showModal = (name: string, data = undefined) => {
     const instance = modals[name];
+
     if (instance) {
-      setModals((prevModals) => ({ ...prevModals, ...{ [name]: { ...instance, visible: true } } }));
+      setModals((prevModals) => ({
+        ...prevModals,
+        ...{ [name]: { ...instance, visible: true, data } },
+      }));
     }
   };
 
@@ -61,7 +76,7 @@ function ModalsProvider({
     if (instance) {
       setModals((prevModals) => ({
         ...prevModals,
-        ...{ [name]: { ...instance, visible: false } },
+        ...{ [name]: { ...instance, visible: false, data: undefined } },
       }));
     }
   };
@@ -70,7 +85,6 @@ function ModalsProvider({
     onInit({ registerModal, showModal } as Context);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   return (
     <ModalsContext.Provider
       // eslint-disable-next-line react/jsx-no-constructed-context-values
@@ -78,8 +92,8 @@ function ModalsProvider({
     >
       {children}
       <Portal>
-        {Object.entries(modals).map(([name, { render, visible }]) =>
-          render({ name, visible, onClose: () => onClose(name) }),
+        {Object.entries(modals).map(([name, { render, visible, data }]) =>
+          render({ name, visible, onClose: () => onClose(name), data }),
         )}
       </Portal>
     </ModalsContext.Provider>

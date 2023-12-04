@@ -81,6 +81,9 @@ const updateConversation = (conversation: Conversation, conversations: Conversat
   return conversations.map((c) => (c.id === updatedConversation.id ? updatedConversation : c));
 };
 
+const deleteConversation = (conversationId: string, conversations: Conversation[]) =>
+  conversations.filter((c) => c.id !== conversationId);
+
 const updateConversationMessages = (
   conversationId: string | undefined,
   conversations: Conversation[],
@@ -107,4 +110,5 @@ export {
   getConversation,
   updateConversation,
   updateConversationMessages,
+  deleteConversation,
 };

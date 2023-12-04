@@ -21,6 +21,7 @@ import { ThemeProvider } from 'next-themes';
 import { AppContextProvider } from '@/context';
 import SettingsModal from '@/modals';
 import Dialog from '@/components/Dialog';
+import { Conversation } from '@/types';
 import { ModalsProvider } from '../utils/modalsProvider';
 
 export default function App({ Component }: AppProps) {
@@ -43,6 +44,7 @@ export default function App({ Component }: AppProps) {
         ({ visible = false, onClose = () => {} }) => (
           <Dialog
             key="welcome"
+            id="welcome"
             title="Welcome to Opla"
             actions={[{ label: 'Ok' }, { label: 'Cancel' }]}
             visible={visible}
@@ -52,6 +54,28 @@ export default function App({ Component }: AppProps) {
           </Dialog>
         ),
         true,
+      );
+
+      registerModal(
+        'deletethread',
+        ({ visible = false, onClose = () => {}, data = undefined }) => {
+          const thread = (data as unknown as { conversation: Conversation })
+            ?.conversation as Conversation;
+          return (
+            <Dialog
+              key="deletethread"
+              id="deletethread"
+              title="Delete this conversation ?"
+              actions={[{ label: 'Delete' }, { label: 'Cancel' }]}
+              visible={visible}
+              onClose={onClose}
+              data={data}
+            >
+              <div>{thread?.name || ''}</div>
+            </Dialog>
+          );
+        },
+        false,
       );
     },
     [/* isModalOpen, onModalClose, */ settingTab],
