@@ -53,5 +53,12 @@
   "Ok": "Ok",
   "Cancel": "Annuler",
   "Let's go!": "Allons-y!",
-  "Delete this conversation?": "Supprimer cette conversation?"
+  "Delete this conversation?": "Supprimer cette conversation?",
+  "Save": "Enregistrer",
+  "Name": "Nom",
+  "Url": "Url",
+  "Token": "Jeton",
+  "Documentation": "Documentation",
+  "Disabled": "Désactivé",
+  "Description": "Description"
 }
