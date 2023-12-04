@@ -22,10 +22,12 @@ import { AppContextProvider } from '@/context';
 import SettingsModal from '@/modals';
 import Dialog from '@/components/Dialog';
 import { Conversation } from '@/types';
+import useTranslation from '@/hooks/useTranslation';
 import { ModalsProvider } from '../utils/modalsProvider';
 
 export default function App({ Component }: AppProps) {
   const [settingTab, setSettingTab] = useState<string>();
+  const { t } = useTranslation();
 
   const onModalsInit = useCallback(
     ({ registerModal }: { registerModal: any }) => {
@@ -45,12 +47,12 @@ export default function App({ Component }: AppProps) {
           <Dialog
             key="welcome"
             id="welcome"
-            title="Welcome to Opla"
-            actions={[{ label: 'Ok' }, { label: 'Cancel' }]}
+            title={t('Welcome to Opla!')}
+            actions={[{ label: t("Let's go!") }]}
             visible={visible}
             onClose={onClose}
           >
-            <div>An open-source app</div>
+            <div>{t('The ultimate Open-source generative AI App')}</div>
           </Dialog>
         ),
         true,
@@ -65,8 +67,11 @@ export default function App({ Component }: AppProps) {
             <Dialog
               key="deletethread"
               id="deletethread"
-              title="Delete this conversation ?"
-              actions={[{ label: 'Delete' }, { label: 'Cancel' }]}
+              title={t('Delete this conversation ?')}
+              actions={[
+                { label: t('Delete'), value: 'Delete' },
+                { label: t('Cancel'), value: 'Cancel' },
+              ]}
               visible={visible}
               onClose={onClose}
               data={data}
@@ -78,7 +83,7 @@ export default function App({ Component }: AppProps) {
         false,
       );
     },
-    [/* isModalOpen, onModalClose, */ settingTab],
+    [settingTab, t],
   );
 
   // Dirty hack to fix hydration mismatch using i18n

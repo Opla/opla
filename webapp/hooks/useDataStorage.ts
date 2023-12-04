@@ -16,17 +16,18 @@ export default function useDataStorage<T>(key: string, defaultValue: T): [T, (va
   const [value, setValue] = useState(defaultValue);
 
   useEffect(() => {
-    const item = dataStorage.getItem(key);
+    const item = dataStorage().getItem(key);
 
     if (!item) {
-      dataStorage.setItem(key, defaultValue);
+      dataStorage().setItem(key, defaultValue);
     } else {
       setValue(item as T);
     }
 
     function handler(e: StorageEvent) {
       if (e.key !== key) return;
-      const i = dataStorage.getItem(key);
+      const i = dataStorage().getItem(key);
+      // logger.info('storage event', e, key, i);
       setValue(i as T);
     }
     window.addEventListener('storage', handler);
@@ -39,7 +40,7 @@ export default function useDataStorage<T>(key: string, defaultValue: T): [T, (va
   const setValueWrap = (v: T) => {
     try {
       setValue(v);
-      dataStorage.setItem(key, v);
+      dataStorage().setItem(key, v);
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new StorageEvent('storage', { key }));
       }

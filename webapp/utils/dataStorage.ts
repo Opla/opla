@@ -46,11 +46,14 @@ const LocalStorage: DataStorage = {
 
 const MockStorage: DataStorage = {
   getItem() {
+    logger.warn('MockStorage.getItem() called');
     return null;
   },
-  setItem() {},
+  setItem() {
+    logger.warn('MockStorage.setItem() called');
+  },
 };
 
-const persistentStorage = window?.localStorage ? LocalStorage : MockStorage;
+const persistentStorage = () => (window && window?.localStorage ? LocalStorage : MockStorage);
 
 export default persistentStorage;
