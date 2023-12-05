@@ -22,7 +22,11 @@ import { AppContext } from '@/context';
 import { Conversation, MenuItem } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
-import { getConversation, updateConversation, deleteConversation } from '@/utils/conversations';
+import {
+  getConversation,
+  updateConversation,
+  deleteConversation,
+} from '@/utils/data/conversations';
 import { ModalsContext } from '@/utils/modalsProvider';
 import ContextMenu from './ContextMenu';
 import EditableItem from './EditableItem';

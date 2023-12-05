@@ -11,18 +11,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { v4 as uuid } from 'uuid';
 import { Author, Conversation, Message } from '@/types';
+import { createBaseRecord, createBaseNamedRecord, updateRecord } from '.';
 
-const createdMessage = (author: Author, content: string) => {
+const createMessage = (author: Author, content: string) => {
   const message = {
-    id: uuid(),
+    ...createBaseRecord(),
     author,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
     content,
   };
-  return message;
+  return message as Message;
 };
 
 const updateMessage = (message: Message, conversationId: string, conversations: Conversation[]) => {
@@ -32,10 +30,7 @@ const updateMessage = (message: Message, conversationId: string, conversations: 
   }
   const { messages } = conversation;
   const i = conversation.messages.findIndex((m) => m.id === message.id);
-  const updatedMessage = {
-    ...message,
-    updatedAt: Date.now(),
-  };
+  const updatedMessage = updateRecord(message) as Message;
   if (i === -1) {
     messages.push(updatedMessage);
   } else {
@@ -57,11 +52,8 @@ const mergeMessages = (messages: Message[], newMessages: Message[]) => {
 
 const createConversation = (name: string) => {
   const conversation = {
-    id: uuid(),
-    name,
+    ...createBaseNamedRecord(name),
     messages: [],
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
   };
   return conversation;
 };
@@ -74,10 +66,7 @@ const updateConversation = (conversation: Conversation, conversations: Conversat
   if (i === -1) {
     return conversations;
   }
-  const updatedConversation = {
-    ...conversation,
-    updatedAt: Date.now(),
-  };
+  const updatedConversation = updateRecord(conversation) as Conversation;
   return conversations.map((c) => (c.id === updatedConversation.id ? updatedConversation : c));
 };
 
@@ -104,7 +93,7 @@ const updateConversationMessages = (
 };
 
 export {
-  createdMessage,
+  createMessage,
   updateMessage,
   createConversation,
   getConversation,

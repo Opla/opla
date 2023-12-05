@@ -29,7 +29,7 @@ export type Metadata = {
 };
 
 export type Author = {
-  role: 'user' | 'system';
+  role: 'user' | 'system' | 'assistant';
   name: string;
   avatarUrl?: string;
   metadata?: Metadata;
@@ -41,66 +41,45 @@ export type Content = {
   metadata?: Metadata;
 };
 
-export type Message = {
+export type BaseRecord = {
   id: string;
-  author: Author;
   createdAt: number;
   updatedAt: number;
+  metadata?: Metadata;
+};
+
+export interface BaseNamedRecord extends BaseRecord {
+  name: string;
+  description?: string;
+}
+
+export interface Message extends BaseRecord {
+  author: Author;
   content: string | Content;
   contentHistory?: (string | Content)[];
-  metadata?: Metadata;
-};
+}
 
-export type Conversation = {
-  id: string;
-  name: string;
+export interface Conversation extends BaseNamedRecord {
   messages: Message[];
   pluginIds?: string[];
-  createdAt: number;
-  updatedAt: number;
-  metadata?: Metadata;
-};
+}
 
-export type Model = {
-  id: string;
-  name: string;
-  description: string;
-  createdAt: number;
-  updatedAt: number;
-  metadata?: Metadata;
-};
+export interface Model extends BaseNamedRecord {}
 
-export type Provider = {
-  id: string;
-  name: string;
-  description: string;
-  createdAt: number;
-  updatedAt: number;
+export interface Provider extends BaseNamedRecord {
   url: string;
   docUrl?: string;
   type: 'local' | 'api' | 'remote' | 'proxy';
   disabled: boolean;
   token: string;
-  metadata?: Metadata;
-};
+}
 
-export type Preset = {
-  id: string;
-  name: string;
-  description: string;
-  createdAt: number;
-  updatedAt: number;
-  metadata?: Metadata;
-};
+export interface Preset extends BaseNamedRecord {
+  providerId: string;
+  modelIds: string[];
+}
 
-export type Plugin = {
-  id: string;
-  name: string;
-  description: string;
-  createdAt: number;
-  updatedAt: number;
-  metadata?: Metadata;
-};
+export interface Plugin extends BaseNamedRecord {}
 
 export type User = {
   id: string;
