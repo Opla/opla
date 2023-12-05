@@ -47,8 +47,8 @@ export default function Dashboard() {
         </div>
       </header>
       <main className="h-full w-full flex-col overflow-y-auto p-4 pb-10">
-        <div className="m-4 flex h-[280px] flex-row rounded-lg bg-gray-100 p-3 dark:bg-gray-950">
-          <div className="flex flex-1 flex-col justify-center p-3">
+        <div className="m-4 flex min-h-[320px] flex-row rounded-lg bg-gray-100 p-3 dark:bg-gray-950">
+          <div className="flex flex-grow flex-col justify-center p-3">
             <h1 className="w-full text-center text-xl">
               {t('The ultimate Open-source generative AI App')}
             </h1>
@@ -58,7 +58,7 @@ export default function Dashboard() {
             <p className="mt-8 flex w-full justify-center">
               <Link
                 href="/threads"
-                className="mx-3 flex h-7 flex-row items-center rounded-md border border-gray-400 px-2 dark:border-gray-400 hover:dark:border-gray-100 "
+                className="mx-3 flex h-7 flex-row items-center rounded-md border border-gray-400 px-2 dark:border-gray-400 hover:dark:border-gray-100"
               >
                 <span className="items-center truncate truncate px-3 dark:text-gray-400 hover:dark:text-gray-100">
                   {t('Ready to Prompt!')}
@@ -66,15 +66,17 @@ export default function Dashboard() {
               </Link>
             </p>
           </div>
-          <div className="flex flex-1 flex-col justify-center rounded-lg bg-gray-300 p-3 p-3 dark:bg-gray-800">
-            <p className="m-4 flex w-full justify-center">
-              <Image width={96} height={968} className="" src="/logo.png" alt="logo" />
-            </p>
+          <div className="flex aspect-[4/3] flex-1 flex-col justify-center rounded-lg bg-gray-300 p-3 p-3 dark:bg-gray-800">
+            <div className="m-4 flex w-full justify-center">
+              <div className="aspect-[4/3]">
+                <Image width={96} height={96} className="" src="/logo.png" alt="logo" />
+              </div>
+            </div>
           </div>
         </div>
         <div className="p-4 pt-8">
           <div className="h-center w-full text-xl font-extrabold">{t('Latest news')}</div>
-          <div className="flex flex-row flex-wrap justify-between gap-4">
+          <div className="flex w-full flex-row justify-between gap-4">
             <Card />
             <Card />
             <Card />
@@ -83,7 +85,7 @@ export default function Dashboard() {
         </div>
         <div className="p-4 pt-8">
           <div className="h-center w-full text-xl font-extrabold">{t('Latest contributions')}</div>
-          <div className="flex flex-row flex-wrap justify-between gap-4">
+          <div className="flex w-full flex-row justify-between gap-4">
             <Card />
             <Card />
             <Card />
