@@ -15,7 +15,7 @@
 'use client';
 
 import Explorer from '@/components/ProvidersExplorer';
-import ProviderEdit from '@/components/ProviderEdit';
+import ProviderConfiguration from '@/components/ProviderConfiguration';
 
 export default function Providers({ selectedProviderId }: { selectedProviderId?: string }) {
   return (
@@ -25,7 +25,7 @@ export default function Providers({ selectedProviderId }: { selectedProviderId?:
           <Explorer selectedProviderId={selectedProviderId} />
         </div>
       </div>
-      <ProviderEdit providerId={selectedProviderId} />
+      <ProviderConfiguration providerId={selectedProviderId} />
     </div>
   );
 }

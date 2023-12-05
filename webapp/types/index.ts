@@ -66,10 +66,12 @@ export interface Conversation extends BaseNamedRecord {
 
 export interface Model extends BaseNamedRecord {}
 
+export type ProviderType = 'opla' | 'server' | 'api' | 'proxy';
+
 export interface Provider extends BaseNamedRecord {
   url: string;
   docUrl?: string;
-  type: 'local' | 'api' | 'remote' | 'proxy';
+  type: ProviderType;
   disabled: boolean;
   token: string;
 }

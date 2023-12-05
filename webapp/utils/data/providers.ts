@@ -15,11 +15,11 @@
 import { Provider } from '@/types';
 import { createBaseNamedRecord, updateRecord } from '.';
 
-const createProvider = (name: string, template: Provider) => {
+const createProvider = (name: string, template: Partial<Provider>) => {
   const provider: Provider = {
     ...template,
     ...createBaseNamedRecord(name),
-  };
+  } as Provider;
   return provider;
 };
 

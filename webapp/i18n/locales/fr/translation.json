@@ -60,5 +60,6 @@
   "Token": "Jeton",
   "Documentation": "Documentation",
   "Disabled": "Désactivé",
-  "Description": "Description"
+  "Description": "Description",
+  "No provider selected": "Aucun fournisseur sélectionné"
 }

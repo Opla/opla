@@ -65,7 +65,7 @@ const initialContext: Context = {
     {
       id: uuid(),
       name: 'Test API',
-      type: 'local',
+      type: 'server',
       url: 'http://localhost:3000',
       description: 'A local server for testing purposes. Compatible with OpenAI API.',
       token: 'test',

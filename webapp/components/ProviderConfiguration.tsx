@@ -23,7 +23,7 @@ import { updateProvider } from '@/utils/data/providers';
 import logger from '@/utils/logger';
 import Parameter from './Parameter';
 
-function ProviderEdit({ providerId }: { providerId?: string }) {
+function ProviderConfiguration({ providerId }: { providerId?: string }) {
   const [updatedProvider, setUpdatedProvider] = useState<Partial<Provider>>({ id: providerId });
   const { providers, setProviders } = useContext(AppContext);
   const { t } = useTranslation();
@@ -156,4 +156,4 @@ function ProviderEdit({ providerId }: { providerId?: string }) {
   );
 }
 
-export default ProviderEdit;
+export default ProviderConfiguration;

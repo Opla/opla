@@ -21,6 +21,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/utils/modalsProvider';
 import SettingsModal from '@/modals';
 import { Conversation } from '@/types';
+import NewProvider from '@/modals/templates/NewProvider';
 import Dialog from './Dialog';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -36,6 +37,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       onTabChanged={setSettingTab}
       onClose={onClose}
     />
+  ));
+
+  registerModal('newprovider', ({ visible = false, onClose = () => {} }) => (
+    <NewProvider key="newprovider" open={visible} onClose={onClose} />
   ));
 
   registerModal(
