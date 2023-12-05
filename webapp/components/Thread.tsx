@@ -21,7 +21,7 @@ import { AppContext } from '@/context';
 import { Message } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
-import { createdMessage, updateConversationMessages } from '@/utils/conversations';
+import { createMessage, updateConversationMessages } from '@/utils/data/conversations';
 import MessageView from './Message';
 import Prompt from './Prompt';
 
@@ -84,8 +84,8 @@ function Thread({ conversationId }: { conversationId?: string }) {
 
     setIsLoading(true);
 
-    const toMessage = createdMessage({ role: 'user', name: 'you' }, message);
-    const fromMessage = createdMessage({ role: 'system', name: selectedPreset }, '...');
+    const toMessage = createMessage({ role: 'user', name: 'you' }, message);
+    const fromMessage = createMessage({ role: 'system', name: selectedPreset }, '...');
     const { newConversationId, newConversations } = updateMessages([toMessage, fromMessage]);
 
     setMessage('');

@@ -16,16 +16,20 @@
 
 export default function Parameter({
   title,
+  name,
   subtitle = '',
   value,
   type,
   children,
+  onChange = () => {},
 }: {
   title: string;
+  name: string;
   subtitle?: string;
   value?: string | boolean;
   type: 'text' | 'password' | 'large-text' | 'select' | 'switch';
   children?: React.ReactNode;
+  onChange?: (name: string, value: string | boolean) => void;
 }) {
   const textCss =
     'w-full bg-gray-100 p-2 dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600';
@@ -37,8 +41,27 @@ export default function Parameter({
         <p className="text-sm text-gray-400">{subtitle}</p>
       </div>
       <div className="flex flex-grow flex-row">
-        {type === 'text' && <input value={value as string} className={textCss} />}
-        {type === 'large-text' && <textarea className={textCss}>{value}</textarea>}
+        {type === 'text' && (
+          <input
+            value={value as string}
+            className={textCss}
+            onChange={(e) => {
+              // e.preventDefault();
+              onChange(name, e.target.value);
+            }}
+          />
+        )}
+        {type === 'large-text' && (
+          <textarea
+            className={textCss}
+            onChange={(e) => {
+              e.preventDefault();
+              onChange(name, e.target.value);
+            }}
+          >
+            {value}
+          </textarea>
+        )}
         {children}
       </div>
     </div>
