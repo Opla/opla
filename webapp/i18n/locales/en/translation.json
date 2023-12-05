@@ -61,5 +61,15 @@
   "Documentation": "Documentation",
   "Disabled": "Disabled",
   "Description": "Description",
-  "No provider selected": "No provider selected"
+  "No provider selected": "No provider selected",
+  "Choose a provider": "Choose a provider",
+  "Server": "Server",
+  "Easy to run on your machine": "Easy to run on your machine",
+  "Using your  access token": "Using your access token",
+  "For experts": "For experts",
+  "Back": "Back",
+  "Next": "Next",
+  "Create": "Create",
+  "configuration": "configuration",
+  "advanced configuration": "advanced configuration"
 }

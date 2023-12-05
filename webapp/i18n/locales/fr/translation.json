@@ -61,5 +61,15 @@
   "Documentation": "Documentation",
   "Disabled": "Désactivé",
   "Description": "Description",
-  "No provider selected": "Aucun fournisseur sélectionné"
+  "No provider selected": "Aucun fournisseur sélectionné",
+  "Choose a provider": "Choisissez un fournisseur",
+  "Server": "Serveur",
+  "Easy to run on your machine": "Facile à lancer sur votre machine",
+  "Using your  access token": "En utilisant votre jeton d'accès",
+  "For experts": "Pour les experts",
+  "Back": "Retour",
+  "Next": "Suivant",
+  "Create": "Créer",
+  "configuration": "configuration",
+  "advanced configuration": "configuration avancée"
 }

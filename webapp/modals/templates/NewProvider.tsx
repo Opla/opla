@@ -83,18 +83,18 @@ export default function NewProvider({
               <Card
                 title="Opla"
                 selected={provider?.type === 'opla'}
-                description="Easy to run on your machine"
+                description={t('Easy to run on your machine')}
                 onClick={() => onChoose('opla', 'Opla')}
               />
               <Card
                 title="OpenAI"
                 selected={provider?.type === 'api'}
-                description="Using your access token"
+                description={t('Using your access token')}
                 onClick={() => onChoose('api', 'OpenAI')}
               />
               <Card
-                title="Server"
-                description="For experts"
+                title={t('Server')}
+                description={t('For experts')}
                 selected={provider?.type === 'server'}
                 onClick={() => onChoose('server', 'Remote server')}
               />
@@ -107,7 +107,7 @@ export default function NewProvider({
           </Panel>
         )}
         {step === 3 && (
-          <Panel title={`${provider.name}: ${t('Advanced')}`}>
+          <Panel title={`${provider.name}: ${t('advanced configuration')}`}>
             <ProviderCreate provider={provider} onParameterChange={onParameterChange} advanced />
           </Panel>
         )}
@@ -122,7 +122,7 @@ export default function NewProvider({
                 }}
                 className="rounded-md border border-gray-600 px-3 py-1 disabled:opacity-50"
               >
-                Create
+                {t('Create')}
               </button>
             )}
           </div>
@@ -137,7 +137,7 @@ export default function NewProvider({
               }}
               className="disabled:opacity-50"
             >
-              Next
+              {t('Next')}
             </button>
             <button
               disabled={step === 1}
@@ -148,7 +148,7 @@ export default function NewProvider({
               }}
               className="disabled:opacity-50"
             >
-              Back
+              {t('Back')}
             </button>
           </div>
         </div>
