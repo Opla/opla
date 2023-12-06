@@ -45,7 +45,7 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
   };
 
   const onDelete = (action: string, data: any) => {
-    const conversation = data?.conversation as Conversation;
+    const conversation = data?.item as Conversation;
     logger.info(`delete ${action} ${data}`);
     if (conversation) {
       if (action === 'Delete') {
@@ -61,7 +61,7 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
   const onToDelete = (data: string) => {
     logger.info(`to delete ${data}`);
     const conversation = getConversation(data, conversations) as Conversation;
-    showModal('deletethread', { conversation, onAction: onDelete });
+    showModal('deleteitem', { item: conversation, onAction: onDelete });
   };
 
   const onChangeConversationName = (value: string, id: string) => {

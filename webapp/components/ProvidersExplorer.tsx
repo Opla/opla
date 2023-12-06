@@ -14,33 +14,70 @@
 
 'use client';
 
-import { AppContext } from '@/context';
-import Link from 'next/link';
 import { useContext } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { BiPlus, BiSolidCircle } from 'react-icons/bi';
-import { MenuItem } from '@/types';
+import { AppContext } from '@/context';
+import { MenuItem, Provider } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { ModalsContext } from '@/utils/modalsProvider';
+import { deleteProvider, getProvider, updateProvider } from '@/utils/data/providers';
 import ContextMenu from './ContextMenu';
 
 function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string }) {
-  const { providers } = useContext(AppContext);
+  const { providers, setProviders } = useContext(AppContext);
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
+  const router = useRouter();
+
+  const createNewProvider = () => {
+    logger.info('create new provider');
+    showModal('newprovider');
+  };
+
+  const onDelete = (action: string, data: any) => {
+    const provider = data?.item as Provider;
+    logger.info(`delete ${action} ${data}`);
+    if (provider) {
+      if (action === 'Delete') {
+        const updatedProviders = deleteProvider(provider.id, providers);
+        setProviders(updatedProviders);
+        if (selectedProviderId && selectedProviderId === provider.id) {
+          router.replace('/providers');
+        }
+      }
+    }
+  };
+
+  const onToDelete = (data: string) => {
+    logger.info(`to delete ${data}`);
+    const provider = getProvider(data, providers) as Provider;
+    showModal('deleteitem', { item: provider, onAction: onDelete });
+  };
+
+  const onProviderToggle = (data: string) => {
+    logger.info('onProviderToggle');
+    const provider = getProvider(data, providers) as Provider;
+    const newProviders = updateProvider(
+      { ...(provider as Provider), disabled: !provider?.disabled },
+      providers,
+    );
+    setProviders(newProviders);
+  };
 
   const menu: MenuItem[] = [
     {
       label: t('Disable'),
       onSelect: (data: string) => {
         logger.info(`disable ${data}`);
+        onProviderToggle(data);
       },
     },
     {
       label: t('Delete'),
-      onSelect: (data: string) => {
-        logger.info(`delete ${data}`);
-      },
+      onSelect: onToDelete,
     },
   ];
   const menuDisabled: MenuItem[] = [
@@ -48,20 +85,14 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
       label: t('Enable'),
       onSelect: (data: string) => {
         logger.info(`enable ${data}`);
+        onProviderToggle(data);
       },
     },
     {
       label: t('Delete'),
-      onSelect: (data: string) => {
-        logger.info(`delete ${data}`);
-      },
+      onSelect: onToDelete,
     },
   ];
-
-  const createNewProvider = () => {
-    logger.info('create new provider');
-    showModal('newprovider');
-  };
 
   return (
     <div className="scrollbar-trigger flex h-full w-full flex-1 items-start bg-gray-100 dark:bg-gray-800">

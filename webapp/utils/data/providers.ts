@@ -15,6 +15,9 @@
 import { Provider } from '@/types';
 import { createBaseNamedRecord, updateRecord } from '.';
 
+const getProvider = (providerId: string | undefined, providers: Provider[]) =>
+  providers.find((c) => c.id === providerId);
+
 const createProvider = (name: string, template: Partial<Provider>) => {
   const provider: Provider = {
     ...template,
@@ -33,4 +36,7 @@ const updateProvider = (provider: Provider, providers: Provider[]) => {
   return providers.map((p) => (p.id === provider.id ? updatedProvider : p));
 };
 
-export { createProvider, updateProvider };
+const deleteProvider = (providerId: string, providers: Provider[]) =>
+  providers.filter((p) => p.id !== providerId);
+
+export { getProvider, createProvider, updateProvider, deleteProvider };
