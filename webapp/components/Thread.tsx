@@ -16,8 +16,10 @@
 
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
-import { BiChevronDown } from 'react-icons/bi';
+import { SiOpenai } from 'react-icons/si';
+import Opla from '@/components/icons/Opla';
 import { AppContext } from '@/context';
+import Dropdown from '@/components/Dropdown';
 import { Message } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
@@ -48,6 +50,16 @@ function Thread({ conversationId }: { conversationId?: string }) {
 
   // logger.info(`${conversationId} ${messages.length}`);
   const selectedPreset = 'LLama2';
+
+  const presets = [
+    { label: 'Opla LLama2', value: 'LLama2', icon: Opla, selected: selectedPreset === 'LLama2' },
+    { label: 'OpenAI GPT-3.5', value: 'GPT-3.5', icon: SiOpenai },
+    { label: 'OpenAI GPT-4', value: 'GPT-4', icon: SiOpenai },
+  ];
+
+  const onSelectPreset = (value?: string, data?: string) => {
+    logger.info(`onSelectPreset ${value} ${data}`);
+  };
 
   const updateMessages = (
     newMessages: Message[],
@@ -97,25 +109,24 @@ function Thread({ conversationId }: { conversationId?: string }) {
   return (
     <div className="flex flex-1 flex-col dark:bg-gray-900">
       <div className="flex flex-col items-center text-sm">
-        <div className="justify-left flex w-full flex-row items-center gap-1 bg-gray-50 p-3 text-gray-500 dark:bg-gray-950 dark:text-gray-300">
-          <div className="mx-3 flex h-7 flex-row items-center rounded-md border border-gray-600 px-2">
-            {/* <span className="gap-1 py-1 text-gray-700 dark:text-gray-500">{t('Model')} :</span> */}
-            <span className="items-center truncate truncate px-3 dark:text-gray-300">
-              {selectedPreset}
-            </span>
-            <span className="right-0 flex items-center pr-2">
-              <BiChevronDown className="h-4 w-4 text-gray-400" />
-            </span>
+        <div className="justify-left flex w-full flex-row items-center gap-4 bg-gray-50 p-3 text-gray-500 dark:bg-gray-950 dark:text-gray-300">
+          <div className="flex flex-1 flex-row items-center">
+            <Dropdown items={presets} onSelect={onSelectPreset} />
           </div>
-          <div className="hidden rounded-md border border-gray-600 px-3 py-1">
-            {t('No plugins installed')}
+          <div className="flex-1">
+            <p className="hidden rounded-md border border-gray-600 px-3 py-1">-</p>
+          </div>
+          <div className="flex-1">
+            <p className="hidden rounded-md border border-gray-600 px-3 py-1">
+              {t('Preset configuration')}
+            </p>
           </div>
         </div>
       </div>
       <div className="flex h-[80%] w-full flex-grow flex-col">
         <div className="flex flex-col overflow-y-auto">
           {showEmptyChat ? (
-            <div className="relative flex h-full w-full flex-col py-10">
+            <div className="flex h-full w-full flex-col py-10">
               <h1 className="flex h-screen items-center justify-center gap-2 text-center text-2xl font-semibold text-gray-200 dark:text-gray-600">
                 {t('Chat with your local GPT')}
               </h1>

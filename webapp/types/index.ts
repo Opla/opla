@@ -25,7 +25,7 @@ export type MenuItem = {
 
 // Model types
 export type Metadata = {
-  [key: string]: string;
+  [key: string]: string | number | boolean | Metadata;
 };
 
 export type Author = {
@@ -62,9 +62,12 @@ export interface Message extends BaseRecord {
 export interface Conversation extends BaseNamedRecord {
   messages: Message[];
   pluginIds?: string[];
+  preset?: Preset;
 }
 
-export interface Model extends BaseNamedRecord {}
+export interface Model extends BaseNamedRecord {
+  presetIds?: string[];
+}
 
 export type ProviderType = 'opla' | 'server' | 'api' | 'proxy';
 
@@ -74,11 +77,14 @@ export interface Provider extends BaseNamedRecord {
   type: ProviderType;
   disabled: boolean;
   token: string;
+  presetIds?: string[];
 }
 
 export interface Preset extends BaseNamedRecord {
-  providerId: string;
-  modelIds: string[];
+  ownerId: string;
+  parentId?: string;
+  providerId?: string;
+  modelIds?: string[];
 }
 
 export interface Plugin extends BaseNamedRecord {}
