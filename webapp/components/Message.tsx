@@ -27,8 +27,8 @@ function MessageComponent({ message }: { message: Message }) {
     <div className={`group w-full text-gray-800 dark:text-gray-100 ${isUser ? '' : ''}`}>
       <div className="m-auto flex w-full gap-4 text-base md:max-w-2xl md:gap-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
         <div className="m-auto flex w-full flex-row gap-4 p-4 md:max-w-2xl md:gap-6 md:py-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
-          <div className="relative flex w-8 flex-col items-end">
-            <div className="text-opacity-100r relative flex h-7 w-7 items-center justify-center rounded-md p-1 text-white">
+          <div className="flex w-8 flex-col items-end">
+            <div className="text-opacity-100r flex h-7 w-7 items-center justify-center rounded-md p-1 text-white">
               {isUser ? (
                 <BiUser className="h-4 w-4 text-white" />
               ) : (
@@ -36,7 +36,7 @@ function MessageComponent({ message }: { message: Message }) {
               )}
             </div>
           </div>
-          <div className="relative flex w-[calc(100%-50px)] flex-col gap-1 md:gap-3 lg:w-[calc(100%-115px)]">
+          <div className="flex w-[calc(100%-50px)] flex-col gap-1 md:gap-3 lg:w-[calc(100%-115px)]">
             <div className="flex flex-grow flex-col gap-3">
               <div className="min-h-20 flex flex-col items-start gap-4 whitespace-pre-wrap break-words">
                 <div className="markdown prose dark:prose-invert dark w-full break-words">
