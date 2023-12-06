@@ -34,7 +34,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 
 export default function NewProvider({
   open,
-  onClose,
+  onClose: _onClose,
 }: {
   open: boolean;
   onClose: () => void | undefined;
@@ -44,6 +44,12 @@ export default function NewProvider({
   const { t } = useTranslation();
   const { providers, setProviders } = useContext(AppContext);
   const router = useRouter();
+
+  const onClose = () => {
+    setStep(1);
+    setProvider({});
+    _onClose();
+  };
 
   const onChoose = (type: ProviderType, name: string) => {
     logger.info('onChoose', type, name, step);

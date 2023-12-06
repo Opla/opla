@@ -20,7 +20,7 @@ import Sidebar from '@/components/Sidebar';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/utils/modalsProvider';
 import SettingsModal from '@/modals';
-import { Conversation } from '@/types';
+import { BaseNamedRecord } from '@/types';
 import NewProvider from '@/modals/templates/NewProvider';
 import Dialog from './Dialog';
 
@@ -61,15 +61,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   );
 
   registerModal(
-    'deletethread',
+    'deleteitem',
     ({ visible = false, onClose = () => {}, data = undefined }) => {
-      const thread = (data as unknown as { conversation: Conversation })
-        ?.conversation as Conversation;
+      const dataItem = data as unknown as { item: BaseNamedRecord };
+      const item = dataItem?.item as BaseNamedRecord;
       return (
         <Dialog
-          key="deletethread"
-          id="deletethread"
-          title={t('Delete this conversation ?')}
+          key="deleteitem"
+          id="deleteitem"
+          title={t('Delete this item?')}
           actions={[
             { label: t('Delete'), value: 'Delete' },
             { label: t('Cancel'), value: 'Cancel' },
@@ -78,7 +78,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           onClose={onClose}
           data={data}
         >
-          <div>{thread?.name || ''}</div>
+          <div>{item?.name || ''}</div>
         </Dialog>
       );
     },
