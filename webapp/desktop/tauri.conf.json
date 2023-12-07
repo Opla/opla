@@ -26,6 +26,26 @@
               "-m",
               {
                 "validator": "\\S+"
+              },
+              "--port",
+              {
+                "validator": "\\S+"
+              },
+              "--host",
+              {
+                "validator": "\\S+"
+              },
+              "-c",
+              {
+                "validator": "\\S+"
+              },
+              "-t",
+              {
+                "validator": "\\S+"
+              },
+              "-ngl",
+              {
+                "validator": "\\S+"
               }
             ]
           }

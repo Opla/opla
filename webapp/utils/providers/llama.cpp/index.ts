@@ -19,7 +19,17 @@ const startLLamaCppServer = async (homeDirPath: string, modelsPath: string) => {
   const command = Command.sidecar('binaries/llama.cpp/server', [
     '-m',
     `${homeDirPath}/${modelsPath}/openhermes-7b-v2.5/ggml-model-q4_k.gguf`,
-  ]); // --port 8888 --host 0.0.0.0 --ctx-size 2048 --threads 4 -ngl 0 -n 512');
+    '--port',
+    '8080',
+    '--host',
+    '127.0.0.1',
+    '-c',
+    '512',
+    '-t',
+    '4',
+    '-ngl',
+    '0',
+  ]);
   const output = await command.execute();
   logger.info(output);
 };
