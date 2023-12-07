@@ -14,6 +14,12 @@
 
 import { IconType } from 'react-icons';
 
+declare global {
+  interface Window {
+    __TAURI__: any;
+  }
+}
+
 // Ui types
 export type MenuItem = {
   label: string;
@@ -87,7 +93,7 @@ export interface Preset extends BaseNamedRecord {
   modelIds?: string[];
 }
 
-export interface Plugin extends BaseNamedRecord {}
+export interface Plugin extends BaseNamedRecord { }
 
 export type User = {
   id: string;
