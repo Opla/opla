@@ -14,6 +14,12 @@
 
 import { IconType } from 'react-icons';
 
+declare global {
+  interface Window {
+    __TAURI__: any;
+  }
+}
+
 // Ui types
 export type MenuItem = {
   label: string;

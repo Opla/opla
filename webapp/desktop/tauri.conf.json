@@ -12,8 +12,24 @@
   "tauri": {
     "allowlist": {
       "all": false,
+      "path": {
+        "all": true
+      },
       "shell": {
-        "open": true
+        "open": true,
+        "sidecar": true,
+        "scope": [
+          {
+            "name": "binaries/llama.cpp/server",
+            "sidecar": true,
+            "args": [
+              "-m",
+              {
+                "validator": "\\S+"
+              }
+            ]
+          }
+        ]
       }
     },
     "bundle": {
@@ -23,7 +39,7 @@
       "deb": {
         "depends": []
       },
-      "externalBin": [],
+      "externalBin": ["binaries/llama.cpp/server"],
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
