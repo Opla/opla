@@ -93,7 +93,7 @@ export interface Preset extends BaseNamedRecord {
   modelIds?: string[];
 }
 
-export interface Plugin extends BaseNamedRecord { }
+export interface Plugin extends BaseNamedRecord {}
 
 export type User = {
   id: string;

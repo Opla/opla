@@ -15,12 +15,12 @@
 import logger from '../logger';
 
 const init = async () => {
-    // eslint-disable-next-line no-underscore-dangle
-    if (window?.__TAURI__) {
-        logger.info('init Opla desktop');
-        const { default: start } = await import('@/utils/desktop/start');
-        await start();
-    }
+  // eslint-disable-next-line no-underscore-dangle
+  if (window?.__TAURI__) {
+    logger.info('init Opla desktop');
+    const { default: start } = await import('@/utils/desktop/start');
+    await start();
+  }
 };
 
 export default init;
