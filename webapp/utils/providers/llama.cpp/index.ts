@@ -14,9 +14,23 @@
 import { Command } from '@tauri-apps/api/shell';
 import logger from '@/utils/logger';
 
+const spawnCommand = async (name: string, exec: string, args: string[]) => {
+  const command = Command.sidecar(exec, args);
+  command.on('close', (data) => {
+    logger.info(`${name} finished with code ${data.code} and signal ${data.signal}`);
+  });
+  command.on('error', (error) => logger.info(`${name} error: "${error}"`));
+  command.stdout.on('data', (line) => logger.info(`${name} stdout: "${line}"`));
+  command.stderr.on('data', (line) => logger.error(`${name} stderr: "${line}"`));
+
+  const child = await command.spawn();
+  logger.info(`${name} pid: ${child.pid}`);
+  return child;
+};
+
 const startLLamaCppServer = async (homeDirPath: string, modelsPath: string) => {
   logger.info('start LLama.cpp server');
-  const command = Command.sidecar('binaries/llama.cpp/server', [
+  const child = spawnCommand('llama.cpp', 'binaries/llama.cpp/llama.cpp.server', [
     '-m',
     `${homeDirPath}/${modelsPath}/openhermes-7b-v2.5/ggml-model-q4_k.gguf`,
     '--port',
@@ -30,8 +44,7 @@ const startLLamaCppServer = async (homeDirPath: string, modelsPath: string) => {
     '-ngl',
     '0',
   ]);
-  const output = await command.execute();
-  logger.info(output);
+  return child;
 };
 
 export default startLLamaCppServer;

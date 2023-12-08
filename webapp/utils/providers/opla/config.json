@@ -1,0 +1,21 @@
+{
+  "name": "Opla",
+  "type": "opla",
+  "url": "127.0.0.1",
+  "description": "Opla is a free and open source AI assistant.",
+  "docUrl": "https://opla.ai/docs",
+  "disabled": true,
+  "metadata": {
+    "server": {
+      "name": "lamma.cpp",
+      "binary": "binaries/llama.cpp/llama.cpp.server",
+      "parameters": {
+        "url": "127.0.0.1",
+        "host": "8080",
+        "contextSize": 512,
+        "threads": 4,
+        "nGpuLayers": 0
+      }
+    }
+  }
+}

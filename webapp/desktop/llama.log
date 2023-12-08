@@ -1,7 +1,7 @@
-[1701974680] warming up the model with an empty run
-[1701974681] Available slots:
-[1701974681]  -> Slot 0 - max context: 512
-[1701974681] 
+[1702030823] warming up the model with an empty run
+[1702030826] Available slots:
+[1702030826]  -> Slot 0 - max context: 512
+[1702030826] 
 llama server listening at http://127.0.0.1:8080
 
-[1701974681] all slots are idle and system prompt is empty, clear the KV cache
+[1702030826] all slots are idle and system prompt is empty, clear the KV cache

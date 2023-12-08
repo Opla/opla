@@ -11,16 +11,23 @@
   },
   "tauri": {
     "allowlist": {
+      "window": {
+        "all": true
+      },
+      "dialog": {
+        "all": true
+      },
       "all": false,
       "path": {
         "all": true
       },
       "shell": {
         "open": true,
+        "execute": true,
         "sidecar": true,
         "scope": [
           {
-            "name": "binaries/llama.cpp/server",
+            "name": "binaries/llama.cpp/llama.cpp.server",
             "sidecar": true,
             "args": [
               "-m",
@@ -59,7 +66,7 @@
       "deb": {
         "depends": []
       },
-      "externalBin": ["binaries/llama.cpp/server"],
+      "externalBin": ["binaries/llama.cpp/llama.cpp.server"],
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
