@@ -29,7 +29,6 @@ export default function App({ Component }: AppProps) {
     setInitialRenderComplete(true);
     initDesktop().then();
   }, []);
-
   if (!initialRenderComplete) return <div />;
   // End of dirty hack...
 

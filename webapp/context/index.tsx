@@ -14,10 +14,12 @@
 
 'use client';
 
-import { createContext } from 'react';
+import { createContext, useEffect } from 'react';
 import { v4 as uuid } from 'uuid';
-import { Conversation, Model, Provider } from '@/types';
+import { Conversation, Model, Provider, ProviderType } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
+import { createProvider } from '@/utils/data/providers';
+import oplaProviderConfig from '@/utils/providers/opla/config.json';
 
 type Context = {
   conversations: Array<Conversation>;
@@ -99,6 +101,14 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
     initialContext.conversations,
   );
   const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
+  useEffect(() => {
+    let oplaProvider = providers.find((provider) => provider.type === 'opla');
+    if (!oplaProvider) {
+      const config = { ...oplaProviderConfig, type: oplaProviderConfig.type as ProviderType };
+      oplaProvider = createProvider('Opla', config);
+      setProviders([oplaProvider, ...providers]);
+    }
+  }, []);
   const [models, setModels] = useDataStorage('models', initialContext.models);
 
   return (
