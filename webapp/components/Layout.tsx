@@ -14,20 +14,29 @@
 
 'use client';
 
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import '@/app/globals.css';
 import Sidebar from '@/components/Sidebar';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/utils/modalsProvider';
 import SettingsModal from '@/modals';
-import { BaseNamedRecord } from '@/types';
+import { BaseNamedRecord, Provider } from '@/types';
 import NewProvider from '@/modals/templates/NewProvider';
+import initBackend from '@/utils/backend';
+import { AppContext } from '@/context';
 import Dialog from './Dialog';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [settingTab, setSettingTab] = useState<string>();
   const { t } = useTranslation();
   const { registerModal } = useContext(ModalsContext);
+  const { providers } = useContext(AppContext);
+  const opla = providers.find((p) => p.type === 'opla');
+  useEffect(() => {
+    if (opla) {
+      initBackend(opla as Provider);
+    }
+  }, [opla]);
 
   registerModal('settings', ({ visible = false, onClose = () => {} }) => (
     <SettingsModal

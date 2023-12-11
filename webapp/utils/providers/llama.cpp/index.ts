@@ -11,40 +11,34 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { Command } from '@tauri-apps/api/shell';
+import { invoke } from '@tauri-apps/api/tauri';
+import { homeDir } from '@tauri-apps/api/path';
 import logger from '@/utils/logger';
+import { LlamaCppArguments, LlamaCppArgumentsSchema } from './types';
 
-const spawnCommand = async (name: string, exec: string, args: string[]) => {
-  const command = Command.sidecar(exec, args);
-  command.on('close', (data) => {
-    logger.info(`${name} finished with code ${data.code} and signal ${data.signal}`);
-  });
-  command.on('error', (error) => logger.info(`${name} error: "${error}"`));
-  command.stdout.on('data', (line) => logger.info(`${name} stdout: "${line}"`));
-  command.stderr.on('data', (line) => logger.error(`${name} stderr: "${line}"`));
-
-  const child = await command.spawn();
-  logger.info(`${name} pid: ${child.pid}`);
-  return child;
+const stopLLamaCppServer = async () => {
+  logger.info('stop LLama.cpp server');
+  await invoke('stop_opla_server');
 };
 
-const startLLamaCppServer = async (homeDirPath: string, modelsPath: string) => {
+const startLLamaCppServer = async (
+  modelsPath: string,
+  modelFile: string,
+  metadata: LlamaCppArguments,
+) => {
   logger.info('start LLama.cpp server');
-  const child = spawnCommand('llama.cpp', 'binaries/llama.cpp/llama.cpp.server', [
-    '-m',
-    `${homeDirPath}/${modelsPath}/openhermes-7b-v2.5/ggml-model-q4_k.gguf`,
-    '--port',
-    '8080',
-    '--host',
-    '127.0.0.1',
-    '-c',
-    '512',
-    '-t',
-    '4',
-    '-ngl',
-    '0',
-  ]);
+  const homeDirPath = await homeDir();
+  logger.info(`homeDirPath=${homeDirPath}`);
+  const model = `${homeDirPath}${modelsPath}/${modelFile}`;
+  /* const port = metadata.port || '8080';
+  const host = metadata.host || '127.0.0.1';
+  const contextSize = metadata.port || '512';
+  const threads = metadata.port || '4';
+  const nGpuLayers = metadata.port || '0'; */
+  const args = LlamaCppArgumentsSchema.parse({ ...metadata, model });
+  const child = await invoke('start_opla_server', args);
+
   return child;
 };
 
-export default startLLamaCppServer;
+export { startLLamaCppServer, stopLLamaCppServer };

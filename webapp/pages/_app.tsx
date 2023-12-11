@@ -19,7 +19,6 @@ import { AppProps } from 'next/app';
 import Layout from '@/components/Layout';
 import { ThemeProvider } from 'next-themes';
 import { AppContextProvider } from '@/context';
-import initDesktop from '@/utils/desktop';
 import { ModalsProvider } from '../utils/modalsProvider';
 
 export default function App({ Component }: AppProps) {
@@ -27,7 +26,6 @@ export default function App({ Component }: AppProps) {
   const [initialRenderComplete, setInitialRenderComplete] = useState<boolean>(false);
   useEffect(() => {
     setInitialRenderComplete(true);
-    initDesktop().then();
   }, []);
   if (!initialRenderComplete) return <div />;
   // End of dirty hack...

@@ -11,29 +11,30 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { homeDir } from '@tauri-apps/api/path';
 import { appWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/api/dialog';
-import { Child } from '@tauri-apps/api/shell';
+import { Provider } from '@/types';
 import logger from '../logger';
-import startLLamaCppServer from '../providers/llama.cpp';
+import { startLLamaCppServer, stopLLamaCppServer } from '../providers/llama.cpp';
+import { LlamaCppArguments } from '../providers/llama.cpp/types';
 
-const startDesktop = async () => {
-  let serverProcess: Child;
-  // eslint-disable-next-line no-underscore-dangle
+const startDesktop = async (oplaConfiguration: Provider) => {
   const unlisten = await appWindow.onCloseRequested(async (event) => {
     const confirmed = await confirm('Are you sure?');
     if (!confirmed) {
       // user did not confirm closing the window; let's prevent it
       event.preventDefault();
+      return;
     }
-    serverProcess?.kill();
+    await stopLLamaCppServer();
   });
   logger.info('init Opla desktop');
-  const homeDirPath = await homeDir();
-  logger.info(`homeDirPath=${homeDirPath}`);
-  const modelsPath = `/dev/ai/models`;
-  serverProcess = await startLLamaCppServer(homeDirPath, modelsPath);
+  const modelsPath = `dev/ai/models`;
+  const modelFile = 'openhermes-7b-v2.5/ggml-model-q4_k.gguf';
+  const metadata = oplaConfiguration.metadata as unknown as {
+    server: { parameters: LlamaCppArguments };
+  };
+  await startLLamaCppServer(modelsPath, modelFile, metadata.server.parameters);
   return unlisten;
 };
 
