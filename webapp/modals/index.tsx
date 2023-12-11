@@ -17,18 +17,14 @@ import Settings from './settings';
 
 export default function SettingsModal({
   open,
-  settingTab,
-  onTabChanged,
   onClose,
 }: {
   open: boolean;
-  settingTab?: string | undefined;
-  onTabChanged: (tab: string) => void | undefined;
   onClose: () => void | undefined;
 }) {
   return (
     <Modal id="settingsmodal" size="xl" open={open} onClose={onClose}>
-      <Settings tab={settingTab} onTabChanged={onTabChanged} />
+      <Settings />
     </Modal>
   );
 }

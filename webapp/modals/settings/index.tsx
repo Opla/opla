@@ -14,20 +14,16 @@
 
 'use client';
 
+import { useState } from 'react';
 import Settings from './Settings';
 import Appearance from './appearance';
 import Storage from './storage';
 
-export default function DefaultSettings({
-  tab = 'appearance',
-  onTabChanged,
-}: {
-  tab?: string;
-  onTabChanged?: (tab: string) => void;
-}) {
+export default function DefaultSettings() {
+  const [tab, setTab] = useState<string>('appearance');
   return (
-    <Settings tab={tab as string} onTabChanged={onTabChanged || (() => {})}>
-      {!tab || (tab === 'appearance' && <Appearance />)}
+    <Settings tab={tab as string} onTabChanged={setTab}>
+      {tab === 'appearance' && <Appearance />}
       {tab === 'storage' && <Storage />}
     </Settings>
   );
