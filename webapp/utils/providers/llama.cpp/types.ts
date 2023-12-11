@@ -77,7 +77,7 @@ const LlamaCppArgumentsSchema = z.object({
     .describe(
       'number of threads to use during batch and prompt processing (default: same as --threads)',
     ),
-  ctxSize: z
+  contextSize: z
     .number()
     .int()
     .optional()
@@ -200,7 +200,7 @@ const LlamaCppOptions = {
   verbose: ['-v', '--verbose'],
   threads: ['-t', '--threads'],
   threadsBatch: ['-tb', '--threads-batch'],
-  ctxSize: ['-c', '--ctx-size'],
+  contextSize: ['-c', '--ctx-size'],
   ropeScaling: ['--rope-scaling'],
   ropeFreqBase: ['--rope-freq-base'],
   ropeFreqScale: ['--rope-freq-scale'],

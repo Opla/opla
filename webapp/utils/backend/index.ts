@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import logger from '../logger';
+import { Provider } from '@/types';
 
-const init = async () => {
+const init = async (oplaConfiguration: Provider) => {
   // eslint-disable-next-line no-underscore-dangle
   if (window?.__TAURI__) {
-    logger.info('init Opla desktop');
-    const { default: start } = await import('@/utils/desktop/start');
-    await start();
+    const { default: start } = await import('@/utils/backend/start');
+    await start(oplaConfiguration);
   }
 };
 
