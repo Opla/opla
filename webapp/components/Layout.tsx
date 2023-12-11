@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import '@/app/globals.css';
 import Sidebar from '@/components/Sidebar';
 import useTranslation from '@/hooks/useTranslation';
@@ -27,7 +27,6 @@ import { AppContext } from '@/context';
 import Dialog from './Dialog';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const [settingTab, setSettingTab] = useState<string>();
   const { t } = useTranslation();
   const { registerModal } = useContext(ModalsContext);
   const { providers } = useContext(AppContext);
@@ -39,13 +38,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, [opla]);
 
   registerModal('settings', ({ visible = false, onClose = () => {} }) => (
-    <SettingsModal
-      key="settings"
-      open={visible}
-      settingTab={settingTab}
-      onTabChanged={setSettingTab}
-      onClose={onClose}
-    />
+    <SettingsModal key="settings" open={visible} onClose={onClose} />
   ));
 
   registerModal('newprovider', ({ visible = false, onClose = () => {} }) => (
