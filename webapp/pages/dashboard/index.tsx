@@ -14,12 +14,13 @@
 
 'use client';
 
-import Card from '@/components/common/Card';
-import Searchbar from '@/components/common/Searchbar';
-import useTranslation from '@/hooks/useTranslation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BiLogoDiscordAlt, BiLogoGithub } from 'react-icons/bi';
+
+import Card from '@/components/common/Card';
+import Searchbar from '@/components/common/Searchbar';
+import useTranslation from '@/hooks/useTranslation';
 
 export default function Dashboard() {
   const { t } = useTranslation();

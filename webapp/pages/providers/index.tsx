@@ -17,7 +17,7 @@
 import { useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppContext } from '@/context';
-import Providers from '../../components/providers';
+import Providers from '@/components/providers';
 
 export default function DefaultProviders() {
   const { providers } = useContext(AppContext);
