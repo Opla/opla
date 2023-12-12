@@ -14,8 +14,7 @@
 
 'use client';
 
-import { createContext, useEffect } from 'react';
-import { v4 as uuid } from 'uuid';
+import { createContext } from 'react';
 import { Conversation, Model, Preset, Provider, ProviderType } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
 import { createProvider } from '@/utils/data/providers';
@@ -33,63 +32,9 @@ type Context = {
 };
 
 const initialContext: Context = {
-  conversations: [
-    {
-      id: '1',
-      name: 'test',
-      messages: [],
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    },
-    {
-      id: '2',
-      name: 'another example',
-      messages: [
-        {
-          id: uuid(),
-          content: "What's up?",
-          author: { role: 'user', name: 'you' },
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        },
-        {
-          id: uuid(),
-          content: 'Not much, just chilling.',
-          author: { role: 'system', name: 'Llama2' },
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        },
-      ],
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    },
-  ],
+  conversations: [],
   setConversations: () => {},
-  providers: [
-    {
-      id: uuid(),
-      name: 'Test API',
-      type: 'server',
-      url: 'http://localhost:3000',
-      description: 'A local server for testing purposes. Compatible with OpenAI API.',
-      token: 'test',
-      disabled: false,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    },
-    {
-      id: uuid(),
-      name: 'OpenAI API',
-      type: 'api',
-      url: 'https://api.openai.com/v1',
-      description: 'You need an OpenAI API token to use it.',
-      docUrl: 'https://platform.openai.com/docs',
-      token: 'TODO',
-      disabled: true,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    },
-  ],
+  providers: [],
   setProviders: () => {},
   models: [],
   setModels: () => {},
@@ -99,22 +44,19 @@ const initialContext: Context = {
 
 const AppContext = createContext(initialContext);
 
+const config = { ...oplaProviderConfig, type: oplaProviderConfig.type as ProviderType };
+const oplaProvider = createProvider('Opla', config);
+const initialProviders = [oplaProvider, ...initialContext.providers];
+
 function AppContextProvider({ children }: { children: React.ReactNode }) {
   const [conversations, setConversations] = useDataStorage(
     'conversations',
     initialContext.conversations,
   );
-  const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
+
+  const [providers, setProviders] = useDataStorage('providers', initialProviders);
   const [models, setModels] = useDataStorage('models', initialContext.models);
   const [presets, setPresets] = useDataStorage('presets', initialContext.presets);
-  useEffect(() => {
-    let oplaProvider = providers.find((provider) => provider.type === 'opla');
-    if (!oplaProvider) {
-      const config = { ...oplaProviderConfig, type: oplaProviderConfig.type as ProviderType };
-      oplaProvider = createProvider('Opla', config);
-      setProviders([oplaProvider, ...providers]);
-    }
-  }, [providers, setProviders]);
 
   return (
     <AppContext.Provider

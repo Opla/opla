@@ -21,7 +21,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { Provider } from '@/types';
 import { updateProvider } from '@/utils/data/providers';
 import logger from '@/utils/logger';
-import Parameter from './Parameter';
+import Parameter from '../common/Parameter';
 
 function ProviderConfiguration({ providerId }: { providerId?: string }) {
   const [updatedProvider, setUpdatedProvider] = useState<Partial<Provider>>({ id: providerId });

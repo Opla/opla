@@ -15,7 +15,7 @@
 'use client';
 
 import { useRouter } from 'next/router';
-import Providers from './Providers';
+import Providers from '../../components/providers';
 
 export default function SelectedProviders() {
   const router = useRouter();

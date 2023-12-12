@@ -54,13 +54,12 @@ export default function Parameter({
         {type === 'large-text' && (
           <textarea
             className={textCss}
+            value={value as string}
             onChange={(e) => {
               e.preventDefault();
               onChange(name, e.target.value);
             }}
-          >
-            {value}
-          </textarea>
+          />
         )}
         {children}
       </div>

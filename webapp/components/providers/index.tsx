@@ -14,18 +14,18 @@
 
 'use client';
 
-import Thread from '@/components/Thread';
-import Explorer from '@/components/Explorer';
+import Explorer from '@/components/providers/Explorer';
+import ProviderConfiguration from '@/components/providers/Configuration';
 
-export default function Threads({ selectedConversationId }: { selectedConversationId?: string }) {
+export default function Providers({ selectedProviderId }: { selectedProviderId?: string }) {
   return (
     <div className="relative flex h-screen w-full overflow-hidden">
       <div className="flex w-[260px] flex-col">
         <div className="flex h-full min-h-0 flex-col ">
-          <Explorer selectedConversationId={selectedConversationId} />
+          <Explorer selectedProviderId={selectedProviderId} />
         </div>
       </div>
-      <Thread conversationId={selectedConversationId} />
+      <ProviderConfiguration providerId={selectedProviderId} />
     </div>
   );
 }

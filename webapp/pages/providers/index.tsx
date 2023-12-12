@@ -14,8 +14,20 @@
 
 'use client';
 
-import Providers from './Providers';
+import { useContext, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { AppContext } from '@/context';
+import Providers from '../../components/providers';
 
 export default function DefaultProviders() {
+  const { providers } = useContext(AppContext);
+  const router = useRouter();
+  useEffect(() => {
+    const oplaProvider = providers.find((p) => p.type === 'opla');
+    if (oplaProvider) {
+      router.replace(`/providers/${oplaProvider.id}`);
+    }
+  }, [providers, router]);
+
   return <Providers />;
 }

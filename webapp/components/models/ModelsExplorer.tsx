@@ -21,7 +21,7 @@ import { BiPlus } from 'react-icons/bi';
 import { MenuItem } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
-import ContextMenu from './ContextMenu';
+import ContextMenu from '../common/ContextMenu';
 
 function ModelsExplorer({ selectedModelId }: { selectedModelId?: string }) {
   const { models } = useContext(AppContext);
