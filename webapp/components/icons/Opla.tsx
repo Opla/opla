@@ -24,7 +24,7 @@ function Opla() {
       enableBackground="new 0 0 283.5 283.5"
     >
       <g>
-        <g stroke="currentColor" stroke-linecap="square">
+        <g stroke="currentColor" strokeLinecap="square">
           <path
             fill="none"
             strokeWidth="12"

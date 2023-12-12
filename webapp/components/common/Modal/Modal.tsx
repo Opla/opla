@@ -79,7 +79,7 @@ export default function Modal({
       id={id}
       ref={modalRef}
       onCancel={onClose}
-      className={`${cssSize} relative rounded-lg bg-white shadow-lg transition-all backdrop:bg-gray-950/50 dark:bg-gray-900`}
+      className={`${cssSize} relative rounded-lg bg-white shadow-lg transition-all backdrop:bg-neutral-950/50 dark:bg-neutral-900`}
     >
       {children}
       <button

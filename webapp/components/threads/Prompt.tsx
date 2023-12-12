@@ -60,7 +60,7 @@ export default function Prompt({
   };
 
   return (
-    <div className="bottom-0 left-0 w-full !bg-transparent bg-white pt-2 dark:bg-gray-800">
+    <div className="bottom-0 left-0 w-full !bg-transparent bg-white pt-2 dark:bg-neutral-800">
       <form className="stretch mx-2 flex flex-row gap-3 last:mb-2">
         <div className="relative flex h-full flex-1 flex-col items-stretch">
           {errorMessage ? (
@@ -70,7 +70,7 @@ export default function Prompt({
               </div>
             </div>
           ) : null}
-          <div className="relative flex w-full flex-grow flex-row rounded-md border border-black/10 bg-white p-3 dark:border-gray-500 dark:bg-gray-700 dark:text-white">
+          <div className="relative flex w-full flex-grow flex-row rounded-md border border-black/10 bg-white p-3 dark:border-neutral-500 dark:bg-neutral-700 dark:text-white">
             <textarea
               ref={textAreaRef}
               value={message}
@@ -90,7 +90,7 @@ export default function Prompt({
               type="button"
               aria-label={t('Send')}
               onClick={handleSendMessage}
-              className="rounded-md bg-gray-500 bg-transparent p-1 text-gray-400 hover:text-white disabled:bg-gray-500 disabled:opacity-40 disabled:hover:text-gray-400"
+              className="rounded-md bg-neutral-500 bg-transparent p-1 text-neutral-400 hover:text-white disabled:bg-neutral-500 disabled:opacity-40 disabled:hover:text-neutral-400"
             >
               <BiSend className=" h-5 w-5" />
             </button>

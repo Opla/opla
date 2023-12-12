@@ -25,6 +25,7 @@ import NewProvider from '@/modals/templates/NewProvider';
 import initBackend from '@/utils/backend';
 import { AppContext } from '@/context';
 import Dialog from './common/Dialog';
+import Statusbar from './common/Statusbar';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
@@ -92,7 +93,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen w-full select-none overflow-hidden">
       <Sidebar />
-      {children}
+      <div className="flex h-full w-full flex-1 flex-col">
+        {children}
+        <Statusbar />
+      </div>
     </div>
   );
 }

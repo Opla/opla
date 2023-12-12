@@ -28,30 +28,32 @@ export default function Parameter({
   name: string;
   subtitle?: string;
   value?: string | number | boolean;
-  type: 'text' | 'password' | 'large-text' | 'select' | 'switch';
+  type: 'text' | 'password' | 'large-text' | 'number' | 'select' | 'switch';
   disabled?: boolean;
   children?: React.ReactNode;
-  onChange?: (name: string, value: string | boolean) => void;
+  onChange?: (name: string, value: string | number | boolean) => void;
 }) {
   const textCss = disabled
     ? 'w-full'
-    : 'w-full bg-gray-100 p-2 dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600';
+    : 'w-full bg-neutral-100 p-2 dark:bg-neutral-800 rounded-md border border-neutral-300 dark:border-neutral-600';
 
   return (
-    <div className="bb-1 flex w-full flex-row border-b border-gray-100 pb-4 pt-3 dark:border-gray-800">
+    <div className="bb-1 flex w-full flex-row border-b border-neutral-100 pb-4 pt-3 dark:border-neutral-800">
       <div className="flex flex-1 flex-col justify-center">
         <p className=" ">{title}</p>
-        <p className="text-sm text-gray-400">{subtitle}</p>
+        <p className="text-sm text-neutral-400">{subtitle}</p>
       </div>
       <div className="flex flex-grow flex-row">
         {disabled && <div className={textCss}>{value}</div>}
-        {!disabled && type === 'text' && (
+        {!disabled && (type === 'text' || type === 'number') && (
           <input
             value={value as string}
             className={textCss}
+            type={type}
             onChange={(e) => {
               // e.preventDefault();
-              onChange(name, e.target.value);
+              const v = type === 'number' ? parseInt(e.target.value, 10) : e.target.value;
+              onChange(name, v);
             }}
           />
         )}

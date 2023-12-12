@@ -107,17 +107,17 @@ function Thread({ conversationId }: { conversationId?: string }) {
   };
 
   return (
-    <div className="flex flex-1 flex-col dark:bg-gray-900">
+    <div className="flex flex-1 flex-col dark:bg-neutral-900">
       <div className="flex flex-col items-center text-sm">
-        <div className="justify-left flex w-full flex-row items-center gap-4 bg-gray-50 p-3 text-gray-500 dark:bg-gray-950 dark:text-gray-300">
+        <div className="justify-left flex w-full flex-row items-center gap-4 bg-neutral-50 p-3 text-neutral-500 dark:bg-neutral-950 dark:text-neutral-300">
           <div className="flex flex-1 flex-row items-center">
             <Dropdown items={presets} onSelect={onSelectPreset} />
           </div>
           <div className="flex-1">
-            <p className="hidden rounded-md border border-gray-600 px-3 py-1">-</p>
+            <p className="hidden rounded-md border border-neutral-600 px-3 py-1">-</p>
           </div>
           <div className="flex-1">
-            <p className="hidden rounded-md border border-gray-600 px-3 py-1">
+            <p className="hidden rounded-md border border-neutral-600 px-3 py-1">
               {t('Preset configuration')}
             </p>
           </div>
@@ -127,7 +127,7 @@ function Thread({ conversationId }: { conversationId?: string }) {
         <div className="flex flex-col overflow-y-auto">
           {showEmptyChat ? (
             <div className="flex h-full w-full flex-col py-10">
-              <h1 className="flex h-screen items-center justify-center gap-2 text-center text-2xl font-semibold text-gray-200 dark:text-gray-600">
+              <h1 className="flex h-screen items-center justify-center gap-2 text-center text-2xl font-semibold text-neutral-200 dark:text-neutral-600">
                 {t('Chat with your local GPT')}
               </h1>
             </div>
@@ -140,7 +140,7 @@ function Thread({ conversationId }: { conversationId?: string }) {
               <div ref={bottomOfChatRef} />
             </>
           )}
-          <div className="flex flex-col items-center text-sm dark:bg-gray-900" />
+          <div className="flex flex-col items-center text-sm dark:bg-neutral-900" />
         </div>
       </div>
       <Prompt

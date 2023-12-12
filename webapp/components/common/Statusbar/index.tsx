@@ -11,25 +11,22 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+import { BiSolidCircle, BiCloudDownload } from 'react-icons/bi';
 
-'use client';
-
-export default function SettingItem({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle: string;
-  children: React.ReactNode;
-}) {
+export default function Statusbar() {
+  const running = false;
   return (
-    <div className="bb-1 flex w-full flex-row items-center border-b border-neutral-100 pb-4 pt-3 dark:border-neutral-800">
-      <div className="flex flex-1 flex-col justify-center">
-        <p className=" ">{title}</p>
-        <p className="text-sm text-neutral-400">{subtitle}</p>
+    <div className="m-0 flex w-full flex-row gap-4 bg-cyan-300 px-2 py-1 text-xs dark:bg-cyan-700">
+      <div className="flex flex-row items-center justify-center gap-1">
+        <span className={`${running ? 'text-green-500' : 'text-red-500'} `}>
+          <BiSolidCircle />
+        </span>
+        <span>Server is starting</span>
       </div>
-      <div className="flex flex-row ">{children}</div>
+      <div className="flex flex-row items-center justify-center gap-1">
+        <BiCloudDownload />
+        <span>Zephyr... downloading 10%</span>
+      </div>
     </div>
   );
 }

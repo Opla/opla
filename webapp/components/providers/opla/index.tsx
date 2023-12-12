@@ -36,12 +36,12 @@ export default function Opla({
   onParameterChange,
 }: {
   provider: Provider;
-  onParameterChange: (name: string, value: string | boolean) => void;
+  onParameterChange: (name: string, value: string | number | boolean) => void;
 }) {
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col items-center gap-2 px-8 py-4 text-sm dark:bg-gray-900">
+    <div className="flex flex-col items-center gap-2 px-8 py-4 text-sm dark:bg-neutral-900">
       <Parameter
         title={t('Description')}
         name="description"
@@ -68,28 +68,28 @@ export default function Opla({
         title={t('Port')}
         name="metadata.server.parameters.port"
         value={deepGet(provider, 'metadata.server.parameters.port', '')}
-        type="text"
+        type="number"
         onChange={onParameterChange}
       />
       <Parameter
         title={t('Context size')}
         name="metadata.server.parameters.contextSize"
         value={deepGet(provider, 'metadata.server.parameters.contextSize', '')}
-        type="text"
+        type="number"
         onChange={onParameterChange}
       />
       <Parameter
         title={t('Threads')}
         name="metadata.server.parameters.threads"
         value={deepGet(provider, 'metadata.server.parameters.threads', '')}
-        type="text"
+        type="number"
         onChange={onParameterChange}
       />
       <Parameter
         title={t('Number of GPU layers')}
         name="metadata.server.parameters.nGpuLayers"
         value={deepGet(provider, 'metadata.server.parameters.nGpuLayers', '')}
-        type="text"
+        type="number"
         onChange={onParameterChange}
       />
     </div>

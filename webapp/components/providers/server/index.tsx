@@ -26,7 +26,7 @@ export default function Server({
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col items-center gap-2 px-8 py-4 text-sm dark:bg-gray-900">
+    <div className="flex flex-col items-center gap-2 px-8 py-4 text-sm dark:bg-neutral-900">
       <Parameter
         title={t('Name')}
         name="name"

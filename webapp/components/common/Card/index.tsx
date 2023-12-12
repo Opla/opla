@@ -25,12 +25,12 @@ export default function Card({
   disabled?: boolean;
   onClick?: () => void;
 }) {
-  const cssTitle = title ? '' : 'bg-gray-300/50 dark:bg-gray-600/50 ';
-  const cssDesc = description ? '' : 'bg-gray-300/50 dark:bg-gray-600/50 ';
+  const cssTitle = title ? '' : 'bg-neutral-300/50 dark:bg-neutral-600/50 ';
+  const cssDesc = description ? '' : 'bg-neutral-300/50 dark:bg-neutral-600/50 ';
   const container = (
     <div className="flex h-full w-full flex-col gap-2 p-4">
       <div className={`${cssTitle}min-h-[24px] w-full text-xl font-bold`}>{title}</div>
-      <p className={`${cssDesc}aspect-[4/3] text-base text-gray-700 dark:text-gray-400`}>
+      <p className={`${cssDesc}aspect-[4/3] text-base text-neutral-700 dark:text-neutral-400`}>
         {description}
       </p>
     </div>
@@ -40,16 +40,16 @@ export default function Card({
       type="button"
       onClick={onClick}
       className={`${
-        selected ? 'border-2 border-gray-800 dark:border-gray-300' : ''
-      } m-2 h-full w-full overflow-hidden rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 hover:dark:bg-gray-800`}
+        selected ? 'border-2 border-neutral-800 dark:border-neutral-300' : ''
+      } m-2 h-full w-full overflow-hidden rounded bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-700 hover:dark:bg-neutral-800`}
     >
       {container}
     </button>
   ) : (
     <div
       className={`${
-        selected ? 'border-b border-gray-100 dark:border-gray-800' : ''
-      } m-2 h-full w-full overflow-hidden rounded bg-gray-100 dark:bg-gray-700`}
+        selected ? 'border-b border-neutral-100 dark:border-neutral-800' : ''
+      } m-2 h-full w-full overflow-hidden rounded bg-neutral-100 dark:bg-neutral-700`}
     >
       {container}
     </div>

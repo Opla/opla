@@ -69,14 +69,14 @@ function ContextMenu({
     <>
       <div ref={contextContainer}>{children}</div>
       <div
-        className="fixed z-10 hidden rounded-lg bg-gray-600 p-2 shadow-lg transition-all dark:bg-gray-900"
+        className="fixed z-10 hidden rounded-lg bg-neutral-600 p-2 shadow-lg transition-all dark:bg-neutral-900"
         ref={contextMenu}
       >
         <li className="modalbox p1 flex flex-1 flex-col">
           {menu.map((item) => (
             <ul
               key={item.label}
-              className="cursor-pointer rounded-md px-2 py-2 text-gray-400 transition-colors duration-200 hover:bg-gray-500/10 hover:text-white dark:text-gray-400 hover:dark:text-white"
+              className="cursor-pointer rounded-md px-2 py-2 text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:text-neutral-400 hover:dark:text-white"
             >
               <button
                 onClick={(e) => {
