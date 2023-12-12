@@ -34,6 +34,12 @@ export type Metadata = {
   [key: string]: string | number | boolean | Metadata;
 };
 
+export type LocalServer = {
+  name: string;
+  binary: string;
+  parameters: { [key: string]: string | number | boolean };
+};
+
 export type Author = {
   role: 'user' | 'system' | 'assistant';
   name: string;

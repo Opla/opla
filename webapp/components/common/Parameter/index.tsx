@@ -20,19 +20,22 @@ export default function Parameter({
   subtitle = '',
   value,
   type,
+  disabled = false,
   children,
   onChange = () => {},
 }: {
   title: string;
   name: string;
   subtitle?: string;
-  value?: string | boolean;
+  value?: string | number | boolean;
   type: 'text' | 'password' | 'large-text' | 'select' | 'switch';
+  disabled?: boolean;
   children?: React.ReactNode;
   onChange?: (name: string, value: string | boolean) => void;
 }) {
-  const textCss =
-    'w-full bg-gray-100 p-2 dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600';
+  const textCss = disabled
+    ? 'w-full'
+    : 'w-full bg-gray-100 p-2 dark:bg-gray-800 rounded-md border border-gray-300 dark:border-gray-600';
 
   return (
     <div className="bb-1 flex w-full flex-row border-b border-gray-100 pb-4 pt-3 dark:border-gray-800">
@@ -41,7 +44,8 @@ export default function Parameter({
         <p className="text-sm text-gray-400">{subtitle}</p>
       </div>
       <div className="flex flex-grow flex-row">
-        {type === 'text' && (
+        {disabled && <div className={textCss}>{value}</div>}
+        {!disabled && type === 'text' && (
           <input
             value={value as string}
             className={textCss}
@@ -51,7 +55,7 @@ export default function Parameter({
             }}
           />
         )}
-        {type === 'large-text' && (
+        {!disabled && type === 'large-text' && (
           <textarea
             className={textCss}
             value={value as string}
