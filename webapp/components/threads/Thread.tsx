@@ -19,7 +19,7 @@ import { useRouter } from 'next/router';
 import { SiOpenai } from 'react-icons/si';
 import Opla from '@/components/icons/Opla';
 import { AppContext } from '@/context';
-import Dropdown from '@/components/Dropdown';
+import Dropdown from '@/components/common/Dropdown';
 import { Message } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';

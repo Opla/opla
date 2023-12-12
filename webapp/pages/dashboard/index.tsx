@@ -14,8 +14,8 @@
 
 'use client';
 
-import Card from '@/components/Card';
-import Searchbar from '@/components/Searchbar';
+import Card from '@/components/common/Card';
+import Searchbar from '@/components/common/Searchbar';
 import useTranslation from '@/hooks/useTranslation';
 import Image from 'next/image';
 import Link from 'next/link';

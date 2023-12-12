@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Modal from '@/components/Modal';
+import Modal from '@/components/common/Modal/Modal';
 import Settings from './settings';
 
 export default function SettingsModal({

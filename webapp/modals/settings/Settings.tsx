@@ -14,7 +14,7 @@
 
 'use client';
 
-import NavContainer from '@/components/NavContainer';
+import NavContainer from '@/components/common/NavContainer';
 import useTranslation from '@/hooks/useTranslation';
 
 export default function Settings({

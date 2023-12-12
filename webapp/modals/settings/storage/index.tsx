@@ -15,7 +15,7 @@
 'use client';
 
 import useTranslation from '@/hooks/useTranslation';
-import SettingItem from '@/components/SettingItem';
+import SettingItem from '@/components/common/SettingItem';
 
 export default function Storage() {
   const { t } = useTranslation();

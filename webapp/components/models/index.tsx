@@ -14,8 +14,8 @@
 
 'use client';
 
-import Explorer from '@/components/ModelsExplorer';
-import Model from '@/components/Model';
+import Explorer from '@/components/models/ModelsExplorer';
+import Model from '@/components/models/Model';
 
 export default function Providers({ selectedModelId }: { selectedModelId?: string }) {
   return (

@@ -15,7 +15,7 @@
 'use client';
 
 import { useRouter } from 'next/router';
-import Models from './Models';
+import Models from '../../components/models';
 
 export default function SelectedModels() {
   const router = useRouter();

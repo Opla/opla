@@ -24,7 +24,7 @@ import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { ModalsContext } from '@/utils/modalsProvider';
 import { deleteProvider, getProvider, updateProvider } from '@/utils/data/providers';
-import ContextMenu from './ContextMenu';
+import ContextMenu from '../common/ContextMenu';
 
 function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string }) {
   const { providers, setProviders } = useContext(AppContext);

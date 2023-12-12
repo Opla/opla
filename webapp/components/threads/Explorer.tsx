@@ -28,8 +28,8 @@ import {
   deleteConversation,
 } from '@/utils/data/conversations';
 import { ModalsContext } from '@/utils/modalsProvider';
-import ContextMenu from './ContextMenu';
-import EditableItem from './EditableItem';
+import ContextMenu from '../common/ContextMenu';
+import EditableItem from '../common/EditableItem';
 
 export default function Explorer({ selectedConversationId }: { selectedConversationId?: string }) {
   const router = useRouter();

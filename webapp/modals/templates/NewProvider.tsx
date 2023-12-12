@@ -14,8 +14,8 @@
 
 import { useContext, useState } from 'react';
 import { useRouter } from 'next/router';
-import Card from '@/components/Card';
-import Modal from '@/components/Modal';
+import Card from '@/components/common/Card';
+import Modal from '@/components/common/Modal/Modal';
 import useTranslation from '@/hooks/useTranslation';
 import { Provider, ProviderType } from '@/types';
 import { createProvider } from '@/utils/data/providers';
@@ -44,6 +44,8 @@ export default function NewProvider({
   const { t } = useTranslation();
   const { providers, setProviders } = useContext(AppContext);
   const router = useRouter();
+
+  const isOpla = !!providers.find((p) => p.type === 'opla');
 
   const onClose = () => {
     setStep(1);
@@ -88,6 +90,7 @@ export default function NewProvider({
             <>
               <Card
                 title="Opla"
+                disabled={isOpla}
                 selected={provider?.type === 'opla'}
                 description={t('Easy to run on your machine')}
                 onClick={() => onChoose('opla', 'Opla')}

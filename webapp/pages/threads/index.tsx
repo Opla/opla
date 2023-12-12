@@ -14,7 +14,7 @@
 
 'use client';
 
-import Threads from './Threads';
+import Threads from '../../components/threads';
 
 export default function DefaultThreads() {
   return <Threads />;

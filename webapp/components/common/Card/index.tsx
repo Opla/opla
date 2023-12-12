@@ -16,11 +16,13 @@ export default function Card({
   title,
   description,
   selected,
+  disabled = false,
   onClick,
 }: {
   title?: string;
   description?: string;
   selected?: boolean;
+  disabled?: boolean;
   onClick?: () => void;
 }) {
   const cssTitle = title ? '' : 'bg-gray-300/50 dark:bg-gray-600/50 ';
@@ -33,7 +35,7 @@ export default function Card({
       </p>
     </div>
   );
-  return onClick ? (
+  return onClick && !disabled ? (
     <button
       type="button"
       onClick={onClick}
@@ -47,7 +49,7 @@ export default function Card({
     <div
       className={`${
         selected ? 'border-b border-gray-100 dark:border-gray-800' : ''
-      } m-2 h-full w-full overflow-hidden rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 hover:dark:bg-gray-800`}
+      } m-2 h-full w-full overflow-hidden rounded bg-gray-100 dark:bg-gray-700`}
     >
       {container}
     </div>

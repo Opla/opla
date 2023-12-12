@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Parameter from '@/components/Parameter';
+import Parameter from '@/components/common/Parameter';
 import useTranslation from '@/hooks/useTranslation';
 import { Provider } from '@/types';
 

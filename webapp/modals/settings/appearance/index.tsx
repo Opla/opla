@@ -16,8 +16,8 @@
 
 import useTheme from '@/hooks/useTheme';
 import useTranslation from '@/hooks/useTranslation';
-import SettingItem from '@/components/SettingItem';
-import Dropdown from '@/components/Dropdown';
+import SettingItem from '@/components/common/SettingItem';
+import Dropdown from '@/components/common/Dropdown';
 import logger from '@/utils/logger';
 import { BiLaptop, BiMoon, BiSun } from 'react-icons/bi';
 
