@@ -39,4 +39,46 @@ const createBaseNamedRecord = (name: string, description?: string) => {
   return item;
 };
 
-export { createBaseRecord, createBaseNamedRecord, updateRecord };
+
+const deepCopy = (obj: any) => window?.structuredClone ? window.structuredClone(obj) : JSON.parse(JSON.stringify(obj));
+
+const deepMerge = (_target: any, source: any) => {
+  const target = _target;
+  Object.keys(source).forEach((key: string) => {
+    const value = source[key];
+    if (value !== null && typeof value === 'object') {
+      if (typeof target[key] !== 'object') {
+        target[key] = {};
+      }
+      deepMerge(target[key], value);
+    } else {
+      target[key] = value;
+    }
+  });
+  return target;
+}
+
+const deepSet = (obj: any, path: string, _value: any, root = path): any => {
+  const [property, ...properties] = path.split('.');
+  let value = _value;
+  if (properties.length) {
+    value = deepSet(obj[property] || {}, properties.join('.'), _value, root);
+  }
+  if (typeof obj !== 'object') {
+    throw new Error(`Path '${root}' is not accessible`);
+  }
+  return { ...obj, [property]: value };
+};
+
+const deepGet = (obj: any, path: string, defaultValue?: any, root = path): any => {
+  const [property, ...properties] = path.split('.');
+  if (properties.length) {
+    return deepGet(obj[property], properties.join('.'), root);
+  }
+  if (typeof obj !== 'object' || property in obj === false) {
+    return defaultValue;
+  }
+  return obj[property];
+};
+
+export { createBaseRecord, createBaseNamedRecord, updateRecord, deepCopy, deepGet, deepMerge, deepSet };

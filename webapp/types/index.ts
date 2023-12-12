@@ -34,6 +34,12 @@ export type Metadata = {
   [key: string]: string | number | boolean | Metadata;
 };
 
+export type LocalServer = {
+  name: string;
+  binary: string;
+  parameters: { [key: string]: string | number | boolean };
+}
+
 export type Author = {
   role: 'user' | 'system' | 'assistant';
   name: string;
@@ -93,7 +99,7 @@ export interface Preset extends BaseNamedRecord {
   modelIds?: string[];
 }
 
-export interface Plugin extends BaseNamedRecord {}
+export interface Plugin extends BaseNamedRecord { }
 
 export type User = {
   id: string;
