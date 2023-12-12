@@ -39,8 +39,8 @@ const createBaseNamedRecord = (name: string, description?: string) => {
   return item;
 };
 
-
-const deepCopy = (obj: any) => window?.structuredClone ? window.structuredClone(obj) : JSON.parse(JSON.stringify(obj));
+const deepCopy = (obj: any) =>
+  window?.structuredClone ? window.structuredClone(obj) : JSON.parse(JSON.stringify(obj));
 
 const deepMerge = (_target: any, source: any) => {
   const target = _target;
@@ -56,7 +56,7 @@ const deepMerge = (_target: any, source: any) => {
     }
   });
   return target;
-}
+};
 
 const deepSet = (obj: any, path: string, _value: any, root = path): any => {
   const [property, ...properties] = path.split('.');
@@ -81,4 +81,12 @@ const deepGet = (obj: any, path: string, defaultValue?: any, root = path): any =
   return obj[property];
 };
 
-export { createBaseRecord, createBaseNamedRecord, updateRecord, deepCopy, deepGet, deepMerge, deepSet };
+export {
+  createBaseRecord,
+  createBaseNamedRecord,
+  updateRecord,
+  deepCopy,
+  deepGet,
+  deepMerge,
+  deepSet,
+};
