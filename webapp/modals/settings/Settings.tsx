@@ -47,7 +47,9 @@ export default function Settings({
     <div className="flex h-full w-full">
       <div className="navSettings">
         <NavContainer>
-          <div className="text-ellipsis break-all p-3 text-sm text-gray-600">{t('Settings')}</div>
+          <div className="text-ellipsis break-all p-3 text-sm text-neutral-600">
+            {t('Settings')}
+          </div>
           <li className="flex flex-1 flex-col gap-1 p-1">
             {menu.map((item) => (
               <ul
@@ -55,8 +57,8 @@ export default function Settings({
                 className={`${
                   item.href === tab || item.hrefAlias === tab
                     ? 'text-black dark:text-white'
-                    : 'text-gray-400 dark:text-gray-400'
-                } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-gray-500/10`}
+                    : 'text-neutral-400 dark:text-neutral-400'
+                } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
               >
                 <div
                   role="button"

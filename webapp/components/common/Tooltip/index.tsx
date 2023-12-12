@@ -43,7 +43,7 @@ export default function Tooltip({
     <div className="group relative flex">
       {children}
       <span
-        className={`absolute ${cssOrientation} z-10 scale-0 rounded-lg bg-gray-600 p-2 text-xs text-white shadow-lg transition-all group-hover:scale-100 dark:bg-gray-900`}
+        className={`absolute ${cssOrientation} z-10 scale-0 rounded-lg bg-neutral-600 p-2 text-xs text-white shadow-lg transition-all group-hover:scale-100 dark:bg-neutral-900`}
       >
         {message}
       </span>

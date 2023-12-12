@@ -22,12 +22,12 @@ function ProviderCreate({
   advanced,
 }: {
   provider: Partial<Provider>;
-  onParameterChange: (name: string, value: string | boolean) => void;
+  onParameterChange: (name: string, value: string | number | boolean) => void;
   advanced?: boolean;
 }) {
   const { t } = useTranslation();
   return (
-    <div className="flex w-full flex-col items-center gap-1 p-2 text-sm dark:bg-gray-900">
+    <div className="flex w-full flex-col items-center gap-1 p-2 text-sm dark:bg-neutral-900">
       {!advanced && (
         <>
           <Parameter

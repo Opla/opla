@@ -72,5 +72,13 @@
   "Next": "Suivant",
   "Create": "Créer",
   "configuration": "configuration",
-  "advanced configuration": "configuration avancée"
+  "advanced configuration": "configuration avancée",
+  "Opla is a free and open source AI assistant.": "Opla est un assistant IA gratuit et open source.",
+  "Local server": "Serveur local",
+  "Host": "Hôte",
+  "Port": "Port",
+  "Context size": "taille du contexte",
+  "Threads": "Threads",
+  "Number of GPU layers": "Nombre de couches GPU",
+  "Remote server": "Serveur distant"
 }

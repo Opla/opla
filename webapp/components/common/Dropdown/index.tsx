@@ -51,16 +51,16 @@ export default function Dropdown({
             toggleModal();
           }}
         />
-        <div className="flex cursor-pointer flex-row rounded-md border border-gray-300 px-2 py-1 hover:border-gray-500 peer-checked:[&>*:nth-child(2)]:-rotate-180">
-          <div className="flex flex-1 flex-row items-center pr-4 dark:text-gray-300">
+        <div className="flex cursor-pointer flex-row rounded-md border border-neutral-300 px-2 py-1 hover:border-neutral-500 peer-checked:[&>*:nth-child(2)]:-rotate-180">
+          <div className="flex flex-1 flex-row items-center pr-4 dark:text-neutral-300">
             {selectedItem?.icon && <I className="mr-2 h-4 w-4" />}
             <p className="mr-4 flex-1 text-left">{selectedItem?.label || ' '}</p>
           </div>
           <div className="flex items-center transition-transform">
-            <BiChevronDown className="h-4 w-4 text-gray-400 " />
+            <BiChevronDown className="h-4 w-4 text-neutral-400 " />
           </div>
         </div>
-        <div className="z-1000 pointer-events-none absolute left-0 top-7 rounded-lg bg-gray-300 p-2 opacity-0 shadow-lg transition-all peer-checked:pointer-events-auto peer-checked:opacity-100 dark:bg-gray-800">
+        <div className="z-1000 pointer-events-none absolute left-0 top-7 rounded-lg bg-neutral-300 p-2 opacity-0 shadow-lg transition-all peer-checked:pointer-events-auto peer-checked:opacity-100 dark:bg-neutral-800">
           <Menu items={itemsWithSelection} onClose={onClose} onSelect={onSelect} />
         </div>
       </label>

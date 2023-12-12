@@ -43,7 +43,7 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
     provider = deepMerge(provider, updatedProvider);
   }
 
-  const onParameterChange = (name: string, value: string | boolean) => {
+  const onParameterChange = (name: string, value: string | number | boolean) => {
     const newProvider = deepSet(updatedProvider, name, value);
     logger.info('onParameterChange', name, value, newProvider);
     setUpdatedProvider(newProvider);
@@ -66,11 +66,11 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
   };
 
   return (
-    <div className="flex max-w-full flex-1 flex-col dark:bg-gray-900">
+    <div className="flex max-w-full flex-1 flex-col dark:bg-neutral-900">
       <div className="transition-width relative flex h-full w-full flex-1 flex-col items-stretch overflow-hidden">
         <div className="flex-1 overflow-hidden">
           {!provider ? (
-            <div className="text-md flex h-full flex-col items-center justify-center text-gray-300 dark:text-gray-700">
+            <div className="text-md flex h-full flex-col items-center justify-center text-neutral-300 dark:text-neutral-700">
               {t('No provider selected')}
             </div>
           ) : (

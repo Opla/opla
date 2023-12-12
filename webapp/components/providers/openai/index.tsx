@@ -34,12 +34,12 @@ export default function OpenAI({
   onParameterChange,
 }: {
   provider: Provider;
-  onParameterChange: (name: string, value: string | boolean) => void;
+  onParameterChange: (name: string, value: string | number | boolean) => void;
 }) {
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col items-center gap-2 px-8 py-4 text-sm dark:bg-gray-900">
+    <div className="flex flex-col items-center gap-2 px-8 py-4 text-sm dark:bg-neutral-900">
       <Parameter
         title={t('Url')}
         name="url"

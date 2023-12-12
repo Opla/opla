@@ -58,7 +58,7 @@ export default function Dialog({
             <button
               key={action.label}
               type="button"
-              className="rounded-md bg-gray-500 px-4 py-2 text-white"
+              className="rounded-md bg-neutral-500 px-4 py-2 text-white"
               onClick={(e) => {
                 e.preventDefault();
                 onPreAction(

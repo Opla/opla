@@ -24,7 +24,7 @@ function MessageComponent({ message }: { message: Message }) {
   const isUser = author.role === 'user';
 
   return (
-    <div className={`group w-full text-gray-800 dark:text-gray-100 ${isUser ? '' : ''}`}>
+    <div className={`group w-full text-neutral-800 dark:text-neutral-100 ${isUser ? '' : ''}`}>
       <div className="m-auto flex w-full gap-4 text-base md:max-w-2xl md:gap-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
         <div className="m-auto flex w-full flex-row gap-4 p-4 md:max-w-2xl md:gap-6 md:py-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
           <div className="flex w-8 flex-col items-end">

@@ -47,7 +47,7 @@ export default function Dashboard() {
         </div>
       </header>
       <main className="h-full w-full flex-col overflow-y-auto p-4 pb-10">
-        <div className="m-4 flex min-h-[320px] flex-row rounded-lg bg-gray-100 p-3 dark:bg-gray-950">
+        <div className="m-4 flex min-h-[320px] flex-row rounded-lg bg-neutral-100 p-3 dark:bg-neutral-950">
           <div className="flex flex-grow flex-col justify-center p-3">
             <h1 className="w-full text-center text-xl">
               {t('The ultimate Open-source generative AI App')}
@@ -58,15 +58,15 @@ export default function Dashboard() {
             <p className="mt-8 flex w-full justify-center">
               <Link
                 href="/threads"
-                className="mx-3 flex h-7 flex-row items-center rounded-md border border-gray-400 px-2 dark:border-gray-400 hover:dark:border-gray-100"
+                className="mx-3 flex h-7 flex-row items-center rounded-md border border-neutral-400 px-2 dark:border-neutral-400 hover:dark:border-neutral-100"
               >
-                <span className="items-center truncate truncate px-3 dark:text-gray-400 hover:dark:text-gray-100">
+                <span className="items-center truncate truncate px-3 dark:text-neutral-400 hover:dark:text-neutral-100">
                   {t('Ready to Prompt!')}
                 </span>
               </Link>
             </p>
           </div>
-          <div className="flex aspect-[4/3] flex-1 flex-col justify-center rounded-lg bg-gray-300 p-3 p-3 dark:bg-gray-800">
+          <div className="flex aspect-[4/3] flex-1 flex-col justify-center rounded-lg bg-neutral-300 p-3 p-3 dark:bg-neutral-800">
             <div className="m-4 flex w-full justify-center">
               <div className="aspect-[4/3]">
                 <Image width={96} height={96} className="" src="/logo.png" alt="logo" />
@@ -93,7 +93,7 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
-      <footer className="absolute bottom-0 flex w-full justify-between bg-gray-100 p-3 dark:bg-gray-950">
+      <footer className="absolute bottom-0 flex w-full justify-between bg-neutral-100 p-3 dark:bg-neutral-950">
         <p className="flex text-center">
           <a href="https://github.com/Opla/opla" target="_blank" className="flex items-center">
             <BiLogoGithub />

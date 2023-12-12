@@ -76,7 +76,7 @@ export default function NewProvider({
     router.push(`/providers/${newProvider.id}`);
   };
 
-  const onParameterChange = (name: string, value: string | boolean) => {
+  const onParameterChange = (name: string, value: string | number | boolean) => {
     const newProvider = { ...provider, [name]: value };
     logger.info('onParameterChange', name, value, newProvider);
     setProvider(newProvider);
@@ -105,7 +105,7 @@ export default function NewProvider({
                 title={t('Server')}
                 description={t('For experts')}
                 selected={provider?.type === 'server'}
-                onClick={() => onChoose('server', 'Remote server')}
+                onClick={() => onChoose('server', t('Remote server'))}
               />
             </>
           </Panel>
@@ -129,7 +129,7 @@ export default function NewProvider({
                   e.preventDefault();
                   onCreate();
                 }}
-                className="rounded-md border border-gray-600 px-3 py-1 disabled:opacity-50"
+                className="rounded-md border border-neutral-600 px-3 py-1 disabled:opacity-50"
               >
                 {t('Create')}
               </button>
