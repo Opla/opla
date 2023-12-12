@@ -21,7 +21,7 @@ export default function Server({
   onParameterChange,
 }: {
   provider: Provider;
-  onParameterChange: (name: string, value: string | boolean) => void;
+  onParameterChange: (name: string, value: string | number | boolean) => void;
 }) {
   const { t } = useTranslation();
 

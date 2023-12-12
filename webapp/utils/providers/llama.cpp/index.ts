@@ -27,7 +27,9 @@ const startLLamaCppServer = async (
   metadata: LlamaCppArguments,
   command = 'start_opla_server',
 ) => {
-  logger.info(command === 'start_opla_server' ? 'start LLama.cpp server' : 'restart LLama.cpp server');
+  logger.info(
+    command === 'start_opla_server' ? 'start LLama.cpp server' : 'restart LLama.cpp server',
+  );
   const homeDirPath = await homeDir();
   logger.info(`homeDirPath=${homeDirPath}`);
   const model = `${homeDirPath}${modelsPath}/${modelFile}`;
@@ -41,6 +43,6 @@ const restartLLamaCppServer = async (
   modelsPath: string,
   modelFile: string,
   metadata: LlamaCppArguments,
-) => startLLamaCppServer(modelsPath, modelFile, metadata, 'restart_opla_server')
+) => startLLamaCppServer(modelsPath, modelFile, metadata, 'restart_opla_server');
 
 export { restartLLamaCppServer, startLLamaCppServer, stopLLamaCppServer };

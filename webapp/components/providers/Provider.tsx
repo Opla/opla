@@ -43,7 +43,7 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
     provider = deepMerge(provider, updatedProvider);
   }
 
-  const onParameterChange = (name: string, value: string | boolean) => {
+  const onParameterChange = (name: string, value: string | number | boolean) => {
     const newProvider = deepSet(updatedProvider, name, value);
     logger.info('onParameterChange', name, value, newProvider);
     setUpdatedProvider(newProvider);

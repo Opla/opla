@@ -76,7 +76,7 @@ export default function NewProvider({
     router.push(`/providers/${newProvider.id}`);
   };
 
-  const onParameterChange = (name: string, value: string | boolean) => {
+  const onParameterChange = (name: string, value: string | number | boolean) => {
     const newProvider = { ...provider, [name]: value };
     logger.info('onParameterChange', name, value, newProvider);
     setProvider(newProvider);
