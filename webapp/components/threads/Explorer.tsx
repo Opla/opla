@@ -86,7 +86,7 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
   ];
 
   return (
-    <div className="scrollbar-trigger flex h-full w-full flex-1 items-start bg-neutral-100 dark:bg-neutral-800">
+    <div className="scrollbar-trigger flex h-full w-full flex-1 items-start bg-neutral-100 dark:bg-neutral-800/70">
       <nav className="flex h-full flex-1 flex-col space-y-1 p-1">
         <Link
           href="/threads"

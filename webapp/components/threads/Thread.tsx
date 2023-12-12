@@ -107,9 +107,9 @@ function Thread({ conversationId }: { conversationId?: string }) {
   };
 
   return (
-    <div className="flex flex-1 flex-col dark:bg-neutral-900">
-      <div className="flex flex-col items-center text-sm">
-        <div className="justify-left flex w-full flex-row items-center gap-4 bg-neutral-50 p-3 text-neutral-500 dark:bg-neutral-950 dark:text-neutral-300">
+    <div className="flex flex-1 flex-col dark:bg-neutral-800/30">
+      <div className="flex flex-col items-center text-xs">
+        <div className="justify-left flex w-full flex-row items-center gap-4 bg-neutral-50 p-3 text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
           <div className="flex flex-1 flex-row items-center">
             <Dropdown items={presets} onSelect={onSelectPreset} />
           </div>
@@ -140,7 +140,7 @@ function Thread({ conversationId }: { conversationId?: string }) {
               <div ref={bottomOfChatRef} />
             </>
           )}
-          <div className="flex flex-col items-center text-sm dark:bg-neutral-900" />
+          <div className="flex flex-col items-center text-sm dark:bg-neutral-800/30" />
         </div>
       </div>
       <Prompt

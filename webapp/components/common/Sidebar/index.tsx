@@ -85,7 +85,7 @@ function Sidebar() {
   };
 
   return (
-    <aside className="flex h-full flex-col bg-neutral-200 p-1 dark:bg-neutral-700">
+    <aside className="box-content flex h-full flex-col border-r-[1px] border-neutral-300/30 bg-neutral-100 p-1 dark:border-neutral-700/30 dark:bg-neutral-800">
       <div className="flex hidden items-center justify-center border-b border-neutral-300 p-1 dark:border-neutral-600">
         <Link className="mb-1 h-8 w-8" href="/">
           <Tooltip message={t('Dashboard')} orientation={Orientation.Right}>

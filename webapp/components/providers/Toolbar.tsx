@@ -30,8 +30,8 @@ export default function Toolbar({
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col items-center text-sm">
-      <div className="flex w-full flex-row items-center justify-between gap-1 bg-neutral-50 p-3 text-neutral-500 dark:bg-neutral-950 dark:text-neutral-300">
+    <div className="flex flex-col items-center text-xs">
+      <div className="flex w-full flex-row items-center justify-between gap-1 bg-neutral-50 p-3 text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
         <div className="mx-3 flex h-7 flex-row items-center  px-2">
           {provider?.type.toLowerCase() !== provider?.name.toLowerCase() && (
             <span className="gap-1 py-1 capitalize text-neutral-700 dark:text-neutral-500">

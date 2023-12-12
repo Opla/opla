@@ -20,8 +20,8 @@ function Content({ name, icon }: { name: string; icon: IconType }) {
   const Icon = icon as IconType;
   return (
     <Tooltip message={name} orientation={Orientation.Right}>
-      <div className="h-7 w-7 hover:text-neutral-800 dark:hover:text-neutral-100">
-        <Icon size="1.75rem" />
+      <div className="h-5 w-5 hover:text-neutral-800 dark:hover:text-neutral-100">
+        <Icon size="28px" />
       </div>
     </Tooltip>
   );
@@ -42,12 +42,12 @@ export default function SidebarItem({
   modal?: boolean;
   onModalClick: (href: string) => void;
 }) {
-  const className = `flex h-7 w-7 rounded-md ${
+  const className = `flex h-6 w-6 rounded-md ${
     selected ? 'text-neutral-800 dark:text-neutral-100' : 'text-neutral-400 dark:text-neutral-500'
-  } dark:bg-neutral-700`;
+  } dark:transparent`;
   const content = <Content name={name} icon={icon as IconType} />;
   return (
-    <li className="p-2">
+    <li className="p-2 py-4">
       {modal ? (
         <div
           className={className}
