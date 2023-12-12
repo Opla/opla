@@ -16,7 +16,7 @@
 
 import { createContext, useEffect } from 'react';
 import { v4 as uuid } from 'uuid';
-import { Conversation, Model, Provider, ProviderType } from '@/types';
+import { Conversation, Model, Preset, Provider, ProviderType } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
 import { createProvider } from '@/utils/data/providers';
 import oplaProviderConfig from '@/utils/providers/opla/config.json';
@@ -25,9 +25,11 @@ type Context = {
   conversations: Array<Conversation>;
   providers: Array<Provider>;
   models: Array<Model>;
+  presets: Array<Preset>;
   setConversations: (newConversations: Conversation[]) => void;
   setProviders: (newProviders: Provider[]) => void;
   setModels: (newModels: Model[]) => void;
+  setPresets: (newPresets: Preset[]) => void;
 };
 
 const initialContext: Context = {
@@ -91,6 +93,8 @@ const initialContext: Context = {
   setProviders: () => {},
   models: [],
   setModels: () => {},
+  presets: [],
+  setPresets: () => {},
 };
 
 const AppContext = createContext(initialContext);
@@ -101,6 +105,8 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
     initialContext.conversations,
   );
   const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
+  const [models, setModels] = useDataStorage('models', initialContext.models);
+  const [presets, setPresets] = useDataStorage('presets', initialContext.presets);
   useEffect(() => {
     let oplaProvider = providers.find((provider) => provider.type === 'opla');
     if (!oplaProvider) {
@@ -108,13 +114,21 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       oplaProvider = createProvider('Opla', config);
       setProviders([oplaProvider, ...providers]);
     }
-  }, []);
-  const [models, setModels] = useDataStorage('models', initialContext.models);
+  }, [providers, setProviders]);
 
   return (
     <AppContext.Provider
       // eslint-disable-next-line react/jsx-no-constructed-context-values
-      value={{ conversations, setConversations, providers, setProviders, models, setModels }}
+      value={{
+        conversations,
+        setConversations,
+        providers,
+        setProviders,
+        models,
+        setModels,
+        presets,
+        setPresets,
+      }}
     >
       {children}
     </AppContext.Provider>
