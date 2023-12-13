@@ -16,7 +16,14 @@
 
 import { useContext } from 'react';
 import Image from 'next/image';
-import { BiChat, BiServer, BiNetworkChart, BiCog, BiExtension, BiUserCircle } from 'react-icons/bi';
+import {
+  PiChats,
+  PiHardDrives,
+  PiGearSix,
+  PiPackage,
+  PiTreeStructure,
+  PiUserCircle,
+} from 'react-icons/pi';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import useTranslation from '@/hooks/useTranslation';
@@ -34,22 +41,22 @@ const sidebarItems: Array<Item> = [
       {
         name: 'Chats',
         href: '/threads',
-        icon: BiChat,
+        icon: PiChats,
       },
       {
         name: 'Models',
         href: '/models',
-        icon: BiNetworkChart,
+        icon: PiTreeStructure,
       },
       {
         name: 'AI Providers',
         href: '/providers',
-        icon: BiServer,
+        icon: PiHardDrives,
       },
       {
         name: 'Plugins',
         href: '/plugins',
-        icon: BiExtension,
+        icon: PiPackage,
         hidden: true,
       },
     ],
@@ -60,13 +67,13 @@ const sidebarItems: Array<Item> = [
       {
         name: 'Profile',
         href: '/profile',
-        icon: BiUserCircle,
+        icon: PiUserCircle,
         hidden: true,
       },
       {
         name: 'Settings',
         href: '/settings',
-        icon: BiCog,
+        icon: PiGearSix,
         modal: true,
       },
     ],
@@ -85,7 +92,7 @@ function Sidebar() {
   };
 
   return (
-    <aside className="box-content flex h-full flex-col border-r-[1px] border-neutral-300/30 bg-neutral-100 p-1 dark:border-neutral-700/30 dark:bg-neutral-800">
+    <aside className="box-content flex h-full flex-col border-r-[1px] border-neutral-300/30 bg-neutral-100 p-1 dark:border-neutral-900 dark:bg-neutral-800">
       <div className="flex hidden items-center justify-center border-b border-neutral-300 p-1 dark:border-neutral-600">
         <Link className="mb-1 h-8 w-8" href="/">
           <Tooltip message={t('Dashboard')} orientation={Orientation.Right}>

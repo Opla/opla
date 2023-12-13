@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BiSolidCircle } from 'react-icons/bi';
+import { PiCircleFill } from 'react-icons/pi';
 import useTranslation from '@/hooks/useTranslation';
 import { Provider } from '@/types';
 
@@ -53,7 +53,7 @@ export default function Toolbar({
           >
             <span>{provider?.disabled ? t('Enable') : t('Disable')}</span>
             <span className={`${provider?.disabled ? 'text-red-500' : 'text-green-500'} `}>
-              <BiSolidCircle />
+              <PiCircleFill />
             </span>
           </button>
           <button

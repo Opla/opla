@@ -17,7 +17,7 @@
 import { AppContext } from '@/context';
 import Link from 'next/link';
 import { useContext } from 'react';
-import { BiPlus } from 'react-icons/bi';
+import { PiPlus } from 'react-icons/pi';
 import { MenuItem } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
@@ -42,10 +42,10 @@ function ModelsExplorer({ selectedModelId }: { selectedModelId?: string }) {
   ];
 
   return (
-    <div className="scrollbar-trigger flex h-full w-full flex-1 items-start bg-neutral-100 dark:bg-neutral-800/70">
+    <div className="scrollbar-trigger flex h-full w-full flex-1 items-start border-r-[1px] border-neutral-300/30 bg-neutral-100 dark:border-neutral-900 dark:bg-neutral-800/70">
       <nav className="flex h-full flex-1 flex-col space-y-1 p-1">
         <div className="m-2 mb-1 flex flex-shrink-0 cursor-pointer items-center gap-2 rounded-md border px-4 py-1 text-sm text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:border-white/20 dark:text-neutral-400 hover:dark:text-white">
-          <BiPlus className="h-4 w-4" />
+          <PiPlus className="h-4 w-4" />
           {t('Add a model')}
         </div>
         <div className="flex-1 flex-col overflow-y-auto overflow-x-hidden dark:border-white/20">
