@@ -15,7 +15,7 @@
 'use client';
 
 import { Message } from '@/types';
-import { BiBot, BiUser } from 'react-icons/bi';
+import { PiRobot, PiUser } from 'react-icons/pi';
 import { TbCursorText } from 'react-icons/tb';
 
 function MessageComponent({ message }: { message: Message }) {
@@ -30,9 +30,9 @@ function MessageComponent({ message }: { message: Message }) {
           <div className="flex w-8 flex-col items-end">
             <div className="text-opacity-100r flex h-7 w-7 items-center justify-center rounded-md p-1 text-white">
               {isUser ? (
-                <BiUser className="h-4 w-4 text-white" />
+                <PiUser className="h-4 w-4 text-white" />
               ) : (
-                <BiBot className="h-4 w-4 text-white" />
+                <PiRobot className="h-4 w-4 text-white" />
               )}
             </div>
           </div>

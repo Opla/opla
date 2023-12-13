@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { BiSolidCircle, BiCloudDownload } from 'react-icons/bi';
+import { PiCircleFill, PiCloudArrowDown } from 'react-icons/pi';
 
 export default function Statusbar() {
   const running = false;
@@ -19,12 +19,12 @@ export default function Statusbar() {
     <div className="m-0 flex w-full flex-row gap-4 bg-cyan-300 px-2 py-1 text-xs dark:bg-cyan-700">
       <div className="flex flex-row items-center justify-center gap-1">
         <span className={`${running ? 'text-green-500' : 'text-red-500'} `}>
-          <BiSolidCircle />
+          <PiCircleFill />
         </span>
         <span>Server is starting</span>
       </div>
       <div className="flex flex-row items-center justify-center gap-1">
-        <BiCloudDownload />
+        <PiCloudArrowDown />
         <span>Zephyr... downloading 10%</span>
       </div>
     </div>

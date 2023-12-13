@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { useRef } from 'react';
-import { BiChevronDown } from 'react-icons/bi';
+import { PiCaretDown } from 'react-icons/pi';
 import { IconType } from 'react-icons';
 import useClickOutside from '@/hooks/useClickOutside';
 import { MenuItem } from '@/types';
@@ -57,7 +57,7 @@ export default function Dropdown({
             <p className="mr-4 flex-1 text-left">{selectedItem?.label || ' '}</p>
           </div>
           <div className="flex items-center transition-transform">
-            <BiChevronDown className="h-4 w-4 text-neutral-400 " />
+            <PiCaretDown className="h-4 w-4 text-neutral-400 " />
           </div>
         </div>
         <div className="z-1000 pointer-events-none absolute left-0 top-7 rounded-lg bg-neutral-300 p-2 opacity-0 shadow-lg transition-all peer-checked:pointer-events-auto peer-checked:opacity-100 dark:bg-neutral-800">

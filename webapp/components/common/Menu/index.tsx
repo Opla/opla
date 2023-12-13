@@ -15,7 +15,7 @@
 import useTranslation from '@/hooks/useTranslation';
 import { MenuItem } from '@/types';
 import { IconType } from 'react-icons';
-import { BiCheck } from 'react-icons/bi';
+import { PiCheck } from 'react-icons/pi';
 
 function Menu({
   items,
@@ -53,7 +53,7 @@ function Menu({
             >
               {item.icon && <I className="mr-2 h-4 w-4" />}
               <p className="mr-4 flex-1 text-left">{t(item.label)}</p>
-              {selection && item.selected && <BiCheck className="ml-2 h-4 w-4" />}
+              {selection && item.selected && <PiCheck className="ml-2 h-4 w-4" />}
             </button>
           </ul>
         );

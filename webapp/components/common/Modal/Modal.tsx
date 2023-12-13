@@ -14,7 +14,7 @@
 
 import * as React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
-import { BiX } from 'react-icons/bi';
+import { PiX } from 'react-icons/pi';
 
 export default function Modal({
   id,
@@ -88,7 +88,7 @@ export default function Modal({
         type="button"
         onClick={onClose}
       >
-        <BiX className="h-6 w-6" />
+        <PiX className="h-6 w-6" />
       </button>
     </dialog>
   );

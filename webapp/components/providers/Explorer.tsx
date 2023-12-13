@@ -17,7 +17,7 @@
 import { useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { BiPlus, BiSolidCircle } from 'react-icons/bi';
+import { PiPlus, PiCircleFill } from 'react-icons/pi';
 import { AppContext } from '@/context';
 import { MenuItem, Provider } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
@@ -95,7 +95,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
   ];
 
   return (
-    <div className="scrollbar-trigger flex h-full w-full flex-1 items-start bg-neutral-100 dark:bg-neutral-800/70">
+    <div className="scrollbar-trigger flex h-full w-full flex-1 items-start border-r-[1px] border-neutral-300/30 bg-neutral-100 dark:border-neutral-900 dark:bg-neutral-800/70">
       <nav className="flex h-full flex-1 flex-col space-y-1 p-1">
         <button
           type="button"
@@ -105,7 +105,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
             createNewProvider();
           }}
         >
-          <BiPlus className="h-4 w-4" />
+          <PiPlus className="h-4 w-4" />
           {t('New AI provider')}
         </button>
         <div className="flex-1 flex-col overflow-y-auto overflow-x-hidden dark:border-white/20">
@@ -134,7 +134,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
                                 provider.disabled ? 'text-red-500' : 'text-green-500'
                               } `}
                             >
-                              <BiSolidCircle />
+                              <PiCircleFill />
                             </div>
                           </div>
                         </div>
