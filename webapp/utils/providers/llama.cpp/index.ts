@@ -34,9 +34,9 @@ const startLLamaCppServer = async (
   logger.info(`homeDirPath=${homeDirPath}`);
   const model = `${homeDirPath}${modelsPath}/${modelFile}`;
   const args = LlamaCppArgumentsSchema.parse({ ...metadata, model });
-  const child = await invoke(command, args);
-
-  return child;
+  const response = await invoke(command, args);
+  logger.info(`opla server starting: ${response}`, response);
+  return response;
 };
 
 const restartLLamaCppServer = async (

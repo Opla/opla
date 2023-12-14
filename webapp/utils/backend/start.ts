@@ -13,12 +13,14 @@
 // limitations under the License.
 import { appWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/api/dialog';
+import { listen } from '@tauri-apps/api/event';
 import { Provider } from '@/types';
 import logger from '../logger';
 import { startLLamaCppServer, stopLLamaCppServer } from '../providers/llama.cpp';
 import { LlamaCppArguments } from '../providers/llama.cpp/types';
 
-const startDesktop = async (oplaConfiguration: Provider) => {
+const startBackend = async (oplaConfiguration: Provider, listener: (payload: any) => void) => {
+  logger.info('startDesktop', oplaConfiguration);
   const unlisten = await appWindow.onCloseRequested(async (event) => {
     const confirmed = await confirm('Are you sure?');
     if (!confirmed) {
@@ -28,14 +30,26 @@ const startDesktop = async (oplaConfiguration: Provider) => {
     }
     await stopLLamaCppServer();
   });
+  const unlistenServer = await listen('opla-server', (event) => {
+    // logger.info('opla-server event', event.payload);
+    listener(event);
+  });
+
   logger.info('init Opla desktop');
   const modelsPath = `dev/ai/models`;
   const modelFile = 'openhermes-7b-v2.5/ggml-model-q4_k.gguf';
   const metadata = oplaConfiguration.metadata as unknown as {
     server: { parameters: LlamaCppArguments };
   };
-  await startLLamaCppServer(modelsPath, modelFile, metadata.server.parameters);
-  return unlisten;
+  let payload;
+  try {
+    payload = await startLLamaCppServer(modelsPath, modelFile, metadata.server.parameters);
+  } catch (error) {
+    logger.error("can't start LlamaCppServer", error);
+    payload = { error };
+  }
+
+  return { unlisten, unlistenServer, payload };
 };
 
-export default startDesktop;
+export default startBackend;

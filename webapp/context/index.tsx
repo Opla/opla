@@ -14,13 +14,23 @@
 
 'use client';
 
-import { createContext } from 'react';
+import { createContext, useState } from 'react';
 import { Conversation, Model, Preset, Provider, ProviderType } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
 import { createProvider } from '@/utils/data/providers';
 import oplaProviderConfig from '@/utils/providers/opla/config.json';
 
-type Context = {
+type BackendContext = {
+  server: {
+    status: 'init' | 'wait' | 'starting' | 'started' | 'stopping' | 'stopped' | 'error';
+    message?: string;
+    name?: string;
+    stout: string[];
+    sterr: string[];
+  };
+};
+
+export type Context = {
   conversations: Array<Conversation>;
   providers: Array<Provider>;
   models: Array<Model>;
@@ -29,6 +39,16 @@ type Context = {
   setProviders: (newProviders: Provider[]) => void;
   setModels: (newModels: Model[]) => void;
   setPresets: (newPresets: Preset[]) => void;
+  backend: BackendContext;
+  setBackend: (newBackend: BackendContext) => void;
+};
+
+const initialBackendContext: BackendContext = {
+  server: {
+    status: 'wait',
+    stout: [],
+    sterr: [],
+  },
 };
 
 const initialContext: Context = {
@@ -40,6 +60,8 @@ const initialContext: Context = {
   setModels: () => {},
   presets: [],
   setPresets: () => {},
+  backend: initialBackendContext,
+  setBackend: () => {},
 };
 
 const AppContext = createContext(initialContext);
@@ -58,6 +80,8 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
   const [models, setModels] = useDataStorage('models', initialContext.models);
   const [presets, setPresets] = useDataStorage('presets', initialContext.presets);
 
+  const [backend, setBackend] = useState(initialBackendContext);
+
   return (
     <AppContext.Provider
       // eslint-disable-next-line react/jsx-no-constructed-context-values
@@ -70,6 +94,8 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
         setModels,
         presets,
         setPresets,
+        backend,
+        setBackend,
       }}
     >
       {children}
