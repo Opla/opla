@@ -28,7 +28,7 @@ export default function Statusbar() {
   };
 
   return (
-    <div className="m-0 flex w-full flex-row gap-4 bg-cyan-300 px-2 py-1 text-xs dark:bg-cyan-700">
+    <div className="m-0 flex w-full grow-0 flex-row gap-4 bg-cyan-300 px-2 py-1 text-xs dark:bg-cyan-700">
       <button
         className="flex flex-row items-center justify-center gap-1"
         type="button"

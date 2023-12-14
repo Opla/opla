@@ -42,8 +42,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       const opla = providers.find((p) => p.type === 'opla');
       if (opla) {
         opla.disabled = disabled;
-        const ps = providers.map((p) => (p.id === opla.id ? opla : p));
-        console.log('enableOpla', ps, providers);
         setProviders(providers.map((p) => (p.id === opla.id ? opla : p)));
       }
     },
@@ -152,7 +150,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen w-full select-none overflow-hidden">
       <Sidebar />
-      <div className="flex h-full w-full flex-1 flex-col">
+      <div className="flex grow flex-col">
         {children}
         <Statusbar />
       </div>

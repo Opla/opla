@@ -107,9 +107,9 @@ function Thread({ conversationId }: { conversationId?: string }) {
   };
 
   return (
-    <div className="flex flex-1 flex-col dark:bg-neutral-800/30">
-      <div className="flex flex-col items-center text-xs">
-        <div className="justify-left flex w-full flex-row items-center gap-4 bg-neutral-50 p-3 text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
+    <div className="flex grow flex-col dark:bg-neutral-800/30">
+      <div className="grow-0">
+        <div className="justify-left flex w-full flex-row items-center gap-4 bg-neutral-50 p-3 text-xs text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
           <div className="flex flex-1 flex-row items-center">
             <Dropdown items={presets} onSelect={onSelectPreset} />
           </div>
@@ -123,11 +123,11 @@ function Thread({ conversationId }: { conversationId?: string }) {
           </div>
         </div>
       </div>
-      <div className="flex h-[80%] w-full flex-grow flex-col">
-        <div className="flex flex-col overflow-y-auto">
+      <div className="grow">
+        <div className="flex h-full flex-col overflow-y-auto">
           {showEmptyChat ? (
-            <div className="flex h-full w-full flex-col py-10">
-              <h1 className="flex h-screen items-center justify-center gap-2 text-center text-2xl font-semibold text-neutral-200 dark:text-neutral-600">
+            <div className="flex grow flex-col py-10">
+              <h1 className="flex grow items-center justify-center gap-2 text-center text-2xl font-semibold text-neutral-200 dark:text-neutral-600">
                 {t('Chat with your local GPT')}
               </h1>
             </div>
@@ -136,7 +136,7 @@ function Thread({ conversationId }: { conversationId?: string }) {
               {messages.map((msg) => (
                 <MessageView key={msg.id} message={msg} />
               ))}
-              <div className="h-4 w-full flex-shrink-0" />
+              <div className="h-4 w-full" />
               <div ref={bottomOfChatRef} />
             </>
           )}

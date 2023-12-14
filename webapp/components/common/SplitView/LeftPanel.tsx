@@ -11,20 +11,29 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+import { useRef, useEffect } from 'react';
 
-'use client';
+export default function LeftPanel({
+  children,
+  leftWidth,
+  setLeftWidth,
+}: {
+  leftWidth: number | undefined;
+  setLeftWidth: (value: number) => void;
+  children: React.ReactNode;
+}) {
+  const leftRef = useRef<HTMLDivElement>(null);
 
-import Thread from '@/components/threads/Thread';
-import Explorer from '@/components/threads/Explorer';
-import SplitView from '../common/SplitView';
+  useEffect(() => {
+    if (leftRef.current) {
+      if (!leftWidth) {
+        setLeftWidth(leftRef.current.clientWidth);
+        return;
+      }
 
-export default function Threads({ selectedConversationId }: { selectedConversationId?: string }) {
-  return (
-    <SplitView
-      className="grow overflow-hidden"
-      left={<Explorer selectedConversationId={selectedConversationId} />}
-    >
-      <Thread conversationId={selectedConversationId} />
-    </SplitView>
-  );
+      leftRef.current.style.width = `${leftWidth}px`;
+    }
+  }, [leftRef, leftWidth, setLeftWidth]);
+
+  return <div ref={leftRef}>{children}</div>;
 }
