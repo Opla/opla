@@ -13,7 +13,7 @@ import logger from '@/utils/logger';
 import { useEffect, useState } from 'react';
 
 export default function useDataStorage<T>(key: string, defaultValue: T): [T, (value: T) => void] {
-  const [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState(undefined as T);
 
   useEffect(() => {
     const item = dataStorage().getItem(key);

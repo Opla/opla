@@ -15,10 +15,8 @@
 'use client';
 
 import { createContext, useState } from 'react';
-import { Conversation, Model, Preset, Provider, ProviderType } from '@/types';
+import { Conversation, Model, Preset, Provider } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
-import { createProvider } from '@/utils/data/providers';
-import oplaProviderConfig from '@/utils/providers/opla/config.json';
 
 type BackendContext = {
   server: {
@@ -66,17 +64,13 @@ const initialContext: Context = {
 
 const AppContext = createContext(initialContext);
 
-const config = { ...oplaProviderConfig, type: oplaProviderConfig.type as ProviderType };
-const oplaProvider = createProvider('Opla', config);
-const initialProviders = [oplaProvider, ...initialContext.providers];
-
 function AppContextProvider({ children }: { children: React.ReactNode }) {
   const [conversations, setConversations] = useDataStorage(
     'conversations',
     initialContext.conversations,
   );
 
-  const [providers, setProviders] = useDataStorage('providers', initialProviders);
+  const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
   const [models, setModels] = useDataStorage('models', initialContext.models);
   const [presets, setPresets] = useDataStorage('presets', initialContext.presets);
 
