@@ -13,11 +13,13 @@
 // limitations under the License.
 import { useContext } from 'react';
 import { useRouter } from 'next/router';
-import { AppContext } from '@/context';
 import { PiCircleFill, PiCloudArrowDown, PiWarning } from 'react-icons/pi';
+import { AppContext } from '@/context';
+import useTranslation from '@/hooks/useTranslation';
 
 export default function Statusbar() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { backend } = useContext(AppContext);
   const running = backend.server.status === 'started';
   const error = backend.server.status === 'error';
@@ -38,21 +40,23 @@ export default function Statusbar() {
           </span>
         )}
         {error && (
-          <span className="text-white">
+          <span className="text-neutral-800 dark:text-neutral-300">
             <PiWarning />
           </span>
         )}
         {(backend.server.status === 'init' ||
           backend.server.status === 'wait' ||
-          backend.server.status === 'starting') && <span>Server is starting</span>}
-        {backend.server.status === 'started' && <span>Server is running</span>}
+          backend.server.status === 'starting') && <span>{t('Server is starting')}</span>}
+        {backend.server.status === 'started' && <span>{t('Server is running')}</span>}
         {(backend.server.status === 'stopping' || backend.server.status === 'stopped') && (
-          <span>Server is stopped</span>
+          <span>{t('Server is stopped')}</span>
         )}
-        {backend.server.status === 'error' && <span>Server has an error</span>}
+        {backend.server.status === 'error' && <span>{t('Server has crashed')}</span>}
       </button>
       <div className="flex flex-row items-center justify-center gap-1">
-        <PiCloudArrowDown />
+        <span className="text-neutral-800 dark:text-neutral-300">
+          <PiCloudArrowDown />
+        </span>
         <span>Zephyr... downloading 10%</span>
       </div>
     </div>

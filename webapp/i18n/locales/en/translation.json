@@ -80,5 +80,9 @@
   "Context size": "Context size",
   "Threads": "Threads",
   "Number of GPU layers": "Number of GPU layers",
-  "Remote server": "Remote server"
+  "Remote server": "Remote server",
+  "Server is starting": "Server is starting",
+  "Server is running": "Server is running",
+  "Server is stopped": "Server is stopped",
+  "Server has crashed": "Server has crashed"
 }

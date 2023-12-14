@@ -47,7 +47,7 @@ struct OplaState {
 use std::sync::{Mutex, RwLock, Arc};
 
 use sysinfo::{ProcessExt, System, SystemExt, Pid, PidExt};
-use tauri::{api::process::{Command, CommandEvent, CommandChild}, Runtime, State, Manager, http::status};
+use tauri::{api::process::{Command, CommandEvent, CommandChild}, Runtime, State, Manager};
 
 fn sysinfo_test() {
   let sys = System::new_all();
