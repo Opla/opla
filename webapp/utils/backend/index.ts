@@ -14,12 +14,13 @@
 
 import { Provider } from '@/types';
 
-const init = async (oplaConfiguration: Provider) => {
+const init = async (oplaConfiguration: Provider, listener: (payload: any) => void) => {
   // eslint-disable-next-line no-underscore-dangle
   if (window?.__TAURI__) {
     const { default: start } = await import('@/utils/backend/start');
-    await start(oplaConfiguration);
+    return start(oplaConfiguration, listener);
   }
+  return { payload: { status: 'error', message: 'no backend' } };
 };
 
 export default init;

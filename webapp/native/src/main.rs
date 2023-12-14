@@ -3,20 +3,51 @@
   windows_subsystem = "windows"
 )]
 
+enum ServerStatus {
+  Init,
+  Wait,
+  Starting,
+  Started,
+  Stopping,
+  Stopped,
+  Error,
+}
+
+impl ServerStatus {
+  fn as_str(&self) -> &'static str {
+      match self {
+        ServerStatus::Init => "init",
+        ServerStatus::Wait => "wait",
+        ServerStatus::Starting => "starting",
+        ServerStatus::Started => "started",
+        ServerStatus::Stopping => "stopping",
+        ServerStatus::Stopped => "stopped",
+        ServerStatus::Error => "error",
+      }
+  }
+}
+
+// the payload type must implement `Serialize` and `Clone`.
+#[derive(Clone, serde::Serialize)]
+struct Payload {
+  message: String,
+  status: String,
+}
+
 struct OplaServer {
   pid: Mutex<usize>,
-  name: Mutex<String>,
-  started: Mutex<bool>,
+  name: String,
+  status: RwLock<ServerStatus>,
 }
 
-struct OplaApp {
-  server: OplaServer,
+struct OplaState {
+  server: Arc<OplaServer>,
 }
 
-use std::sync::Mutex;
+use std::sync::{Mutex, RwLock, Arc};
 
 use sysinfo::{ProcessExt, System, SystemExt, Pid, PidExt};
-use tauri::{api::process::{Command, CommandEvent, CommandChild}, Runtime, State, async_runtime::Receiver};
+use tauri::{api::process::{Command, CommandEvent, CommandChild}, Runtime, State, Manager, http::status};
 
 fn sysinfo_test() {
   let sys = System::new_all();
@@ -37,31 +68,55 @@ fn sysinfo_test() {
   println!("NB CPUs: {}", sys.cpus().len());
 }
 
-fn start_llama_cpp_server(arguments: [&str; 12]) -> CommandChild {
+fn start_llama_cpp_server<R: Runtime>(app: tauri::AppHandle<R>, arguments: [&str; 12]) -> CommandChild {
+
+  app.emit_all("opla-server", Payload {
+    message: format!("Opla server starting: {} ", "llama.cpp.server"),
+    status: "waiting".to_string(),
+  }).unwrap();
+
   let command = Command::new_sidecar("llama.cpp.server").expect("failed to init llama.cpp.server");
   let (mut rx, child) = command.args(arguments).spawn().expect("failed to execute llama.cpp.server");
   tauri::async_runtime::spawn(async move {
+    println!("Opla server started: {} / {}", "0", "llama.cpp.server");
+    app.emit_all("opla-server", Payload {
+      message: format!("Opla server started: {} / {}", "0", "llama.cpp.server"),
+      status: "started".to_string(),
+    }).unwrap();
+
     while let Some(event) = rx.recv().await {
       if let CommandEvent::Stdout(line) = event {
         println!("{}", line);
-          /* window.emit("opla-server-stdout", Payload {
-              message: line,
-          }); */
+          app.emit_all("opla-server-stdout", Payload {
+              message: line.clone(),
+              status: "new-line".to_string(),
+          }).unwrap();
       }
       else if let CommandEvent::Stderr(line) = event {
         println!("\x1b[93m{}\x1b[0m", line);
-          /* window.emit("opla-server-sterr", Payload {
-              message: line,
-          }); */
+          app.emit_all("opla-server-sterr", Payload {
+              message: line.clone(),
+              status: "new-line".to_string(),
+          }).unwrap();
+
+
+          if line.starts_with("llama server listening") {
+            println!("Opla server started: {}", "llama.cpp.server");
+            app.emit_all("opla-server", Payload {
+              message: format!("Opla server started: {} / {}", "0", "llama.cpp.server"),
+              status: "started".to_string(),
+            }).unwrap();
+            let opla = app.state::<OplaState>();
+            let mut wstatus = opla.server.status.write().expect("Opla server can't write status");
+            *wstatus = ServerStatus::Started;
+          }
       }
   }
   });
-  println!("Opla server started: {} / {}", child.pid(), "llama.cpp.server");
-  
   child
 }
 
-fn init_opla() -> OplaApp {
+fn init_opla() -> OplaState {
   sysinfo_test();
   let sys = System::new_all();
   let mut pid: u32 = 0;
@@ -77,33 +132,61 @@ fn init_opla() -> OplaApp {
       println!("Opla server kill zombie {} / {}", process.pid(), process.name());
       process.kill();
   }
-  OplaApp {
-    server: OplaServer {
+  OplaState {
+    server: Arc::new(OplaServer {
       pid: Mutex::new(0),
-      name: Mutex::new(name.to_string()),
-      started: Mutex::new(started),
-    }
+      name: name.to_string(),
+      status: RwLock::new(ServerStatus::Init),
+    })
   }
 }
 
+#[derive(serde::Serialize)]
+struct OplaServerResponse {
+  status: String,
+  message: String,
+}
+
 #[tauri::command]
-async fn start_opla_server<R: Runtime>(_app: tauri::AppHandle<R>, 
+async fn start_opla_server<R: Runtime>(app: tauri::AppHandle<R>, 
   _window: tauri::Window<R>, 
-  opla_app: State<'_, OplaApp>,
+  opla_app: State<'_, OplaState>,
   model: String,
   port: i32,
   host: String,
   context_size: i32,
   threads: i32,
   n_gpu_layers: i32,
-  ) -> Result<(), String> {
-  let mut pid = opla_app.server.pid.lock().expect("can't get Pid");
-  if pid.to_owned() != 0 {
-    println!("Opla server already started {}", pid);
-    return Ok(());
-  }
+  ) -> Result<OplaServerResponse, String> {
+    println!("Opla try to start ");
+    let server : &OplaServer = &opla_app.server;
+  let status = match server.status.try_read(){ 
+    Ok(status) => status.as_str(),
+    Err(_) => {
+      println!("Opla server error try to read status");
+      return Err("Opla server can't read status".to_string());
+    }
+  };
 
-  let child = start_llama_cpp_server([
+  if status == "started"  || status == "starting" {
+    println!("Opla server already started {}", "llama.cpp.server");
+    /* app.emit_all("opla-server", Payload {
+      message: format!("Opla server {}: {}", status.to_owned(), "llama.cpp.server"),
+      status: status.to_owned(),
+    }).unwrap(); */
+    return Ok(OplaServerResponse{ status: status.to_string(), message: "llama.cpp.server".to_string() });
+  }
+  println!("Opla try to start c");
+  let mut wstatus = match server.status.try_write(){ 
+    Ok(status) => status,
+    Err(_) => {
+      println!("Opla server error try to write status");
+      return Err("Opla server can't write status".to_string());
+    }
+  };
+  *wstatus = ServerStatus::Starting;
+  
+  let child = start_llama_cpp_server(app, [
     "-m",
     model.as_str(),
     "--port",
@@ -117,27 +200,45 @@ async fn start_opla_server<R: Runtime>(_app: tauri::AppHandle<R>,
     "-ngl",
     &n_gpu_layers.to_string(),
   ]);
+  let mut pid = server.pid.lock().expect("can't get Pid");
   *pid = child.pid().try_into().expect("can't convert pid");
-  Ok(())
+
+  Ok(OplaServerResponse { status: wstatus.as_str().to_string(), message: server.name.to_string() })
 }
 
 #[tauri::command]
-async fn stop_opla_server<R: Runtime>(_app: tauri::AppHandle<R>, _window: tauri::Window<R>, opla_app: State<'_, OplaApp>) -> Result<(), String> {
+async fn stop_opla_server<R: Runtime>(app: tauri::AppHandle<R>, _window: tauri::Window<R>, opla_app: State<'_, OplaState>) -> Result<(), String> {
   let pid = opla_app.server.pid.lock().expect("can't get Pid");
   if pid.to_owned() != 0 {
+    app.emit_all("opla-server", Payload {
+      message: format!("Opla server to stop: {} ", "llama.cpp.server"),
+      status: "waiting".to_string(),
+    }).unwrap();
     let sys = System::new_all();
     let process = sys.process(Pid::from(pid.to_owned())).expect("can't get process");
     process.kill();
     println!("Kill Opla server {}", pid);
+    app.emit_all("opla-server", Payload {
+      message: format!("Opla server killed: {} ", "llama.cpp.server"),
+      status: "stop".to_string(),
+    }).unwrap();
     return Ok(());
   }
+  app.emit_all("opla-server", Payload {
+    message: format!("Opla server already stopped: {} ", "llama.cpp.server"),
+    status: "stop".to_string(),
+  }).unwrap();
   Ok(())
 }
 
 fn main() {
-  let opla_app = init_opla();
+  let opla_app: OplaState = init_opla();
   tauri::Builder::default()
-    .manage(opla_app)
+  .manage(opla_app)
+  .setup(|app| {
+    app.emit_all("opla-server", Payload { message: "Init Opla backend".into(), status: "ok".to_owned() }).unwrap();
+      Ok(())
+    })
     .invoke_handler(tauri::generate_handler![start_opla_server, stop_opla_server])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
