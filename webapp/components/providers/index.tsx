@@ -14,18 +14,17 @@
 
 'use client';
 
+import SplitView from '../common/SplitView';
 import Explorer from './Explorer';
 import Provider from './Provider';
 
 export default function Providers({ selectedProviderId }: { selectedProviderId?: string }) {
   return (
-    <div className="relative flex h-screen w-full overflow-hidden">
-      <div className="flex w-[260px] flex-col">
-        <div className="flex h-full min-h-0 flex-col ">
-          <Explorer selectedProviderId={selectedProviderId} />
-        </div>
-      </div>
+    <SplitView
+      className="grow overflow-hidden"
+      left={<Explorer selectedProviderId={selectedProviderId} />}
+    >
       <Provider providerId={selectedProviderId} />
-    </div>
+    </SplitView>
   );
 }

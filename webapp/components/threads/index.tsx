@@ -14,9 +14,9 @@
 
 'use client';
 
-import Thread from '@/components/threads/Thread';
-import Explorer from '@/components/threads/Explorer';
 import SplitView from '../common/SplitView';
+import Explorer from './Explorer';
+import Thread from './Thread';
 
 export default function Threads({ selectedConversationId }: { selectedConversationId?: string }) {
   return (

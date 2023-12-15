@@ -14,18 +14,17 @@
 
 'use client';
 
-import Explorer from '@/components/models/ModelsExplorer';
-import Model from '@/components/models/Model';
+import SplitView from '../common/SplitView';
+import Explorer from './Explorer';
+import Model from './Model';
 
 export default function Providers({ selectedModelId }: { selectedModelId?: string }) {
   return (
-    <div className="relative flex h-screen w-full overflow-hidden">
-      <div className="flex w-[260px] flex-col">
-        <div className="flex h-full min-h-0 flex-col ">
-          <Explorer selectedModelId={selectedModelId} />
-        </div>
-      </div>
+    <SplitView
+      className="grow overflow-hidden"
+      left={<Explorer selectedModelId={selectedModelId} />}
+    >
       <Model modelId={selectedModelId} />
-    </div>
+    </SplitView>
   );
 }

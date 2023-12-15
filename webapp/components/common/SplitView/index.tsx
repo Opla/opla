@@ -28,8 +28,8 @@ export default function SplitView({
   left,
   children,
   className,
-  width = 265,
-  minWidth = 65,
+  width = 260,
+  minWidth = 140,
 }: SplitViewProps) {
   const [leftWidth, setLeftWidth] = useState<undefined | number>(width);
   const [separatorXPosition, setSeparatorXPosition] = useState<undefined | number>(undefined);
@@ -108,7 +108,7 @@ export default function SplitView({
         onTouchStart={onTouchStart}
         onTouchEnd={onMouseUp}
       >
-        <div className="h-full border-[1px] border-neutral-900" />
+        <div className="h-full border-[1px] border-neutral-900 hover:border-orange-500" />
       </button>
       {children}
     </div>
