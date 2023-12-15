@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { BackendStatus } from '@/context';
 import { Provider } from '@/types';
+import { BackendResponse } from '@/utils/backend/start';
 
 const init = async (oplaConfiguration: Provider, listener: (payload: any) => void) => {
   // eslint-disable-next-line no-underscore-dangle
@@ -20,7 +22,7 @@ const init = async (oplaConfiguration: Provider, listener: (payload: any) => voi
     const { default: start } = await import('@/utils/backend/start');
     return start(oplaConfiguration, listener);
   }
-  return { payload: { status: 'error', message: 'no backend' } };
+  return { payload: { status: BackendStatus.ERROR, message: 'no backend' } } as BackendResponse;
 };
 
 export default init;

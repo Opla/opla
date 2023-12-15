@@ -21,11 +21,13 @@ export default function Toolbar({
   onProviderToggle,
   onParametersSave,
   hasParametersChanged,
+  actions,
 }: {
   provider: Provider;
   onProviderToggle: () => void;
   onParametersSave: () => void;
   hasParametersChanged: boolean;
+  actions?: React.ReactNode;
 }) {
   const { t } = useTranslation();
 
@@ -43,19 +45,21 @@ export default function Toolbar({
           </span>
         </div>
         <div className="flex flex-grow flex-row-reverse items-center gap-4">
-          <button
-            type="button"
-            className="flex flex-row items-center gap-4 rounded-md border border-neutral-600 p-2"
-            onClick={(e) => {
-              e.preventDefault();
-              onProviderToggle();
-            }}
-          >
-            <span>{provider?.disabled ? t('Enable') : t('Disable')}</span>
-            <span className={`${provider?.disabled ? 'text-red-500' : 'text-green-500'} `}>
-              <PiCircleFill />
-            </span>
-          </button>
+          {actions || (
+            <button
+              type="button"
+              className="flex flex-row items-center gap-4 rounded-md border border-neutral-600 p-2"
+              onClick={(e) => {
+                e.preventDefault();
+                onProviderToggle();
+              }}
+            >
+              <span>{provider?.disabled ? t('Enable') : t('Disable')}</span>
+              <span className={`${provider?.disabled ? 'text-red-500' : 'text-green-500'} `}>
+                <PiCircleFill />
+              </span>
+            </button>
+          )}
           <button
             disabled={!hasParametersChanged}
             type="button"

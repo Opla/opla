@@ -30,3 +30,13 @@ body.modalbox-open .modalbox * {
   min-width: 80%;
   padding: 2rem;
 }
+
+.loading-icon {
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
