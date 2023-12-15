@@ -14,83 +14,30 @@
 
 'use client';
 
-import { useCallback, useContext, useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import '@/app/globals.css';
 import Sidebar from '@/components/common/Sidebar';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/utils/modalsProvider';
 import SettingsModal from '@/modals';
-import { BaseNamedRecord, Provider, ProviderType } from '@/types';
+import { BaseNamedRecord } from '@/types';
 import NewProvider from '@/modals/templates/NewProvider';
-import initBackend from '@/utils/backend';
 import { AppContext } from '@/context';
-import logger from '@/utils/logger';
-import { createProvider } from '@/utils/data/providers';
-import oplaProviderConfig from '@/utils/providers/opla/config.json';
+import useBackend from '@/hooks/useBackend';
 import Dialog from './common/Dialog';
 import Statusbar from './common/Statusbar';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
   const { registerModal } = useContext(ModalsContext);
-  const { backend, setBackend } = useContext(AppContext);
-  const { providers, setProviders, models, presets } = useContext(AppContext);
+  const { providers, models, presets } = useContext(AppContext);
   const firstRender = useRef(true);
 
-  const enableOpla = useCallback(
-    (disabled: boolean) => {
-      const opla = providers.find((p) => p.type === 'opla');
-      if (opla) {
-        opla.disabled = disabled;
-        setProviders(providers.map((p) => (p.id === opla.id ? opla : p)));
-      }
-    },
-    [providers, setProviders],
-  );
-
-  const backendListener = useCallback(
-    (event: any) => {
-      logger.info('backend event', event);
-      if (event.event === 'opla-server') {
-        setBackend({
-          ...backend,
-          server: {
-            ...backend.server,
-            status: event.payload.status,
-            message: event.payload.message,
-          },
-        });
-        enableOpla(event.payload.status !== 'started');
-      }
-    },
-    [backend, setBackend, enableOpla],
-  );
-
-  const startBackend = useCallback(async () => {
-    let opla = providers.find((p) => p.type === 'opla') as Provider;
-    if (!opla) {
-      const config = { ...oplaProviderConfig, type: oplaProviderConfig.type as ProviderType };
-      opla = createProvider('Opla', config);
-      providers.splice(0, 0, opla);
-    }
-    const response: { payload: any } = await initBackend(opla as Provider, backendListener);
-    logger.info('backend response', response);
-    setBackend({
-      ...backend,
-      server: {
-        ...backend.server,
-        status: response.payload.status,
-        message: response.payload.message,
-        name: response.payload.message,
-      },
-    });
-    enableOpla(response.payload.status !== 'started');
-  }, [backend, backendListener, enableOpla, providers, setBackend]);
+  useBackend();
 
   useEffect(() => {
-    if (firstRender.current && providers) {
+    if (firstRender.current) {
       firstRender.current = false;
-      startBackend();
       registerModal('settings', ({ visible = false, onClose = () => {} }) => (
         <SettingsModal key="settings" open={visible} onClose={onClose} />
       ));
@@ -141,7 +88,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         false,
       );
     }
-  }, [providers, registerModal, startBackend, t]);
+  }, [providers, registerModal, t]);
 
   if (!providers || !models || !presets) {
     return <div>Loading...</div>;

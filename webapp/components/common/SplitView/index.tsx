@@ -108,7 +108,7 @@ export default function SplitView({
         onTouchStart={onTouchStart}
         onTouchEnd={onMouseUp}
       >
-        <div className="h-full border-[1px] border-neutral-900 hover:border-orange-500" />
+        <div className="h-full border-[1px] border-neutral-300 hover:border-orange-500 dark:border-neutral-900" />
       </button>
       {children}
     </div>

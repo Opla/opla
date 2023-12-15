@@ -15,7 +15,7 @@
 'use client';
 
 import { useContext, useEffect, useState } from 'react';
-import { AppContext } from '@/context';
+import { AppContext, BackendStatus } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
 import { Provider } from '@/types';
 import { updateProvider } from '@/utils/data/providers';
@@ -25,10 +25,11 @@ import Toolbar from './Toolbar';
 import Server from './server';
 import OpenAI from './openai';
 import Opla from './opla';
+import OplaActions from './opla/Actions';
 
 function ProviderConfiguration({ providerId }: { providerId?: string }) {
   const [updatedProvider, setUpdatedProvider] = useState<Partial<Provider>>({ id: providerId });
-  const { providers, setProviders } = useContext(AppContext);
+  const { providers, setProviders, backend } = useContext(AppContext);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -58,11 +59,20 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
 
   const onProviderToggle = () => {
     logger.info('onProviderToggle');
-    const newProviders = updateProvider(
-      { ...(provider as Provider), disabled: !provider?.disabled },
-      providers,
-    );
-    setProviders(newProviders);
+    if (provider?.type === 'opla') {
+      logger.info('backend.server', backend.server);
+      if (backend.server.status === BackendStatus.STARTED) {
+        backend.server.actions.stop();
+      } else if (backend.server.status === BackendStatus.STOPPED) {
+        backend.server.actions.start();
+      }
+    } else {
+      const newProviders = updateProvider(
+        { ...(provider as Provider), disabled: !provider?.disabled },
+        providers,
+      );
+      setProviders(newProviders);
+    }
   };
 
   return (
@@ -80,6 +90,15 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
                 onProviderToggle={onProviderToggle}
                 onParametersSave={onParametersSave}
                 hasParametersChanged={hasParametersChanged}
+                actions={
+                  provider.type === 'opla' && (
+                    <OplaActions
+                      onProviderToggle={onProviderToggle}
+                      provider={provider}
+                      backend={backend}
+                    />
+                  )
+                }
               />
               {provider.type === 'opla' && (
                 <Opla provider={provider} onParameterChange={onParameterChange} />

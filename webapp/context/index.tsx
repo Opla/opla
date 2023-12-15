@@ -18,13 +18,33 @@ import { createContext, useState } from 'react';
 import { Conversation, Model, Preset, Provider } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
 
-type BackendContext = {
+export enum BackendStatus {
+  INIT = 'init',
+  WAIT = 'wait',
+  STARTING = 'starting',
+  STARTED = 'started',
+  STOPPING = 'stopping',
+  STOPPED = 'stopped',
+  ERROR = 'error',
+}
+
+export type BackendPayload = {
+  status: BackendStatus;
+  message?: string;
+};
+
+export type BackendContext = {
   server: {
-    status: 'init' | 'wait' | 'starting' | 'started' | 'stopping' | 'stopped' | 'error';
+    status: BackendStatus;
     message?: string;
     name?: string;
     stout: string[];
     sterr: string[];
+    actions: {
+      start: () => void;
+      stop: () => void;
+      restart: () => void;
+    };
   };
 };
 
@@ -43,9 +63,20 @@ export type Context = {
 
 const initialBackendContext: BackendContext = {
   server: {
-    status: 'wait',
+    status: BackendStatus.INIT,
     stout: [],
     sterr: [],
+    actions: {
+      start: () => {
+        throw new Error('Start server not implemented');
+      },
+      stop: () => {
+        throw new Error('Stop server not implemented');
+      },
+      restart: () => {
+        throw new Error('Restart server not implemented');
+      },
+    },
   },
 };
 
