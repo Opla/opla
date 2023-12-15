@@ -24,6 +24,16 @@ import { Provider, ProviderType } from '@/types';
 const useBackend = () => {
   const { backend, setBackend } = useContext(AppContext);
   const { providers, setProviders } = useContext(AppContext);
+  const startRef = useRef(async () => {
+    throw new Error('start not initialized');
+  });
+  const stopRef = useRef(async () => {
+    throw new Error('stop not initialized');
+  });
+  const restartRef = useRef(async () => {
+    throw new Error('restart not initialized');
+  });
+
   const firstRender = useRef(true);
 
   const enableOpla = useCallback(
@@ -78,6 +88,10 @@ const useBackend = () => {
         },
       },
     });
+    startRef.current = response.start as () => Promise<never>;
+    stopRef.current = response.stop as () => Promise<never>;
+    restartRef.current = response.restart as () => Promise<never>;
+
     enableOpla(response.payload.status !== BackendStatus.STARTED);
   }, [backend, backendListener, enableOpla, providers, setBackend]);
 
@@ -88,7 +102,7 @@ const useBackend = () => {
     }
   }, [providers, startBackend]);
 
-  return backend;
+  return { backend, start: startRef.current, stop: stopRef.current, restart: restartRef.current };
 };
 
 export default useBackend;

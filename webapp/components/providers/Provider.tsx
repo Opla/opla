@@ -21,6 +21,7 @@ import { Provider } from '@/types';
 import { updateProvider } from '@/utils/data/providers';
 import logger from '@/utils/logger';
 import { deepMerge, deepSet } from '@/utils/data';
+import useBackend from '@/hooks/useBackend';
 import Toolbar from './Toolbar';
 import Server from './server';
 import OpenAI from './openai';
@@ -31,6 +32,8 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
   const [updatedProvider, setUpdatedProvider] = useState<Partial<Provider>>({ id: providerId });
   const { providers, setProviders, backend } = useContext(AppContext);
   const { t } = useTranslation();
+
+  const { start, stop } = useBackend();
 
   useEffect(() => {
     if (providerId !== updatedProvider.id) {
@@ -62,9 +65,9 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
     if (provider?.type === 'opla') {
       logger.info('backend.server', backend.server);
       if (backend.server.status === BackendStatus.STARTED) {
-        backend.server.actions.stop();
+        stop();
       } else if (backend.server.status === BackendStatus.STOPPED) {
-        backend.server.actions.start();
+        start();
       }
     } else {
       const newProviders = updateProvider(
