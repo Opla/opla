@@ -24,14 +24,14 @@ import { Provider, ProviderType } from '@/types';
 const useBackend = () => {
   const { backend, setBackend } = useContext(AppContext);
   const { providers, setProviders } = useContext(AppContext);
-  const startRef = useRef(async () => {
-    throw new Error('start not initialized');
+  const startRef = useRef(async (conf: any) => {
+    throw new Error(`start not initialized${conf}`);
   });
   const stopRef = useRef(async () => {
     throw new Error('stop not initialized');
   });
-  const restartRef = useRef(async () => {
-    throw new Error('restart not initialized');
+  const restartRef = useRef(async (conf: any) => {
+    throw new Error(`restart not initialized${conf}`);
   });
 
   const firstRender = useRef(true);
@@ -39,6 +39,7 @@ const useBackend = () => {
   const enableOpla = useCallback(
     (disabled: boolean) => {
       const opla = providers.find((p) => p.type === 'opla');
+      logger.info('enableOpla', opla, disabled, opla?.disabled);
       if (opla) {
         opla.disabled = disabled;
         setProviders(providers.map((p) => (p.id === opla.id ? opla : p)));
@@ -102,7 +103,13 @@ const useBackend = () => {
     }
   }, [providers, startBackend]);
 
-  return { backend, start: startRef.current, stop: stopRef.current, restart: restartRef.current };
+  const restart = async (params: any) => restartRef.current(params);
+
+  const start = async (params: any) => startRef.current(params);
+
+  const stop = async () => stopRef.current();
+
+  return { backend, start, stop, restart };
 };
 
 export default useBackend;

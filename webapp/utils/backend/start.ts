@@ -67,24 +67,16 @@ const startBackend = async (oplaConfiguration: Provider, listener: (payload: any
     payload = { status: BackendStatus.ERROR, message: error as string };
   }
 
-  const start = async (
-    mp = modelsPath,
-    mf = modelFile,
-    parameters = metadata.server.parameters,
-  ) => {
-    logger.info('start server');
+  const start = async (parameters: any, mp = modelsPath, mf = modelFile) => {
+    logger.info('start server', parameters);
     return startLLamaCppServer(mp, mf, parameters);
   };
   const stop = async () => {
     logger.info('stop server');
     return stopLLamaCppServer();
   };
-  const restart = async (
-    mp = modelsPath,
-    mf = modelFile,
-    parameters = metadata.server.parameters,
-  ) => {
-    logger.info('restart server');
+  const restart = async (parameters: any, mp = modelsPath, mf = modelFile) => {
+    logger.info('restart server', parameters);
     return restartLLamaCppServer(mp, mf, parameters);
   };
   return { unlisten, unlistenServer, payload, start, stop, restart } as BackendResponse;

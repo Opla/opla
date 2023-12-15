@@ -33,7 +33,7 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
   const { providers, setProviders, backend } = useContext(AppContext);
   const { t } = useTranslation();
 
-  const { start, stop } = useBackend();
+  const { restart, start, stop } = useBackend();
 
   useEffect(() => {
     if (providerId !== updatedProvider.id) {
@@ -54,10 +54,16 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
   };
 
   const onParametersSave = () => {
-    logger.info('onParametersSave');
+    logger.info('onParametersSave', provider);
     const newProviders = updateProvider(provider as Provider, providers);
     setProviders(newProviders);
     setUpdatedProvider({ id: providerId });
+    if (provider?.type === 'opla') {
+      const server: any = provider?.metadata?.server;
+      const parameters = server?.parameters; // deepCopy(provider?.metadata?.parameters);
+      logger.info('params', parameters);
+      restart(parameters);
+    }
   };
 
   const onProviderToggle = () => {
@@ -67,7 +73,9 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
       if (backend.server.status === BackendStatus.STARTED) {
         stop();
       } else if (backend.server.status === BackendStatus.STOPPED) {
-        start();
+        const server: any = provider?.metadata?.server;
+        const parameters = server?.parameters;
+        start(parameters);
       }
     } else {
       const newProviders = updateProvider(
