@@ -22,31 +22,30 @@ import initBackend from '@/utils/backend';
 import { Provider, ProviderType } from '@/types';
 import { BackendContext, BackendStatus } from '@/types/backend';
 
-
 const initialBackendContext: BackendContext = {
-    server: {
-        status: BackendStatus.INIT,
-        stout: [],
-        sterr: [],
-    },
+  server: {
+    status: BackendStatus.INIT,
+    stout: [],
+    sterr: [],
+  },
 };
 
 const useBackend = () => {
-    const [backend, setBackend] = useState(initialBackendContext);
-    const { providers, setProviders } = useContext(AppContext);
-    const startRef = useRef(async (conf: any) => {
-        throw new Error(`start not initialized${conf}`);
-    });
-    const stopRef = useRef(async () => {
-        throw new Error('stop not initialized');
-    });
-    const restartRef = useRef(async (conf: any) => {
-        throw new Error(`restart not initialized${conf}`);
-    });
+  const [backend, setBackend] = useState(initialBackendContext);
+  const { providers, setProviders } = useContext(AppContext);
+  const startRef = useRef(async (conf: any) => {
+    throw new Error(`start not initialized${conf}`);
+  });
+  const stopRef = useRef(async () => {
+    throw new Error('stop not initialized');
+  });
+  const restartRef = useRef(async (conf: any) => {
+    throw new Error(`restart not initialized${conf}`);
+  });
 
-    const firstRender = useRef(true);
+  const firstRender = useRef(true);
 
-    /* const enableOpla = useCallback(
+  /* const enableOpla = useCallback(
         (disabled: boolean) => {
             const opla = providers.find((p) => p.type === 'opla');
             logger.info('enableOpla', opla, disabled, opla?.disabled);
@@ -58,63 +57,63 @@ const useBackend = () => {
         [providers, setProviders],
     ); */
 
-    const backendListener = useCallback(
-        (event: any) => {
-            logger.info('backend event', event);
-            if (event.event === 'opla-server') {
-                setBackend({
-                    ...backend,
-                    server: {
-                        ...backend.server,
-                        status: event.payload.status,
-                        message: event.payload.message,
-                    },
-                });
-            }
-        },
-        [backend, setBackend],
-    );
-
-    const startBackend = useCallback(async () => {
-        let opla = providers.find((p) => p.type === 'opla') as Provider;
-        if (!opla) {
-            const config = { ...oplaProviderConfig, type: oplaProviderConfig.type as ProviderType };
-            opla = createProvider('Opla', config);
-            providers.splice(0, 0, opla);
-            setProviders(providers);
-        }
-        const response: BackendResponse = await initBackend(opla as Provider, backendListener);
-        logger.info('backend response', response);
+  const backendListener = useCallback(
+    (event: any) => {
+      logger.info('backend event', event);
+      if (event.event === 'opla-server') {
         setBackend({
-            ...backend,
-            server: {
-                ...backend.server,
-                status: response.payload.status,
-                message: response.payload.message,
-                name: response.payload.message,
-            },
+          ...backend,
+          server: {
+            ...backend.server,
+            status: event.payload.status,
+            message: event.payload.message,
+          },
         });
-        startRef.current = response.start as () => Promise<never>;
-        stopRef.current = response.stop as () => Promise<never>;
-        restartRef.current = response.restart as () => Promise<never>;
+      }
+    },
+    [backend, setBackend],
+  );
 
-        // enableOpla(response.payload.status !== BackendStatus.STARTED);
-    }, [backend, backendListener, providers, setProviders]);
+  const startBackend = useCallback(async () => {
+    let opla = providers.find((p) => p.type === 'opla') as Provider;
+    if (!opla) {
+      const config = { ...oplaProviderConfig, type: oplaProviderConfig.type as ProviderType };
+      opla = createProvider('Opla', config);
+      providers.splice(0, 0, opla);
+      setProviders(providers);
+    }
+    const response: BackendResponse = await initBackend(opla as Provider, backendListener);
+    logger.info('backend response', response);
+    setBackend({
+      ...backend,
+      server: {
+        ...backend.server,
+        status: response.payload.status,
+        message: response.payload.message,
+        name: response.payload.message,
+      },
+    });
+    startRef.current = response.start as () => Promise<never>;
+    stopRef.current = response.stop as () => Promise<never>;
+    restartRef.current = response.restart as () => Promise<never>;
 
-    useEffect(() => {
-        if (firstRender.current && providers) {
-            firstRender.current = false;
-            startBackend();
-        }
-    }, [providers, startBackend]);
+    // enableOpla(response.payload.status !== BackendStatus.STARTED);
+  }, [backend, backendListener, providers, setProviders]);
 
-    const restart = async (params: any) => restartRef.current(params);
+  useEffect(() => {
+    if (firstRender.current && providers) {
+      firstRender.current = false;
+      startBackend();
+    }
+  }, [providers, startBackend]);
 
-    const start = async (params: any) => startRef.current(params);
+  const restart = async (params: any) => restartRef.current(params);
 
-    const stop = async () => stopRef.current();
+  const start = async (params: any) => startRef.current(params);
 
-    return { backend, start, stop, restart };
+  const stop = async () => stopRef.current();
+
+  return { backend, start, stop, restart };
 };
 
 export default useBackend;
