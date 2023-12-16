@@ -15,14 +15,14 @@ import { appWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/api/dialog';
 import { listen } from '@tauri-apps/api/event';
 import { Provider } from '@/types';
-import { BackendPayload, BackendStatus } from '@/context';
+import { BackendPayload, BackendStatus } from '../../types/backend';
 import logger from '../logger';
 import {
   restartLLamaCppServer,
   startLLamaCppServer,
   stopLLamaCppServer,
 } from '../providers/llama.cpp';
-import { LlamaCppArguments } from '../providers/llama.cpp/types';
+import { LlamaCppArguments } from '../providers/llama.cpp/schema';
 
 export type BackendResponse = {
   unlisten?: () => void;

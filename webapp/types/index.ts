@@ -90,6 +90,7 @@ export interface Provider extends BaseNamedRecord {
   disabled: boolean;
   token: string;
   presetIds?: string[];
+  isDisabled?: () => boolean;
 }
 
 export interface Preset extends BaseNamedRecord {
@@ -99,7 +100,7 @@ export interface Preset extends BaseNamedRecord {
   modelIds?: string[];
 }
 
-export interface Plugin extends BaseNamedRecord {}
+export interface Plugin extends BaseNamedRecord { }
 
 export type User = {
   id: string;

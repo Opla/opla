@@ -24,10 +24,13 @@ import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { ModalsContext } from '@/utils/modalsProvider';
 import { deleteProvider, getProvider, updateProvider } from '@/utils/data/providers';
+import useBackend from '@/hooks/useBackend';
+import { BackendStatus } from '@/types/backend';
 import ContextMenu from '../common/ContextMenu';
 
 function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string }) {
   const { providers, setProviders } = useContext(AppContext);
+  const { backend } = useBackend();
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
   const router = useRouter();
@@ -94,6 +97,13 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
     },
   ];
 
+  const isDisabled = (provider: Provider) => {
+    if (provider?.type === 'opla') {
+      return backend.server?.status !== BackendStatus.STARTED;
+    }
+    return provider?.disabled;
+  };
+
   return (
     <div className="scrollbar-trigger flex h-full w-full flex-1 items-start border-r-[1px] border-neutral-300/30 bg-neutral-100 dark:border-neutral-900 dark:bg-neutral-800/70">
       <nav className="flex h-full flex-1 flex-col space-y-1 p-1">
@@ -131,7 +141,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
                             </div>
                             <div
                               className={`${
-                                provider.disabled ? 'text-red-500' : 'text-green-500'
+                                isDisabled(provider) ? 'text-red-500' : 'text-green-500'
                               } `}
                             >
                               <PiCircleFill />

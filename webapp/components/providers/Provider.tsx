@@ -14,14 +14,15 @@
 
 'use client';
 
-import { useContext, useEffect, useState } from 'react';
-import { AppContext, BackendStatus } from '@/context';
+import { useContext, useEffect, useMemo, useState } from 'react';
+import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
 import { Provider } from '@/types';
 import { updateProvider } from '@/utils/data/providers';
 import logger from '@/utils/logger';
 import { deepMerge, deepSet } from '@/utils/data';
 import useBackend from '@/hooks/useBackend';
+import { BackendStatus } from '@/types/backend';
 import Toolbar from './Toolbar';
 import Server from './server';
 import OpenAI from './openai';
@@ -30,10 +31,10 @@ import OplaActions from './opla/Actions';
 
 function ProviderConfiguration({ providerId }: { providerId?: string }) {
   const [updatedProvider, setUpdatedProvider] = useState<Partial<Provider>>({ id: providerId });
-  const { providers, setProviders, backend } = useContext(AppContext);
+  const { providers, setProviders } = useContext(AppContext);
   const { t } = useTranslation();
 
-  const { restart, start, stop } = useBackend();
+  const { backend, restart, start, stop } = useBackend();
 
   useEffect(() => {
     if (providerId !== updatedProvider.id) {
@@ -41,11 +42,21 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
     }
   }, [providerId, updatedProvider.id]);
 
-  let provider = providers.find((c) => c.id === providerId);
-  const hasParametersChanged = Object.keys(updatedProvider).length > 1;
-  if (provider && hasParametersChanged) {
-    provider = deepMerge(provider, updatedProvider);
-  }
+  const hasParametersChanged = useMemo(
+    () => Object.keys(updatedProvider).length > 1,
+    [updatedProvider],
+  );
+
+  const provider = useMemo(() => {
+    let p = providers.find((c) => c.id === providerId);
+    if (p && hasParametersChanged) {
+      p = deepMerge(p, updatedProvider);
+    }
+    if (p?.type === 'opla') {
+      p.disabled = backend.server.status === BackendStatus.STOPPED;
+    }
+    return p;
+  }, [backend.server.status, hasParametersChanged, providerId, providers, updatedProvider]);
 
   const onParameterChange = (name: string, value: string | number | boolean) => {
     const newProvider = deepSet(updatedProvider, name, value);

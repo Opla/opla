@@ -14,7 +14,7 @@
 
 import { PiPause, PiPlay, PiSpinner, PiWarning } from 'react-icons/pi';
 import Tooltip, { Orientation } from '@/components/common/Tooltip';
-import { BackendContext } from '@/context';
+import { BackendContext } from '@/types/backend';
 import { Provider } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 
