@@ -14,39 +14,9 @@
 
 'use client';
 
-import { createContext, useState } from 'react';
+import { createContext } from 'react';
 import { Conversation, Model, Preset, Provider } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
-
-export enum BackendStatus {
-  INIT = 'init',
-  WAIT = 'wait',
-  STARTING = 'starting',
-  STARTED = 'started',
-  STOPPING = 'stopping',
-  STOPPED = 'stopped',
-  ERROR = 'error',
-}
-
-export type BackendPayload = {
-  status: BackendStatus;
-  message?: string;
-};
-
-export type BackendContext = {
-  server: {
-    status: BackendStatus;
-    message?: string;
-    name?: string;
-    stout: string[];
-    sterr: string[];
-    actions: {
-      start: () => void;
-      stop: () => void;
-      restart: () => void;
-    };
-  };
-};
 
 export type Context = {
   conversations: Array<Conversation>;
@@ -57,27 +27,6 @@ export type Context = {
   setProviders: (newProviders: Provider[]) => void;
   setModels: (newModels: Model[]) => void;
   setPresets: (newPresets: Preset[]) => void;
-  backend: BackendContext;
-  setBackend: (newBackend: BackendContext) => void;
-};
-
-const initialBackendContext: BackendContext = {
-  server: {
-    status: BackendStatus.INIT,
-    stout: [],
-    sterr: [],
-    actions: {
-      start: () => {
-        throw new Error('Start server not implemented');
-      },
-      stop: () => {
-        throw new Error('Stop server not implemented');
-      },
-      restart: () => {
-        throw new Error('Restart server not implemented');
-      },
-    },
-  },
 };
 
 const initialContext: Context = {
@@ -89,8 +38,6 @@ const initialContext: Context = {
   setModels: () => {},
   presets: [],
   setPresets: () => {},
-  backend: initialBackendContext,
-  setBackend: () => {},
 };
 
 const AppContext = createContext(initialContext);
@@ -105,8 +52,6 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
   const [models, setModels] = useDataStorage('models', initialContext.models);
   const [presets, setPresets] = useDataStorage('presets', initialContext.presets);
 
-  const [backend, setBackend] = useState(initialBackendContext);
-
   return (
     <AppContext.Provider
       // eslint-disable-next-line react/jsx-no-constructed-context-values
@@ -119,8 +64,6 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
         setModels,
         presets,
         setPresets,
-        backend,
-        setBackend,
       }}
     >
       {children}

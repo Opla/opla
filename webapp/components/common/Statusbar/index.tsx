@@ -11,16 +11,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { useContext } from 'react';
 import { useRouter } from 'next/router';
 import { PiCircleFill, PiCloudArrowDown, PiWarning } from 'react-icons/pi';
-import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
+import useBackend from '@/hooks/useBackend';
 
 export default function Statusbar() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { backend } = useContext(AppContext);
+  const { backend } = useBackend();
   const running = backend.server.status === 'started';
   const error = backend.server.status === 'error';
   const displayServer = () => {

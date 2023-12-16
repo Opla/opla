@@ -14,7 +14,7 @@
 import { invoke } from '@tauri-apps/api/tauri';
 import { homeDir } from '@tauri-apps/api/path';
 import logger from '@/utils/logger';
-import { LlamaCppArguments, LlamaCppArgumentsSchema } from './types';
+import { LlamaCppArguments, LlamaCppArgumentsSchema } from './schema';
 
 const stopLLamaCppServer = async () => {
   logger.info('stop LLama.cpp server');
@@ -43,6 +43,9 @@ const restartLLamaCppServer = async (
   modelsPath: string,
   modelFile: string,
   metadata: LlamaCppArguments,
-) => startLLamaCppServer(modelsPath, modelFile, metadata, 'restart_opla_server');
+) => {
+  await stopLLamaCppServer();
+  return startLLamaCppServer(modelsPath, modelFile, metadata, 'start_opla_server');
+};
 
 export { restartLLamaCppServer, startLLamaCppServer, stopLLamaCppServer };

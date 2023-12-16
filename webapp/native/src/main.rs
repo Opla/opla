@@ -110,6 +110,17 @@ fn start_llama_cpp_server<R: Runtime>(app: tauri::AppHandle<R>, arguments: [&str
             let mut wstatus = opla.server.status.write().expect("Opla server can't write status");
             *wstatus = ServerStatus::Started;
           }
+
+          if line.starts_with("error") {
+            println!("Opla server error: {}", line);
+            app.emit_all("opla-server", Payload {
+              message: format!("Opla server error: {}", line),
+              status: "error".to_string(),
+            }).unwrap();
+            let opla = app.state::<OplaState>();
+            let mut wstatus = opla.server.status.write().expect("Opla server can't write status");
+            *wstatus = ServerStatus::Error;
+          }
       }
   }
   });
@@ -169,7 +180,7 @@ async fn start_opla_server<R: Runtime>(app: tauri::AppHandle<R>,
   };
 
   if status == "started"  || status == "starting" {
-    println!("Opla server already started {}", "llama.cpp.server");
+    println!("Opla server already started {}", status);
     /* app.emit_all("opla-server", Payload {
       message: format!("Opla server {}: {}", status.to_owned(), "llama.cpp.server"),
       status: status.to_owned(),

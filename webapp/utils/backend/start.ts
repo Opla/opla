@@ -15,14 +15,14 @@ import { appWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/api/dialog';
 import { listen } from '@tauri-apps/api/event';
 import { Provider } from '@/types';
-import { BackendPayload, BackendStatus } from '@/context';
+import { BackendPayload, BackendStatus } from '../../types/backend';
 import logger from '../logger';
 import {
   restartLLamaCppServer,
   startLLamaCppServer,
   stopLLamaCppServer,
 } from '../providers/llama.cpp';
-import { LlamaCppArguments } from '../providers/llama.cpp/types';
+import { LlamaCppArguments } from '../providers/llama.cpp/schema';
 
 export type BackendResponse = {
   unlisten?: () => void;
@@ -67,24 +67,16 @@ const startBackend = async (oplaConfiguration: Provider, listener: (payload: any
     payload = { status: BackendStatus.ERROR, message: error as string };
   }
 
-  const start = async (
-    mp = modelsPath,
-    mf = modelFile,
-    parameters = metadata.server.parameters,
-  ) => {
-    logger.info('start server');
+  const start = async (parameters: any, mp = modelsPath, mf = modelFile) => {
+    logger.info('start server', parameters);
     return startLLamaCppServer(mp, mf, parameters);
   };
   const stop = async () => {
     logger.info('stop server');
     return stopLLamaCppServer();
   };
-  const restart = async (
-    mp = modelsPath,
-    mf = modelFile,
-    parameters = metadata.server.parameters,
-  ) => {
-    logger.info('restart server');
+  const restart = async (parameters: any, mp = modelsPath, mf = modelFile) => {
+    logger.info('restart server', parameters);
     return restartLLamaCppServer(mp, mf, parameters);
   };
   return { unlisten, unlistenServer, payload, start, stop, restart } as BackendResponse;

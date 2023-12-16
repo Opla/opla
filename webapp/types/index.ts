@@ -90,6 +90,7 @@ export interface Provider extends BaseNamedRecord {
   disabled: boolean;
   token: string;
   presetIds?: string[];
+  isDisabled?: () => boolean;
 }
 
 export interface Preset extends BaseNamedRecord {
