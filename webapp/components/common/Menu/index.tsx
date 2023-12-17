@@ -1,4 +1,4 @@
-// Copyright 2023 mik
+// Copyright 2023 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
