@@ -19,7 +19,6 @@ mod server;
 use std::sync::Mutex;
 
 use server::*;
-use sysinfo::{ ProcessExt, System, SystemExt, Pid };
 use tauri::{ Runtime, State, Manager };
 
 #[tauri::command]
@@ -63,51 +62,7 @@ async fn stop_opla_server<R: Runtime>(
     _window: tauri::Window<R>,
     opla_app: State<'_, OplaState>
 ) -> Result<OplaServerResponse, String> {
-    let server: &OplaServer = &opla_app.server.lock().expect("can't get OplaServer");
-    let pid = server.pid;
-    let status = match server.status.try_lock() {
-        Ok(status) => status.as_str(),
-        Err(_) => {
-            println!("Opla server error try to read status");
-            return Err("Opla server can't read status".to_string());
-        }
-    };
-    if status == "started" && pid.to_owned() != 0 {
-        let mut wstatus = match server.status.try_lock() {
-            Ok(status) => status,
-            Err(_) => {
-                println!("Opla server error try to write status");
-                return Err("Opla server can't write status".to_string());
-            }
-        };
-        *wstatus = ServerStatus::Stopping;
-        drop(wstatus);
-        app.emit_all("opla-server", Payload {
-            message: format!("Opla server to stop: {} ", "llama.cpp.server"),
-            status: ServerStatus::Stopping.as_str().to_string(),
-        }).unwrap();
-        let sys = System::new_all();
-        let process = sys.process(Pid::from(pid.to_owned())).expect("can't get process");
-        process.kill();
-        println!("Kill Opla server {}", pid);
-        app.emit_all("opla-server", Payload {
-            message: format!("Opla server killed: {} ", "llama.cpp.server"),
-            status: ServerStatus::Stopped.as_str().to_string(),
-        }).unwrap();
-        let mut wstatus = match server.status.try_lock() {
-            Ok(status) => status,
-            Err(_) => {
-                println!("Opla server error try to write status");
-                return Err("Opla server can't write status".to_string());
-            }
-        };
-        *wstatus = ServerStatus::Stopped;
-        return Ok(OplaServerResponse {
-            status: wstatus.as_str().to_string(),
-            message: server.name.to_string(),
-        });
-    }
-    Ok(OplaServerResponse { status: status.to_string(), message: server.name.to_string() })
+    opla_app.server.lock().unwrap().stop(app)
 }
 
 fn main() {
