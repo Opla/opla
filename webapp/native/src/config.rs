@@ -37,21 +37,26 @@ pub struct ModelsConfig {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ServerConfig {
-    pub name: String,
-    pub launch_at_startup: bool,
+pub struct ServerParameters {
     pub port: i32,
     pub host: String,
     pub context_size: i32,
     pub threads: i32,
     pub n_gpu_layers: i32,
 }
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ServerConfiguration {
+    pub name: String,
+    pub launch_at_startup: bool,
+    pub binary: String,
+    pub parameters: ServerParameters,
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Config {
     pub start_app: bool,
     pub welcome_splash: bool,
-    pub server: ServerConfig,
+    pub server: ServerConfiguration,
     pub models: ModelsConfig,
 }
 
@@ -67,6 +72,7 @@ impl Config {
         } else {
             // load default config from app path
             let app_path = std::env::current_exe()?;
+            println!("app_path: {}", app_path.to_str().unwrap());
             let default_config_path = app_path.with_file_name("opla_default_config.json");
 
             if default_config_path.exists() {
@@ -78,14 +84,17 @@ impl Config {
                 Ok(Config {
                     start_app: true,
                     welcome_splash: true,
-                    server: ServerConfig {
+                    server: ServerConfiguration {
                         name: String::from("llama.cpp"),
                         launch_at_startup: true,
-                        port: 8080,
-                        host: String::from("localhost"),
-                        context_size: 512,
-                        threads: 4,
-                        n_gpu_layers: 0,
+                        binary: String::from("binaries/llama.cpp/llama.cpp.server"),
+                        parameters: ServerParameters {
+                            port: 8082,
+                            host: String::from("localhost"),
+                            context_size: 512,
+                            threads: 6,
+                            n_gpu_layers: 0,
+                        },
                     },
                     models: ModelsConfig {
                         path: String::from("dev/ai/models"),

@@ -113,4 +113,5 @@ export type OplaConfig = {
   models: {
     default_model: string;
   };
+  server: LocalServer;
 };

@@ -66,11 +66,11 @@ async fn start_opla_server<R: Runtime>(
     let model_path = models_path.join(&model_config.path).join(&model_config.file_name);
 
     config.models.default_model = model.clone();
-    config.server.port = port;
-    config.server.host = host.clone();
-    config.server.context_size = context_size;
-    config.server.threads = threads;
-    config.server.n_gpu_layers = n_gpu_layers;
+    config.server.parameters.port = port;
+    config.server.parameters.host = host.clone();
+    config.server.parameters.context_size = context_size;
+    config.server.parameters.threads = threads;
+    config.server.parameters.n_gpu_layers = n_gpu_layers;
     config.save_config().expect("Failed to save config");
 
     let response = opla_app.server
@@ -106,11 +106,11 @@ async fn stop_opla_server<R: Runtime>(
 fn start_server<R: Runtime>(app: tauri::AppHandle<R>, opla_app: State<'_, OplaState>) {
     println!("TODO Opla try to start at startup");
     let config = opla_app.config.lock().unwrap();
-    let port = config.server.port;
-    let host = config.server.host.clone();
-    let context_size = config.server.context_size;
-    let threads = config.server.threads;
-    let n_gpu_layers = config.server.n_gpu_layers;
+    let port = config.server.parameters.port;
+    let host = config.server.parameters.host.clone();
+    let context_size = config.server.parameters.context_size;
+    let threads = config.server.parameters.threads;
+    let n_gpu_layers = config.server.parameters.n_gpu_layers;
 
     let default_model = config.models.default_model.clone();
     let model = config.models.items

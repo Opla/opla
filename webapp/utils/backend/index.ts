@@ -12,17 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Provider } from '@/types';
-import { BackendResponse } from '@/utils/backend/connect';
+import { Backend } from '@/utils/backend/connect';
 import { BackendStatus } from '../../types/backend';
 
-const init = async (oplaConfiguration: Provider, listener: (payload: any) => void) => {
+const connect = async (listener: (payload: any) => void) => {
   // eslint-disable-next-line no-underscore-dangle
   if (window?.__TAURI__) {
-    const { default: connect } = await import('@/utils/backend/connect');
-    return connect(oplaConfiguration, listener);
+    const { default: connectBackend } = await import('@/utils/backend/connect');
+    return connectBackend(listener);
   }
-  return { payload: { status: BackendStatus.ERROR, message: 'no backend' } } as BackendResponse;
+  return { payload: { status: BackendStatus.ERROR, message: 'no backend' } } as Backend;
 };
 
-export default init;
+export default connect;
