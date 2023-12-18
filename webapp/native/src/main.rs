@@ -56,7 +56,7 @@ async fn start_opla_server<R: Runtime>(
     n_gpu_layers: i32
 ) -> Result<OplaServerResponse, String> {
     println!("Opla try to start ");
-    let config = opla_app.config.lock().unwrap();
+    let mut config = opla_app.config.lock().unwrap();
     let model_config = config.models.items
         .iter()
         .find(|m| m.name == model)
@@ -64,6 +64,14 @@ async fn start_opla_server<R: Runtime>(
     let home_dir = utils::Utils::get_home_directory().expect("Failed to get home directory");
     let models_path = home_dir.join(&config.models.path);
     let model_path = models_path.join(&model_config.path).join(&model_config.file_name);
+
+    config.models.default_model = model.clone();
+    config.server.port = port;
+    config.server.host = host.clone();
+    config.server.context_size = context_size;
+    config.server.threads = threads;
+    config.server.n_gpu_layers = n_gpu_layers;
+    config.save_config().expect("Failed to save config");
 
     let response = opla_app.server
         .lock()

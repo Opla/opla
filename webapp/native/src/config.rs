@@ -110,7 +110,7 @@ impl Config {
         }
     }
 
-    fn save_config(&self) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn save_config(&self) -> Result<(), Box<dyn std::error::Error>> {
         let home_dir = Utils::get_config_directory().expect("Failed to get config directory");
         let config_path = home_dir.join("config.json");
 

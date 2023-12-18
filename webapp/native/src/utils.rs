@@ -23,9 +23,9 @@ impl Utils {
     }
 
     pub fn get_config_directory() -> Result<PathBuf, String> {
-        let config_dir = dirs::home_dir().ok_or("Failed to get conf directory")?;
+        let config_dir = dirs::config_dir().ok_or("Failed to get conf directory")?;
         println!("conf_dir: {}", config_dir.to_str().unwrap());
-        let config_dir = config_dir.join("opla");
+        let config_dir = config_dir.join("Opla");
         if !Path::exists(&config_dir) {
             fs::create_dir(&config_dir).expect("Failed to create conf directory");
         }
