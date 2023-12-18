@@ -100,11 +100,18 @@ export interface Preset extends BaseNamedRecord {
   modelIds?: string[];
 }
 
-export interface Plugin extends BaseNamedRecord {}
+export interface Plugin extends BaseNamedRecord { }
 
 export type User = {
   id: string;
   name: string;
   avatarUrl?: string;
   metadata?: Metadata;
+};
+
+export type OplaConfig = {
+  models: {
+    default_model: string;
+  };
+
 };

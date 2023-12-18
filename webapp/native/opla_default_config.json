@@ -1,0 +1,29 @@
+{
+    "start_app": true,
+    "welcome_splash": true,
+    "models": {
+        "path": "dev/ai/models",
+        "default_model": "OpenHermes 2.5 - Mistral 7B",
+        "items": [
+            {
+                "name": "OpenHermes 2.5 - Mistral 7B",
+                "path": "openhermes-7b-v2.5",
+                "file_name": "ggml-model-q4_k.gguf",
+                "description": "OpenHermes 2.5 Mistral 7B is a state of the art Mistral Fine-tune, a continuation of OpenHermes 2 model, which trained on additional code datasets.",
+                "version": "2.5.0",
+                "license": "Apache-2.0",
+                "author": "Teknium",
+                "url": "https://huggingface.co/teknium/OpenHermes-2.5-Mistral-7B"
+            }
+        ]
+    },
+    "server": {
+        "name": "llama.cpp",
+        "launch_at_startup": true,
+        "port": 8080,
+        "host": "localhost",
+        "context_size": 512,
+        "threads": 4,
+        "n_gpu_layers": 0
+    }
+}
