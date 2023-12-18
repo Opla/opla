@@ -20,10 +20,13 @@
   "server": {
     "name": "llama.cpp",
     "launch_at_startup": true,
-    "port": 8080,
-    "host": "localhost",
-    "context_size": 512,
-    "threads": 4,
-    "n_gpu_layers": 0
+    "binary": "binaries/llama.cpp/llama.cpp.server",
+    "parameters": {
+      "host": "localhost",
+      "port": 8081,
+      "contextSize": 512,
+      "threads": 6,
+      "nGpuLayers": 0
+    }
   }
 }

@@ -14,7 +14,7 @@
 import { appWindow } from '@tauri-apps/api/window';
 import { confirm } from '@tauri-apps/api/dialog';
 import { listen } from '@tauri-apps/api/event';
-import { OplaConfig, Provider } from '@/types';
+import { OplaConfig } from '@/types';
 import { invoke } from '@tauri-apps/api';
 import { BackendPayload, BackendStatus } from '../../types/backend';
 import logger from '../logger';
@@ -25,17 +25,17 @@ import {
 } from '../providers/llama.cpp';
 import { LlamaCppArguments } from '../providers/llama.cpp/schema';
 
-export type BackendResponse = {
+export type Backend = {
   unlisten?: () => void;
   unlistenServer?: () => void;
+  configuration: OplaConfig;
   payload: { status: BackendStatus; message: string };
-  start: (mp?: string, mf?: string, parameters?: LlamaCppArguments) => Promise<void>;
+  start: (model?: string, parameters?: LlamaCppArguments) => Promise<void>;
   stop: () => Promise<void>;
-  restart: (mp?: string, mf?: string, parameters?: LlamaCppArguments) => Promise<void>;
+  restart: (model?: string, parameters?: LlamaCppArguments) => Promise<void>;
 };
 
-const connectBackend = async (oplaConfiguration: Provider, listener: (payload: any) => void) => {
-  logger.info('startDesktop', oplaConfiguration);
+const connectBackend = async (listener: (payload: any) => void) => {
   const unlisten = await appWindow.onCloseRequested(async (event) => {
     const confirmed = await confirm('Are you sure?');
     if (!confirmed) {
@@ -51,8 +51,7 @@ const connectBackend = async (oplaConfiguration: Provider, listener: (payload: a
   });
 
   const oplaConfig = (await invoke('get_opla_config')) as OplaConfig;
-  // const modelsPath = `dev/ai/models`;
-  // const modelFile = 'openhermes-7b-v2.5/ggml-model-q4_k.gguf';
+
   logger.info('oplaConfig', oplaConfig);
   const defaultModel = oplaConfig.models.default_model;
   let payload: BackendPayload;
@@ -63,23 +62,6 @@ const connectBackend = async (oplaConfiguration: Provider, listener: (payload: a
     logger.error("can't start LlamaCppServer", error);
     payload = { status: BackendStatus.ERROR, message: error as string };
   }
-  /* Opla server is now started in the backend process 
-  logger.info('init Opla desktop');
-  const metadata = oplaConfiguration.metadata as unknown as {
-    server: { parameters: LlamaCppArguments };
-  };
-  let payload: BackendPayload;
-  try {
-    payload = (await startLLamaCppServer(
-      modelsPath,
-      modelFile,
-      metadata.server.parameters,
-    )) as BackendPayload;
-  } catch (error) {
-    logger.error("can't start LlamaCppServer", error);
-    payload = { status: BackendStatus.ERROR, message: error as string };
-  } */
-
   const start = async (parameters: any, model = defaultModel) => {
     logger.info('start server', parameters);
     return startLLamaCppServer(model, parameters);
@@ -92,7 +74,15 @@ const connectBackend = async (oplaConfiguration: Provider, listener: (payload: a
     logger.info('restart server', parameters);
     return restartLLamaCppServer(model, parameters);
   };
-  return { unlisten, unlistenServer, payload, start, stop, restart } as BackendResponse;
+  return {
+    configuration: oplaConfig,
+    unlisten,
+    unlistenServer,
+    payload,
+    start,
+    stop,
+    restart,
+  } as Backend;
 };
 
 export default connectBackend;
