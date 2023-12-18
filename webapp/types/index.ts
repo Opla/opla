@@ -108,3 +108,9 @@ export type User = {
   avatarUrl?: string;
   metadata?: Metadata;
 };
+
+export type OplaConfig = {
+  models: {
+    default_model: string;
+  };
+};

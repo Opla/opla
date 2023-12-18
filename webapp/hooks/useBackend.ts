@@ -14,7 +14,7 @@
 
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AppContext } from '@/context';
-import { BackendResponse } from '@/utils/backend/start';
+import { BackendResponse } from '@/utils/backend/connect';
 import logger from '@/utils/logger';
 import oplaProviderConfig from '@/utils/providers/opla/config.json';
 import { createProvider } from '@/utils/data/providers';

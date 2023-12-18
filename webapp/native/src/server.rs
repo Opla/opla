@@ -16,7 +16,9 @@ use std::sync::{ Mutex, Arc };
 use sysinfo::{ ProcessExt, System, SystemExt, PidExt, Pid };
 use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
 
-#[derive(Clone, serde::Serialize)]
+use crate::config::Config;
+
+#[derive(Clone, Debug, serde::Serialize)]
 pub struct OplaServerResponse {
     pub status: String,
     pub message: String,
@@ -62,6 +64,7 @@ pub struct Payload {
 
 pub struct OplaState {
     pub server: Mutex<OplaServer>,
+    pub config: Mutex<Config>,
 }
 
 impl OplaServer {
@@ -154,6 +157,17 @@ impl OplaServer {
                 }
             }
         });
+    }
+
+    pub fn get_status(&self) -> Result<OplaServerResponse, String> {
+        let status = match self.status.try_lock() {
+            Ok(status) => status.as_str(),
+            Err(_) => {
+                println!("Opla server error try to read status");
+                return Err("Opla server can't read status".to_string());
+            }
+        };
+        Ok(OplaServerResponse { status: status.to_string(), message: self.name.to_string() })
     }
 
     pub fn start<R: Runtime>(

@@ -15,11 +15,33 @@
 #![cfg_attr(all(not(debug_assertions), target_os = "windows"), windows_subsystem = "windows")]
 
 mod server;
+mod config;
+pub mod utils;
 
 use std::sync::Mutex;
 
+use config::Config;
 use server::*;
 use tauri::{ Runtime, State, Manager };
+
+#[tauri::command]
+async fn get_opla_config<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    opla_app: State<'_, OplaState>
+) -> Result<Config, String> {
+    let config = opla_app.config.lock().unwrap();
+    Ok(config.clone())
+}
+
+#[tauri::command]
+async fn get_opla_server_status<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    opla_app: State<'_, OplaState>
+) -> Result<OplaServerResponse, String> {
+    opla_app.server.lock().unwrap().get_status()
+}
 
 #[tauri::command]
 async fn start_opla_server<R: Runtime>(
@@ -34,13 +56,21 @@ async fn start_opla_server<R: Runtime>(
     n_gpu_layers: i32
 ) -> Result<OplaServerResponse, String> {
     println!("Opla try to start ");
+    let config = opla_app.config.lock().unwrap();
+    let model_config = config.models.items
+        .iter()
+        .find(|m| m.name == model)
+        .unwrap();
+    let home_dir = utils::Utils::get_home_directory().expect("Failed to get home directory");
+    let models_path = home_dir.join(&config.models.path);
+    let model_path = models_path.join(&model_config.path).join(&model_config.file_name);
 
     let response = opla_app.server
         .lock()
         .unwrap()
         .start(app, [
             "-m",
-            model.as_str(),
+            model_path.to_str().unwrap(),
             "--port",
             &port.to_string(),
             "--host",
@@ -65,24 +95,74 @@ async fn stop_opla_server<R: Runtime>(
     opla_app.server.lock().unwrap().stop(app)
 }
 
+fn start_server<R: Runtime>(app: tauri::AppHandle<R>, opla_app: State<'_, OplaState>) {
+    println!("TODO Opla try to start at startup");
+    let config = opla_app.config.lock().unwrap();
+    let port = config.server.port;
+    let host = config.server.host.clone();
+    let context_size = config.server.context_size;
+    let threads = config.server.threads;
+    let n_gpu_layers = config.server.n_gpu_layers;
+
+    let default_model = config.models.default_model.clone();
+    let model = config.models.items
+        .iter()
+        .find(|m| m.name == default_model)
+        .unwrap();
+    let home_dir = utils::Utils::get_home_directory().expect("Failed to get home directory");
+    let models_path = home_dir.join(&config.models.path);
+    let model_path = models_path.join(&model.path).join(&model.file_name);
+    let response = opla_app.server
+        .lock()
+        .unwrap()
+        .start(app, [
+            "-m",
+            model_path.to_str().unwrap(),
+            "--port",
+            &port.to_string(),
+            "--host",
+            host.as_str(),
+            "-c",
+            &context_size.to_string(),
+            "-t",
+            &threads.to_string(),
+            "-ngl",
+            &n_gpu_layers.to_string(),
+        ]);
+
+    println!("Opla server started: {:?}", response);
+}
+
 fn main() {
+    let config = Config::load_config().unwrap();
     let server = OplaServer::new();
     let opla_app: OplaState = OplaState {
         server: Mutex::new(server),
+        config: Mutex::new(config.clone()),
     };
     tauri::Builder
         ::default()
         .manage(opla_app)
-        .setup(|app| {
+        .setup(move |app| {
             let opla_app = app.state::<OplaState>();
             app.emit_all("opla-server", Payload {
                 message: "Init Opla backend".into(),
                 status: ServerStatus::Wait.as_str().to_string(),
             }).unwrap();
             opla_app.server.lock().unwrap().init();
+            if config.server.launch_at_startup {
+                start_server(app.app_handle(), opla_app);
+            }
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![start_opla_server, stop_opla_server])
+        .invoke_handler(
+            tauri::generate_handler![
+                get_opla_config,
+                get_opla_server_status,
+                start_opla_server,
+                stop_opla_server
+            ]
+        )
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

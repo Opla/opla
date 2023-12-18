@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { invoke } from '@tauri-apps/api/tauri';
-import { homeDir } from '@tauri-apps/api/path';
 import logger from '@/utils/logger';
 import { LlamaCppArguments, LlamaCppArgumentsSchema } from './schema';
 
@@ -22,30 +21,22 @@ const stopLLamaCppServer = async () => {
 };
 
 const startLLamaCppServer = async (
-  modelsPath: string,
-  modelFile: string,
+  model: string,
   metadata: LlamaCppArguments,
   command = 'start_opla_server',
 ) => {
   logger.info(
     command === 'start_opla_server' ? 'start LLama.cpp server' : 'restart LLama.cpp server',
   );
-  const homeDirPath = await homeDir();
-  logger.info(`homeDirPath=${homeDirPath}`);
-  const model = `${homeDirPath}${modelsPath}/${modelFile}`;
   const args = LlamaCppArgumentsSchema.parse({ ...metadata, model });
   const response = await invoke(command, args);
   logger.info(`opla server starting: ${response}`, response);
   return response;
 };
 
-const restartLLamaCppServer = async (
-  modelsPath: string,
-  modelFile: string,
-  metadata: LlamaCppArguments,
-) => {
+const restartLLamaCppServer = async (model: string, metadata: LlamaCppArguments) => {
   await stopLLamaCppServer();
-  return startLLamaCppServer(modelsPath, modelFile, metadata, 'start_opla_server');
+  return startLLamaCppServer(model, metadata, 'start_opla_server');
 };
 
 export { restartLLamaCppServer, startLLamaCppServer, stopLLamaCppServer };
