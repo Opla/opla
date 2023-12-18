@@ -90,7 +90,7 @@ impl Config {
                         binary: String::from("binaries/llama.cpp/llama.cpp.server"),
                         parameters: ServerParameters {
                             port: 8082,
-                            host: String::from("localhost"),
+                            host: String::from("127.0.0.1"),
                             context_size: 512,
                             threads: 6,
                             n_gpu_layers: 0,

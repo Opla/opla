@@ -156,7 +156,6 @@ const LlamaCppArgumentsSchema = z.object({
     .describe('optional model to use as a base for the layers modified by the LoRA adapter'),
   host: z
     .string()
-    .ip()
     .optional()
     .default('127.0.0.1')
     .describe('ip address to listen (default  (default:127.0.0.1)'),
