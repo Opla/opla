@@ -50,7 +50,7 @@ const connectBackend = async (oplaConfiguration: Provider, listener: (payload: a
     listener(event);
   });
 
-  const oplaConfig = await invoke('get_opla_config') as OplaConfig;
+  const oplaConfig = (await invoke('get_opla_config')) as OplaConfig;
   // const modelsPath = `dev/ai/models`;
   // const modelFile = 'openhermes-7b-v2.5/ggml-model-q4_k.gguf';
   logger.info('oplaConfig', oplaConfig);

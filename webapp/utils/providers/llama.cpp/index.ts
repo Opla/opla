@@ -34,10 +34,7 @@ const startLLamaCppServer = async (
   return response;
 };
 
-const restartLLamaCppServer = async (
-  model: string,
-  metadata: LlamaCppArguments,
-) => {
+const restartLLamaCppServer = async (model: string, metadata: LlamaCppArguments) => {
   await stopLLamaCppServer();
   return startLLamaCppServer(model, metadata, 'start_opla_server');
 };
