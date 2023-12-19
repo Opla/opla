@@ -154,6 +154,11 @@ fn main() {
         ::default()
         .manage(context)
         .setup(move |app| {
+            #[cfg(debug_assertions)] // only include this code on debug builds
+            {
+                let window = app.get_window("main").unwrap();
+                window.open_devtools();
+            }
             println!("Opla setup: ");
             let context = app.state::<OplaContext>();
             let mut config = context.config.lock().unwrap();

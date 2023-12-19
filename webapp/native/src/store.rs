@@ -18,7 +18,8 @@ use serde::{ Deserialize, Serialize };
 use crate::utils::Utils;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LLModel {
+pub struct Model {
+    pub id: String,
     pub name: String,
     pub path: String,
     pub file_name: String,
@@ -33,7 +34,7 @@ pub struct LLModel {
 pub struct ModelsConfiguration {
     pub path: String,
     pub default_model: String,
-    pub items: Vec<LLModel>,
+    pub items: Vec<Model>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

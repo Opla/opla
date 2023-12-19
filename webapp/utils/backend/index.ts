@@ -24,22 +24,22 @@ const connect = async (listener: (payload: any) => void) => {
   return {
     context: {
       config: {
-        settings: {},
+        settings: {
+          startApp: false,
+          welcomeSplash: false,
+        },
         server: {
-          name: '',
-          binary: '',
+          name: 'None',
           parameters: {},
         },
         models: {
           defaultModel: 'None',
-          models: [],
+          items: [],
         },
       },
       server: {
         status: ServerStatus.ERROR,
         message: 'no backend',
-        stout: [],
-        sterr: [],
       },
     },
     start: async () => {},

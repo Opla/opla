@@ -8,6 +8,7 @@
     "default_model": "OpenHermes 2.5 - Mistral 7B",
     "items": [
       {
+        "id": "f9a8b7c6-d5e4-4f3e-2d1c-0a9b8c7d6e5f",
         "name": "OpenHermes 2.5 - Mistral 7B",
         "path": "openhermes-7b-v2.5",
         "file_name": "ggml-model-q4_k.gguf",

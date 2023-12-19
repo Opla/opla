@@ -16,7 +16,6 @@ import { invoke } from '@tauri-apps/api';
 import { Payload, Store } from '@/types';
 import { mapKeys } from '../data';
 import { toCamelCase } from '../string';
-import logger from '../logger';
 
 export const getOplaServerStatus = async (): Promise<Payload> => {
   const payload = (await invoke('get_opla_server_status')) as Payload;
@@ -25,7 +24,5 @@ export const getOplaServerStatus = async (): Promise<Payload> => {
 
 export const getOplaConfig = async (): Promise<Store> => {
   const store = (await invoke('get_opla_config')) as Store;
-  const st = mapKeys(store, toCamelCase);
-  logger.info('getOplaConfig', store, st);
-  return st;
+  return mapKeys(store, toCamelCase);
 };

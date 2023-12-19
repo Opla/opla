@@ -28,7 +28,10 @@ const initialBackendContext: OplaContext = {
     sterr: [],
   },
   config: {
-    settings: {},
+    settings: {
+      startApp: false,
+      welcomeSplash: false,
+    },
     server: {
       name: '',
       binary: '',
@@ -36,7 +39,8 @@ const initialBackendContext: OplaContext = {
     },
     models: {
       defaultModel: 'None',
-      models: [],
+      items: [],
+      path: '',
     },
   },
 };
