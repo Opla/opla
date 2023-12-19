@@ -21,10 +21,14 @@ import { PiPlus } from 'react-icons/pi';
 import { MenuItem } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
+import useBackend from '@/hooks/useBackend';
 import ContextMenu from '../common/ContextMenu';
 
 function ModelsExplorer({ selectedModelId }: { selectedModelId?: string }) {
-  const { models } = useContext(AppContext);
+  const { models: localModels } = useContext(AppContext);
+  const { backendContext } = useBackend();
+  const models = backendContext.config.models.items; // .concat(localModels);
+  logger.info('models', models, localModels);
   const { t } = useTranslation();
   const menu: MenuItem[] = [
     {

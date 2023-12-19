@@ -72,7 +72,12 @@ export interface Conversation extends BaseNamedRecord {
 }
 
 export interface Model extends BaseNamedRecord {
-  presetIds?: string[];
+  path: string;
+  fileName: string;
+  version: string;
+  license: string;
+  author: string;
+  url: string;
 }
 
 export type ProviderType = 'opla' | 'server' | 'api' | 'proxy';
@@ -83,7 +88,6 @@ export interface Provider extends BaseNamedRecord {
   type: ProviderType;
   disabled: boolean;
   token: string;
-  presetIds?: string[];
   isDisabled?: () => boolean;
 }
 
@@ -122,29 +126,31 @@ export type OplaServer = {
   status: ServerStatus;
   message?: string;
   name?: string;
-  stout: string[];
-  sterr: string[];
+  stout?: string[];
+  sterr?: string[];
 };
 
 export type Settings = {
-  // TODO: add settings
+  startApp: boolean;
+  welcomeSplash: boolean;
 };
 
 export type ServerConfiguration = {
   name: string;
-  binary: string;
+  binary?: string;
   parameters: { [key: string]: string | number | boolean };
 };
 
-export type ModelConfiguration = {
+export type ModelsConfiguration = {
   defaultModel: string;
-  models: Array<{ name: string; path: string }>;
+  path?: string;
+  items: Array<Model>;
 };
 
 export type Store = {
   settings: Settings;
   server: ServerConfiguration;
-  models: ModelConfiguration;
+  models: ModelsConfiguration;
 };
 
 export type OplaContext = {

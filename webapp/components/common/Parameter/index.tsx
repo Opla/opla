@@ -28,7 +28,7 @@ export default function Parameter({
   name: string;
   subtitle?: string;
   value?: string | number | boolean;
-  type: 'text' | 'password' | 'large-text' | 'number' | 'select' | 'switch';
+  type: 'text' | 'password' | 'large-text' | 'number' | 'url' | 'select' | 'switch';
   disabled?: boolean;
   children?: React.ReactNode;
   onChange?: (name: string, value: string | number | boolean) => void;
@@ -44,8 +44,13 @@ export default function Parameter({
         <p className="text-sm text-neutral-400">{subtitle}</p>
       </div>
       <div className="flex flex-grow flex-row">
-        {disabled && <div className={textCss}>{value}</div>}
-        {!disabled && (type === 'text' || type === 'number') && (
+        {disabled && type !== 'url' && <div className={textCss}>{value}</div>}
+        {disabled && type === 'url' && (
+          <a href={value as string} target="_blank" className={textCss}>
+            {value}
+          </a>
+        )}
+        {!disabled && (type === 'text' || type === 'number' || type === 'url') && (
           <input
             value={value as string}
             className={textCss}
