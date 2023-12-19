@@ -83,7 +83,7 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": ["../assets/*"],
+      "resources": ["assets/opla_default_config.json"],
       "shortDescription": "",
       "targets": "all",
       "windows": {

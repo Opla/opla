@@ -22,11 +22,11 @@
     "launch_at_startup": true,
     "binary": "binaries/llama.cpp/llama.cpp.server",
     "parameters": {
-      "host": "127.0.01",
+      "host": "127.0.0.1",
       "port": 8081,
-      "contextSize": 512,
+      "context_size": 512,
       "threads": 6,
-      "nGpuLayers": 0
+      "n_gpu_layers": 0
     }
   }
 }
