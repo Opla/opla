@@ -170,6 +170,21 @@ impl OplaServer {
         Ok(OplaServerResponse { status: status.to_string(), message: self.name.to_string() })
     }
 
+    pub fn set_status(&mut self, status: ServerStatus) -> Result<OplaServerResponse, String> {
+        let mut wstatus = match self.status.try_lock() {
+            Ok(status) => status,
+            Err(_) => {
+                println!("Opla server error try to write status");
+                return Err("Opla server can't write status".to_string());
+            }
+        };
+        *wstatus = status;
+        Ok(OplaServerResponse {
+            status: wstatus.as_str().to_string(),
+            message: self.name.to_string(),
+        })
+    }
+
     pub fn start<R: Runtime>(
         &mut self,
         app: tauri::AppHandle<R>,

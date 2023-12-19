@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::fs;
+use std::{ fs, path::PathBuf };
 use serde::{ Deserialize, Serialize };
 
 use crate::utils::Utils;
@@ -61,62 +61,61 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn load_config() -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn new() -> Self {
+        Config {
+            start_app: true,
+            welcome_splash: true,
+            server: ServerConfiguration {
+                name: String::from("llama.cpp"),
+                launch_at_startup: true,
+                binary: String::from("binaries/llama.cpp/llama.cpp.server"),
+                parameters: ServerParameters {
+                    port: 8081,
+                    host: String::from("127.0.0.1"),
+                    context_size: 512,
+                    threads: 6,
+                    n_gpu_layers: 0,
+                },
+            },
+            models: ModelsConfig {
+                path: String::from("models"),
+                default_model: String::from("None"),
+                items: vec![],
+            },
+        }
+    }
+
+    pub fn set(&mut self, new_config: Config) {
+        self.start_app = new_config.start_app;
+        self.welcome_splash = new_config.welcome_splash;
+        self.server = new_config.server.clone();
+        self.models = new_config.models.clone();
+    }
+
+    pub fn load_config(&mut self, asset_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         let home_dir = Utils::get_config_directory().expect("Failed to get config directory");
         let config_path = home_dir.join("config.json");
 
         if config_path.exists() {
             let config_data = fs::read_to_string(config_path)?;
             let config: Config = serde_json::from_str(&config_data)?;
-            Ok(config)
+            self.set(config);
         } else {
-            // load default config from app path
-            let app_path = std::env::current_exe()?;
-            println!("app_path: {}", app_path.to_str().unwrap());
-            let default_config_path = app_path.with_file_name("opla_default_config.json");
-
+            let default_config_path = asset_dir.join("opla_default_config.json");
+            println!(
+                "asset_dir: {} / {} / {}",
+                asset_dir.to_str().unwrap(),
+                default_config_path.to_str().unwrap(),
+                default_config_path.exists()
+            );
             if default_config_path.exists() {
                 let default_config_data = fs::read_to_string(default_config_path)?;
                 let default_config: Config = serde_json::from_str(&default_config_data)?;
-                Ok(default_config)
-            } else {
-                // Return a default config if neither file exists
-                Ok(Config {
-                    start_app: true,
-                    welcome_splash: true,
-                    server: ServerConfiguration {
-                        name: String::from("llama.cpp"),
-                        launch_at_startup: true,
-                        binary: String::from("binaries/llama.cpp/llama.cpp.server"),
-                        parameters: ServerParameters {
-                            port: 8082,
-                            host: String::from("127.0.0.1"),
-                            context_size: 512,
-                            threads: 6,
-                            n_gpu_layers: 0,
-                        },
-                    },
-                    models: ModelsConfig {
-                        path: String::from("dev/ai/models"),
-                        default_model: String::from("OpenHermes 2.5 - Mistral 7B"),
-                        items: vec![LLModel {
-                            name: String::from("OpenHermes 2.5 - Mistral 7B"),
-                            path: String::from("openhermes-7b-v2.5"),
-                            file_name: String::from("ggml-model-q4_k.gguf"),
-                            description: String::from(
-                                "OpenHermes 2.5 Mistral 7B is a state of the art Mistral Fine-tune, a continuation of OpenHermes 2 model, which trained on additional code datasets."
-                            ),
-                            version: String::from("2.5.0"),
-                            license: String::from("Apache-2.0"),
-                            author: String::from("Teknium"),
-                            url: String::from(
-                                "https://huggingface.co/teknium/OpenHermes-2.5-Mistral-7B"
-                            ),
-                        }],
-                    },
-                })
+                println!("default_config: {:?}", default_config);
+                self.set(default_config);
             }
         }
+        Ok(())
     }
 
     pub fn save_config(&self) -> Result<(), Box<dyn std::error::Error>> {

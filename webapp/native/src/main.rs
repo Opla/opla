@@ -104,14 +104,13 @@ async fn stop_opla_server<R: Runtime>(
 }
 
 fn start_server<R: Runtime>(app: tauri::AppHandle<R>, opla_app: State<'_, OplaState>) {
-    println!("TODO Opla try to start at startup");
-    let config = opla_app.config.lock().unwrap();
+    println!("Opla try to start server");
+    let config = opla_app.config.lock().expect("Failed to get config");
     let port = config.server.parameters.port;
     let host = config.server.parameters.host.clone();
     let context_size = config.server.parameters.context_size;
     let threads = config.server.parameters.threads;
     let n_gpu_layers = config.server.parameters.n_gpu_layers;
-
     let default_model = config.models.default_model.clone();
     let model = config.models.items
         .iter()
@@ -142,24 +141,47 @@ fn start_server<R: Runtime>(app: tauri::AppHandle<R>, opla_app: State<'_, OplaSt
 }
 
 fn main() {
-    let config = Config::load_config().unwrap();
-    let server = OplaServer::new();
-    let opla_app: OplaState = OplaState {
-        server: Mutex::new(server),
-        config: Mutex::new(config.clone()),
+    let store: OplaState = OplaState {
+        server: Mutex::new(OplaServer::new()),
+        config: Mutex::new(Config::new()),
     };
     tauri::Builder
         ::default()
-        .manage(opla_app)
+        .manage(store)
         .setup(move |app| {
-            let opla_app = app.state::<OplaState>();
+            println!("Opla setup: ");
+            let store = app.state::<OplaState>();
+            let mut config = store.config.lock().unwrap();
+            let resource_path = app
+                .path_resolver()
+                .resolve_resource("assets")
+                .expect("failed to resolve resource");
+            config.load_config(resource_path).expect("Opla failed to load config");
+            // println!("Opla config: {:?}", config);
+            let launch_at_startup = config.server.launch_at_startup;
+            let has_model = config.models.default_model != "None";
+            let default_model = config.models.default_model.clone();
+            drop(config);
             app.emit_all("opla-server", Payload {
                 message: "Init Opla backend".into(),
-                status: ServerStatus::Wait.as_str().to_string(),
+                status: ServerStatus::Init.as_str().to_string(),
             }).unwrap();
-            opla_app.server.lock().unwrap().init();
-            if config.server.launch_at_startup {
-                start_server(app.app_handle(), opla_app);
+            let mut server = store.server.lock().unwrap();
+            server.init();
+            if launch_at_startup && has_model {
+                drop(server);
+                app.emit_all("opla-server", Payload {
+                    message: "Opla server is waiting to start".into(),
+                    status: ServerStatus::Wait.as_str().to_string(),
+                }).unwrap();
+                start_server(app.app_handle(), app.state::<OplaState>());
+            } else {
+                println!("Opla server not started model: {:?}", default_model);
+                server.set_status(ServerStatus::Stopped).expect("Failed to set server status");
+                app.emit_all("opla-server", Payload {
+                    message: "Not started Opla backend".into(),
+                    status: ServerStatus::Stopped.as_str().to_string(),
+                }).unwrap();
             }
             Ok(())
         })
