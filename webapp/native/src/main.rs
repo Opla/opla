@@ -15,22 +15,27 @@
 #![cfg_attr(all(not(debug_assertions), target_os = "windows"), windows_subsystem = "windows")]
 
 mod server;
-mod config;
+mod store;
 pub mod utils;
 
 use std::sync::Mutex;
 
-use config::Config;
+use store::Store;
 use server::*;
 use tauri::{ Runtime, State, Manager };
+
+pub struct OplaContext {
+    pub server: Mutex<OplaServer>,
+    pub config: Mutex<Store>,
+}
 
 #[tauri::command]
 async fn get_opla_config<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
-    opla_app: State<'_, OplaState>
-) -> Result<Config, String> {
-    let config = opla_app.config.lock().unwrap();
+    context: State<'_, OplaContext>
+) -> Result<Store, String> {
+    let config = context.config.lock().unwrap();
     Ok(config.clone())
 }
 
@@ -38,25 +43,25 @@ async fn get_opla_config<R: Runtime>(
 async fn get_opla_server_status<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
-    opla_app: State<'_, OplaState>
-) -> Result<OplaServerResponse, String> {
-    opla_app.server.lock().unwrap().get_status()
+    context: State<'_, OplaContext>
+) -> Result<Payload, String> {
+    context.server.lock().unwrap().get_status()
 }
 
 #[tauri::command]
 async fn start_opla_server<R: Runtime>(
     app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
-    opla_app: State<'_, OplaState>,
+    context: State<'_, OplaContext>,
     model: String,
     port: i32,
     host: String,
     context_size: i32,
     threads: i32,
     n_gpu_layers: i32
-) -> Result<OplaServerResponse, String> {
+) -> Result<Payload, String> {
     println!("Opla try to start ");
-    let mut config = opla_app.config.lock().unwrap();
+    let mut config = context.config.lock().unwrap();
     let model_config = config.models.items
         .iter()
         .find(|m| m.name == model)
@@ -71,9 +76,9 @@ async fn start_opla_server<R: Runtime>(
     config.server.parameters.context_size = context_size;
     config.server.parameters.threads = threads;
     config.server.parameters.n_gpu_layers = n_gpu_layers;
-    config.save_config().expect("Failed to save config");
+    config.save().expect("Failed to save config");
 
-    let response = opla_app.server
+    let response = context.server
         .lock()
         .unwrap()
         .start(app, [
@@ -98,14 +103,14 @@ async fn start_opla_server<R: Runtime>(
 async fn stop_opla_server<R: Runtime>(
     app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
-    opla_app: State<'_, OplaState>
-) -> Result<OplaServerResponse, String> {
-    opla_app.server.lock().unwrap().stop(app)
+    context: State<'_, OplaContext>
+) -> Result<Payload, String> {
+    context.server.lock().unwrap().stop(app)
 }
 
-fn start_server<R: Runtime>(app: tauri::AppHandle<R>, opla_app: State<'_, OplaState>) {
+fn start_server<R: Runtime>(app: tauri::AppHandle<R>, context: State<'_, OplaContext>) {
     println!("Opla try to start server");
-    let config = opla_app.config.lock().expect("Failed to get config");
+    let config = context.config.lock().expect("Failed to get config");
     let port = config.server.parameters.port;
     let host = config.server.parameters.host.clone();
     let context_size = config.server.parameters.context_size;
@@ -119,7 +124,7 @@ fn start_server<R: Runtime>(app: tauri::AppHandle<R>, opla_app: State<'_, OplaSt
     let home_dir = utils::Utils::get_home_directory().expect("Failed to get home directory");
     let models_path = home_dir.join(&config.models.path);
     let model_path = models_path.join(&model.path).join(&model.file_name);
-    let response = opla_app.server
+    let response = context.server
         .lock()
         .unwrap()
         .start(app, [
@@ -141,22 +146,22 @@ fn start_server<R: Runtime>(app: tauri::AppHandle<R>, opla_app: State<'_, OplaSt
 }
 
 fn main() {
-    let store: OplaState = OplaState {
+    let context: OplaContext = OplaContext {
         server: Mutex::new(OplaServer::new()),
-        config: Mutex::new(Config::new()),
+        config: Mutex::new(Store::new()),
     };
     tauri::Builder
         ::default()
-        .manage(store)
+        .manage(context)
         .setup(move |app| {
             println!("Opla setup: ");
-            let store = app.state::<OplaState>();
-            let mut config = store.config.lock().unwrap();
+            let context = app.state::<OplaContext>();
+            let mut config = context.config.lock().unwrap();
             let resource_path = app
                 .path_resolver()
                 .resolve_resource("assets")
                 .expect("failed to resolve resource");
-            config.load_config(resource_path).expect("Opla failed to load config");
+            config.load(resource_path).expect("Opla failed to load config");
             // println!("Opla config: {:?}", config);
             let launch_at_startup = config.server.launch_at_startup;
             let has_model = config.models.default_model != "None";
@@ -166,7 +171,7 @@ fn main() {
                 message: "Init Opla backend".into(),
                 status: ServerStatus::Init.as_str().to_string(),
             }).unwrap();
-            let mut server = store.server.lock().unwrap();
+            let mut server = context.server.lock().unwrap();
             server.init();
             if launch_at_startup && has_model {
                 drop(server);
@@ -174,7 +179,7 @@ fn main() {
                     message: "Opla server is waiting to start".into(),
                     status: ServerStatus::Wait.as_str().to_string(),
                 }).unwrap();
-                start_server(app.app_handle(), app.state::<OplaState>());
+                start_server(app.app_handle(), app.state::<OplaContext>());
             } else {
                 println!("Opla server not started model: {:?}", default_model);
                 server.set_status(ServerStatus::Stopped).expect("Failed to set server status");

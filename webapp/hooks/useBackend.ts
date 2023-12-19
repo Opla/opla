@@ -19,19 +19,30 @@ import logger from '@/utils/logger';
 import oplaProviderConfig from '@/utils/providers/opla/config.json';
 import { createProvider } from '@/utils/data/providers';
 import connectBackend from '@/utils/backend';
-import { Metadata, Provider, ProviderType } from '@/types';
-import { BackendContext, BackendStatus } from '@/types/backend';
+import { Metadata, Provider, ProviderType, OplaContext, ServerStatus } from '@/types';
 
-const initialBackendContext: BackendContext = {
+const initialBackendContext: OplaContext = {
   server: {
-    status: BackendStatus.INIT,
+    status: ServerStatus.INIT,
     stout: [],
     sterr: [],
+  },
+  config: {
+    settings: {},
+    server: {
+      name: '',
+      binary: '',
+      parameters: {},
+    },
+    models: {
+      defaultModel: 'None',
+      models: [],
+    },
   },
 };
 
 const useBackend = () => {
-  const [backend, setBackend] = useState(initialBackendContext);
+  const [backendContext, setBackendContext] = useState(initialBackendContext);
   const { providers, setProviders } = useContext(AppContext);
   const startRef = useRef(async (conf: any) => {
     throw new Error(`start not initialized${conf}`);
@@ -49,17 +60,17 @@ const useBackend = () => {
     (event: any) => {
       logger.info('backend event', event);
       if (event.event === 'opla-server') {
-        setBackend({
-          ...backend,
+        setBackendContext({
+          ...backendContext,
           server: {
-            ...backend.server,
+            ...backendContext.server,
             status: event.payload.status,
             message: event.payload.message,
           },
         });
       }
     },
-    [backend, setBackend],
+    [backendContext, setBackendContext],
   );
 
   const startBackend = useCallback(async () => {
@@ -71,30 +82,19 @@ const useBackend = () => {
     }
     const backendImpl: Backend = await connectBackend(backendListener);
     logger.info('backend impl', backendImpl);
-    setBackend({
-      ...backend,
-      server: {
-        ...backend.server,
-        status: backendImpl.payload.status,
-        message: backendImpl.payload.message,
-        name: backendImpl.payload.message,
-      },
+    setBackendContext({
+      ...backendContext,
+      ...backendImpl.context,
     });
-    logger.info('backend', opla.metadata, backendImpl.configuration.server.parameters);
+    logger.info('backend', opla.metadata, backendImpl.context.config.server.parameters);
     const metadata = opla.metadata as Metadata;
-    metadata.server = backendImpl.configuration.server as Metadata;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { context_size, n_gpu_layers, ...parameters } = backendImpl.configuration.server
-      .parameters as Metadata;
-    parameters.contextSize = context_size;
-    parameters.nGpuLayers = n_gpu_layers;
-    metadata.server.parameters = parameters;
+    metadata.server = backendImpl.context.config.server as Metadata;
     setProviders(providers);
 
     startRef.current = backendImpl.start as () => Promise<never>;
     stopRef.current = backendImpl.stop as () => Promise<never>;
     restartRef.current = backendImpl.restart as () => Promise<never>;
-  }, [backend, backendListener, providers, setProviders]);
+  }, [backendContext, backendListener, providers, setProviders]);
 
   useEffect(() => {
     if (firstRender.current && providers) {
@@ -109,7 +109,7 @@ const useBackend = () => {
 
   const stop = async () => stopRef.current();
 
-  return { backend, start, stop, restart };
+  return { backendContext, start, stop, restart };
 };
 
 export default useBackend;

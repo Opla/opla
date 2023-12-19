@@ -19,18 +19,17 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { PiPlus, PiCircleFill } from 'react-icons/pi';
 import { AppContext } from '@/context';
-import { MenuItem, Provider } from '@/types';
+import { MenuItem, Provider, ServerStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { ModalsContext } from '@/utils/modalsProvider';
 import { deleteProvider, getProvider, updateProvider } from '@/utils/data/providers';
 import useBackend from '@/hooks/useBackend';
-import { BackendStatus } from '@/types/backend';
 import ContextMenu from '../common/ContextMenu';
 
 function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string }) {
   const { providers, setProviders } = useContext(AppContext);
-  const { backend } = useBackend();
+  const { backendContext } = useBackend();
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
   const router = useRouter();
@@ -99,7 +98,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
 
   const isDisabled = (provider: Provider) => {
     if (provider?.type === 'opla') {
-      return backend.server?.status !== BackendStatus.STARTED;
+      return backendContext.server?.status !== ServerStatus.STARTED;
     }
     return provider?.disabled;
   };

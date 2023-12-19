@@ -19,9 +19,9 @@ import useBackend from '@/hooks/useBackend';
 export default function Statusbar() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { backend } = useBackend();
-  const running = backend.server.status === 'started';
-  const error = backend.server.status === 'error';
+  const { backendContext } = useBackend();
+  const running = backendContext.server.status === 'started';
+  const error = backendContext.server.status === 'error';
   const displayServer = () => {
     router.push(`/providers`);
   };
@@ -43,14 +43,13 @@ export default function Statusbar() {
             <PiWarning />
           </span>
         )}
-        {(backend.server.status === 'init' ||
-          backend.server.status === 'wait' ||
-          backend.server.status === 'starting') && <span>{t('Server is starting')}</span>}
-        {backend.server.status === 'started' && <span>{t('Server is running')}</span>}
-        {(backend.server.status === 'stopping' || backend.server.status === 'stopped') && (
-          <span>{t('Server is stopped')}</span>
-        )}
-        {backend.server.status === 'error' && <span>{t('Server has crashed')}</span>}
+        {(backendContext.server.status === 'init' ||
+          backendContext.server.status === 'wait' ||
+          backendContext.server.status === 'starting') && <span>{t('Server is starting')}</span>}
+        {backendContext.server.status === 'started' && <span>{t('Server is running')}</span>}
+        {(backendContext.server.status === 'stopping' ||
+          backendContext.server.status === 'stopped') && <span>{t('Server is stopped')}</span>}
+        {backendContext.server.status === 'error' && <span>{t('Server has crashed')}</span>}
       </button>
       <div className="flex flex-row items-center justify-center gap-1">
         <span className="text-neutral-800 dark:text-neutral-300">

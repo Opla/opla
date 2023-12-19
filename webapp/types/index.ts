@@ -34,12 +34,6 @@ export type Metadata = {
   [key: string]: string | number | boolean | Metadata;
 };
 
-export type LocalServer = {
-  name: string;
-  binary: string;
-  parameters: { [key: string]: string | number | boolean };
-};
-
 export type Author = {
   role: 'user' | 'system' | 'assistant';
   name: string;
@@ -109,9 +103,51 @@ export type User = {
   metadata?: Metadata;
 };
 
-export type OplaConfig = {
-  models: {
-    default_model: string;
-  };
-  server: LocalServer;
+export enum ServerStatus {
+  INIT = 'init',
+  WAIT = 'wait',
+  STARTING = 'starting',
+  STARTED = 'started',
+  STOPPING = 'stopping',
+  STOPPED = 'stopped',
+  ERROR = 'error',
+}
+
+export type Payload = {
+  status: ServerStatus;
+  message: string;
+};
+
+export type OplaServer = {
+  status: ServerStatus;
+  message?: string;
+  name?: string;
+  stout: string[];
+  sterr: string[];
+};
+
+export type Settings = {
+  // TODO: add settings
+};
+
+export type ServerConfiguration = {
+  name: string;
+  binary: string;
+  parameters: { [key: string]: string | number | boolean };
+};
+
+export type ModelConfiguration = {
+  defaultModel: string;
+  models: Array<{ name: string; path: string }>;
+};
+
+export type Store = {
+  settings: Settings;
+  server: ServerConfiguration;
+  models: ModelConfiguration;
+};
+
+export type OplaContext = {
+  server: OplaServer;
+  config: Store;
 };

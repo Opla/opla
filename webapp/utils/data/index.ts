@@ -81,6 +81,28 @@ const deepGet = (obj: any, path: string, defaultValue?: any, root = path): any =
   return obj[property];
 };
 
+// Inspiration: https://github.com/rayepps/radash/blob/31c1397437d7fb7a78e97499c8d46f992c49844c/src/object.ts
+
+export const mapKeys = <TValue>(
+  value: TValue,
+  mapFunc: (key: string, value: TValue) => string,
+): TValue => {
+  if (typeof value !== 'object') return value as TValue;
+  const record = value as Record<string, TValue>;
+  const keys = Object.keys(record) as string[];
+  return keys.reduce(
+    (acc, key) => {
+      let v = record[key];
+      if (typeof v === 'object') {
+        v = mapKeys(v, mapFunc);
+      }
+      acc[mapFunc(key, v)] = v;
+      return acc;
+    },
+    {} as Record<string, TValue>,
+  ) as TValue;
+};
+
 export {
   createBaseRecord,
   createBaseNamedRecord,
