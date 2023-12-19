@@ -16,14 +16,6 @@ use std::sync::{ Mutex, Arc };
 use sysinfo::{ ProcessExt, System, SystemExt, PidExt, Pid };
 use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
 
-use crate::config::Config;
-
-#[derive(Clone, Debug, serde::Serialize)]
-pub struct OplaServerResponse {
-    pub status: String,
-    pub message: String,
-}
-
 #[derive(Clone)]
 pub struct OplaServer {
     pub pid: Arc<Mutex<usize>>,
@@ -56,15 +48,10 @@ impl ServerStatus {
     }
 }
 
-#[derive(Clone, serde::Serialize)]
+#[derive(Clone, Debug, serde::Serialize)]
 pub struct Payload {
     pub message: String,
     pub status: String,
-}
-
-pub struct OplaState {
-    pub server: Mutex<OplaServer>,
-    pub config: Mutex<Config>,
 }
 
 impl OplaServer {
@@ -159,7 +146,7 @@ impl OplaServer {
         });
     }
 
-    pub fn get_status(&self) -> Result<OplaServerResponse, String> {
+    pub fn get_status(&self) -> Result<Payload, String> {
         let status = match self.status.try_lock() {
             Ok(status) => status.as_str(),
             Err(_) => {
@@ -167,10 +154,10 @@ impl OplaServer {
                 return Err("Opla server can't read status".to_string());
             }
         };
-        Ok(OplaServerResponse { status: status.to_string(), message: self.name.to_string() })
+        Ok(Payload { status: status.to_string(), message: self.name.to_string() })
     }
 
-    pub fn set_status(&mut self, status: ServerStatus) -> Result<OplaServerResponse, String> {
+    pub fn set_status(&mut self, status: ServerStatus) -> Result<Payload, String> {
         let mut wstatus = match self.status.try_lock() {
             Ok(status) => status,
             Err(_) => {
@@ -179,7 +166,7 @@ impl OplaServer {
             }
         };
         *wstatus = status;
-        Ok(OplaServerResponse {
+        Ok(Payload {
             status: wstatus.as_str().to_string(),
             message: self.name.to_string(),
         })
@@ -189,7 +176,7 @@ impl OplaServer {
         &mut self,
         app: tauri::AppHandle<R>,
         arguments: [&str; 12]
-    ) -> Result<OplaServerResponse, String> {
+    ) -> Result<Payload, String> {
         let status = match self.status.try_lock() {
             Ok(status) => status.as_str(),
             Err(_) => {
@@ -203,7 +190,7 @@ impl OplaServer {
             status == ServerStatus::Starting.as_str().to_string()
         {
             println!("Opla server already started {}", status);
-            return Ok(OplaServerResponse {
+            return Ok(Payload {
                 status: status.to_string(),
                 message: "llama.cpp.server".to_string(),
             });
@@ -244,13 +231,10 @@ impl OplaServer {
             .collect();
         OplaServer::start_llama_cpp_server(app, arguments, do_started, callback);
 
-        Ok(OplaServerResponse { status: status_response, message: self.name.to_string() })
+        Ok(Payload { status: status_response, message: self.name.to_string() })
     }
 
-    pub fn stop<R: Runtime>(
-        &mut self,
-        app: tauri::AppHandle<R>
-    ) -> Result<OplaServerResponse, String> {
+    pub fn stop<R: Runtime>(&mut self, app: tauri::AppHandle<R>) -> Result<Payload, String> {
         let pid = self.pid.lock().unwrap().to_owned();
         println!("Opla try to stop {}", pid);
         let status = match self.status.try_lock() {
@@ -292,12 +276,12 @@ impl OplaServer {
                 }
             };
             *wstatus = ServerStatus::Stopped;
-            return Ok(OplaServerResponse {
+            return Ok(Payload {
                 status: wstatus.as_str().to_string(),
                 message: self.name.to_string(),
             });
         }
-        Ok(OplaServerResponse { status: status.to_string(), message: self.name.to_string() })
+        Ok(Payload { status: status.to_string(), message: self.name.to_string() })
     }
 
     pub fn init(&mut self) {

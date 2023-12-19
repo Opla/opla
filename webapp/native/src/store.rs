@@ -30,7 +30,7 @@ pub struct LLModel {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ModelsConfig {
+pub struct ModelsConfiguration {
     pub path: String,
     pub default_model: String,
     pub items: Vec<LLModel>,
@@ -53,18 +53,25 @@ pub struct ServerConfiguration {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Config {
+pub struct Settings {
     pub start_app: bool,
     pub welcome_splash: bool,
-    pub server: ServerConfiguration,
-    pub models: ModelsConfig,
 }
 
-impl Config {
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Store {
+    pub settings: Settings,
+    pub server: ServerConfiguration,
+    pub models: ModelsConfiguration,
+}
+
+impl Store {
     pub fn new() -> Self {
-        Config {
-            start_app: true,
-            welcome_splash: true,
+        Store {
+            settings: Settings {
+                start_app: true,
+                welcome_splash: true,
+            },
             server: ServerConfiguration {
                 name: String::from("llama.cpp"),
                 launch_at_startup: true,
@@ -77,7 +84,7 @@ impl Config {
                     n_gpu_layers: 0,
                 },
             },
-            models: ModelsConfig {
+            models: ModelsConfiguration {
                 path: String::from("models"),
                 default_model: String::from("None"),
                 items: vec![],
@@ -85,20 +92,19 @@ impl Config {
         }
     }
 
-    pub fn set(&mut self, new_config: Config) {
-        self.start_app = new_config.start_app;
-        self.welcome_splash = new_config.welcome_splash;
+    pub fn set(&mut self, new_config: Store) {
+        self.settings = new_config.settings.clone();
         self.server = new_config.server.clone();
         self.models = new_config.models.clone();
     }
 
-    pub fn load_config(&mut self, asset_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn load(&mut self, asset_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         let home_dir = Utils::get_config_directory().expect("Failed to get config directory");
         let config_path = home_dir.join("config.json");
 
         if config_path.exists() {
             let config_data = fs::read_to_string(config_path)?;
-            let config: Config = serde_json::from_str(&config_data)?;
+            let config: Store = serde_json::from_str(&config_data)?;
             self.set(config);
         } else {
             let default_config_path = asset_dir.join("opla_default_config.json");
@@ -110,7 +116,7 @@ impl Config {
             );
             if default_config_path.exists() {
                 let default_config_data = fs::read_to_string(default_config_path)?;
-                let default_config: Config = serde_json::from_str(&default_config_data)?;
+                let default_config: Store = serde_json::from_str(&default_config_data)?;
                 println!("default_config: {:?}", default_config);
                 self.set(default_config);
             }
@@ -118,7 +124,7 @@ impl Config {
         Ok(())
     }
 
-    pub fn save_config(&self) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn save(&self) -> Result<(), Box<dyn std::error::Error>> {
         let home_dir = Utils::get_config_directory().expect("Failed to get config directory");
         let config_path = home_dir.join("config.json");
 

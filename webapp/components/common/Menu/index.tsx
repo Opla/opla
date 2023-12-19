@@ -52,7 +52,7 @@ function Menu({
               className="flex w-full flex-row items-center"
             >
               {item.icon && <I className="mr-2 h-4 w-4" />}
-              <p className="mr-4 flex-1 text-left">{t(item.label)}</p>
+              <p className="mr-4 flex-1 truncate text-left">{t(item.label)}</p>
               {selection && item.selected && <PiCheck className="ml-2 h-4 w-4" />}
             </button>
           </ul>

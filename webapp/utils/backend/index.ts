@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { Backend } from '@/utils/backend/connect';
-import { BackendStatus } from '../../types/backend';
+import { ServerStatus } from '@/types';
 
 const connect = async (listener: (payload: any) => void) => {
   // eslint-disable-next-line no-underscore-dangle
@@ -21,7 +21,31 @@ const connect = async (listener: (payload: any) => void) => {
     const { default: connectBackend } = await import('@/utils/backend/connect');
     return connectBackend(listener);
   }
-  return { payload: { status: BackendStatus.ERROR, message: 'no backend' } } as Backend;
+  return {
+    context: {
+      config: {
+        settings: {},
+        server: {
+          name: '',
+          binary: '',
+          parameters: {},
+        },
+        models: {
+          defaultModel: 'None',
+          models: [],
+        },
+      },
+      server: {
+        status: ServerStatus.ERROR,
+        message: 'no backend',
+        stout: [],
+        sterr: [],
+      },
+    },
+    start: async () => {},
+    stop: async () => {},
+    restart: async () => {},
+  } as Backend;
 };
 
 export default connect;

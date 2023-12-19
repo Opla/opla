@@ -24,12 +24,15 @@ import { Message } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { createMessage, updateConversationMessages } from '@/utils/data/conversations';
+import useBackend from '@/hooks/useBackend';
 import MessageView from './Message';
 import Prompt from './Prompt';
 
 function Thread({ conversationId }: { conversationId?: string }) {
   const router = useRouter();
   const { conversations, setConversations } = useContext(AppContext);
+  const { backendContext } = useBackend();
+  logger.info('backendContext', backendContext);
   const selectedConversation = conversations.find((c) => c.id === conversationId);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -48,11 +51,11 @@ function Thread({ conversationId }: { conversationId?: string }) {
 
   const showEmptyChat = messages.length < 1;
 
-  // logger.info(`${conversationId} ${messages.length}`);
-  const selectedPreset = 'LLama2';
+  const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.defaultModel}`;
+  logger.info(`selectedPreset ${selectedPreset}`);
 
   const presets = [
-    { label: 'Opla LLama2', value: 'LLama2', icon: Opla, selected: selectedPreset === 'LLama2' },
+    { label: selectedPreset, value: backendContext.config.server.name, icon: Opla, selected: true },
     { label: 'OpenAI GPT-3.5', value: 'GPT-3.5', icon: SiOpenai },
     { label: 'OpenAI GPT-4', value: 'GPT-4', icon: SiOpenai },
   ];

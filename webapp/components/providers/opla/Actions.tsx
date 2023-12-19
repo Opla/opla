@@ -14,8 +14,7 @@
 
 import { PiPause, PiPlay, PiSpinner, PiWarning } from 'react-icons/pi';
 import Tooltip, { Orientation } from '@/components/common/Tooltip';
-import { BackendContext } from '@/types/backend';
-import { Provider } from '@/types';
+import { OplaContext, Provider } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 
 export default function Actions({
@@ -24,7 +23,7 @@ export default function Actions({
   onProviderToggle,
 }: {
   provider: Provider;
-  backend: BackendContext;
+  backend: OplaContext;
   onProviderToggle: () => void;
 }) {
   const { message, status } = backend.server;

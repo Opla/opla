@@ -17,12 +17,11 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
-import { Provider } from '@/types';
+import { Provider, ServerStatus } from '@/types';
 import { updateProvider } from '@/utils/data/providers';
 import logger from '@/utils/logger';
 import { deepMerge, deepSet } from '@/utils/data';
 import useBackend from '@/hooks/useBackend';
-import { BackendStatus } from '@/types/backend';
 import Toolbar from './Toolbar';
 import Server from './server';
 import OpenAI from './openai';
@@ -34,7 +33,7 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
   const { providers, setProviders } = useContext(AppContext);
   const { t } = useTranslation();
 
-  const { backend, restart, start, stop } = useBackend();
+  const { backendContext, restart, start, stop } = useBackend();
 
   useEffect(() => {
     if (providerId !== updatedProvider.id) {
@@ -53,10 +52,10 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
       p = deepMerge(p, updatedProvider);
     }
     if (p?.type === 'opla') {
-      p.disabled = backend.server.status === BackendStatus.STOPPED;
+      p.disabled = backendContext.server.status === ServerStatus.STOPPED;
     }
     return p;
-  }, [backend.server.status, hasParametersChanged, providerId, providers, updatedProvider]);
+  }, [backendContext.server.status, hasParametersChanged, providerId, providers, updatedProvider]);
 
   const onParameterChange = (name: string, value: string | number | boolean) => {
     const newProvider = deepSet(updatedProvider, name, value);
@@ -80,10 +79,10 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
   const onProviderToggle = () => {
     logger.info('onProviderToggle');
     if (provider?.type === 'opla') {
-      logger.info('backend.server', backend.server);
-      if (backend.server.status === BackendStatus.STARTED) {
+      logger.info('backend.server', backendContext.server);
+      if (backendContext.server.status === ServerStatus.STARTED) {
         stop();
-      } else if (backend.server.status === BackendStatus.STOPPED) {
+      } else if (backendContext.server.status === ServerStatus.STOPPED) {
         const server: any = provider?.metadata?.server;
         const parameters = server?.parameters;
         start(parameters);
@@ -117,7 +116,7 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
                     <OplaActions
                       onProviderToggle={onProviderToggle}
                       provider={provider}
-                      backend={backend}
+                      backend={backendContext}
                     />
                   )
                 }
