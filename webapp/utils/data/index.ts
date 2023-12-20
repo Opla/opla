@@ -90,7 +90,7 @@ export const mapKeys = <TValue>(
   if (Array.isArray(value)) {
     return value.map((item) => mapKeys(item, mapFunc)) as TValue;
   }
-  if (typeof value !== 'object') return value as TValue;
+  if (!value || typeof value !== 'object') return value as TValue;
   const record = value as Record<string, TValue>;
   const keys = Object.keys(record) as string[];
   return keys.reduce(
