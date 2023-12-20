@@ -16,6 +16,7 @@ import { invoke } from '@tauri-apps/api';
 import { Model, Payload, Store } from '@/types';
 import { mapKeys } from '../data';
 import { toCamelCase } from '../string';
+import logger from '../logger';
 
 export const getOplaServerStatus = async (): Promise<Payload> => {
   const payload = (await invoke('get_opla_server_status')) as Payload;
@@ -30,10 +31,10 @@ export const getOplaConfig = async (): Promise<Store> => {
 export const getModelsCollection = async (): Promise<{ models: [] }> => {
   try {
     const collection = (await invoke('get_models_collection')) as unknown as { models: Model[] };
-    console.log("getCollection", collection);
+    logger.info('getCollection', collection);
     return await mapKeys(collection, toCamelCase);
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
   return { models: [] };
-}
+};
