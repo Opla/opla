@@ -14,17 +14,30 @@
 
 'use client';
 
+import { useEffect, useState } from 'react';
+import { Model } from '@/types';
+import logger from '@/utils/logger';
+import { getModelsCollection } from '@/utils/backend/commands';
 import SplitView from '../common/SplitView';
 import Explorer from './Explorer';
-import Model from './Model';
+import ModelView from './Model';
 
 export default function Providers({ selectedModelId }: { selectedModelId?: string }) {
+  const [collection, setCollection] = useState<Model[]>([]);
+  useEffect(() => {
+    const getCollection = async () => {
+      const coll = (await getModelsCollection()) as unknown as { models: Model[] };
+      setCollection(coll.models);
+    };
+    getCollection();
+  }, []);
+  logger.info('collection: ', collection);
   return (
     <SplitView
       className="grow overflow-hidden"
       left={<Explorer selectedModelId={selectedModelId} />}
     >
-      <Model modelId={selectedModelId} />
+      <ModelView modelId={selectedModelId} />
     </SplitView>
   );
 }

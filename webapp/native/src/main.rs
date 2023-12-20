@@ -17,9 +17,12 @@
 mod server;
 mod store;
 pub mod utils;
+pub mod models;
 
 use std::sync::Mutex;
 
+use models::{ fetch_models_collection, ModelsCollection };
+use serde::Serialize;
 use store::Store;
 use server::*;
 use tauri::{ Runtime, State, Manager };
@@ -106,6 +109,19 @@ async fn stop_opla_server<R: Runtime>(
     context: State<'_, OplaContext>
 ) -> Result<Payload, String> {
     context.server.lock().unwrap().stop(app)
+}
+
+#[tauri::command]
+async fn get_models_collection<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    _context: State<'_, OplaContext>
+) -> Result<ModelsCollection, String>
+    where Result<ModelsCollection, String>: Serialize
+{
+    fetch_models_collection("https://opla.github.io/models/all.json").await.map_err(|err|
+        err.to_string()
+    )
 }
 
 fn start_server<R: Runtime>(app: tauri::AppHandle<R>, context: State<'_, OplaContext>) {
@@ -200,7 +216,8 @@ fn main() {
                 get_opla_config,
                 get_opla_server_status,
                 start_opla_server,
-                stop_opla_server
+                stop_opla_server,
+                get_models_collection
             ]
         )
         .run(tauri::generate_context!())
