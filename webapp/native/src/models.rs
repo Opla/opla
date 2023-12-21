@@ -101,6 +101,7 @@ pub struct Model {
     pub recommended: Option<bool>,
     pub deprecated: Option<bool>,
     pub private: Option<bool>,
+    pub featured: Option<bool>,
 
     pub model_type: Option<String>, // TODO enum
     pub library: Option<String>, // TODO enum
@@ -134,11 +135,10 @@ pub struct Model {
         deserialize_with = "option_string_or_struct"
     )]
     pub paper: Option<Resource>,
-
     // TODO use Resource instead of String
     pub path: Option<String>,
+    // Deprecated put it in path
     pub file_name: Option<String>,
-    pub url: Option<String>,
 
     pub include: Option<Vec<Model>>,
 }

@@ -71,7 +71,9 @@ async fn start_opla_server<R: Runtime>(
         .unwrap();
     let home_dir = utils::Utils::get_home_directory().expect("Failed to get home directory");
     let models_path = home_dir.join(&config.models.path);
-    let model_path = models_path.join(&model_config.path).join(&model_config.file_name);
+    let model_path = models_path
+        .join(&model_config.path.clone().unwrap())
+        .join(&model_config.file_name.clone().unwrap());
 
     config.models.default_model = model.clone();
     config.server.parameters.port = port;
@@ -133,13 +135,17 @@ fn start_server<R: Runtime>(app: tauri::AppHandle<R>, context: State<'_, OplaCon
     let threads = config.server.parameters.threads;
     let n_gpu_layers = config.server.parameters.n_gpu_layers;
     let default_model = config.models.default_model.clone();
-    let model = config.models.items
-        .iter()
-        .find(|m| m.name == default_model)
-        .unwrap();
+    let model = config.models.items.iter().find(|m| m.name == default_model);
+    if model.is_none() {
+        println!("Opla server not started model not found: {:?}", default_model);
+        return;
+    }
+    let model = model.unwrap();
     let home_dir = utils::Utils::get_home_directory().expect("Failed to get home directory");
     let models_path = home_dir.join(&config.models.path);
-    let model_path = models_path.join(&model.path).join(&model.file_name);
+    let model_path = models_path
+        .join(&model.path.clone().unwrap())
+        .join(&model.file_name.clone().unwrap());
     let response = context.server
         .lock()
         .unwrap()

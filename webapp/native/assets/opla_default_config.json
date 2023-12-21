@@ -9,14 +9,17 @@
     "items": [
       {
         "id": "f9a8b7c6-d5e4-4f3e-2d1c-0a9b8c7d6e5f",
-        "name": "OpenHermes 2.5 - Mistral 7B",
+        "name": "OpenHermes-2.5-Mistral-7B.q4_k.gguf",
+        "title": "OpenHermes 2.5 - Mistral 7B",
         "path": "openhermes-7b-v2.5",
         "file_name": "ggml-model-q4_k.gguf",
         "description": "OpenHermes 2.5 Mistral 7B is a state of the art Mistral Fine-tune, a continuation of OpenHermes 2 model, which trained on additional code datasets.",
         "version": "2.5.0",
         "license": "Apache-2.0",
         "author": "Teknium",
-        "url": "https://huggingface.co/teknium/OpenHermes-2.5-Mistral-7B"
+        "quantization": "Q4_K",
+        "bits": 4,
+        "repository": "https://huggingface.co/teknium/OpenHermes-2.5-Mistral-7B"
       }
     ]
   },

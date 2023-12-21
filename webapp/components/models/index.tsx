@@ -27,7 +27,9 @@ export default function Providers({ selectedModelId }: { selectedModelId?: strin
   useEffect(() => {
     const getCollection = async () => {
       const coll = (await getModelsCollection()) as unknown as { models: Model[] };
-      const models = coll.models.map((m) => ({ ...m, id: m.name }));
+      const models = coll.models
+        .filter((m) => m.featured === true)
+        .map((m) => ({ ...m, id: m.name }));
       setCollection(models);
     };
     getCollection();
