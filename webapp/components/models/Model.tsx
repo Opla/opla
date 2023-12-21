@@ -32,12 +32,15 @@ import useTranslation from '@/hooks/useTranslation';
 import { Model } from '@/types';
 import Parameter from '../common/Parameter';
 
-function ModelView({ modelId }: { modelId?: string }) {
+function ModelView({ modelId, collection }: { modelId?: string; collection: Model[] }) {
   const { backendContext } = useBackend();
   const { t } = useTranslation();
 
   const models = backendContext.config.models.items; // .concat(localModels);
-  const model = models.find((m) => m.id === modelId) as Model;
+  let model = models.find((m) => m.id === modelId) as Model;
+  if (!model && modelId) {
+    model = collection.find((m) => m.id === modelId) as Model;
+  }
 
   if (!model) {
     return null;
@@ -51,7 +54,7 @@ function ModelView({ modelId }: { modelId?: string }) {
             <div className="justify-left flex w-full flex-row items-center gap-1 bg-neutral-50 p-3 text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
               <div className="mx-3 flex h-7 flex-row items-center px-2">
                 <span className="gap-1 py-1 capitalize text-neutral-700 dark:text-neutral-500">
-                  {model.author}
+                  {`${model.author}`}
                 </span>
                 <span className="pl-3"> /</span>
                 <span className="items-center truncate truncate px-3 dark:text-neutral-300">
@@ -72,32 +75,32 @@ function ModelView({ modelId }: { modelId?: string }) {
               <Parameter
                 title={t('File')}
                 name="file"
-                value={`${model.path}/${model.fileName}`}
+                value={`${model.path || ''}/${model.fileName || ''}`}
                 disabled
                 type="text"
               />
               <Parameter
                 title={t('Author')}
                 name="version"
-                value={model.author}
+                value={`${model.author}`}
                 disabled
                 type="text"
               />
               <Parameter
                 title={t('Version')}
                 name="version"
-                value={model.version}
+                value={`${model.version}`}
                 disabled
                 type="text"
               />
               <Parameter
                 title={t('License')}
                 name="license"
-                value={model.license}
+                value={`${model.license}`}
                 disabled
                 type="text"
               />
-              <Parameter title={t('Url')} name="url" value={model.url} disabled type="url" />
+              <Parameter title={t('Url')} name="url" value={`${model.url}`} disabled type="url" />
             </div>
           </div>
         </div>

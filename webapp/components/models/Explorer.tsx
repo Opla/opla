@@ -18,13 +18,19 @@ import { AppContext } from '@/context';
 import Link from 'next/link';
 import { useContext } from 'react';
 import { PiPlus } from 'react-icons/pi';
-import { MenuItem } from '@/types';
+import { MenuItem, Model } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import useBackend from '@/hooks/useBackend';
 import ContextMenu from '../common/ContextMenu';
 
-function ModelsExplorer({ selectedModelId }: { selectedModelId?: string }) {
+function ModelsExplorer({
+  selectedModelId,
+  collection,
+}: {
+  selectedModelId?: string;
+  collection: Model[];
+}) {
   const { models: localModels } = useContext(AppContext);
   const { backendContext } = useBackend();
   const models = backendContext.config.models.items; // .concat(localModels);
@@ -58,6 +64,40 @@ function ModelsExplorer({ selectedModelId }: { selectedModelId?: string }) {
               <div className="p1 text-ellipsis break-all text-neutral-600">{t('Local models')}</div>
               <li className="p1 flex flex-1 flex-col">
                 {models.map((model) => (
+                  <ul
+                    key={model.id}
+                    className={`${
+                      selectedModelId === model.id
+                        ? 'text-black dark:text-white'
+                        : 'text-neutral-400 dark:text-neutral-400'
+                    } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
+                  >
+                    <ContextMenu data={model.id} menu={menu}>
+                      <Link href={`/models/${model.id}`}>
+                        <div>
+                          <div className="flex cursor-pointer flex-row items-center">
+                            <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
+                              {model.name}
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    </ContextMenu>
+                  </ul>
+                ))}
+              </li>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 flex-col overflow-y-auto overflow-x-hidden dark:border-white/20">
+          <div className="flex flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
+            <div className="group relative flex flex-col gap-3 break-all rounded-md px-1 py-3">
+              <div className="p1 text-ellipsis break-all text-neutral-600">
+                {t('Featured models')}
+              </div>
+              <li className="p1 flex flex-1 flex-col">
+                {collection.map((model) => (
                   <ul
                     key={model.id}
                     className={`${
