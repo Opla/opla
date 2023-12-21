@@ -27,7 +27,8 @@ export default function Providers({ selectedModelId }: { selectedModelId?: strin
   useEffect(() => {
     const getCollection = async () => {
       const coll = (await getModelsCollection()) as unknown as { models: Model[] };
-      setCollection(coll.models);
+      const models = coll.models.map((m) => ({ ...m, id: m.name }));
+      setCollection(models);
     };
     getCollection();
   }, []);
@@ -35,9 +36,9 @@ export default function Providers({ selectedModelId }: { selectedModelId?: strin
   return (
     <SplitView
       className="grow overflow-hidden"
-      left={<Explorer selectedModelId={selectedModelId} />}
+      left={<Explorer selectedModelId={selectedModelId} collection={collection} />}
     >
-      <ModelView modelId={selectedModelId} />
+      <ModelView modelId={selectedModelId} collection={collection} />
     </SplitView>
   );
 }
