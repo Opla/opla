@@ -29,8 +29,13 @@
 
 import useBackend from '@/hooks/useBackend';
 import useTranslation from '@/hooks/useTranslation';
-import { Model } from '@/types';
+import { Entity, Model, Resource } from '@/types';
 import Parameter from '../common/Parameter';
+
+const getEntityName = (entity: string | Entity | undefined) =>
+  (entity as Entity)?.name || entity || '';
+const getResourceUrl = (resource: string | Resource | undefined) =>
+  (resource as Resource)?.url || resource || '';
 
 function ModelView({ modelId, collection }: { modelId?: string; collection: Model[] }) {
   const { backendContext } = useBackend();
@@ -54,16 +59,17 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
             <div className="justify-left flex w-full flex-row items-center gap-1 bg-neutral-50 p-3 text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
               <div className="mx-3 flex h-7 flex-row items-center px-2">
                 <span className="gap-1 py-1 capitalize text-neutral-700 dark:text-neutral-500">
-                  {`${model.author}`}
+                  {`${model.creator || getEntityName(model.author)}`}
                 </span>
-                <span className="pl-3"> /</span>
-                <span className="items-center truncate truncate px-3 dark:text-neutral-300">
+                <span className="pl-2">/</span>
+                <span className="items-center truncate truncate px-2 dark:text-neutral-300">
                   {model.name}
                 </span>
               </div>
             </div>
           </div>
-          <div className="flex h-full flex-col items-center text-sm dark:bg-neutral-900">
+          <div className="flex h-full flex-col text-sm dark:bg-neutral-900">
+            <h1 className="items-right bold px-8 py-4 text-xl">{model.title || model.name}</h1>
             <div className="flex flex-col items-center gap-2 px-8 py-4 text-sm">
               <Parameter
                 title=""
@@ -72,17 +78,19 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
                 disabled
                 type="large-text"
               />
-              <Parameter
-                title={t('File')}
-                name="file"
-                value={`${model.path || ''}/${model.fileName || ''}`}
-                disabled
-                type="text"
-              />
+              {model.path && (
+                <Parameter
+                  title={t('File')}
+                  name="file"
+                  value={`${model.path || ''}/${model.fileName || ''}`}
+                  disabled
+                  type="text"
+                />
+              )}
               <Parameter
                 title={t('Author')}
                 name="version"
-                value={`${model.author}`}
+                value={`${getEntityName(model.author)}`}
                 disabled
                 type="text"
               />
@@ -96,11 +104,17 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
               <Parameter
                 title={t('License')}
                 name="license"
-                value={`${model.license}`}
+                value={`${getEntityName(model.license)}`}
                 disabled
                 type="text"
               />
-              <Parameter title={t('Url')} name="url" value={`${model.url}`} disabled type="url" />
+              <Parameter
+                title={t('Repository')}
+                name="url"
+                value={`${getResourceUrl(model.repository)}`}
+                disabled
+                type="url"
+              />
             </div>
           </div>
         </div>

@@ -15,20 +15,7 @@
 use std::{ fs, path::PathBuf };
 use serde::{ Deserialize, Serialize };
 
-use crate::utils::Utils;
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Model {
-    pub id: String,
-    pub name: String,
-    pub path: String,
-    pub file_name: String,
-    pub description: String,
-    pub version: String,
-    pub license: String,
-    pub author: String,
-    pub url: String,
-}
+use crate::{ utils::Utils, models::Model };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ModelsConfiguration {

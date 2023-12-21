@@ -77,7 +77,7 @@ function ModelsExplorer({
                         <div>
                           <div className="flex cursor-pointer flex-row items-center">
                             <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
-                              {model.name}
+                              {model.title || model.name}
                             </div>
                           </div>
                         </div>
@@ -111,7 +111,7 @@ function ModelsExplorer({
                         <div>
                           <div className="flex cursor-pointer flex-row items-center">
                             <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
-                              {model.name}
+                              {model.title || model.name}
                             </div>
                           </div>
                         </div>

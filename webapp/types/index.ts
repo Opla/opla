@@ -71,13 +71,52 @@ export interface Conversation extends BaseNamedRecord {
   preset?: Preset;
 }
 
+export type Entity = {
+  name: string;
+  email?: string;
+  url?: string;
+};
+
+export type Resource = {
+  name: string;
+  url?: string;
+};
+
 export interface Model extends BaseNamedRecord {
-  path: string;
-  fileName: string;
-  version: string;
-  license: string;
-  author: string;
-  url: string;
+  base_model?: string;
+  title?: string;
+  description?: string;
+  summary?: string;
+  version?: string;
+  creator?: string;
+  author?: Entity | string;
+  publisher?: Entity | string;
+  license?: Entity | string;
+  languages?: string | string[];
+  tags?: string[];
+  recommendations?: string;
+  recommended?: boolean;
+  featured?: boolean;
+  deprecated?: boolean;
+  private?: boolean;
+
+  modelType?: string;
+  library?: string;
+  tensorType?: string;
+  quantization?: string;
+  bits?: number;
+  size?: number;
+  maxRam?: number;
+
+  repository?: Resource | string;
+  download?: Resource | string;
+  documentation?: Resource | string;
+  paper?: Resource | string;
+
+  path?: Resource | string; // local path
+  fileName?: string; // local file name : deprecated
+
+  include?: Model[];
 }
 
 export type ProviderType = 'opla' | 'server' | 'api' | 'proxy';
