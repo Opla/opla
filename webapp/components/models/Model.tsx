@@ -29,13 +29,9 @@
 
 import useBackend from '@/hooks/useBackend';
 import useTranslation from '@/hooks/useTranslation';
-import { Entity, Model, Resource } from '@/types';
+import { Model } from '@/types';
+import { getDownloads, getEntityName, getResourceUrl } from '@/utils/data/models';
 import Parameter from '../common/Parameter';
-
-const getEntityName = (entity: string | Entity | undefined) =>
-  (entity as Entity)?.name || entity || '';
-const getResourceUrl = (resource: string | Resource | undefined) =>
-  (resource as Resource)?.url || resource || '';
 
 function ModelView({ modelId, collection }: { modelId?: string; collection: Model[] }) {
   const { backendContext } = useBackend();
@@ -50,6 +46,11 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
   if (!model) {
     return null;
   }
+
+  const downloads = getDownloads(model).filter(
+    (d) =>
+      d.private !== true && (d.library === 'GGUF' || getResourceUrl(d.download).endsWith('.gguf')),
+  );
 
   return (
     <div className="flex max-w-full flex-1 flex-col dark:bg-neutral-800/30">
@@ -68,53 +69,79 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
               </div>
             </div>
           </div>
-          <div className="flex h-full flex-col text-sm dark:bg-neutral-900">
-            <h1 className="items-right bold px-8 py-4 text-xl">{model.title || model.name}</h1>
-            <div className="flex flex-col items-center gap-2 px-8 py-4 text-sm">
-              <Parameter
-                title=""
-                name="description"
-                value={t(model.description || '')}
-                disabled
-                type="large-text"
-              />
-              {model.path && (
-                <Parameter
-                  title={t('File')}
-                  name="file"
-                  value={`${model.path || ''}/${model.fileName || ''}`}
-                  disabled
-                  type="text"
-                />
-              )}
-              <Parameter
-                title={t('Author')}
-                name="version"
-                value={`${getEntityName(model.author)}`}
-                disabled
-                type="text"
-              />
-              <Parameter
-                title={t('Version')}
-                name="version"
-                value={`${model.version}`}
-                disabled
-                type="text"
-              />
-              <Parameter
-                title={t('License')}
-                name="license"
-                value={`${getEntityName(model.license)}`}
-                disabled
-                type="text"
-              />
-              <Parameter
-                title={t('Repository')}
-                name="url"
-                value={`${getResourceUrl(model.repository)}`}
-                disabled
-                type="url"
-              />
+          <div className="flex h-full w-full flex-col text-sm dark:bg-neutral-900">
+            <div className="flex h-[90%] w-full flex-col overflow-y-auto overflow-x-hidden">
+              <div className="flex w-full flex-col px-8 py-4 text-sm">
+                <h1 className="items-right bold w-full text-xl">{model.title || model.name}</h1>
+                <div className="flex w-full flex-col items-center gap-2 text-sm">
+                  <Parameter
+                    title=""
+                    name="description"
+                    value={t(model.description || '')}
+                    disabled
+                    type="large-text"
+                  />
+                  {model.path && (
+                    <Parameter
+                      title={t('File')}
+                      name="file"
+                      value={`${model.path || ''}/${model.fileName || ''}`}
+                      disabled
+                      type="text"
+                    />
+                  )}
+                  <Parameter
+                    title={t('Author')}
+                    name="version"
+                    value={`${getEntityName(model.author)}`}
+                    disabled
+                    type="text"
+                  />
+                  <Parameter
+                    title={t('Version')}
+                    name="version"
+                    value={`${model.version}`}
+                    disabled
+                    type="text"
+                  />
+                  <Parameter
+                    title={t('License')}
+                    name="license"
+                    value={`${getEntityName(model.license)}`}
+                    disabled
+                    type="text"
+                  />
+                  <Parameter
+                    title={t('Repository')}
+                    name="url"
+                    value={`${getResourceUrl(model.repository)}`}
+                    disabled
+                    type="url"
+                  />
+                </div>
+                <div className="flex w-full flex-col gap-2 text-sm">
+                  <p className="py-4">{t('Downloadable implementations')}</p>
+                  <table className="w-full">
+                    <tbody className="flex h-[30vh] flex-col justify-between overflow-y-auto">
+                      {downloads.map((download) => (
+                        <tr
+                          onClick={() => {}}
+                          key={download.id || download.name}
+                          className="mb-2 flex w-full cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                        >
+                          <td className="w-1/3 truncate p-1">{download.name}</td>
+                          <td className="w-2/3 p-1">
+                            <p className="w-full truncate">
+                              <span>{`${(download.size || 0).toFixed(1)}Gb`}</span>
+                              <span className="ml-4">{download.recommendations || ''}</span>
+                            </p>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </div>

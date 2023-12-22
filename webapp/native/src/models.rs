@@ -97,7 +97,7 @@ pub struct Model {
 
     #[serde_as(deserialize_as = "Option<OneOrMany<_, PreferOne>>")]
     pub tags: Option<Vec<String>>,
-    pub recommandations: Option<String>,
+    pub recommendations: Option<String>,
     pub recommended: Option<bool>,
     pub deprecated: Option<bool>,
     pub private: Option<bool>,
