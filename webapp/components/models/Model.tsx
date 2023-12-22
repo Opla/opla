@@ -119,28 +119,30 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
                     type="url"
                   />
                 </div>
-                <div className="flex w-full flex-col gap-2 text-sm">
-                  <p className="py-4">{t('Downloadable implementations')}</p>
-                  <table className="w-full">
-                    <tbody className="flex h-[30vh] flex-col justify-between overflow-y-auto">
-                      {downloads.map((download) => (
-                        <tr
-                          onClick={() => {}}
-                          key={download.id || download.name}
-                          className="mb-2 flex w-full cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                        >
-                          <td className="w-1/3 truncate p-1">{download.name}</td>
-                          <td className="w-2/3 p-1">
-                            <p className="w-full truncate">
-                              <span>{`${(download.size || 0).toFixed(1)}Gb`}</span>
-                              <span className="ml-4">{download.recommendations || ''}</span>
-                            </p>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                {downloads.length > 0 && (
+                  <div className="flex w-full flex-col gap-2 text-sm">
+                    <p className="py-4">{t('Downloadable implementations')}</p>
+                    <table className="w-full">
+                      <tbody className="flex h-[30vh] flex-col justify-between overflow-y-auto">
+                        {downloads.map((download) => (
+                          <tr
+                            onClick={() => {}}
+                            key={download.id || download.name}
+                            className="mb-2 flex w-full cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                          >
+                            <td className="w-1/3 truncate p-1">{download.name}</td>
+                            <td className="w-2/3 p-1">
+                              <p className="w-full truncate">
+                                <span>{`${(download.size || 0).toFixed(1)}Gb`}</span>
+                                <span className="ml-4">{download.recommendations || ''}</span>
+                              </p>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
           </div>
