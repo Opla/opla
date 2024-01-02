@@ -14,7 +14,7 @@
 
 'use client';
 
-import { createContext } from 'react';
+import { createContext, useMemo } from 'react';
 import { Conversation, Model, Preset, Provider } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
 
@@ -52,23 +52,32 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
   const [models, setModels] = useDataStorage('models', initialContext.models);
   const [presets, setPresets] = useDataStorage('presets', initialContext.presets);
 
-  return (
-    <AppContext.Provider
-      // eslint-disable-next-line react/jsx-no-constructed-context-values
-      value={{
-        conversations,
-        setConversations,
-        providers,
-        setProviders,
-        models,
-        setModels,
-        presets,
-        setPresets,
-      }}
-    >
-      {children}
-    </AppContext.Provider>
+  // ...
+
+  const contextValue = useMemo(
+    () => ({
+      conversations,
+      setConversations,
+      providers,
+      setProviders,
+      models,
+      setModels,
+      presets,
+      setPresets,
+    }),
+    [
+      conversations,
+      setConversations,
+      providers,
+      setProviders,
+      models,
+      setModels,
+      presets,
+      setPresets,
+    ],
   );
+
+  return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
 }
 
 export { AppContext, AppContextProvider };

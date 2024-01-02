@@ -14,10 +14,10 @@
 
 import logger from './logger';
 
-interface DataStorage {
+type DataStorage = {
   getItem<T>(key: string): T | null;
   setItem<T>(key: string, value: T): void;
-}
+};
 
 const LocalStorage: DataStorage = {
   getItem(key: string) {

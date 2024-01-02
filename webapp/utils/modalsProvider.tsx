@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import Portal from '@/components/common/Portal';
-import { createContext, useState } from 'react';
+import { createContext, useCallback, useMemo, useState } from 'react';
 
 type Context = {
   instances: {
@@ -43,27 +43,28 @@ const ModalsContext = createContext(initialContext);
 function ModalsProvider({ children }: { children: React.ReactNode }) {
   const [modals, setModals] = useState(initialContext.instances);
 
-  const registerModal = (
-    name: string,
-    render: () => React.ReactNode,
-    visible = false,
-    data = undefined,
-  ) => {
-    if (!modals[name]) {
-      setModals((prevModals) => ({ ...prevModals, ...{ [name]: { render, visible, data } } }));
-    }
-  };
+  const registerModal = useCallback(
+    (name: string, render: () => React.ReactNode, visible = false, data = undefined) => {
+      if (!modals[name]) {
+        setModals((prevModals) => ({ ...prevModals, ...{ [name]: { render, visible, data } } }));
+      }
+    },
+    [modals],
+  );
 
-  const showModal = (name: string, data = undefined) => {
-    const instance = modals[name];
+  const showModal = useCallback(
+    (name: string, data = undefined) => {
+      const instance = modals[name];
 
-    if (instance) {
-      setModals((prevModals) => ({
-        ...prevModals,
-        ...{ [name]: { ...instance, visible: true, data } },
-      }));
-    }
-  };
+      if (instance) {
+        setModals((prevModals) => ({
+          ...prevModals,
+          ...{ [name]: { ...instance, visible: true, data } },
+        }));
+      }
+    },
+    [modals],
+  );
 
   const onClose = (name: string) => {
     const instance = modals[name];
@@ -75,11 +76,13 @@ function ModalsProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const contextValue = useMemo(
+    () => ({ instances: modals, registerModal, showModal }),
+    [modals, registerModal, showModal],
+  );
+
   return (
-    <ModalsContext.Provider
-      // eslint-disable-next-line react/jsx-no-constructed-context-values
-      value={{ instances: modals, registerModal, showModal }}
-    >
+    <ModalsContext.Provider value={contextValue}>
       {children}
       <Portal>
         {Object.entries(modals).map(([name, { render, visible, data }]) =>

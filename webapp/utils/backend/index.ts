@@ -16,7 +16,6 @@ import { Backend } from '@/utils/backend/connect';
 import { ServerStatus } from '@/types';
 
 const connect = async (listener: (payload: any) => void) => {
-  // eslint-disable-next-line no-underscore-dangle
   if (window?.__TAURI__) {
     const { default: connectBackend } = await import('@/utils/backend/connect');
     return connectBackend(listener);
