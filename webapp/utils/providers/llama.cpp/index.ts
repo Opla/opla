@@ -11,13 +11,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { invoke } from '@tauri-apps/api/tauri';
+
+// import { invoke } from '@tauri-apps/api/tauri';
 import logger from '@/utils/logger';
 import { LlamaCppArguments, LlamaCppArgumentsSchema } from './schema';
 
+const invokeTauri = async (command: string, args?: LlamaCppArguments) => {
+  const { invoke } = (await import('@tauri-apps/api/tauri'));
+  return invoke(command, args);
+}
+
 const stopLLamaCppServer = async () => {
   logger.info('stop LLama.cpp server');
-  await invoke('stop_opla_server');
+  await invokeTauri('stop_opla_server');
 };
 
 const startLLamaCppServer = async (
@@ -29,7 +35,7 @@ const startLLamaCppServer = async (
     command === 'start_opla_server' ? 'start LLama.cpp server' : 'restart LLama.cpp server',
   );
   const args = LlamaCppArgumentsSchema.parse({ ...metadata, model });
-  const response = await invoke(command, args);
+  const response = await invokeTauri(command, args);
   logger.info(`opla server starting: ${response}`, response);
   return response;
 };
