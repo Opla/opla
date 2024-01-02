@@ -11,9 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { appWindow } from '@tauri-apps/api/window';
-import { confirm } from '@tauri-apps/api/dialog';
-import { listen } from '@tauri-apps/api/event';
+// import { appWindow } from '@tauri-apps/api/window';
+// import { confirm } from '@tauri-apps/api/dialog';
+// import { listen } from '@tauri-apps/api/event';
 import { OplaContext, OplaServer, ServerStatus } from '@/types';
 import logger from '../logger';
 import {
@@ -34,6 +34,9 @@ export type Backend = {
 };
 
 const connectBackend = async (listener: (payload: any) => void) => {
+  const { appWindow } = await import('@tauri-apps/api/window');
+  const { confirm } = await import('@tauri-apps/api/dialog');
+  const { listen } = await import('@tauri-apps/api/event');
   const unlisten = await appWindow.onCloseRequested(async (event) => {
     const confirmed = await confirm('Are you sure?');
     if (!confirmed) {
