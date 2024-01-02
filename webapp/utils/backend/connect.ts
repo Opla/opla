@@ -34,9 +34,9 @@ export type Backend = {
 };
 
 const connectBackend = async (listener: (payload: any) => void) => {
-  const { appWindow } = (await import('@tauri-apps/api/window'));
-  const { confirm } = (await import('@tauri-apps/api/dialog'));
-  const { listen } = (await import('@tauri-apps/api/event'));
+  const { appWindow } = await import('@tauri-apps/api/window');
+  const { confirm } = await import('@tauri-apps/api/dialog');
+  const { listen } = await import('@tauri-apps/api/event');
   const unlisten = await appWindow.onCloseRequested(async (event) => {
     const confirmed = await confirm('Are you sure?');
     if (!confirmed) {
