@@ -5,7 +5,7 @@ on: [pull_request]
 # This workflow will build your tauri app without uploading it anywhere.
 
 jobs:
-  test-tauri:
+  test-webapp:
     strategy:
       fail-fast: false
       matrix:
