@@ -54,22 +54,22 @@ export type BaseRecord = {
   metadata?: Metadata;
 };
 
-export interface BaseNamedRecord extends BaseRecord {
+export type BaseNamedRecord = BaseRecord & {
   name: string;
   description?: string;
-}
+};
 
-export interface Message extends BaseRecord {
+export type Message = BaseRecord & {
   author: Author;
   content: string | Content;
   contentHistory?: (string | Content)[];
-}
+};
 
-export interface Conversation extends BaseNamedRecord {
+export type Conversation = BaseNamedRecord & {
   messages: Message[];
   pluginIds?: string[];
   preset?: Preset;
-}
+};
 
 export type Entity = {
   name: string;
@@ -82,7 +82,7 @@ export type Resource = {
   url?: string;
 };
 
-export interface Model extends BaseNamedRecord {
+export type Model = BaseNamedRecord & {
   base_model?: string;
   title?: string;
   description?: string;
@@ -117,27 +117,27 @@ export interface Model extends BaseNamedRecord {
   fileName?: string; // local file name : deprecated
 
   include?: Model[];
-}
+};
 
 export type ProviderType = 'opla' | 'server' | 'api' | 'proxy';
 
-export interface Provider extends BaseNamedRecord {
+export type Provider = BaseNamedRecord & {
   url: string;
   docUrl?: string;
   type: ProviderType;
   disabled: boolean;
   token: string;
   isDisabled?: () => boolean;
-}
+};
 
-export interface Preset extends BaseNamedRecord {
+export type Preset = BaseNamedRecord & {
   ownerId: string;
   parentId?: string;
   providerId?: string;
   modelIds?: string[];
-}
+};
 
-export interface Plugin extends BaseNamedRecord {}
+export type Plugin = BaseNamedRecord & {};
 
 export type User = {
   id: string;

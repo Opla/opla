@@ -16,13 +16,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import LeftPanel from './LeftPanel';
 
-interface SplitViewProps {
+type SplitViewProps = {
   left: React.ReactElement;
   children: React.ReactNode;
   className?: string;
   width?: number;
   minWidth?: number;
-}
+};
 
 export default function SplitView({
   left,
