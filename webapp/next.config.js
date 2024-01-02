@@ -2,7 +2,7 @@
 const nextConfig = {
   output: 'export',
   images: { unoptimized: true },
-  react: {},
+  reactStrictMode: true,
 };
 
 module.exports = nextConfig;
