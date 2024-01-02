@@ -38,7 +38,7 @@ function MessageComponent({ message }: { message: Message }) {
           </div>
           <div className="flex w-[calc(100%-50px)] flex-col gap-1 md:gap-3 lg:w-[calc(100%-115px)]">
             <div className="flex flex-grow flex-col gap-3">
-              <div className="min-h-20 flex flex-col items-start gap-4 whitespace-pre-wrap break-words">
+              <div className="flex min-h-20 flex-col items-start gap-4 whitespace-pre-wrap break-words">
                 <div className="markdown prose dark:prose-invert dark w-full break-words">
                   <p className="font-bold capitalize">{author.name}</p>
                   {!isUser && text === null ? (

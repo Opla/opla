@@ -76,7 +76,7 @@ export default function Prompt({
               value={message}
               tabIndex={0}
               placeholder={t('Send a message...')}
-              className="m-0 h-[24px] max-h-[200px] w-full resize-none overflow-y-hidden border-0 bg-transparent p-0 pl-2 pr-7 focus:outline-none focus:ring-0 focus-visible:ring-0 dark:bg-transparent md:pl-0"
+              className="m-0 h-[24px] max-h-[200px] w-full resize-none overflow-y-hidden border-0 bg-transparent p-0 pl-2 pr-7 focus:outline-none focus:ring-0 focus-visible:ring-0 md:pl-0 dark:bg-transparent"
               onChange={handleUpdateMessage}
               onKeyDown={(e) => handleKeypress(e)}
             />
