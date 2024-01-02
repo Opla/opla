@@ -35,7 +35,9 @@ export const getOplaConfig = async (): Promise<Store> => {
 
 export const getModelsCollection = async (): Promise<{ models: [] }> => {
   try {
-    const collection = (await invokeTauri('get_models_collection')) as unknown as { models: Model[] };
+    const collection = (await invokeTauri('get_models_collection')) as unknown as {
+      models: Model[];
+    };
     logger.info('getCollection', collection);
     return await mapKeys(collection, toCamelCase);
   } catch (error) {
