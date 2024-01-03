@@ -7,7 +7,9 @@ env:
   ASSETS_URL: https://github.com/mikbry/llama.cpp-builds/releases/download/main/
   BINARIES_DIR: webapp/native/binaries/llama.cpp/
   MACOS_ARM64: llama.cpp.server-aarch64-apple-darwin
-
+  MACOS_x86_64: llama.cpp.server-x86_64-apple-darwin
+  LINUX_x86_64: llama.cpp.server-x86_64-unknown-linux-gnu
+  WINDOWS_x86_64: llama.cpp.server-x86_64-pc-windows-msvc.exe
 jobs:
   upload-assets:
     runs-on: ubuntu-latest
@@ -19,6 +21,9 @@ jobs:
       - name: Upload Llama.cpp Assets
         run: |
           curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L -o ${{ env.BINARIES_DIR }}${{ env.MACOS_ARM64 }} ${{ env.ASSETS_URL }}${{ env.MACOS_ARM64 }}
+          curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L -o ${{ env.BINARIES_DIR }}${{ env.MACOS_x86_64 }} ${{ env.ASSETS_URL }}${{ env.MACOS_x86_64 }}
+          curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L -o ${{ env.BINARIES_DIR }}${{ env.LINUX_x86_64 }} ${{ env.ASSETS_URL }}${{ env.LINUX_x86_64 }}
+          curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L -o ${{ env.BINARIES_DIR }}${{ env.WINDOWS_x86_64 }} ${{ env.ASSETS_URL }}${{ env.WINDOWS_x86_64 }}
 
       - name: Upload Llama.cpp Assets
         uses: EndBug/add-and-commit@v9
