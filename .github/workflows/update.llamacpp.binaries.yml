@@ -1,0 +1,26 @@
+name: Update Llama.cpp Binaries
+
+on:
+  workflow_dispatch:
+
+env:
+  ASSETS_URL: https://github.com/mikbry/llama.cpp-builds/releases/download/main/
+  BINARIES_DIR: webapp/native/binaries/llama.cpp/
+  MACOS_ARM64: llama.cpp.server-aarch64-apple-darwin
+
+jobs:
+  upload-assets:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Upload Llama.cpp Assets
+        run: |
+          curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L -o ${{ env.BINARIES_DIR }}${{ env.MACOS_ARM64 }} ${{ env.ASSETS_URL }}${{ env.MACOS_ARM64 }}
+
+      - name: Upload Llama.cpp Assets
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: "chore: update llama.cpp.server binaries"
