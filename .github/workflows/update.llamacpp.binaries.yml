@@ -1,4 +1,4 @@
-name: Update Llama.cpp Binaries
+name: update Llama.cpp binaries
 
 on:
   workflow_dispatch:
@@ -15,17 +15,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Upload Llama.cpp Assets
+      - name: upload Llama.cpp.server files
         run: |
           curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L -o ${{ env.BINARIES_DIR }}${{ env.MACOS_ARM64 }} ${{ env.ASSETS_URL }}${{ env.MACOS_ARM64 }}
           curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L -o ${{ env.BINARIES_DIR }}${{ env.MACOS_x86_64 }} ${{ env.ASSETS_URL }}${{ env.MACOS_x86_64 }}
           curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L -o ${{ env.BINARIES_DIR }}${{ env.LINUX_x86_64 }} ${{ env.ASSETS_URL }}${{ env.LINUX_x86_64 }}
           curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L -o ${{ env.BINARIES_DIR }}${{ env.WINDOWS_x86_64 }} ${{ env.ASSETS_URL }}${{ env.WINDOWS_x86_64 }}
 
-      - name: Upload Llama.cpp Assets
+      - name: add and commit Llama.cpp.server changes
         uses: EndBug/add-and-commit@v9
         with:
           message: "chore: update llama.cpp.server binaries"
