@@ -16,11 +16,13 @@
 
 mod server;
 mod store;
+mod downloader;
 pub mod utils;
 pub mod models;
 
 use std::sync::Mutex;
 
+use downloader::Downloader;
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
 use store::Store;
@@ -30,6 +32,7 @@ use tauri::{ Runtime, State, Manager };
 pub struct OplaContext {
     pub server: Mutex<OplaServer>,
     pub config: Mutex<Store>,
+    pub downloader: Mutex<Downloader>,
 }
 
 #[tauri::command]
@@ -126,6 +129,21 @@ async fn get_models_collection<R: Runtime>(
     )
 }
 
+#[tauri::command]
+async fn download_model<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>,
+    model: String,
+    url: String,
+    file_name: String
+) -> Result<Downloader, String> {
+    let downloader = context.downloader.lock().unwrap();
+    downloader.download_file(model, url, file_name, app);
+
+    Ok(downloader.clone())
+}
+
 fn start_server<R: Runtime>(app: tauri::AppHandle<R>, context: State<'_, OplaContext>) {
     println!("Opla try to start server");
     let config = context.config.lock().expect("Failed to get config");
@@ -171,6 +189,7 @@ fn main() {
     let context: OplaContext = OplaContext {
         server: Mutex::new(OplaServer::new()),
         config: Mutex::new(Store::new()),
+        downloader: Mutex::new(Downloader::new()),
     };
     tauri::Builder
         ::default()
@@ -223,7 +242,8 @@ fn main() {
                 get_opla_server_status,
                 start_opla_server,
                 stop_opla_server,
-                get_models_collection
+                get_models_collection,
+                download_model
             ]
         )
         .run(tauri::generate_context!())
