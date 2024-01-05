@@ -28,4 +28,9 @@ const getEntityName = (entity: string | Entity | undefined) =>
 const getResourceUrl = (resource: string | Resource | undefined) =>
   ((resource as Resource)?.url || resource || '') as string;
 
-export { getDownloads, getEntityName, getResourceUrl };
+const isValidFormat = (m: Model) =>
+  m?.library === 'GGUF' ||
+  m?.name.endsWith('.gguf') ||
+  getResourceUrl(m?.download).endsWith('.gguf');
+
+export { getDownloads, getEntityName, getResourceUrl, isValidFormat };

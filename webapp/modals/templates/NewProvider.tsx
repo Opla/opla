@@ -33,9 +33,11 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 }
 
 export default function NewProvider({
+  id,
   open,
   onClose: _onClose,
 }: {
+  id: string;
   open: boolean;
   onClose: () => void | undefined;
 }) {
@@ -83,7 +85,7 @@ export default function NewProvider({
   };
 
   return (
-    <Dialog id="newprovider" size="md" open={open} onClose={onClose}>
+    <Dialog id={id} size="md" open={open} onClose={onClose}>
       <div className="flex h-full w-full flex-col justify-between gap-3 p-2 pb-4">
         {step === 1 && (
           <Panel title={t('Choose a provider')}>

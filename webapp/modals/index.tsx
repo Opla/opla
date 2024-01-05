@@ -17,34 +17,55 @@ import Dialog from '@/components/common/Modal';
 import AlertDialog from '@/components/common/AlertDialog';
 import { BaseNamedRecord } from '@/types';
 import { ModalRef } from '@/context/modals';
-import Settings from './settings';
-import NewProvider from './templates/NewProvider';
+import SettingsPanel from './settings';
+import NewProviderPanel from './templates/NewProvider';
+
+enum ModalIds {
+  Settings = 'settings',
+  NewProvider = 'newprovider',
+  Welcome = 'welcome',
+  DeleteItem = 'deleteitem',
+  DownloadItem = 'downloaditem',
+}
 
 const Modals: ModalRef[] = [
   {
-    id: 'settings',
+    id: ModalIds.Settings,
     Component: function SettingsDialog({ visible, onClose }) {
       return (
-        <Dialog key="settingsmodal" id="settingsmodal" size="xl" open={visible} onClose={onClose}>
-          <Settings />
+        <Dialog
+          key={ModalIds.Settings}
+          id={ModalIds.Settings}
+          size="xl"
+          open={visible}
+          onClose={onClose}
+        >
+          <SettingsPanel />
         </Dialog>
       );
     },
   },
   {
-    id: 'newprovider',
+    id: ModalIds.NewProvider,
     Component: function NewProviderDialog({ visible, onClose }) {
-      return <NewProvider key="newprovider" open={visible} onClose={onClose} />;
+      return (
+        <NewProviderPanel
+          key={ModalIds.NewProvider}
+          id={ModalIds.NewProvider}
+          open={visible}
+          onClose={onClose}
+        />
+      );
     },
   },
   {
-    id: 'welcome',
+    id: ModalIds.Welcome,
     Component: function NewProviderDialog({ visible, onClose }) {
       const { t } = useTranslation();
       return (
         <AlertDialog
-          key="welcome"
-          id="welcome"
+          key={ModalIds.Welcome}
+          id={ModalIds.Welcome}
           title={t('Welcome to Opla!')}
           actions={[{ label: t("Let's go!") }]}
           visible={visible}
@@ -56,14 +77,14 @@ const Modals: ModalRef[] = [
     },
   },
   {
-    id: 'deleteitem',
+    id: ModalIds.DeleteItem,
     Component: function DeleteItemDialog({ visible, onClose, data }) {
       const { t } = useTranslation();
       const item = data?.item as BaseNamedRecord;
       return (
         <AlertDialog
-          key="deleteitem"
-          id="deleteitem"
+          key={ModalIds.DeleteItem}
+          id={ModalIds.DeleteItem}
           title={t('Delete this item?')}
           actions={[
             { label: t('Delete'), value: 'Delete' },
@@ -78,6 +99,31 @@ const Modals: ModalRef[] = [
       );
     },
   },
+  {
+    id: ModalIds.DownloadItem,
+    Component: function DownloadItemDialog({ visible, onClose, data }) {
+      const { t } = useTranslation();
+      const item = data?.item as BaseNamedRecord;
+      return (
+        <AlertDialog
+          key={ModalIds.DownloadItem}
+          id={ModalIds.DownloadItem}
+          title={t('Download this item?')}
+          actions={[
+            { label: t('Download'), value: 'Download' },
+            { label: t('Cancel'), value: 'Cancel' },
+          ]}
+          visible={visible}
+          onClose={onClose}
+          data={data}
+        >
+          <div>{item?.name || ''}</div>
+        </AlertDialog>
+      );
+    },
+  },
 ];
 
 export default Modals;
+
+export { ModalIds };

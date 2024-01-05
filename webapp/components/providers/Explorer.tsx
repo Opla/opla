@@ -25,6 +25,7 @@ import logger from '@/utils/logger';
 import { ModalsContext } from '@/context/modals';
 import { deleteProvider, getProvider, updateProvider } from '@/utils/data/providers';
 import useBackend from '@/hooks/useBackend';
+import { ModalIds } from '@/modals';
 import ContextMenu from '../common/ContextMenu';
 
 function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string }) {
@@ -36,7 +37,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
 
   const createNewProvider = () => {
     logger.info('create new provider');
-    showModal('newprovider');
+    showModal(ModalIds.NewProvider);
   };
 
   const onDelete = (action: string, data: any) => {
@@ -56,7 +57,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
   const onToDelete = (data: string) => {
     logger.info(`to delete ${data}`);
     const provider = getProvider(data, providers) as Provider;
-    showModal('deleteitem', { item: provider, onAction: onDelete });
+    showModal(ModalIds.DeleteItem, { item: provider, onAction: onDelete });
   };
 
   const onProviderToggle = (data: string) => {

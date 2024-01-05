@@ -28,6 +28,7 @@ import {
   deleteConversation,
 } from '@/utils/data/conversations';
 import { ModalsContext } from '@/context/modals';
+import { ModalIds } from '@/modals';
 import ContextMenu from '../common/ContextMenu';
 import EditableItem from '../common/EditableItem';
 
@@ -61,7 +62,7 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
   const onToDelete = (data: string) => {
     logger.info(`to delete ${data}`);
     const conversation = getConversation(data, conversations) as Conversation;
-    showModal('deleteitem', { item: conversation, onAction: onDelete });
+    showModal(ModalIds.DeleteItem, { item: conversation, onAction: onDelete });
   };
 
   const onChangeConversationName = (value: string, id: string) => {
