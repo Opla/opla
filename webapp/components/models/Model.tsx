@@ -27,11 +27,15 @@
 
 'use client';
 
+import { useContext } from 'react';
 import { DownloadIcon } from '@radix-ui/react-icons';
 import useBackend from '@/hooks/useBackend';
 import useTranslation from '@/hooks/useTranslation';
 import { Model } from '@/types';
-import { getDownloads, getEntityName, getResourceUrl } from '@/utils/data/models';
+import { getDownloads, getEntityName, getResourceUrl, isValidFormat } from '@/utils/data/models';
+import { ModalIds } from '@/modals';
+import { ModalsContext } from '@/context/modals';
+import logger from '@/utils/logger';
 import Parameter from '../common/Parameter';
 import { Button } from '../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../ui/table';
@@ -39,21 +43,48 @@ import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '.
 function ModelView({ modelId, collection }: { modelId?: string; collection: Model[] }) {
   const { backendContext } = useBackend();
   const { t } = useTranslation();
+  const { showModal } = useContext(ModalsContext);
 
-  const models = backendContext.config.models.items; // .concat(localModels);
+  const models = backendContext.config.models.items;
+  let local = true;
   let model = models.find((m) => m.id === modelId) as Model;
   if (!model && modelId) {
     model = collection.find((m) => m.id === modelId) as Model;
+    local = false;
   }
 
   if (!model) {
     return null;
   }
 
-  const downloads = getDownloads(model).filter(
-    (d) =>
-      d.private !== true && (d.library === 'GGUF' || getResourceUrl(d.download).endsWith('.gguf')),
-  );
+  const downloads = getDownloads(model).filter((d) => d.private !== true && isValidFormat(d));
+
+  const onDownload = () => {
+    logger.info(`TODO download ${model.name} ${getResourceUrl(model.download)}`);
+  };
+
+  const onDelete = () => {
+    logger.info(`TODO delete ${model.name} ${getResourceUrl(model.download)}`);
+  };
+
+  const onChange = (selectedModel?: Model) => {
+    if (local && !selectedModel) {
+      showModal(ModalIds.DeleteItem, { item: model, onAction: onDelete });
+      return;
+    }
+    let item: Model = selectedModel || model;
+    // If the model is not a GGUF model, we need to find the recommended or first download
+    if (!isValidFormat(item) && downloads.length > 0) {
+      item = downloads.find((d) => d.recommended) || downloads[0];
+    }
+
+    if (isValidFormat(item)) {
+      showModal(ModalIds.DownloadItem, { item, onAction: onDownload });
+    } else {
+      logger.info(`No valid format ${item?.name} ${item?.library}`);
+      // TODO: display toaster
+    }
+  };
 
   return (
     <div className="flex max-w-full flex-1 flex-col dark:bg-neutral-800/30">
@@ -71,8 +102,8 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
                 </span>
               </div>
               <div>
-                <Button variant="secondary" className="mr-4">
-                  {t('Download')}
+                <Button variant="secondary" className="mr-4" onClick={() => onChange()}>
+                  {local ? t('Delete') : t('Download')}
                 </Button>
               </div>
             </div>
@@ -154,7 +185,11 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
                               <span>{download.recommendations || ''}</span>
                             </TableCell>
                             <TableCell aria-label={t('Download')}>
-                              <Button variant="ghost" size="icon">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => onChange(download)}
+                              >
                                 <DownloadIcon />
                               </Button>
                             </TableCell>

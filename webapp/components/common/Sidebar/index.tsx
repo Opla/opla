@@ -29,6 +29,7 @@ import { useRouter } from 'next/router';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import logger from '@/utils/logger';
+import { ModalIds } from '@/modals';
 import Tooltip, { Orientation } from '../Tooltip';
 import SidebarItems from './SidebarItems';
 import { Item } from './types';
@@ -88,7 +89,7 @@ function Sidebar() {
   const { showModal } = useContext(ModalsContext);
 
   const onModal = () => {
-    showModal('settings');
+    showModal(ModalIds.Settings);
   };
 
   return (
