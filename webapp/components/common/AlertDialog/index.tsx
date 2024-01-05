@@ -15,9 +15,10 @@
 'use client';
 
 import { MenuItem } from '@/types';
-import Modal from '../Modal/Modal';
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
-export default function Dialog({
+export default function AlertDialog({
   id,
   title,
   visible,
@@ -42,7 +43,7 @@ export default function Dialog({
   };
 
   return (
-    <Modal
+    <Dialog
       id={id}
       open={visible}
       size="sm"
@@ -51,14 +52,14 @@ export default function Dialog({
       }}
     >
       <div className="flex h-full w-full flex-col gap-3 p-4">
-        <div className="mb-4 text-lg font-bold">{title}</div>
-        <div className="relative flex-auto">{children}</div>
-        <div className="flex flex-shrink-0 flex-row-reverse gap-3">
+        <DialogHeader>{title}</DialogHeader>
+        <DialogContent>{children}</DialogContent>
+        <DialogFooter>
           {actions?.map((action) => (
-            <button
+            <Button
               key={action.label}
               type="button"
-              className="rounded-md bg-neutral-500 px-4 py-2 text-white"
+              variant={action.variant || 'default'}
               onClick={(e) => {
                 e.preventDefault();
                 onPreAction(
@@ -68,10 +69,10 @@ export default function Dialog({
               }}
             >
               {action.label}
-            </button>
+            </Button>
           ))}
-        </div>
+        </DialogFooter>
       </div>
-    </Modal>
+    </Dialog>
   );
 }

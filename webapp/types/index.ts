@@ -22,6 +22,7 @@ declare global {
 
 // Ui types
 export type MenuItem = {
+  variant?: 'link' | 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
   label: string;
   value?: string;
   icon?: IconType;

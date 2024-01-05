@@ -12,19 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Dialog from '@/components/common/Modal';
-import Settings from './settings';
+// @deprecated
+import { Dialog } from '@/components/ui/dialog';
 
-export default function SettingsModal({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void | undefined;
-}) {
-  return (
-    <Dialog id="settingsmodal" size="xl" open={open} onClose={onClose}>
-      <Settings />
-    </Dialog>
-  );
-}
+export default Dialog;
