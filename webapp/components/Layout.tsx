@@ -20,6 +20,7 @@ import Sidebar from '@/components/common/Sidebar';
 import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackend';
 import useRegisterModals from '@/hooks/useRegisterModals';
+import Modals from '@/modals';
 import Statusbar from './common/Statusbar';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -27,7 +28,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   useBackend();
 
-  useRegisterModals();
+  useRegisterModals(Modals);
 
   if (!providers || !models || !presets) {
     return <div>Loading...</div>;

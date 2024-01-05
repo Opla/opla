@@ -19,7 +19,7 @@ import { AppProps } from 'next/app';
 import Layout from '@/components/Layout';
 import { ThemeProvider } from 'next-themes';
 import { AppContextProvider } from '@/context';
-import { ModalsProvider } from '@/utils/modalsProvider';
+import { ModalsProvider } from '@/context/modals';
 
 export default function App({ Component }: AppProps) {
   // Dirty hack to fix hydration mismatch using i18n

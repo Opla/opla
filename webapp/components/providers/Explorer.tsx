@@ -22,7 +22,7 @@ import { AppContext } from '@/context';
 import { MenuItem, Provider, ServerStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
-import { ModalsContext } from '@/utils/modalsProvider';
+import { ModalsContext } from '@/context/modals';
 import { deleteProvider, getProvider, updateProvider } from '@/utils/data/providers';
 import useBackend from '@/hooks/useBackend';
 import ContextMenu from '../common/ContextMenu';

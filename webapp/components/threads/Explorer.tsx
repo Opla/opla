@@ -27,7 +27,7 @@ import {
   updateConversation,
   deleteConversation,
 } from '@/utils/data/conversations';
-import { ModalsContext } from '@/utils/modalsProvider';
+import { ModalsContext } from '@/context/modals';
 import ContextMenu from '../common/ContextMenu';
 import EditableItem from '../common/EditableItem';
 
