@@ -27,7 +27,7 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import useTranslation from '@/hooks/useTranslation';
-import { ModalsContext } from '@/utils/modalsProvider';
+import { ModalsContext } from '@/context/modals';
 import logger from '@/utils/logger';
 import Tooltip, { Orientation } from '../Tooltip';
 import SidebarItems from './SidebarItems';

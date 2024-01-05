@@ -14,6 +14,18 @@
 
 import Portal from '@/components/common/Portal';
 import { createContext, useCallback, useMemo, useState } from 'react';
+import { BaseNamedRecord } from '@/types';
+
+export type ModalComponentRef = {
+  visible: boolean;
+  onClose: () => void | undefined;
+  data?: { item: BaseNamedRecord };
+};
+
+export type ModalRef = {
+  id: string;
+  Component: (props: ModalComponentRef) => React.ReactNode;
+};
 
 type Context = {
   instances: {

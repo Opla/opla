@@ -13,72 +13,23 @@
 // limitations under the License.
 
 import { useContext, useEffect, useRef } from 'react';
-import useTranslation from '@/hooks/useTranslation';
-import { ModalsContext } from '@/utils/modalsProvider';
-import SettingsModal from '@/modals';
-import { BaseNamedRecord } from '@/types';
-import NewProvider from '@/modals/templates/NewProvider';
-import AlertDialog from '@/components/common/AlertDialog';
+import { ModalComponentRef, ModalRef, ModalsContext } from '@/context/modals';
 
-const useRegisterModals = () => {
-  const { t } = useTranslation();
+const useRegisterModals = (Modals: ModalRef[]) => {
   const { registerModal } = useContext(ModalsContext);
   const firstRender = useRef(true);
 
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false;
-      registerModal('settings', ({ visible = false, onClose = () => {} }) => (
-        <SettingsModal key="settings" open={visible} onClose={onClose} />
-      ));
 
-      registerModal('newprovider', ({ visible = false, onClose = () => {} }) => (
-        <NewProvider key="newprovider" open={visible} onClose={onClose} />
-      ));
-
-      registerModal(
-        'welcome',
-        ({ visible = false, onClose = () => {} }) => (
-          <AlertDialog
-            key="welcome"
-            id="welcome"
-            title={t('Welcome to Opla!')}
-            actions={[{ label: t("Let's go!") }]}
-            visible={visible}
-            onClose={onClose}
-          >
-            <div>{t('The ultimate Open-source generative AI App')} </div>
-          </AlertDialog>
-        ),
-        true,
-      );
-
-      registerModal(
-        'deleteitem',
-        ({ visible = false, onClose = () => {}, data = undefined }) => {
-          const dataItem = data as unknown as { item: BaseNamedRecord };
-          const item = dataItem?.item as BaseNamedRecord;
-          return (
-            <AlertDialog
-              key="deleteitem"
-              id="deleteitem"
-              title={t('Delete this item?')}
-              actions={[
-                { label: t('Delete'), value: 'Delete' },
-                { label: t('Cancel'), value: 'Cancel' },
-              ]}
-              visible={visible}
-              onClose={onClose}
-              data={data}
-            >
-              <div>{item?.name || ''}</div>
-            </AlertDialog>
-          );
-        },
-        false,
-      );
+      Modals.forEach(({ id, Component }) => {
+        registerModal(id, ({ visible = false, onClose = () => {}, data }: ModalComponentRef) => (
+          <Component key={id} visible={visible} onClose={onClose} data={data} />
+        ));
+      });
     }
-  }, [registerModal, t]);
+  }, [registerModal, Modals]);
 };
 
 export default useRegisterModals;
