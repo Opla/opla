@@ -15,7 +15,7 @@
 import { useContext, useState } from 'react';
 import { useRouter } from 'next/router';
 import Card from '@/components/common/Card';
-import Modal from '@/components/common/Modal/Modal';
+import Dialog from '@/components/common/Modal';
 import useTranslation from '@/hooks/useTranslation';
 import { Provider, ProviderType } from '@/types';
 import { createProvider } from '@/utils/data/providers';
@@ -83,7 +83,7 @@ export default function NewProvider({
   };
 
   return (
-    <Modal id="newprovider" size="md" open={open} onClose={onClose}>
+    <Dialog id="newprovider" size="md" open={open} onClose={onClose}>
       <div className="flex h-full w-full flex-col justify-between gap-3 p-2 pb-4">
         {step === 1 && (
           <Panel title={t('Choose a provider')}>
@@ -162,6 +162,6 @@ export default function NewProvider({
           </div>
         </div>
       </div>
-    </Modal>
+    </Dialog>
   );
 }

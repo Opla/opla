@@ -24,7 +24,7 @@ import { BaseNamedRecord } from '@/types';
 import NewProvider from '@/modals/templates/NewProvider';
 import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackend';
-import Dialog from './common/Dialog';
+import AlertDialog from './common/AlertDialog';
 import Statusbar from './common/Statusbar';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -49,7 +49,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       registerModal(
         'welcome',
         ({ visible = false, onClose = () => {} }) => (
-          <Dialog
+          <AlertDialog
             key="welcome"
             id="welcome"
             title={t('Welcome to Opla!')}
@@ -58,7 +58,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             onClose={onClose}
           >
             <div>{t('The ultimate Open-source generative AI App')}</div>
-          </Dialog>
+          </AlertDialog>
         ),
         true,
       );
@@ -69,7 +69,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           const dataItem = data as unknown as { item: BaseNamedRecord };
           const item = dataItem?.item as BaseNamedRecord;
           return (
-            <Dialog
+            <AlertDialog
               key="deleteitem"
               id="deleteitem"
               title={t('Delete this item?')}
@@ -82,7 +82,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               data={data}
             >
               <div>{item?.name || ''}</div>
-            </Dialog>
+            </AlertDialog>
           );
         },
         false,
