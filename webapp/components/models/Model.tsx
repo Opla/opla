@@ -72,7 +72,7 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
               </div>
               <div>
                 <Button variant="secondary" className="mr-4">
-                  Download
+                  {t('Download')}
                 </Button>
               </div>
             </div>
@@ -133,10 +133,10 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
                     <Table className="w-full">
                       <TableHeader>
                         <TableRow>
-                          <TableHead>File</TableHead>
-                          <TableHead>Size</TableHead>
-                          <TableHead>Description</TableHead>
-                          <TableHead>Action</TableHead>
+                          <TableHead>{t('File')}</TableHead>
+                          <TableHead>{t('Size')}</TableHead>
+                          <TableHead>{t('Description')}</TableHead>
+                          <TableHead>{t('Action')}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -153,7 +153,7 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
                             <TableCell className="truncate">
                               <span>{download.recommendations || ''}</span>
                             </TableCell>
-                            <TableCell aria-label="download">
+                            <TableCell aria-label={t('Download')}>
                               <Button variant="ghost" size="icon">
                                 <DownloadIcon />
                               </Button>
