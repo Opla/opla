@@ -91,5 +91,9 @@
   "stopping": "stopping",
   "stopped": "stopped",
   "error": "error",
-  "no backend": "no backend"
+  "no backend": "no backend",
+  "Download": "Download",
+  "File": "File",
+  "Size": "Size",
+  "Action": "Action"
 }

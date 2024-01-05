@@ -14,81 +14,20 @@
 
 'use client';
 
-import { useContext, useEffect, useRef } from 'react';
+import { useContext } from 'react';
 import '@/app/globals.css';
 import Sidebar from '@/components/common/Sidebar';
-import useTranslation from '@/hooks/useTranslation';
-import { ModalsContext } from '@/utils/modalsProvider';
-import SettingsModal from '@/modals';
-import { BaseNamedRecord } from '@/types';
-import NewProvider from '@/modals/templates/NewProvider';
 import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackend';
-import AlertDialog from './common/AlertDialog';
+import useRegisterModals from '@/hooks/useRegisterModals';
 import Statusbar from './common/Statusbar';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const { t } = useTranslation();
-  const { registerModal } = useContext(ModalsContext);
   const { providers, models, presets } = useContext(AppContext);
-  const firstRender = useRef(true);
 
   useBackend();
 
-  useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false;
-      registerModal('settings', ({ visible = false, onClose = () => {} }) => (
-        <SettingsModal key="settings" open={visible} onClose={onClose} />
-      ));
-
-      registerModal('newprovider', ({ visible = false, onClose = () => {} }) => (
-        <NewProvider key="newprovider" open={visible} onClose={onClose} />
-      ));
-
-      registerModal(
-        'welcome',
-        ({ visible = false, onClose = () => {} }) => (
-          <AlertDialog
-            key="welcome"
-            id="welcome"
-            title={t('Welcome to Opla!')}
-            actions={[{ label: t("Let's go!") }]}
-            visible={visible}
-            onClose={onClose}
-          >
-            <div>{t('The ultimate Open-source generative AI App')}</div>
-          </AlertDialog>
-        ),
-        true,
-      );
-
-      registerModal(
-        'deleteitem',
-        ({ visible = false, onClose = () => {}, data = undefined }) => {
-          const dataItem = data as unknown as { item: BaseNamedRecord };
-          const item = dataItem?.item as BaseNamedRecord;
-          return (
-            <AlertDialog
-              key="deleteitem"
-              id="deleteitem"
-              title={t('Delete this item?')}
-              actions={[
-                { label: t('Delete'), value: 'Delete' },
-                { label: t('Cancel'), value: 'Cancel' },
-              ]}
-              visible={visible}
-              onClose={onClose}
-              data={data}
-            >
-              <div>{item?.name || ''}</div>
-            </AlertDialog>
-          );
-        },
-        false,
-      );
-    }
-  }, [providers, registerModal, t]);
+  useRegisterModals();
 
   if (!providers || !models || !presets) {
     return <div>Loading...</div>;

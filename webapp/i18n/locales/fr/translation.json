@@ -91,5 +91,9 @@
   "stopping": "arrêt",
   "stopped": "arrêté",
   "error": "erreur",
-  "no backend": "pas de serveur"
+  "no backend": "pas de serveur",
+  "Download": "Télécharger",
+  "File": "Fichier",
+  "Size": "Taille",
+  "Action": "Action"
 }
