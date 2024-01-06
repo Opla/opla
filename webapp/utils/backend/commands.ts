@@ -29,7 +29,7 @@ export const getOplaServerStatus = async (): Promise<Payload> => {
 };
 
 export const getOplaConfig = async (): Promise<Store> => {
-  const store = (await invokeTauri('get_opla_config')) as Store;
+  const store = (await invokeTauri('get_opla_configuration')) as Store;
   return mapKeys(store, toCamelCase);
 };
 

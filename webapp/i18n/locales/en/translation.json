@@ -95,5 +95,7 @@
   "Download": "Download",
   "File": "File",
   "Size": "Size",
-  "Action": "Action"
+  "Action": "Action",
+  "Install": "Install",
+  "Uninstall": "Uninstall"
 }

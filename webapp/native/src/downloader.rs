@@ -19,7 +19,7 @@ use serde::{ Serialize, Deserialize };
 use tauri::{ AppHandle, Manager, Runtime };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Progress {
+pub struct Download {
     pub download_id: String,
     pub filesize: u64,
     pub transfered: u64,
@@ -28,7 +28,7 @@ pub struct Progress {
     pub error: Option<String>,
 }
 
-impl Progress {
+impl Download {
     pub fn emit_progress<R: Runtime>(&self, handle: &AppHandle<R>) {
         handle.emit_all("OPLA_DOWNLOAD_PROGRESS", &self).ok();
     }
@@ -63,7 +63,7 @@ impl Downloader {
         println!("Downloading {}...", url);
         tauri::async_runtime::spawn(async move {
             let start_time = Instant::now();
-            let mut progress = Progress {
+            let mut download = Download {
                 download_id: id.to_string(),
                 filesize: 0,
                 transfered: 0,
@@ -75,7 +75,7 @@ impl Downloader {
             if res.is_err() {
                 let error = res.err().unwrap();
                 println!("Failed to create file: {}", error);
-                progress.emit_error(&handle, Box::new(error));
+                download.emit_error(&handle, Box::new(error));
                 return;
             }
             let mut file = res.unwrap();
@@ -84,13 +84,13 @@ impl Downloader {
             if res.is_err() {
                 let error = res.err().unwrap();
                 println!("Failed to download ressource: {}", error);
-                progress.emit_error(&handle, Box::new(error));
+                download.emit_error(&handle, Box::new(error));
                 return;
             }
             let response = res.unwrap();
 
             Downloader::download_chunks(
-                &mut progress,
+                &mut download,
                 &file,
                 response,
                 start_time,
@@ -100,15 +100,15 @@ impl Downloader {
             if res.is_err() {
                 let error = res.err().unwrap();
                 println!("Failed to finish download: {}", error);
-                progress.emit_error(&handle, Box::new(error));
+                download.emit_error(&handle, Box::new(error));
                 return;
             }
-            progress.emit_finished(&handle);
+            download.emit_finished(&handle);
         });
     }
 
     async fn download_chunks<R: Runtime>(
-        progress: &mut Progress,
+        progress: &mut Download,
         mut file: &File,
         mut response: Response,
         start_time: Instant,

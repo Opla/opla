@@ -31,18 +31,18 @@ use tauri::{ Runtime, State, Manager };
 
 pub struct OplaContext {
     pub server: Mutex<OplaServer>,
-    pub config: Mutex<Store>,
+    pub store: Mutex<Store>,
     pub downloader: Mutex<Downloader>,
 }
 
 #[tauri::command]
-async fn get_opla_config<R: Runtime>(
+async fn get_opla_configuration<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>
 ) -> Result<Store, String> {
-    let config = context.config.lock().unwrap();
-    Ok(config.clone())
+    let store = context.store.lock().unwrap();
+    Ok(store.clone())
 }
 
 #[tauri::command]
@@ -67,24 +67,25 @@ async fn start_opla_server<R: Runtime>(
     n_gpu_layers: i32
 ) -> Result<Payload, String> {
     println!("Opla try to start ");
-    let mut config = context.config.lock().unwrap();
-    let model_config = config.models.items
+    let mut store = context.store.lock().unwrap();
+    let model_store = store.models.items
         .iter()
-        .find(|m| m.name == model)
-        .unwrap();
+        .find(|m| m.reference.name == model)
+        .unwrap()
+        .reference.clone();
     let home_dir = utils::Utils::get_home_directory().expect("Failed to get home directory");
-    let models_path = home_dir.join(&config.models.path);
+    let models_path = home_dir.join(&store.models.path);
     let model_path = models_path
-        .join(&model_config.path.clone().unwrap())
-        .join(&model_config.file_name.clone().unwrap());
+        .join(&model_store.path.unwrap())
+        .join(&model_store.file_name.unwrap());
 
-    config.models.default_model = model.clone();
-    config.server.parameters.port = port;
-    config.server.parameters.host = host.clone();
-    config.server.parameters.context_size = context_size;
-    config.server.parameters.threads = threads;
-    config.server.parameters.n_gpu_layers = n_gpu_layers;
-    config.save().expect("Failed to save config");
+    store.models.default_model = model.clone();
+    store.server.parameters.port = port;
+    store.server.parameters.host = host.clone();
+    store.server.parameters.context_size = context_size;
+    store.server.parameters.threads = threads;
+    store.server.parameters.n_gpu_layers = n_gpu_layers;
+    store.save().expect("Failed to save config");
 
     let response = context.server
         .lock()
@@ -130,7 +131,7 @@ async fn get_models_collection<R: Runtime>(
 }
 
 #[tauri::command]
-async fn download_model<R: Runtime>(
+async fn install_model<R: Runtime>(
     app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
@@ -138,6 +139,8 @@ async fn download_model<R: Runtime>(
     url: String,
     file_name: String
 ) -> Result<Downloader, String> {
+    let store = context.store.lock().expect("Failed to get config");
+
     let downloader = context.downloader.lock().unwrap();
     downloader.download_file(model, url, file_name, app);
 
@@ -146,24 +149,24 @@ async fn download_model<R: Runtime>(
 
 fn start_server<R: Runtime>(app: tauri::AppHandle<R>, context: State<'_, OplaContext>) {
     println!("Opla try to start server");
-    let config = context.config.lock().expect("Failed to get config");
-    let port = config.server.parameters.port;
-    let host = config.server.parameters.host.clone();
-    let context_size = config.server.parameters.context_size;
-    let threads = config.server.parameters.threads;
-    let n_gpu_layers = config.server.parameters.n_gpu_layers;
-    let default_model = config.models.default_model.clone();
-    let model = config.models.items.iter().find(|m| m.name == default_model);
+    let store = context.store.lock().expect("Failed to get config");
+    let port = store.server.parameters.port;
+    let host = store.server.parameters.host.clone();
+    let context_size = store.server.parameters.context_size;
+    let threads = store.server.parameters.threads;
+    let n_gpu_layers = store.server.parameters.n_gpu_layers;
+    let default_model = store.models.default_model.clone();
+    let model = store.models.items.iter().find(|m| m.reference.name == default_model);
     if model.is_none() {
         println!("Opla server not started model not found: {:?}", default_model);
         return;
     }
     let model = model.unwrap();
     let home_dir = utils::Utils::get_home_directory().expect("Failed to get home directory");
-    let models_path = home_dir.join(&config.models.path);
+    let models_path = home_dir.join(&store.models.path);
     let model_path = models_path
-        .join(&model.path.clone().unwrap())
-        .join(&model.file_name.clone().unwrap());
+        .join(&model.reference.path.clone().unwrap())
+        .join(&model.reference.file_name.clone().unwrap());
     let response = context.server
         .lock()
         .unwrap()
@@ -188,7 +191,7 @@ fn start_server<R: Runtime>(app: tauri::AppHandle<R>, context: State<'_, OplaCon
 fn main() {
     let context: OplaContext = OplaContext {
         server: Mutex::new(OplaServer::new()),
-        config: Mutex::new(Store::new()),
+        store: Mutex::new(Store::new()),
         downloader: Mutex::new(Downloader::new()),
     };
     tauri::Builder
@@ -202,17 +205,17 @@ fn main() {
             }
             println!("Opla setup: ");
             let context = app.state::<OplaContext>();
-            let mut config = context.config.lock().unwrap();
+            let mut store = context.store.lock().unwrap();
             let resource_path = app
                 .path_resolver()
                 .resolve_resource("assets")
                 .expect("failed to resolve resource");
-            config.load(resource_path).expect("Opla failed to load config");
+            store.load(resource_path).expect("Opla failed to load config");
             // println!("Opla config: {:?}", config);
-            let launch_at_startup = config.server.launch_at_startup;
-            let has_model = config.models.default_model != "None";
-            let default_model = config.models.default_model.clone();
-            drop(config);
+            let launch_at_startup = store.server.launch_at_startup;
+            let has_model = store.models.default_model != "None";
+            let default_model = store.models.default_model.clone();
+            drop(store);
             app.emit_all("opla-server", Payload {
                 message: "Init Opla backend".into(),
                 status: ServerStatus::Init.as_str().to_string(),
@@ -238,12 +241,12 @@ fn main() {
         })
         .invoke_handler(
             tauri::generate_handler![
-                get_opla_config,
+                get_opla_configuration,
                 get_opla_server_status,
                 start_opla_server,
                 stop_opla_server,
                 get_models_collection,
-                download_model
+                install_model
             ]
         )
         .run(tauri::generate_context!())

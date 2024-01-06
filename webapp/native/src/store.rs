@@ -15,13 +15,19 @@
 use std::{ fs, path::PathBuf };
 use serde::{ Deserialize, Serialize };
 
-use crate::{ utils::Utils, models::Model };
+use crate::{ utils::Utils, models::Model, downloader::Download };
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ModelEntity {
+    #[serde(flatten)]
+    pub reference: Model,
+    pub state: Option<String>,
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ModelsConfiguration {
     pub path: String,
     pub default_model: String,
-    pub items: Vec<Model>,
+    pub items: Vec<ModelEntity>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -51,6 +57,7 @@ pub struct Store {
     pub settings: Settings,
     pub server: ServerConfiguration,
     pub models: ModelsConfiguration,
+    pub downloads: Vec<Download>,
 }
 
 impl Store {
@@ -77,6 +84,7 @@ impl Store {
                 default_model: String::from("None"),
                 items: vec![],
             },
+            downloads: vec![],
         }
     }
 

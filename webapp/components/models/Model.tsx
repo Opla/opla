@@ -103,7 +103,7 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
               </div>
               <div>
                 <Button variant="secondary" className="mr-4" onClick={() => onChange()}>
-                  {local ? t('Delete') : t('Download')}
+                  {local ? t('Uninstall') : t('Install')}
                 </Button>
               </div>
             </div>
