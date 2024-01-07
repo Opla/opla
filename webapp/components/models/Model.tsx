@@ -28,6 +28,7 @@
 'use client';
 
 import { useContext } from 'react';
+import { PiDotsThreeVerticalBold } from 'react-icons/pi';
 import { DownloadIcon } from '@radix-ui/react-icons';
 import useBackend from '@/hooks/useBackend';
 import useTranslation from '@/hooks/useTranslation';
@@ -39,6 +40,13 @@ import logger from '@/utils/logger';
 import Parameter from '../common/Parameter';
 import { Button } from '../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../ui/table';
+import Separator from '../ui/separator';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 
 function ModelView({ modelId, collection }: { modelId?: string; collection: Model[] }) {
   const { backendContext } = useBackend();
@@ -101,10 +109,33 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
                   {model.name}
                 </span>
               </div>
-              <div>
-                <Button variant="secondary" className="mr-4" onClick={() => onChange()}>
+              <div className="flex flex-row gap-2">
+                <Button variant="secondary" className="" onClick={() => onChange()}>
                   {local ? t('Uninstall') : t('Install')}
                 </Button>
+                <Separator orientation="vertical" className="" />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <PiDotsThreeVerticalBold className="h-4 w-4" />
+                      <span className="sr-only">{t('More')}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onSelect={() => onChange()}>
+                      {local ? t('Uninstall') : t('Install')}
+                    </DropdownMenuItem>
+                    {local && (
+                      <>
+                        <DropdownMenuItem onSelect={() => onChange()}>
+                          {t('Uninstall & Remove')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>{t('Open in Finder')}</DropdownMenuItem>
+                        <DropdownMenuItem>{t('Change version')}</DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>
