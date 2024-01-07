@@ -97,5 +97,9 @@
   "Size": "Size",
   "Action": "Action",
   "Install": "Install",
-  "Uninstall": "Uninstall"
+  "Uninstall": "Uninstall",
+  "Uninstall & Delete": "Uninstall & Delete",
+  "Open in Finder": "Open in Finder",
+  "Change version": "Change version",
+  "More": "More"
 }
