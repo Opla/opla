@@ -14,11 +14,15 @@
 
 import { Entity, Model, Resource } from '@/types';
 
-const getDownloads = (model: Model, downloads = [] as Array<Model>) => {
+const getDownloads = (model: Model, downloads = [] as Array<Model>, parent?: Model) => {
   if (model?.download) {
-    downloads.push(model);
+    if (parent?.publisher && !model?.publisher) {
+      downloads.push({ ...model, publisher: parent.publisher });
+    } else {
+      downloads.push(model);
+    }
   }
-  model?.include?.forEach((m) => getDownloads(m, downloads));
+  model?.include?.forEach((m) => getDownloads(m, downloads, model));
   return downloads;
 };
 

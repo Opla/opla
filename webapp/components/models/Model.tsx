@@ -112,7 +112,7 @@ function ModelView({
                     disabled
                     type="large-text"
                   />
-                  {model.path && (
+                  {model.fileName && (
                     <Parameter
                       title={t('File')}
                       name="file"
@@ -121,13 +121,38 @@ function ModelView({
                       type="text"
                     />
                   )}
-                  <Parameter
-                    title={t('Author')}
-                    name="version"
-                    value={`${getEntityName(model.author)}`}
-                    disabled
-                    type="text"
-                  />
+                  {model.author && (
+                    <Parameter
+                      title={t('Author')}
+                      name="version"
+                      value={`${getEntityName(model.author)}`}
+                      disabled
+                      type="text"
+                    />
+                  )}
+                  {getEntityName(model.creator).toLowerCase() !==
+                    getEntityName(model.author).toLowerCase() && (
+                    <Parameter
+                      title={t('Creator')}
+                      name="version"
+                      value={`${getEntityName(model.creator)}`}
+                      disabled
+                      type="text"
+                    />
+                  )}
+                  {model.publisher &&
+                    getEntityName(model.publisher).toLowerCase() !==
+                      getEntityName(model.author).toLowerCase() &&
+                    getEntityName(model.publisher).toLowerCase() !==
+                      getEntityName(model.creator).toLowerCase() && (
+                      <Parameter
+                        title={t('Publisher')}
+                        name="version"
+                        value={`${getEntityName(model.publisher)}`}
+                        disabled
+                        type="text"
+                      />
+                    )}
                   <Parameter
                     title={t('Version')}
                     name="version"

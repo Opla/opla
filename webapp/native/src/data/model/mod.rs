@@ -174,7 +174,7 @@ impl ModelStorage {
         }
     }
 
-    pub fn get_model_path(&self, file_name: String, path: String) -> String {
+    pub fn get_model_path(&self, path: String, file_name: String) -> String {
         let mut models_path = get_data_directory().expect("Failed to get data directory");
         print!("models_path: {:?}", self.path);
         if self.path.is_some() {
