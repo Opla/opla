@@ -15,10 +15,10 @@
 import { Entity, Model, Resource } from '@/types';
 
 const getDownloads = (model: Model, downloads = [] as Array<Model>) => {
-  if (model.download) {
+  if (model?.download) {
     downloads.push(model);
   }
-  model.include?.forEach((m) => getDownloads(m, downloads));
+  model?.include?.forEach((m) => getDownloads(m, downloads));
   return downloads;
 };
 

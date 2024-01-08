@@ -31,7 +31,8 @@ import Prompt from './Prompt';
 function Thread({ conversationId }: { conversationId?: string }) {
   const router = useRouter();
   const { conversations, setConversations } = useContext(AppContext);
-  const { backendContext } = useBackend();
+  const { getBackendContext } = useBackend();
+  const backendContext = getBackendContext();
   logger.info('backendContext', backendContext);
   const selectedConversation = conversations.find((c) => c.id === conversationId);
 

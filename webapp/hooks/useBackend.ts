@@ -120,7 +120,9 @@ const useBackend = () => {
     setBackendContext({ ...backendContext, config: store });
   }, [backendContext, setBackendContext]);
 
-  return { backendContext, updateBackendStore, start, stop, restart };
+  const getBackendContext = useCallback(() => backendContext, [backendContext]);
+
+  return { getBackendContext, updateBackendStore, start, stop, restart };
 };
 
 export default useBackend;

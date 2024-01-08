@@ -72,9 +72,9 @@ function ContextMenu({
         className="fixed z-10 hidden rounded-lg bg-neutral-600 p-2 shadow-lg transition-all dark:bg-neutral-900"
         ref={contextMenu}
       >
-        <li className="modalbox p1 flex flex-1 flex-col">
+        <ul className="modalbox p1 flex flex-1 flex-col">
           {menu.map((item) => (
-            <ul
+            <li
               key={item.label}
               className="cursor-pointer rounded-md px-2 py-2 text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:text-neutral-400 hover:dark:text-white"
             >
@@ -88,9 +88,9 @@ function ContextMenu({
               >
                 {t(item.label)}
               </button>
-            </ul>
+            </li>
           ))}
-        </li>
+        </ul>
       </div>
     </>
   );

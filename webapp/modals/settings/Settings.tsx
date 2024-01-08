@@ -50,9 +50,9 @@ export default function Settings({
           <div className="text-ellipsis break-all p-3 text-sm text-neutral-600">
             {t('Settings')}
           </div>
-          <li className="flex flex-1 flex-col gap-1 p-1">
+          <ul className="flex flex-1 flex-col gap-1 p-1">
             {menu.map((item) => (
-              <ul
+              <li
                 key={item.id}
                 className={`${
                   item.href === tab || item.hrefAlias === tab
@@ -76,9 +76,9 @@ export default function Settings({
                     {t(item.name)}
                   </div>
                 </div>
-              </ul>
+              </li>
             ))}
-          </li>
+          </ul>
         </NavContainer>
       </div>
       <div className="contentSettings h-full flex-grow p-6">

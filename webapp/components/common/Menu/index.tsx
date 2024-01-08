@@ -31,11 +31,11 @@ function Menu({
   const { t } = useTranslation();
   const selection = items.length > 0 && 'selected' in items[0];
   return (
-    <li className="flex w-full flex-col">
+    <ul className="flex w-full flex-col">
       {items.map((item) => {
         const I = item.icon as IconType;
         return (
-          <ul
+          <li
             key={item.label}
             className="w-full cursor-pointer rounded-md px-2 py-2 text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:text-neutral-400 hover:dark:text-white"
           >
@@ -55,10 +55,10 @@ function Menu({
               <p className="mr-4 flex-1 truncate text-left">{t(item.label)}</p>
               {selection && item.selected && <PiCheck className="ml-2 h-4 w-4" />}
             </button>
-          </ul>
+          </li>
         );
       })}
-    </li>
+    </ul>
   );
 }
 

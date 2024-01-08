@@ -30,7 +30,7 @@ import ContextMenu from '../common/ContextMenu';
 
 function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string }) {
   const { providers, setProviders } = useContext(AppContext);
-  const { backendContext } = useBackend();
+  const { getBackendContext } = useBackend();
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
   const router = useRouter();
@@ -99,7 +99,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
 
   const isDisabled = (provider: Provider) => {
     if (provider?.type === 'opla') {
-      return backendContext.server?.status !== ServerStatus.STARTED;
+      return getBackendContext().server?.status !== ServerStatus.STARTED;
     }
     return provider?.disabled;
   };
@@ -122,9 +122,9 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
           <div className="flex flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
             <div className="group relative flex flex-col gap-3 break-all rounded-md px-1 py-3">
               <div className="p1 text-ellipsis break-all text-neutral-600">{t('Providers')}</div>
-              <li className="p1 flex flex-1 flex-col">
+              <ul className="p1 flex flex-1 flex-col">
                 {providers.map((provider) => (
-                  <ul
+                  <li
                     key={provider.id}
                     className={`${
                       selectedProviderId === provider.id
@@ -150,9 +150,9 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
                         </div>
                       </Link>
                     </ContextMenu>
-                  </ul>
+                  </li>
                 ))}
-              </li>
+              </ul>
             </div>
           </div>
         </div>

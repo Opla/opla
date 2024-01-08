@@ -27,19 +27,11 @@
 
 'use client';
 
-import { useContext } from 'react';
-import { useRouter } from 'next/router';
 import { PiDotsThreeVerticalBold } from 'react-icons/pi';
 import { DownloadIcon } from '@radix-ui/react-icons';
-import useBackend from '@/hooks/useBackend';
 import useTranslation from '@/hooks/useTranslation';
 import { Model } from '@/types';
-import { getDownloads, getEntityName, getResourceUrl, isValidFormat } from '@/utils/data/models';
-import { ModalIds } from '@/modals';
-import { ModalsContext } from '@/context/modals';
-import logger from '@/utils/logger';
-import { installModel, uninstallModel } from '@/utils/backend/commands';
-import { deepMerge } from '@/utils/data';
+import { getEntityName, getResourceUrl } from '@/utils/data/models';
 import Parameter from '../common/Parameter';
 import { Button } from '../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../ui/table';
@@ -50,64 +42,22 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 
-function ModelView({ modelId, collection }: { modelId?: string; collection: Model[] }) {
-  const { backendContext, updateBackendStore } = useBackend();
+function ModelView({
+  model,
+  local,
+  downloads,
+  onChange,
+}: {
+  model: Model;
+  local: boolean;
+  downloads: Model[];
+  onChange: (item?: Model) => void;
+}) {
   const { t } = useTranslation();
-  const { showModal } = useContext(ModalsContext);
-  const router = useRouter();
-
-  const models = backendContext.config.models.items;
-  let local = true;
-  let model = models.find((m) => m.id === modelId) as Model;
-  if (!model && modelId) {
-    model = collection.find((m) => m.id === modelId) as Model;
-    local = false;
-  }
 
   if (!model) {
     return null;
   }
-
-  const downloads = getDownloads(model).filter((d) => d.private !== true && isValidFormat(d));
-
-  const onInstall = async (item?: Model) => {
-    const selectedModel = deepMerge(model, item || {}, true);
-    logger.info(`install ${model.name} ${getResourceUrl(selectedModel.download)}`);
-    const id = await installModel(
-      model,
-      getResourceUrl(selectedModel.download),
-      selectedModel.name,
-    );
-    await updateBackendStore();
-    logger.info(`installed ${id}`);
-    router.replace(`/models/${id}`);
-  };
-
-  const onUninstall = async () => {
-    logger.info(`Uninstall ${model.name} model.id=${model.id}`);
-    await uninstallModel(model.id);
-    await updateBackendStore();
-    router.replace('/models');
-  };
-
-  const onChange = (selectedModel?: Model) => {
-    if (local && !selectedModel) {
-      showModal(ModalIds.DeleteItem, { item: model, onAction: onUninstall });
-      return;
-    }
-    let item: Model = selectedModel || model;
-    // If the model is not a GGUF model, we need to find the recommended or first download
-    if (!isValidFormat(item) && downloads.length > 0) {
-      item = downloads.find((d) => d.recommended) || downloads[0];
-    }
-
-    if (isValidFormat(item)) {
-      showModal(ModalIds.DownloadItem, { item, onAction: onInstall });
-    } else {
-      logger.info(`No valid format ${item?.name} ${item?.library}`);
-      // TODO: display toaster
-    }
-  };
 
   return (
     <div className="flex max-w-full flex-1 flex-col dark:bg-neutral-800/30">

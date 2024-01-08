@@ -19,7 +19,8 @@ import useBackend from '@/hooks/useBackend';
 export default function Statusbar() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { backendContext } = useBackend();
+  const { getBackendContext } = useBackend();
+  const backendContext = getBackendContext();
   const running = backendContext.server.status === 'started';
   const error = backendContext.server.status === 'error';
   const displayServer = () => {
