@@ -23,7 +23,7 @@ import { getModelsCollection, installModel, uninstallModel } from '@/utils/backe
 import { deepMerge } from '@/utils/data';
 // import { ModalIds } from '@/modals';
 import useBackend from '@/hooks/useBackend';
-import { getDownloads, getResourceUrl, isValidFormat } from '@/utils/data/models';
+import { getEntityName, getDownloads, getResourceUrl, isValidFormat } from '@/utils/data/models';
 import SplitView from '../common/SplitView';
 import Explorer from './Explorer';
 import ModelView from './Model';
@@ -57,10 +57,15 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
 
   const onInstall = async (item?: Model) => {
     const selectedModel = deepMerge(model, item || {}, true);
-    logger.info(`install ${model.name} ${getResourceUrl(selectedModel.download)}`);
+    logger.info(`install ${model.name}`, selectedModel, item);
+    if (selectedModel.private === true) {
+      delete selectedModel.private;
+    }
+    const path = getEntityName(selectedModel.creator || selectedModel.author);
     const id = await installModel(
-      model,
+      selectedModel,
       getResourceUrl(selectedModel.download),
+      path,
       selectedModel.name,
     );
     await updateBackendStore();
@@ -70,6 +75,7 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
 
   const onUninstall = async () => {
     logger.info(`Uninstall ${model.name} model.id=${model.id}`);
+
     const nextModelId = models.findLast((m) => m.id !== model.id)?.id;
     await uninstallModel(model.id);
     await updateBackendStore();
