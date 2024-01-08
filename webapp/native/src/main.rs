@@ -24,7 +24,7 @@ pub mod data;
 use std::sync::Mutex;
 
 use api::models;
-use data::model::{ Model, ModelStorage };
+use data::model::Model;
 use downloader::Downloader;
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
@@ -135,7 +135,7 @@ async fn get_models_collection<R: Runtime>(
 
 #[tauri::command]
 async fn install_model<R: Runtime>(
-    app: tauri::AppHandle<R>,
+    _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
     model: Model,
@@ -151,6 +151,22 @@ async fn install_model<R: Runtime>(
     store.save().expect("Failed to save config");
 
     Ok(model_id.clone())
+}
+
+#[tauri::command]
+async fn uninstall_model<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>,
+    model_id: String
+) -> Result<(), String> {
+    let mut store = context.store.lock().expect("Failed to get config");
+
+    store.models.remove_model(model_id.as_str());
+
+    store.save().expect("Failed to save config");
+
+    Ok(())
 }
 
 fn start_server<R: Runtime>(app: tauri::AppHandle<R>, context: State<'_, OplaContext>) {
@@ -252,7 +268,8 @@ fn main() {
                 start_opla_server,
                 stop_opla_server,
                 get_models_collection,
-                install_model
+                install_model,
+                uninstall_model
             ]
         )
         .run(tauri::generate_context!())

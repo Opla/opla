@@ -20,6 +20,7 @@ import oplaProviderConfig from '@/utils/providers/opla/config.json';
 import { createProvider } from '@/utils/data/providers';
 import connectBackend from '@/utils/backend';
 import { Metadata, Provider, ProviderType, OplaContext, ServerStatus } from '@/types';
+import { getOplaConfig } from '@/utils/backend/commands';
 
 const initialBackendContext: OplaContext = {
   server: {
@@ -113,7 +114,13 @@ const useBackend = () => {
 
   const stop = async () => stopRef.current();
 
-  return { backendContext, start, stop, restart };
+  const updateBackendStore = useCallback(async () => {
+    logger.info('updateBackendStore');
+    const store = await getOplaConfig();
+    setBackendContext({ ...backendContext, config: store });
+  }, [backendContext, setBackendContext]);
+
+  return { backendContext, updateBackendStore, start, stop, restart };
 };
 
 export default useBackend;

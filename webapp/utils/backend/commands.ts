@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // import { invoke } from '@tauri-apps/api';
-import { Model, Payload, Store } from '@/types';
+import { Model, OplaServer, Payload, Store } from '@/types';
 import { mapKeys } from '../data';
 import { toCamelCase } from '../string';
 import logger from '../logger';
@@ -22,6 +22,11 @@ import { invokeTauri } from '../tauri';
 export const getOplaServerStatus = async (): Promise<Payload> => {
   const payload = (await invokeTauri('get_opla_server_status')) as Payload;
   return mapKeys(payload, toCamelCase);
+};
+
+export const getOplaServer = async (): Promise<OplaServer> => {
+  const server = (await invokeTauri('get_opla_server')) as OplaServer;
+  return mapKeys(server, toCamelCase);
 };
 
 export const getOplaConfig = async (): Promise<Store> => {
@@ -42,7 +47,12 @@ export const getModelsCollection = async (): Promise<{ models: [] }> => {
   return { models: [] };
 };
 
-export const installModel = async (model: Model): Promise<Payload> => {
-  const payload = (await invokeTauri('install_model', model)) as Payload;
-  return mapKeys(payload, toCamelCase);
+export const installModel = async (model: Model, url: String, fileName: String): Promise<String> => {
+  const id = (await invokeTauri('install_model', { model, url, fileName })) as String;
+  return id;
+};
+
+export const uninstallModel = async (modelId: String) => {
+  const id = (await invokeTauri('uninstall_model', { modelId })) as String;
+  return id;
 };

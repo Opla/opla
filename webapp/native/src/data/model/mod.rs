@@ -144,6 +144,15 @@ pub struct Model {
     pub include: Option<Vec<Model>>,
 }
 
+impl Model {
+    pub fn is_same_id(&self, id: &str) -> bool {
+        self.id.is_some() && self.id.as_deref().unwrap() == id
+    }
+    pub fn is_same_model(&self, another_model: &Model) -> bool {
+        self.id.is_some() & another_model.id.is_some() && self.id == another_model.id
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ModelEntity {
     #[serde(flatten)]
@@ -167,10 +176,10 @@ impl ModelStorage {
         }
     }
 
-    pub fn get_model(&self, name: &str) -> Option<Model> {
+    pub fn get_model(&self, id: &str) -> Option<Model> {
         self.items
             .iter()
-            .find(|m| m.reference.name == name)
+            .find(|m| m.reference.is_same_id(id))
             .map(|m| m.reference.clone())
     }
 
@@ -186,15 +195,15 @@ impl ModelStorage {
         uuid
     }
 
-    pub fn remove_model(&mut self, name: &str) {
-        self.items.retain(|m| m.reference.name != name);
+    pub fn remove_model(&mut self, id: &str) {
+        self.items.retain(|m| !m.reference.is_same_id(id));
     }
 
     pub fn update_model(&mut self, model: ModelEntity) {
         if
             let Some(index) = self.items
                 .iter()
-                .position(|m| m.reference.name == model.reference.name)
+                .position(|m| m.reference.is_same_model(&model.reference))
         {
             self.items.remove(index);
             self.items.insert(index, model);

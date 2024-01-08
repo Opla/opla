@@ -42,8 +42,8 @@ const createBaseNamedRecord = (name: string, description?: string) => {
 const deepCopy = (obj: any) =>
   window?.structuredClone ? window.structuredClone(obj) : JSON.parse(JSON.stringify(obj));
 
-const deepMerge = (_target: any, source: any) => {
-  const target = _target;
+const deepMerge = (_target: any, source: any, copy = false) => {
+  const target = copy ? deepCopy(_target) : _target;
   Object.keys(source).forEach((key: string) => {
     const value = source[key];
     if (value !== null && typeof value === 'object') {

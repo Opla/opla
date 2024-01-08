@@ -28,6 +28,7 @@
 'use client';
 
 import { useContext } from 'react';
+import { useRouter } from 'next/router';
 import { PiDotsThreeVerticalBold } from 'react-icons/pi';
 import { DownloadIcon } from '@radix-ui/react-icons';
 import useBackend from '@/hooks/useBackend';
@@ -37,6 +38,8 @@ import { getDownloads, getEntityName, getResourceUrl, isValidFormat } from '@/ut
 import { ModalIds } from '@/modals';
 import { ModalsContext } from '@/context/modals';
 import logger from '@/utils/logger';
+import { installModel, uninstallModel } from '@/utils/backend/commands';
+import { deepMerge } from '@/utils/data';
 import Parameter from '../common/Parameter';
 import { Button } from '../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../ui/table';
@@ -48,9 +51,10 @@ import {
 } from '../ui/dropdown-menu';
 
 function ModelView({ modelId, collection }: { modelId?: string; collection: Model[] }) {
-  const { backendContext } = useBackend();
+  const { backendContext, updateBackendStore } = useBackend();
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
+  const router = useRouter();
 
   const models = backendContext.config.models.items;
   let local = true;
@@ -66,17 +70,29 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
 
   const downloads = getDownloads(model).filter((d) => d.private !== true && isValidFormat(d));
 
-  const onDownload = () => {
-    logger.info(`TODO download ${model.name} ${getResourceUrl(model.download)}`);
+  const onInstall = async (item?: Model) => {
+    const selectedModel = deepMerge(model, item || {}, true);
+    logger.info(`install ${model.name} ${getResourceUrl(selectedModel.download)}`);
+    const id = await installModel(
+      model,
+      getResourceUrl(selectedModel.download),
+      selectedModel.name,
+    );
+    await updateBackendStore();
+    logger.info(`installed ${id}`);
+    router.replace(`/models/${id}`);
   };
 
-  const onDelete = () => {
-    logger.info(`TODO delete ${model.name} ${getResourceUrl(model.download)}`);
+  const onUninstall = async () => {
+    logger.info(`Uninstall ${model.name} model.id=${model.id}`);
+    await uninstallModel(model.id);
+    await updateBackendStore();
+    router.replace('/models');
   };
 
   const onChange = (selectedModel?: Model) => {
     if (local && !selectedModel) {
-      showModal(ModalIds.DeleteItem, { item: model, onAction: onDelete });
+      showModal(ModalIds.DeleteItem, { item: model, onAction: onUninstall });
       return;
     }
     let item: Model = selectedModel || model;
@@ -86,7 +102,7 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
     }
 
     if (isValidFormat(item)) {
-      showModal(ModalIds.DownloadItem, { item, onAction: onDownload });
+      showModal(ModalIds.DownloadItem, { item, onAction: onInstall });
     } else {
       logger.info(`No valid format ${item?.name} ${item?.library}`);
       // TODO: display toaster
