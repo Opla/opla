@@ -47,7 +47,11 @@ export const getModelsCollection = async (): Promise<{ models: [] }> => {
   return { models: [] };
 };
 
-export const installModel = async (model: Model, url: String, fileName: String): Promise<String> => {
+export const installModel = async (
+  model: Model,
+  url: String,
+  fileName: String,
+): Promise<String> => {
   const id = (await invokeTauri('install_model', { model, url, fileName })) as String;
   return id;
 };
