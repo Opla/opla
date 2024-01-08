@@ -95,5 +95,11 @@
   "Download": "Télécharger",
   "File": "Fichier",
   "Size": "Taille",
-  "Action": "Action"
+  "Action": "Action",
+  "Install": "Installer",
+  "Uninstall": "Désinstaller",
+  "Uninstall & Delete": "Désinstaller et supprimer",
+  "Open in Finder": "Ouvrir dans le Finder",
+  "Change version": "Changer de version",
+  "More": "Plus"
 }

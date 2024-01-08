@@ -14,12 +14,8 @@
 
 // import { invoke } from '@tauri-apps/api/tauri';
 import logger from '@/utils/logger';
+import { invokeTauri } from '@/utils/tauri';
 import { LlamaCppArguments, LlamaCppArgumentsSchema } from './schema';
-
-const invokeTauri = async (command: string, args?: LlamaCppArguments) => {
-  const { invoke } = await import('@tauri-apps/api/tauri');
-  return invoke(command, args);
-};
 
 const stopLLamaCppServer = async () => {
   logger.info('stop LLama.cpp server');

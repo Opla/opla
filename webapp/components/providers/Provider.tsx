@@ -33,7 +33,7 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
   const { providers, setProviders } = useContext(AppContext);
   const { t } = useTranslation();
 
-  const { backendContext, restart, start, stop } = useBackend();
+  const { getBackendContext, restart, start, stop } = useBackend();
 
   useEffect(() => {
     if (providerId !== updatedProvider.id) {
@@ -52,10 +52,10 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
       p = deepMerge(p, updatedProvider);
     }
     if (p?.type === 'opla') {
-      p.disabled = backendContext.server.status === ServerStatus.STOPPED;
+      p.disabled = getBackendContext().server.status === ServerStatus.STOPPED;
     }
     return p;
-  }, [backendContext.server.status, hasParametersChanged, providerId, providers, updatedProvider]);
+  }, [getBackendContext, hasParametersChanged, providerId, providers, updatedProvider]);
 
   const onParameterChange = (name: string, value: string | number | boolean) => {
     const newProvider = deepSet(updatedProvider, name, value);
@@ -79,10 +79,10 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
   const onProviderToggle = () => {
     logger.info('onProviderToggle');
     if (provider?.type === 'opla') {
-      logger.info('backend.server', backendContext.server);
-      if (backendContext.server.status === ServerStatus.STARTED) {
+      logger.info('backend.server', getBackendContext().server);
+      if (getBackendContext().server.status === ServerStatus.STARTED) {
         stop();
-      } else if (backendContext.server.status === ServerStatus.STOPPED) {
+      } else if (getBackendContext().server.status === ServerStatus.STOPPED) {
         const server: any = provider?.metadata?.server;
         const parameters = server?.parameters;
         start(parameters);
@@ -95,6 +95,8 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
       setProviders(newProviders);
     }
   };
+
+  const backendContext = getBackendContext();
 
   return (
     <div className="flex max-w-full flex-1 flex-col dark:bg-neutral-800/30">

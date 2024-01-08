@@ -14,37 +14,33 @@
 
 'use client';
 
-import { AppContext } from '@/context';
 import Link from 'next/link';
-import { useContext } from 'react';
 import { PiPlus } from 'react-icons/pi';
 import { MenuItem, Model } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
-import useBackend from '@/hooks/useBackend';
 import ContextMenu from '../common/ContextMenu';
 
 function ModelsExplorer({
+  models,
   selectedModelId,
   collection,
 }: {
+  models: Model[];
   selectedModelId?: string;
   collection: Model[];
 }) {
-  const { models: localModels } = useContext(AppContext);
-  const { backendContext } = useBackend();
-  const models = backendContext.config.models.items; // .concat(localModels);
-  logger.info('models', models, localModels);
+  logger.info('models', models);
   const { t } = useTranslation();
   const menu: MenuItem[] = [
     {
-      label: t('Rename'),
+      label: t('Uninstall'),
       onSelect: (data: string) => {
         logger.info(`rename ${data}`);
       },
     },
     {
-      label: t('Delete'),
+      label: t('Install'),
       onSelect: (data: string) => {
         logger.info(`delete ${data}`);
       },
@@ -62,9 +58,9 @@ function ModelsExplorer({
           <div className="flex flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
             <div className="group relative flex flex-col gap-3 break-all rounded-md px-1 py-3">
               <div className="p1 text-ellipsis break-all text-neutral-600">{t('Local models')}</div>
-              <li className="p1 flex flex-1 flex-col">
+              <ul className="p1 flex flex-1 flex-col">
                 {models.map((model) => (
-                  <ul
+                  <li
                     key={model.id}
                     className={`${
                       selectedModelId === model.id
@@ -83,9 +79,9 @@ function ModelsExplorer({
                         </div>
                       </Link>
                     </ContextMenu>
-                  </ul>
+                  </li>
                 ))}
-              </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -96,9 +92,9 @@ function ModelsExplorer({
               <div className="p1 text-ellipsis break-all text-neutral-600">
                 {t('Featured models')}
               </div>
-              <li className="p1 flex flex-1 flex-col">
+              <ul className="p1 flex flex-1 flex-col">
                 {collection.map((model) => (
-                  <ul
+                  <li
                     key={model.id}
                     className={`${
                       selectedModelId === model.id
@@ -117,9 +113,9 @@ function ModelsExplorer({
                         </div>
                       </Link>
                     </ContextMenu>
-                  </ul>
+                  </li>
                 ))}
-              </li>
+              </ul>
             </div>
           </div>
         </div>

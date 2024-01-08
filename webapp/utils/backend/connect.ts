@@ -80,6 +80,7 @@ const connectBackend = async (listener: (payload: any) => void) => {
     logger.info('restart server', parameters);
     return restartLLamaCppServer(model, parameters);
   };
+
   const context = { config, server };
 
   return {

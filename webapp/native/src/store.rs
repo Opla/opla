@@ -14,15 +14,7 @@
 
 use std::{ fs, path::PathBuf };
 use serde::{ Deserialize, Serialize };
-
-use crate::{ utils::Utils, models::Model };
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ModelsConfiguration {
-    pub path: String,
-    pub default_model: String,
-    pub items: Vec<Model>,
-}
+use crate::{ utils::Utils, downloader::Download, data::model::ModelStorage };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ServerParameters {
@@ -32,6 +24,7 @@ pub struct ServerParameters {
     pub threads: i32,
     pub n_gpu_layers: i32,
 }
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ServerConfiguration {
     pub name: String,
@@ -50,7 +43,8 @@ pub struct Settings {
 pub struct Store {
     pub settings: Settings,
     pub server: ServerConfiguration,
-    pub models: ModelsConfiguration,
+    pub models: ModelStorage,
+    pub downloads: Vec<Download>,
 }
 
 impl Store {
@@ -72,11 +66,12 @@ impl Store {
                     n_gpu_layers: 0,
                 },
             },
-            models: ModelsConfiguration {
+            models: ModelStorage {
                 path: String::from("models"),
                 default_model: String::from("None"),
                 items: vec![],
             },
+            downloads: vec![],
         }
     }
 

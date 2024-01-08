@@ -15,15 +15,25 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import { Model } from '@/types';
 import logger from '@/utils/logger';
-import { getModelsCollection } from '@/utils/backend/commands';
+import { getModelsCollection, installModel, uninstallModel } from '@/utils/backend/commands';
+// import { ModalsContext } from '@/context/modals';
+import { deepMerge } from '@/utils/data';
+// import { ModalIds } from '@/modals';
+import useBackend from '@/hooks/useBackend';
+import { getDownloads, getResourceUrl, isValidFormat } from '@/utils/data/models';
 import SplitView from '../common/SplitView';
 import Explorer from './Explorer';
 import ModelView from './Model';
 
-export default function Providers({ selectedModelId }: { selectedModelId?: string }) {
+export default function Models({ selectedModelId }: { selectedModelId?: string }) {
+  const { getBackendContext, updateBackendStore } = useBackend();
   const [collection, setCollection] = useState<Model[]>([]);
+  // const { showModal } = useContext(ModalsContext);
+  const router = useRouter();
+
   useEffect(() => {
     const getCollection = async () => {
       const coll = (await getModelsCollection()) as unknown as { models: Model[] };
@@ -35,12 +45,64 @@ export default function Providers({ selectedModelId }: { selectedModelId?: strin
     getCollection();
   }, []);
   logger.info('collection: ', collection);
+
+  const models = getBackendContext().config.models.items;
+  let local = true;
+  let model = models.find((m) => m.id === selectedModelId) as Model;
+  if (!model && selectedModelId) {
+    model = collection.find((m) => m.id === selectedModelId) as Model;
+    local = false;
+  }
+  const downloads = getDownloads(model).filter((d) => d.private !== true && isValidFormat(d));
+
+  const onInstall = async (item?: Model) => {
+    const selectedModel = deepMerge(model, item || {}, true);
+    logger.info(`install ${model.name} ${getResourceUrl(selectedModel.download)}`);
+    const id = await installModel(
+      model,
+      getResourceUrl(selectedModel.download),
+      selectedModel.name,
+    );
+    await updateBackendStore();
+    logger.info(`installed ${id}`);
+    router.push(`/models/${id}`);
+  };
+
+  const onUninstall = async () => {
+    logger.info(`Uninstall ${model.name} model.id=${model.id}`);
+    const nextModelId = models.findLast((m) => m.id !== model.id)?.id;
+    await uninstallModel(model.id);
+    await updateBackendStore();
+    router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
+  };
+
+  const onChange = (selectedModel?: Model) => {
+    if (local && !selectedModel) {
+      // showModal(ModalIds.DeleteItem, { item: model, onAction: onUninstall });
+      onUninstall();
+      return;
+    }
+    let item: Model = selectedModel || model;
+    // If the model is not a GGUF model, we need to find the recommended or first download
+    if (!isValidFormat(item) && downloads.length > 0) {
+      item = downloads.find((d) => d.recommended) || downloads[0];
+    }
+
+    if (isValidFormat(item)) {
+      // showModal(ModalIds.DownloadItem, { item, onAction: onInstall });
+      onInstall(item);
+    } else {
+      logger.info(`No valid format ${item?.name} ${item?.library}`);
+      // TODO: display toaster
+    }
+  };
+
   return (
     <SplitView
       className="grow overflow-hidden"
-      left={<Explorer selectedModelId={selectedModelId} collection={collection} />}
+      left={<Explorer models={models} selectedModelId={selectedModelId} collection={collection} />}
     >
-      <ModelView modelId={selectedModelId} collection={collection} />
+      <ModelView model={model} local={local} downloads={downloads} onChange={onChange} />
     </SplitView>
   );
 }

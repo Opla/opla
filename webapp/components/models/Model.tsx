@@ -27,64 +27,37 @@
 
 'use client';
 
-import { useContext } from 'react';
+import { PiDotsThreeVerticalBold } from 'react-icons/pi';
 import { DownloadIcon } from '@radix-ui/react-icons';
-import useBackend from '@/hooks/useBackend';
 import useTranslation from '@/hooks/useTranslation';
 import { Model } from '@/types';
-import { getDownloads, getEntityName, getResourceUrl, isValidFormat } from '@/utils/data/models';
-import { ModalIds } from '@/modals';
-import { ModalsContext } from '@/context/modals';
-import logger from '@/utils/logger';
+import { getEntityName, getResourceUrl } from '@/utils/data/models';
 import Parameter from '../common/Parameter';
 import { Button } from '../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 
-function ModelView({ modelId, collection }: { modelId?: string; collection: Model[] }) {
-  const { backendContext } = useBackend();
+function ModelView({
+  model,
+  local,
+  downloads,
+  onChange,
+}: {
+  model: Model;
+  local: boolean;
+  downloads: Model[];
+  onChange: (item?: Model) => void;
+}) {
   const { t } = useTranslation();
-  const { showModal } = useContext(ModalsContext);
-
-  const models = backendContext.config.models.items;
-  let local = true;
-  let model = models.find((m) => m.id === modelId) as Model;
-  if (!model && modelId) {
-    model = collection.find((m) => m.id === modelId) as Model;
-    local = false;
-  }
 
   if (!model) {
     return null;
   }
-
-  const downloads = getDownloads(model).filter((d) => d.private !== true && isValidFormat(d));
-
-  const onDownload = () => {
-    logger.info(`TODO download ${model.name} ${getResourceUrl(model.download)}`);
-  };
-
-  const onDelete = () => {
-    logger.info(`TODO delete ${model.name} ${getResourceUrl(model.download)}`);
-  };
-
-  const onChange = (selectedModel?: Model) => {
-    if (local && !selectedModel) {
-      showModal(ModalIds.DeleteItem, { item: model, onAction: onDelete });
-      return;
-    }
-    let item: Model = selectedModel || model;
-    // If the model is not a GGUF model, we need to find the recommended or first download
-    if (!isValidFormat(item) && downloads.length > 0) {
-      item = downloads.find((d) => d.recommended) || downloads[0];
-    }
-
-    if (isValidFormat(item)) {
-      showModal(ModalIds.DownloadItem, { item, onAction: onDownload });
-    } else {
-      logger.info(`No valid format ${item?.name} ${item?.library}`);
-      // TODO: display toaster
-    }
-  };
 
   return (
     <div className="flex max-w-full flex-1 flex-col dark:bg-neutral-800/30">
@@ -101,10 +74,29 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
                   {model.name}
                 </span>
               </div>
-              <div>
-                <Button variant="secondary" className="mr-4" onClick={() => onChange()}>
-                  {local ? t('Delete') : t('Download')}
+              <div className="flex flex-row gap-2">
+                <Button variant="secondary" className="" onClick={() => onChange()}>
+                  {local ? t('Uninstall') : t('Install')}
                 </Button>
+                {local && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <PiDotsThreeVerticalBold className="h-4 w-4" />
+                        <span className="sr-only">{t('More')}</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <>
+                        <DropdownMenuItem onSelect={() => onChange()}>
+                          {t('Uninstall & Remove')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>{t('Open in Finder')}</DropdownMenuItem>
+                        <DropdownMenuItem>{t('Change version')}</DropdownMenuItem>
+                      </>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
           </div>
