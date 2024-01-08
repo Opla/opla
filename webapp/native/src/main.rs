@@ -18,10 +18,13 @@ mod server;
 mod store;
 mod downloader;
 pub mod utils;
-pub mod models;
+pub mod api;
+pub mod data;
 
 use std::sync::Mutex;
 
+use api::models;
+use data::model::{ Model, ModelStorage };
 use downloader::Downloader;
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
@@ -135,16 +138,19 @@ async fn install_model<R: Runtime>(
     app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
-    model: String,
+    model: Model,
     url: String,
     file_name: String
-) -> Result<Downloader, String> {
-    let store = context.store.lock().expect("Failed to get config");
+) -> Result<String, String> {
+    let mut store = context.store.lock().expect("Failed to get config");
 
-    let downloader = context.downloader.lock().unwrap();
-    downloader.download_file(model, url, file_name, app);
+    let model_id = store.models.add_model(model, None);
+    // let downloader = context.downloader.lock().unwrap();
+    // downloader.download_file(model_id, url, file_name, app);
 
-    Ok(downloader.clone())
+    store.save().expect("Failed to save config");
+
+    Ok(model_id.clone())
 }
 
 fn start_server<R: Runtime>(app: tauri::AppHandle<R>, context: State<'_, OplaContext>) {

@@ -1,4 +1,4 @@
-// Copyright 2023 mik
+// Copyright 2024 mik
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,157 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use chrono::{ DateTime, Utc };
-use serde::{ self, Deserialize, Serialize, Deserializer };
-use serde_with::{ serde_as, OneOrMany, formats::PreferOne };
+use serde::{ self, Deserialize, Deserializer };
 use std::fmt;
 use std::marker::PhantomData;
 use std::str::FromStr;
 use serde::de::{ self, Visitor, MapAccess };
 use void::Void;
 
-// See https://serde.rs/string-or-struct.html
-#[serde_with::skip_serializing_none]
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Entity {
-    pub name: String,
-    pub email: Option<String>,
-    pub url: Option<String>,
-}
-impl FromStr for Entity {
-    type Err = Void;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Entity {
-            name: s.to_string(),
-            email: None,
-            url: None,
-        })
-    }
-}
+pub mod model;
 
-#[serde_with::skip_serializing_none]
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Resource {
-    pub url: String,
-    pub name: Option<String>,
-    // TODO handle filename
-}
-impl FromStr for Resource {
-    type Err = Void;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        // TODO check if s is a valid URL or a file path
-        Ok(Resource {
-            url: s.to_string(),
-            name: None,
-        })
-    }
-}
-
-#[serde_as]
-#[serde_with::skip_serializing_none]
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Model {
-    pub id: Option<String>,
-    pub name: String,
-    pub base_model: Option<String>,
-    #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
-    pub created_at: Option<DateTime<Utc>>,
-    #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
-    pub updated_at: Option<DateTime<Utc>>,
-    pub title: Option<String>,
-    pub description: Option<String>,
-    pub summary: Option<String>,
-    pub version: Option<String>,
-    pub creator: Option<String>,
-    #[serde(
-        skip_serializing_if = "Option::is_none",
-        default,
-        deserialize_with = "option_string_or_struct"
-    )]
-    pub author: Option<Entity>,
-    #[serde(
-        skip_serializing_if = "Option::is_none",
-        default,
-        deserialize_with = "option_string_or_struct"
-    )]
-    pub publisher: Option<Entity>,
-    #[serde(
-        skip_serializing_if = "Option::is_none",
-        default,
-        deserialize_with = "option_string_or_struct"
-    )]
-    pub license: Option<Entity>,
-    #[serde_as(deserialize_as = "Option<OneOrMany<_, PreferOne>>")]
-    pub languages: Option<Vec<String>>,
-
-    #[serde_as(deserialize_as = "Option<OneOrMany<_, PreferOne>>")]
-    pub tags: Option<Vec<String>>,
-    pub recommendations: Option<String>,
-    pub recommended: Option<bool>,
-    pub deprecated: Option<bool>,
-    pub private: Option<bool>,
-    pub featured: Option<bool>,
-
-    pub model_type: Option<String>, // TODO enum
-    pub library: Option<String>, // TODO enum
-    pub tensor_type: Option<String>, // TODO enum
-    pub quantization: Option<String>, // TODO enum
-    pub bits: Option<i32>,
-    pub size: Option<f32>,
-    pub max_ram: Option<f32>,
-
-    #[serde(
-        skip_serializing_if = "Option::is_none",
-        default,
-        deserialize_with = "option_string_or_struct"
-    )]
-    pub repository: Option<Resource>,
-    #[serde(
-        skip_serializing_if = "Option::is_none",
-        default,
-        deserialize_with = "option_string_or_struct"
-    )]
-    pub download: Option<Resource>,
-    #[serde(
-        skip_serializing_if = "Option::is_none",
-        default,
-        deserialize_with = "option_string_or_struct"
-    )]
-    pub documentation: Option<Resource>,
-    #[serde(
-        skip_serializing_if = "Option::is_none",
-        default,
-        deserialize_with = "option_string_or_struct"
-    )]
-    pub paper: Option<Resource>,
-    // TODO use Resource instead of String
-    pub path: Option<String>,
-    // Deprecated put it in path
-    pub file_name: Option<String>,
-
-    pub include: Option<Vec<Model>>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct ModelsCollection {
-    #[serde(with = "date_format")]
-    pub created_at: DateTime<Utc>,
-    #[serde(with = "date_format")]
-    pub updated_at: DateTime<Utc>,
-    pub models: Vec<Model>,
-}
-
-pub async fn fetch_models_collection(
-    url: &str
-) -> Result<ModelsCollection, Box<dyn std::error::Error>> {
-    println!("Fetching models collection from {}", url);
-    let response = reqwest::get(url).await?;
-    let collection = response.json::<ModelsCollection>().await?;
-    println!("Fetched models collection: {:?}", collection);
-    Ok(collection)
-}
-
-mod date_format {
+pub mod date_format {
     use chrono::{ DateTime, Utc, NaiveDateTime };
     use serde::{ Deserializer, Deserialize };
 
@@ -188,7 +47,7 @@ mod date_format {
     }
 }
 
-mod option_date_format {
+pub mod option_date_format {
     use chrono::{ DateTime, Utc };
     use serde::{ Deserializer, Deserialize };
 
@@ -222,7 +81,7 @@ mod option_date_format {
     }
 }
 
-fn string_or_struct<'de, T, D>(deserializer: D) -> Result<T, D::Error>
+pub fn string_or_struct<'de, T, D>(deserializer: D) -> Result<T, D::Error>
     where T: Deserialize<'de> + FromStr<Err = Void>, D: Deserializer<'de>
 {
     // This is a Visitor that forwards string types to T's `FromStr` impl and
@@ -255,7 +114,7 @@ fn string_or_struct<'de, T, D>(deserializer: D) -> Result<T, D::Error>
     deserializer.deserialize_any(StringOrStruct(PhantomData))
 }
 
-fn option_string_or_struct<'de, T, D>(deserializer: D) -> Result<Option<T>, D::Error>
+pub fn option_string_or_struct<'de, T, D>(deserializer: D) -> Result<Option<T>, D::Error>
     where T: Deserialize<'de> + FromStr<Err = Void>, D: Deserializer<'de>
 {
     struct OptStringOrStruct<T>(PhantomData<T>);

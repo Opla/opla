@@ -40,7 +40,6 @@ import logger from '@/utils/logger';
 import Parameter from '../common/Parameter';
 import { Button } from '../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../ui/table';
-import Separator from '../ui/separator';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -113,19 +112,15 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
                 <Button variant="secondary" className="" onClick={() => onChange()}>
                   {local ? t('Uninstall') : t('Install')}
                 </Button>
-                <Separator orientation="vertical" className="" />
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <PiDotsThreeVerticalBold className="h-4 w-4" />
-                      <span className="sr-only">{t('More')}</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onSelect={() => onChange()}>
-                      {local ? t('Uninstall') : t('Install')}
-                    </DropdownMenuItem>
-                    {local && (
+                {local && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <PiDotsThreeVerticalBold className="h-4 w-4" />
+                        <span className="sr-only">{t('More')}</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
                       <>
                         <DropdownMenuItem onSelect={() => onChange()}>
                           {t('Uninstall & Remove')}
@@ -133,9 +128,9 @@ function ModelView({ modelId, collection }: { modelId?: string; collection: Mode
                         <DropdownMenuItem>{t('Open in Finder')}</DropdownMenuItem>
                         <DropdownMenuItem>{t('Change version')}</DropdownMenuItem>
                       </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
           </div>
