@@ -100,9 +100,9 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
           <div className="flex flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
             <div className="group relative flex flex-col gap-3 break-all rounded-md px-1 py-3">
               <div className="p1 text-ellipsis break-all text-neutral-600">{t('Recent')}</div>
-              <li className="p1 flex flex-1 flex-col">
+              <ul className="p1 flex flex-1 flex-col">
                 {conversations.map((conversation) => (
-                  <ul
+                  <li
                     key={conversation.id}
                     className={`${
                       selectedConversationId === conversation.id
@@ -124,9 +124,9 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
                         />
                       </Link>
                     </ContextMenu>
-                  </ul>
+                  </li>
                 ))}
-              </li>
+              </ul>
             </div>
           </div>
         </div>
