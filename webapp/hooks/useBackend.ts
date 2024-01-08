@@ -16,11 +16,10 @@ import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AppContext } from '@/context';
 import { Backend } from '@/utils/backend/connect';
 import logger from '@/utils/logger';
-import oplaProviderConfig from '@/utils/providers/opla/config.json';
 import { createProvider } from '@/utils/data/providers';
 import connectBackend from '@/utils/backend';
 import { Metadata, Provider, ProviderType, OplaContext, ServerStatus } from '@/types';
-import { getOplaConfig } from '@/utils/backend/commands';
+import { getOplaConfig, getProviderTemplate } from '@/utils/backend/commands';
 
 const initialBackendContext: OplaContext = {
   server: {
@@ -81,6 +80,7 @@ const useBackend = () => {
   const startBackend = useCallback(async () => {
     let opla = providers.find((p) => p.type === 'opla') as Provider;
     if (!opla) {
+      const oplaProviderConfig = await getProviderTemplate();
       const provider = { ...oplaProviderConfig, type: oplaProviderConfig.type as ProviderType };
       opla = createProvider('Opla', provider);
       providers.splice(0, 0, opla);

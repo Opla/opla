@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ fs, path::PathBuf };
+use std::{ fs, path::PathBuf, fmt };
 use serde::{ Deserialize, Serialize };
 use crate::{ utils::Utils, downloader::Download, data::model::ModelStorage };
 
@@ -31,6 +31,55 @@ pub struct ServerConfiguration {
     pub launch_at_startup: bool,
     pub binary: String,
     pub parameters: ServerParameters,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum ProviderType {
+    #[serde(rename = "opla")]
+    Opla,
+    #[serde(rename = "server")]
+    Server,
+    #[serde(rename = "api")]
+    Api,
+    #[serde(rename = "proxy")]
+    Proxy,
+}
+/* impl ProviderType {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            ProviderType::Opla => "opla",
+            ProviderType::Server => "server",
+            ProviderType::Api => "api",
+            ProviderType::Proxy => "proxy",
+        }
+    }
+} */
+
+impl fmt::Display for ProviderType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ProviderType::Opla => write!(f, "opla"),
+            ProviderType::Server => write!(f, "server"),
+            ProviderType::Api => write!(f, "api"),
+            ProviderType::Proxy => write!(f, "proxy"),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ProviderMetadata {
+    pub server: ServerConfiguration,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ProviderConfiguration {
+    pub name: String,
+    pub r#type: String,
+    pub url: String,
+    pub description: String,
+    pub doc_url: Option<String>,
+    pub disabled: bool,
+    pub metadata: ProviderMetadata,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

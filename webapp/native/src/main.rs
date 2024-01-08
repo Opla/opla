@@ -28,7 +28,7 @@ use data::model::Model;
 use downloader::Downloader;
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
-use store::Store;
+use store::{ Store, ProviderConfiguration, ProviderType, ServerParameters, ProviderMetadata };
 use server::*;
 use tauri::{ Runtime, State, Manager };
 
@@ -46,6 +46,28 @@ async fn get_opla_configuration<R: Runtime>(
 ) -> Result<Store, String> {
     let store = context.store.lock().unwrap();
     Ok(store.clone())
+}
+
+#[tauri::command]
+async fn get_provider_template<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>
+) -> Result<ProviderConfiguration, String> {
+    let store = context.store.lock().unwrap();
+    let server = store.server.clone();
+    let template = ProviderConfiguration {
+        name: "Opla".to_string(),
+        r#type: ProviderType::Opla.to_string(),
+        description: "Opla is a free and open source AI assistant.".to_string(),
+        url: server.parameters.host.clone(),
+        disabled: false,
+        doc_url: Some("https://opla.ai/docs".to_string()),
+        metadata: ProviderMetadata {
+            server: server.clone(),
+        },
+    };
+    Ok(template.clone())
 }
 
 #[tauri::command]
@@ -264,6 +286,7 @@ fn main() {
         .invoke_handler(
             tauri::generate_handler![
                 get_opla_configuration,
+                get_provider_template,
                 get_opla_server_status,
                 start_opla_server,
                 stop_opla_server,
