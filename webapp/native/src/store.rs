@@ -14,7 +14,7 @@
 
 use std::{ fs, path::PathBuf, fmt };
 use serde::{ Deserialize, Serialize };
-use crate::{ utils::Utils, downloader::Download, data::model::ModelStorage };
+use crate::{ utils::get_config_directory, downloader::Download, data::model::ModelStorage };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ServerParameters {
@@ -116,8 +116,8 @@ impl Store {
                 },
             },
             models: ModelStorage {
-                path: String::from("models"),
-                default_model: String::from("None"),
+                path: None,
+                default_model: None,
                 items: vec![],
             },
             downloads: vec![],
@@ -131,7 +131,7 @@ impl Store {
     }
 
     pub fn load(&mut self, asset_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-        let home_dir = Utils::get_config_directory().expect("Failed to get config directory");
+        let home_dir = get_config_directory().expect("Failed to get config directory");
         let config_path = home_dir.join("config.json");
 
         if config_path.exists() {
@@ -157,7 +157,7 @@ impl Store {
     }
 
     pub fn save(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let home_dir = Utils::get_config_directory().expect("Failed to get config directory");
+        let home_dir = get_config_directory().expect("Failed to get config directory");
         let config_path = home_dir.join("config.json");
 
         let config_data = serde_json::to_string_pretty(self)?;
