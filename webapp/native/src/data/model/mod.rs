@@ -18,7 +18,7 @@ use serde::{ self, Deserialize, Serialize };
 use serde_with::{ serde_as, OneOrMany, formats::PreferOne };
 use uuid::Uuid;
 use void::Void;
-
+use crate::utils::{ get_home_directory, get_data_directory };
 use crate::data::{ option_date_format, option_string_or_struct };
 
 // See https://serde.rs/string-or-struct.html
@@ -136,10 +136,6 @@ pub struct Model {
         deserialize_with = "option_string_or_struct"
     )]
     pub paper: Option<Resource>,
-    // TODO use Resource instead of String
-    pub path: Option<String>,
-    // Deprecated put it in path
-    pub file_name: Option<String>,
 
     pub include: Option<Vec<Model>>,
 }
@@ -158,22 +154,38 @@ pub struct ModelEntity {
     #[serde(flatten)]
     pub reference: Model,
     pub state: Option<String>,
+    pub path: Option<String>,
+    pub file_name: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ModelStorage {
-    pub path: String,
-    pub default_model: String,
+    pub path: Option<String>,
+    pub default_model: Option<String>,
     pub items: Vec<ModelEntity>,
 }
 
 impl ModelStorage {
     pub fn new() -> Self {
         ModelStorage {
-            path: String::from("models"),
-            default_model: String::from("None"),
+            path: None,
+            default_model: None,
             items: vec![],
         }
+    }
+
+    pub fn get_model_path(&self, file_name: String, path: String) -> String {
+        let mut models_path = get_data_directory().expect("Failed to get data directory");
+        print!("models_path: {:?}", self.path);
+        if self.path.is_some() {
+            let home_dir = get_home_directory().expect("Failed to get home directory");
+            models_path = home_dir.join(self.path.as_deref().unwrap());
+        } else {
+            models_path = models_path.join("models".to_string());
+        }
+
+        let model_path = models_path.join(path).join(file_name);
+        model_path.to_str().unwrap().to_string()
     }
 
     pub fn get_model(&self, id: &str) -> Option<Model> {
@@ -183,7 +195,13 @@ impl ModelStorage {
             .map(|m| m.reference.clone())
     }
 
-    pub fn add_model(&mut self, model: Model, state: Option<String>) -> String {
+    pub fn add_model(
+        &mut self,
+        model: Model,
+        state: Option<String>,
+        path: Option<String>,
+        file_name: Option<String>
+    ) -> String {
         let mut model = model.clone();
         model.base_model = model.id;
         let uuid = Uuid::new_v4().to_string();
@@ -191,6 +209,8 @@ impl ModelStorage {
         self.items.push(ModelEntity {
             reference: model,
             state,
+            path,
+            file_name,
         });
         uuid
     }

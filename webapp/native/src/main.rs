@@ -28,7 +28,7 @@ use data::model::Model;
 use downloader::Downloader;
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
-use store::{ Store, ProviderConfiguration, ProviderType, ServerParameters, ProviderMetadata };
+use store::{ Store, ProviderConfiguration, ProviderType, ProviderMetadata };
 use server::*;
 use tauri::{ Runtime, State, Manager };
 
@@ -93,18 +93,19 @@ async fn start_opla_server<R: Runtime>(
 ) -> Result<Payload, String> {
     println!("Opla try to start ");
     let mut store = context.store.lock().unwrap();
-    let model_store = store.models.items
+    let model_name = model;
+    let models = &store.models;
+    let model = models.items
         .iter()
-        .find(|m| m.reference.name == model)
+        .find(|m| m.reference.name == model_name)
         .unwrap()
-        .reference.clone();
-    let home_dir = utils::Utils::get_home_directory().expect("Failed to get home directory");
-    let models_path = home_dir.join(&store.models.path);
-    let model_path = models_path
-        .join(&model_store.path.unwrap())
-        .join(&model_store.file_name.unwrap());
+        .clone();
+    let model_path = models.get_model_path(
+        model.file_name.clone().unwrap(),
+        model.path.clone().unwrap()
+    );
 
-    store.models.default_model = model.clone();
+    store.models.default_model = Some(model_name);
     store.server.parameters.port = port;
     store.server.parameters.host = host.clone();
     store.server.parameters.context_size = context_size;
@@ -117,7 +118,7 @@ async fn start_opla_server<R: Runtime>(
         .unwrap()
         .start(app, [
             "-m",
-            model_path.to_str().unwrap(),
+            model_path.as_str(),
             "--port",
             &port.to_string(),
             "--host",
@@ -166,7 +167,7 @@ async fn install_model<R: Runtime>(
 ) -> Result<String, String> {
     let mut store = context.store.lock().expect("Failed to get config");
 
-    let model_id = store.models.add_model(model, None);
+    let model_id = store.models.add_model(model, None, None, Some(file_name));
     // let downloader = context.downloader.lock().unwrap();
     // downloader.download_file(model_id, url, file_name, app);
 
@@ -200,23 +201,28 @@ fn start_server<R: Runtime>(app: tauri::AppHandle<R>, context: State<'_, OplaCon
     let threads = store.server.parameters.threads;
     let n_gpu_layers = store.server.parameters.n_gpu_layers;
     let default_model = store.models.default_model.clone();
+    if default_model.is_none() {
+        println!("Opla server not started default model not set: {:?}", default_model);
+        return;
+    }
+    let default_model = default_model.unwrap();
     let model = store.models.items.iter().find(|m| m.reference.name == default_model);
     if model.is_none() {
         println!("Opla server not started model not found: {:?}", default_model);
         return;
     }
     let model = model.unwrap();
-    let home_dir = utils::Utils::get_home_directory().expect("Failed to get home directory");
-    let models_path = home_dir.join(&store.models.path);
-    let model_path = models_path
-        .join(&model.reference.path.clone().unwrap())
-        .join(&model.reference.file_name.clone().unwrap());
+    let model_path = store.models.get_model_path(
+        model.file_name.clone().unwrap(),
+        model.path.clone().unwrap()
+    );
+
     let response = context.server
         .lock()
         .unwrap()
         .start(app, [
             "-m",
-            model_path.to_str().unwrap(),
+            model_path.as_str(),
             "--port",
             &port.to_string(),
             "--host",
@@ -257,7 +263,7 @@ fn main() {
             store.load(resource_path).expect("Opla failed to load config");
             // println!("Opla config: {:?}", config);
             let launch_at_startup = store.server.launch_at_startup;
-            let has_model = store.models.default_model != "None";
+            let has_model = store.models.default_model.is_some();
             let default_model = store.models.default_model.clone();
             drop(store);
             app.emit_all("opla-server", Payload {
