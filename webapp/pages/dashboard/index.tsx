@@ -16,7 +16,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { BiLogoDiscordAlt, BiLogoGithub } from 'react-icons/bi';
+import { DiscordLogoIcon, GitHubLogoIcon } from '@radix-ui/react-icons';
 
 import Card from '@/components/common/Card';
 import Searchbar from '@/components/common/Searchbar';
@@ -37,10 +37,10 @@ export default function Dashboard() {
         </div>
         <div className="mr-8 flex w-full flex-row-reverse items-center gap-4">
           <a href="https://discord.gg/RJD4Xa2Y" target="_blank" className="" aria-label="Discord">
-            <BiLogoDiscordAlt />
+            <DiscordLogoIcon />
           </a>
           <a href="https://github.com/Opla/opla" target="_blank" className="" aria-label="Github">
-            <BiLogoGithub />
+            <GitHubLogoIcon />
           </a>
           <a href="https://opla.ai" target="_blank">
             opla.ai
@@ -97,11 +97,11 @@ export default function Dashboard() {
       <footer className="absolute bottom-0 flex w-full justify-between bg-neutral-100 p-3 dark:bg-neutral-950">
         <p className="flex text-center">
           <a href="https://github.com/Opla/opla" target="_blank" className="flex items-center">
-            <BiLogoGithub />
+            <GitHubLogoIcon />
             <span className="ml-2">{t('Contribute')}</span>
           </a>
           <a href="https://discord.gg/RJD4Xa2Y" target="_blank" className="ml-4 flex items-center">
-            <BiLogoDiscordAlt />
+            <DiscordLogoIcon />
             <span className="ml-2">{t('Community')}</span>
           </a>
         </p>

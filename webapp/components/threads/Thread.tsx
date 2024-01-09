@@ -16,7 +16,7 @@
 
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
-import { SiOpenai } from 'react-icons/si';
+import { BrainCircuit } from 'lucide-react';
 import Opla from '@/components/icons/Opla';
 import { AppContext } from '@/context';
 import Dropdown from '@/components/common/Dropdown';
@@ -57,8 +57,8 @@ function Thread({ conversationId }: { conversationId?: string }) {
 
   const presets = [
     { label: selectedPreset, value: backendContext.config.server.name, icon: Opla, selected: true },
-    { label: 'OpenAI GPT-3.5', value: 'GPT-3.5', icon: SiOpenai },
-    { label: 'OpenAI GPT-4', value: 'GPT-4', icon: SiOpenai },
+    { label: 'OpenAI GPT-3.5', value: 'GPT-3.5', icon: BrainCircuit },
+    { label: 'OpenAI GPT-4', value: 'GPT-4', icon: BrainCircuit },
   ];
 
   const onSelectPreset = (value?: string, data?: string) => {

@@ -15,7 +15,7 @@
 'use client';
 
 import { ChangeEvent, useEffect, KeyboardEvent, MouseEvent } from 'react';
-import { PiPaperPlaneRight } from 'react-icons/pi';
+import { SendHorizontal } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import useAutoResizeTextArea from '@/hooks/useAutoResizeTextArea';
 
@@ -87,7 +87,7 @@ export default function Prompt({
               onClick={handleSendMessage}
               className="rounded-md bg-neutral-500 bg-transparent p-1 text-neutral-400 hover:text-white disabled:bg-neutral-500 disabled:opacity-40 disabled:hover:text-neutral-400"
             >
-              <PiPaperPlaneRight className=" h-5 w-5" />
+              <SendHorizontal className=" h-4 w-4" />
             </button>
           </div>
         </div>

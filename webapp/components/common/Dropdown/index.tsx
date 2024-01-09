@@ -13,8 +13,7 @@
 // limitations under the License.
 
 import { useRef } from 'react';
-import { PiCaretDown } from 'react-icons/pi';
-import { IconType } from 'react-icons';
+import { ChevronDown, LucideIcon } from 'lucide-react';
 import useClickOutside from '@/hooks/useClickOutside';
 import { MenuItem } from '@/types';
 import Menu from '../Menu';
@@ -39,7 +38,7 @@ export default function Dropdown({
     ...item,
     selected: item.selected || item.value === selectedItem?.value,
   }));
-  const I = selectedItem?.icon as IconType;
+  const I = selectedItem?.icon as LucideIcon;
   return (
     <div ref={target} className="relative w-full">
       <label className="w-full" aria-label={selectedItem?.label}>
@@ -53,11 +52,11 @@ export default function Dropdown({
         />
         <div className="flex cursor-pointer flex-row rounded-md border border-neutral-300 px-2 py-1 hover:border-neutral-500 peer-checked:[&>*:nth-child(2)]:-rotate-180">
           <div className="flex flex-1 flex-row items-center pr-4 dark:text-neutral-300">
-            {selectedItem?.icon && <I className="mr-2 h-4 w-4" />}
+            {I && <I className="mr-2 h-4 w-4" />}
             <p className="mr-4 flex-1 truncate text-left">{selectedItem?.label || ' '}</p>
           </div>
           <div className="flex items-center transition-transform">
-            <PiCaretDown className="h-4 w-4 text-neutral-400 " />
+            <ChevronDown className="h-4 w-4 text-neutral-400 " strokeWidth={1.5} />
           </div>
         </div>
         <div className="z-1000 pointer-events-none absolute left-0 top-7 rounded-lg bg-neutral-300 p-2 opacity-0 shadow-lg transition-all peer-checked:pointer-events-auto peer-checked:opacity-100 dark:bg-neutral-800">

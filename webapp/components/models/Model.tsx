@@ -27,7 +27,7 @@
 
 'use client';
 
-// import { PiDotsThreeVerticalBold } from 'react-icons/pi';
+// import { DotsVerticalIcon } from '@radix-ui/react-icons';
 import { DownloadIcon } from '@radix-ui/react-icons';
 import useTranslation from '@/hooks/useTranslation';
 import { Model } from '@/types';

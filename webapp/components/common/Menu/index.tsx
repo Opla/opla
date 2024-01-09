@@ -14,8 +14,7 @@
 
 import useTranslation from '@/hooks/useTranslation';
 import { MenuItem } from '@/types';
-import { IconType } from 'react-icons';
-import { PiCheck } from 'react-icons/pi';
+import { Check, LucideIcon } from 'lucide-react';
 
 function Menu({
   items,
@@ -33,7 +32,7 @@ function Menu({
   return (
     <ul className="flex w-full flex-col">
       {items.map((item) => {
-        const I = item.icon as IconType;
+        const I = item.icon as LucideIcon;
         return (
           <li
             key={item.label}
@@ -51,9 +50,9 @@ function Menu({
               type="button"
               className="flex w-full flex-row items-center"
             >
-              {item.icon && <I className="mr-2 h-4 w-4" />}
+              {I && <I className="mr-2 h-4 w-4" />}
               <p className="mr-4 flex-1 truncate text-left">{t(item.label)}</p>
-              {selection && item.selected && <PiCheck className="ml-2 h-4 w-4" />}
+              {selection && item.selected && <Check className="ml-2 h-4 w-4" strokeWidth={1.5} />}
             </button>
           </li>
         );

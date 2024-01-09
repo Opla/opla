@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { useRouter } from 'next/router';
-import { PiCircleFill, PiCloudArrowDown, PiWarning } from 'react-icons/pi';
+import { DownloadCloud, AlertTriangle, Server } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import useBackend from '@/hooks/useBackend';
 
@@ -39,12 +39,12 @@ export default function Statusbar() {
       >
         {!error && (
           <span className={`${running ? 'text-green-500' : 'text-red-500'} `}>
-            <PiCircleFill />
+            <Server className="h-4 w-4" />
           </span>
         )}
         {error && (
           <span className="text-neutral-800 dark:text-neutral-300">
-            <PiWarning />
+            <AlertTriangle className="h-4 w-4" />
           </span>
         )}
         {(backendContext.server.status === 'init' ||
@@ -58,7 +58,7 @@ export default function Statusbar() {
       {download && (
         <div className="flex flex-row items-center justify-center gap-1">
           <span className="text-neutral-800 dark:text-neutral-300">
-            <PiCloudArrowDown />
+            <DownloadCloud strokeWidth={1.5} />
           </span>
           <span>
             <span>{download.fileName} </span>

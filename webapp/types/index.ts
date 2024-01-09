@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconType } from 'react-icons';
-
 declare global {
   interface Window {
     __TAURI__: any;
@@ -25,7 +23,7 @@ export type MenuItem = {
   variant?: 'link' | 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
   label: string;
   value?: string;
-  icon?: IconType;
+  icon?: unknown;
   selected?: boolean;
   onSelect?: (data: string) => void;
 };
