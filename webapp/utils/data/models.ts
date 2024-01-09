@@ -14,7 +14,7 @@
 
 import { Entity, Model, Resource } from '@/types';
 
-const getDownloads = (model: Model, downloads = [] as Array<Model>, parent?: Model) => {
+const getDownloadables = (model: Model, downloads = [] as Array<Model>, parent?: Model) => {
   if (model?.download) {
     if (parent?.publisher && !model?.publisher) {
       downloads.push({ ...model, publisher: parent.publisher });
@@ -22,7 +22,7 @@ const getDownloads = (model: Model, downloads = [] as Array<Model>, parent?: Mod
       downloads.push(model);
     }
   }
-  model?.include?.forEach((m) => getDownloads(m, downloads, model));
+  model?.include?.forEach((m) => getDownloadables(m, downloads, model));
   return downloads;
 };
 
@@ -37,4 +37,4 @@ const isValidFormat = (m: Model) =>
   m?.name.endsWith('.gguf') ||
   getResourceUrl(m?.download).endsWith('.gguf');
 
-export { getDownloads, getEntityName, getResourceUrl, isValidFormat };
+export { getDownloadables, getEntityName, getResourceUrl, isValidFormat };

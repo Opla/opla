@@ -23,7 +23,12 @@ import { getModelsCollection, installModel, uninstallModel } from '@/utils/backe
 import { deepMerge } from '@/utils/data';
 // import { ModalIds } from '@/modals';
 import useBackend from '@/hooks/useBackend';
-import { getEntityName, getDownloads, getResourceUrl, isValidFormat } from '@/utils/data/models';
+import {
+  getEntityName,
+  getDownloadables,
+  getResourceUrl,
+  isValidFormat,
+} from '@/utils/data/models';
 import SplitView from '../common/SplitView';
 import Explorer from './Explorer';
 import ModelView from './Model';
@@ -53,13 +58,18 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
     model = collection.find((m) => m.id === selectedModelId) as Model;
     local = false;
   }
-  const downloads = getDownloads(model).filter((d) => d.private !== true && isValidFormat(d));
+  const downloadables = local
+    ? []
+    : getDownloadables(model).filter((d) => d.private !== true && isValidFormat(d));
 
   const onInstall = async (item?: Model) => {
-    const selectedModel = deepMerge(model, item || {}, true);
+    const selectedModel: Model = deepMerge(model, item || {}, true);
     logger.info(`install ${model.name}`, selectedModel, item);
     if (selectedModel.private === true) {
       delete selectedModel.private;
+    }
+    if (selectedModel.include) {
+      delete selectedModel.include;
     }
     const path = getEntityName(selectedModel.creator || selectedModel.author);
     const id = await installModel(
@@ -90,8 +100,8 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
     }
     let item: Model = selectedModel || model;
     // If the model is not a GGUF model, we need to find the recommended or first download
-    if (!isValidFormat(item) && downloads.length > 0) {
-      item = downloads.find((d) => d.recommended) || downloads[0];
+    if (!isValidFormat(item) && downloadables.length > 0) {
+      item = downloadables.find((d) => d.recommended) || downloadables[0];
     }
 
     if (isValidFormat(item)) {
@@ -103,12 +113,23 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
     }
   };
 
+  const backendContext = getBackendContext();
+  const { downloads = [] } = backendContext;
+
+  const isDownloading = downloads.findIndex((d) => d.id === model?.id) !== -1;
+
   return (
     <SplitView
       className="grow overflow-hidden"
       left={<Explorer models={models} selectedModelId={selectedModelId} collection={collection} />}
     >
-      <ModelView model={model} local={local} downloads={downloads} onChange={onChange} />
+      <ModelView
+        model={model}
+        isDownloading={isDownloading}
+        local={local}
+        downloadables={downloadables}
+        onChange={onChange}
+      />
     </SplitView>
   );
 }
