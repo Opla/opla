@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import { LegacyRef, useCallback, useEffect, useRef } from 'react';
-import { PiX } from 'react-icons/pi';
+import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 function DialogClose({ className, onClose }: { className?: string; onClose: () => void }) {
@@ -14,7 +14,7 @@ function DialogClose({ className, onClose }: { className?: string; onClose: () =
       type="button"
       onClick={onClose}
     >
-      <PiX className="h-4 w-4" />
+      <X className="h-4 w-4" />
     </button>
   );
 }

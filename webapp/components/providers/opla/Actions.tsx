@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PiPause, PiPlay, PiSpinner, PiWarning } from 'react-icons/pi';
+import { Pause, Play, AlertTriangle, Loader2 } from 'lucide-react';
 import Tooltip, { Orientation } from '@/components/common/Tooltip';
 import { OplaContext, Provider } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
@@ -67,12 +67,21 @@ export default function Actions({
             onProviderToggle();
           }}
         >
-          {waiting && <PiSpinner className="loading-icon h-[24px] w-[24px]" />}
-          {!waiting && status === 'started' && <PiPause className="h-[24px] w-[24px]" />}
-          {!waiting && status !== 'started' && <PiPlay className="h-[24px] w-[24px]" />}
+          {waiting && (
+            <Loader2 strokeWidth={1.5} className="loading-icon h-[24px] w-[24px] animate-spin" />
+          )}
+          {!waiting && status === 'started' && (
+            <Pause strokeWidth={1.5} className="h-[24px] w-[24px]" />
+          )}
+          {!waiting && status !== 'started' && (
+            <Play strokeWidth={1.5} className="h-[24px] w-[24px]" />
+          )}
           {status === 'error' && (
             <span className="absolute right-0 top-0 inline-flex translate-x-1 translate-y-5 transform rounded-full bg-red-600 p-[2px]">
-              <PiWarning className="h-[13px] w-[13px] -translate-y-[1px] text-white" />
+              <AlertTriangle
+                strokeWidth={1.5}
+                className="h-[13px] w-[13px] -translate-y-[1px] text-white"
+              />
             </span>
           )}
         </button>

@@ -15,8 +15,7 @@
 'use client';
 
 import { Message } from '@/types';
-import { PiRobot, PiUser } from 'react-icons/pi';
-import { TbCursorText } from 'react-icons/tb';
+import { Bot, TextCursor, User } from 'lucide-react';
 
 function MessageComponent({ message }: { message: Message }) {
   const { author, content: text } = message;
@@ -30,9 +29,9 @@ function MessageComponent({ message }: { message: Message }) {
           <div className="flex w-8 flex-col items-end">
             <div className="text-opacity-100r flex h-7 w-7 items-center justify-center rounded-md p-1 text-white">
               {isUser ? (
-                <PiUser className="h-4 w-4 text-white" />
+                <User className="h-4 w-4 text-white" />
               ) : (
-                <PiRobot className="h-4 w-4 text-white" />
+                <Bot className="h-4 w-4 text-white" />
               )}
             </div>
           </div>
@@ -42,7 +41,7 @@ function MessageComponent({ message }: { message: Message }) {
                 <div className="markdown prose dark:prose-invert dark w-full break-words">
                   <p className="font-bold capitalize">{author.name}</p>
                   {!isUser && text === null ? (
-                    <TbCursorText className="h-6 w-6 animate-pulse" />
+                    <TextCursor className="h-6 w-6 animate-pulse" />
                   ) : (
                     <p className="select-auto">{text as string}</p>
                   )}

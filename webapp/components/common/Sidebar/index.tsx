@@ -16,14 +16,7 @@
 
 import { useContext } from 'react';
 import Image from 'next/image';
-import {
-  PiChats,
-  PiHardDrives,
-  PiGearSix,
-  PiPackage,
-  PiTreeStructure,
-  PiUserCircle,
-} from 'react-icons/pi';
+import { BrainCircuit, MessagesSquare, Package, Server, Settings, UserCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import useTranslation from '@/hooks/useTranslation';
@@ -42,22 +35,22 @@ const sidebarItems: Array<Item> = [
       {
         name: 'Chats',
         href: '/threads',
-        icon: PiChats,
+        icon: MessagesSquare,
       },
       {
         name: 'Models',
         href: '/models',
-        icon: PiTreeStructure,
+        icon: BrainCircuit,
       },
       {
         name: 'AI Providers',
         href: '/providers',
-        icon: PiHardDrives,
+        icon: Server,
       },
       {
         name: 'Plugins',
         href: '/plugins',
-        icon: PiPackage,
+        icon: Package,
         hidden: true,
       },
     ],
@@ -68,13 +61,13 @@ const sidebarItems: Array<Item> = [
       {
         name: 'Profile',
         href: '/profile',
-        icon: PiUserCircle,
+        icon: UserCircle2,
         hidden: true,
       },
       {
         name: 'Settings',
         href: '/settings',
-        icon: PiGearSix,
+        icon: Settings,
         modal: true,
       },
     ],
