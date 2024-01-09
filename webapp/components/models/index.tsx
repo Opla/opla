@@ -29,7 +29,7 @@ import {
   getResourceUrl,
   isValidFormat,
 } from '@/utils/data/models';
-import SplitView from '../common/SplitView';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import Explorer from './Explorer';
 import ModelView from './Model';
 
@@ -119,17 +119,20 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
   const isDownloading = downloads.findIndex((d) => d.id === model?.id) !== -1;
 
   return (
-    <SplitView
-      className="grow overflow-hidden"
-      left={<Explorer models={models} selectedModelId={selectedModelId} collection={collection} />}
-    >
-      <ModelView
-        model={model}
-        isDownloading={isDownloading}
-        local={local}
-        downloadables={downloadables}
-        onChange={onChange}
-      />
-    </SplitView>
+    <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel defaultSize={20}>
+        <Explorer models={models} selectedModelId={selectedModelId} collection={collection} />
+      </ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel>
+        <ModelView
+          model={model}
+          isDownloading={isDownloading}
+          local={local}
+          downloadables={downloadables}
+          onChange={onChange}
+        />
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }

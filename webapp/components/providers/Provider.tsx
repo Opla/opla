@@ -99,7 +99,7 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
   const backendContext = getBackendContext();
 
   return (
-    <div className="flex max-w-full flex-1 flex-col dark:bg-neutral-800/30">
+    <div className="flex h-full max-w-full flex-col dark:bg-neutral-800/30">
       <div className="transition-width relative flex h-full w-full flex-1 flex-col items-stretch overflow-hidden">
         <div className="flex-1 overflow-hidden">
           {!provider ? (
