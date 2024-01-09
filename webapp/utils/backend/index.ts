@@ -15,10 +15,10 @@
 import { Backend } from '@/utils/backend/connect';
 import { ServerStatus } from '@/types';
 
-const connect = async (listener: (payload: any) => void) => {
+const connect = async (listener: (payload: unknown) => void, downloadListener: (payload: unknown) => void) => {
   if (window?.__TAURI__) {
     const { default: connectBackend } = await import('@/utils/backend/connect');
-    return connectBackend(listener);
+    return connectBackend(listener, downloadListener);
   }
   return {
     context: {
@@ -41,9 +41,9 @@ const connect = async (listener: (payload: any) => void) => {
         message: 'no backend',
       },
     },
-    start: async () => {},
-    stop: async () => {},
-    restart: async () => {},
+    start: async () => { },
+    stop: async () => { },
+    restart: async () => { },
   } as Backend;
 };
 

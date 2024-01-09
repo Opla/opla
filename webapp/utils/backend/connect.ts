@@ -27,13 +27,14 @@ import { getOplaConfig, getOplaServerStatus } from './commands';
 export type Backend = {
   unlisten?: () => void;
   unlistenServer?: () => void;
+  unlistenDownloader?: () => void;
   context: OplaContext;
   start: (model?: string, parameters?: LlamaCppArguments) => Promise<void>;
   stop: () => Promise<void>;
   restart: (model?: string, parameters?: LlamaCppArguments) => Promise<void>;
 };
 
-const connectBackend = async (listener: (payload: any) => void) => {
+const connectBackend = async (listener: (payload: unknown) => void, downloaderlistener: (payload: unknown) => void) => {
   const { appWindow } = await import('@tauri-apps/api/window');
   const { confirm } = await import('@tauri-apps/api/dialog');
   const { listen } = await import('@tauri-apps/api/event');
@@ -50,7 +51,10 @@ const connectBackend = async (listener: (payload: any) => void) => {
     // logger.info('opla-server event', event.payload);
     listener(event);
   });
-
+  const unlistenDownloader = await listen('opla-downloader', (event) => {
+    // logger.info('opla-downloader event', event.payload);
+    downloaderlistener(event);
+  });
   const config = await getOplaConfig(); // (await invoke('get_opla_config')) as Store;
 
   logger.info('oplaConfig', config);
@@ -87,6 +91,7 @@ const connectBackend = async (listener: (payload: any) => void) => {
     context,
     unlisten,
     unlistenServer,
+    unlistenDownloader,
     payload: server,
     start,
     stop,

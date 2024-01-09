@@ -193,7 +193,17 @@ export type Store = {
   models: ModelsConfiguration;
 };
 
+export type Download = {
+  id: string;
+  fileName: string;
+  fileSize: number;
+  transfered: number;
+  transferRate: number;
+  percentage: number;
+  error?: string;
+}
 export type OplaContext = {
   server: OplaServer;
   config: Store;
+  downloads?: Download[];
 };
