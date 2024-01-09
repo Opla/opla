@@ -13,15 +13,15 @@
 // limitations under the License.
 
 import Link from 'next/link';
-import { IconType } from 'react-icons';
+import { LucideIcon } from 'lucide-react';
 import Tooltip, { Orientation } from '../Tooltip';
 
-function Content({ name, icon }: { name: string; icon: IconType }) {
-  const Icon = icon as IconType;
+function Content({ name, icon }: { name: string; icon: LucideIcon }) {
+  const Icon = icon as LucideIcon;
   return (
     <Tooltip message={name} orientation={Orientation.Right}>
       <div className="h-5 w-5 hover:text-neutral-800 dark:hover:text-neutral-100">
-        <Icon size="28px" />
+        <Icon size="28px" strokeWidth={1.5} />
       </div>
     </Tooltip>
   );
@@ -38,14 +38,14 @@ export default function SidebarItem({
   href: string | undefined;
   selected: boolean;
   name: string;
-  icon: IconType | undefined;
+  icon: LucideIcon | undefined;
   modal?: boolean;
   onModalClick: (href: string) => void;
 }) {
   const className = `flex h-6 w-6 rounded-md ${
     selected ? 'text-neutral-800 dark:text-neutral-100' : 'text-neutral-400 dark:text-neutral-500'
   } dark:transparent`;
-  const content = <Content name={name} icon={icon as IconType} />;
+  const content = <Content name={name} icon={icon as LucideIcon} />;
   return (
     <li className="p-2 py-4">
       {modal ? (

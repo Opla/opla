@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconType } from 'react-icons';
+import { LucideIcon } from 'lucide-react';
 
 export type Item = {
   name: string;
   href?: string;
-  icon?: IconType;
+  icon?: LucideIcon;
   items?: Array<Item>;
   flex?: number;
   hidden?: boolean;

@@ -19,16 +19,16 @@ import useTranslation from '@/hooks/useTranslation';
 import SettingItem from '@/components/common/SettingItem';
 import Dropdown from '@/components/common/Dropdown';
 import logger from '@/utils/logger';
-import { PiLaptop, PiMoon, PiSun } from 'react-icons/pi';
+import { Laptop, Moon, Sun } from 'lucide-react';
 
 export default function Appearance() {
   const { t } = useTranslation();
   const { theme, setTheme, isSystem } = useTheme();
 
   const colorSchemes = [
-    { label: 'System', value: 'system', icon: PiLaptop, selected: isSystem },
-    { label: 'Light', value: 'light', icon: PiSun, selected: !isSystem && theme === 'light' },
-    { label: 'Dark', value: 'dark', icon: PiMoon, selected: !isSystem && theme === 'dark' },
+    { label: 'System', value: 'system', icon: Laptop, selected: isSystem },
+    { label: 'Light', value: 'light', icon: Sun, selected: !isSystem && theme === 'light' },
+    { label: 'Dark', value: 'dark', icon: Moon, selected: !isSystem && theme === 'dark' },
   ];
 
   const onSelectColorScheme = (value?: string, data?: string) => {

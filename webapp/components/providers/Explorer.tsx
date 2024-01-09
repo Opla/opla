@@ -17,7 +17,7 @@
 import { useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { PiPlus, PiCircleFill } from 'react-icons/pi';
+import { Plus, Server } from 'lucide-react';
 import { AppContext } from '@/context';
 import { MenuItem, Provider, ServerStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
@@ -115,7 +115,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
             createNewProvider();
           }}
         >
-          <PiPlus className="h-4 w-4" />
+          <Plus className="h-4 w-4" strokeWidth={1.5} />
           {t('New AI provider')}
         </button>
         <div className="flex-1 flex-col overflow-y-auto overflow-x-hidden dark:border-white/20">
@@ -144,7 +144,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
                                 isDisabled(provider) ? 'text-red-500' : 'text-green-500'
                               } `}
                             >
-                              <PiCircleFill />
+                              <Server className="h-4 w-4" />
                             </div>
                           </div>
                         </div>

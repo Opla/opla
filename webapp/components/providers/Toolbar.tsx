@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PiCircleFill } from 'react-icons/pi';
 import useTranslation from '@/hooks/useTranslation';
 import { Provider } from '@/types';
+import { Plug } from 'lucide-react';
 
 export default function Toolbar({
   provider,
@@ -54,10 +54,10 @@ export default function Toolbar({
                 onProviderToggle();
               }}
             >
-              <span>{provider?.disabled ? t('Enable') : t('Disable')}</span>
               <span className={`${provider?.disabled ? 'text-red-500' : 'text-green-500'} `}>
-                <PiCircleFill />
+                <Plug className="h-4 w-4 rotate-90" />
               </span>
+              <span>{provider?.disabled ? t('Enable') : t('Disable')}</span>
             </button>
           )}
           <button
