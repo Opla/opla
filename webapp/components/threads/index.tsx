@@ -14,17 +14,20 @@
 
 'use client';
 
-import SplitView from '../common/SplitView';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import Explorer from './Explorer';
 import Thread from './Thread';
 
 export default function Threads({ selectedConversationId }: { selectedConversationId?: string }) {
   return (
-    <SplitView
-      className="grow overflow-hidden"
-      left={<Explorer selectedConversationId={selectedConversationId} />}
-    >
-      <Thread conversationId={selectedConversationId} />
-    </SplitView>
+    <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel defaultSize={20}>
+        <Explorer selectedConversationId={selectedConversationId} />
+      </ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel>
+        <Thread conversationId={selectedConversationId} />
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }

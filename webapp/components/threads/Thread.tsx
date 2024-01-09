@@ -111,7 +111,7 @@ function Thread({ conversationId }: { conversationId?: string }) {
   };
 
   return (
-    <div className="flex grow flex-col dark:bg-neutral-800/30">
+    <div className="flex h-full flex-col dark:bg-neutral-800/30">
       <div className="grow-0">
         <div className="justify-left flex w-full flex-row items-center gap-4 bg-neutral-50 p-3 text-xs text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
           <div className="flex flex-1 flex-row items-center">

@@ -14,17 +14,20 @@
 
 'use client';
 
-import SplitView from '../common/SplitView';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import Explorer from './Explorer';
 import Provider from './Provider';
 
 export default function Providers({ selectedProviderId }: { selectedProviderId?: string }) {
   return (
-    <SplitView
-      className="grow overflow-hidden"
-      left={<Explorer selectedProviderId={selectedProviderId} />}
-    >
-      <Provider providerId={selectedProviderId} />
-    </SplitView>
+    <ResizablePanelGroup direction="horizontal">
+      <ResizablePanel defaultSize={20}>
+        <Explorer selectedProviderId={selectedProviderId} />
+      </ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel>
+        <Provider providerId={selectedProviderId} />
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }
