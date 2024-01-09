@@ -71,10 +71,10 @@ impl Downloader {
                 percentage: 0.0,
                 error: None,
             };
-            let res = File::create(path);
+            let res = File::create(path.clone());
             if res.is_err() {
                 let error = res.err().unwrap();
-                println!("Failed to create file: {}", error);
+                println!("Failed to create file: {} {}", path, error);
                 download.emit_error(&handle, Box::new(error));
                 return;
             }
@@ -152,6 +152,7 @@ impl Downloader {
                 (progress.filesize as f64) / 1024.0 / 1024.0
             );
         }
+        println!("Download finished");
         Ok(())
     }
 }
