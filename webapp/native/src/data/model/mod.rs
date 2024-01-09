@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::fs::create_dir_all;
+use std::path::PathBuf;
 use std::str::FromStr;
 use chrono::{ DateTime, Utc };
 use serde::{ self, Deserialize, Serialize };
@@ -174,7 +176,7 @@ impl ModelStorage {
         }
     }
 
-    pub fn get_model_path(&self, path: String, file_name: String) -> String {
+    fn get_path(&self, path: String) -> PathBuf {
         let mut models_path = get_data_directory().expect("Failed to get data directory");
         print!("models_path: {:?}", self.path);
         if self.path.is_some() {
@@ -184,7 +186,20 @@ impl ModelStorage {
             models_path = models_path.join("models".to_string());
         }
 
-        let model_path = models_path.join(path).join(file_name);
+        let model_path = models_path.join(path);
+        model_path
+    }
+
+    pub fn create_model_path_filename(&self, path: String, file_name: String) -> String {
+        let models_path = self.get_path(path);
+        create_dir_all(models_path.clone()).expect("Failed to create model directory");
+        let model_path = models_path.join(file_name);
+        model_path.to_str().unwrap().to_string()
+    }
+
+    pub fn get_model_path_filename(&self, path: String, file_name: String) -> String {
+        let models_path = self.get_path(path);
+        let model_path = models_path.join(file_name);
         model_path.to_str().unwrap().to_string()
     }
 

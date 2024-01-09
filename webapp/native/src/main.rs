@@ -100,7 +100,7 @@ async fn start_opla_server<R: Runtime>(
         .find(|m| m.reference.name == model_name)
         .unwrap()
         .clone();
-    let model_path = models.get_model_path(
+    let model_path = models.get_model_path_filename(
         model.path.clone().unwrap(),
         model.file_name.clone().unwrap()
     );
@@ -158,7 +158,7 @@ async fn get_models_collection<R: Runtime>(
 
 #[tauri::command]
 async fn install_model<R: Runtime>(
-    _app: tauri::AppHandle<R>,
+    app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
     model: Model,
@@ -168,9 +168,10 @@ async fn install_model<R: Runtime>(
 ) -> Result<String, String> {
     let mut store = context.store.lock().expect("Failed to get config");
 
-    let model_id = store.models.add_model(model, None, Some(path), Some(file_name));
-    // let downloader = context.downloader.lock().unwrap();
-    // downloader.download_file(model_id, url, file_name, app);
+    let model_id = store.models.add_model(model, None, Some(path.clone()), Some(file_name.clone()));
+    let model_path = store.models.create_model_path_filename(path, file_name);
+    let downloader = context.downloader.lock().unwrap();
+    downloader.download_file(model_id.clone(), url, model_path, app);
 
     store.save().expect("Failed to save config");
 
@@ -213,7 +214,7 @@ fn start_server<R: Runtime>(app: tauri::AppHandle<R>, context: State<'_, OplaCon
         return;
     }
     let model = model.unwrap();
-    let model_path = store.models.get_model_path(
+    let model_path = store.models.get_model_path_filename(
         model.path.clone().unwrap(),
         model.file_name.clone().unwrap()
     );
