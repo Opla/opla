@@ -27,7 +27,7 @@
 
 'use client';
 
-import { PiDotsThreeVerticalBold } from 'react-icons/pi';
+// import { PiDotsThreeVerticalBold } from 'react-icons/pi';
 import { DownloadIcon } from '@radix-ui/react-icons';
 import useTranslation from '@/hooks/useTranslation';
 import { Model } from '@/types';
@@ -35,22 +35,24 @@ import { getEntityName, getResourceUrl } from '@/utils/data/models';
 import Parameter from '../common/Parameter';
 import { Button } from '../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../ui/table';
-import {
+/* import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
+} from '../ui/dropdown-menu'; */
 
 function ModelView({
   model,
+  isDownloading,
   local,
-  downloads,
+  downloadables,
   onChange,
 }: {
   model: Model;
+  isDownloading: boolean;
   local: boolean;
-  downloads: Model[];
+  downloadables: Model[];
   onChange: (item?: Model) => void;
 }) {
   const { t } = useTranslation();
@@ -75,10 +77,16 @@ function ModelView({
                 </span>
               </div>
               <div className="flex flex-row gap-2">
-                <Button variant="secondary" className="" onClick={() => onChange()}>
-                  {local ? t('Uninstall') : t('Install')}
+                <Button
+                  disabled={isDownloading}
+                  variant="secondary"
+                  className=""
+                  onClick={() => onChange()}
+                >
+                  {isDownloading && t('Downloading...')}
+                  {!isDownloading && (local ? t('Uninstall') : t('Install'))}
                 </Button>
-                {local && (
+                {/* local && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon">
@@ -96,7 +104,7 @@ function ModelView({
                       </>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                )}
+                ) */}
               </div>
             </div>
           </div>
@@ -175,7 +183,7 @@ function ModelView({
                     type="url"
                   />
                 </div>
-                {downloads.length > 0 && (
+                {downloadables.length > 0 && (
                   <div className="flex w-full flex-col text-sm">
                     <p className="py-4">{t('Downloadable implementations')}</p>
                     <Table className="w-full">
@@ -188,7 +196,7 @@ function ModelView({
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {downloads.map((download) => (
+                        {downloadables.map((download) => (
                           <TableRow
                             onClick={() => {}}
                             key={download.id || download.name}
