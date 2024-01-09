@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ fs::File, time::Instant, cmp::min, io::Write, error::Error };
+use std::{ fs::File, time::Instant, cmp::min, io::Write, error::Error, path::Path };
 
 use reqwest::Response;
 use serde::{ Serialize, Deserialize };
@@ -20,8 +20,9 @@ use tauri::{ AppHandle, Manager, Runtime };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Download {
-    pub download_id: String,
-    pub filesize: u64,
+    pub id: String,
+    pub file_name: String,
+    pub file_size: u64,
     pub transfered: u64,
     pub transfer_rate: f64,
     pub percentage: f64,
@@ -30,16 +31,19 @@ pub struct Download {
 
 impl Download {
     pub fn emit_progress<R: Runtime>(&self, handle: &AppHandle<R>) {
-        handle.emit_all("OPLA_DOWNLOAD_PROGRESS", &self).ok();
+        let payload = ("progress", &self);
+        handle.emit_all("opla-downloader", payload).ok();
     }
 
     pub fn emit_finished<R: Runtime>(&self, handle: &AppHandle<R>) {
-        handle.emit_all("OPLA_DOWNLOAD_FINISHED", &self).ok();
+        let payload = ("finished", &self);
+        handle.emit_all("opla-downloader", payload).ok();
     }
 
     pub fn emit_error<R: Runtime>(&mut self, handle: &AppHandle<R>, error: Box<dyn Error>) {
         self.error = Some(error.to_string());
-        handle.emit_all("OPLA_DOWNLOAD_ERROR", &self).ok();
+        let payload = ("error", &self, error.to_string());
+        handle.emit_all("opla-downloader", payload).ok();
     }
 }
 
@@ -63,9 +67,12 @@ impl Downloader {
         println!("Downloading {}...", url);
         tauri::async_runtime::spawn(async move {
             let start_time = Instant::now();
+            let dir = Path::new(&path);
+            let file_name = dir.file_name().unwrap();
             let mut download = Download {
-                download_id: id.to_string(),
-                filesize: 0,
+                id: id.to_string(),
+                file_name: file_name.to_str().unwrap().to_string(),
+                file_size: 0,
                 transfered: 0,
                 transfer_rate: 0.0,
                 percentage: 0.0,
@@ -115,7 +122,7 @@ impl Downloader {
         handle: &AppHandle<R>
     ) -> Result<(), Box<dyn Error>> {
         let mut last_update = Instant::now();
-        progress.filesize = response.content_length().unwrap_or(0);
+        progress.file_size = response.content_length().unwrap_or(0);
 
         while let Some(chunk) = response.chunk().await? {
             let res = file.write_all(&chunk);
@@ -127,7 +134,7 @@ impl Downloader {
             }
             progress.transfered = min(
                 progress.transfered + (chunk.len() as u64),
-                progress.filesize
+                progress.file_size
             );
             let duration = start_time.elapsed().as_secs_f64();
             let speed = if duration > 0.0 {
@@ -135,7 +142,7 @@ impl Downloader {
             } else {
                 0.0
             };
-            progress.percentage = ((progress.transfered * 100) / progress.filesize) as f64;
+            progress.percentage = ((progress.transfered * 100) / progress.file_size) as f64;
             progress.transfer_rate =
                 (progress.transfered as f64) / (start_time.elapsed().as_secs() as f64) +
                 ((start_time.elapsed().subsec_nanos() as f64) / 1_000_000_000.0).trunc();
@@ -149,7 +156,7 @@ impl Downloader {
                 "Downloaded {:.2} MB at {:.2} MB/s total: {:.2} MB",
                 (progress.transfered as f64) / 1024.0 / 1024.0,
                 speed,
-                (progress.filesize as f64) / 1024.0 / 1024.0
+                (progress.file_size as f64) / 1024.0 / 1024.0
             );
         }
         println!("Download finished");

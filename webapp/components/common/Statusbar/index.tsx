@@ -23,6 +23,9 @@ export default function Statusbar() {
   const backendContext = getBackendContext();
   const running = backendContext.server.status === 'started';
   const error = backendContext.server.status === 'error';
+
+  const download = (backendContext.downloads ?? [undefined])[0];
+
   const displayServer = () => {
     router.push(`/providers`);
   };
@@ -52,12 +55,17 @@ export default function Statusbar() {
           backendContext.server.status === 'stopped') && <span>{t('Server is stopped')}</span>}
         {backendContext.server.status === 'error' && <span>{t('Server has crashed')}</span>}
       </button>
-      <div className="flex flex-row items-center justify-center gap-1">
-        <span className="text-neutral-800 dark:text-neutral-300">
-          <PiCloudArrowDown />
-        </span>
-        <span>Zephyr... downloading 10%</span>
-      </div>
+      {download && (
+        <div className="flex flex-row items-center justify-center gap-1">
+          <span className="text-neutral-800 dark:text-neutral-300">
+            <PiCloudArrowDown />
+          </span>
+          <span>
+            <span>{download.fileName} </span>
+            <span>{download.percentage} %</span>
+          </span>
+        </div>
+      )}
     </div>
   );
 }

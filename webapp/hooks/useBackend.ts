@@ -18,8 +18,10 @@ import { Backend } from '@/utils/backend/connect';
 import logger from '@/utils/logger';
 import { createProvider } from '@/utils/data/providers';
 import connectBackend from '@/utils/backend';
-import { Metadata, Provider, ProviderType, OplaContext, ServerStatus } from '@/types';
+import { Metadata, Provider, ProviderType, OplaContext, ServerStatus, Download } from '@/types';
 import { getOplaConfig, getProviderTemplate } from '@/utils/backend/commands';
+import { toCamelCase } from '@/utils/string';
+import { mapKeys } from '@/utils/data';
 
 const initialBackendContext: OplaContext = {
   server: {
@@ -64,17 +66,57 @@ const useBackend = () => {
     (event: any) => {
       logger.info('backend event', event);
       if (event.event === 'opla-server') {
-        setBackendContext({
-          ...backendContext,
+        setBackendContext((context) => ({
+          ...context,
           server: {
-            ...backendContext.server,
+            ...context.server,
             status: event.payload.status,
             message: event.payload.message,
           },
-        });
+        }));
       }
     },
-    [backendContext, setBackendContext],
+    [setBackendContext],
+  );
+
+  const downloadListener = useCallback(
+    async (event: any) => {
+      // logger.info('downloader event', event);
+      if (event.event === 'opla-downloader') {
+        const [type, download]: [string, Download] = await mapKeys(event.payload, toCamelCase);
+
+        // logger.info('download', type, downloads);
+        if (type === 'progress') {
+          setBackendContext((context) => {
+            const { downloads = [] } = context;
+            const index = downloads.findIndex((d) => d.id === download.id);
+            if (index === -1) {
+              downloads.push(download);
+            } else {
+              downloads[index] = download;
+            }
+            return {
+              ...context,
+              downloads,
+            };
+          });
+        } else if (type === 'finished') {
+          setBackendContext((context) => {
+            const { downloads = [] } = context;
+            const index = downloads.findIndex((d) => d.id === download.id);
+            logger.info('download finished', index, download);
+            if (index !== -1) {
+              downloads.splice(index, 1);
+            }
+            return {
+              ...context,
+              downloads,
+            };
+          });
+        }
+      }
+    },
+    [setBackendContext],
   );
 
   const startBackend = useCallback(async () => {
@@ -85,12 +127,12 @@ const useBackend = () => {
       opla = createProvider('Opla', provider);
       providers.splice(0, 0, opla);
     }
-    const backendImpl: Backend = await connectBackend(backendListener);
+    const backendImpl: Backend = await connectBackend(backendListener, downloadListener);
     logger.info('backend impl', backendImpl);
-    setBackendContext({
-      ...backendContext,
+    setBackendContext((context) => ({
+      ...context,
       ...backendImpl.context,
-    });
+    }));
     logger.info('backend', opla.metadata, backendImpl.context.config.server.parameters);
     const metadata = opla.metadata as Metadata;
     metadata.server = backendImpl.context.config.server as Metadata;
@@ -99,7 +141,7 @@ const useBackend = () => {
     startRef.current = backendImpl.start as () => Promise<never>;
     stopRef.current = backendImpl.stop as () => Promise<never>;
     restartRef.current = backendImpl.restart as () => Promise<never>;
-  }, [backendContext, backendListener, providers, setProviders]);
+  }, [backendListener, downloadListener, providers, setProviders]);
 
   useEffect(() => {
     if (firstRender.current && providers) {
@@ -117,10 +159,10 @@ const useBackend = () => {
   const updateBackendStore = useCallback(async () => {
     logger.info('updateBackendStore');
     const store = await getOplaConfig();
-    setBackendContext({ ...backendContext, config: store });
-  }, [backendContext, setBackendContext]);
+    setBackendContext((context) => ({ ...context, config: store }));
+  }, [setBackendContext]);
 
-  const getBackendContext = useCallback(() => backendContext, [backendContext]);
+  const getBackendContext = () => backendContext;
 
   return { getBackendContext, updateBackendStore, start, stop, restart };
 };
