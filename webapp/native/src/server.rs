@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::sync::{ Mutex, Arc };
-use sysinfo::{ ProcessExt, System, SystemExt, PidExt, Pid };
+use sysinfo::{ System, Pid };
 use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
 
 #[derive(Clone)]
@@ -73,11 +73,10 @@ impl OplaServer {
         println!("used swap   : {} bytes", sys.used_swap());
 
         // Display system information:
-        println!("System name:             {:?}", sys.name());
-        println!("System kernel version:   {:?}", sys.kernel_version());
-        println!("System OS version:       {:?}", sys.os_version());
-        println!("System host name:        {:?}", sys.host_name());
-
+        println!("System name:             {:?}", System::name());
+        println!("System kernel version:   {:?}", System::kernel_version());
+        println!("System OS version:       {:?}", System::os_version());
+        println!("System host name:        {:?}", System::host_name());
         // Number of CPUs:
         println!("NB CPUs: {}", sys.cpus().len());
     }
