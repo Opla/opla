@@ -201,7 +201,7 @@ export type Download = {
   transferRate: number;
   percentage: number;
   error?: string;
-}
+};
 export type OplaContext = {
   server: OplaServer;
   config: Store;

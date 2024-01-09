@@ -34,7 +34,10 @@ export type Backend = {
   restart: (model?: string, parameters?: LlamaCppArguments) => Promise<void>;
 };
 
-const connectBackend = async (listener: (payload: unknown) => void, downloaderlistener: (payload: unknown) => void) => {
+const connectBackend = async (
+  listener: (payload: unknown) => void,
+  downloaderlistener: (payload: unknown) => void,
+) => {
   const { appWindow } = await import('@tauri-apps/api/window');
   const { confirm } = await import('@tauri-apps/api/dialog');
   const { listen } = await import('@tauri-apps/api/event');

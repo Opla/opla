@@ -98,7 +98,7 @@ const useBackend = () => {
             return {
               ...context,
               downloads,
-            }
+            };
           });
         } else if (type === 'finished') {
           setBackendContext((context) => {
@@ -111,10 +111,9 @@ const useBackend = () => {
             return {
               ...context,
               downloads,
-            }
+            };
           });
         }
-
       }
     },
     [setBackendContext],
