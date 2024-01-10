@@ -156,6 +156,18 @@ const useBackend = () => {
 
   const stop = async () => stopRef.current();
 
+  const setActivePreset = async (preset: string) => {
+    logger.info('setActivePreset', preset);
+
+    setBackendContext((context) => {
+      const newContext = {
+        ...context,
+        config: { ...context.config, models: { ...context.config.models, defaultModel: preset } },
+      };
+      return newContext;
+    });
+  };
+
   const updateBackendStore = useCallback(async () => {
     logger.info('updateBackendStore');
     const store = await getOplaConfig();
@@ -164,7 +176,7 @@ const useBackend = () => {
 
   const getBackendContext = () => backendContext;
 
-  return { getBackendContext, updateBackendStore, start, stop, restart };
+  return { getBackendContext, updateBackendStore, start, stop, restart, setActivePreset };
 };
 
 export default useBackend;

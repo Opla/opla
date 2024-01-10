@@ -143,8 +143,17 @@ pub struct Model {
 }
 
 impl Model {
-    pub fn is_same_id(&self, id: &str) -> bool {
-        self.id.is_some() && self.id.as_deref().unwrap() == id
+    pub fn is_same_id(&self, id2: &str) -> bool {
+        match self.id {
+            Some(ref id) => id == id2,
+            None => false,
+        }
+    }
+    pub fn is_same_id_or_name(&self, id_or_name: &str) -> bool {
+        match self.id {
+            Some(ref id) => id == id_or_name || self.name == id_or_name,
+            None => self.name == id_or_name,
+        }
     }
     pub fn is_same_model(&self, another_model: &Model) -> bool {
         self.id.is_some() & another_model.id.is_some() && self.id == another_model.id
@@ -176,38 +185,89 @@ impl ModelStorage {
         }
     }
 
-    fn get_path(&self, path: String) -> PathBuf {
-        let mut models_path = get_data_directory().expect("Failed to get data directory");
-        print!("models_path: {:?}", self.path);
-        if self.path.is_some() {
-            let home_dir = get_home_directory().expect("Failed to get home directory");
-            models_path = home_dir.join(self.path.as_deref().unwrap());
-        } else {
-            models_path = models_path.join("models".to_string());
-        }
-
+    fn get_path(&self, path: String) -> Result<PathBuf, String> {
+        let models_path = match self.path {
+            Some(ref path) => get_home_directory()?.join(path),
+            None => get_data_directory()?.join("models"),
+        };
         let model_path = models_path.join(path);
-        model_path
+        Ok(model_path)
     }
 
-    pub fn create_model_path_filename(&self, path: String, file_name: String) -> String {
-        let models_path = self.get_path(path);
-        create_dir_all(models_path.clone()).expect("Failed to create model directory");
-        let model_path = models_path.join(file_name);
-        model_path.to_str().unwrap().to_string()
+    pub fn create_model_path_filename(
+        &self,
+        path: String,
+        file_name: String
+    ) -> Result<String, String> {
+        let models_path = self.get_path(path)?;
+        let result = create_dir_all(models_path.clone());
+        if result.is_err() {
+            return Err(format!("Failed to create model directory: {:?}", result));
+        }
+        let file_name = file_name.as_str();
+        let binding = models_path.join(file_name);
+        let model_path = match binding.to_str() {
+            Some(path) => path,
+            None => {
+                return Err(
+                    format!("Failed to create model path: {:?}/{:?}", models_path, file_name)
+                );
+            }
+        };
+        println!("model_path: {}", model_path);
+        Ok(model_path.to_string())
     }
 
-    pub fn get_model_path_filename(&self, path: String, file_name: String) -> String {
-        let models_path = self.get_path(path);
-        let model_path = models_path.join(file_name);
-        model_path.to_str().unwrap().to_string()
+    pub fn get_model_path_filename(
+        &self,
+        path: String,
+        file_name: String
+    ) -> Result<String, String> {
+        let models_path = self.get_path(path)?;
+        let file_name = file_name.as_str();
+        let binding = models_path.join(file_name);
+        let model_path = match binding.to_str() {
+            Some(path) => path,
+            None => {
+                return Err(
+                    format!("Failed to create model path: {:?}/{:?}", models_path, file_name)
+                );
+            }
+        };
+        Ok(model_path.to_string())
     }
 
-    pub fn get_model(&self, id: &str) -> Option<Model> {
+    pub fn get_model_entity(&self, id_or_name: &str) -> Option<ModelEntity> {
         self.items
             .iter()
-            .find(|m| m.reference.is_same_id(id))
-            .map(|m| m.reference.clone())
+            .find(|m| m.reference.is_same_id_or_name(id_or_name))
+            .map(|m| m.clone())
+    }
+
+    pub fn get_model(&self, id_or_name: &str) -> Option<Model> {
+        self.get_model_entity(id_or_name).map(|m| m.reference.clone())
+    }
+
+    pub fn get_model_path(&self, id_or_name: String) -> Result<String, String> {
+        let (file_name, path) = match self.get_model_entity(&id_or_name) {
+            Some(model) => (model.file_name.clone(), model.path.clone()),
+            None => {
+                return Err(format!("Model not found: {:?}", id_or_name));
+            }
+        };
+        let path = match path {
+            Some(path) => path,
+            None => {
+                return Err(format!("Model path not found: {:?}", id_or_name));
+            }
+        };
+        let file_name = match file_name {
+            Some(file_name) => file_name,
+            None => {
+                return Err(format!("Model file name not found: {:?}", id_or_name));
+            }
+        };
+        self.get_model_path_filename(path, file_name)
     }
 
     pub fn add_model(

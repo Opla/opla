@@ -58,12 +58,15 @@ pub mod option_date_format {
     {
         let s = Option::<String>::deserialize(deserializer)?;
         println!("Parsing date: {:?}", s);
-        if s == None {
-            return Ok(None);
-        }
-        let datetime = DateTime::parse_from_rfc3339(&s.unwrap())
-            .map_err(serde::de::Error::custom)?
-            .with_timezone(&Utc);
+        let datetime = match s {
+            Some(s) =>
+                DateTime::parse_from_rfc3339(&s)
+                    .map_err(serde::de::Error::custom)?
+                    .with_timezone(&Utc),
+            None => {
+                return Ok(None);
+            }
+        };
         println!("Parsed date: {:?}", datetime);
         Ok(Some(datetime))
     }
@@ -99,7 +102,10 @@ pub fn string_or_struct<'de, T, D>(deserializer: D) -> Result<T, D::Error>
         }
 
         fn visit_str<E>(self, value: &str) -> Result<T, E> where E: de::Error {
-            Ok(FromStr::from_str(value).unwrap())
+            match FromStr::from_str(value) {
+                Ok(v) => Ok(v),
+                Err(_) => Err(de::Error::custom("invalid string")),
+            }
         }
 
         fn visit_map<M>(self, map: M) -> Result<T, M::Error> where M: MapAccess<'de> {

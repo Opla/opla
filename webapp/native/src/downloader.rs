@@ -126,11 +126,13 @@ impl Downloader {
 
         while let Some(chunk) = response.chunk().await? {
             let res = file.write_all(&chunk);
-            if res.is_err() {
-                let error = Box::new(res.err().unwrap());
-                println!("Failed to write chunk: {}", error);
-                progress.emit_error(&handle, error);
-                break;
+            match res {
+                Ok(_) => {}
+                Err(error) => {
+                    println!("Failed to write chunk: {}", error);
+                    progress.emit_error(&handle, Box::new(error));
+                    break;
+                }
             }
             progress.transfered = min(
                 progress.transfered + (chunk.len() as u64),

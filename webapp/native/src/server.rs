@@ -174,7 +174,7 @@ impl OplaServer {
     pub fn start<R: Runtime>(
         &mut self,
         app: tauri::AppHandle<R>,
-        arguments: [&str; 12]
+        arguments: Vec<String>
     ) -> Result<Payload, String> {
         let status = match self.status.try_lock() {
             Ok(status) => status.as_str(),
@@ -204,10 +204,12 @@ impl OplaServer {
         };
         *wstatus = ServerStatus::Starting;
         let status_response = wstatus.as_str().to_string();
-        app.emit_all("opla-server", Payload {
-            message: format!("Opla server starting: {} ", "llama.cpp.server"),
-            status: "waiting".to_string(),
-        }).unwrap();
+        app
+            .emit_all("opla-server", Payload {
+                message: format!("Opla server starting: {} ", "llama.cpp.server"),
+                status: "waiting".to_string(),
+            })
+            .map_err(|err| err.to_string())?;
         drop(wstatus);
 
         let wpid = Arc::clone(&self.pid);
@@ -224,17 +226,16 @@ impl OplaServer {
             *st = status;
             drop(st);
         });
-        let arguments: Vec<String> = arguments
-            .iter()
-            .map(|&arg| arg.to_string())
-            .collect();
         OplaServer::start_llama_cpp_server(app, arguments, do_started, callback);
 
         Ok(Payload { status: status_response, message: self.name.to_string() })
     }
 
     pub fn stop<R: Runtime>(&mut self, app: tauri::AppHandle<R>) -> Result<Payload, String> {
-        let pid = self.pid.lock().unwrap().to_owned();
+        let pid = self.pid
+            .lock()
+            .map_err(|err| err.to_string())?
+            .to_owned();
         println!("Opla try to stop {}", pid);
         let status = match self.status.try_lock() {
             Ok(status) => status.as_str(),
@@ -253,20 +254,27 @@ impl OplaServer {
             };
             *wstatus = ServerStatus::Stopping;
             drop(wstatus);
-            app.emit_all("opla-server", Payload {
-                message: format!("Opla server to stop: {} ", "llama.cpp.server"),
-                status: ServerStatus::Stopping.as_str().to_string(),
-            }).unwrap();
+            app
+                .emit_all("opla-server", Payload {
+                    message: format!("Opla server to stop: {} ", "llama.cpp.server"),
+                    status: ServerStatus::Stopping.as_str().to_string(),
+                })
+                .map_err(|err| err.to_string())?;
 
             let sys = System::new_all();
-            let pid = self.pid.lock().unwrap().to_owned();
+            let pid = self.pid
+                .lock()
+                .map_err(|err| err.to_string())?
+                .to_owned();
             let process = sys.process(Pid::from(pid)).expect("can't get process");
             process.kill();
             println!("Kill Opla server {}", pid);
-            app.emit_all("opla-server", Payload {
-                message: format!("Opla server killed: {} ", "llama.cpp.server"),
-                status: ServerStatus::Stopped.as_str().to_string(),
-            }).unwrap();
+            app
+                .emit_all("opla-server", Payload {
+                    message: format!("Opla server killed: {} ", "llama.cpp.server"),
+                    status: ServerStatus::Stopped.as_str().to_string(),
+                })
+                .map_err(|err| err.to_string())?;
             let mut wstatus = match self.status.try_lock() {
                 Ok(status) => status,
                 Err(_) => {
