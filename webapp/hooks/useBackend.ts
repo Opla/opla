@@ -160,11 +160,13 @@ const useBackend = () => {
     logger.info('setActivePreset', preset);
 
     setBackendContext((context) => {
-      const newContext = { ...context, config: { ...context.config, models: { ...context.config.models, defaultModel: preset } } };
+      const newContext = {
+        ...context,
+        config: { ...context.config, models: { ...context.config.models, defaultModel: preset } },
+      };
       return newContext;
     });
   };
-
 
   const updateBackendStore = useCallback(async () => {
     logger.info('updateBackendStore');
