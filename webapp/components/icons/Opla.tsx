@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-function Opla() {
+import { cn } from '@/lib/utils';
+
+function Opla({ className }: { className?: string }) {
   return (
     <svg
-      className="mr-2 h-4 w-4"
+      className={cn('h-4 w-4', className)}
       version="1.1"
       xmlns="http://www.w3.org/2000/svg"
       x="0px"

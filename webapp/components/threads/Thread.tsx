@@ -16,18 +16,18 @@
 
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
-import { BrainCircuit } from 'lucide-react';
 import Opla from '@/components/icons/Opla';
 import { AppContext } from '@/context';
-import Dropdown from '@/components/common/Dropdown';
 import { Message } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { createMessage, updateConversationMessages } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackend';
+import { getPresets, getSelectedPreset } from '@/utils/data/presets';
 import MessageView from './Message';
 import Prompt from './Prompt';
 import { ScrollArea } from '../ui/scroll-area';
+import Combobox from '../common/Combobox';
 
 function Thread({ conversationId }: { conversationId?: string }) {
   const router = useRouter();
@@ -53,14 +53,15 @@ function Thread({ conversationId }: { conversationId?: string }) {
 
   const showEmptyChat = messages.length < 1;
 
-  const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.defaultModel}`;
+  const selectedPreset = getSelectedPreset(backendContext);
   logger.info(`selectedPreset ${selectedPreset}`);
 
-  const presets = [
-    { label: selectedPreset, value: backendContext.config.server.name, icon: Opla, selected: true },
-    { label: 'OpenAI GPT-3.5', value: 'GPT-3.5', icon: BrainCircuit },
-    { label: 'OpenAI GPT-4', value: 'GPT-4', icon: BrainCircuit },
-  ];
+  const presets = getPresets(backendContext).map((p) => ({
+    label: p.title,
+    value: p.name,
+    icon: Opla,
+    selected: p.name === selectedPreset,
+  }));
 
   const onSelectPreset = (value?: string, data?: string) => {
     logger.info(`onSelectPreset ${value} ${data}`);
@@ -116,7 +117,7 @@ function Thread({ conversationId }: { conversationId?: string }) {
       <div className="grow-0">
         <div className="justify-left flex w-full flex-row items-center gap-4 bg-neutral-50 p-3 text-xs text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
           <div className="flex flex-1 flex-row items-center">
-            <Dropdown items={presets} onSelect={onSelectPreset} />
+            <Combobox items={presets} onSelect={onSelectPreset} />
           </div>
           <div className="flex-1">
             <p className="hidden rounded-md border border-neutral-600 px-3 py-1">-</p>
