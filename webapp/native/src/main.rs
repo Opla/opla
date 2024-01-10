@@ -308,22 +308,27 @@ fn main() {
         ::default()
         .manage(context)
         .setup(move |app| {
-            #[cfg(debug_assertions)] // only include this code on debug builds
+            // only include this code on debug builds
+            #[cfg(debug_assertions)]
             {
-                let window = match app.get_window("main") {
-                    Some(w) => { w }
+                match app.get_window("main") {
+                    Some(window) => {
+                        window.open_devtools();
+                    }
                     None => {
                         return Err("Opla failed to get window".into());
                     }
-                };
-                window.open_devtools();
-                let result = opla_setup(app);
-                if result.is_err() {
-                    let err = result.unwrap_err();
-                    println!("Opla setup error: {:?}", err);
                 }
-                Ok(())
             }
+
+            match opla_setup(app) {
+                Ok(_) => {}
+                Err(err) => {
+                    println!("Opla setup error: {:?}", err);
+                    return Err(err.into());
+                }
+            }
+            Ok(())
         })
         .invoke_handler(
             tauri::generate_handler![
