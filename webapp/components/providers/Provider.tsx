@@ -17,7 +17,7 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
-import { Provider, ServerStatus } from '@/types';
+import { Provider, ServerConfiguration, ServerStatus } from '@/types';
 import { updateProvider } from '@/utils/data/providers';
 import logger from '@/utils/logger';
 import { deepMerge, deepSet } from '@/utils/data';
@@ -69,7 +69,7 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
     setProviders(newProviders);
     setUpdatedProvider({ id: providerId });
     if (provider?.type === 'opla') {
-      const server: any = provider?.metadata?.server;
+      const server: ServerConfiguration = provider?.metadata?.server as ServerConfiguration;
       const parameters = server?.parameters; // deepCopy(provider?.metadata?.parameters);
       logger.info('params', parameters);
       restart(parameters);

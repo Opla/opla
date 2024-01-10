@@ -24,7 +24,24 @@ pub struct ServerParameters {
     pub threads: i32,
     pub n_gpu_layers: i32,
 }
-
+impl ServerParameters {
+    pub fn to_args(&self, model_path: &str) -> Vec<String> {
+        let mut parameters: Vec<String> = Vec::with_capacity(12);
+        parameters.push(format!("-m"));
+        parameters.push(format!("{}", model_path.to_string()));
+        parameters.push(format!("--port"));
+        parameters.push(format!("{}", self.port));
+        parameters.push(format!("--host"));
+        parameters.push(format!("{}", self.host));
+        parameters.push(format!("-c"));
+        parameters.push(format!("{}", self.context_size));
+        parameters.push(format!("-t"));
+        parameters.push(format!("{}", self.threads));
+        parameters.push(format!("-ngl"));
+        parameters.push(format!("{}", self.n_gpu_layers));
+        parameters
+    }
+}
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ServerConfiguration {
     pub name: String,
@@ -140,12 +157,6 @@ impl Store {
             self.set(config);
         } else {
             let default_config_path = asset_dir.join("opla_default_config.json");
-            println!(
-                "asset_dir: {} / {} / {}",
-                asset_dir.to_str().unwrap(),
-                default_config_path.to_str().unwrap(),
-                default_config_path.exists()
-            );
             if default_config_path.exists() {
                 let default_config_data = fs::read_to_string(default_config_path)?;
                 let default_config: Store = serde_json::from_str(&default_config_data)?;
