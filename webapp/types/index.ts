@@ -130,7 +130,8 @@ export type Provider = BaseNamedRecord & {
 };
 
 export type Preset = BaseNamedRecord & {
-  ownerId: string;
+  title: string;
+  ownerId?: string;
   parentId?: string;
   providerId?: string;
   modelIds?: string[];
