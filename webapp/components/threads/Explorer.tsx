@@ -88,7 +88,7 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
 
   return (
     <div className="scrollbar-trigger flex h-full bg-neutral-100 dark:bg-neutral-800/70">
-      <nav className="flex h-full flex-col space-y-1 p-1">
+      <nav className="flex h-full w-full flex-col space-y-1 p-1">
         <Link
           href="/threads"
           className="m-2 mb-1 flex flex-shrink-0 cursor-pointer items-center gap-2 rounded-md border px-4 py-1 text-sm text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:border-white/20 dark:text-neutral-400 hover:dark:text-white"
@@ -98,7 +98,7 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
         </Link>
         <div className="flex-1 flex-col overflow-y-auto overflow-x-hidden dark:border-white/20">
           <div className="flex flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
-            <div className="group relative flex flex-col gap-3 break-all rounded-md px-1 py-3">
+            <div className="group flex flex-col gap-3 break-all rounded-md px-1 py-3">
               <div className="p1 text-ellipsis break-all text-neutral-600">{t('Recent')}</div>
               <ul className="p1 flex flex-1 flex-col">
                 {conversations.map((conversation) => (
@@ -119,7 +119,7 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
                           id={conversation.id}
                           title={conversation.name}
                           editable={conversation.id === selectedConversationId}
-                          className="relative max-h-5 flex-1 overflow-hidden text-ellipsis break-all"
+                          className="max-h-5 flex-1 overflow-hidden text-ellipsis break-all"
                           onChange={onChangeConversationName}
                         />
                       </Link>

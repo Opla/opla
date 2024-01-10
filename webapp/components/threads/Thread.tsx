@@ -27,6 +27,7 @@ import { createMessage, updateConversationMessages } from '@/utils/data/conversa
 import useBackend from '@/hooks/useBackend';
 import MessageView from './Message';
 import Prompt from './Prompt';
+import { ScrollArea } from '../ui/scroll-area';
 
 function Thread({ conversationId }: { conversationId?: string }) {
   const router = useRouter();
@@ -127,26 +128,24 @@ function Thread({ conversationId }: { conversationId?: string }) {
           </div>
         </div>
       </div>
-      <div className="grow">
-        <div className="flex h-full flex-col overflow-y-auto">
-          {showEmptyChat ? (
-            <div className="flex grow flex-col py-10">
-              <h1 className="flex grow items-center justify-center gap-2 text-center text-2xl font-semibold text-neutral-200 dark:text-neutral-600">
-                {t('Chat with your local GPT')}
-              </h1>
-            </div>
-          ) : (
-            <>
-              {messages.map((msg) => (
-                <MessageView key={msg.id} message={msg} />
-              ))}
-              <div className="h-4 w-full" />
-              <div ref={bottomOfChatRef} />
-            </>
-          )}
-          <div className="flex flex-col items-center text-sm dark:bg-neutral-800/30" />
+
+      {showEmptyChat ? (
+        <div className="flex grow flex-col py-10">
+          <h1 className="flex grow items-center justify-center gap-2 text-center text-2xl font-semibold text-neutral-200 dark:text-neutral-600">
+            {t('Chat with your local GPT')}
+          </h1>
         </div>
-      </div>
+      ) : (
+        <ScrollArea className="flex h-full flex-col">
+          {messages.map((msg) => (
+            <MessageView key={msg.id} message={msg} />
+          ))}
+          <div className="h-4 w-full" />
+          <div ref={bottomOfChatRef} />
+        </ScrollArea>
+      )}
+      <div className="flex flex-col items-center text-sm dark:bg-neutral-800/30" />
+
       <Prompt
         message={message}
         isLoading={isLoading}
