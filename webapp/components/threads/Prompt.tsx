@@ -14,10 +14,11 @@
 
 'use client';
 
-import { ChangeEvent, useEffect, KeyboardEvent, MouseEvent } from 'react';
-import { SendHorizontal } from 'lucide-react';
+import { ChangeEvent, KeyboardEvent, MouseEvent } from 'react';
+import { AlertTriangle, SendHorizontal } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
-import useAutoResizeTextArea from '@/hooks/useAutoResizeTextArea';
+import { Textarea } from '../ui/textarea';
+import { Button } from '../ui/button';
 
 export default function Prompt({
   message,
@@ -32,15 +33,7 @@ export default function Prompt({
   updateMessage: any;
   handleMessage: any;
 }) {
-  const textAreaRef = useAutoResizeTextArea();
   const { t } = useTranslation();
-
-  useEffect(() => {
-    if (textAreaRef.current) {
-      textAreaRef.current.style.height = '24px';
-      textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
-    }
-  }, [message, textAreaRef]);
 
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
@@ -60,36 +53,34 @@ export default function Prompt({
   };
 
   return (
-    <div className="w-full grow-0 !bg-transparent bg-white pt-2 dark:bg-neutral-800">
-      <form className="stretch mx-2 flex flex-row gap-3 last:mb-2">
-        <div className="relative flex h-full flex-1 flex-col items-stretch">
-          {errorMessage ? (
-            <div className="mb-2 md:mb-0">
-              <div className="m-1 flex h-full w-full justify-center gap-0">
-                <span className="text-sm text-red-500">{errorMessage}</span>
-              </div>
-            </div>
-          ) : null}
-          <div className="relative flex w-full flex-grow flex-row rounded-md border border-black/10 bg-white p-3 dark:border-neutral-500 dark:bg-neutral-700 dark:text-white">
-            <textarea
-              ref={textAreaRef}
-              value={message}
-              tabIndex={0}
-              placeholder={t('Send a message...')}
-              className="m-0 h-[24px] max-h-[200px] w-full resize-none overflow-y-hidden border-0 bg-transparent p-0 pl-2 pr-7 focus:outline-none focus:ring-0 focus-visible:ring-0 md:pl-0 dark:bg-transparent"
-              onChange={handleUpdateMessage}
-              onKeyDown={(e) => handleKeypress(e)}
-            />
-            <button
-              disabled={isLoading || message?.length === 0}
-              type="button"
-              aria-label={t('Send')}
-              onClick={handleSendMessage}
-              className="rounded-md bg-neutral-500 bg-transparent p-1 text-neutral-400 hover:text-white disabled:bg-neutral-500 disabled:opacity-40 disabled:hover:text-neutral-400"
-            >
-              <SendHorizontal className=" h-4 w-4" />
-            </button>
+    <div className="w-full grow-0 !bg-transparent dark:bg-neutral-800">
+      <form className="mx-2 flex flex-col gap-2 last:mb-2">
+        {errorMessage ? (
+          <div className="m-1 flex w-full items-center justify-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-red-500" />
+            <span className="text-sm text-red-500">{errorMessage}</span>
           </div>
+        ) : null}
+        <div className="flex w-full flex-row rounded-md border border-black/10 bg-white p-3 dark:border-neutral-500 dark:bg-neutral-700 dark:text-white">
+          <Textarea
+            value={message}
+            tabIndex={0}
+            placeholder={t('Send a message...')}
+            className="m-0 max-h-[200px] min-h-[24px] w-full resize-none overflow-y-hidden border-0 bg-transparent p-0 px-2 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent"
+            onChange={handleUpdateMessage}
+            onKeyDown={(e) => handleKeypress(e)}
+          />
+          <Button
+            disabled={isLoading || message?.length === 0}
+            type="button"
+            aria-label={t('Send')}
+            onClick={handleSendMessage}
+            className="ml-2"
+            size="icon"
+            variant="outline"
+          >
+            <SendHorizontal className=" h-4 w-4" />
+          </Button>
         </div>
       </form>
     </div>

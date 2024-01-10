@@ -12,19 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useRef, useEffect } from 'react';
+import * as React from 'react';
 
-function useAutoResizeTextArea() {
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+const useAutoResizeTextarea = (ref: React.ForwardedRef<HTMLTextAreaElement>) => {
+  const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    if (textAreaRef.current) {
-      textAreaRef.current.style.height = '24px';
-      textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
-    }
-  }, [textAreaRef]);
+  React.useImperativeHandle(ref, () => textAreaRef.current!);
 
-  return textAreaRef;
-}
+  React.useEffect(() => {
+    const r = textAreaRef?.current;
 
-export default useAutoResizeTextArea;
+    const updateTextareaHeight = () => {
+      if (r) {
+        r.style.height = 'auto';
+        r.style.height = `${r.scrollHeight}px`;
+      }
+    };
+    updateTextareaHeight();
+    r?.addEventListener('input', updateTextareaHeight);
+
+    return () => r?.removeEventListener('input', updateTextareaHeight);
+  }, []);
+
+  return { textAreaRef };
+};
+
+export default useAutoResizeTextarea;
