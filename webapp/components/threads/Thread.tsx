@@ -16,6 +16,7 @@
 
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
+import { PanelRight, PanelRightClose } from 'lucide-react';
 import Opla from '@/components/icons/Opla';
 import { AppContext } from '@/context';
 import { Conversation, Message } from '@/types';
@@ -32,8 +33,17 @@ import MessageView from './Message';
 import Prompt from './Prompt';
 import { ScrollArea } from '../ui/scroll-area';
 import Combobox from '../common/Combobox';
+import { Toggle } from '../ui/toggle';
 
-function Thread({ conversationId }: { conversationId?: string }) {
+function Thread({
+  conversationId,
+  displaySettings,
+  onChangeDisplaySettings,
+}: {
+  conversationId?: string;
+  displaySettings: boolean;
+  onChangeDisplaySettings: (displaySettings: boolean) => void;
+}) {
   const router = useRouter();
   const { conversations, setConversations } = useContext(AppContext);
   const { getBackendContext } = useBackend();
@@ -149,6 +159,19 @@ function Thread({ conversationId }: { conversationId?: string }) {
             <p className="hidden rounded-md border border-neutral-600 px-3 py-1">
               {t('Preset configuration')}
             </p>
+          </div>
+          <div>
+            <Toggle
+              aria-label="Toggle thread settings"
+              pressed={displaySettings}
+              onPressedChange={() => onChangeDisplaySettings(!displaySettings)}
+            >
+              {displaySettings ? (
+                <PanelRightClose strokeWidth={1.5} />
+              ) : (
+                <PanelRight strokeWidth={1.5} />
+              )}
+            </Toggle>
           </div>
         </div>
       </div>
