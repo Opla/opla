@@ -152,7 +152,7 @@ async fn install_model<R: Runtime>(
     let mut store = context.store.lock().map_err(|err| err.to_string())?;
 
     let model_id = store.models.add_model(model, None, Some(path.clone()), Some(file_name.clone()));
-    let res = store.models.create_model_path_filename(path, file_name);
+    let res = store.models.create_model_path_filename(path, file_name.clone());
     let model_path = match res {
         Ok(m) => { m }
         Err(err) => {
@@ -160,7 +160,7 @@ async fn install_model<R: Runtime>(
         }
     };
     let downloader = context.downloader.lock().map_err(|err| err.to_string())?;
-    downloader.download_file(model_id.clone(), url, model_path, app);
+    downloader.download_file(model_id.clone(), url, model_path, file_name.as_str(), app);
 
     store.save().map_err(|err| err.to_string())?;
 
@@ -248,7 +248,7 @@ fn opla_setup(app: &mut App) -> Result<(), String> {
             return Err(format!("Opla failed to resolve resource path: {:?}", resource_path));
         }
     };
-    store.load(resource_path).expect("Opla failed to load config");
+    store.load(resource_path).map_err(|err| err.to_string())?;
     // println!("Opla config: {:?}", config);
     let launch_at_startup = store.server.launch_at_startup;
     let has_model = store.models.default_model.is_some();
@@ -275,7 +275,7 @@ fn opla_setup(app: &mut App) -> Result<(), String> {
             Ok(_) => {}
             Err(err) => {
                 let mut server = context.server.lock().map_err(|err| err.to_string())?;
-                server.set_status(ServerStatus::Error).expect("Failed to set server status");
+                server.set_status(ServerStatus::Error).map(|_| "Failed to set server status")?;
                 app
                     .emit_all("opla-server", Payload {
                         message: err.clone(),
@@ -287,7 +287,7 @@ fn opla_setup(app: &mut App) -> Result<(), String> {
         }
     } else {
         println!("Opla server not started model: {:?}", default_model);
-        server.set_status(ServerStatus::Stopped).expect("Failed to set server status");
+        server.set_status(ServerStatus::Stopped).map(|_| "Failed to set server status")?;
         app
             .emit_all("opla-server", Payload {
                 message: "Not started Opla backend".into(),

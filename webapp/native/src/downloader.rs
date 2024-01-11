@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ fs::File, time::Instant, cmp::min, io::Write, error::Error, path::Path };
+use std::{ fs::File, time::Instant, cmp::min, io::Write, error::Error };
 
 use reqwest::Response;
 use serde::{ Serialize, Deserialize };
@@ -62,39 +62,39 @@ impl Downloader {
         id: String,
         url: String,
         path: String,
+        file_name: &str,
         handle: AppHandle<EventLoopMessage>
     ) -> () {
         println!("Downloading {}...", url);
+        let file_name = file_name.to_string();
         tauri::async_runtime::spawn(async move {
             let start_time = Instant::now();
-            let dir = Path::new(&path);
-            let file_name = dir.file_name().unwrap();
             let mut download = Download {
                 id: id.to_string(),
-                file_name: file_name.to_str().unwrap().to_string(),
+                file_name: file_name.to_string(),
                 file_size: 0,
                 transfered: 0,
                 transfer_rate: 0.0,
                 percentage: 0.0,
                 error: None,
             };
-            let res = File::create(path.clone());
-            if res.is_err() {
-                let error = res.err().unwrap();
-                println!("Failed to create file: {} {}", path, error);
-                download.emit_error(&handle, Box::new(error));
-                return;
-            }
-            let mut file = res.unwrap();
+            let mut file = match File::create(path.clone()) {
+                Ok(file) => file,
+                Err(error) => {
+                    println!("Failed to create file: {} {}", path, error);
+                    download.emit_error(&handle, Box::new(error));
+                    return;
+                }
+            };
 
-            let res = reqwest::get(url).await;
-            if res.is_err() {
-                let error = res.err().unwrap();
-                println!("Failed to download ressource: {}", error);
-                download.emit_error(&handle, Box::new(error));
-                return;
-            }
-            let response = res.unwrap();
+            let response = match reqwest::get(url).await {
+                Ok(res) => res,
+                Err(error) => {
+                    println!("Failed to download ressource: {}", error);
+                    download.emit_error(&handle, Box::new(error));
+                    return;
+                }
+            };
 
             Downloader::download_chunks(
                 &mut download,
@@ -103,12 +103,13 @@ impl Downloader {
                 start_time,
                 &handle
             ).await.ok();
-            let res = file.flush();
-            if res.is_err() {
-                let error = res.err().unwrap();
-                println!("Failed to finish download: {}", error);
-                download.emit_error(&handle, Box::new(error));
-                return;
+            match file.flush() {
+                Ok(_) => {}
+                Err(error) => {
+                    println!("Failed to finish download: {}", error);
+                    download.emit_error(&handle, Box::new(error));
+                    return;
+                }
             }
             download.emit_finished(&handle);
         });
@@ -122,7 +123,7 @@ impl Downloader {
         handle: &AppHandle<R>
     ) -> Result<(), Box<dyn Error>> {
         let mut last_update = Instant::now();
-        progress.file_size = response.content_length().unwrap_or(0);
+        progress.file_size = response.content_length().unwrap_or_else(|| 0);
 
         while let Some(chunk) = response.chunk().await? {
             let res = file.write_all(&chunk);
