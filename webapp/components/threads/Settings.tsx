@@ -51,7 +51,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
         </TabsList>
         <TabsContent value="model" className="py-4">
           <ScrollArea className="w-full">
-            <div className="h-[400px]">Choose your model here.</div>
+            <div className="h-[400px]">Choose your local model.</div>
             <Accordion
               type="multiple"
               className="h-[200px] w-full"
