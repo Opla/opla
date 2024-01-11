@@ -8,7 +8,8 @@
         "lint": "cd webapp && npm run lint",
         "test": "cd webapp && npm run test",
         "precommit-lint": "cd webapp && npm run precommit-lint",
-        "prepare": "husky install"
+        "prepare": "husky install",
+        "tauri": "cd webapp && npm run tauri"
     },
     "workspaces": [
         "webapp"
