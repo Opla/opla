@@ -24,8 +24,12 @@ const useAutoResizeTextarea = (ref: React.ForwardedRef<HTMLTextAreaElement>) => 
 
     const updateTextareaHeight = () => {
       if (r) {
-        r.style.height = 'auto';
-        r.style.height = `${r.scrollHeight}px`;
+        if (r.value === '') {
+          r.style.height = 'auto';
+        } else {
+          r.style.height = 'auto';
+          r.style.height = `${r.scrollHeight}px`;
+        }
       }
     };
     updateTextareaHeight();
