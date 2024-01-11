@@ -14,11 +14,15 @@
 
 'use client';
 
+import { useState } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import Explorer from './Explorer';
+import Settings from './Settings';
 import Thread from './Thread';
 
 export default function Threads({ selectedConversationId }: { selectedConversationId?: string }) {
+  const [displaySettings, setDisplaySettings] = useState(true);
+
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel defaultSize={20}>
@@ -26,7 +30,15 @@ export default function Threads({ selectedConversationId }: { selectedConversati
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel>
-        <Thread conversationId={selectedConversationId} />
+        <Thread
+          conversationId={selectedConversationId}
+          displaySettings={displaySettings}
+          onChangeDisplaySettings={setDisplaySettings}
+        />
+      </ResizablePanel>
+      <ResizableHandle />
+      <ResizablePanel defaultSize={20} className={displaySettings ? '' : 'hidden'}>
+        <Settings conversationId={selectedConversationId} />
       </ResizablePanel>
     </ResizablePanelGroup>
   );
