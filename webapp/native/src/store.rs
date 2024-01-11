@@ -148,7 +148,7 @@ impl Store {
     }
 
     pub fn load(&mut self, asset_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-        let home_dir = get_config_directory().expect("Failed to get config directory");
+        let home_dir = get_config_directory()?;
         let config_path = home_dir.join("config.json");
 
         if config_path.exists() {
@@ -168,7 +168,7 @@ impl Store {
     }
 
     pub fn save(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let home_dir = get_config_directory().expect("Failed to get config directory");
+        let home_dir = get_config_directory()?;
         let config_path = home_dir.join("config.json");
 
         let config_data = serde_json::to_string_pretty(self)?;

@@ -22,7 +22,7 @@ use void::Void;
 pub mod model;
 
 pub mod date_format {
-    use chrono::{ DateTime, Utc, NaiveDateTime };
+    use chrono::{ DateTime, Utc };
     use serde::{ Deserializer, Deserialize };
 
     const FORMAT: &str = "%Y-%m-%dT%H:%M:%S%.fZ";
@@ -31,11 +31,11 @@ pub mod date_format {
         where D: Deserializer<'de>
     {
         let s = String::deserialize(deserializer)?;
-        println!("Parsing date: {}", s);
-        let datetime = NaiveDateTime::parse_from_str(&s, FORMAT).expect("Error parsing date");
+        /* println!("Parsing date: {}", s);
+        let datetime = NaiveDateTime::parse_from_str(&s, FORMAT).expect("Failed to parse date");
         println!("Parsed date: {:?}", datetime);
-        let datetime = DateTime::parse_from_rfc3339(&s).expect("Error parsing date");
-        println!("Parsed date: {:?}", datetime);
+        let datetime = DateTime::parse_from_rfc3339(&s).expect("Failed to parse date");
+        println!("Parsed date: {:?}", datetime); */
         Ok(DateTime::parse_from_rfc3339(&s).map_err(serde::de::Error::custom)?.with_timezone(&Utc))
     }
 

@@ -23,7 +23,7 @@ pub fn get_data_directory() -> Result<PathBuf, String> {
     let data_dir = dirs::data_dir().ok_or("Failed to get home directory")?;
     let home_dir = data_dir.join("Opla");
     if !Path::exists(&home_dir) {
-        fs::create_dir(&home_dir).expect("Failed to create conf directory");
+        fs::create_dir(&home_dir).map_err(|_| "Failed to create data directory")?;
     }
     Ok(home_dir)
 }
@@ -32,7 +32,7 @@ pub fn get_config_directory() -> Result<PathBuf, String> {
     let config_dir = dirs::config_dir().ok_or("Failed to get conf directory")?;
     let config_dir = config_dir.join("Opla");
     if !Path::exists(&config_dir) {
-        fs::create_dir(&config_dir).expect("Failed to create conf directory");
+        fs::create_dir(&config_dir).map_err(|_| "Failed to create conf directory")?;
     }
     Ok(config_dir)
 }

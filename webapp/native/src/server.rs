@@ -86,63 +86,125 @@ impl OplaServer {
         arguments: Vec<String>,
         do_started: Box<dyn (Fn(usize) -> ()) + Send>,
         callback: Box<dyn (Fn(ServerStatus) -> ()) + Send>
-    ) {
-        let command = Command::new_sidecar("llama.cpp.server").expect(
-            "failed to init llama.cpp.server"
-        );
+    ) -> Result<(), String> {
+        let command = Command::new_sidecar("llama.cpp.server").map_err(
+            |_| "failed to init llama.cpp.server"
+        )?;
 
         tauri::async_runtime::spawn(async move {
-            let (mut rx, child) = command
-                .args(arguments)
-                .spawn()
-                .expect("failed to execute llama.cpp.server");
+            let (mut rx, child) = match command.args(arguments).spawn() {
+                Ok((rx, child)) => (rx, child),
+                Err(err) => {
+                    println!("Opla server error: {}", err);
+                    if
+                        app
+                            .emit_all("opla-server", Payload {
+                                message: format!("Opla server error: {}", err),
+                                status: ServerStatus::Error.as_str().to_string(),
+                            })
+                            .is_err()
+                    {
+                        println!("Opla server error: {}", "failed to emit error");
+                    }
+                    callback(ServerStatus::Error);
+                    return;
+                }
+            };
             println!("Opla server started: {} / {}", "0", "llama.cpp.server");
-            app.emit_all("opla-server", Payload {
-                message: format!("Opla server started: {} / {}", "0", "llama.cpp.server"),
-                status: ServerStatus::Starting.as_str().to_string(),
-            }).unwrap();
-            let p: usize = child.pid().try_into().expect("can't convert pid");
+            if
+                app
+                    .emit_all("opla-server", Payload {
+                        message: format!("Opla server started: {} / {}", "0", "llama.cpp.server"),
+                        status: ServerStatus::Starting.as_str().to_string(),
+                    })
+                    .is_err()
+            {
+                println!("Opla server error: {}", "failed to emit started");
+            }
+            let p: usize = match child.pid().try_into() {
+                Ok(pid) => pid,
+                Err(_) => {
+                    println!("Opla server error: {}", "failed to get pid");
+                    if
+                        app
+                            .emit_all("opla-server", Payload {
+                                message: format!("Opla server error: {}", "failed to get pid"),
+                                status: ServerStatus::Error.as_str().to_string(),
+                            })
+                            .is_err()
+                    {
+                        println!("Opla server error: {}", "failed to emit error");
+                    }
+                    callback(ServerStatus::Error);
+                    return;
+                }
+            };
             do_started(p);
             while let Some(event) = rx.recv().await {
                 if let CommandEvent::Stdout(line) = event {
                     println!("{}", line);
-                    app.emit_all("opla-server-stdout", Payload {
-                        message: line.clone(),
-                        status: "new-line".to_string(),
-                    }).unwrap();
+                    if
+                        app
+                            .emit_all("opla-server-stdout", Payload {
+                                message: line.clone(),
+                                status: "new-line".to_string(),
+                            })
+                            .is_err()
+                    {
+                        println!("Opla server error: {}", "failed to emit stdout");
+                    }
                 } else if let CommandEvent::Stderr(line) = event {
                     println!("\x1b[93m{}\x1b[0m", line);
-                    app.emit_all("opla-server-sterr", Payload {
-                        message: line.clone(),
-                        status: "new-line".to_string(),
-                    }).unwrap();
+                    if
+                        app
+                            .emit_all("opla-server-sterr", Payload {
+                                message: line.clone(),
+                                status: "new-line".to_string(),
+                            })
+                            .is_err()
+                    {
+                        println!("Opla server error: {}", "failed to emit stderr");
+                    }
 
                     if line.starts_with("llama server listening") {
                         println!("Opla server started: {}", "llama.cpp.server");
-                        app.emit_all("opla-server", Payload {
-                            message: format!(
-                                "Opla server started: {} / {}",
-                                "0",
-                                "llama.cpp.server"
-                            ),
-                            status: ServerStatus::Started.as_str().to_string(),
-                        }).unwrap();
+                        if
+                            app
+                                .emit_all("opla-server", Payload {
+                                    message: format!(
+                                        "Opla server started: {} / {}",
+                                        "0",
+                                        "llama.cpp.server"
+                                    ),
+                                    status: ServerStatus::Started.as_str().to_string(),
+                                })
+                                .is_err()
+                        {
+                            println!("Opla server error: {}", "failed to emit started");
+                        }
 
                         callback(ServerStatus::Started);
                     }
 
                     if line.starts_with("error") {
                         println!("Opla server error: {}", line);
-                        app.emit_all("opla-server", Payload {
-                            message: format!("Opla server error: {}", line),
-                            status: ServerStatus::Error.as_str().to_string(),
-                        }).unwrap();
+                        if
+                            app
+                                .emit_all("opla-server", Payload {
+                                    message: format!("Opla server error: {}", line),
+                                    status: ServerStatus::Error.as_str().to_string(),
+                                })
+                                .is_err()
+                        {
+                            println!("Opla server error: {}", "failed to emit error");
+                        }
 
                         callback(ServerStatus::Error);
                     }
                 }
             }
         });
+        Ok(())
     }
 
     pub fn get_status(&self) -> Result<Payload, String> {
@@ -215,18 +277,28 @@ impl OplaServer {
         let wpid = Arc::clone(&self.pid);
         let do_started: Box<dyn Fn(usize) + Send> = Box::new(move |pid: usize| {
             println!("Opla server just started: {} / {}", pid, "llama.cpp.server");
-            let mut wp = wpid.lock().unwrap();
-            *wp = pid;
-            drop(wp);
+            match wpid.lock() {
+                Ok(mut p) => {
+                    *p = pid;
+                }
+                Err(_) => {
+                    println!("Opla server error try to write pid");
+                }
+            }
         }) as Box<dyn Fn(usize) + Send>;
 
         let wstatus = Arc::clone(&self.status);
         let callback = Box::new(move |status| {
-            let mut st = wstatus.lock().unwrap();
-            *st = status;
-            drop(st);
+            match wstatus.lock() {
+                Ok(mut st) => {
+                    *st = status;
+                }
+                Err(_) => {
+                    println!("Opla server error try to write status");
+                }
+            }
         });
-        OplaServer::start_llama_cpp_server(app, arguments, do_started, callback);
+        OplaServer::start_llama_cpp_server(app, arguments, do_started, callback)?;
 
         Ok(Payload { status: status_response, message: self.name.to_string() })
     }
@@ -266,7 +338,13 @@ impl OplaServer {
                 .lock()
                 .map_err(|err| err.to_string())?
                 .to_owned();
-            let process = sys.process(Pid::from(pid)).expect("can't get process");
+            let process = match sys.process(Pid::from(pid)) {
+                Some(process) => process,
+                None => {
+                    println!("Opla server error trying to get process");
+                    return Err("Opla server can't get process".to_string());
+                }
+            };
             process.kill();
             println!("Kill Opla server {}", pid);
             app
