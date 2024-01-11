@@ -68,6 +68,7 @@ export type Conversation = BaseNamedRecord & {
   messages: Message[];
   pluginIds?: string[];
   preset?: Preset;
+  currentPrompt?: string;
 };
 
 export type Entity = {

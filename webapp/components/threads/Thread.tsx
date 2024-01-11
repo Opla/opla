@@ -18,10 +18,14 @@ import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Opla from '@/components/icons/Opla';
 import { AppContext } from '@/context';
-import { Message } from '@/types';
+import { Conversation, Message } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
-import { createMessage, updateConversationMessages } from '@/utils/data/conversations';
+import {
+  createMessage,
+  getConversation,
+  updateConversationMessages,
+} from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackend';
 import { getPresets, getSelectedPreset } from '@/utils/data/presets';
 import MessageView from './Message';
@@ -37,10 +41,9 @@ function Thread({ conversationId }: { conversationId?: string }) {
   logger.info('backendContext', backendContext);
   const selectedConversation = conversations.find((c) => c.id === conversationId);
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [message, setMessage] = useState('');
-
+  const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>({});
+  const [errorMessage, setErrorMessage] = useState<{ [key: string]: string }>({});
+  const { currentPrompt = '' } = selectedConversation || {};
   const { t } = useTranslation();
 
   logger.info(`${conversationId} ${selectedConversation?.messages?.length}`);
@@ -94,22 +97,42 @@ function Thread({ conversationId }: { conversationId?: string }) {
   }, [messages]);
 
   const sendMessage = async () => {
-    if (message.length < 1) {
-      setErrorMessage(t('Please enter a message.'));
+    if (conversationId === undefined) {
       return;
     }
-    setErrorMessage('');
+    if (currentPrompt.trim().length < 1) {
+      const error = { ...errorMessage, [conversationId]: t('Please enter a message.') };
+      setErrorMessage(error);
+      return;
+    }
+    setErrorMessage({ ...errorMessage, [conversationId]: '' });
 
-    setIsLoading(true);
+    setIsLoading({ ...isLoading, [conversationId]: true });
 
-    const toMessage = createMessage({ role: 'user', name: 'you' }, message);
+    const toMessage = createMessage({ role: 'user', name: 'you' }, currentPrompt);
     const fromMessage = createMessage({ role: 'system', name: selectedPreset }, '...');
     const { newConversationId, newConversations } = updateMessages([toMessage, fromMessage]);
 
-    setMessage('');
-
+    const conversation: Conversation = getConversation(
+      newConversationId,
+      newConversations,
+    ) as Conversation;
+    conversation.currentPrompt = '';
     fromMessage.content = 'What?';
     updateMessages([fromMessage], newConversationId, newConversations);
+
+    setIsLoading({ ...isLoading, [conversationId]: false });
+  };
+
+  const setMessage = (message: string) => {
+    logger.info('setMessage', message);
+    const newConversations = conversations.map((c) => {
+      if (c.id === conversationId) {
+        return { ...c, currentPrompt: message };
+      }
+      return c;
+    });
+    setConversations(newConversations);
   };
 
   return (
@@ -148,9 +171,9 @@ function Thread({ conversationId }: { conversationId?: string }) {
       <div className="flex flex-col items-center text-sm dark:bg-neutral-800/30" />
 
       <Prompt
-        message={message}
-        isLoading={isLoading}
-        errorMessage={errorMessage}
+        message={currentPrompt}
+        isLoading={conversationId ? isLoading[conversationId] : false}
+        errorMessage={conversationId ? errorMessage[conversationId] : ''}
         handleMessage={sendMessage}
         updateMessage={setMessage}
       />
