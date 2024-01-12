@@ -29,6 +29,7 @@ import {
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackend';
 import { getPresets, getSelectedPreset } from '@/utils/data/presets';
+import { completion } from '@/utils/providers/opla';
 import MessageView from './Message';
 import Prompt from './Prompt';
 import { ScrollArea } from '../ui/scroll-area';
@@ -127,8 +128,9 @@ function Thread({
       newConversationId,
       newConversations,
     ) as Conversation;
+    const response = await completion(currentPrompt);
     conversation.currentPrompt = '';
-    fromMessage.content = 'What?';
+    fromMessage.content = response;
     updateMessages([fromMessage], newConversationId, newConversations);
 
     setIsLoading({ ...isLoading, [conversationId]: false });
