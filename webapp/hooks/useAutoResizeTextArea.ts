@@ -14,31 +14,47 @@
 
 import * as React from 'react';
 
+const pxValueAsNumber = (px: string, defaultValue: number) => {
+  if (px.indexOf('px') !== -1) {
+    try {
+      return parseInt(px.replace('px', ''), 10);
+    } catch (e) {
+      // ignore
+    }
+  }
+  return defaultValue;
+};
+
 const useAutoResizeTextarea = (ref: React.ForwardedRef<HTMLTextAreaElement>) => {
   const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
 
   React.useImperativeHandle(ref, () => textAreaRef.current!);
 
+  const updateTextareaHeight = () => {
+    const r = textAreaRef?.current;
+    if (r) {
+      const computed = window.getComputedStyle(r);
+      r.style.height = '0px';
+      const height = Math.min(r.scrollHeight, pxValueAsNumber(computed.maxHeight, r.scrollHeight));
+
+      r.style.height = `${height}px`;
+      const parent = r.parentElement!;
+      if (parent?.classList.contains('textarea-container')) {
+        parent.style.height = `${height}px`;
+      }
+    }
+  };
+
   React.useEffect(() => {
     const r = textAreaRef?.current;
-
-    const updateTextareaHeight = () => {
-      if (r) {
-        if (r.value === '') {
-          r.style.height = 'auto';
-        } else {
-          r.style.height = 'auto';
-          r.style.height = `${r.scrollHeight}px`;
-        }
-      }
-    };
     updateTextareaHeight();
     r?.addEventListener('input', updateTextareaHeight);
-
-    return () => r?.removeEventListener('input', updateTextareaHeight);
+    return () => {
+      r?.removeEventListener('input', updateTextareaHeight);
+    };
   }, []);
 
-  return { textAreaRef };
+  return { textAreaRef, updateTextarea: updateTextareaHeight };
 };
 
 export default useAutoResizeTextarea;

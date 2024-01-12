@@ -15,18 +15,20 @@
 'use client';
 
 import { ChangeEvent, KeyboardEvent, MouseEvent } from 'react';
-import { AlertTriangle, SendHorizontal } from 'lucide-react';
+import { AlertTriangle, Loader2, SendHorizontal } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
 
 export default function Prompt({
+  conversationId,
   message,
   errorMessage,
   updateMessage,
   handleMessage,
   isLoading,
 }: {
+  conversationId: string;
   message: string;
   isLoading: boolean;
   errorMessage: string;
@@ -61,12 +63,14 @@ export default function Prompt({
             <span className="text-sm text-red-500">{errorMessage}</span>
           </div>
         ) : null}
-        <div className="flex w-full flex-row rounded-md border border-black/10 bg-white p-3 dark:border-neutral-500 dark:bg-neutral-700 dark:text-white">
+        <div className="flex w-full flex-row items-center rounded-md border border-black/10 bg-white p-3 dark:border-neutral-500 dark:bg-neutral-700 dark:text-white">
           <Textarea
+            autoresize
             value={message}
+            key={conversationId}
             tabIndex={0}
             placeholder={t('Send a message...')}
-            className="m-0 max-h-[200px] min-h-[24px] w-full resize-none overflow-y-hidden border-0 bg-transparent p-0 px-2 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent"
+            className="m-0 max-h-[200px] min-h-[4px] w-full resize-none overflow-y-hidden border-0 bg-transparent px-3 py-1.5 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent dark:text-white dark:placeholder-white"
             onChange={handleUpdateMessage}
             onKeyDown={(e) => handleKeypress(e)}
           />
@@ -79,7 +83,11 @@ export default function Prompt({
             size="icon"
             variant="outline"
           >
-            <SendHorizontal className=" h-4 w-4" />
+            {isLoading ? (
+              <Loader2 strokeWidth={1.5} className="loading-icon h-4 w-4 animate-spin" />
+            ) : (
+              <SendHorizontal className="strokeWidth={1.5} h-4 w-4" />
+            )}
           </Button>
         </div>
       </form>

@@ -194,6 +194,7 @@ function Thread({
       <div className="flex flex-col items-center text-sm dark:bg-neutral-800/30" />
 
       <Prompt
+        conversationId={conversationId as string}
         message={currentPrompt}
         isLoading={conversationId ? isLoading[conversationId] : false}
         errorMessage={conversationId ? errorMessage[conversationId] : ''}
