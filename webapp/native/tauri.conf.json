@@ -11,6 +11,15 @@
   },
   "tauri": {
     "allowlist": {
+      "http": {
+        "all": true,
+        "request": true,
+        "scope": [
+          "http://localhost:8080/*",
+          "https://localhost/*",
+          "https://opla.ai/*"
+        ]
+      },
       "window": {
         "all": true
       },
