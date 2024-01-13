@@ -15,7 +15,7 @@
 'use client';
 
 import { Message } from '@/types';
-import { Bot, TextCursor, User } from 'lucide-react';
+import { Bot, MoreHorizontal, User } from 'lucide-react';
 
 function MessageComponent({ message }: { message: Message }) {
   const { author, content: text } = message;
@@ -40,8 +40,10 @@ function MessageComponent({ message }: { message: Message }) {
               <div className="flex min-h-20 flex-col items-start gap-4 whitespace-pre-wrap break-words">
                 <div className="markdown prose dark:prose-invert dark w-full break-words">
                   <p className="font-bold capitalize">{author.name}</p>
-                  {!isUser && text === null ? (
-                    <TextCursor className="h-6 w-6 animate-pulse" />
+                  {!isUser && text === '...' ? (
+                    <p className="pt-2">
+                      <MoreHorizontal className="h-4 w-4 animate-pulse" />
+                    </p>
                   ) : (
                     <p className="select-auto">{text as string}</p>
                   )}

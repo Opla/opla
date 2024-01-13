@@ -25,6 +25,7 @@ import logger from '@/utils/logger';
 import {
   createMessage,
   getConversation,
+  updateConversation,
   updateConversationMessages,
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackend';
@@ -122,14 +123,19 @@ function Thread({
 
     const toMessage = createMessage({ role: 'user', name: 'you' }, currentPrompt);
     const fromMessage = createMessage({ role: 'system', name: selectedPreset }, '...');
-    const { newConversationId, newConversations } = updateMessages([toMessage, fromMessage]);
+    const { newConversationId, newConversations: nc } = updateMessages([toMessage, fromMessage]);
+    let newConversations = nc;
 
     const conversation: Conversation = getConversation(
       newConversationId,
       newConversations,
     ) as Conversation;
-    const response = await completion(currentPrompt);
     conversation.currentPrompt = '';
+    newConversations = updateConversation(conversation, newConversations);
+    setConversations(newConversations);
+
+    const response = await completion(currentPrompt);
+
     fromMessage.content = response;
     updateMessages([fromMessage], newConversationId, newConversations);
 
