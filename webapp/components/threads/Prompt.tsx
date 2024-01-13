@@ -70,7 +70,7 @@ export default function Prompt({
             key={conversationId}
             tabIndex={0}
             placeholder={t('Send a message...')}
-            className="m-0 max-h-[200px] min-h-[4px] w-full resize-none overflow-y-hidden border-0 bg-transparent px-3 py-1.5 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent dark:text-white dark:placeholder-white"
+            className="m-0 max-h-[200px] min-h-[32px] w-full resize-none overflow-y-hidden border-0 bg-transparent px-3 py-1.5 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent dark:text-white dark:placeholder-white"
             onChange={handleUpdateMessage}
             onKeyDown={(e) => handleKeypress(e)}
           />
