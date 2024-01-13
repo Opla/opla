@@ -67,7 +67,6 @@ const useAutoResizeTextarea = (ref: React.ForwardedRef<HTMLTextAreaElement>) => 
           parent.style.height = 'auto';
         }
       }
-
     };
   }, []);
 
