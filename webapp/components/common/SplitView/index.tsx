@@ -13,6 +13,8 @@
 // limitations under the License.
 // Inspiration :
 // https://codesandbox.io/p/sandbox/splitview-p37yw?file=%2Fsrc%2Fcomponents%2FSplitView.tsx%3A1%2C1-118%2C3
+
+// Deprecated use Resizable instead
 import React, { useEffect, useRef, useState } from 'react';
 import LeftPanel from './LeftPanel';
 

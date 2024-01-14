@@ -21,6 +21,7 @@ import { Provider, ProviderType } from '@/types';
 import { createProvider } from '@/utils/data/providers';
 import logger from '@/utils/logger';
 import { AppContext } from '@/context';
+import { Button } from '@/components/ui/button';
 import ProviderCreate from './providers';
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
@@ -125,22 +126,21 @@ export default function NewProvider({
         <div className="flex w-full flex-shrink-0 flex-row items-center gap-2 px-2 pt-4">
           <div className="flex w-full flex-row gap-2">
             {provider?.type && step > 1 && (
-              <button
+              <Button
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
                   onCreate();
                 }}
-                className="rounded-md border border-neutral-600 px-3 py-1 disabled:opacity-50"
               >
                 {t('Create')}
-              </button>
+              </Button>
             )}
           </div>
           <div className="flex w-full flex-row-reverse gap-2">
             <div> {step}/3</div>
-            <button
-              type="button"
+            <Button
+              variant="outline"
               disabled={!provider?.type || step === 3}
               onClick={(e) => {
                 e.preventDefault();
@@ -149,10 +149,10 @@ export default function NewProvider({
               className="disabled:opacity-50"
             >
               {t('Next')}
-            </button>
-            <button
+            </Button>
+            <Button
               disabled={step === 1}
-              type="button"
+              variant="outline"
               onClick={(e) => {
                 e.preventDefault();
                 onBack();
@@ -160,7 +160,7 @@ export default function NewProvider({
               className="disabled:opacity-50"
             >
               {t('Back')}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

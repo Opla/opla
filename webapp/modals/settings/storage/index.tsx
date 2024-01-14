@@ -16,6 +16,7 @@
 
 import useTranslation from '@/hooks/useTranslation';
 import SettingItem from '@/components/common/SettingItem';
+import { Button } from '@/components/ui/button';
 
 export default function Storage() {
   const { t } = useTranslation();
@@ -29,11 +30,11 @@ export default function Storage() {
         subtitle={t("In this path all Opla's files are stored")}
       >
         <p>{t('Path')}</p>
-        <button type="button">{t('Import')}</button>
+        <Button variant="ghost">{t('Import')}</Button>
       </SettingItem>
       <SettingItem title={t('Backup data')} subtitle={t('From ChatGPT or others')}>
-        <button type="button">{t('Import')}</button>
-        <button type="button">{t('Export')}</button>
+        <Button variant="ghost">{t('Import')}</Button>
+        <Button variant="ghost">{t('Export')}</Button>
       </SettingItem>
     </>
   );
