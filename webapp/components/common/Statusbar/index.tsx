@@ -21,6 +21,7 @@ export default function Statusbar() {
   const { t } = useTranslation();
   const { getBackendContext } = useBackend();
   const backendContext = getBackendContext();
+
   const running = backendContext.server.status === 'started';
   const error = backendContext.server.status === 'error';
 
@@ -29,6 +30,8 @@ export default function Statusbar() {
   const displayServer = () => {
     router.push(`/providers`);
   };
+
+  const { defaultModel } = backendContext.config.models;
 
   return (
     <div className="m-0 flex w-full grow-0 flex-row gap-4 bg-cyan-300 px-2 py-1 text-xs dark:bg-cyan-700">
@@ -50,7 +53,7 @@ export default function Statusbar() {
         {(backendContext.server.status === 'init' ||
           backendContext.server.status === 'wait' ||
           backendContext.server.status === 'starting') && <span>{t('Server is starting')}</span>}
-        {backendContext.server.status === 'started' && <span>{t('Server is running')}</span>}
+        {backendContext.server.status === 'started' && <span>{defaultModel}</span>}
         {(backendContext.server.status === 'stopping' ||
           backendContext.server.status === 'stopped') && <span>{t('Server is stopped')}</span>}
         {backendContext.server.status === 'error' && <span>{t('Server has crashed')}</span>}
