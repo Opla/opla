@@ -11,11 +11,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+import { useContext } from 'react';
 import { BrainCircuit, File, Palette, Settings2 } from 'lucide-react';
 import Link from 'next/link';
 import { DotsVerticalIcon } from '@radix-ui/react-icons';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
+import { AppContext } from '@/context';
+import useBackend from '@/hooks/useBackend';
+import { updateConversation } from '@/utils/data/conversations';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -26,9 +30,22 @@ import { Button } from '../ui/button';
 
 export default function Settings({ conversationId }: { conversationId?: string }) {
   const { t } = useTranslation();
-  // TODO: implement it
-  logger.info('Settings', conversationId);
+  const { conversations, setConversations } = useContext(AppContext);
+  const { getBackendContext } = useBackend();
+  const backendContext = getBackendContext();
+  logger.info('backendContext', backendContext);
+  const selectedConversation = conversations.find((c) => c.id === conversationId);
 
+  const onNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const { value } = e.target;
+    if (selectedConversation) {
+      const newConversations = updateConversation(
+        { ...selectedConversation, note: value },
+        conversations,
+      );
+      setConversations(newConversations);
+    }
+  };
   return (
     <div className="scrollbar-trigger flex h-full w-full bg-neutral-100 px-4 dark:bg-neutral-800/70">
       <Tabs defaultValue="model" className="w-full py-3">
@@ -99,8 +116,10 @@ export default function Settings({ conversationId }: { conversationId?: string }
         <TabsContent value="appearance">Thread / Document view</TabsContent>
         <TabsContent value="documents">
           <Textarea
+            value={selectedConversation?.note ?? ''}
             placeholder={t('Write a note...')}
             className="resize-none overflow-y-hidden border-0 bg-transparent p-2 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent"
+            onChange={onNoteChange}
           />
         </TabsContent>
       </Tabs>
