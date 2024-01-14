@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Button } from '@/components/ui/button';
+
 export default function Card({
   title,
   description,
@@ -36,15 +38,14 @@ export default function Card({
     </div>
   );
   return onClick && !disabled ? (
-    <button
-      type="button"
+    <Button
       onClick={onClick}
       className={`${
         selected ? 'border-2 border-neutral-800 dark:border-neutral-300' : ''
       } m-2 h-full w-full overflow-hidden rounded bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-700 hover:dark:bg-neutral-800`}
     >
       {container}
-    </button>
+    </Button>
   ) : (
     <div
       className={`${

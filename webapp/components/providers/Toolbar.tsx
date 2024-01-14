@@ -15,6 +15,7 @@
 import useTranslation from '@/hooks/useTranslation';
 import { Provider } from '@/types';
 import { Plug } from 'lucide-react';
+import { Button } from '../ui/button';
 
 export default function Toolbar({
   provider,
@@ -46,31 +47,29 @@ export default function Toolbar({
         </div>
         <div className="flex flex-grow flex-row-reverse items-center gap-4">
           {actions || (
-            <button
-              type="button"
-              className="flex flex-row items-center gap-4 rounded-md border border-neutral-600 p-2"
+            <Button
+              variant="outline"
               onClick={(e) => {
                 e.preventDefault();
                 onProviderToggle();
               }}
             >
               <span className={`${provider?.disabled ? 'text-red-500' : 'text-green-500'} `}>
-                <Plug className="h-4 w-4 rotate-90" />
+                <Plug className="mr-2 h-4 w-4 rotate-90" />
               </span>
               <span>{provider?.disabled ? t('Enable') : t('Disable')}</span>
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             disabled={!hasParametersChanged}
-            type="button"
-            className="rounded-md border border-neutral-600 p-2 disabled:opacity-50"
+            variant="outline"
             onClick={(e) => {
               e.preventDefault();
               onParametersSave();
             }}
           >
             {t('Save')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

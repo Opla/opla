@@ -27,6 +27,7 @@ import { deleteProvider, getProvider, updateProvider } from '@/utils/data/provid
 import useBackend from '@/hooks/useBackend';
 import { ModalIds } from '@/modals';
 import ContextMenu from '../common/ContextMenu';
+import { Button } from '../ui/button';
 
 function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string }) {
   const { providers, setProviders } = useContext(AppContext);
@@ -106,18 +107,21 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
 
   return (
     <div className="scrollbar-trigger flex h-full w-full flex-1 items-start border-r-[1px] border-neutral-300/30 bg-neutral-100 dark:border-neutral-900 dark:bg-neutral-800/70">
-      <nav className="flex h-full flex-1 flex-col space-y-1 p-1">
-        <button
-          type="button"
-          className="m-2 mb-1 flex flex-shrink-0 items-center gap-2 rounded-md border px-4 py-1 text-sm text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:border-white/20 dark:text-neutral-400 hover:dark:text-white"
-          onClick={(e) => {
-            e.preventDefault();
-            createNewProvider();
-          }}
-        >
-          <Plus className="h-4 w-4" strokeWidth={1.5} />
-          {t('New AI provider')}
-        </button>
+      <nav className="flex h-full flex-1 flex-col space-y-1">
+        <div className="flex w-full flex-row p-3">
+          <Button
+            className="w-full"
+            variant="outline"
+            onClick={(e) => {
+              e.preventDefault();
+              createNewProvider();
+            }}
+          >
+            <Plus className="mr-2 h-4 w-4" strokeWidth={1.5} />
+            {t('New AI provider')}
+          </Button>
+        </div>
+
         <div className="flex-1 flex-col overflow-y-auto overflow-x-hidden dark:border-white/20">
           <div className="flex flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
             <div className="group relative flex flex-col gap-3 break-all rounded-md px-1 py-3">

@@ -16,6 +16,7 @@ import { Pause, Play, AlertTriangle, Loader2 } from 'lucide-react';
 import Tooltip, { Orientation } from '@/components/common/Tooltip';
 import { OplaContext, Provider } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
+import { Button } from '@/components/ui/button';
 
 export default function Actions({
   provider,
@@ -58,24 +59,17 @@ export default function Actions({
   return (
     <div>
       <Tooltip message={tooltipMessage} orientation={Orientation.Left}>
-        <button
-          type="button"
+        <Button
+          variant="outline"
           disabled={disabled}
-          className="relative inline-block flex flex-row rounded-md bg-neutral-500 bg-transparent p-1 text-neutral-400 hover:text-white disabled:bg-neutral-500 disabled:hover:text-neutral-400"
           onClick={(event) => {
             event.preventDefault();
             onProviderToggle();
           }}
         >
-          {waiting && (
-            <Loader2 strokeWidth={1.5} className="loading-icon h-[24px] w-[24px] animate-spin" />
-          )}
-          {!waiting && status === 'started' && (
-            <Pause strokeWidth={1.5} className="h-[24px] w-[24px]" />
-          )}
-          {!waiting && status !== 'started' && (
-            <Play strokeWidth={1.5} className="h-[24px] w-[24px]" />
-          )}
+          {waiting && <Loader2 strokeWidth={1.5} className="loading-icon h-4 w-4 animate-spin" />}
+          {!waiting && status === 'started' && <Pause strokeWidth={1.5} className="h-4 w-4" />}
+          {!waiting && status !== 'started' && <Play strokeWidth={1.5} className="h-4 w-4" />}
           {status === 'error' && (
             <span className="absolute right-0 top-0 inline-flex translate-x-1 translate-y-5 transform rounded-full bg-red-600 p-[2px]">
               <AlertTriangle
@@ -84,7 +78,7 @@ export default function Actions({
               />
             </span>
           )}
-        </button>
+        </Button>
       </Tooltip>
     </div>
   );
