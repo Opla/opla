@@ -23,7 +23,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import logger from '@/utils/logger';
 import { ModalIds } from '@/modals';
-import Tooltip, { Orientation } from '../Tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import SidebarItems from './SidebarItems';
 import { Item } from './types';
 
@@ -88,11 +88,16 @@ function Sidebar() {
   return (
     <aside className="flex h-full flex-col border-r-[1px] border-neutral-300/30 bg-neutral-100 p-1 dark:border-neutral-900 dark:bg-neutral-800">
       <div className="flex hidden items-center justify-center border-b border-neutral-300 p-1 dark:border-neutral-600">
-        <Link className="mb-1 h-8 w-8" href="/">
-          <Tooltip message={t('Dashboard')} orientation={Orientation.Right}>
-            <Image width={32} height={32} className="" src="/logo.png" alt="logo" />
-          </Tooltip>
-        </Link>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link className="mb-1 h-8 w-8" href="/">
+              <Image width={32} height={32} className="" src="/logo.png" alt="logo" />
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{t('Dashboard')}</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
       <ul className="p1 flex h-full flex-1 flex-col">
         <SidebarItems items={sidebarItems} pathname={pathname} t={t} onModal={onModal} />

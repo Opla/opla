@@ -14,16 +14,14 @@
 
 import Link from 'next/link';
 import { LucideIcon } from 'lucide-react';
-import Tooltip, { Orientation } from '../Tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
-function Content({ name, icon }: { name: string; icon: LucideIcon }) {
+function Content({ icon }: { icon: LucideIcon }) {
   const Icon = icon as LucideIcon;
   return (
-    <Tooltip message={name} orientation={Orientation.Right}>
-      <div className="h-5 w-5 hover:text-neutral-800 dark:hover:text-neutral-100">
-        <Icon size="28px" strokeWidth={1.5} />
-      </div>
-    </Tooltip>
+    <div className="h-5 w-5 hover:text-neutral-800 dark:hover:text-neutral-100">
+      <Icon size="28px" strokeWidth={1.5} />
+    </div>
   );
 }
 
@@ -45,29 +43,36 @@ export default function SidebarItem({
   const className = `flex h-6 w-6 rounded-md ${
     selected ? 'text-neutral-800 dark:text-neutral-100' : 'text-neutral-400 dark:text-neutral-500'
   } dark:transparent`;
-  const content = <Content name={name} icon={icon as LucideIcon} />;
+  const content = <Content icon={icon as LucideIcon} />;
   return (
     <li className="p-2 py-4">
-      {modal ? (
-        <div
-          className={className}
-          role="button"
-          tabIndex={0}
-          onKeyUp={() => {
-            // e.stopPropagation();
-          }}
-          onClick={(e) => {
-            e.preventDefault();
-            onModalClick(href as string);
-          }}
-        >
-          {content}
-        </div>
-      ) : (
-        <Link className={className} href={href as string}>
-          {content}
-        </Link>
-      )}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {modal ? (
+            <div
+              className={className}
+              role="button"
+              tabIndex={0}
+              onKeyUp={() => {
+                // e.stopPropagation();
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                onModalClick(href as string);
+              }}
+            >
+              {content}
+            </div>
+          ) : (
+            <Link className={className} href={href as string}>
+              {content}
+            </Link>
+          )}
+        </TooltipTrigger>
+        <TooltipContent side="right" sideOffset={12} className="mt-1">
+          <p>{name}</p>
+        </TooltipContent>
+      </Tooltip>
     </li>
   );
 }
