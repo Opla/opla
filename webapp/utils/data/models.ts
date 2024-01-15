@@ -37,4 +37,6 @@ const isValidFormat = (m: Model) =>
   m?.name.endsWith('.gguf') ||
   getResourceUrl(m?.download).endsWith('.gguf');
 
-export { getDownloadables, getEntityName, getResourceUrl, isValidFormat };
+const findModel = (model: string, models: Model[]): Model | undefined =>
+  models.find((m) => m.name === model || m.id === model);
+export { getDownloadables, getEntityName, getResourceUrl, isValidFormat, findModel };

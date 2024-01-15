@@ -20,6 +20,8 @@ import logger from '@/utils/logger';
 import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackend';
 import { updateConversation } from '@/utils/data/conversations';
+import { findModel } from '@/utils/data/models';
+import { DEFAULT_SYSTEM } from '@/utils/providers/opla';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -35,6 +37,8 @@ export default function Settings({ conversationId }: { conversationId?: string }
   const backendContext = getBackendContext();
   logger.info('backendContext', backendContext);
   const selectedConversation = conversations.find((c) => c.id === conversationId);
+  const { defaultModel } = backendContext.config.models;
+  const model = findModel(defaultModel, backendContext.config.models.items);
 
   const onNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
@@ -46,6 +50,19 @@ export default function Settings({ conversationId }: { conversationId?: string }
       setConversations(newConversations);
     }
   };
+
+  const onSystemChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const { value } = e.target;
+    if (selectedConversation) {
+      const newConversations = updateConversation(
+        { ...selectedConversation, system: value },
+        conversations,
+      );
+      setConversations(newConversations);
+    }
+  };
+
+  const system = selectedConversation?.system ?? model?.system ?? DEFAULT_SYSTEM;
   return (
     <div className="scrollbar-trigger flex h-full w-full bg-neutral-100 px-4 dark:bg-neutral-800/70">
       <Tabs defaultValue="model" className="w-full py-3">
@@ -104,7 +121,13 @@ export default function Settings({ conversationId }: { conversationId?: string }
               </AccordionItem>
               <AccordionItem value="settings-preset">
                 <AccordionTrigger>System</AccordionTrigger>
-                <AccordionContent>Type the system prompt.</AccordionContent>
+                <AccordionContent>
+                  <Textarea
+                    value={system}
+                    onChange={onSystemChange}
+                    className="resize-none overflow-y-hidden border-0 bg-transparent p-2 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent"
+                  />
+                </AccordionContent>
               </AccordionItem>
               <AccordionItem value="settings-appearance">
                 <AccordionTrigger>Advanced</AccordionTrigger>
