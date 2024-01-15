@@ -26,8 +26,10 @@ import { ModalsContext } from '@/context/modals';
 import { deleteProvider, getProvider, updateProvider } from '@/utils/data/providers';
 import useBackend from '@/hooks/useBackend';
 import { ModalIds } from '@/modals';
-import ContextMenu from '../common/ContextMenu';
+import { ContextMenuTrigger } from '@radix-ui/react-context-menu';
 import { Button } from '../ui/button';
+import { ContextMenu } from '../ui/context-menu';
+import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
 
 function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string }) {
   const { providers, setProviders } = useContext(AppContext);
@@ -136,23 +138,29 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
                         : 'text-neutral-400 dark:text-neutral-400'
                     } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
                   >
-                    <ContextMenu data={provider.id} menu={provider.disabled ? menuDisabled : menu}>
-                      <Link href={`/providers/${provider.id}`}>
-                        <div>
-                          <div className="flex cursor-pointer flex-row items-center">
-                            <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
-                              {provider.name}
-                            </div>
-                            <div
-                              className={`${
-                                isDisabled(provider) ? 'text-red-500' : 'text-green-500'
-                              } `}
-                            >
-                              <Server className="h-4 w-4" />
+                    <ContextMenu>
+                      <ContextMenuTrigger>
+                        <Link href={`/providers/${provider.id}`}>
+                          <div>
+                            <div className="flex cursor-pointer flex-row items-center">
+                              <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
+                                {provider.name}
+                              </div>
+                              <div
+                                className={`${
+                                  isDisabled(provider) ? 'text-red-500' : 'text-green-500'
+                                } `}
+                              >
+                                <Server className="h-4 w-4" />
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </Link>
+                        </Link>
+                      </ContextMenuTrigger>
+                      <ContextMenuList
+                        data={provider.id}
+                        menu={isDisabled(provider) ? menuDisabled : menu}
+                      />
                     </ContextMenu>
                   </li>
                 ))}

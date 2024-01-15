@@ -19,7 +19,8 @@ import { Plus } from 'lucide-react';
 import { MenuItem, Model } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
-import ContextMenu from '../common/ContextMenu';
+import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
+import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
 
 function ModelsExplorer({
   models,
@@ -68,16 +69,19 @@ function ModelsExplorer({
                         : 'text-neutral-400 dark:text-neutral-400'
                     } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
                   >
-                    <ContextMenu data={model.id} menu={menu}>
-                      <Link href={`/models/${model.id}`}>
-                        <div>
-                          <div className="flex cursor-pointer flex-row items-center">
-                            <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
-                              {model.title || model.name}
+                    <ContextMenu>
+                      <ContextMenuTrigger>
+                        <Link href={`/models/${model.id}`}>
+                          <div>
+                            <div className="flex cursor-pointer flex-row items-center">
+                              <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
+                                {model.title || model.name}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </Link>
+                        </Link>
+                      </ContextMenuTrigger>
+                      <ContextMenuList data={model.id} menu={menu} />
                     </ContextMenu>
                   </li>
                 ))}
@@ -102,16 +106,19 @@ function ModelsExplorer({
                         : 'text-neutral-400 dark:text-neutral-400'
                     } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
                   >
-                    <ContextMenu data={model.id} menu={menu}>
-                      <Link href={`/models/${model.id}`}>
-                        <div>
-                          <div className="flex cursor-pointer flex-row items-center">
-                            <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
-                              {model.title || model.name}
+                    <ContextMenu>
+                      <ContextMenuTrigger>
+                        <Link href={`/models/${model.id}`}>
+                          <div>
+                            <div className="flex cursor-pointer flex-row items-center">
+                              <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
+                                {model.title || model.name}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </Link>
+                        </Link>
+                      </ContextMenuTrigger>
+                      <ContextMenuList data={model.id} menu={menu} />
                     </ContextMenu>
                   </li>
                 ))}
