@@ -30,7 +30,7 @@
     "i18next": "^23.7.6",
     "i18next-browser-languagedetector": "^7.2.0",
     "lucide-react": "^0.308.0",
-    "next": "14.0.3",
+    "next": "14.0.4",
     "next-themes": "^0.2.1",
     "pino": "^8.16.2",
     "pino-pretty": "^10.2.3",
