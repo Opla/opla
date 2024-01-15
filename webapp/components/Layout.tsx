@@ -22,6 +22,7 @@ import useBackend from '@/hooks/useBackend';
 import useRegisterModals from '@/hooks/useRegisterModals';
 import Modals from '@/modals';
 import Statusbar from './common/Statusbar';
+import { TooltipProvider } from './ui/tooltip';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { providers, models, presets } = useContext(AppContext);
@@ -36,11 +37,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen w-full select-none overflow-hidden">
-      <Sidebar />
-      <div className="flex grow flex-col">
-        {children}
-        <Statusbar />
-      </div>
+      <TooltipProvider>
+        <Sidebar />
+        <div className="flex grow flex-col">
+          {children}
+          <Statusbar />
+        </div>
+      </TooltipProvider>
     </div>
   );
 }

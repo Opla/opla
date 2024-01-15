@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import { Pause, Play, AlertTriangle, Loader2 } from 'lucide-react';
-import Tooltip, { Orientation } from '@/components/common/Tooltip';
 import { OplaContext, Provider } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function Actions({
   provider,
@@ -58,27 +58,30 @@ export default function Actions({
 
   return (
     <div>
-      <Tooltip message={tooltipMessage} orientation={Orientation.Left}>
-        <Button
-          variant="outline"
-          disabled={disabled}
-          onClick={(event) => {
-            event.preventDefault();
-            onProviderToggle();
-          }}
-        >
-          {waiting && <Loader2 strokeWidth={1.5} className="loading-icon h-4 w-4 animate-spin" />}
-          {!waiting && status === 'started' && <Pause strokeWidth={1.5} className="h-4 w-4" />}
-          {!waiting && status !== 'started' && <Play strokeWidth={1.5} className="h-4 w-4" />}
-          {status === 'error' && (
-            <span className="absolute right-0 top-0 inline-flex translate-x-1 translate-y-5 transform rounded-full bg-red-600 p-[2px]">
-              <AlertTriangle
-                strokeWidth={1.5}
-                className="h-[13px] w-[13px] -translate-y-[1px] text-white"
-              />
-            </span>
-          )}
-        </Button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="outline"
+            disabled={disabled}
+            onClick={(event) => {
+              event.preventDefault();
+              onProviderToggle();
+            }}
+          >
+            {waiting && <Loader2 strokeWidth={1.5} className="loading-icon h-4 w-4 animate-spin" />}
+            {!waiting && status === 'started' && <Pause strokeWidth={1.5} className="h-4 w-4" />}
+            {!waiting && status !== 'started' && <Play strokeWidth={1.5} className="h-4 w-4" />}
+            {status === 'error' && (
+              <span className="absolute right-0 top-0 inline-flex translate-x-1 translate-y-5 transform rounded-full bg-red-600 p-[2px]">
+                <AlertTriangle
+                  strokeWidth={1.5}
+                  className="h-[13px] w-[13px] -translate-y-[1px] text-white"
+                />
+              </span>
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{tooltipMessage}</TooltipContent>
       </Tooltip>
     </div>
   );
