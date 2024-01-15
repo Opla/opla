@@ -20,12 +20,15 @@ mod downloader;
 pub mod utils;
 pub mod api;
 pub mod data;
+pub mod llm;
+pub mod error;
 
 use std::sync::Mutex;
 
 use api::models;
 use data::model::Model;
 use downloader::Downloader;
+use llm::{ LlmQuery, LlmResponse, LlmQueryCompletion };
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
 use store::{ Store, ProviderConfiguration, ProviderType, ProviderMetadata };
@@ -103,7 +106,7 @@ async fn start_opla_server<R: Runtime>(
             return Err(format!("Opla server not started model not found: {:?}", err));
         }
     };
-    store.models.default_model = Some(model_name);
+    store.models.default_model = Some(model_name.clone());
     store.server.parameters.port = port;
     store.server.parameters.host = host.clone();
     store.server.parameters.context_size = context_size;
@@ -113,7 +116,7 @@ async fn start_opla_server<R: Runtime>(
 
     let args = store.server.parameters.to_args(model_path.as_str());
     let mut server = context.server.lock().map_err(|err| err.to_string())?;
-    server.start(app, args)
+    server.start(app, model_name, args)
 }
 
 #[tauri::command]
@@ -200,6 +203,41 @@ async fn set_active_model<R: Runtime>(
     Ok(())
 }
 
+#[tauri::command]
+async fn llm_call_completion<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>,
+    model: String,
+    llm_provider: String,
+    query: LlmQuery<LlmQueryCompletion>
+) -> Result<LlmResponse, String> {
+    if llm_provider == "opla" {
+        let model_name = {
+            let store = context.store.lock().map_err(|err| err.to_string())?;
+            let result = store.models.get_model(model.as_str());
+            let model = match result {
+                Some(model) => model.clone(),
+                None => {
+                    return Err(format!("Model not found: {:?}", model));
+                }
+            };
+            drop(store);
+            model.name
+        };
+        let response = {
+            let mut server = context.server
+                .lock()
+                .map_err(|err| err.to_string())?
+                .clone();
+            server.call_completion(model_name, query).await
+        };
+
+        return response.map_err(|err| err.to_string());
+    }
+    return Err(format!("LLM provider not found: {:?}", llm_provider));
+}
+
 fn start_server<R: Runtime>(
     app: tauri::AppHandle<R>,
     context: State<'_, OplaContext>
@@ -212,24 +250,21 @@ fn start_server<R: Runtime>(
             return Err(format!("Opla server not started store not found: {:?}", err));
         }
     };
-    let default_model = &store.models.default_model;
-    let model_path = match default_model {
-        Some(m) => {
-            let res = store.models.get_model_path(m.clone());
-            match res {
-                Ok(m) => { m }
-                Err(err) => {
-                    return Err(format!("Opla server not started model path not found: {:?}", err));
-                }
-            }
-        }
+    let default_model = match &store.models.default_model {
+        Some(m) => { m }
         None => {
             return Err(format!("Opla server not started default model not set"));
         }
     };
+    let model_path = match store.models.get_model_path(default_model.clone()) {
+        Ok(m) => { m }
+        Err(err) => {
+            return Err(format!("Opla server not started model path not found: {:?}", err));
+        }
+    };
     let args = store.server.parameters.to_args(model_path.as_str());
     let mut server = context.server.lock().map_err(|err| err.to_string())?;
-    let response = server.start(app, args);
+    let response = server.start(app, default_model.to_string(), args);
     if response.is_err() {
         return Err(format!("Opla server not started: {:?}", response));
     }
@@ -340,7 +375,8 @@ fn main() {
                 get_models_collection,
                 install_model,
                 uninstall_model,
-                set_active_model
+                set_active_model,
+                llm_call_completion
             ]
         )
         .run(tauri::generate_context!())

@@ -26,6 +26,7 @@ chrono = "0.4.31"
 serde_with = { version = "3.4.0", features = ["json"] }
 uuid = { version = "1.6.1", features = ["v4"] }
 void = "1.0.2"
+thiserror = "1.0.56"
 
 [features]
 # by default Tauri runs in production mode

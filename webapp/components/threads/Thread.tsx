@@ -51,6 +51,7 @@ function Thread({
   const { getBackendContext } = useBackend();
   const backendContext = getBackendContext();
   logger.info('backendContext', backendContext);
+  const { defaultModel } = backendContext.config.models;
   const selectedConversation = conversations.find((c) => c.id === conversationId);
 
   const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>({});
@@ -134,7 +135,7 @@ function Thread({
     newConversations = updateConversation(conversation, newConversations);
     setConversations(newConversations);
 
-    const response = await completion(currentPrompt);
+    const response = await completion(defaultModel, currentPrompt);
 
     fromMessage.content = response;
     updateMessages([fromMessage], newConversationId, newConversations);

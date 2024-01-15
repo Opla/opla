@@ -12,32 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { LlmResponse } from '@/types';
 import logger from '@/utils/logger';
-
-const api = 'http://localhost:8080';
-
-type Request = {
-  method: 'POST' | 'GET' | 'PUT' | 'DELETE' | 'PATCH';
-  headers: Record<string, string>;
-  body?: any;
-};
-
-type CompletionData = {
-  content: string;
-};
-
-const fetch = async (url: string, request: Request) => {
-  const { Body, fetch: fetchTauri, ResponseType } = await import('@tauri-apps/api/http');
-  const response = await fetchTauri(url, {
-    method: request.method,
-    body: Body.json(request.body),
-    headers: request.headers,
-    timeout: 30,
-    responseType: ResponseType.JSON,
-  });
-  logger.info('LLama.cpp fetch response', response);
-  return response;
-};
+import { invokeTauri } from '@/utils/tauri';
 
 const DEFAULT_SYSTEM = `
 You are an expert in retrieving information.
@@ -46,29 +23,33 @@ Thought: Let us the above reference document to find the answer.
 Answer:
 `;
 
-const completion = async (input: string, system = DEFAULT_SYSTEM): Promise<string> => {
+const completion = async (
+  model: string,
+  input: string,
+  system = DEFAULT_SYSTEM,
+): Promise<string> => {
   const prompt = system.replace('{{QUESTION}}', input);
-  const method = 'POST';
-  const headers = {
-    'Content-Type': 'application/json',
-  };
+
   const stop = ['Llama:', 'User:', 'Question:'];
-  const body = {
+  const parameters = {
     prompt,
     stop,
     n_predict: 200,
     temperature: 0,
   };
-  const request: Request = { method, headers, body };
-  const response = await fetch(`${api}/completion`, request);
-  const { data } = response;
-  if (response.ok) {
-    logger.info('LLama.cpp completion data', data);
-    const { content } = data as CompletionData;
+
+  const response: LlmResponse = (await invokeTauri('llm_call_completion', {
+    model,
+    llmProvider: 'opla',
+    query: { command: 'completion', parameters },
+  })) as LlmResponse;
+  const { content } = response;
+  if (content) {
+    logger.info('LLama.cpp completion response', content);
     return content.trim();
   }
-  logger.info('LLama.cpp completion error', data);
+  logger.info('LLama.cpp completion error', response);
   return 'error';
 };
 
-export { api, completion };
+export { DEFAULT_SYSTEM, completion };

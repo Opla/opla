@@ -203,8 +203,25 @@ export type Download = {
   percentage: number;
   error?: string;
 };
+
 export type OplaContext = {
   server: OplaServer;
   config: Store;
   downloads?: Download[];
+};
+
+export type LlmQueryCompletion = {
+  prompt: string;
+  temperature: number;
+  nPredict: number;
+  stop: string[];
+};
+
+export type LlmQuery = {
+  command: string;
+  parameters: LlmQueryCompletion;
+};
+
+export type LlmResponse = {
+  content: string;
 };
