@@ -70,6 +70,7 @@ export type Conversation = BaseNamedRecord & {
   preset?: Preset;
   currentPrompt?: string;
   note?: string;
+  system?: string;
 };
 
 export type Entity = {
@@ -118,6 +119,8 @@ export type Model = BaseNamedRecord & {
   fileName?: string; // local file name : deprecated
 
   include?: Model[];
+
+  system?: string;
 };
 
 export type ProviderType = 'opla' | 'server' | 'api' | 'proxy';

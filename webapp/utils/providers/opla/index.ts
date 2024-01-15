@@ -12,44 +12,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LlmResponse } from '@/types';
+import { LlmResponse, Model } from '@/types';
 import logger from '@/utils/logger';
 import { invokeTauri } from '@/utils/tauri';
 
 const DEFAULT_SYSTEM = `
 You are an expert in retrieving information.
 Question: {{QUESTION}}
-Thought: Let us the above reference document to find the answer.
 Answer:
 `;
 
 const completion = async (
-  model: string,
+  model: Model | undefined,
   input: string,
   system = DEFAULT_SYSTEM,
-): Promise<string> => {
-  const prompt = system.replace('{{QUESTION}}', input);
-
-  const stop = ['Llama:', 'User:', 'Question:'];
-  const parameters = {
-    prompt,
-    stop,
+  properties = {
     n_predict: 200,
     temperature: 0,
+    stop: ['Llama:', 'User:', 'Question:'],
+  },
+): Promise<string> => {
+  if (!model) {
+    throw new Error('Model not found');
+  }
+
+  const prompt = system.replace('{{QUESTION}}', input);
+
+  const parameters = {
+    prompt,
+    ...properties,
   };
 
   const response: LlmResponse = (await invokeTauri('llm_call_completion', {
-    model,
+    model: model.name,
     llmProvider: 'opla',
     query: { command: 'completion', parameters },
   })) as LlmResponse;
+
   const { content } = response;
   if (content) {
     logger.info('LLama.cpp completion response', content);
     return content.trim();
   }
-  logger.info('LLama.cpp completion error', response);
-  return 'error';
+  throw new Error(`LLama.cpp completion error ${response}`);
 };
 
 export { DEFAULT_SYSTEM, completion };

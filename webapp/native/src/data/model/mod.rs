@@ -140,6 +140,8 @@ pub struct Model {
     pub paper: Option<Resource>,
 
     pub include: Option<Vec<Model>>,
+
+    pub system: Option<String>,
 }
 
 impl Model {

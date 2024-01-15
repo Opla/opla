@@ -31,6 +31,7 @@ import {
 import useBackend from '@/hooks/useBackend';
 import { getPresets, getSelectedPreset } from '@/utils/data/presets';
 import { completion } from '@/utils/providers/opla';
+import { findModel } from '@/utils/data/models';
 import MessageView from './Message';
 import Prompt from './Prompt';
 import { ScrollArea } from '../ui/scroll-area';
@@ -135,9 +136,15 @@ function Thread({
     newConversations = updateConversation(conversation, newConversations);
     setConversations(newConversations);
 
-    const response = await completion(defaultModel, currentPrompt);
+    const model = findModel(defaultModel, backendContext.config.models.items);
+    try {
+      const response = await completion(model, currentPrompt, conversation?.system);
+      fromMessage.content = response;
+    } catch (e) {
+      logger.error('sendMessage', e);
+      fromMessage.content = t('Oops, something went wrong.');
+    }
 
-    fromMessage.content = response;
     updateMessages([fromMessage], newConversationId, newConversations);
 
     setIsLoading({ ...isLoading, [conversationId]: false });
