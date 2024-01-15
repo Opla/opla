@@ -29,8 +29,9 @@ import {
 } from '@/utils/data/conversations';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
-import ContextMenu from '../common/ContextMenu';
 import EditableItem from '../common/EditableItem';
+import { ContextMenu, ContextMenuTrigger } from '../ui/context-menu';
+import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
 
 export default function Explorer({ selectedConversationId }: { selectedConversationId?: string }) {
   const router = useRouter();
@@ -110,19 +111,22 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
                         : 'text-neutral-400 dark:text-neutral-400'
                     } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
                   >
-                    <ContextMenu data={conversation.id} menu={menu}>
-                      <Link
-                        href={`/threads/${conversation.id}`}
-                        className="flex cursor-pointer flex-row items-center"
-                      >
-                        <EditableItem
-                          id={conversation.id}
-                          title={conversation.name}
-                          editable={conversation.id === selectedConversationId}
-                          className="max-h-5 flex-1 overflow-hidden text-ellipsis break-all"
-                          onChange={onChangeConversationName}
-                        />
-                      </Link>
+                    <ContextMenu>
+                      <ContextMenuTrigger>
+                        <Link
+                          href={`/threads/${conversation.id}`}
+                          className="flex cursor-pointer flex-row items-center"
+                        >
+                          <EditableItem
+                            id={conversation.id}
+                            title={conversation.name}
+                            editable={conversation.id === selectedConversationId}
+                            className="max-h-5 flex-1 overflow-hidden text-ellipsis break-all"
+                            onChange={onChangeConversationName}
+                          />
+                        </Link>
+                      </ContextMenuTrigger>
+                      <ContextMenuList data={conversation.id} menu={menu} />
                     </ContextMenu>
                   </li>
                 ))}
