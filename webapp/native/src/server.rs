@@ -16,6 +16,8 @@ use std::sync::{ Mutex, Arc };
 use sysinfo::{ System, Pid };
 use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
 
+use crate::llm::{ LlmQuery, LlmResponse };
+
 #[derive(Clone)]
 pub struct OplaServer {
     pub pid: Arc<Mutex<usize>>,
@@ -391,14 +393,13 @@ impl OplaServer {
         }
     }
 
-    pub fn request(&mut self, model: String, query: String) -> Result<Payload, String> {
-        println!("{}", format!("Opla server request: {:?}", query));
+    pub fn call(&mut self, model: String, query: LlmQuery) -> Result<LlmResponse, String> {
+        println!("{}", format!("Opla llm call: {:?}", query));
         if self.model.is_none() || self.model.as_ref().unwrap() != &model {
-            return Err("Opla server model not started".to_string());
+            return Err("Opla llm model not started".to_string());
         }
-        Ok(Payload {
-            status: "ok".to_string(),
-            message: "llama.cpp.server".to_string(),
+        Ok(LlmResponse {
+            content: "ok".to_string(),
         })
     }
 }

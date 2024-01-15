@@ -20,12 +20,14 @@ mod downloader;
 pub mod utils;
 pub mod api;
 pub mod data;
+pub mod llm;
 
 use std::sync::Mutex;
 
 use api::models;
 use data::model::Model;
 use downloader::Downloader;
+use llm::{ LlmQuery, LlmResponse };
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
 use store::{ Store, ProviderConfiguration, ProviderType, ProviderMetadata };
@@ -201,34 +203,34 @@ async fn set_active_model<R: Runtime>(
 }
 
 #[tauri::command]
-async fn provider_request<R: Runtime>(
+async fn llm_call<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
-    model_id: String,
-    provider: String,
-    query: String
-) -> Result<Payload, String> {
+    model: String,
+    llm_provider: String,
+    query: LlmQuery
+) -> Result<LlmResponse, String> {
     let store = context.store.lock().map_err(|err| err.to_string())?;
-    if provider == "opla" {
-        let result = store.models.get_model(model_id.as_str());
+    if llm_provider == "opla" {
+        let result = store.models.get_model(model.as_str());
         let model = match result {
             Some(model) => model,
             None => {
-                return Err(format!("Model not found: {:?}", model_id));
+                return Err(format!("Model not found: {:?}", model));
             }
         };
         let mut server = context.server.lock().map_err(|err| err.to_string())?;
-        let res = server.request(model.name, query);
-        let payload = match res {
-            Ok(payload) => payload,
+        let res = server.call(model.name, query);
+        let res = match res {
+            Ok(r) => r,
             Err(err) => {
-                return Err(format!("Opla server request error: {:?}", err));
+                return Err(format!("Opla server call error: {:?}", err));
             }
         };
-        return Ok(payload);
+        return Ok(res);
     }
-    return Err(format!("Provider not found: {:?}", provider));
+    return Err(format!("LLM provider not found: {:?}", llm_provider));
 }
 
 fn start_server<R: Runtime>(
@@ -369,7 +371,7 @@ fn main() {
                 install_model,
                 uninstall_model,
                 set_active_model,
-                provider_request
+                llm_call
             ]
         )
         .run(tauri::generate_context!())
