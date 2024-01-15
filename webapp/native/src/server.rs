@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::sync::{ Mutex, Arc };
+use crate::{ error::Error, llm::LlmQueryCompletion };
 use sysinfo::{ System, Pid };
 use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
 
@@ -393,13 +394,37 @@ impl OplaServer {
         }
     }
 
-    pub fn call(&mut self, model: String, query: LlmQuery) -> Result<LlmResponse, String> {
-        println!("{}", format!("Opla llm call: {:?}", query));
+    pub async fn call_completion(
+        &mut self,
+        model: String,
+        query: LlmQuery<LlmQueryCompletion>
+    ) -> Result<LlmResponse, Box<dyn std::error::Error>> {
+        println!("{}", format!("Opla llm call: {:?}", query.command));
         if self.model.is_none() || self.model.as_ref().unwrap() != &model {
-            return Err("Opla llm model not started".to_string());
+            return Err(Box::new(Error::ModelNotLoaded));
         }
-        Ok(LlmResponse {
-            content: "ok".to_string(),
-        })
+
+        let parameters: LlmQueryCompletion = query.parameters;
+        let api = "http://localhost:8080";
+        let client = reqwest::Client::new();
+        let res = client
+            .post(format!("{}/{}", api, query.command)) // TODO remove hardcoding
+            .json(&parameters)
+            .send().await;
+        let response = match res {
+            Ok(res) => res,
+            Err(error) => {
+                println!("Failed to download ressource: {}", error);
+                return Err(Box::new(Error::ModelNotLoaded));
+            }
+        };
+        let response = match response.json::<LlmResponse>().await {
+            Ok(r) => r,
+            Err(error) => {
+                println!("Failed to download ressource: {}", error);
+                return Err(Box::new(Error::ModelNotLoaded));
+            }
+        };
+        Ok(response)
     }
 }

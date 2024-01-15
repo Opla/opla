@@ -12,23 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use serde::{ Deserialize, Serialize };
+use thiserror::Error;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LlmQueryCompletion {
-    pub prompt: String,
-    pub temperature: f32,
-    pub n_predict: i32,
-    pub stop: Vec<String>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LlmQuery<T> {
-    pub command: String,
-    pub parameters: T,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LlmResponse {
-    pub content: String,
+#[derive(Error, Debug)]
+pub enum Error {
+    #[error("the provided model is not loaded")]
+    ModelNotLoaded,
 }

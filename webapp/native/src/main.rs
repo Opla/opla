@@ -21,13 +21,14 @@ pub mod utils;
 pub mod api;
 pub mod data;
 pub mod llm;
+pub mod error;
 
 use std::sync::Mutex;
 
 use api::models;
 use data::model::Model;
 use downloader::Downloader;
-use llm::{ LlmQuery, LlmResponse };
+use llm::{ LlmQuery, LlmResponse, LlmQueryCompletion };
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
 use store::{ Store, ProviderConfiguration, ProviderType, ProviderMetadata };
@@ -203,32 +204,36 @@ async fn set_active_model<R: Runtime>(
 }
 
 #[tauri::command]
-async fn llm_call<R: Runtime>(
+async fn llm_call_completion<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
     model: String,
     llm_provider: String,
-    query: LlmQuery
+    query: LlmQuery<LlmQueryCompletion>
 ) -> Result<LlmResponse, String> {
-    let store = context.store.lock().map_err(|err| err.to_string())?;
     if llm_provider == "opla" {
-        let result = store.models.get_model(model.as_str());
-        let model = match result {
-            Some(model) => model,
-            None => {
-                return Err(format!("Model not found: {:?}", model));
-            }
+        let model_name = {
+            let store = context.store.lock().map_err(|err| err.to_string())?;
+            let result = store.models.get_model(model.as_str());
+            let model = match result {
+                Some(model) => model.clone(),
+                None => {
+                    return Err(format!("Model not found: {:?}", model));
+                }
+            };
+            drop(store);
+            model.name
         };
-        let mut server = context.server.lock().map_err(|err| err.to_string())?;
-        let res = server.call(model.name, query);
-        let res = match res {
-            Ok(r) => r,
-            Err(err) => {
-                return Err(format!("Opla server call error: {:?}", err));
-            }
+        let response = {
+            let mut server = context.server
+                .lock()
+                .map_err(|err| err.to_string())?
+                .clone();
+            server.call_completion(model_name, query).await
         };
-        return Ok(res);
+
+        return response.map_err(|err| err.to_string());
     }
     return Err(format!("LLM provider not found: {:?}", llm_provider));
 }
@@ -371,7 +376,7 @@ fn main() {
                 install_model,
                 uninstall_model,
                 set_active_model,
-                llm_call
+                llm_call_completion
             ]
         )
         .run(tauri::generate_context!())
