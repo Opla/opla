@@ -23,7 +23,11 @@ Thought: Let us the above reference document to find the answer.
 Answer:
 `;
 
-const completion = async (model: string, input: string, system = DEFAULT_SYSTEM): Promise<string> => {
+const completion = async (
+  model: string,
+  input: string,
+  system = DEFAULT_SYSTEM,
+): Promise<string> => {
   const prompt = system.replace('{{QUESTION}}', input);
 
   const stop = ['Llama:', 'User:', 'Question:'];
@@ -34,11 +38,11 @@ const completion = async (model: string, input: string, system = DEFAULT_SYSTEM)
     temperature: 0,
   };
 
-  const response: LlmResponse = await invokeTauri('llm_call_completion', {
+  const response: LlmResponse = (await invokeTauri('llm_call_completion', {
     model,
     llmProvider: 'opla',
     query: { command: 'completion', parameters },
-  }) as LlmResponse;
+  })) as LlmResponse;
   const { content } = response;
   if (content) {
     logger.info('LLama.cpp completion response', content);

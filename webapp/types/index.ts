@@ -215,13 +215,13 @@ export type LlmQueryCompletion = {
   temperature: number;
   nPredict: number;
   stop: string[];
-}
+};
 
 export type LlmQuery = {
   command: string;
   parameters: LlmQueryCompletion;
-}
+};
 
 export type LlmResponse = {
   content: string;
-}
+};
