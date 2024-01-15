@@ -103,7 +103,7 @@ async fn start_opla_server<R: Runtime>(
             return Err(format!("Opla server not started model not found: {:?}", err));
         }
     };
-    store.models.default_model = Some(model_name);
+    store.models.default_model = Some(model_name.clone());
     store.server.parameters.port = port;
     store.server.parameters.host = host.clone();
     store.server.parameters.context_size = context_size;
@@ -113,7 +113,7 @@ async fn start_opla_server<R: Runtime>(
 
     let args = store.server.parameters.to_args(model_path.as_str());
     let mut server = context.server.lock().map_err(|err| err.to_string())?;
-    server.start(app, args)
+    server.start(app, model_name, args)
 }
 
 #[tauri::command]
@@ -200,6 +200,37 @@ async fn set_active_model<R: Runtime>(
     Ok(())
 }
 
+#[tauri::command]
+async fn provider_request<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>,
+    model_id: String,
+    provider: String,
+    query: String
+) -> Result<Payload, String> {
+    let store = context.store.lock().map_err(|err| err.to_string())?;
+    if provider == "opla" {
+        let result = store.models.get_model(model_id.as_str());
+        let model = match result {
+            Some(model) => model,
+            None => {
+                return Err(format!("Model not found: {:?}", model_id));
+            }
+        };
+        let mut server = context.server.lock().map_err(|err| err.to_string())?;
+        let res = server.request(model.name, query);
+        let payload = match res {
+            Ok(payload) => payload,
+            Err(err) => {
+                return Err(format!("Opla server request error: {:?}", err));
+            }
+        };
+        return Ok(payload);
+    }
+    return Err(format!("Provider not found: {:?}", provider));
+}
+
 fn start_server<R: Runtime>(
     app: tauri::AppHandle<R>,
     context: State<'_, OplaContext>
@@ -212,24 +243,21 @@ fn start_server<R: Runtime>(
             return Err(format!("Opla server not started store not found: {:?}", err));
         }
     };
-    let default_model = &store.models.default_model;
-    let model_path = match default_model {
-        Some(m) => {
-            let res = store.models.get_model_path(m.clone());
-            match res {
-                Ok(m) => { m }
-                Err(err) => {
-                    return Err(format!("Opla server not started model path not found: {:?}", err));
-                }
-            }
-        }
+    let default_model = match &store.models.default_model {
+        Some(m) => { m }
         None => {
             return Err(format!("Opla server not started default model not set"));
         }
     };
+    let model_path = match store.models.get_model_path(default_model.clone()) {
+        Ok(m) => { m }
+        Err(err) => {
+            return Err(format!("Opla server not started model path not found: {:?}", err));
+        }
+    };
     let args = store.server.parameters.to_args(model_path.as_str());
     let mut server = context.server.lock().map_err(|err| err.to_string())?;
-    let response = server.start(app, args);
+    let response = server.start(app, default_model.to_string(), args);
     if response.is_err() {
         return Err(format!("Opla server not started: {:?}", response));
     }
@@ -340,7 +368,8 @@ fn main() {
                 get_models_collection,
                 install_model,
                 uninstall_model,
-                set_active_model
+                set_active_model,
+                provider_request
             ]
         )
         .run(tauri::generate_context!())

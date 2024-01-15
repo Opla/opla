@@ -20,6 +20,7 @@ use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
 pub struct OplaServer {
     pub pid: Arc<Mutex<usize>>,
     pub name: String,
+    pub model: Option<String>,
     pub status: Arc<Mutex<ServerStatus>>,
 }
 
@@ -60,6 +61,7 @@ impl OplaServer {
             pid: Arc::new(Mutex::new(0)),
             name: "llama.cpp.server".to_string(),
             status: Arc::new(Mutex::new(ServerStatus::Init)),
+            model: None,
         }
     }
 
@@ -236,6 +238,7 @@ impl OplaServer {
     pub fn start<R: Runtime>(
         &mut self,
         app: tauri::AppHandle<R>,
+        model: String,
         arguments: Vec<String>
     ) -> Result<Payload, String> {
         let status = match self.status.try_lock() {
@@ -245,6 +248,7 @@ impl OplaServer {
                 return Err("Opla server can't read status".to_string());
             }
         };
+        self.model = Some(model);
 
         if
             status == ServerStatus::Started.as_str().to_string() ||
@@ -385,5 +389,16 @@ impl OplaServer {
             println!("Opla server kill zombie {} / {}", process.pid(), process.name());
             process.kill();
         }
+    }
+
+    pub fn request(&mut self, model: String, query: String) -> Result<Payload, String> {
+        println!("{}", format!("Opla server request: {:?}", query));
+        if self.model.is_none() || self.model.as_ref().unwrap() != &model {
+            return Err("Opla server model not started".to_string());
+        }
+        Ok(Payload {
+            status: "ok".to_string(),
+            message: "llama.cpp.server".to_string(),
+        })
     }
 }

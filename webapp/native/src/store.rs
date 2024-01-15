@@ -24,6 +24,7 @@ pub struct ServerParameters {
     pub threads: i32,
     pub n_gpu_layers: i32,
 }
+
 impl ServerParameters {
     pub fn to_args(&self, model_path: &str) -> Vec<String> {
         let mut parameters: Vec<String> = Vec::with_capacity(12);
