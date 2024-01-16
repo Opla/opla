@@ -19,7 +19,6 @@ import { toCamelCase, toSnakeCase } from '../string';
 import logger from '../logger';
 import { invokeTauri } from '../tauri';
 
-
 export const getOplaServerStatus = async (): Promise<Payload> => {
   const payload = (await invokeTauri('get_opla_server_status')) as Payload;
   return mapKeys(payload, toCamelCase);
