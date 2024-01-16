@@ -18,8 +18,16 @@ import { Backend } from '@/utils/backend/connect';
 import logger from '@/utils/logger';
 import { createProvider } from '@/utils/data/providers';
 import connectBackend from '@/utils/backend';
-import { Metadata, Provider, ProviderType, OplaContext, ServerStatus, Download } from '@/types';
-import { getOplaConfig, getProviderTemplate } from '@/utils/backend/commands';
+import {
+  Metadata,
+  Provider,
+  ProviderType,
+  OplaContext,
+  ServerStatus,
+  Download,
+  Settings,
+} from '@/types';
+import { getOplaConfig, getProviderTemplate, saveSettings } from '@/utils/backend/commands';
 import { toCamelCase } from '@/utils/string';
 import { mapKeys } from '@/utils/data';
 
@@ -168,6 +176,14 @@ const useBackend = () => {
     });
   };
 
+  const setSettings = useCallback(
+    async (settings: Settings) => {
+      const store = await saveSettings(settings);
+      setBackendContext((context) => ({ ...context, config: store }));
+    },
+    [setBackendContext],
+  );
+
   const updateBackendStore = useCallback(async () => {
     logger.info('updateBackendStore');
     const store = await getOplaConfig();
@@ -176,7 +192,15 @@ const useBackend = () => {
 
   const getBackendContext = () => backendContext;
 
-  return { getBackendContext, updateBackendStore, start, stop, restart, setActivePreset };
+  return {
+    getBackendContext,
+    setSettings,
+    updateBackendStore,
+    start,
+    stop,
+    restart,
+    setActivePreset,
+  };
 };
 
 export default useBackend;

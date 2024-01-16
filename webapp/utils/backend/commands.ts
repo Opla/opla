@@ -13,9 +13,9 @@
 // limitations under the License.
 
 // import { invoke } from '@tauri-apps/api';
-import { Model, OplaServer, Payload, Provider, Store } from '@/types';
+import { Model, OplaServer, Payload, Provider, Settings, Store } from '@/types';
 import { mapKeys } from '../data';
-import { toCamelCase } from '../string';
+import { toCamelCase, toSnakeCase } from '../string';
 import logger from '../logger';
 import { invokeTauri } from '../tauri';
 
@@ -31,6 +31,12 @@ export const getOplaServer = async (): Promise<OplaServer> => {
 
 export const getOplaConfig = async (): Promise<Store> => {
   const store = (await invokeTauri('get_opla_configuration')) as Store;
+  return mapKeys(store, toCamelCase);
+};
+
+export const saveSettings = async (settings: Settings): Promise<Store> => {
+  const args = mapKeys({ settings }, toSnakeCase);
+  const store = (await invokeTauri('save_settings', args)) as Store;
   return mapKeys(store, toCamelCase);
 };
 

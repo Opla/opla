@@ -27,6 +27,7 @@ export default function App({ Component }: AppProps) {
   useEffect(() => {
     setInitialRenderComplete(true);
   }, []);
+
   if (!initialRenderComplete) return <div />;
   // End of dirty hack...
 
