@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ fs, path::PathBuf, fmt };
+use std::{ fs, path::PathBuf, fmt, collections::HashMap };
 use serde::{ Deserialize, Serialize };
 use crate::{ utils::get_config_directory, downloader::Download, data::model::ModelStorage };
 
@@ -101,9 +101,27 @@ pub struct ProviderConfiguration {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct WindowSettings {
+    pub width: u32,
+    pub height: u32,
+    pub fullscreen: bool,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PageSettings {
+    pub explorer_hidden: bool,
+    pub settings_hidden: bool,
+    pub explorer_width: u32,
+    pub settings_width: u32,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Settings {
     pub start_app: bool,
     pub welcome_splash: bool,
+    pub window: Option<WindowSettings>,
+    pub selected_page: Option<String>,
+    pub pages: Option<HashMap<String, PageSettings>>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -120,6 +138,9 @@ impl Store {
             settings: Settings {
                 start_app: true,
                 welcome_splash: true,
+                window: None,
+                selected_page: None,
+                pages: None,
             },
             server: ServerConfiguration {
                 name: String::from("llama.cpp"),

@@ -23,7 +23,7 @@ pub mod data;
 pub mod llm;
 pub mod error;
 
-use std::sync::Mutex;
+use std::sync::{ Mutex, Arc };
 
 use api::models;
 use data::model::Model;
@@ -31,9 +31,9 @@ use downloader::Downloader;
 use llm::{ LlmQuery, LlmResponse, LlmQueryCompletion };
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
-use store::{ Store, ProviderConfiguration, ProviderType, ProviderMetadata };
+use store::{ Store, ProviderConfiguration, ProviderType, ProviderMetadata, WindowSettings };
 use server::*;
-use tauri::{ Runtime, State, Manager, App };
+use tauri::{ Runtime, State, Manager, App, Size, WindowEvent, PhysicalSize, EventLoopMessage };
 
 pub struct OplaContext {
     pub server: Mutex<OplaServer>,
@@ -272,6 +272,62 @@ fn start_server<R: Runtime>(
     Ok(())
 }
 
+fn window_setup<EventLoopMessage>(app: &mut App) -> Result<(), String> {
+    let context = app.state::<OplaContext>();
+    let window = app.get_window("main").ok_or("Opla failed to get window")?;
+    let store = context.store.lock().map_err(|err| err.to_string())?;
+    // TODO fix window size
+    // Instead used https://github.com/tauri-apps/tauri-plugin-window-state
+    // but not optimal...
+    match &store.settings.window {
+        Some(w) => {
+            window.set_fullscreen(w.fullscreen).map_err(|err| err.to_string())?;
+            println!("Window size: {:?}", w);
+            /* window
+                .set_size(Size::Physical(PhysicalSize { width: w.width, height: w.height }))
+                .map_err(|err| err.to_string())?; */
+        }
+        None => {}
+    }
+
+    /* let window_clone = Arc::new(Mutex::new(window.clone()));
+    window.clone().on_window_event(move |event| {
+        if let WindowEvent::CloseRequested { .. } | WindowEvent::Destroyed { .. } = event {
+            println!("Window closed");
+            let win = match window_clone.lock() {
+                Ok(w) => { w }
+                Err(err) => {
+                    println!("{}", err.to_string());
+                    return;
+                }
+            };
+            let app = win.app_handle();
+            let context = app.state::<OplaContext>(); // Use app_arc instead of app
+            let mut store = match context.store.lock() {
+                Ok(s) => { s }
+                Err(err) => {
+                    println!("{}", err.to_string());
+                    return;
+                }
+            };
+            let size = win.inner_size().unwrap_or(PhysicalSize { width: 800, height: 600 });
+            store.settings.window = Some(WindowSettings {
+                fullscreen: window.is_fullscreen().unwrap_or(false),
+                width: size.width,
+                height: size.height,
+            });
+            match store.save() {
+                Ok(_) => {}
+                Err(err) => {
+                    println!("{}", err.to_string());
+                    return;
+                }
+            }
+        }
+    });*/
+    Ok(())
+}
+
 fn opla_setup(app: &mut App) -> Result<(), String> {
     println!("Opla setup: ");
     let context = app.state::<OplaContext>();
@@ -342,6 +398,7 @@ fn main() {
     tauri::Builder
         ::default()
         .manage(context)
+        .plugin(tauri_plugin_window_state::Builder::default().build())
         .setup(move |app| {
             // only include this code on debug builds
             #[cfg(debug_assertions)]
@@ -360,6 +417,13 @@ fn main() {
                 Ok(_) => {}
                 Err(err) => {
                     println!("Opla setup error: {:?}", err);
+                    return Err(err.into());
+                }
+            }
+            match window_setup::<EventLoopMessage>(app) {
+                Ok(_) => {}
+                Err(err) => {
+                    println!("Window setup error: {:?}", err);
                     return Err(err.into());
                 }
             }

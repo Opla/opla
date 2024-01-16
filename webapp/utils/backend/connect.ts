@@ -39,15 +39,15 @@ const connectBackend = async (
   downloaderlistener: (payload: unknown) => void,
 ) => {
   const { appWindow } = await import('@tauri-apps/api/window');
-  const { confirm } = await import('@tauri-apps/api/dialog');
+  // const { confirm } = await import('@tauri-apps/api/dialog');
   const { listen } = await import('@tauri-apps/api/event');
-  const unlisten = await appWindow.onCloseRequested(async (event) => {
-    const confirmed = await confirm('Are you sure?');
+  const unlisten = await appWindow.onCloseRequested(async () => {
+    /* const confirmed = await confirm('Are you sure?');
     if (!confirmed) {
       // user did not confirm closing the window; let's prevent it
       event.preventDefault();
       return;
-    }
+    } */
     await stopLLamaCppServer();
   });
   const unlistenServer = await listen('opla-server', (event) => {

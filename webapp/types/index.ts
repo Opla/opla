@@ -174,9 +174,23 @@ export type OplaServer = {
   sterr?: string[];
 };
 
+export type PageSettings = {
+  explorerHidden: boolean;
+  settingsHidden: boolean;
+  explorerWidth: number;
+  settingsWidth: number;
+};
+
 export type Settings = {
   startApp: boolean;
   welcomeSplash: boolean;
+  window?: {
+    width: number;
+    height: number;
+    fullscreen: boolean;
+  };
+  selectedPage?: string;
+  pages?: Record<string, PageSettings>;
 };
 
 export type ServerConfiguration = {
