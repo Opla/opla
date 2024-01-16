@@ -13,7 +13,7 @@
 
 'use client';
 
-import { Item } from './types';
+import { Item } from '@/types';
 import SidebarItem from './SidebarItem';
 
 export default function SidebarItems({

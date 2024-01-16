@@ -12,7 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Entity, Model, Resource } from '@/types';
+import { Entity, MenuItem, Model, Resource, OplaContext } from '@/types';
+import Opla from '@/components/icons/Opla';
+import logger from '../logger';
+
+
+const getSelectedModel = (backendContext: OplaContext) => {
+  const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.defaultModel}`;
+
+  logger.warn('getSelectedPreset not implemented');
+  return selectedPreset;
+};
+
+const getLocalModelsAsItems = (backendContext: OplaContext, modelname: string): MenuItem[] => backendContext.config.models.items.map((model) => ({
+  label: model.title || model.name,
+  value: model.name,
+  icon: Opla,
+  selected: model.name === modelname,
+}));
 
 const getDownloadables = (model: Model, downloads = [] as Array<Model>, parent?: Model) => {
   if (model?.download) {
@@ -39,4 +56,5 @@ const isValidFormat = (m: Model) =>
 
 const findModel = (model: string, models: Model[]): Model | undefined =>
   models.find((m) => m.name === model || m.id === model);
-export { getDownloadables, getEntityName, getResourceUrl, isValidFormat, findModel };
+
+export { getDownloadables, getEntityName, getResourceUrl, isValidFormat, findModel, getSelectedModel, getLocalModelsAsItems };
