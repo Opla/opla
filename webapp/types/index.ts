@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { LucideIcon } from 'lucide-react';
+
 declare global {
   interface Window {
     __TAURI__: any;
@@ -19,6 +21,17 @@ declare global {
 }
 
 // Ui types
+export type Item = {
+  name: string;
+  href?: string;
+  page?: string;
+  icon?: LucideIcon;
+  items?: Array<Item>;
+  flex?: number;
+  hidden?: boolean;
+  modal?: boolean;
+};
+
 export type MenuItem = {
   variant?: 'link' | 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
   label: string;
@@ -71,6 +84,7 @@ export type Conversation = BaseNamedRecord & {
   currentPrompt?: string;
   note?: string;
   system?: string;
+  model?: string;
 };
 
 export type Entity = {

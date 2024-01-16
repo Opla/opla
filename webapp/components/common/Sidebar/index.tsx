@@ -25,8 +25,8 @@ import logger from '@/utils/logger';
 import { ModalIds } from '@/modals';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import useBackend from '@/hooks/useBackend';
+import { Item } from '@/types';
 import SidebarItems from './SidebarItems';
-import { Item } from './types';
 
 const sidebarItems: Array<Item> = [
   {

@@ -17,7 +17,6 @@
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { PanelRight, PanelRightClose } from 'lucide-react';
-import Opla from '@/components/icons/Opla';
 import { AppContext } from '@/context';
 import { Conversation, Message } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
@@ -29,9 +28,8 @@ import {
   updateConversationMessages,
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackend';
-import { getPresets, getSelectedPreset } from '@/utils/data/presets';
 import { completion } from '@/utils/providers/opla';
-import { findModel } from '@/utils/data/models';
+import { findModel, getLocalModelsAsItems, getSelectedModel } from '@/utils/data/models';
 import MessageView from './Message';
 import Prompt from './Prompt';
 import { ScrollArea } from '../ui/scroll-area';
@@ -70,18 +68,23 @@ function Thread({
 
   const showEmptyChat = messages.length < 1;
 
-  const selectedPreset = getSelectedPreset(backendContext);
-  logger.info(`selectedPreset ${selectedPreset}`);
+  const selectedModel = getSelectedModel(backendContext);
+  logger.info(`selectedModel ${selectedModel}`);
 
-  const presets = getPresets(backendContext).map((p) => ({
-    label: p.title,
-    value: p.name,
-    icon: Opla,
-    selected: p.name === selectedPreset,
-  }));
+  const modelItems = getLocalModelsAsItems(
+    backendContext,
+    selectedConversation?.model || defaultModel,
+  );
 
-  const onSelectPreset = (value?: string, data?: string) => {
-    logger.info(`onSelectPreset ${value} ${data}`);
+  const onSelectModel = async (value?: string, data?: string) => {
+    logger.info(`onSelectModel ${value} ${data}`);
+    if (value && selectedConversation) {
+      const newConversations = updateConversation(
+        { ...selectedConversation, model: value },
+        conversations,
+      );
+      setConversations(newConversations);
+    }
   };
 
   const updateMessages = (
@@ -124,7 +127,7 @@ function Thread({
     setIsLoading({ ...isLoading, [conversationId]: true });
 
     const toMessage = createMessage({ role: 'user', name: 'you' }, currentPrompt);
-    const fromMessage = createMessage({ role: 'system', name: selectedPreset }, '...');
+    const fromMessage = createMessage({ role: 'system', name: selectedModel }, '...');
     const { newConversationId, newConversations: nc } = updateMessages([toMessage, fromMessage]);
     let newConversations = nc;
 
@@ -136,12 +139,13 @@ function Thread({
     newConversations = updateConversation(conversation, newConversations);
     setConversations(newConversations);
 
-    const model = findModel(defaultModel, backendContext.config.models.items);
+    const model = findModel(conversation.model || defaultModel, backendContext.config.models.items);
     try {
       const response = await completion(model, currentPrompt, conversation?.system);
       fromMessage.content = response;
-    } catch (e) {
-      logger.error('sendMessage', e);
+    } catch (e: any) {
+      logger.error('sendMessage', e, typeof e);
+      setErrorMessage({ ...errorMessage, [conversationId]: String(e) });
       fromMessage.content = t('Oops, something went wrong.');
     }
 
@@ -166,7 +170,7 @@ function Thread({
       <div className="grow-0">
         <div className="justify-left flex w-full flex-row items-center gap-4 bg-neutral-50 p-3 text-xs text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
           <div className="flex flex-1 flex-row items-center">
-            <Combobox items={presets} onSelect={onSelectPreset} />
+            <Combobox items={modelItems} onSelect={onSelectModel} />
           </div>
           <div className="flex-1">
             <p className="hidden rounded-md border border-neutral-600 px-3 py-1">-</p>
