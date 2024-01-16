@@ -24,6 +24,7 @@ import { ModalsContext } from '@/context/modals';
 import logger from '@/utils/logger';
 import { ModalIds } from '@/modals';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import useBackend from '@/hooks/useBackend';
 import SidebarItems from './SidebarItems';
 import { Item } from './types';
 
@@ -35,6 +36,7 @@ const sidebarItems: Array<Item> = [
       {
         name: 'Chats',
         href: '/threads',
+        page: '/threads',
         icon: MessagesSquare,
       },
       {
@@ -80,7 +82,9 @@ function Sidebar() {
   logger.info('pathname', pathname);
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
-
+  const { getBackendContext } = useBackend();
+  const defaultSettings = getBackendContext().config.settings;
+  (sidebarItems[0].items as Item[])[0].href = defaultSettings?.selectedPage ?? '/threads';
   const onModal = () => {
     showModal(ModalIds.Settings);
   };

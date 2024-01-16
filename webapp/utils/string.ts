@@ -21,6 +21,7 @@ export const toCapitalize = (str: string): string => {
 };
 
 export const toCamelCase = (str: string): string => {
+  if (str.startsWith('/')) return str;
   const parts =
     str
       ?.replace(/([A-Z])+/g, toCapitalize)
@@ -32,6 +33,7 @@ export const toCamelCase = (str: string): string => {
 };
 
 export const toSnakeCase = (str: string): string => {
+  if (str.startsWith('/')) return str;
   const parts =
     str
       ?.replace(/([A-Z])+/g, toCapitalize)

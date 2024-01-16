@@ -111,8 +111,8 @@ pub struct WindowSettings {
 pub struct PageSettings {
     pub explorer_hidden: bool,
     pub settings_hidden: bool,
-    pub explorer_width: u32,
-    pub settings_width: u32,
+    pub explorer_width: f32,
+    pub settings_width: f32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

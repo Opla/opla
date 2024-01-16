@@ -27,7 +27,7 @@ export default function SidebarItems({
   t: any;
   onModal: (href: string) => void;
 }) {
-  return items.map(({ name, flex, href, icon, modal, items: subItems, hidden }) => {
+  return items.map(({ name, flex, href, page, icon, modal, items: subItems, hidden }) => {
     if (hidden) return null;
 
     return subItems ? (
@@ -39,7 +39,11 @@ export default function SidebarItems({
     ) : (
       <SidebarItem
         key={name}
-        selected={href === pathname || !!(href && pathname.startsWith(href))}
+        selected={
+          href === pathname ||
+          !!(href && pathname.startsWith(href)) ||
+          !!(page && pathname.startsWith(page))
+        }
         href={href}
         name={t(name)}
         icon={icon}

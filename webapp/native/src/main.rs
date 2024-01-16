@@ -60,6 +60,7 @@ async fn save_settings<R: Runtime>(
 ) -> Result<Store, String> {
     let mut store = context.store.lock().map_err(|err| err.to_string())?;
     store.settings = settings;
+    // println!("Save settings: {:?}", store.settings);
     store.save().map_err(|err| err.to_string())?;
     Ok(store.clone())
 }
