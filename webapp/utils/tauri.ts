@@ -14,9 +14,9 @@
 
 import { InvokeArgs } from '@tauri-apps/api/tauri';
 
-const invokeTauri = async (command: string, args?: InvokeArgs) => {
+const invokeTauri = async (command: string, args?: any) => {
   const { invoke } = await import('@tauri-apps/api/tauri');
-  return invoke(command, args);
+  return invoke(command, args as InvokeArgs);
 };
 
 const getPlatformInfos = async () => {

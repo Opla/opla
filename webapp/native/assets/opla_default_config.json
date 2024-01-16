@@ -1,7 +1,8 @@
 {
   "settings": {
     "start_app": true,
-    "welcome_splash": true
+    "welcome_splash": true,
+    "selected_page": "/threads"
   },
   "models": {
     "path": "dev/ai/models",

@@ -14,7 +14,8 @@
 
 'use client';
 
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import '@/app/globals.css';
 import Sidebar from '@/components/common/Sidebar';
 import { AppContext } from '@/context';
@@ -26,10 +27,27 @@ import { TooltipProvider } from './ui/tooltip';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { providers, models, presets } = useContext(AppContext);
+  const router = useRouter();
 
-  useBackend();
+  const { getBackendContext, setSettings } = useBackend();
 
   useRegisterModals(Modals);
+
+  useEffect(() => {
+    const handleRouteChange = (url: any) => {
+      const backendContext = getBackendContext();
+      const { settings } = backendContext.config;
+      if (settings.selectedPage !== url) {
+        settings.selectedPage = url;
+        setSettings(settings);
+      }
+    };
+
+    router.events.on('routeChangeStart', handleRouteChange);
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChange);
+    };
+  }, [getBackendContext, router, setSettings]);
 
   if (!providers || !models || !presets) {
     return <div>Loading...</div>;

@@ -23,7 +23,7 @@ pub mod data;
 pub mod llm;
 pub mod error;
 
-use std::sync::{ Mutex, Arc };
+use std::sync::Mutex;
 
 use api::models;
 use data::model::Model;
@@ -31,9 +31,9 @@ use downloader::Downloader;
 use llm::{ LlmQuery, LlmResponse, LlmQueryCompletion };
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
-use store::{ Store, ProviderConfiguration, ProviderType, ProviderMetadata, WindowSettings };
+use store::{ Store, ProviderConfiguration, ProviderType, ProviderMetadata, Settings };
 use server::*;
-use tauri::{ Runtime, State, Manager, App, Size, WindowEvent, PhysicalSize, EventLoopMessage };
+use tauri::{ Runtime, State, Manager, App, EventLoopMessage };
 
 pub struct OplaContext {
     pub server: Mutex<OplaServer>,
@@ -48,6 +48,19 @@ async fn get_opla_configuration<R: Runtime>(
     context: State<'_, OplaContext>
 ) -> Result<Store, String> {
     let store = context.store.lock().map_err(|err| err.to_string())?;
+    Ok(store.clone())
+}
+
+#[tauri::command]
+async fn save_settings<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>,
+    settings: Settings
+) -> Result<Store, String> {
+    let mut store = context.store.lock().map_err(|err| err.to_string())?;
+    store.settings = settings;
+    store.save().map_err(|err| err.to_string())?;
     Ok(store.clone())
 }
 
@@ -432,6 +445,7 @@ fn main() {
         .invoke_handler(
             tauri::generate_handler![
                 get_opla_configuration,
+                save_settings,
                 get_provider_template,
                 get_opla_server_status,
                 start_opla_server,
