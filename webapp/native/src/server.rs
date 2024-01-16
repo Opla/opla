@@ -13,21 +13,25 @@
 // limitations under the License.
 
 use std::sync::{ Mutex, Arc };
-use crate::{ error::Error, llm::LlmQueryCompletion };
+use crate::{ error::Error, llm::LlmQueryCompletion, store::ServerParameters };
 use sysinfo::{ System, Pid };
 use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
 
 use crate::llm::{ LlmQuery, LlmResponse };
+use std::time::Duration;
+use std::thread;
 
 #[derive(Clone)]
 pub struct OplaServer {
     pub pid: Arc<Mutex<usize>>,
     pub name: String,
     pub model: Option<String>,
+    pub model_path: Option<String>,
     pub status: Arc<Mutex<ServerStatus>>,
+    pub parameters: Option<ServerParameters>,
 }
 
-#[derive(Clone, serde::Serialize, Copy)]
+#[derive(Clone, serde::Serialize, Copy, PartialEq, Debug)]
 pub enum ServerStatus {
     Init,
     Wait,
@@ -65,6 +69,8 @@ impl OplaServer {
             name: "llama.cpp.server".to_string(),
             status: Arc::new(Mutex::new(ServerStatus::Init)),
             model: None,
+            model_path: None,
+            parameters: None,
         }
     }
 
@@ -86,7 +92,7 @@ impl OplaServer {
         println!("NB CPUs: {}", sys.cpus().len());
     }
 
-    pub fn start_llama_cpp_server<EventLoopMessage: Runtime + 'static>(
+    /* async */ pub fn start_llama_cpp_server<EventLoopMessage: Runtime + 'static>(
         app: tauri::AppHandle<EventLoopMessage>,
         arguments: Vec<String>,
         do_started: Box<dyn (Fn(usize) -> ()) + Send>,
@@ -96,7 +102,7 @@ impl OplaServer {
             |_| "failed to init llama.cpp.server"
         )?;
 
-        tauri::async_runtime::spawn(async move {
+        let future = tauri::async_runtime::spawn(async move {
             let (mut rx, child) = match command.args(arguments).spawn() {
                 Ok((rx, child)) => (rx, child),
                 Err(err) => {
@@ -241,8 +247,10 @@ impl OplaServer {
     pub fn start<R: Runtime>(
         &mut self,
         app: tauri::AppHandle<R>,
-        model: String,
-        arguments: Vec<String>
+        model: &str,
+        model_path: &str,
+        parameters: Option<&ServerParameters>
+        // arguments: Vec<String>
     ) -> Result<Payload, String> {
         let status = match self.status.try_lock() {
             Ok(status) => status.as_str(),
@@ -251,7 +259,24 @@ impl OplaServer {
                 return Err("Opla server can't read status".to_string());
             }
         };
-        self.model = Some(model);
+        self.model = Some(model.to_string());
+        self.model_path = Some(model_path.to_string());
+        let parameters: &ServerParameters = match parameters {
+            Some(p) => {
+                self.parameters = Some(p.clone());
+                &p
+            }
+            None => {
+                match &self.parameters {
+                    Some(p) => p, // Dereference the &ServerParameters
+                    None => {
+                        println!("Opla server error try to read parameters");
+                        return Err("Opla server can't read parameters".to_string());
+                    }
+                }
+            }
+        };
+        let arguments = parameters.to_args(&model_path);
 
         if
             status == ServerStatus::Started.as_str().to_string() ||
@@ -310,7 +335,7 @@ impl OplaServer {
         Ok(Payload { status: status_response, message: self.name.to_string() })
     }
 
-    pub fn stop<R: Runtime>(&mut self, app: tauri::AppHandle<R>) -> Result<Payload, String> {
+    pub fn stop<R: Runtime>(&mut self, app: &tauri::AppHandle<R>) -> Result<Payload, String> {
         let pid = self.pid
             .lock()
             .map_err(|err| err.to_string())?
@@ -394,14 +419,51 @@ impl OplaServer {
         }
     }
 
-    pub async fn call_completion(
+    pub async fn call_completion<R: Runtime>(
         &mut self,
-        model: String,
+        app: tauri::AppHandle<R>,
+        model: &str,
+        model_path: &str,
         query: LlmQuery<LlmQueryCompletion>
     ) -> Result<LlmResponse, Box<dyn std::error::Error>> {
         println!("{}", format!("Opla llm call: {:?}", query.command));
         if self.model.is_none() || self.model.as_ref().unwrap() != &model {
-            return Err(Box::new(Error::ModelNotLoaded));
+            self.stop(&app)?;
+            let self_status = Arc::clone(&self.status);
+            let mut wouldblock = true;
+            let handle = tauri::async_runtime::spawn(async move {
+                let mut retries = 0;
+                while retries < 20 {
+                    let status = match self_status.try_lock() {
+                        Ok(status) => status,
+                        Err(e) => {
+                            //if e.into_inner().kind() == std::io::ErrorKind::WouldBlock {
+                            println!("Opla server error try to read status {:?}", e);
+                            if wouldblock {
+                                // Retry after a short delay
+                                thread::sleep(Duration::from_millis(100));
+                                wouldblock = false;
+                                continue;
+                            } else {
+                                println!("Opla server error try to read status {:?}", e);
+                                return Err(Box::new(Error::ModelNotLoaded));
+                            }
+                        }
+                    };
+                    if *status == ServerStatus::Started {
+                        drop(status);
+                        break;
+                    }
+                    drop(status);
+                    thread::sleep(Duration::from_secs(2));
+                    retries += 1;
+                }
+                Ok(())
+            });
+            let _ = self.start(app, model, model_path, None)?;
+            // Wait for server to start
+            let _ = handle.await;
+            println!("Opla server started: available for completion");
         }
 
         let parameters: LlmQueryCompletion = query.parameters;

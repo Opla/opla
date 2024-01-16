@@ -128,9 +128,10 @@ async fn start_opla_server<R: Runtime>(
     store.server.parameters.n_gpu_layers = n_gpu_layers;
     store.save().map_err(|err| err.to_string())?;
 
-    let args = store.server.parameters.to_args(model_path.as_str());
+    // let args = store.server.parameters.to_args(model_path.as_str());
+    let parameters = store.server.parameters.clone();
     let mut server = context.server.lock().map_err(|err| err.to_string())?;
-    server.start(app, model_name, args)
+    server.start(app, &model_name, &model_path, Some(&parameters))
 }
 
 #[tauri::command]
@@ -140,7 +141,7 @@ async fn stop_opla_server<R: Runtime>(
     context: State<'_, OplaContext>
 ) -> Result<Payload, String> {
     let mut server = context.server.lock().map_err(|err| err.to_string())?;
-    server.stop(app)
+    server.stop(&app)
 }
 
 #[tauri::command]
@@ -219,7 +220,7 @@ async fn set_active_model<R: Runtime>(
 
 #[tauri::command]
 async fn llm_call_completion<R: Runtime>(
-    _app: tauri::AppHandle<R>,
+    app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
     model: String,
@@ -227,7 +228,7 @@ async fn llm_call_completion<R: Runtime>(
     query: LlmQuery<LlmQueryCompletion>
 ) -> Result<LlmResponse, String> {
     if llm_provider == "opla" {
-        let model_name = {
+        let (model_name, model_path) = {
             let store = context.store.lock().map_err(|err| err.to_string())?;
             let result = store.models.get_model(model.as_str());
             let model = match result {
@@ -236,15 +237,24 @@ async fn llm_call_completion<R: Runtime>(
                     return Err(format!("Model not found: {:?}", model));
                 }
             };
+            let res = store.models.get_model_path(model.name.clone());
+            let model_path = match res {
+                Ok(m) => { m }
+                Err(err) => {
+                    return Err(format!("Opla server not started model not found: {:?}", err));
+                }
+            };
             drop(store);
-            model.name
+
+            (model.name, model_path)
         };
+
         let response = {
             let mut server = context.server
                 .lock()
                 .map_err(|err| err.to_string())?
                 .clone();
-            server.call_completion(model_name, query).await
+            server.call_completion(app, &model_name, &model_path, query).await
         };
 
         return response.map_err(|err| err.to_string());
@@ -276,9 +286,10 @@ fn start_server<R: Runtime>(
             return Err(format!("Opla server not started model path not found: {:?}", err));
         }
     };
-    let args = store.server.parameters.to_args(model_path.as_str());
+    // let args = store.server.parameters.to_args(model_path.as_str());
+    let parameters = store.server.parameters.clone();
     let mut server = context.server.lock().map_err(|err| err.to_string())?;
-    let response = server.start(app, default_model.to_string(), args);
+    let response = server.start(app, &default_model, &model_path, Some(&parameters));
     if response.is_err() {
         return Err(format!("Opla server not started: {:?}", response));
     }
