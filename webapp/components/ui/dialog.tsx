@@ -24,18 +24,24 @@ DialogClose.displayName = 'DialogClose';
 
 function Dialog({
   id,
+  title,
   open,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  setOpen,
   onClose,
   children,
   size,
 }: {
   id?: string;
+  title?: string;
   open: boolean;
+  setOpen?: (open: boolean) => void;
   onClose: () => void;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   children: React.ReactNode;
 }) {
   const modalRef = useRef<HTMLDialogElement>(null);
+  // Dialog setOpen TODO
 
   const handleDialogClick = useCallback(
     (event: MouseEvent) => {
@@ -87,6 +93,7 @@ function Dialog({
       onCancel={onClose}
       className={`${cssSize} relative rounded-lg bg-white shadow-lg transition-all backdrop:bg-neutral-950/50 dark:bg-neutral-900`}
     >
+      {title && <div>{title}</div>}
       {children}
       <DialogClose onClose={onClose} />
     </dialog>
