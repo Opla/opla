@@ -94,6 +94,7 @@ impl OplaServer {
 
     /* async */ pub fn start_llama_cpp_server<EventLoopMessage: Runtime + 'static>(
         app: tauri::AppHandle<EventLoopMessage>,
+        model: &str,
         arguments: Vec<String>,
         do_started: Box<dyn (Fn(usize) -> ()) + Send>,
         callback: Box<dyn (Fn(ServerStatus) -> ()) + Send>
@@ -102,6 +103,7 @@ impl OplaServer {
             |_| "failed to init llama.cpp.server"
         )?;
 
+        let model = model.to_string();
         let future = tauri::async_runtime::spawn(async move {
             let (mut rx, child) = match command.args(arguments).spawn() {
                 Ok((rx, child)) => (rx, child),
@@ -121,11 +123,11 @@ impl OplaServer {
                     return;
                 }
             };
-            println!("Opla server started: {} / {}", "0", "llama.cpp.server");
+            println!("Opla server started: {} / {}", "0", model);
             if
                 app
                     .emit_all("opla-server", Payload {
-                        message: format!("Opla server started: {} / {}", "0", "llama.cpp.server"),
+                        message: format!("{}", model),
                         status: ServerStatus::Starting.as_str().to_string(),
                     })
                     .is_err()
@@ -178,15 +180,11 @@ impl OplaServer {
                     }
 
                     if line.starts_with("llama server listening") {
-                        println!("Opla server started: {}", "llama.cpp.server");
+                        println!("{}", model);
                         if
                             app
                                 .emit_all("opla-server", Payload {
-                                    message: format!(
-                                        "Opla server started: {} / {}",
-                                        "0",
-                                        "llama.cpp.server"
-                                    ),
+                                    message: format!("{}", model),
                                     status: ServerStatus::Started.as_str().to_string(),
                                 })
                                 .is_err()
@@ -244,13 +242,23 @@ impl OplaServer {
         })
     }
 
+    pub fn set_parameters(
+        &mut self,
+        model: &str,
+        model_path: &str,
+        parameters: Option<ServerParameters>
+    ) {
+        self.parameters = parameters;
+        self.model = Some(model.to_string());
+        self.model_path = Some(model_path.to_string());
+    }
+
     pub fn start<R: Runtime>(
         &mut self,
         app: tauri::AppHandle<R>,
         model: &str,
         model_path: &str,
         parameters: Option<&ServerParameters>
-        // arguments: Vec<String>
     ) -> Result<Payload, String> {
         let status = match self.status.try_lock() {
             Ok(status) => status.as_str(),
@@ -288,7 +296,7 @@ impl OplaServer {
                 message: "llama.cpp.server".to_string(),
             });
         }
-        println!("Opla try to start c");
+        println!("Opla try to start {:?}", self.model);
         let mut wstatus = match self.status.try_lock() {
             Ok(status) => status,
             Err(_) => {
@@ -300,7 +308,7 @@ impl OplaServer {
         let status_response = wstatus.as_str().to_string();
         app
             .emit_all("opla-server", Payload {
-                message: format!("Opla server starting: {} ", "llama.cpp.server"),
+                message: format!("{}", model),
                 status: "waiting".to_string(),
             })
             .map_err(|err| err.to_string())?;
@@ -308,7 +316,7 @@ impl OplaServer {
 
         let wpid = Arc::clone(&self.pid);
         let do_started: Box<dyn Fn(usize) + Send> = Box::new(move |pid: usize| {
-            println!("Opla server just started: {} / {}", pid, "llama.cpp.server");
+            println!("Opla server just started: {}", pid);
             match wpid.lock() {
                 Ok(mut p) => {
                     *p = pid;
@@ -330,7 +338,7 @@ impl OplaServer {
                 }
             }
         });
-        OplaServer::start_llama_cpp_server(app, arguments, do_started, callback)?;
+        OplaServer::start_llama_cpp_server(app, model, arguments, do_started, callback)?;
 
         Ok(Payload { status: status_response, message: self.name.to_string() })
     }
@@ -426,11 +434,15 @@ impl OplaServer {
         model_path: &str,
         query: LlmQuery<LlmQueryCompletion>
     ) -> Result<LlmResponse, Box<dyn std::error::Error>> {
-        println!("{}", format!("Opla llm call: {:?}", query.command));
+        println!(
+            "{}",
+            format!("Opla llm call:  {:?} / {:?} / {:?}", query.command, self.model, &model)
+        );
         if self.model.is_none() || self.model.as_ref().unwrap() != &model {
             self.stop(&app)?;
             let self_status = Arc::clone(&self.status);
             let mut wouldblock = true;
+            let _ = self.start(app, model, model_path, None)?;
             let handle = tauri::async_runtime::spawn(async move {
                 let mut retries = 0;
                 while retries < 20 {
@@ -460,7 +472,6 @@ impl OplaServer {
                 }
                 Ok(())
             });
-            let _ = self.start(app, model, model_path, None)?;
             // Wait for server to start
             let _ = handle.await;
             println!("Opla server started: available for completion");

@@ -29,7 +29,7 @@ import {
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackend';
 import { completion } from '@/utils/providers/opla';
-import { findModel, getLocalModelsAsItems, getSelectedModel } from '@/utils/data/models';
+import { findModel, getLocalModelsAsItems } from '@/utils/data/models';
 import MessageView from './Message';
 import Prompt from './Prompt';
 import { ScrollArea } from '../ui/scroll-area';
@@ -68,13 +68,8 @@ function Thread({
 
   const showEmptyChat = messages.length < 1;
 
-  const selectedModel = getSelectedModel(backendContext);
-  logger.info(`selectedModel ${selectedModel}`);
-
-  const modelItems = getLocalModelsAsItems(
-    backendContext,
-    selectedConversation?.model || defaultModel,
-  );
+  const selectedModel = selectedConversation?.model || defaultModel;
+  const modelItems = getLocalModelsAsItems(backendContext, selectedModel);
 
   const onSelectModel = async (value?: string, data?: string) => {
     logger.info(`onSelectModel ${value} ${data}`);

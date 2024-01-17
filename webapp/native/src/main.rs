@@ -254,10 +254,18 @@ async fn llm_call_completion<R: Runtime>(
                 .lock()
                 .map_err(|err| err.to_string())?
                 .clone();
-            server.call_completion(app, &model_name, &model_path, query).await
+            server
+                .call_completion(app, &model_name, &model_path, query).await
+                .map_err(|err| err.to_string())?
         };
+        let mut server = context.server.lock().map_err(|err| err.to_string())?;
+        let parameters = server.parameters.clone();
+        server.set_parameters(&model, &model_path, parameters);
 
-        return response.map_err(|err| err.to_string());
+        let mut store = context.store.lock().map_err(|err| err.to_string())?;
+        store.models.default_model = Some(model);
+        store.save().map_err(|err| err.to_string())?;
+        return Ok(response);
     }
     return Err(format!("LLM provider not found: {:?}", llm_provider));
 }

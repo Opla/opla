@@ -74,14 +74,27 @@ const useBackend = () => {
     (event: any) => {
       logger.info('backend event', event);
       if (event.event === 'opla-server') {
-        setBackendContext((context) => ({
-          ...context,
-          server: {
-            ...context.server,
-            status: event.payload.status,
-            message: event.payload.message,
-          },
-        }));
+        setBackendContext((context) => {
+          let { defaultModel } = context.config.models;
+          if (event.payload.status === ServerStatus.STARTING) {
+            defaultModel = event.payload.message;
+          }
+          return {
+            ...context,
+            config: {
+              ...context.config,
+              models: {
+                ...context.config.models,
+                defaultModel,
+              },
+            },
+            server: {
+              ...context.server,
+              status: event.payload.status,
+              message: event.payload.message,
+            },
+          };
+        });
       }
     },
     [setBackendContext],
