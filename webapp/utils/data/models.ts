@@ -14,12 +14,9 @@
 
 import { Entity, MenuItem, Model, Resource, OplaContext } from '@/types';
 import Opla from '@/components/icons/Opla';
-import logger from '../logger';
 
 const getSelectedModel = (backendContext: OplaContext) => {
   const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.defaultModel}`;
-
-  logger.warn('getSelectedPreset not implemented');
   return selectedPreset;
 };
 
