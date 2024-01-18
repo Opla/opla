@@ -14,6 +14,7 @@
 
 // import { invoke } from '@tauri-apps/api';
 import { Model, OplaServer, Payload, Provider, Settings, Store } from '@/types';
+import { toast } from '@/components/ui/Toast';
 import { mapKeys } from '../data';
 import { toCamelCase, toSnakeCase } from '../string';
 import logger from '../logger';
@@ -54,6 +55,7 @@ export const getModelsCollection = async (): Promise<{ models: [] }> => {
     return await mapKeys(collection, toCamelCase);
   } catch (error) {
     logger.error(error);
+    toast.error(`Error fetching models ${error}`);
   }
   return { models: [] };
 };
@@ -64,8 +66,14 @@ export const installModel = async (
   path: String,
   fileName: String,
 ): Promise<String> => {
-  const id = (await invokeTauri('install_model', { model, url, path, fileName })) as String;
-  return id;
+  try {
+    const id = (await invokeTauri('install_model', { model, url, path, fileName })) as String;
+    return id;
+  } catch (error) {
+    logger.error(error);
+    toast.error(`Error installing model ${error}`);
+  }
+  return '';
 };
 
 export const uninstallModel = async (modelId: String) => {

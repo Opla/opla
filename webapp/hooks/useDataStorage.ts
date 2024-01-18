@@ -8,9 +8,10 @@
  *  - Also value will be updated everywhere, when value updated (via `storage` event)
  */
 
+import { useEffect, useState } from 'react';
 import dataStorage from '@/utils/dataStorage';
 import logger from '@/utils/logger';
-import { useEffect, useState } from 'react';
+import { toast } from '@/components/ui/Toast';
 
 export default function useDataStorage<T>(key: string, defaultValue: T): [T, (value: T) => void] {
   const [value, setValue] = useState(undefined as T);
@@ -46,6 +47,7 @@ export default function useDataStorage<T>(key: string, defaultValue: T): [T, (va
       }
     } catch (e) {
       logger.error(e);
+      toast.error(`Error saving data ${e}`);
     }
   };
 
