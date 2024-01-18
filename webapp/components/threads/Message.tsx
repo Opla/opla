@@ -39,14 +39,14 @@ function MessageComponent({ message }: { message: Message }) {
           <div className="flex w-[calc(100%-50px)] flex-col gap-1 md:gap-3 lg:w-[calc(100%-115px)]">
             <div className="flex flex-grow flex-col gap-3">
               <div className="flex min-h-20 flex-col items-start gap-4 whitespace-pre-wrap break-words">
-                <div className="w-full select-auto break-words ">
+                <div className="w-full break-words">
                   <p className="font-bold capitalize">{author.name}</p>
                   {!isUser && text === '...' ? (
-                    <div className="pt-2">
+                    <p className="pt-2">
                       <MoreHorizontal className="h-4 w-4 animate-pulse" />
-                    </div>
+                    </p>
                   ) : (
-                    <div className="pt-2">{content}</div>
+                    <p className="select-auto pt-2">{content}</p>
                   )}
                 </div>
               </div>

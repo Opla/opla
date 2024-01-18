@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use client';
-
 import { Children, createElement, isValidElement, useEffect, useMemo } from 'react';
 import { Element, Root } from 'hast';
 import * as prod from 'react/jsx-runtime';
@@ -168,7 +166,7 @@ const useMarkdownProcessor = (content: string) => {
           </div>
         ),
         thead: ({ children }: JSX.IntrinsicElements['thead']) => (
-          <thead className="bg-neutral-100  dark:bg-neutral-700"> {children} </thead>
+          <thead className="bg-neutral-100  dark:bg-neutral-700">{children}</thead>
         ),
         th: ({ children }: JSX.IntrinsicElements['th']) => (
           <th className="border-2 border-neutral-200 p-2 font-sans text-sm font-semibold text-neutral-950  dark:text-neutral-100">

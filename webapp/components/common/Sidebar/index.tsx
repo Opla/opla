@@ -84,7 +84,9 @@ function Sidebar() {
   const { showModal } = useContext(ModalsContext);
   const { getBackendContext } = useBackend();
   const defaultSettings = getBackendContext().config.settings;
-  (sidebarItems[0].items as Item[])[0].href = defaultSettings?.selectedPage ?? '/threads';
+  (sidebarItems[0].items as Item[])[0].href = defaultSettings?.selectedPage?.startsWith('/threads')
+    ? defaultSettings?.selectedPage
+    : '/threads';
   const onModal = () => {
     showModal(ModalIds.Settings);
   };
