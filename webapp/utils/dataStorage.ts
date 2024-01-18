@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { toast } from 'sonner';
 import logger from './logger';
 
 type DataStorage = {
@@ -31,6 +32,7 @@ const LocalStorage: DataStorage = {
       return JSON.parse(item);
     } catch {
       logger.error(`Failed to parse item ${key} from localStorage`);
+      toast.error(`Failed to parse item ${key} from localStorage`);
     }
 
     return item;

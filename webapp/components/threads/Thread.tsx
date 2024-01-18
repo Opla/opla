@@ -30,6 +30,7 @@ import {
 import useBackend from '@/hooks/useBackend';
 import { completion } from '@/utils/providers/opla';
 import { findModel, getLocalModelsAsItems } from '@/utils/data/models';
+import { toast } from '@/components/ui/Toast';
 import MessageView from './Message';
 import Prompt from './Prompt';
 import { ScrollArea } from '../ui/scroll-area';
@@ -142,6 +143,7 @@ function Thread({
       logger.error('sendMessage', e, typeof e);
       setErrorMessage({ ...errorMessage, [conversationId]: String(e) });
       fromMessage.content = t('Oops, something went wrong.');
+      toast.error(String(e));
     }
 
     updateMessages([fromMessage], newConversationId, newConversations);
@@ -150,7 +152,7 @@ function Thread({
   };
 
   const setMessage = (message: string) => {
-    logger.info('setMessage', message);
+    // logger.info('setMessage', message);
     const newConversations = conversations.map((c) => {
       if (c.id === conversationId) {
         return { ...c, currentPrompt: message };

@@ -42,11 +42,11 @@ function MessageComponent({ message }: { message: Message }) {
                 <div className="w-full break-words">
                   <p className="font-bold capitalize">{author.name}</p>
                   {!isUser && text === '...' ? (
-                    <p className="pt-2">
+                    <div className="pt-2">
                       <MoreHorizontal className="h-4 w-4 animate-pulse" />
-                    </p>
+                    </div>
                   ) : (
-                    <p className="select-auto pt-2">{content}</p>
+                    <div className="select-auto pt-2">{content}</div>
                   )}
                 </div>
               </div>

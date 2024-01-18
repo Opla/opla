@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { HtmlGenerator, parse } from 'latex.js';
 import logger from '@/utils/logger';
+import { toast } from '@/components/ui/Toast';
 
 function Latex({ content }: { content: string }) {
   const [diagram, setDiagram] = useState<string | boolean>(true);
@@ -28,6 +29,7 @@ function Latex({ content }: { content: string }) {
     } catch (error) {
       logger.error(error);
       setDiagram(false);
+      toast.error(`Unable to render this diagram.${error}`);
     }
   }, [content]);
 

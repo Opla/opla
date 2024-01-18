@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { useState, useEffect } from 'react';
+import { toast } from '@/components/ui/Toast';
 
 type UseFetchResponse = {
   fetchedData: unknown;
@@ -39,6 +40,7 @@ const useFetch = (endpoint: string, options?: ResponseInit): UseFetchResponse =>
         if (!abortController.signal.aborted) {
           setError(error);
           setIsLoading(false);
+          toast.error(`Error fetching data ${err}`);
         }
       }
     };

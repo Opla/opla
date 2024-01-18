@@ -22,6 +22,7 @@ import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackend';
 import useRegisterModals from '@/hooks/useRegisterModals';
 import Modals from '@/modals';
+import { Toaster } from '@/components/ui/Toast';
 import Statusbar from './common/Statusbar';
 import { TooltipProvider } from './ui/tooltip';
 
@@ -62,6 +63,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Statusbar />
         </div>
       </TooltipProvider>
+      <Toaster />
     </div>
   );
 }
