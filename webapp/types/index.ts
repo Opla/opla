@@ -36,6 +36,7 @@ export type MenuItem = {
   variant?: 'link' | 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
   label: string;
   value?: string;
+  type?: string;
   icon?: unknown;
   selected?: boolean;
   onSelect?: (data: string) => void;
@@ -145,6 +146,7 @@ export type Provider = BaseNamedRecord & {
   type: ProviderType;
   disabled: boolean;
   token: string;
+  models?: Model[];
   isDisabled?: () => boolean;
 };
 

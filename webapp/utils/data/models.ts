@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Entity, MenuItem, Model, Resource, OplaContext } from '@/types';
+import { Entity, MenuItem, Model, Resource, OplaContext, Provider } from '@/types';
 import Opla from '@/components/icons/Opla';
 
 const getSelectedModel = (backendContext: OplaContext) => {
@@ -27,6 +27,20 @@ const getLocalModelsAsItems = (backendContext: OplaContext, modelname: string): 
     icon: Opla,
     selected: model.name === modelname,
   }));
+
+const getProviderModelsAsItems = (providers: Provider[], modelname: string): MenuItem[] => {
+  const items = providers.reduce((acc, provider) => {
+    if (!provider.models || provider.disabled) return acc;
+    const providerItems = provider.models.map((model) => ({
+      label: model.title || model.name,
+      value: model.name,
+      type: provider.name === "OpenAI " ? "openai" : provider.type,
+      selected: model.name === modelname,
+    })) || [];
+    return [...acc, ...providerItems];
+  }, [] as MenuItem[]);
+  return items;
+};
 
 const getDownloadables = (model: Model, downloads = [] as Array<Model>, parent?: Model) => {
   if (model?.download) {
@@ -62,4 +76,5 @@ export {
   findModel,
   getSelectedModel,
   getLocalModelsAsItems,
+  getProviderModelsAsItems,
 };

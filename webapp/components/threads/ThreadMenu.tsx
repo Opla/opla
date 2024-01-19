@@ -14,7 +14,7 @@
 
 'use client';
 
-import * as React from 'react';
+import { useContext, useState } from 'react';
 import { Check, HardDriveDownload, MoreHorizontal, Plug, Plus, Trash } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { Button } from '@/components/ui/button';
@@ -40,6 +40,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MenuItem } from '@/types';
+import useTranslation from '@/hooks/useTranslation';
+import { ModalsContext } from '@/context/modals';
+import { ModalIds } from '@/modals';
 
 export default function ThreadMenu({
   selectedModel,
@@ -51,12 +54,20 @@ export default function ThreadMenu({
   onSelectModel: (model: string) => void;
 }) {
   const router = useRouter();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
+  const { showModal } = useContext(ModalsContext);
   const selectedItem = modelItems.find((item) => item.value === selectedModel);
+
+  const onSetupChatGPT = () => {
+    console.log('onSetupChatGPT');
+    showModal(ModalIds.OpenAI);
+  };
+
   return (
     <div className="flex w-full flex-col items-start justify-between rounded-md border px-4 py-0 sm:flex-row sm:items-center">
       <p className="text-sm font-medium leading-none">
-        <span className="text-muted-foreground">{selectedItem?.label || 'Select a model'}</span>
+        <span className="text-muted-foreground">{selectedItem?.label || t('Select a model')}</span>
       </p>
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
@@ -65,18 +76,18 @@ export default function ThreadMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-[200px]">
-          <DropdownMenuLabel>Model</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('Model')}</DropdownMenuLabel>
           <DropdownMenuGroup>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 <Check className="mr-2 h-4 w-4" />
-                {selectedItem?.label || 'Select a model'}
+                {selectedItem?.label || t('Select a model')}
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="p-0">
                 <Command>
-                  <CommandInput placeholder="Filter model..." autoFocus />
+                  <CommandInput placeholder={t('Filter model...')} autoFocus />
                   <CommandList>
-                    <CommandEmpty>No Model found.</CommandEmpty>
+                    <CommandEmpty>{t('No Model found.')}</CommandEmpty>
                     <CommandGroup>
                       {modelItems.map((item) => (
                         <CommandItem
@@ -98,11 +109,11 @@ export default function ThreadMenu({
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <HardDriveDownload className="mr-2 h-4 w-4" />
-              Install local model
+              {t('Install local model')}
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onSelect={onSetupChatGPT}>
               <Plug className="mr-2 h-4 w-4" />
-              Connect to ChatGPT
+              {t('Connect to ChatGPT')}
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => {
@@ -110,15 +121,15 @@ export default function ThreadMenu({
               }}
             >
               <Plus className="mr-2 h-4 w-4" />
-              Add other AI providers
+              {t('Add other AI providers')}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
           </DropdownMenuGroup>
-          <DropdownMenuLabel>Thread</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('Thread')}</DropdownMenuLabel>
           <DropdownMenuGroup>
             <DropdownMenuItem className="text-red-600">
               <Trash className="mr-2 h-4 w-4" />
-              Delete
+              {t('Delete')}
               <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
             </DropdownMenuItem>
           </DropdownMenuGroup>

@@ -29,7 +29,7 @@ import {
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackend';
 import { completion } from '@/utils/providers/opla';
-import { findModel, getLocalModelsAsItems } from '@/utils/data/models';
+import { findModel, getLocalModelsAsItems, getProviderModelsAsItems } from '@/utils/data/models';
 import { toast } from '@/components/ui/Toast';
 import MessageView from './Message';
 import PromptArea from './Prompt';
@@ -48,7 +48,7 @@ function Thread({
   onChangeDisplaySettings: (displaySettings: boolean) => void;
 }) {
   const router = useRouter();
-  const { conversations, setConversations } = useContext(AppContext);
+  const { providers, conversations, setConversations } = useContext(AppContext);
   const { getBackendContext } = useBackend();
   const backendContext = getBackendContext();
   logger.info('backendContext', backendContext);
@@ -71,7 +71,9 @@ function Thread({
   const showEmptyChat = !conversationId; // messages.length < 1;
 
   const selectedModel = selectedConversation?.model || defaultModel;
-  const modelItems = getLocalModelsAsItems(backendContext, selectedModel);
+  const localModelItems = getLocalModelsAsItems(backendContext, selectedModel);
+  const cloudModelItems = getProviderModelsAsItems(providers, selectedModel);
+  const modelItems = [...localModelItems, ...cloudModelItems];
 
   const onSelectModel = async (value?: string, data?: string) => {
     logger.info(`onSelectModel ${value} ${data}`);
