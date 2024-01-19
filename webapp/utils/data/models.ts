@@ -31,12 +31,13 @@ const getLocalModelsAsItems = (backendContext: OplaContext, modelname: string): 
 const getProviderModelsAsItems = (providers: Provider[], modelname: string): MenuItem[] => {
   const items = providers.reduce((acc, provider) => {
     if (!provider.models || provider.disabled) return acc;
-    const providerItems = provider.models.map((model) => ({
-      label: model.title || model.name,
-      value: model.name,
-      type: provider.name === "OpenAI " ? "openai" : provider.type,
-      selected: model.name === modelname,
-    })) || [];
+    const providerItems =
+      provider.models.map((model) => ({
+        label: model.title || model.name,
+        value: model.name,
+        type: provider.name === 'OpenAI ' ? 'openai' : provider.type,
+        selected: model.name === modelname,
+      })) || [];
     return [...acc, ...providerItems];
   }, [] as MenuItem[]);
   return items;

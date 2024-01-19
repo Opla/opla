@@ -60,7 +60,6 @@ export default function ThreadMenu({
   const selectedItem = modelItems.find((item) => item.value === selectedModel);
 
   const onSetupChatGPT = () => {
-    console.log('onSetupChatGPT');
     showModal(ModalIds.OpenAI);
   };
 
