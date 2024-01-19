@@ -18,7 +18,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { PanelRight, PanelRightClose } from 'lucide-react';
 import { AppContext } from '@/context';
-import { Conversation, Message } from '@/types';
+import { Conversation, Message, Prompt } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import {
@@ -32,10 +32,11 @@ import { completion } from '@/utils/providers/opla';
 import { findModel, getLocalModelsAsItems } from '@/utils/data/models';
 import { toast } from '@/components/ui/Toast';
 import MessageView from './Message';
-import Prompt from './Prompt';
+import PromptArea from './Prompt';
 import { ScrollArea } from '../ui/scroll-area';
 import Combobox from '../common/Combobox';
 import { Toggle } from '../ui/toggle';
+import PromptsGrid from './PromptsGrid';
 
 function Thread({
   conversationId,
@@ -67,7 +68,7 @@ function Thread({
     [selectedConversation?.messages],
   );
 
-  const showEmptyChat = messages.length < 1;
+  const showEmptyChat = !conversationId; // messages.length < 1;
 
   const selectedModel = selectedConversation?.model || defaultModel;
   const modelItems = getLocalModelsAsItems(backendContext, selectedModel);
@@ -162,6 +163,26 @@ function Thread({
     setConversations(newConversations);
   };
 
+  const onPromptSelected = (prompt: Prompt) => {
+    let newConversations: Conversation[];
+    let newConversationId;
+    if (conversationId) {
+      const conversation = getConversation(conversationId, conversations) as Conversation;
+      conversation.currentPrompt = prompt.prompt;
+      newConversations = updateConversation(conversation, conversations);
+    } else {
+      newConversations = updateConversationMessages(conversationId, conversations, []);
+      const conversation = newConversations[newConversations.length - 1];
+      conversation.name = prompt.name;
+      conversation.currentPrompt = prompt.prompt;
+      newConversationId = conversation.id;
+    }
+    setConversations(newConversations);
+    if (newConversationId) {
+      router.push(`/threads/${newConversationId}`);
+    }
+  };
+
   return (
     <div className="flex h-full flex-col dark:bg-neutral-800/30">
       <div className="grow-0">
@@ -198,6 +219,7 @@ function Thread({
           <h1 className="flex grow items-center justify-center gap-2 text-center text-2xl font-semibold text-neutral-200 dark:text-neutral-600">
             {t('Chat with your local GPT')}
           </h1>
+          <PromptsGrid onPromptSelected={onPromptSelected} />
         </div>
       ) : (
         <ScrollArea className="flex h-full flex-col">
@@ -210,7 +232,7 @@ function Thread({
       )}
       <div className="flex flex-col items-center text-sm dark:bg-neutral-800/30" />
 
-      <Prompt
+      <PromptArea
         conversationId={conversationId as string}
         message={currentPrompt}
         isLoading={conversationId ? isLoading[conversationId] : false}

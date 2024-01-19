@@ -156,6 +156,16 @@ export type Preset = BaseNamedRecord & {
   modelIds?: string[];
 };
 
+export type Prompt = BaseNamedRecord & {
+  title: string;
+  icon?: unknown;
+  prompt: string;
+  tags?: string[];
+  temperature?: number;
+  nPredict?: number;
+  stop?: string[];
+};
+
 export type Plugin = BaseNamedRecord & {};
 
 export type User = {
