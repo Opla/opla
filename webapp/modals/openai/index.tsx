@@ -13,7 +13,7 @@
 // limitations under the License.
 import React from 'react';
 import Dialog from '@/components/common/Modal';
-import useTranslation from '@/hooks/useTranslation';
+import OpenAICard from './Card';
 
 function OpenAIDialog({
   id,
@@ -24,14 +24,13 @@ function OpenAIDialog({
   open: boolean;
   onClose: () => void | undefined;
 }) {
-  const { t } = useTranslation();
   const onClose = () => {
     _onClose();
   };
   console.log('OpenAIDialog', id);
   return (
     <Dialog id={id} size="md" open={open} onClose={onClose}>
-      <div>{t('ChatGPT token:')}</div>
+      <OpenAICard />
     </Dialog>
   );
 }
