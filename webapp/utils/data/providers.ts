@@ -28,11 +28,11 @@ const createProvider = (name: string, template: Partial<Provider>) => {
 
 const updateProvider = (provider: Provider, providers: Provider[]) => {
   const i = providers.findIndex((p) => p.id === provider.id);
+  const updatedProvider = updateRecord(provider) as Provider;
   if (i === -1) {
+    providers.push(updatedProvider);
     return providers;
   }
-  const updatedProvider = updateRecord(provider) as Provider;
-
   return providers.map((p) => (p.id === provider.id ? updatedProvider : p));
 };
 

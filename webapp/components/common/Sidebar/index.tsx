@@ -24,7 +24,7 @@ import { ModalsContext } from '@/context/modals';
 import logger from '@/utils/logger';
 import { ModalIds } from '@/modals';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import useBackend from '@/hooks/useBackend';
+import useBackend from '@/hooks/useBackendContext';
 import { Item } from '@/types';
 import SidebarItems from './SidebarItems';
 
@@ -82,8 +82,8 @@ function Sidebar() {
   logger.info('pathname', pathname);
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
-  const { getBackendContext } = useBackend();
-  const defaultSettings = getBackendContext().config.settings;
+  const { backendContext } = useBackend();
+  const defaultSettings = backendContext?.config.settings;
   (sidebarItems[0].items as Item[])[0].href = defaultSettings?.selectedPage?.startsWith('/threads')
     ? defaultSettings?.selectedPage
     : '/threads';

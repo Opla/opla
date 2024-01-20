@@ -22,7 +22,7 @@ import { getModelsCollection, installModel, uninstallModel } from '@/utils/backe
 // import { ModalsContext } from '@/context/modals';
 import { deepMerge } from '@/utils/data';
 // import { ModalIds } from '@/modals';
-import useBackend from '@/hooks/useBackend';
+import useBackend from '@/hooks/useBackendContext';
 import {
   getEntityName,
   getDownloadables,
@@ -34,7 +34,7 @@ import Explorer from './Explorer';
 import ModelView from './Model';
 
 export default function Models({ selectedModelId }: { selectedModelId?: string }) {
-  const { getBackendContext, updateBackendStore } = useBackend();
+  const { backendContext, updateBackendStore } = useBackend();
   const [collection, setCollection] = useState<Model[]>([]);
   // const { showModal } = useContext(ModalsContext);
   const router = useRouter();
@@ -51,7 +51,7 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
   }, []);
   logger.info('collection: ', collection);
 
-  const models = getBackendContext().config.models.items;
+  const models = backendContext.config.models.items;
   let local = true;
   let model = models.find((m) => m.id === selectedModelId) as Model;
   if (!model && selectedModelId) {
@@ -113,7 +113,6 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
     }
   };
 
-  const backendContext = getBackendContext();
   const { downloads = [] } = backendContext;
 
   const isDownloading = downloads.findIndex((d) => d.id === model?.id) !== -1;

@@ -24,7 +24,7 @@ import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { ModalsContext } from '@/context/modals';
 import { deleteProvider, getProvider, updateProvider } from '@/utils/data/providers';
-import useBackend from '@/hooks/useBackend';
+import useBackend from '@/hooks/useBackendContext';
 import { ModalIds } from '@/modals';
 import { ContextMenuTrigger } from '@radix-ui/react-context-menu';
 import { Button } from '../ui/button';
@@ -33,7 +33,8 @@ import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
 
 function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string }) {
   const { providers, setProviders } = useContext(AppContext);
-  const { getBackendContext } = useBackend();
+  const { backendContext } = useBackend();
+
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
   const router = useRouter();
@@ -102,7 +103,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
 
   const isDisabled = (provider: Provider) => {
     if (provider?.type === 'opla') {
-      return getBackendContext().server?.status !== ServerStatus.STARTED;
+      return backendContext.server?.status !== ServerStatus.STARTED;
     }
     return provider?.disabled;
   };
@@ -148,7 +149,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
                               </div>
                               <div
                                 className={`${
-                                  isDisabled(provider) ? 'text-red-500' : 'text-green-500'
+                                  isDisabled(provider) ? 'text-gray-500' : 'text-green-500'
                                 } `}
                               >
                                 <Server className="h-4 w-4" />

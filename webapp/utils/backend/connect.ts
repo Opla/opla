@@ -63,7 +63,7 @@ const connectBackend = async (
   logger.info('oplaConfig', config);
   const { defaultModel } = config.models;
   let server: OplaServer = {
-    status: ServerStatus.INIT,
+    status: ServerStatus.IDLE,
     stout: [],
     sterr: [],
   };
@@ -95,7 +95,6 @@ const connectBackend = async (
     unlisten,
     unlistenServer,
     unlistenDownloader,
-    payload: server,
     start,
     stop,
     restart,

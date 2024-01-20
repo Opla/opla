@@ -19,11 +19,13 @@ import { BaseNamedRecord } from '@/types';
 import { ModalRef } from '@/context/modals';
 import SettingsPanel from './settings';
 import NewProviderPanel from './templates/NewProvider';
+import OpenAIDialog from './openai';
 
 enum ModalIds {
   Settings = 'settings',
   NewProvider = 'newprovider',
   Welcome = 'welcome',
+  OpenAI = 'openai',
   DeleteItem = 'deleteitem',
   DownloadItem = 'downloaditem',
 }
@@ -60,7 +62,7 @@ const Modals: ModalRef[] = [
   },
   {
     id: ModalIds.Welcome,
-    Component: function NewProviderDialog({ visible, onClose }) {
+    Component: function WelcomeDialog({ visible, onClose }) {
       const { t } = useTranslation();
       return (
         <AlertDialog
@@ -73,6 +75,20 @@ const Modals: ModalRef[] = [
         >
           <div>{t('The ultimate Open-source generative AI App')} </div>
         </AlertDialog>
+      );
+    },
+  },
+  {
+    id: ModalIds.OpenAI,
+    Component: function OAIDialog({ visible, onClose, data }) {
+      return (
+        <OpenAIDialog
+          key={ModalIds.OpenAI}
+          id={ModalIds.OpenAI}
+          open={visible}
+          data={data}
+          onClose={onClose}
+        />
       );
     },
   },

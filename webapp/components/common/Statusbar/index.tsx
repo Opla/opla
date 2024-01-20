@@ -14,13 +14,14 @@
 import { useRouter } from 'next/router';
 import { DownloadCloud, AlertTriangle, Server } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
-import useBackend from '@/hooks/useBackend';
+import useBackend from '@/hooks/useBackendContext';
+import logger from '@/utils/logger';
 
 export default function Statusbar() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { getBackendContext } = useBackend();
-  const backendContext = getBackendContext();
+  const { backendContext } = useBackend();
+  logger.info('statusbar backendContext', backendContext);
 
   const running = backendContext.server.status === 'started';
   const error = backendContext.server.status === 'error';
@@ -41,12 +42,12 @@ export default function Statusbar() {
         onClick={displayServer}
       >
         {!error && (
-          <span className={`${running ? 'text-green-500' : 'text-red-500'} `}>
+          <span className={`${running ? 'text-green-500' : 'text-gray-500'} `}>
             <Server className="h-4 w-4" />
           </span>
         )}
         {error && (
-          <span className="text-neutral-800 dark:text-neutral-300">
+          <span className="text-red-500 dark:text-neutral-300">
             <AlertTriangle className="h-4 w-4" />
           </span>
         )}

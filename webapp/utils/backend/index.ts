@@ -14,6 +14,7 @@
 
 import { Backend } from '@/utils/backend/connect';
 import { ServerStatus } from '@/types';
+import logger from '../logger';
 
 const connect = async (
   listener: (payload: unknown) => void,
@@ -44,9 +45,15 @@ const connect = async (
         message: 'no backend',
       },
     },
-    start: async () => {},
-    stop: async () => {},
-    restart: async () => {},
+    start: async () => {
+      logger.error('no backend');
+    },
+    stop: async () => {
+      logger.error('no backend');
+    },
+    restart: async () => {
+      logger.error('no backend');
+    },
   } as Backend;
 };
 

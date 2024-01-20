@@ -28,7 +28,7 @@ export default function useDataStorage<T>(key: string, defaultValue: T): [T, (va
     function handler(e: StorageEvent) {
       if (e.key !== key) return;
       const i = dataStorage().getItem(key);
-      // logger.info('storage event', e, key, i);
+      logger.info('storage event', e, key, i);
       setValue(i as T);
     }
     window.addEventListener('storage', handler);

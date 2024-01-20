@@ -54,7 +54,7 @@ export default function Toolbar({
                 onProviderToggle();
               }}
             >
-              <span className={`${provider?.disabled ? 'text-red-500' : 'text-green-500'} `}>
+              <span className={`${provider?.disabled ? 'text-gray-500' : 'text-green-500'} `}>
                 <Plug className="mr-2 h-4 w-4 rotate-90" />
               </span>
               <span>{provider?.disabled ? t('Enable') : t('Disable')}</span>

@@ -224,7 +224,14 @@ impl OplaServer {
                 return Err("Opla server can't read status".to_string());
             }
         };
-        Ok(Payload { status: status.to_string(), message: self.name.to_string() })
+        let message = match &self.model {
+            Some(model) => model.to_string(),
+            None => "None".to_string(),
+        };
+        Ok(Payload {
+            status: status.to_string(),
+            message,
+        })
     }
 
     pub fn set_status(&mut self, status: ServerStatus) -> Result<Payload, String> {

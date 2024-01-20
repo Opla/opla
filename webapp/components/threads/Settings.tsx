@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { useContext } from 'react';
-import { BrainCircuit, File, Palette, Settings2 } from 'lucide-react';
-import Link from 'next/link';
-import { DotsVerticalIcon } from '@radix-ui/react-icons';
+import { File, Palette, Settings2 } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { AppContext } from '@/context';
-import useBackend from '@/hooks/useBackend';
+import useBackend from '@/hooks/useBackendContext';
 import { updateConversation } from '@/utils/data/conversations';
 import { findModel } from '@/utils/data/models';
 import { DEFAULT_SYSTEM } from '@/utils/providers/opla';
@@ -26,15 +24,11 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '..
 import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Textarea } from '../ui/textarea';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Button } from '../ui/button';
 
 export default function Settings({ conversationId }: { conversationId?: string }) {
   const { t } = useTranslation();
   const { conversations, setConversations } = useContext(AppContext);
-  const { getBackendContext } = useBackend();
-  const backendContext = getBackendContext();
+  const { backendContext } = useBackend();
   logger.info('backendContext', backendContext);
   const selectedConversation = conversations.find((c) => c.id === conversationId);
   const { defaultModel } = backendContext.config.models;
@@ -65,11 +59,8 @@ export default function Settings({ conversationId }: { conversationId?: string }
   const system = selectedConversation?.system ?? model?.system ?? DEFAULT_SYSTEM;
   return (
     <div className="scrollbar-trigger flex h-full w-full bg-neutral-100 px-4 dark:bg-neutral-800/70">
-      <Tabs defaultValue="model" className="w-full py-3">
+      <Tabs defaultValue="settings" className="w-full py-3">
         <TabsList className="justify-left w-full gap-4">
-          <TabsTrigger value="model">
-            <BrainCircuit className="h-4 w-4" />
-          </TabsTrigger>
           <TabsTrigger value="settings">
             <Settings2 className="h-4 w-4" />
           </TabsTrigger>
@@ -79,35 +70,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
           <TabsTrigger value="documents">
             <File className="h-4 w-4" />
           </TabsTrigger>
-          <div>
-            <DotsVerticalIcon />
-          </div>
         </TabsList>
-        <TabsContent value="model" className="py-4">
-          <ScrollArea className="w-full">
-            <div className="h-[400px]">Choose your local model.</div>
-            <Accordion
-              type="multiple"
-              className="h-[200px] w-full"
-              defaultValue={['settings-model-openai']}
-            >
-              <AccordionItem value="settings-model-openai">
-                <AccordionTrigger>OpenAI ChatGPT</AccordionTrigger>
-                <AccordionContent>
-                  <div className="flex flex-col gap-2 p-2">
-                    <Label>{t('Enter your API key to use it')}</Label>
-                    <Input placeholder="API key" />
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-            <div className="flex flex-col gap-2 p-2">
-              <Button variant="outline" className="dark:bg-transparent" asChild>
-                <Link href="/providers">{t('Configure other AI Providers')}</Link>
-              </Button>
-            </div>
-          </ScrollArea>
-        </TabsContent>
         <TabsContent value="settings" className="py-4">
           <ScrollArea className="w-full">
             <Accordion
