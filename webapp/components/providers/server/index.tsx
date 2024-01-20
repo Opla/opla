@@ -42,9 +42,9 @@ export default function Server({
         onChange={onParameterChange}
       />
       <Parameter
-        title={t('Token')}
-        name="token"
-        value={provider?.token}
+        title={t('Secret key')}
+        name="key"
+        value={provider?.key}
         type="text"
         onChange={onParameterChange}
       />

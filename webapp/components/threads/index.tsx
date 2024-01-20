@@ -15,7 +15,7 @@
 'use client';
 
 // import { useState } from 'react';
-import useBackend from '@/hooks/useBackend';
+import useBackend from '@/hooks/useBackendContext';
 import { PageSettings } from '@/types';
 import { DefaultPageSettings } from '@/utils/constants';
 import logger from '@/utils/logger';
@@ -28,8 +28,8 @@ const getSelectedPage = (selectedConversationId?: string) =>
   `/threads${selectedConversationId ? `/${selectedConversationId}` : ''}`;
 
 export default function Threads({ selectedConversationId }: { selectedConversationId?: string }) {
-  const { getBackendContext, setSettings } = useBackend();
-  const defaultSettings = getBackendContext().config.settings;
+  const { backendContext, setSettings } = useBackend();
+  const defaultSettings = backendContext.config.settings;
   const selectedPage = getSelectedPage(selectedConversationId);
   const pageSettings =
     defaultSettings.pages?.[selectedPage] ||
@@ -38,7 +38,6 @@ export default function Threads({ selectedConversationId }: { selectedConversati
   // logger.info('page', selectedPage, pageSettings, defaultSettings);
 
   const saveSettings = (partialSettings: Partial<PageSettings>) => {
-    const backendContext = getBackendContext();
     const { settings } = backendContext.config;
     logger.info('saveSettings', selectedPage, partialSettings, backendContext.config);
     if (settings.selectedPage) {

@@ -47,7 +47,7 @@ function ProviderCreate({
           <Parameter
             title={t('Token')}
             name="token"
-            value={provider?.token}
+            value={provider?.key}
             type="text"
             onChange={onParameterChange}
           />

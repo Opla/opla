@@ -16,7 +16,7 @@ import { File, Palette, Settings2 } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { AppContext } from '@/context';
-import useBackend from '@/hooks/useBackend';
+import useBackend from '@/hooks/useBackendContext';
 import { updateConversation } from '@/utils/data/conversations';
 import { findModel } from '@/utils/data/models';
 import { DEFAULT_SYSTEM } from '@/utils/providers/opla';
@@ -28,8 +28,7 @@ import { Textarea } from '../ui/textarea';
 export default function Settings({ conversationId }: { conversationId?: string }) {
   const { t } = useTranslation();
   const { conversations, setConversations } = useContext(AppContext);
-  const { getBackendContext } = useBackend();
-  const backendContext = getBackendContext();
+  const { backendContext } = useBackend();
   logger.info('backendContext', backendContext);
   const selectedConversation = conversations.find((c) => c.id === conversationId);
   const { defaultModel } = backendContext.config.models;

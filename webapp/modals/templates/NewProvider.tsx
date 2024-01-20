@@ -100,9 +100,9 @@ export default function NewProvider({
               />
               <Card
                 title="OpenAI"
-                selected={provider?.type === 'api'}
+                selected={provider?.type === 'openai'}
                 description={t('Using your access token')}
-                onClick={() => onChoose('api', 'OpenAI')}
+                onClick={() => onChoose('openai', 'OpenAI')}
               />
               <Card
                 title={t('Server')}

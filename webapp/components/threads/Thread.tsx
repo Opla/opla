@@ -27,7 +27,7 @@ import {
   updateConversation,
   updateConversationMessages,
 } from '@/utils/data/conversations';
-import useBackend from '@/hooks/useBackend';
+import useBackend from '@/hooks/useBackendContext';
 import { completion } from '@/utils/providers/opla';
 import { findModel, getLocalModelsAsItems, getProviderModelsAsItems } from '@/utils/data/models';
 import { toast } from '@/components/ui/Toast';
@@ -49,8 +49,7 @@ function Thread({
 }) {
   const router = useRouter();
   const { providers, conversations, setConversations } = useContext(AppContext);
-  const { getBackendContext } = useBackend();
-  const backendContext = getBackendContext();
+  const { backendContext } = useBackend();
   logger.info('backendContext', backendContext);
   const { defaultModel } = backendContext.config.models;
   const selectedConversation = conversations.find((c) => c.id === conversationId);

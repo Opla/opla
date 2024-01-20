@@ -13,24 +13,46 @@
 // limitations under the License.
 import React from 'react';
 import Dialog from '@/components/common/Modal';
-import OpenAICard from './Card';
+import OpenAI from '@/components/providers/openai';
+import useProviderState from '@/hooks/useProviderState';
+import { Provider } from '@/types';
 
 function OpenAIDialog({
   id,
+  data,
   open,
   onClose: _onClose,
 }: {
   id: string;
+  data: unknown;
   open: boolean;
   onClose: () => void | undefined;
 }) {
+  const newProvider = data as Provider;
+  const { provider, onParametersSave, onParameterChange } = useProviderState(
+    newProvider?.id,
+    newProvider,
+  );
+
   const onClose = () => {
     _onClose();
   };
-  console.log('OpenAIDialog', id);
+
+  const onSave = () => {
+    onParametersSave({ disabled: false });
+    onClose();
+  };
+
   return (
     <Dialog id={id} size="md" open={open} onClose={onClose}>
-      <OpenAICard />
+      {provider && (
+        <OpenAI
+          provider={provider}
+          className="w-full"
+          onParameterChange={onParameterChange}
+          onSave={onSave}
+        />
+      )}
     </Dialog>
   );
 }

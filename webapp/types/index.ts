@@ -138,14 +138,14 @@ export type Model = BaseNamedRecord & {
   system?: string;
 };
 
-export type ProviderType = 'opla' | 'server' | 'api' | 'proxy';
+export type ProviderType = 'opla' | 'server' | 'openai' | 'proxy';
 
 export type Provider = BaseNamedRecord & {
   url: string;
   docUrl?: string;
   type: ProviderType;
   disabled: boolean;
-  token: string;
+  key: string;
   models?: Model[];
   isDisabled?: () => boolean;
 };
@@ -178,6 +178,7 @@ export type User = {
 };
 
 export enum ServerStatus {
+  IDLE = 'idle',
   INIT = 'init',
   WAIT = 'wait',
   STARTING = 'starting',

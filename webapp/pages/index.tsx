@@ -15,19 +15,18 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import useBackend from '@/hooks/useBackend';
+import useBackend from '@/hooks/useBackendContext';
 import { useEffect } from 'react';
 
 export default function Home() {
   const router = useRouter();
-  const { getBackendContext } = useBackend();
+  const { backendContext } = useBackend();
 
   useEffect(() => {
-    const backendContext = getBackendContext();
     const { settings } = backendContext.config;
     if (settings.selectedPage) {
       router.replace(settings.selectedPage);
     }
-  }, [router, getBackendContext]);
+  }, [router, backendContext]);
   return <div className="relative flex h-screen w-full flex-col overflow-hidden" />;
 }

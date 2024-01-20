@@ -14,14 +14,9 @@
 
 'use client';
 
-import { useContext, useEffect, useMemo, useState } from 'react';
-import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
-import { Provider, ServerConfiguration, ServerStatus } from '@/types';
-import { updateProvider } from '@/utils/data/providers';
-import logger from '@/utils/logger';
-import { deepMerge, deepSet } from '@/utils/data';
-import useBackend from '@/hooks/useBackend';
+import useBackend from '@/hooks/useBackendContext';
+import useProviderState from '@/hooks/useProviderState';
 import Toolbar from './Toolbar';
 import Server from './server';
 import OpenAI from './openai';
@@ -29,74 +24,11 @@ import Opla from './opla';
 import OplaActions from './opla/Actions';
 
 function ProviderConfiguration({ providerId }: { providerId?: string }) {
-  const [updatedProvider, setUpdatedProvider] = useState<Partial<Provider>>({ id: providerId });
-  const { providers, setProviders } = useContext(AppContext);
   const { t } = useTranslation();
 
-  const { getBackendContext, restart, start, stop } = useBackend();
-
-  useEffect(() => {
-    if (providerId !== updatedProvider.id) {
-      setUpdatedProvider({ id: providerId });
-    }
-  }, [providerId, updatedProvider.id]);
-
-  const hasParametersChanged = useMemo(
-    () => Object.keys(updatedProvider).length > 1,
-    [updatedProvider],
-  );
-
-  const provider = useMemo(() => {
-    let p = providers.find((c) => c.id === providerId);
-    if (p && hasParametersChanged) {
-      p = deepMerge(p, updatedProvider);
-    }
-    if (p?.type === 'opla') {
-      p.disabled = getBackendContext().server.status === ServerStatus.STOPPED;
-    }
-    return p;
-  }, [getBackendContext, hasParametersChanged, providerId, providers, updatedProvider]);
-
-  const onParameterChange = (name: string, value: string | number | boolean) => {
-    const newProvider = deepSet(updatedProvider, name, value);
-    logger.info('onParameterChange', name, value, newProvider);
-    setUpdatedProvider(newProvider);
-  };
-
-  const onParametersSave = () => {
-    logger.info('onParametersSave', provider);
-    const newProviders = updateProvider(provider as Provider, providers);
-    setProviders(newProviders);
-    setUpdatedProvider({ id: providerId });
-    if (provider?.type === 'opla') {
-      const server: ServerConfiguration = provider?.metadata?.server as ServerConfiguration;
-      const parameters = server?.parameters; // deepCopy(provider?.metadata?.parameters);
-      logger.info('params', parameters);
-      restart(parameters);
-    }
-  };
-
-  const onProviderToggle = () => {
-    logger.info('onProviderToggle');
-    if (provider?.type === 'opla') {
-      logger.info('backend.server', getBackendContext().server);
-      if (getBackendContext().server.status === ServerStatus.STARTED) {
-        stop();
-      } else if (getBackendContext().server.status === ServerStatus.STOPPED) {
-        const server: any = provider?.metadata?.server;
-        const parameters = server?.parameters;
-        start(parameters);
-      }
-    } else {
-      const newProviders = updateProvider(
-        { ...(provider as Provider), disabled: !provider?.disabled },
-        providers,
-      );
-      setProviders(newProviders);
-    }
-  };
-
-  const backendContext = getBackendContext();
+  const { provider, hasParametersChanged, onParametersSave, onParameterChange, onProviderToggle } =
+    useProviderState(providerId);
+  const { backendContext } = useBackend();
 
   return (
     <div className="flex h-full max-w-full flex-col dark:bg-neutral-800/30">
@@ -123,15 +55,21 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
                   )
                 }
               />
-              {provider.type === 'opla' && (
-                <Opla provider={provider} onParameterChange={onParameterChange} />
-              )}
-              {provider.type === 'api' && (
-                <OpenAI provider={provider} onParameterChange={onParameterChange} />
-              )}
-              {provider.type === 'server' && (
-                <Server provider={provider} onParameterChange={onParameterChange} />
-              )}
+              <div className="h-full w-full p-8 pb-24">
+                {provider.type === 'opla' && (
+                  <Opla provider={provider} onParameterChange={onParameterChange} />
+                )}
+                {provider.type === 'openai' && (
+                  <OpenAI
+                    className="h-full w-full"
+                    provider={provider}
+                    onParameterChange={onParameterChange}
+                  />
+                )}
+                {provider.type === 'server' && (
+                  <Server provider={provider} onParameterChange={onParameterChange} />
+                )}
+              </div>
             </>
           )}
         </div>

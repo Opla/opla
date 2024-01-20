@@ -20,6 +20,7 @@ import Layout from '@/components/Layout';
 import { ThemeProvider } from 'next-themes';
 import { AppContextProvider } from '@/context';
 import { ModalsProvider } from '@/context/modals';
+import { BackendProvider } from '@/hooks/useBackendContext';
 
 export default function App({ Component }: AppProps) {
   // Dirty hack to fix hydration mismatch using i18n
@@ -34,11 +35,13 @@ export default function App({ Component }: AppProps) {
   return (
     <ThemeProvider attribute="class">
       <AppContextProvider>
-        <ModalsProvider>
-          <Layout>
-            <Component />
-          </Layout>
-        </ModalsProvider>
+        <BackendProvider>
+          <ModalsProvider>
+            <Layout>
+              <Component />
+            </Layout>
+          </ModalsProvider>
+        </BackendProvider>
       </AppContextProvider>
     </ThemeProvider>
   );

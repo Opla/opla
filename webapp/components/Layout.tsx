@@ -14,12 +14,12 @@
 
 'use client';
 
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import '@/app/globals.css';
 import Sidebar from '@/components/common/Sidebar';
 import { AppContext } from '@/context';
-import useBackend from '@/hooks/useBackend';
+import useBackend from '@/hooks/useBackendContext';
 import useRegisterModals from '@/hooks/useRegisterModals';
 import Modals from '@/modals';
 import { Toaster } from '@/components/ui/Toast';
@@ -27,16 +27,24 @@ import Statusbar from './common/Statusbar';
 import { TooltipProvider } from './ui/tooltip';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const firstRender = useRef(true);
+
   const { providers, models, presets } = useContext(AppContext);
   const router = useRouter();
 
-  const { getBackendContext, setSettings } = useBackend();
+  const { startBackend, backendContext, setSettings } = useBackend();
 
   useRegisterModals(Modals);
 
   useEffect(() => {
+    if (firstRender.current && providers) {
+      firstRender.current = false;
+      startBackend();
+    }
+  }, [providers, startBackend]);
+
+  useEffect(() => {
     const handleRouteChange = (url: any) => {
-      const backendContext = getBackendContext();
       const { settings } = backendContext.config;
       if (settings.selectedPage !== url) {
         settings.selectedPage = url;
@@ -48,9 +56,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     return () => {
       router.events.off('routeChangeStart', handleRouteChange);
     };
-  }, [getBackendContext, router, setSettings]);
+  }, [backendContext, router, setSettings]);
 
-  if (!providers || !models || !presets) {
+  if (!backendContext || !providers || !models || !presets) {
     return <div>Loading...</div>;
   }
 

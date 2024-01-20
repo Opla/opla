@@ -39,10 +39,12 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MenuItem } from '@/types';
+import { MenuItem, Provider } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
+import { AppContext } from '@/context';
+import { createProvider } from '@/utils/data/providers';
 
 export default function ThreadMenu({
   selectedModel,
@@ -54,13 +56,18 @@ export default function ThreadMenu({
   onSelectModel: (model: string) => void;
 }) {
   const router = useRouter();
+  const { providers } = useContext(AppContext);
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
   const selectedItem = modelItems.find((item) => item.value === selectedModel);
+  let chatGPT = providers.find((p: Provider) => p.type === 'openai' && p.name === 'OpenAI API');
 
   const onSetupChatGPT = () => {
-    showModal(ModalIds.OpenAI);
+    if (!chatGPT) {
+      chatGPT = createProvider('OpenAI API', { type: 'openai' });
+    }
+    showModal(ModalIds.OpenAI, chatGPT);
   };
 
   return (
@@ -111,8 +118,12 @@ export default function ThreadMenu({
               {t('Install local model')}
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={onSetupChatGPT}>
-              <Plug className="mr-2 h-4 w-4" />
-              {t('Connect to ChatGPT')}
+              <Plug
+                className={`mr-2 h-4 w-4 ${
+                  chatGPT && !chatGPT.disabled ? 'text-green-500' : 'animate-pulse text-gray-500'
+                }`}
+              />
+              {t('Configure ChatGPT')}
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => {

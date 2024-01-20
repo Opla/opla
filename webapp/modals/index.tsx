@@ -80,9 +80,15 @@ const Modals: ModalRef[] = [
   },
   {
     id: ModalIds.OpenAI,
-    Component: function OAIDialog({ visible, onClose }) {
+    Component: function OAIDialog({ visible, onClose, data }) {
       return (
-        <OpenAIDialog key={ModalIds.OpenAI} id={ModalIds.OpenAI} open={visible} onClose={onClose} />
+        <OpenAIDialog
+          key={ModalIds.OpenAI}
+          id={ModalIds.OpenAI}
+          open={visible}
+          data={data}
+          onClose={onClose}
+        />
       );
     },
   },
