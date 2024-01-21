@@ -45,6 +45,7 @@ import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { AppContext } from '@/context';
 import { createProvider } from '@/utils/data/providers';
+import { openAIProviderTemplate } from '@/utils/providers/openai';
 
 export default function ThreadMenu({
   selectedModel,
@@ -65,7 +66,7 @@ export default function ThreadMenu({
 
   const onSetupChatGPT = () => {
     if (!chatGPT) {
-      chatGPT = createProvider('OpenAI API', { type: 'openai' });
+      chatGPT = createProvider(openAIProviderTemplate.name as string, openAIProviderTemplate);
     }
     showModal(ModalIds.OpenAI, chatGPT);
   };

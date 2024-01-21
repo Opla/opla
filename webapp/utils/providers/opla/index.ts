@@ -16,6 +16,8 @@ import { LlmResponse, Model } from '@/types';
 import logger from '@/utils/logger';
 import { invokeTauri } from '@/utils/tauri';
 
+const NAME = 'Opla';
+const TYPE = 'opla';
 const DEFAULT_SYSTEM = `
 You are an expert in retrieving information.
 Question: {{QUESTION}}
@@ -45,16 +47,16 @@ const completion = async (
 
   const response: LlmResponse = (await invokeTauri('llm_call_completion', {
     model: model.name,
-    llmProvider: 'opla',
+    llmProvider: TYPE,
     query: { command: 'completion', parameters },
   })) as LlmResponse;
 
   const { content } = response;
   if (content) {
-    logger.info('LLama.cpp completion response', content);
+    logger.info(`${NAME} completion response`, content);
     return content.trim();
   }
-  throw new Error(`LLama.cpp completion error ${response}`);
+  throw new Error(`${NAME} completion error ${response}`);
 };
 
 export { DEFAULT_SYSTEM, completion };
