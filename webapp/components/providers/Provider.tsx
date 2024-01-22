@@ -17,6 +17,7 @@
 import useTranslation from '@/hooks/useTranslation';
 import useBackend from '@/hooks/useBackendContext';
 import useProviderState from '@/hooks/useProviderState';
+import { ProviderType } from '@/types';
 import Toolbar from './Toolbar';
 import Server from './server';
 import OpenAI from './openai';
@@ -46,7 +47,7 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
                 onParametersSave={onParametersSave}
                 hasParametersChanged={hasParametersChanged}
                 actions={
-                  provider.type === 'opla' && (
+                  provider.type === ProviderType.opla && (
                     <OplaActions
                       onProviderToggle={onProviderToggle}
                       provider={provider}
@@ -56,17 +57,17 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
                 }
               />
               <div className="h-full w-full p-8 pb-24">
-                {provider.type === 'opla' && (
+                {provider.type === ProviderType.opla && (
                   <Opla provider={provider} onParameterChange={onParameterChange} />
                 )}
-                {provider.type === 'openai' && (
+                {provider.type === ProviderType.openai && (
                   <OpenAI
                     className="h-full w-full"
                     provider={provider}
                     onParameterChange={onParameterChange}
                   />
                 )}
-                {provider.type === 'server' && (
+                {provider.type === ProviderType.server && (
                   <Server provider={provider} onParameterChange={onParameterChange} />
                 )}
               </div>

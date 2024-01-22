@@ -12,49 +12,64 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LlmResponse, Model } from '@/types';
+import { LlmMessage, LlmQueryCompletion, LlmResponse, Model, Provider } from '@/types';
 import logger from '@/utils/logger';
 import { invokeTauri } from '@/utils/tauri';
 
-const DEFAULT_SYSTEM = `
-You are an expert in retrieving information.
-Question: {{QUESTION}}
-Answer:
-`;
+const NAME = 'Opla';
+// const TYPE = ProviderType.opla;
+const DEFAULT_SYSTEM = 'You are an expert in retrieving information.\n';
+
+const DEFAULT_PROPERTIES: Partial<LlmQueryCompletion> = {
+  nPredict: 200,
+  temperature: 0,
+  stop: ['Llama:', 'User:', 'Question:'],
+};
 
 const completion = async (
   model: Model | undefined,
-  input: string,
+  provider: Provider | undefined,
+  messages: LlmMessage[],
   system = DEFAULT_SYSTEM,
-  properties = {
-    n_predict: 200,
-    temperature: 0,
-    stop: ['Llama:', 'User:', 'Question:'],
-  },
+  properties = DEFAULT_PROPERTIES,
 ): Promise<string> => {
   if (!model) {
     throw new Error('Model not found');
   }
 
-  const prompt = system.replace('{{QUESTION}}', input);
+  /* let prompt = messages
+    .reduce((acc, m) => {
+      if (m.role === 'user') {
+        return `${acc}\nQuestion: ${m.content}`;
+      }
+      if (m.role === 'assistant') {
+        return `${acc}\nAnswer: ${m.content}`;
+      }
+      return acc;
+    }, ''); */
 
-  const parameters = {
-    prompt,
+  const systemMessage: LlmMessage = {
+    role: 'system',
+    content: system,
+  };
+
+  const parameters: LlmQueryCompletion = {
+    messages: [systemMessage, ...messages],
     ...properties,
   };
 
   const response: LlmResponse = (await invokeTauri('llm_call_completion', {
     model: model.name,
-    llmProvider: 'opla',
+    llmProvider: provider,
     query: { command: 'completion', parameters },
   })) as LlmResponse;
 
   const { content } = response;
   if (content) {
-    logger.info('LLama.cpp completion response', content);
+    logger.info(`${NAME} completion response`, content);
     return content.trim();
   }
-  throw new Error(`LLama.cpp completion error ${response}`);
+  throw new Error(`${NAME} completion error ${response}`);
 };
 
 export { DEFAULT_SYSTEM, completion };

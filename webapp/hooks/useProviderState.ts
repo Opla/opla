@@ -15,7 +15,7 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { AppContext } from '@/context';
 import logger from '@/utils/logger';
-import { Provider, ServerConfiguration, ServerStatus } from '@/types';
+import { Provider, ProviderType, ServerConfiguration, ServerStatus } from '@/types';
 import { deepMerge, deepSet } from '@/utils/data';
 import { updateProvider } from '@/utils/data/providers';
 import useBackend from './useBackendContext';
@@ -44,7 +44,7 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
     } else if (p && hasParametersChanged) {
       p = deepMerge(p, updatedProvider);
     }
-    if (p?.type === 'opla') {
+    if (p?.type === ProviderType.opla) {
       p.disabled = backendContext.server.status === ServerStatus.STOPPED;
     }
     return p;
@@ -62,7 +62,7 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
     logger.info('onParametersSave', mergedProvider, newProviders);
     setProviders(newProviders);
     setUpdatedProvider({ id: providerId });
-    if (mergedProvider.type === 'opla') {
+    if (mergedProvider.type === ProviderType.opla) {
       const server: ServerConfiguration = mergedProvider.metadata?.server as ServerConfiguration;
       const parameters = server?.parameters; // deepCopy(provider?.metadata?.parameters);
       logger.info('params', parameters);
@@ -72,7 +72,7 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
 
   const onProviderToggle = () => {
     logger.info('onProviderToggle');
-    if (provider?.type === 'opla') {
+    if (provider?.type === ProviderType.opla) {
       logger.info('backend.server', backendContext.server);
       if (backendContext.server.status === ServerStatus.STARTED) {
         stop();

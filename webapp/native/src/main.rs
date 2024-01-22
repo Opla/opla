@@ -28,10 +28,10 @@ use std::sync::Mutex;
 use api::models;
 use data::model::Model;
 use downloader::Downloader;
-use llm::{ LlmQuery, LlmResponse, LlmQueryCompletion };
+use llm::{ LlmQuery, LlmResponse, LlmQueryCompletion, call_completion };
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
-use store::{ Store, ProviderConfiguration, ProviderType, ProviderMetadata, Settings };
+use store::{ Store, Provider, ProviderType, ProviderMetadata, Settings, ServerConfiguration };
 use server::*;
 use tauri::{ Runtime, State, Manager, App, EventLoopMessage };
 
@@ -41,6 +41,20 @@ pub struct OplaContext {
     pub downloader: Mutex<Downloader>,
 }
 
+pub fn get_opla_provider(server: ServerConfiguration) -> Provider {
+    Provider {
+        name: "Opla".to_string(),
+        r#type: ProviderType::Opla.to_string(),
+        description: "Opla is a free and open source AI assistant.".to_string(),
+        url: format!("{:}:{:}", server.parameters.host.clone(), server.parameters.port.clone()),
+        disabled: false,
+        key: None,
+        doc_url: Some("https://opla.ai/docs".to_string()),
+        metadata: Option::Some(ProviderMetadata {
+            server: server.clone(),
+        }),
+    }
+}
 #[tauri::command]
 async fn get_opla_configuration<R: Runtime>(
     _app: tauri::AppHandle<R>,
@@ -70,20 +84,10 @@ async fn get_provider_template<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>
-) -> Result<ProviderConfiguration, String> {
+) -> Result<Provider, String> {
     let store = context.store.lock().map_err(|err| err.to_string())?;
     let server = store.server.clone();
-    let template = ProviderConfiguration {
-        name: "Opla".to_string(),
-        r#type: ProviderType::Opla.to_string(),
-        description: "Opla is a free and open source AI assistant.".to_string(),
-        url: server.parameters.host.clone(),
-        disabled: false,
-        doc_url: Some("https://opla.ai/docs".to_string()),
-        metadata: ProviderMetadata {
-            server: server.clone(),
-        },
-    };
+    let template = get_opla_provider(server);
     Ok(template.clone())
 }
 
@@ -224,10 +228,18 @@ async fn llm_call_completion<R: Runtime>(
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
     model: String,
-    llm_provider: String,
+    llm_provider: Option<Provider>,
     query: LlmQuery<LlmQueryCompletion>
 ) -> Result<LlmResponse, String> {
-    if llm_provider == "opla" {
+    let (llm_provider, llm_provider_type) = match llm_provider {
+        Some(p) => { (p.clone(), p.r#type) }
+        None => {
+            let store = context.store.lock().map_err(|err| err.to_string())?;
+            let server = store.server.clone();
+            (get_opla_provider(server), "opla".to_string())
+        }
+    };
+    if llm_provider_type == "opla" {
         let (model_name, model_path) = {
             let store = context.store.lock().map_err(|err| err.to_string())?;
             let result = store.models.get_model(model.as_str());
@@ -267,7 +279,26 @@ async fn llm_call_completion<R: Runtime>(
         store.save().map_err(|err| err.to_string())?;
         return Ok(response);
     }
-    return Err(format!("LLM provider not found: {:?}", llm_provider));
+    if llm_provider_type == "openai" {
+        // TODO
+
+        let response = {
+            let api = format!("{:}", llm_provider.url);
+            let secret_key = match llm_provider.key {
+                Some(k) => { k }
+                None => {
+                    return Err(format!("llm provider key not set: {:?}", llm_provider_type));
+                }
+            };
+            let model = model.clone();
+            let query = query.clone();
+            call_completion::<R>(&api, &secret_key, &model, query).await.map_err(|err|
+                err.to_string()
+            )?
+        };
+        return Ok(response);
+    }
+    return Err(format!("LLM provider not found: {:?}", llm_provider_type));
 }
 
 fn start_server<R: Runtime>(
