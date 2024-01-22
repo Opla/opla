@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LlmResponse, Model } from '@/types';
+import { LlmResponse, Model, ProviderType } from '@/types';
 import logger from '@/utils/logger';
 import { invokeTauri } from '@/utils/tauri';
 
 const NAME = 'Opla';
-const TYPE = 'opla';
+const TYPE = ProviderType.opla;
 const DEFAULT_SYSTEM = `
 You are an expert in retrieving information.
 Question: {{QUESTION}}

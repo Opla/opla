@@ -36,7 +36,7 @@ export type MenuItem = {
   variant?: 'link' | 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
   label: string;
   value?: string;
-  type?: string;
+  group?: string;
   icon?: unknown;
   selected?: boolean;
   onSelect?: (data: string) => void;
@@ -86,6 +86,7 @@ export type Conversation = BaseNamedRecord & {
   note?: string;
   system?: string;
   model?: string;
+  provider?: string;
 };
 
 export type Entity = {
@@ -97,6 +98,23 @@ export type Entity = {
 export type Resource = {
   name: string;
   url?: string;
+};
+
+export enum ProviderType {
+  opla = 'opla',
+  server = 'server',
+  openai = 'openai',
+  proxy = 'proxy',
+}
+
+export type Provider = BaseNamedRecord & {
+  url: string;
+  docUrl?: string;
+  type: ProviderType;
+  disabled: boolean;
+  key: string;
+  models?: Model[];
+  isDisabled?: () => boolean;
 };
 
 export type Model = BaseNamedRecord & {
@@ -131,23 +149,12 @@ export type Model = BaseNamedRecord & {
   paper?: Resource | string;
 
   path?: Resource | string; // local path
-  fileName?: string; // local file name : deprecated
+  fileName?: string; // local file name
+  provider?: string; // provider id or name
 
   include?: Model[];
 
   system?: string;
-};
-
-export type ProviderType = 'opla' | 'server' | 'openai' | 'proxy';
-
-export type Provider = BaseNamedRecord & {
-  url: string;
-  docUrl?: string;
-  type: ProviderType;
-  disabled: boolean;
-  key: string;
-  models?: Model[];
-  isDisabled?: () => boolean;
 };
 
 export type Preset = BaseNamedRecord & {

@@ -18,12 +18,13 @@ import { useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppContext } from '@/context';
 import Providers from '@/components/providers';
+import { ProviderType } from '@/types';
 
 export default function DefaultProviders() {
   const { providers } = useContext(AppContext);
   const router = useRouter();
   useEffect(() => {
-    const oplaProvider = providers.find((p) => p.type === 'opla');
+    const oplaProvider = providers.find((p) => p.type === ProviderType.opla);
     if (oplaProvider) {
       router.replace(`/providers/${oplaProvider.id}`);
     }

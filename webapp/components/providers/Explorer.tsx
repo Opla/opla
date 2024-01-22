@@ -19,7 +19,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Plus, Server } from 'lucide-react';
 import { AppContext } from '@/context';
-import { MenuItem, Provider, ServerStatus } from '@/types';
+import { MenuItem, Provider, ProviderType, ServerStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { ModalsContext } from '@/context/modals';
@@ -102,7 +102,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
   ];
 
   const isDisabled = (provider: Provider) => {
-    if (provider?.type === 'opla') {
+    if (provider?.type === ProviderType.opla) {
       return backendContext.server?.status !== ServerStatus.STARTED;
     }
     return provider?.disabled;

@@ -39,13 +39,14 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MenuItem, Provider } from '@/types';
+import { MenuItem, Provider, ProviderType } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { AppContext } from '@/context';
 import { createProvider } from '@/utils/data/providers';
 import { openAIProviderTemplate } from '@/utils/providers/openai';
+import { Badge } from '../ui/badge';
 
 export default function ThreadMenu({
   selectedModel,
@@ -54,7 +55,7 @@ export default function ThreadMenu({
 }: {
   selectedModel: string;
   modelItems: MenuItem[];
-  onSelectModel: (model: string) => void;
+  onSelectModel: (model: string, provider: string) => void;
 }) {
   const router = useRouter();
   const { providers } = useContext(AppContext);
@@ -62,7 +63,9 @@ export default function ThreadMenu({
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
   const selectedItem = modelItems.find((item) => item.value === selectedModel);
-  let chatGPT = providers.find((p: Provider) => p.type === 'openai' && p.name === 'OpenAI API');
+  let chatGPT = providers.find(
+    (p: Provider) => p.type === ProviderType.openai && p.name === 'OpenAI API',
+  );
 
   const onSetupChatGPT = () => {
     if (!chatGPT) {
@@ -73,8 +76,11 @@ export default function ThreadMenu({
 
   return (
     <div className="flex w-full flex-col items-start justify-between rounded-md border px-4 py-0 sm:flex-row sm:items-center">
-      <p className="text-sm font-medium leading-none">
-        <span className="text-muted-foreground">{selectedItem?.label || t('Select a model')}</span>
+      <p className="flex w-full items-center justify-between text-sm font-medium leading-none">
+        <span className="capitalize text-muted-foreground">
+          {selectedItem?.label || t('Select a model')}
+        </span>
+        <Badge className="mr-4 capitalize">{selectedItem?.group || 'local'}</Badge>
       </p>
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
@@ -82,13 +88,13 @@ export default function ThreadMenu({
             <MoreHorizontal />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[200px]">
+        <DropdownMenuContent align="end" className="w-full">
           <DropdownMenuLabel>{t('Model')}</DropdownMenuLabel>
           <DropdownMenuGroup>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 <Check className="mr-2 h-4 w-4" />
-                {selectedItem?.label || t('Select a model')}
+                <span className="capitalize">{selectedItem?.label || t('Select a model')}</span>
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="p-0">
                 <Command>
@@ -101,11 +107,13 @@ export default function ThreadMenu({
                           key={item.label}
                           value={item.value}
                           onSelect={() => {
-                            onSelectModel(item.value as string);
+                            onSelectModel(item.value as string, item.group as string);
                             setOpen(false);
                           }}
+                          className="flex w-full items-center justify-between"
                         >
-                          {item.label}
+                          <span className="capitalize">{item.label}</span>
+                          <Badge className="ml-4 capitalize">{item.group || 'local'}</Badge>
                         </CommandItem>
                       ))}
                     </CommandGroup>

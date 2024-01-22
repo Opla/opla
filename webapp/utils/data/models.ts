@@ -35,7 +35,7 @@ const getProviderModelsAsItems = (providers: Provider[], modelname: string): Men
       provider.models.map((model) => ({
         label: model.title || model.name,
         value: model.name,
-        type: provider.name === 'OpenAI ' ? 'openai' : provider.type,
+        group: provider.name,
         selected: model.name === modelname,
       })) || [];
     return [...acc, ...providerItems];

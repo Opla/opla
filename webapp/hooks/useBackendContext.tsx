@@ -65,6 +65,7 @@ type Context = {
   restart: (params: any) => Promise<void>;
   setActivePreset: (preset: string) => Promise<void>;
 };
+
 const BackendContext = createContext<Context>({
   startBackend: async () => {},
   backendContext: initialBackendContext,
@@ -154,7 +155,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   };
 
   const startBackend = useCallback(async () => {
-    let opla = providers.find((p) => p.type === 'opla') as Provider;
+    let opla = providers.find((p) => p.type === ProviderType.opla) as Provider;
     if (!opla) {
       const oplaProviderConfig = await getProviderTemplate();
       const provider = { ...oplaProviderConfig, type: oplaProviderConfig.type as ProviderType };

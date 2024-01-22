@@ -48,7 +48,7 @@ export default function NewProvider({
   const { providers, setProviders } = useContext(AppContext);
   const router = useRouter();
 
-  const isOpla = !!providers.find((p) => p.type === 'opla');
+  const isOpla = !!providers.find((p) => p.type === ProviderType.opla);
 
   const onClose = () => {
     setStep(1);
@@ -94,21 +94,21 @@ export default function NewProvider({
               <Card
                 title="Opla"
                 disabled={isOpla}
-                selected={provider?.type === 'opla'}
+                selected={provider?.type === ProviderType.opla}
                 description={t('Easy to run on your machine')}
-                onClick={() => onChoose('opla', 'Opla')}
+                onClick={() => onChoose(ProviderType.opla, 'Opla')}
               />
               <Card
                 title="OpenAI"
-                selected={provider?.type === 'openai'}
+                selected={provider?.type === ProviderType.openai}
                 description={t('Using your access token')}
-                onClick={() => onChoose('openai', 'OpenAI')}
+                onClick={() => onChoose(ProviderType.openai, 'OpenAI')}
               />
               <Card
                 title={t('Server')}
                 description={t('For experts')}
-                selected={provider?.type === 'server'}
-                onClick={() => onChoose('server', t('Remote server'))}
+                selected={provider?.type === ProviderType.server}
+                onClick={() => onChoose(ProviderType.server, t('Remote server'))}
               />
             </>
           </Panel>

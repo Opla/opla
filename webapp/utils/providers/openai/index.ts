@@ -1,12 +1,12 @@
 // Copyright 2024 mik
 //
 
-import { LlmResponse, Model, Provider } from '@/types';
+import { LlmResponse, Model, Provider, ProviderType } from '@/types';
 import logger from '@/utils/logger';
 import { invokeTauri } from '@/utils/tauri';
 
 const NAME = 'OpenAI';
-const TYPE = 'openai';
+const TYPE = ProviderType.openai;
 const DEFAULT_SYSTEM = `
 You are an expert in retrieving information.
 Question: {{QUESTION}}
@@ -14,11 +14,27 @@ Answer:
 `;
 
 export const openAIProviderTemplate: Partial<Provider> = {
-  name: 'OpenAI API',
+  name: 'OpenAI',
   type: TYPE,
   description: 'OpenAI API',
   url: 'https://api.openai.com/v1',
   docUrl: 'https://platform.openai.com/docs',
+  models: [
+    {
+      id: 'gpt-3.5-turbo',
+      name: 'gpt-3.5 turbo',
+      createdAt: 1677610602,
+      updatedAt: 1677610602,
+      creator: 'openai',
+    },
+    {
+      id: 'gpt-4',
+      name: 'gpt-4',
+      createdAt: 1687882411,
+      updatedAt: 1687882411,
+      creator: 'openai',
+    },
+  ],
 };
 
 export const completion = async (

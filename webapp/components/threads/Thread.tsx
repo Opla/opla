@@ -28,7 +28,7 @@ import {
   updateConversationMessages,
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
-import { completion } from '@/utils/providers/opla';
+import { completion } from '@/utils/providers';
 import { findModel, getLocalModelsAsItems, getProviderModelsAsItems } from '@/utils/data/models';
 import { toast } from '@/components/ui/Toast';
 import MessageView from './Message';
@@ -74,11 +74,11 @@ function Thread({
   const cloudModelItems = getProviderModelsAsItems(providers, selectedModel);
   const modelItems = [...localModelItems, ...cloudModelItems];
 
-  const onSelectModel = async (value?: string, data?: string) => {
-    logger.info(`onSelectModel ${value} ${data}`);
-    if (value && selectedConversation) {
+  const onSelectModel = async (model?: string, provider?: string) => {
+    logger.info(`onSelectModel ${model} ${provider}`);
+    if (model && selectedConversation) {
       const newConversations = updateConversation(
-        { ...selectedConversation, model: value },
+        { ...selectedConversation, model, provider },
         conversations,
       );
       setConversations(newConversations);
@@ -139,7 +139,7 @@ function Thread({
 
     const model = findModel(conversation.model || defaultModel, backendContext.config.models.items);
     try {
-      const response = await completion(model, currentPrompt, conversation?.system);
+      const response = await completion(model, { providers }, currentPrompt, conversation?.system);
       fromMessage.content = response;
     } catch (e: any) {
       logger.error('sendMessage', e, typeof e);
