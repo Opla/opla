@@ -76,12 +76,12 @@ export default function ThreadMenu({
 
   return (
     <div className="flex w-full flex-col items-start justify-between rounded-md border px-4 py-0 sm:flex-row sm:items-center">
-      <p className="flex w-full items-center justify-between text-sm font-medium leading-none">
+      <div className="flex w-full items-center justify-between text-sm font-medium leading-none">
         <span className="capitalize text-muted-foreground">
           {selectedItem?.label || t('Select a model')}
         </span>
         <Badge className="mr-4 capitalize">{selectedItem?.group || 'local'}</Badge>
-      </p>
+      </div>
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm">

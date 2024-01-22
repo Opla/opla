@@ -261,11 +261,16 @@ export type OplaContext = {
   downloads?: Download[];
 };
 
+export type LlmMessage = {
+  role: 'system' | 'user' | 'assistant' | 'tool';
+  content: string;
+  name?: string;
+};
 export type LlmQueryCompletion = {
-  prompt: string;
-  temperature: number;
-  nPredict: number;
-  stop: string[];
+  messages: LlmMessage[];
+  temperature?: number;
+  nPredict?: number;
+  stop?: string[];
 };
 
 export type LlmQuery = {

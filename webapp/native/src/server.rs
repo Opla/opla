@@ -16,10 +16,45 @@ use std::sync::{ Mutex, Arc };
 use crate::{ error::Error, llm::LlmQueryCompletion, store::ServerParameters };
 use sysinfo::{ System, Pid };
 use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
-
+use serde::{ Deserialize, Serialize };
 use crate::llm::{ LlmQuery, LlmResponse };
 use std::time::Duration;
 use std::thread;
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LlamaCppQueryCompletion {
+    pub prompt: String,
+    pub temperature: Option<f32>,
+    pub n_predict: Option<i32>,
+    pub stop: Option<Vec<String>>,
+}
+
+impl LlmQueryCompletion {
+    fn to_llama_cpp_parameters(&self) -> LlamaCppQueryCompletion {
+        let mut prompt = String::new();
+        for message in &self.messages {
+            match message.role.as_str() {
+                "user" => {
+                    prompt.push_str("Question:");
+                }
+                "assistant" => {
+                    prompt.push_str("Answer:");
+                }
+                _ => {}
+            }
+            prompt.push_str(&message.content.trim());
+            prompt.push('\n');
+        }
+        prompt.push_str("Answer:");
+        println!("prompt: {}", prompt);
+        LlamaCppQueryCompletion {
+            prompt,
+            temperature: self.temperature.clone(),
+            n_predict: self.n_predict.clone(),
+            stop: self.stop.clone(),
+        }
+    }
+}
 
 #[derive(Clone)]
 pub struct OplaServer {
@@ -104,7 +139,7 @@ impl OplaServer {
         )?;
 
         let model = model.to_string();
-        let future = tauri::async_runtime::spawn(async move {
+        let _future = tauri::async_runtime::spawn(async move {
             let (mut rx, child) = match command.args(arguments).spawn() {
                 Ok((rx, child)) => (rx, child),
                 Err(err) => {
@@ -484,7 +519,7 @@ impl OplaServer {
             println!("Opla server started: available for completion");
         }
 
-        let parameters: LlmQueryCompletion = query.parameters;
+        let parameters = query.parameters.to_llama_cpp_parameters();
         let api = "http://localhost:8080";
         let client = reqwest::Client::new();
         let res = client

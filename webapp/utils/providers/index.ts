@@ -1,31 +1,34 @@
 // Copyright 2024 mik
 //
 
-import { Model, Provider, ProviderType } from '@/types';
+import { LlmMessage, LlmQueryCompletion, Message, Model, Provider, ProviderType } from '@/types';
 import { completion as openAICompletion } from './openai';
 import { completion as oplaCompletion } from './opla';
-import { getProvider } from '../data/providers';
+import { findProvider } from '../data/providers';
+import { getContent } from '../data';
 
 const completion = async (
   model: Model | undefined,
+  providerName: string | undefined,
   context: { providers: Provider[] },
-  input: string,
+  threadMessages: Message[],
   system?: string,
-  properties = {
-    n_predict: 200,
-    temperature: 0,
-    stop: ['Llama:', 'User:', 'Question:'],
-  },
+  properties?: Partial<LlmQueryCompletion>,
 ): Promise<string> => {
   if (!model) {
-    throw new Error('Model not found');
+    throw new Error('Model not set');
   }
-  const providerIdOrName = model?.provider;
-  const provider = getProvider(providerIdOrName, context.providers);
+  const providerIdOrName = providerName || model?.provider;
+  const provider = findProvider(providerIdOrName, context.providers);
+  const messages: LlmMessage[] = threadMessages.map((m) => ({
+    content: getContent(m.content),
+    role: m.author?.role === 'user' ? 'user' : 'assistant',
+    name: m.author?.name,
+  }));
   if (provider?.type === ProviderType.openai) {
-    return openAICompletion(model, input, system, properties);
+    return openAICompletion(model, provider, messages, system, properties);
   }
-  return oplaCompletion(model, input, system, properties);
+  return oplaCompletion(model, provider, messages, system, properties);
 };
 
 const models = async (provider: Provider): Promise<Model[]> => {

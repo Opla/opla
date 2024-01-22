@@ -90,14 +90,15 @@ pub struct ProviderMetadata {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ProviderConfiguration {
+pub struct Provider {
     pub name: String,
     pub r#type: String,
     pub url: String,
     pub description: String,
     pub doc_url: Option<String>,
+    pub key: Option<String>,
     pub disabled: bool,
-    pub metadata: ProviderMetadata,
+    pub metadata: Option<ProviderMetadata>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

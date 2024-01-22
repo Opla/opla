@@ -31,7 +31,7 @@
 import { DownloadIcon } from '@radix-ui/react-icons';
 import useTranslation from '@/hooks/useTranslation';
 import { Model } from '@/types';
-import { getEntityName, getResourceUrl } from '@/utils/data/models';
+import { getEntityName, getResourceUrl } from '@/utils/data';
 import Parameter from '../common/Parameter';
 import { Button } from '../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../ui/table';

@@ -18,4 +18,10 @@ use thiserror::Error;
 pub enum Error {
     #[error("the provided model is not loaded")]
     ModelNotLoaded,
+
+    #[error("the response json can't be deserialized")]
+    BadJson,
+
+    #[error("the API returned an error")]
+    BadResponse,
 }

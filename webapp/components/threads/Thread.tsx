@@ -18,7 +18,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { PanelRight, PanelRightClose } from 'lucide-react';
 import { AppContext } from '@/context';
-import { Conversation, Message, Prompt } from '@/types';
+import { Conversation, Message, Model, Prompt } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import {
@@ -30,6 +30,7 @@ import {
 import useBackend from '@/hooks/useBackendContext';
 import { completion } from '@/utils/providers';
 import { findModel, getLocalModelsAsItems, getProviderModelsAsItems } from '@/utils/data/models';
+import { findProvider } from '@/utils/data/providers';
 import { toast } from '@/components/ui/Toast';
 import MessageView from './Message';
 import PromptArea from './Prompt';
@@ -137,9 +138,28 @@ function Thread({
     newConversations = updateConversation(conversation, newConversations);
     setConversations(newConversations);
 
-    const model = findModel(conversation.model || defaultModel, backendContext.config.models.items);
+    let model: Model | undefined;
+    let providerName: string | undefined = model?.provider;
+    if (conversation.provider && conversation.model) {
+      const provider = findProvider(conversation.provider, providers);
+      model = findModel(conversation.model, provider?.models || []);
+      if (provider) {
+        providerName = provider.name;
+      }
+    }
+    if (!model) {
+      model = findModel(conversation.model || defaultModel, backendContext.config.models.items);
+    }
+
     try {
-      const response = await completion(model, { providers }, currentPrompt, conversation?.system);
+      const response = await completion(
+        model,
+        providerName,
+        { providers },
+        // TODO build tokens context
+        [toMessage],
+        conversation?.system,
+      );
       fromMessage.content = response;
     } catch (e: any) {
       logger.error('sendMessage', e, typeof e);

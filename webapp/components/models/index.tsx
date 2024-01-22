@@ -19,16 +19,9 @@ import { useRouter } from 'next/router';
 import { Model } from '@/types';
 import logger from '@/utils/logger';
 import { getModelsCollection, installModel, uninstallModel } from '@/utils/backend/commands';
-// import { ModalsContext } from '@/context/modals';
-import { deepMerge } from '@/utils/data';
-// import { ModalIds } from '@/modals';
 import useBackend from '@/hooks/useBackendContext';
-import {
-  getEntityName,
-  getDownloadables,
-  getResourceUrl,
-  isValidFormat,
-} from '@/utils/data/models';
+import { deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
+import { getDownloadables, isValidFormat } from '@/utils/data/models';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import Explorer from './Explorer';
 import ModelView from './Model';

@@ -23,7 +23,7 @@ import { MenuItem, Provider, ProviderType, ServerStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { ModalsContext } from '@/context/modals';
-import { deleteProvider, getProvider, updateProvider } from '@/utils/data/providers';
+import { deleteProvider, findProvider, updateProvider } from '@/utils/data/providers';
 import useBackend from '@/hooks/useBackendContext';
 import { ModalIds } from '@/modals';
 import { ContextMenuTrigger } from '@radix-ui/react-context-menu';
@@ -60,13 +60,13 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
 
   const onToDelete = (data: string) => {
     logger.info(`to delete ${data}`);
-    const provider = getProvider(data, providers) as Provider;
+    const provider = findProvider(data, providers) as Provider;
     showModal(ModalIds.DeleteItem, { item: provider, onAction: onDelete });
   };
 
   const onProviderToggle = (data: string) => {
     logger.info('onProviderToggle');
-    const provider = getProvider(data, providers) as Provider;
+    const provider = findProvider(data, providers) as Provider;
     const newProviders = updateProvider(
       { ...(provider as Provider), disabled: !provider?.disabled },
       providers,

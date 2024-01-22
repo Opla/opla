@@ -1,7 +1,14 @@
 // Copyright 2024 mik
 //
 
-import { LlmResponse, Model, Provider, ProviderType } from '@/types';
+import {
+  LlmMessage,
+  LlmQueryCompletion,
+  LlmResponse,
+  Model,
+  Provider,
+  ProviderType,
+} from '@/types';
 import logger from '@/utils/logger';
 import { invokeTauri } from '@/utils/tauri';
 
@@ -9,8 +16,6 @@ const NAME = 'OpenAI';
 const TYPE = ProviderType.openai;
 const DEFAULT_SYSTEM = `
 You are an expert in retrieving information.
-Question: {{QUESTION}}
-Answer:
 `;
 
 export const openAIProviderTemplate: Partial<Provider> = {
@@ -39,28 +44,27 @@ export const openAIProviderTemplate: Partial<Provider> = {
 
 export const completion = async (
   model: Model | undefined,
-  input: string,
+  provider: Provider | undefined,
+  messages: LlmMessage[],
   system = DEFAULT_SYSTEM,
-  properties = {
-    n_predict: 200,
-    temperature: 0,
-    stop: ['User:', 'Question:'],
-  },
+  properties = {},
 ): Promise<string> => {
   if (!model) {
     throw new Error('Model not found');
   }
 
-  const prompt = system.replace('{{QUESTION}}', input);
-
-  const parameters = {
-    prompt,
-    ...properties,
+  const systemMessage: LlmMessage = {
+    role: 'system',
+    content: system,
   };
 
+  const parameters: LlmQueryCompletion = {
+    messages: [systemMessage, ...messages],
+    ...properties,
+  };
   const response: LlmResponse = (await invokeTauri('llm_call_completion', {
-    model: model.name,
-    llmProvider: TYPE,
+    model: model.id,
+    llmProvider: provider,
     query: { command: 'completion', parameters },
   })) as LlmResponse;
 

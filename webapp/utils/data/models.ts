@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Entity, MenuItem, Model, Resource, OplaContext, Provider } from '@/types';
+import { MenuItem, Model, OplaContext, Provider } from '@/types';
 import Opla from '@/components/icons/Opla';
+import { getResourceUrl } from '.';
 
 const getSelectedModel = (backendContext: OplaContext) => {
   const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.defaultModel}`;
@@ -55,12 +56,6 @@ const getDownloadables = (model: Model, downloads = [] as Array<Model>, parent?:
   return downloads;
 };
 
-const getEntityName = (entity: string | Entity | undefined) =>
-  ((entity as Entity)?.name || entity || '') as string;
-
-const getResourceUrl = (resource: string | Resource | undefined) =>
-  ((resource as Resource)?.url || resource || '') as string;
-
 const isValidFormat = (m: Model) =>
   m?.library === 'GGUF' ||
   m?.name.endsWith('.gguf') ||
@@ -71,8 +66,6 @@ const findModel = (model: string, models: Model[]): Model | undefined =>
 
 export {
   getDownloadables,
-  getEntityName,
-  getResourceUrl,
   isValidFormat,
   findModel,
   getSelectedModel,
