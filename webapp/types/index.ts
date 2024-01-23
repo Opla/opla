@@ -30,6 +30,7 @@ export type Item = {
   flex?: number;
   hidden?: boolean;
   modal?: boolean;
+  shortcut?: string;
 };
 
 export type MenuItem = {
