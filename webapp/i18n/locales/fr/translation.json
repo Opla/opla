@@ -84,7 +84,7 @@
   "Server is starting": "Démarrage du serveur",
   "Server is running": "Le serveur fonctionne",
   "Server is stopped": "Le serveur est arrêté",
-  "Server has crashed": "Le serveur a planté",
+  "Server error": "Erreur serveur",
   "wait": "attendre",
   "starting": "démarrage",
   "started": "démarré",
