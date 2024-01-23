@@ -177,7 +177,7 @@ export type Preset = BaseNamedRecord & {
 export type Prompt = BaseNamedRecord & {
   title: string;
   icon?: unknown;
-  prompt: string;
+  value: string;
   tags?: string[];
   temperature?: number;
   nPredict?: number;

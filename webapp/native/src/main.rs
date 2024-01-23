@@ -437,7 +437,7 @@ fn opla_setup(app: &mut App) -> Result<(), String> {
                         status: ServerStatus::Error.as_str().to_string(),
                     })
                     .map_err(|err| err.to_string())?;
-                return Err(err.into());
+                // return Err(err.into());
             }
         }
     } else {

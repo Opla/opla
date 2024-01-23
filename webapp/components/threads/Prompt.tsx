@@ -24,34 +24,35 @@ export default function Prompt({
   conversationId,
   message,
   errorMessage,
-  updateMessage,
-  handleMessage,
+  onUpdatePrompt,
+  onSendMessage,
   isLoading,
 }: {
   conversationId: string;
   message: string;
   isLoading: boolean;
   errorMessage: string;
-  updateMessage: any;
-  handleMessage: any;
+  onUpdatePrompt: any;
+  onSendMessage: any;
 }) {
   const { t } = useTranslation();
 
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
-    handleMessage();
+    onSendMessage();
   };
 
   const handleKeypress = (e: KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleMessage();
+      onSendMessage();
     }
   };
 
   const handleUpdateMessage = (e: ChangeEvent<HTMLTextAreaElement>) => {
     e.preventDefault();
-    updateMessage(e.target.value);
+    console.log('handleUpdateMessage', e.target.value);
+    onUpdatePrompt(e.target.value);
   };
 
   return (
@@ -66,6 +67,7 @@ export default function Prompt({
         <div className="flex w-full flex-row items-center rounded-md border border-black/10 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white">
           <Textarea
             autoresize
+            autoFocus
             value={message}
             key={conversationId}
             tabIndex={0}

@@ -43,10 +43,12 @@ function Thread({
   conversationId,
   displaySettings,
   onChangeDisplaySettings,
+  onSelectMenu,
 }: {
   conversationId?: string;
   displaySettings: boolean;
   onChangeDisplaySettings: (displaySettings: boolean) => void;
+  onSelectMenu: (menu: string, data: string) => void;
 }) {
   const router = useRouter();
   const { providers, conversations, setConversations } = useContext(AppContext);
@@ -75,16 +77,11 @@ function Thread({
   const cloudModelItems = getProviderModelsAsItems(providers, selectedModel);
   const modelItems = [...localModelItems, ...cloudModelItems];
 
-  const onSelectModel = async (model?: string, provider?: string) => {
-    logger.info(`onSelectModel ${model} ${provider}`);
-    if (model && selectedConversation) {
-      const newConversations = updateConversation(
-        { ...selectedConversation, model, provider },
-        conversations,
-      );
-      setConversations(newConversations);
+  useEffect(() => {
+    if (bottomOfChatRef.current) {
+      bottomOfChatRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  };
+  }, [messages]);
 
   const updateMessages = (
     newMessages: Message[],
@@ -106,13 +103,18 @@ function Thread({
     return { newConversationId, newConversations };
   };
 
-  useEffect(() => {
-    if (bottomOfChatRef.current) {
-      bottomOfChatRef.current.scrollIntoView({ behavior: 'smooth' });
+  const onSelectModel = async (model?: string, provider?: string) => {
+    logger.info(`onSelectModel ${model} ${provider}`);
+    if (model && selectedConversation) {
+      const newConversations = updateConversation(
+        { ...selectedConversation, model, provider },
+        conversations,
+      );
+      setConversations(newConversations);
     }
-  }, [messages]);
+  };
 
-  const sendMessage = async () => {
+  const onSendMessage = async () => {
     if (conversationId === undefined) {
       return;
     }
@@ -173,19 +175,28 @@ function Thread({
     setIsLoading({ ...isLoading, [conversationId]: false });
   };
 
-  const setMessage = (message: string) => {
-    // logger.info('setMessage', message);
-    const newConversations = conversations.map((c) => {
-      if (c.id === conversationId) {
-        return { ...c, currentPrompt: message };
-      }
-      return c;
-    });
+  const onUpdatePrompt = (message: string, conversationName = 'Conversation') => {
+    let newConversations: Conversation[];
+    let newConversationId;
+    if (conversationId) {
+      const conversation = getConversation(conversationId, conversations) as Conversation;
+      conversation.currentPrompt = message;
+      newConversations = updateConversation(conversation, conversations);
+    } else {
+      newConversations = updateConversationMessages(conversationId, conversations, []);
+      const conversation = newConversations[newConversations.length - 1];
+      conversation.name = conversationName;
+      conversation.currentPrompt = message;
+      newConversationId = conversation.id;
+    }
     setConversations(newConversations);
+    if (newConversationId) {
+      router.push(`/threads/${newConversationId}`);
+    }
   };
 
   const onPromptSelected = (prompt: Prompt) => {
-    let newConversations: Conversation[];
+    /* let newConversations: Conversation[];
     let newConversationId;
     if (conversationId) {
       const conversation = getConversation(conversationId, conversations) as Conversation;
@@ -201,7 +212,8 @@ function Thread({
     setConversations(newConversations);
     if (newConversationId) {
       router.push(`/threads/${newConversationId}`);
-    }
+    } */
+    onUpdatePrompt(prompt.value, prompt.name);
   };
 
   return (
@@ -211,8 +223,10 @@ function Thread({
           <div className="flex grow flex-row items-center">
             <ThreadMenu
               selectedModel={selectedModel}
+              selectedConversationId={conversationId}
               modelItems={modelItems}
               onSelectModel={onSelectModel}
+              onSelectMenu={onSelectMenu}
             />
           </div>
           <div className="flex-1">
@@ -262,8 +276,8 @@ function Thread({
         message={currentPrompt}
         isLoading={conversationId ? isLoading[conversationId] : false}
         errorMessage={conversationId ? errorMessage[conversationId] : ''}
-        handleMessage={sendMessage}
-        updateMessage={setMessage}
+        onSendMessage={onSendMessage}
+        onUpdatePrompt={onUpdatePrompt}
       />
     </div>
   );

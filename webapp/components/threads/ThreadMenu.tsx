@@ -54,12 +54,16 @@ import { ShortcutBadge } from '../common/ShortCut';
 
 export default function ThreadMenu({
   selectedModel,
+  selectedConversationId,
   modelItems,
   onSelectModel,
+  onSelectMenu,
 }: {
   selectedModel: string;
+  selectedConversationId?: string;
   modelItems: MenuItem[];
   onSelectModel: (model: string, provider: string) => void;
+  onSelectMenu: (menu: string, data: string) => void;
 }) {
   const router = useRouter();
   const { providers } = useContext(AppContext);
@@ -96,12 +100,24 @@ export default function ThreadMenu({
 
   return (
     <div className="flex w-full flex-col items-start justify-between rounded-md border px-4 py-0 sm:flex-row sm:items-center">
-      <div className="flex w-full items-center justify-between text-sm font-medium leading-none">
-        <span className="capitalize text-muted-foreground">
-          {selectedItem?.label || t('Select a model')}
-        </span>
-        <Badge className="mr-4 capitalize">{selectedItem?.group || 'local'}</Badge>
-      </div>
+      {modelItems.length > 0 && (
+        <div className="flex w-full items-center justify-between text-sm font-medium leading-none">
+          {selectedItem?.label ? (
+            <span className="capitalize text-muted-foreground">{selectedItem?.label}</span>
+          ) : (
+            <span>{t('Select a model')}</span>
+          )}
+          <Badge className="mr-4 capitalize">{selectedItem?.group || 'local'}</Badge>
+        </div>
+      )}
+      {modelItems.length === 0 && (
+        <Button
+          variant="ghost"
+          className="flex h-[20px] w-full items-center justify-between text-sm font-medium leading-none text-red-500 hover:text-red-700"
+        >
+          <span>{t('You must install a local model - click here')}</span>
+        </Button>
+      )}
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm">
@@ -111,37 +127,41 @@ export default function ThreadMenu({
         <DropdownMenuContent align="end" className="w-full">
           <DropdownMenuLabel>{t('Model')}</DropdownMenuLabel>
           <DropdownMenuGroup>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <Check className="mr-2 h-4 w-4" />
-                <span className="capitalize">{selectedItem?.label || t('Select a model')}</span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="p-0">
-                <Command>
-                  <CommandInput placeholder={t('Filter model...')} autoFocus />
-                  <CommandList>
-                    <CommandEmpty>{t('No Model found.')}</CommandEmpty>
-                    <CommandGroup>
-                      {modelItems.map((item) => (
-                        <CommandItem
-                          key={item.label}
-                          value={item.value}
-                          onSelect={() => {
-                            onSelectModel(item.value as string, item.group as string);
-                            setOpen(false);
-                          }}
-                          className="flex w-full items-center justify-between"
-                        >
-                          <span className="capitalize">{item.label}</span>
-                          <Badge className="ml-4 capitalize">{item.group || 'local'}</Badge>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-            <DropdownMenuSeparator />
+            {modelItems.length > 0 && (
+              <>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <Check className="mr-2 h-4 w-4" />
+                    <span className="capitalize">{selectedItem?.label || t('Select a model')}</span>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="p-0">
+                    <Command>
+                      <CommandInput placeholder={t('Filter model...')} autoFocus />
+                      <CommandList>
+                        <CommandEmpty>{t('No Model found.')}</CommandEmpty>
+                        <CommandGroup>
+                          {modelItems.map((item) => (
+                            <CommandItem
+                              key={item.label}
+                              value={item.value}
+                              onSelect={() => {
+                                onSelectModel(item.value as string, item.group as string);
+                                setOpen(false);
+                              }}
+                              className="flex w-full items-center justify-between"
+                            >
+                              <span className="capitalize">{item.label}</span>
+                              <Badge className="ml-4 capitalize">{item.group || 'local'}</Badge>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuItem>
               <HardDriveDownload className="mr-2 h-4 w-4" />
               {t('Install local model')}
@@ -171,18 +191,25 @@ export default function ThreadMenu({
                 <ShortcutBadge command="new-provider" />
               </DropdownMenuShortcut>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            {selectedConversationId && <DropdownMenuSeparator />}
           </DropdownMenuGroup>
-          <DropdownMenuLabel>{t('Thread')}</DropdownMenuLabel>
-          <DropdownMenuGroup>
-            <DropdownMenuItem className="text-red-600">
-              <Trash className="mr-2 h-4 w-4" />
-              {t('Delete')}
-              <DropdownMenuShortcut>
-                <ShortcutBadge command="delete-conversation" />
-              </DropdownMenuShortcut>
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
+          {selectedConversationId && (
+            <>
+              <DropdownMenuLabel>{t('Thread')}</DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  className="text-red-600"
+                  onSelect={() => onSelectMenu('delete-conversation', selectedConversationId)}
+                >
+                  <Trash className="mr-2 h-4 w-4" />
+                  {t('Delete')}
+                  <DropdownMenuShortcut>
+                    <ShortcutBadge command="delete-conversation" />
+                  </DropdownMenuShortcut>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

@@ -31,7 +31,7 @@ function PromptsGrid({
       createdAt: new Date().getTime(),
       updatedAt: new Date().getTime(),
       title: 'Introduction',
-      prompt: 'Hi, my name is [Your Name]. I am interested in [Your Interests].',
+      value: 'Hi, my name is [Your Name]. I am interested in [Your Interests].',
     },
     {
       id: '2',
@@ -40,7 +40,7 @@ function PromptsGrid({
       createdAt: new Date().getTime(),
       updatedAt: new Date().getTime(),
       title: 'Favorite Book',
-      prompt: 'My favorite book is [Book Title]. I love it because [Reason].',
+      value: 'My favorite book is [Book Title]. I love it because [Reason].',
     },
     {
       id: '3',
@@ -49,7 +49,7 @@ function PromptsGrid({
       createdAt: new Date().getTime(),
       updatedAt: new Date().getTime(),
       title: 'Dream Vacation',
-      prompt:
+      value:
         'My dream vacation destination is [Destination]. I would love to visit because [Reason].',
     },
     {
@@ -59,7 +59,7 @@ function PromptsGrid({
       createdAt: new Date().getTime(),
       updatedAt: new Date().getTime(),
       title: 'Hobby',
-      prompt: 'My favorite hobby is [Hobby]. I enjoy it because [Reason].',
+      value: 'My favorite hobby is [Hobby]. I enjoy it because [Reason].',
     },
     {
       id: '5',
@@ -68,7 +68,7 @@ function PromptsGrid({
       createdAt: new Date().getTime(),
       updatedAt: new Date().getTime(),
       title: 'Future Goals',
-      prompt: 'My future goals include [Goals]. I am excited to achieve them because [Reason].',
+      value: 'My future goals include [Goals]. I am excited to achieve them because [Reason].',
     },
     {
       id: '6',
@@ -77,7 +77,7 @@ function PromptsGrid({
       createdAt: new Date().getTime(),
       updatedAt: new Date().getTime(),
       title: 'Favorite Movie',
-      prompt: 'My all-time favorite movie is [Movie Title]. I love it because [Reason].',
+      value: 'My all-time favorite movie is [Movie Title]. I love it because [Reason].',
     },
   ];
 
