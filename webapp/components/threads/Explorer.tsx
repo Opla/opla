@@ -29,6 +29,8 @@ import {
 } from '@/utils/data/conversations';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
+import useShortcuts from '@/hooks/useShortcuts';
+import { toast } from '../ui/Toast';
 import EditableItem from '../common/EditableItem';
 import { ContextMenu, ContextMenuTrigger } from '../ui/context-menu';
 import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
@@ -75,6 +77,29 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
     setConversations(updatedConversations);
     logger.info(`onChangeConversationName ${editableConversation} ${value} ${id}`);
   };
+
+  useShortcuts('#new-conversation', (event) => {
+    if (selectedConversationId) {
+      event.preventDefault();
+      logger.info('shortcut new Conversation');
+      router.push('/threads');
+      toast.message('New Conversation');
+    }
+  });
+  useShortcuts('#delete-conversation', (event) => {
+    if (selectedConversationId) {
+      event.preventDefault();
+      logger.info('shortcut delete Conversation');
+      onToDelete(selectedConversationId);
+    }
+  });
+  useShortcuts('#rename-conversation', (event) => {
+    if (selectedConversationId) {
+      event.preventDefault();
+      logger.info('shortcut rename Conversation');
+      onRename(selectedConversationId);
+    }
+  });
 
   const menu: MenuItem[] = [
     {

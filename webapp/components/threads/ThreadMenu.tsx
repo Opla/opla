@@ -46,7 +46,11 @@ import { ModalIds } from '@/modals';
 import { AppContext } from '@/context';
 import { createProvider } from '@/utils/data/providers';
 import { openAIProviderTemplate } from '@/utils/providers/openai';
+import useShortcuts from '@/hooks/useShortcuts';
+import logger from '@/utils/logger';
 import { Badge } from '../ui/badge';
+import { toast } from '../ui/Toast';
+import { ShortcutBadge } from '../common/ShortCut';
 
 export default function ThreadMenu({
   selectedModel,
@@ -73,6 +77,22 @@ export default function ThreadMenu({
     }
     showModal(ModalIds.OpenAI, chatGPT);
   };
+
+  useShortcuts('#install-model', (event) => {
+    event.preventDefault();
+    logger.info('shortcut install Model TODO');
+    router.push('/providers');
+  });
+  useShortcuts('#load-model', (event) => {
+    event.preventDefault();
+    logger.info('shortcut load Model TODO');
+    toast.message('Load Model TODO');
+  });
+  useShortcuts('#config-gpt', (event) => {
+    event.preventDefault();
+    logger.info('shortcut configure ChatGPT');
+    onSetupChatGPT();
+  });
 
   return (
     <div className="flex w-full flex-col items-start justify-between rounded-md border px-4 py-0 sm:flex-row sm:items-center">
@@ -125,6 +145,9 @@ export default function ThreadMenu({
             <DropdownMenuItem>
               <HardDriveDownload className="mr-2 h-4 w-4" />
               {t('Install local model')}
+              <DropdownMenuShortcut>
+                <ShortcutBadge command="install-model" />
+              </DropdownMenuShortcut>
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={onSetupChatGPT}>
               <Plug
@@ -133,6 +156,9 @@ export default function ThreadMenu({
                 }`}
               />
               {t('Configure ChatGPT')}
+              <DropdownMenuShortcut>
+                <ShortcutBadge command="config-gpt" />
+              </DropdownMenuShortcut>
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => {
@@ -141,6 +167,9 @@ export default function ThreadMenu({
             >
               <Plus className="mr-2 h-4 w-4" />
               {t('Add other AI providers')}
+              <DropdownMenuShortcut>
+                <ShortcutBadge command="new-provider" />
+              </DropdownMenuShortcut>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
           </DropdownMenuGroup>
@@ -149,7 +178,9 @@ export default function ThreadMenu({
             <DropdownMenuItem className="text-red-600">
               <Trash className="mr-2 h-4 w-4" />
               {t('Delete')}
-              <DropdownMenuShortcut>⌘⌫</DropdownMenuShortcut>
+              <DropdownMenuShortcut>
+                <ShortcutBadge command="delete-conversation" />
+              </DropdownMenuShortcut>
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

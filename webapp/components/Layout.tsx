@@ -16,6 +16,7 @@
 
 import { useContext, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
+// import { useHotkeys } from 'react-hotkeys-hook';
 import '@/app/globals.css';
 import Sidebar from '@/components/common/Sidebar';
 import { AppContext } from '@/context';
@@ -57,6 +58,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       router.events.off('routeChangeStart', handleRouteChange);
     };
   }, [backendContext, router, setSettings]);
+
+  /* useShortcuts('info', (e) => {
+    logger.info('shortcut', e);
+  }); */
 
   if (!backendContext || !providers || !models || !presets) {
     return <div>Loading...</div>;

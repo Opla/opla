@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PageSettings } from '@/types';
+import { KeyBinding, PageSettings } from '@/types';
 
 export const DefaultPageSettings: PageSettings = {
   explorerHidden: false,
@@ -24,76 +24,78 @@ export const DefaultPageSettings: PageSettings = {
 export const AppName = 'Opla';
 export const AppVersion = '0.1.0';
 
-export const defaultShortcuts = [
-  { command: 'toggle-explorer', keys: ['Ctrl', 'E'], description: 'Toggle Explorer' },
-  { command: 'toggle-settings', keys: ['Ctrl', 'S'], description: 'Toggle Settings' },
-  { command: 'toggle-shortcuts', keys: ['Ctrl', 'H'], description: 'Toggle Shortcuts' },
-  { command: 'toggle-fullscreen', keys: ['Ctrl', 'F'], description: 'Toggle Fullscreen' },
-  { command: 'toggle-darkmode', keys: ['Ctrl', 'D'], description: 'Toggle Dark Mode' },
-  { command: 'send-message', keys: ['Enter'], description: 'Send message', page: 'threads' },
-  { command: 'new line', keys: ['Ctrl', 'Enter'], description: 'New line', page: 'threads' },
+// mod is the command key on mac, ctrl on windows/linux
+export const defaultShortcuts: KeyBinding[] = [
+  { command: 'toggle-explorer', keys: ['mod+e'], description: 'Toggle Explorer' },
+  { command: 'toggle-settings', keys: ['mod+t'], description: 'Toggle Settings' },
+  { command: 'toggle-shortcuts', keys: ['mod+h'], description: 'Toggle Shortcuts' },
+  { command: 'toggle-fullscreen', keys: ['mod+f'], description: 'Toggle Fullscreen' },
+  { command: 'toggle-darkmode', keys: ['mod+d'], description: 'Toggle Dark Mode' },
+  { command: 'send-message', keys: ['enter'], description: 'Send message', scope: 'threads' },
+  { command: 'new line', keys: ['mod+enter'], description: 'New line', scope: 'threads' },
   {
     command: 'delete-conversation',
-    keys: ['Ctrl', 'Backspace'],
+    keys: ['mod+backspace'],
     description: 'Delete selected conversation',
-    page: 'threads',
+    scope: 'threads',
   },
   {
     command: 'clear-conversation',
-    keys: ['Ctrl', 'Shift', 'Backspace'],
+    keys: ['mod+shift+backspace'],
     description: 'Clear selected conversation',
-    page: 'threads',
+    scope: 'threads',
   },
   {
     command: 'rename-conversation',
-    keys: ['Ctrl', 'R'],
+    keys: ['mod+r'],
     description: 'Rename selected conversation',
-    page: 'threads',
+    scope: 'threads',
   },
   {
     command: 'new-conversation',
-    keys: ['Ctrl', 'N'],
+    keys: ['mod+n'],
     description: 'New conversation',
-    page: 'threads',
+    scope: 'threads',
   },
   {
     command: 'delete-message',
-    keys: ['Ctrl', 'Delete'],
+    keys: ['mod+delete'],
     description: 'Delete selected message',
-    page: 'threads',
+    scope: 'threads',
   },
   {
     command: 'edit-message',
-    keys: ['Ctrl', 'M'],
+    keys: ['mod+m'],
     description: 'Edit selected message',
-    page: 'threads',
+    scope: 'threads',
   },
 
-  { command: 'install-model', keys: ['Ctrl', 'I'], description: 'Install local model' },
-  { command: 'load-model', keys: ['Ctrl', 'L'], description: 'Load a model' },
+  { command: 'install-model', keys: ['mod+i'], description: 'Install local model' },
+  { command: 'load-model', keys: ['mod+l'], description: 'Load a model' },
+  { command: 'config-gpt', keys: ['mod+g'], description: 'Configure ChatGPT' },
   {
     command: 'delete-model',
-    keys: ['Ctrl', 'Shift', 'Delete'],
+    keys: ['mod+shift+delete'],
     description: 'Delete selected model',
-    page: 'models',
+    scope: 'models',
   },
   {
     command: 'toggle-provider',
-    keys: ['Ctrl', 'P'],
+    keys: ['mod+x'],
     description: 'Toggle selected provider',
-    page: 'provider',
+    scope: 'provider',
   },
   {
     command: 'delete-provider',
-    keys: ['Ctrl', 'Shift', 'Delete'],
+    keys: ['mod+shift+delete'],
     description: 'Delete selected provider',
-    page: 'provider',
+    scope: 'provider',
   },
   {
     command: 'save-provider',
-    keys: ['Ctrl', 'S'],
+    keys: ['mod+shift+s'],
     description: 'Save selected provider',
-    page: 'provider',
+    scope: 'provider',
   },
-  { command: 'new-provider', keys: ['Ctrl', 'N'], description: 'New provider', page: 'provider' },
+  { command: 'new-provider', keys: ['mod+p'], description: 'New provider', scope: 'provider' },
 ];

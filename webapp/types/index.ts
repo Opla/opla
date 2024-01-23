@@ -43,6 +43,14 @@ export type MenuItem = {
   onSelect?: (data: string) => void;
 };
 
+export type KeyBinding = {
+  command: string;
+  keys: string | readonly string[];
+  description: string;
+  scope?: string;
+  innerCommand?: boolean;
+};
+
 // Model types
 export type Metadata = {
   [key: string]: string | number | boolean | Metadata;

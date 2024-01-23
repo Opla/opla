@@ -17,12 +17,14 @@ import Dialog from '@/components/common/Modal';
 import AlertDialog from '@/components/common/AlertDialog';
 import { BaseNamedRecord } from '@/types';
 import { ModalRef } from '@/context/modals';
+import { ShortcutSettings } from '@/components/common/ShortCut';
 import SettingsPanel from './settings';
 import NewProviderPanel from './templates/NewProvider';
 import OpenAIDialog from './openai';
 
 enum ModalIds {
   Settings = 'settings',
+  Shortcuts = 'shortcuts',
   NewProvider = 'newprovider',
   Welcome = 'welcome',
   OpenAI = 'openai',
@@ -43,6 +45,22 @@ const Modals: ModalRef[] = [
           onClose={onClose}
         >
           <SettingsPanel />
+        </Dialog>
+      );
+    },
+  },
+  {
+    id: ModalIds.Shortcuts,
+    Component: function SettingsDialog({ visible, onClose }) {
+      return (
+        <Dialog
+          key={ModalIds.Shortcuts}
+          id={ModalIds.Shortcuts}
+          size="lg"
+          open={visible}
+          onClose={onClose}
+        >
+          <ShortcutSettings />
         </Dialog>
       );
     },
