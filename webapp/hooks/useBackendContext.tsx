@@ -81,13 +81,13 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   const [backendContext, setBackendContext] = useState<OplaContext>();
   const { providers, setProviders } = useContext(AppContext);
   const startRef = useRef(async (conf: any) => {
-    throw new Error(`start not initialized${conf}`);
+    throw new Error(`start not initialized ${conf}`);
   });
   const stopRef = useRef(async () => {
     throw new Error('stop not initialized');
   });
   const restartRef = useRef(async (conf: any) => {
-    throw new Error(`restart not initialized${conf}`);
+    throw new Error(`restart not initialized ${conf}`);
   });
 
   const backendListener = (event: any) => {

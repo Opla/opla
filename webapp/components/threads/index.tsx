@@ -19,6 +19,7 @@ import useBackend from '@/hooks/useBackendContext';
 import { PageSettings } from '@/types';
 import { DefaultPageSettings } from '@/utils/constants';
 import logger from '@/utils/logger';
+import useShortcuts from '@/hooks/useShortcuts';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import Explorer from './Explorer';
 import Settings from './Settings';
@@ -29,13 +30,22 @@ const getSelectedPage = (selectedConversationId?: string) =>
 
 export default function Threads({ selectedConversationId }: { selectedConversationId?: string }) {
   const { backendContext, setSettings } = useBackend();
+
+  useShortcuts('#delete-message', (event) => {
+    event.preventDefault();
+    logger.info('delete Message');
+  });
+  useShortcuts('#editMessage', (event) => {
+    event.preventDefault();
+    logger.info('edit Message');
+  });
+
   const defaultSettings = backendContext.config.settings;
   const selectedPage = getSelectedPage(selectedConversationId);
   const pageSettings =
     defaultSettings.pages?.[selectedPage] ||
     defaultSettings.pages?.['/threads'] ||
     DefaultPageSettings;
-  // logger.info('page', selectedPage, pageSettings, defaultSettings);
 
   const saveSettings = (partialSettings: Partial<PageSettings>) => {
     const { settings } = backendContext.config;

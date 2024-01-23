@@ -97,8 +97,12 @@ function Sidebar() {
   (sidebarItems[0].items as Item[])[0].href = defaultSettings?.selectedPage?.startsWith('/threads')
     ? defaultSettings?.selectedPage
     : '/threads';
-  const onModal = () => {
-    showModal(ModalIds.Settings);
+  const onModal = (href: string) => {
+    if (href === '/settings') {
+      showModal(ModalIds.Settings);
+    } else if (href === '/shortcuts') {
+      showModal(ModalIds.Shortcuts);
+    }
   };
 
   return (
