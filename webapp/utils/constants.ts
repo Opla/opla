@@ -23,3 +23,77 @@ export const DefaultPageSettings: PageSettings = {
 
 export const AppName = 'Opla';
 export const AppVersion = '0.1.0';
+
+export const defaultShortcuts = [
+  { command: 'toggle-explorer', keys: ['Ctrl', 'E'], description: 'Toggle Explorer' },
+  { command: 'toggle-settings', keys: ['Ctrl', 'S'], description: 'Toggle Settings' },
+  { command: 'toggle-shortcuts', keys: ['Ctrl', 'H'], description: 'Toggle Shortcuts' },
+  { command: 'toggle-fullscreen', keys: ['Ctrl', 'F'], description: 'Toggle Fullscreen' },
+  { command: 'toggle-darkmode', keys: ['Ctrl', 'D'], description: 'Toggle Dark Mode' },
+  { command: 'send-message', keys: ['Enter'], description: 'Send message', page: 'threads' },
+  { command: 'new line', keys: ['Ctrl', 'Enter'], description: 'New line', page: 'threads' },
+  {
+    command: 'delete-conversation',
+    keys: ['Ctrl', 'Backspace'],
+    description: 'Delete selected conversation',
+    page: 'threads',
+  },
+  {
+    command: 'clear-conversation',
+    keys: ['Ctrl', 'Shift', 'Backspace'],
+    description: 'Clear selected conversation',
+    page: 'threads',
+  },
+  {
+    command: 'rename-conversation',
+    keys: ['Ctrl', 'R'],
+    description: 'Rename selected conversation',
+    page: 'threads',
+  },
+  {
+    command: 'new-conversation',
+    keys: ['Ctrl', 'N'],
+    description: 'New conversation',
+    page: 'threads',
+  },
+  {
+    command: 'delete-message',
+    keys: ['Ctrl', 'Delete'],
+    description: 'Delete selected message',
+    page: 'threads',
+  },
+  {
+    command: 'edit-message',
+    keys: ['Ctrl', 'M'],
+    description: 'Edit selected message',
+    page: 'threads',
+  },
+
+  { command: 'install-model', keys: ['Ctrl', 'I'], description: 'Install local model' },
+  { command: 'load-model', keys: ['Ctrl', 'L'], description: 'Load a model' },
+  {
+    command: 'delete-model',
+    keys: ['Ctrl', 'Shift', 'Delete'],
+    description: 'Delete selected model',
+    page: 'models',
+  },
+  {
+    command: 'toggle-provider',
+    keys: ['Ctrl', 'P'],
+    description: 'Toggle selected provider',
+    page: 'provider',
+  },
+  {
+    command: 'delete-provider',
+    keys: ['Ctrl', 'Shift', 'Delete'],
+    description: 'Delete selected provider',
+    page: 'provider',
+  },
+  {
+    command: 'save-provider',
+    keys: ['Ctrl', 'S'],
+    description: 'Save selected provider',
+    page: 'provider',
+  },
+  { command: 'new-provider', keys: ['Ctrl', 'N'], description: 'New provider', page: 'provider' },
+];

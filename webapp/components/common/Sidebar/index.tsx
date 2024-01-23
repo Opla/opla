@@ -68,9 +68,19 @@ const sidebarItems: Array<Item> = [
       },
       {
         name: 'Settings',
-        href: '/settings',
         icon: Settings,
         modal: true,
+        items: [
+          { name: 'Settings', href: '/settings', shortcut: 'toggle-settings', modal: true },
+          {
+            name: 'Keyboard shortcuts',
+            href: '/shortcuts',
+            shortcut: 'toggle-shortcuts',
+            modal: true,
+          },
+          { name: '-' },
+          { name: 'Check for updates...', href: '/updates', modal: true },
+        ],
       },
     ],
   },

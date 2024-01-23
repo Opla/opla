@@ -13,7 +13,16 @@
 
 'use client';
 
+import { useState } from 'react';
+import { LucideIcon } from 'lucide-react';
 import { Item } from '@/types';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import SidebarItem from './SidebarItem';
 
 export default function SidebarItems({
@@ -27,9 +36,45 @@ export default function SidebarItems({
   t: any;
   onModal: (href: string) => void;
 }) {
+  const [open, setOpen] = useState(false);
   return items.map(({ name, flex, href, page, icon, modal, items: subItems, hidden }) => {
     if (hidden) return null;
 
+    if (modal && subItems) {
+      const Icon = icon as LucideIcon;
+      const className = `flex pb-8 h-6 w-6 rounded-md ${
+        open ? 'text-neutral-800 dark:text-neutral-100' : 'text-neutral-400 dark:text-neutral-500'
+      } dark:transparent`;
+      return (
+        <li key={name} className={className}>
+          <DropdownMenu open={open} onOpenChange={setOpen}>
+            <DropdownMenuTrigger>
+              <div className="h-5 w-5 p-0 hover:text-neutral-800 dark:hover:text-neutral-100">
+                <Icon size="28px" strokeWidth={1.5} />
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="p-0" side="right" align="end" alignOffset={-24}>
+              {subItems.map((item) =>
+                item.name === '-' ? (
+                  <DropdownMenuSeparator key={item.name} />
+                ) : (
+                  <DropdownMenuItem
+                    key={item.name}
+                    onSelect={() => {
+                      if (item.href) {
+                        onModal(item.href);
+                      }
+                    }}
+                  >
+                    {item.name}
+                  </DropdownMenuItem>
+                ),
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </li>
+      );
+    }
     return subItems ? (
       <li className={flex ? 'flex-1' : ''} key={name}>
         <ul className="flex flex-col items-center">
