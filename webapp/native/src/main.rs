@@ -280,8 +280,6 @@ async fn llm_call_completion<R: Runtime>(
         return Ok(response);
     }
     if llm_provider_type == "openai" {
-        // TODO
-
         let response = {
             let api = format!("{:}", llm_provider.url);
             let secret_key = match llm_provider.key {
@@ -412,7 +410,7 @@ fn opla_setup(app: &mut App) -> Result<(), String> {
         })
         .map_err(|err| err.to_string())?;
     let mut server = context.server.lock().map_err(|err| err.to_string())?;
-    server.init();
+    server.init(store.server.clone());
     let launch_at_startup = store.server.launch_at_startup;
     let active_model = &String::from("");
     let (has_model, active_model) = match &store.models.active_model {

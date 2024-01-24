@@ -26,7 +26,12 @@ import {
   Download,
   Settings,
 } from '@/types';
-import { getOplaConfig, getProviderTemplate, saveSettings } from '@/utils/backend/commands';
+import {
+  getOplaConfig,
+  getProviderTemplate,
+  setActiveModel as setBackendActiveModel,
+  saveSettings,
+} from '@/utils/backend/commands';
 import { toCamelCase } from '@/utils/string';
 import { mapKeys } from '@/utils/data';
 import { AppContext } from '@/context';
@@ -184,18 +189,6 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
 
   const stop = async () => stopRef.current();
 
-  const setActiveModel = async (model: string) => {
-    logger.info('setActiveModel', model);
-
-    setBackendContext((context = initialBackendContext) => {
-      const newContext = {
-        ...context,
-        config: { ...context.config, models: { ...context.config.models, activeModel: model } },
-      };
-      return newContext;
-    });
-  };
-
   const setSettings = useCallback(
     async (settings: Settings) => {
       const store = await saveSettings(settings);
@@ -209,6 +202,19 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     const store = await getOplaConfig();
     setBackendContext((context = initialBackendContext) => ({ ...context, config: store }));
   }, [setBackendContext]);
+
+  const setActiveModel = async (model: string) => {
+    logger.info('setActiveModel', model);
+    await setBackendActiveModel(model);
+    await updateBackendStore();
+    setBackendContext((context = initialBackendContext) => {
+      const newContext = {
+        ...context,
+        config: { ...context.config, models: { ...context.config.models, activeModel: model } },
+      };
+      return newContext;
+    });
+  };
 
   const contextValue = useMemo(
     () => ({

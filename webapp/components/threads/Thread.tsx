@@ -18,7 +18,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { PanelRight, PanelRightClose } from 'lucide-react';
 import { AppContext } from '@/context';
-import { Conversation, Message, Model, Prompt } from '@/types';
+import { Conversation, Message, Model, Prompt, ProviderType } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import {
@@ -40,7 +40,7 @@ import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
 
 function Thread({
-  conversationId,
+  conversationId: _conversationId,
   displaySettings,
   onChangeDisplaySettings,
   onSelectMenu,
@@ -52,9 +52,10 @@ function Thread({
 }) {
   const router = useRouter();
   const { providers, conversations, setConversations } = useContext(AppContext);
-  const { backendContext } = useBackend();
-  logger.info('backendContext', backendContext);
+  const { backendContext, setActiveModel } = useBackend();
   const { activeModel } = backendContext.config.models;
+  const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
+  const conversationId = _conversationId || tempConversationId;
   const selectedConversation = conversations.find((c) => c.id === conversationId);
 
   const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>({});
@@ -83,6 +84,12 @@ function Thread({
     }
   }, [messages]);
 
+  useEffect(() => {
+    if (_conversationId && tempConversationId) {
+      setTempConversationId(undefined);
+    }
+  }, [_conversationId, tempConversationId]);
+
   const updateMessages = (
     newMessages: Message[],
     selectedConversationId = conversationId,
@@ -95,22 +102,21 @@ function Thread({
     );
     setConversations(newConversations);
 
-    let newConversationId = selectedConversationId;
-    if (!newConversationId) {
-      newConversationId = newConversations[newConversations.length - 1].id;
-      router.push(`/threads/${newConversationId}`);
-    }
+    const newConversationId = selectedConversationId;
+
     return { newConversationId, newConversations };
   };
 
-  const onSelectModel = async (model?: string, provider?: string) => {
-    logger.info(`onSelectModel ${model} ${provider}`);
+  const onSelectModel = async (model?: string, provider = ProviderType.opla) => {
+    logger.info(`onSelectModel ${model} ${provider} activeModel=${typeof activeModel}`);
     if (model && selectedConversation) {
       const newConversations = updateConversation(
         { ...selectedConversation, model, provider },
         conversations,
       );
       setConversations(newConversations);
+    } else if (model && !activeModel) {
+      await setActiveModel(model);
     }
   };
 
@@ -136,7 +142,11 @@ function Thread({
       newConversationId,
       newConversations,
     ) as Conversation;
+    if (conversation.temp) {
+      conversation.name = conversation.currentPrompt as string;
+    }
     conversation.currentPrompt = '';
+    conversation.temp = false;
     newConversations = updateConversation(conversation, newConversations);
     setConversations(newConversations);
 
@@ -172,47 +182,35 @@ function Thread({
 
     updateMessages([fromMessage], newConversationId, newConversations);
 
+    if (tempConversationId) {
+      router.push(`/threads/${tempConversationId}`);
+    }
+
     setIsLoading({ ...isLoading, [conversationId]: false });
   };
 
   const onUpdatePrompt = (message: string, conversationName = 'Conversation') => {
     let newConversations: Conversation[];
-    let newConversationId;
-    if (conversationId) {
-      const conversation = getConversation(conversationId, conversations) as Conversation;
+    // console.log('onUpdatePrompt', conversationId, tempConversationId, conversations);
+    const conversation = getConversation(conversationId, conversations) as Conversation;
+    if (conversation) {
       conversation.currentPrompt = message;
       newConversations = updateConversation(conversation, conversations);
     } else {
       newConversations = updateConversationMessages(conversationId, conversations, []);
-      const conversation = newConversations[newConversations.length - 1];
-      conversation.name = conversationName;
-      conversation.currentPrompt = message;
-      newConversationId = conversation.id;
+      const newConversation = newConversations[newConversations.length - 1];
+      newConversation.temp = true;
+      newConversation.name = conversationName;
+      newConversation.currentPrompt = message;
+      setTempConversationId(newConversation.id);
     }
     setConversations(newConversations);
-    if (newConversationId) {
+    /* if (newConversationId) {
       router.push(`/threads/${newConversationId}`);
-    }
+    } */
   };
 
   const onPromptSelected = (prompt: Prompt) => {
-    /* let newConversations: Conversation[];
-    let newConversationId;
-    if (conversationId) {
-      const conversation = getConversation(conversationId, conversations) as Conversation;
-      conversation.currentPrompt = prompt.prompt;
-      newConversations = updateConversation(conversation, conversations);
-    } else {
-      newConversations = updateConversationMessages(conversationId, conversations, []);
-      const conversation = newConversations[newConversations.length - 1];
-      conversation.name = prompt.name;
-      conversation.currentPrompt = prompt.prompt;
-      newConversationId = conversation.id;
-    }
-    setConversations(newConversations);
-    if (newConversationId) {
-      router.push(`/threads/${newConversationId}`);
-    } */
     onUpdatePrompt(prompt.value, prompt.name);
   };
 

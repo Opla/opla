@@ -66,7 +66,6 @@ export default function Prompt({
         <div className="flex w-full flex-row items-center rounded-md border border-black/10 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white">
           <Textarea
             autoresize
-            autoFocus
             value={message}
             key={conversationId}
             tabIndex={0}

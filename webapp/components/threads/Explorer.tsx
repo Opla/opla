@@ -110,7 +110,7 @@ export default function Explorer({
                   <li
                     key={conversation.id}
                     className={`${
-                      selectedConversationId === conversation.id
+                      conversation.temp || selectedConversationId === conversation.id
                         ? 'text-black dark:text-white'
                         : 'text-neutral-400 dark:text-neutral-400'
                     } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
@@ -123,8 +123,14 @@ export default function Explorer({
                         >
                           <EditableItem
                             id={conversation.id}
-                            title={conversation.name}
-                            editable={conversation.id === selectedConversationId}
+                            title={
+                              conversation.temp
+                                ? `${conversation.currentPrompt || ''} ...`
+                                : conversation.name
+                            }
+                            editable={
+                              !conversation.temp && conversation.id === selectedConversationId
+                            }
                             className="max-h-5 flex-1 overflow-hidden text-ellipsis break-all"
                             onChange={onChangeConversationName}
                           />

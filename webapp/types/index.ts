@@ -96,6 +96,7 @@ export type Conversation = BaseNamedRecord & {
   system?: string;
   model?: string;
   provider?: string;
+  temp?: boolean;
 };
 
 export type Entity = {
@@ -264,11 +265,11 @@ export type Download = {
   error?: string;
 };
 
-export type OplaContext = {
+export type OplaContext = Readonly<{
   server: OplaServer;
   config: Store;
   downloads?: Download[];
-};
+}>;
 
 export type LlmMessage = {
   role: 'system' | 'user' | 'assistant' | 'tool';

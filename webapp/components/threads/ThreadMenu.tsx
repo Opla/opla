@@ -62,7 +62,7 @@ export default function ThreadMenu({
   selectedModel: string;
   selectedConversationId?: string;
   modelItems: MenuItem[];
-  onSelectModel: (model: string, provider: string) => void;
+  onSelectModel: (model: string, provider: ProviderType) => void;
   onSelectMenu: (menu: string, data: string) => void;
 }) {
   // const router = useRouter();
@@ -154,7 +154,7 @@ export default function ThreadMenu({
                               key={item.label}
                               value={item.value}
                               onSelect={() => {
-                                onSelectModel(item.value as string, item.group as string);
+                                onSelectModel(item.value as string, item.group as ProviderType);
                                 setOpen(false);
                               }}
                               className="flex w-full items-center justify-between"
