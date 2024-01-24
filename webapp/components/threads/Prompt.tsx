@@ -51,7 +51,6 @@ export default function Prompt({
 
   const handleUpdateMessage = (e: ChangeEvent<HTMLTextAreaElement>) => {
     e.preventDefault();
-    console.log('handleUpdateMessage', e.target.value);
     onUpdatePrompt(e.target.value);
   };
 
