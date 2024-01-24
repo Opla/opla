@@ -16,7 +16,7 @@
 
 import { useContext, useState } from 'react';
 import { Check, HardDriveDownload, MoreHorizontal, Plug, Plus, Trash } from 'lucide-react';
-import { useRouter } from 'next/router';
+// import { useRouter } from 'next/router';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -49,19 +49,23 @@ import { openAIProviderTemplate } from '@/utils/providers/openai';
 import useShortcuts from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
 import { Badge } from '../ui/badge';
-import { toast } from '../ui/Toast';
+// import { toast } from '../ui/Toast';
 import { ShortcutBadge } from '../common/ShortCut';
 
 export default function ThreadMenu({
   selectedModel,
+  selectedConversationId,
   modelItems,
   onSelectModel,
+  onSelectMenu,
 }: {
   selectedModel: string;
+  selectedConversationId?: string;
   modelItems: MenuItem[];
-  onSelectModel: (model: string, provider: string) => void;
+  onSelectModel: (model: string, provider: ProviderType) => void;
+  onSelectMenu: (menu: string, data: string) => void;
 }) {
-  const router = useRouter();
+  // const router = useRouter();
   const { providers } = useContext(AppContext);
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
@@ -78,15 +82,23 @@ export default function ThreadMenu({
     showModal(ModalIds.OpenAI, chatGPT);
   };
 
+  const onNewLocalModel = () => {
+    showModal(ModalIds.NewLocalModel);
+  };
+
+  const onNewProviderModel = () => {
+    showModal(ModalIds.NewProvider);
+  };
+
   useShortcuts('#install-model', (event) => {
     event.preventDefault();
-    logger.info('shortcut install Model TODO');
-    router.push('/providers');
+    logger.info('shortcut install Model');
+    onNewLocalModel();
   });
-  useShortcuts('#load-model', (event) => {
+  useShortcuts('#new-provider', (event) => {
     event.preventDefault();
-    logger.info('shortcut load Model TODO');
-    toast.message('Load Model TODO');
+    logger.info('shortcut new provider');
+    onNewProviderModel();
   });
   useShortcuts('#config-gpt', (event) => {
     event.preventDefault();
@@ -96,12 +108,25 @@ export default function ThreadMenu({
 
   return (
     <div className="flex w-full flex-col items-start justify-between rounded-md border px-4 py-0 sm:flex-row sm:items-center">
-      <div className="flex w-full items-center justify-between text-sm font-medium leading-none">
-        <span className="capitalize text-muted-foreground">
-          {selectedItem?.label || t('Select a model')}
-        </span>
-        <Badge className="mr-4 capitalize">{selectedItem?.group || 'local'}</Badge>
-      </div>
+      {modelItems.length > 0 && (
+        <div className="flex w-full items-center justify-between text-sm font-medium leading-none">
+          {selectedItem?.label ? (
+            <span className="capitalize text-muted-foreground">{selectedItem?.label}</span>
+          ) : (
+            <span>{t('Select a model')}</span>
+          )}
+          <Badge className="mr-4 capitalize">{selectedItem?.group || 'local'}</Badge>
+        </div>
+      )}
+      {modelItems.length === 0 && (
+        <Button
+          variant="ghost"
+          className="flex h-[20px] w-full items-center justify-between text-sm font-medium leading-none text-red-500 hover:text-red-700"
+          onClick={onNewLocalModel}
+        >
+          <span>{t('You need to install a local model - click here')}</span>
+        </Button>
+      )}
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm">
@@ -111,38 +136,42 @@ export default function ThreadMenu({
         <DropdownMenuContent align="end" className="w-full">
           <DropdownMenuLabel>{t('Model')}</DropdownMenuLabel>
           <DropdownMenuGroup>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <Check className="mr-2 h-4 w-4" />
-                <span className="capitalize">{selectedItem?.label || t('Select a model')}</span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="p-0">
-                <Command>
-                  <CommandInput placeholder={t('Filter model...')} autoFocus />
-                  <CommandList>
-                    <CommandEmpty>{t('No Model found.')}</CommandEmpty>
-                    <CommandGroup>
-                      {modelItems.map((item) => (
-                        <CommandItem
-                          key={item.label}
-                          value={item.value}
-                          onSelect={() => {
-                            onSelectModel(item.value as string, item.group as string);
-                            setOpen(false);
-                          }}
-                          className="flex w-full items-center justify-between"
-                        >
-                          <span className="capitalize">{item.label}</span>
-                          <Badge className="ml-4 capitalize">{item.group || 'local'}</Badge>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            {modelItems.length > 0 && (
+              <>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <Check className="mr-2 h-4 w-4" />
+                    <span className="capitalize">{selectedItem?.label || t('Select a model')}</span>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="p-0">
+                    <Command>
+                      <CommandInput placeholder={t('Filter model...')} autoFocus />
+                      <CommandList>
+                        <CommandEmpty>{t('No Model found.')}</CommandEmpty>
+                        <CommandGroup>
+                          {modelItems.map((item) => (
+                            <CommandItem
+                              key={item.label}
+                              value={item.value}
+                              onSelect={() => {
+                                onSelectModel(item.value as string, item.group as ProviderType);
+                                setOpen(false);
+                              }}
+                              className="flex w-full items-center justify-between"
+                            >
+                              <span className="capitalize">{item.label}</span>
+                              <Badge className="ml-4 capitalize">{item.group || 'local'}</Badge>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuSeparator />
+              </>
+            )}
+            <DropdownMenuItem onSelect={onNewLocalModel}>
               <HardDriveDownload className="mr-2 h-4 w-4" />
               {t('Install local model')}
               <DropdownMenuShortcut>
@@ -162,7 +191,7 @@ export default function ThreadMenu({
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => {
-                router.push('/providers');
+                onNewProviderModel();
               }}
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -171,18 +200,25 @@ export default function ThreadMenu({
                 <ShortcutBadge command="new-provider" />
               </DropdownMenuShortcut>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
+            {selectedConversationId && <DropdownMenuSeparator />}
           </DropdownMenuGroup>
-          <DropdownMenuLabel>{t('Thread')}</DropdownMenuLabel>
-          <DropdownMenuGroup>
-            <DropdownMenuItem className="text-red-600">
-              <Trash className="mr-2 h-4 w-4" />
-              {t('Delete')}
-              <DropdownMenuShortcut>
-                <ShortcutBadge command="delete-conversation" />
-              </DropdownMenuShortcut>
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
+          {selectedConversationId && (
+            <>
+              <DropdownMenuLabel>{t('Thread')}</DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  className="text-red-600"
+                  onSelect={() => onSelectMenu('delete-conversation', selectedConversationId)}
+                >
+                  <Trash className="mr-2 h-4 w-4" />
+                  {t('Delete')}
+                  <DropdownMenuShortcut>
+                    <ShortcutBadge command="delete-conversation" />
+                  </DropdownMenuShortcut>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

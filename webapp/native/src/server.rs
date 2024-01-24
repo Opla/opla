@@ -13,7 +13,11 @@
 // limitations under the License.
 
 use std::sync::{ Mutex, Arc };
-use crate::{ error::Error, llm::LlmQueryCompletion, store::ServerParameters };
+use crate::{
+    error::Error,
+    llm::LlmQueryCompletion,
+    store::{ ServerParameters, ServerConfiguration },
+};
 use sysinfo::{ System, Pid };
 use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
 use serde::{ Deserialize, Serialize };
@@ -251,6 +255,13 @@ impl OplaServer {
         Ok(())
     }
 
+    pub fn remove_model(&mut self) {
+        if self.model.is_some() {
+            self.model = None;
+            self.model_path = None;
+        }
+    }
+
     pub fn get_status(&self) -> Result<Payload, String> {
         let status = match self.status.try_lock() {
             Ok(status) => status.as_str(),
@@ -451,7 +462,7 @@ impl OplaServer {
         Ok(Payload { status: status.to_string(), message: self.name.to_string() })
     }
 
-    pub fn init(&mut self) {
+    pub fn init(&mut self, store_server: ServerConfiguration) {
         Self::sysinfo_test();
         let sys = System::new_all();
         let mut pid: u32 = 0;
@@ -467,6 +478,7 @@ impl OplaServer {
             println!("Opla server kill zombie {} / {}", process.pid(), process.name());
             process.kill();
         }
+        self.parameters = Some(store_server.parameters);
     }
 
     pub async fn call_completion<R: Runtime>(

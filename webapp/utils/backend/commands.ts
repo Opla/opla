@@ -35,6 +35,10 @@ export const getOplaConfig = async (): Promise<Store> => {
   return mapKeys(store, toCamelCase);
 };
 
+export const setActiveModel = async (modelId: String) => {
+  await invokeTauri('set_active_model', { modelId });
+};
+
 export const saveSettings = async (settings: Settings): Promise<Store> => {
   const args = mapKeys({ settings }, toSnakeCase);
   const store = (await invokeTauri('save_settings', args)) as Store;

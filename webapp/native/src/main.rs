@@ -124,7 +124,7 @@ async fn start_opla_server<R: Runtime>(
             return Err(format!("Opla server not started model not found: {:?}", err));
         }
     };
-    store.models.default_model = Some(model_name.clone());
+    store.models.active_model = Some(model_name.clone());
     store.server.parameters.port = port;
     store.server.parameters.host = host.clone();
     store.server.parameters.context_size = context_size;
@@ -217,7 +217,7 @@ async fn set_active_model<R: Runtime>(
     if result.is_none() {
         return Err(format!("Model not found: {:?}", model_id));
     }
-    store.models.default_model = Some(model_id);
+    store.models.active_model = Some(model_id);
     store.save().map_err(|err| err.to_string())?;
     Ok(())
 }
@@ -275,13 +275,11 @@ async fn llm_call_completion<R: Runtime>(
         server.set_parameters(&model, &model_path, parameters);
 
         let mut store = context.store.lock().map_err(|err| err.to_string())?;
-        store.models.default_model = Some(model);
+        store.models.active_model = Some(model);
         store.save().map_err(|err| err.to_string())?;
         return Ok(response);
     }
     if llm_provider_type == "openai" {
-        // TODO
-
         let response = {
             let api = format!("{:}", llm_provider.url);
             let secret_key = match llm_provider.key {
@@ -313,13 +311,13 @@ fn start_server<R: Runtime>(
             return Err(format!("Opla server not started store not found: {:?}", err));
         }
     };
-    let default_model = match &store.models.default_model {
+    let active_model = match &store.models.active_model {
         Some(m) => { m }
         None => {
             return Err(format!("Opla server not started default model not set"));
         }
     };
-    let model_path = match store.models.get_model_path(default_model.clone()) {
+    let model_path = match store.models.get_model_path(active_model.clone()) {
         Ok(m) => { m }
         Err(err) => {
             return Err(format!("Opla server not started model path not found: {:?}", err));
@@ -328,7 +326,7 @@ fn start_server<R: Runtime>(
     // let args = store.server.parameters.to_args(model_path.as_str());
     let parameters = store.server.parameters.clone();
     let mut server = context.server.lock().map_err(|err| err.to_string())?;
-    let response = server.start(app, &default_model, &model_path, Some(&parameters));
+    let response = server.start(app, &active_model, &model_path, Some(&parameters));
     if response.is_err() {
         return Err(format!("Opla server not started: {:?}", response));
     }
@@ -404,11 +402,7 @@ fn opla_setup(app: &mut App) -> Result<(), String> {
         }
     };
     store.load(resource_path).map_err(|err| err.to_string())?;
-    // println!("Opla config: {:?}", config);
-    let launch_at_startup = store.server.launch_at_startup;
-    let has_model = store.models.default_model.is_some();
-    let default_model = store.models.default_model.clone();
-    drop(store);
+
     app
         .emit_all("opla-server", Payload {
             message: "Init Opla backend".into(),
@@ -416,7 +410,21 @@ fn opla_setup(app: &mut App) -> Result<(), String> {
         })
         .map_err(|err| err.to_string())?;
     let mut server = context.server.lock().map_err(|err| err.to_string())?;
-    server.init();
+    server.init(store.server.clone());
+    let launch_at_startup = store.server.launch_at_startup;
+    let active_model = &String::from("");
+    let (has_model, active_model) = match &store.models.active_model {
+        Some(m) => { (store.has_model(m.as_str()), m) }
+        None => { (false, active_model) }
+    };
+    if !has_model && active_model != "" {
+        println!("Opla server model not found: {:?}", active_model);
+        // Remove default model from server
+        server.remove_model();
+        store.models.active_model = None;
+        store.save().map_err(|err| err.to_string())?;
+    }
+    drop(store);
     if launch_at_startup && has_model {
         drop(server);
         app
@@ -437,11 +445,10 @@ fn opla_setup(app: &mut App) -> Result<(), String> {
                         status: ServerStatus::Error.as_str().to_string(),
                     })
                     .map_err(|err| err.to_string())?;
-                return Err(err.into());
+                // return Err(err.into());
             }
         }
     } else {
-        println!("Opla server not started model: {:?}", default_model);
         server.set_status(ServerStatus::Stopped).map(|_| "Failed to set server status")?;
         app
             .emit_all("opla-server", Payload {

@@ -94,7 +94,7 @@ const useShortcuts = <T extends HTMLElement>(
             ? shortcut.keys.join()
             : (shortcut.keys as string);
           if (shortcut && isShortcutMatchingEvent(shortcutKeys, event)) {
-            console.log('shortcut found=', shortcut.description);
+            logger.info('shortcut found=', shortcut.description);
             callbackRef.current(event);
           }
         }

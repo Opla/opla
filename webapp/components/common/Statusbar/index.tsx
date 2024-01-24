@@ -32,10 +32,10 @@ export default function Statusbar() {
     router.push(`/providers`);
   };
 
-  const { defaultModel } = backendContext.config.models;
+  const { activeModel } = backendContext.config.models;
 
   return (
-    <div className="m-0 flex w-full grow-0 flex-row gap-4 bg-cyan-300 px-2 py-1 text-xs dark:bg-cyan-700">
+    <div className="m-0 flex w-full grow-0 flex-row gap-4 bg-orange-300 px-2 py-1 text-xs dark:bg-orange-500">
       <button
         className="flex flex-row items-center justify-center gap-1"
         type="button"
@@ -47,17 +47,19 @@ export default function Statusbar() {
           </span>
         )}
         {error && (
-          <span className="text-red-500 dark:text-neutral-300">
+          <span className="text-red-600">
             <AlertTriangle className="h-4 w-4" />
           </span>
         )}
         {(backendContext.server.status === 'init' ||
           backendContext.server.status === 'wait' ||
           backendContext.server.status === 'starting') && <span>{t('Server is starting')}</span>}
-        {backendContext.server.status === 'started' && <span>{defaultModel}</span>}
+        {backendContext.server.status === 'started' && <span>{activeModel}</span>}
         {(backendContext.server.status === 'stopping' ||
           backendContext.server.status === 'stopped') && <span>{t('Server is stopped')}</span>}
-        {backendContext.server.status === 'error' && <span>{t('Server has crashed')}</span>}
+        {backendContext.server.status === 'error' && (
+          <span className="text-red-600">{t('Server error')}</span>
+        )}
       </button>
       {download && (
         <div className="flex flex-row items-center justify-center gap-1">

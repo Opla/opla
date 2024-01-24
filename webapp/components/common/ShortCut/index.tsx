@@ -31,7 +31,7 @@ function ShortcutBadge({ command }: { command: string }) {
   keys = keys.replace('enter', '⏎');
   keys = keys.replace('delete', '⌦');
 
-  return <div className="text-neutral-500">{keys.toUpperCase()}</div>;
+  return <div className="ml-2 text-neutral-500">{keys.toUpperCase()}</div>;
 }
 
 function ShortcutSettings() {

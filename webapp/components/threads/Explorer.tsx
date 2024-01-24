@@ -22,50 +22,29 @@ import { AppContext } from '@/context';
 import { Conversation, MenuItem } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
-import {
-  getConversation,
-  updateConversation,
-  deleteConversation,
-} from '@/utils/data/conversations';
-import { ModalsContext } from '@/context/modals';
-import { ModalIds } from '@/modals';
+import { getConversation, updateConversation } from '@/utils/data/conversations';
 import useShortcuts from '@/hooks/useShortcuts';
 import { toast } from '../ui/Toast';
 import EditableItem from '../common/EditableItem';
 import { ContextMenu, ContextMenuTrigger } from '../ui/context-menu';
 import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
 
-export default function Explorer({ selectedConversationId }: { selectedConversationId?: string }) {
+export default function Explorer({
+  selectedConversationId,
+  onShouldDelete,
+}: {
+  selectedConversationId?: string;
+  onShouldDelete: (id: string) => void;
+}) {
   const router = useRouter();
 
   const { conversations, setConversations } = useContext(AppContext);
   const [editableConversation, setEditableConversation] = useState<string | undefined>(undefined);
   const { t } = useTranslation();
-  const { showModal } = useContext(ModalsContext);
 
   const onRename = (data: string) => {
     logger.info(`rename ${data}`);
     setEditableConversation(data);
-  };
-
-  const onDelete = (action: string, data: any) => {
-    const conversation = data?.item as Conversation;
-    logger.info(`delete ${action} ${data}`);
-    if (conversation) {
-      if (action === 'Delete') {
-        const updatedConversations = deleteConversation(conversation.id, conversations);
-        setConversations(updatedConversations);
-        if (selectedConversationId && selectedConversationId === conversation.id) {
-          router.replace('/threads');
-        }
-      }
-    }
-  };
-
-  const onToDelete = (data: string) => {
-    logger.info(`to delete ${data}`);
-    const conversation = getConversation(data, conversations) as Conversation;
-    showModal(ModalIds.DeleteItem, { item: conversation, onAction: onDelete });
   };
 
   const onChangeConversationName = (value: string, id: string) => {
@@ -90,7 +69,7 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
     if (selectedConversationId) {
       event.preventDefault();
       logger.info('shortcut delete Conversation');
-      onToDelete(selectedConversationId);
+      onShouldDelete(selectedConversationId);
     }
   });
   useShortcuts('#rename-conversation', (event) => {
@@ -108,7 +87,7 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
     },
     {
       label: t('Delete'),
-      onSelect: onToDelete,
+      onSelect: onShouldDelete,
     },
   ];
 
@@ -131,7 +110,7 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
                   <li
                     key={conversation.id}
                     className={`${
-                      selectedConversationId === conversation.id
+                      conversation.temp || selectedConversationId === conversation.id
                         ? 'text-black dark:text-white'
                         : 'text-neutral-400 dark:text-neutral-400'
                     } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
@@ -144,8 +123,14 @@ export default function Explorer({ selectedConversationId }: { selectedConversat
                         >
                           <EditableItem
                             id={conversation.id}
-                            title={conversation.name}
-                            editable={conversation.id === selectedConversationId}
+                            title={
+                              conversation.temp
+                                ? `${conversation.currentPrompt || ''} ...`
+                                : conversation.name
+                            }
+                            editable={
+                              !conversation.temp && conversation.id === selectedConversationId
+                            }
                             className="max-h-5 flex-1 overflow-hidden text-ellipsis break-all"
                             onChange={onChangeConversationName}
                           />

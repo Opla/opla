@@ -157,7 +157,7 @@ impl Store {
             },
             models: ModelStorage {
                 path: None,
-                default_model: None,
+                active_model: None,
                 items: vec![],
             },
             downloads: vec![],
@@ -198,5 +198,16 @@ impl Store {
         fs::write(config_path, config_data)?;
 
         Ok(())
+    }
+
+    pub fn has_model(&self, model_name: &str) -> bool {
+        self.models.items.iter().any(
+            |m|
+                m.reference.name == model_name ||
+                (match &m.reference.id {
+                    Some(id) => id == model_name,
+                    None => false,
+                })
+        )
     }
 }

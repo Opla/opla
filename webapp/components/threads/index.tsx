@@ -14,12 +14,17 @@
 
 'use client';
 
-// import { useState } from 'react';
+import { useContext } from 'react';
+import { useRouter } from 'next/router';
 import useBackend from '@/hooks/useBackendContext';
-import { PageSettings } from '@/types';
+import { Conversation, PageSettings } from '@/types';
 import { DefaultPageSettings } from '@/utils/constants';
 import logger from '@/utils/logger';
 import useShortcuts from '@/hooks/useShortcuts';
+import { getConversation, deleteConversation } from '@/utils/data/conversations';
+import { ModalIds } from '@/modals';
+import { ModalsContext } from '@/context/modals';
+import { AppContext } from '@/context';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import Explorer from './Explorer';
 import Settings from './Settings';
@@ -29,6 +34,9 @@ const getSelectedPage = (selectedConversationId?: string) =>
   `/threads${selectedConversationId ? `/${selectedConversationId}` : ''}`;
 
 export default function Threads({ selectedConversationId }: { selectedConversationId?: string }) {
+  const router = useRouter();
+
+  const { conversations, setConversations } = useContext(AppContext);
   const { backendContext, setSettings } = useBackend();
 
   useShortcuts('#delete-message', (event) => {
@@ -39,6 +47,7 @@ export default function Threads({ selectedConversationId }: { selectedConversati
     event.preventDefault();
     logger.info('edit Message');
   });
+  const { showModal } = useContext(ModalsContext);
 
   const defaultSettings = backendContext.config.settings;
   const selectedPage = getSelectedPage(selectedConversationId);
@@ -73,6 +82,33 @@ export default function Threads({ selectedConversationId }: { selectedConversati
     saveSettings({ settingsHidden: !value });
   };
 
+  const onDelete = (action: string, data: any) => {
+    const conversation = data?.item as Conversation;
+    logger.info(`delete ${action} ${data}`);
+    if (conversation) {
+      if (action === 'Delete') {
+        const updatedConversations = deleteConversation(conversation.id, conversations);
+        setConversations(updatedConversations);
+        if (selectedConversationId && selectedConversationId === conversation.id) {
+          router.replace('/threads');
+        }
+      }
+    }
+  };
+
+  const onShouldDelete = (data: string) => {
+    logger.info(`to delete ${data}`);
+    const conversation = getConversation(data, conversations) as Conversation;
+    showModal(ModalIds.DeleteItem, { item: conversation, onAction: onDelete });
+  };
+
+  const onSelectMenu = (menu: string, data: string) => {
+    logger.info('onSelectMenu', menu);
+    if (menu === 'delete-conversation') {
+      onShouldDelete(data);
+    }
+  };
+
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel
@@ -80,7 +116,7 @@ export default function Threads({ selectedConversationId }: { selectedConversati
         defaultSize={pageSettings.explorerWidth}
         onResize={onResizeExplorer}
       >
-        <Explorer selectedConversationId={selectedConversationId} />
+        <Explorer onShouldDelete={onShouldDelete} selectedConversationId={selectedConversationId} />
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel>
@@ -88,6 +124,7 @@ export default function Threads({ selectedConversationId }: { selectedConversati
           conversationId={selectedConversationId}
           displaySettings={!pageSettings.settingsHidden}
           onChangeDisplaySettings={onChangeDisplaySettings}
+          onSelectMenu={onSelectMenu}
         />
       </ResizablePanel>
       <ResizableHandle />

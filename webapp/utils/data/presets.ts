@@ -16,7 +16,7 @@ import { OplaContext, Preset } from '@/types';
 import logger from '../logger';
 
 const getSelectedPreset = (backendContext: OplaContext) => {
-  const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.defaultModel}`;
+  const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.activeModel}`;
 
   logger.warn('getSelectedPreset not implemented');
   return selectedPreset;

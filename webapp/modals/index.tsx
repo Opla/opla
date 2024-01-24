@@ -19,13 +19,15 @@ import { BaseNamedRecord } from '@/types';
 import { ModalRef } from '@/context/modals';
 import { ShortcutSettings } from '@/components/common/ShortCut';
 import SettingsPanel from './settings';
-import NewProviderPanel from './templates/NewProvider';
+import NewProviderDialog from './templates/NewProvider';
 import OpenAIDialog from './openai';
+import NewLocalModelDialog from './models';
 
 enum ModalIds {
   Settings = 'settings',
   Shortcuts = 'shortcuts',
   NewProvider = 'newprovider',
+  NewLocalModel = 'newlocalmodel',
   Welcome = 'welcome',
   OpenAI = 'openai',
   DeleteItem = 'deleteitem',
@@ -51,7 +53,7 @@ const Modals: ModalRef[] = [
   },
   {
     id: ModalIds.Shortcuts,
-    Component: function SettingsDialog({ visible, onClose }) {
+    Component: function ShortcutsDialog({ visible, onClose }) {
       return (
         <Dialog
           key={ModalIds.Shortcuts}
@@ -67,11 +69,24 @@ const Modals: ModalRef[] = [
   },
   {
     id: ModalIds.NewProvider,
-    Component: function NewProviderDialog({ visible, onClose }) {
+    Component: function NPDialog({ visible, onClose }) {
       return (
-        <NewProviderPanel
+        <NewProviderDialog
           key={ModalIds.NewProvider}
           id={ModalIds.NewProvider}
+          open={visible}
+          onClose={onClose}
+        />
+      );
+    },
+  },
+  {
+    id: ModalIds.NewLocalModel,
+    Component: function NLMDialog({ visible, onClose }) {
+      return (
+        <NewLocalModelDialog
+          key={ModalIds.NewLocalModel}
+          id={ModalIds.NewLocalModel}
           open={visible}
           onClose={onClose}
         />

@@ -31,8 +31,8 @@ export default function Settings({ conversationId }: { conversationId?: string }
   const { backendContext } = useBackend();
   logger.info('backendContext', backendContext);
   const selectedConversation = conversations.find((c) => c.id === conversationId);
-  const { defaultModel } = backendContext.config.models;
-  const model = findModel(defaultModel, backendContext.config.models.items);
+  const { activeModel } = backendContext.config.models;
+  const model = findModel(activeModel, backendContext.config.models.items);
 
   const onNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;

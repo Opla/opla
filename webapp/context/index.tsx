@@ -52,8 +52,6 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
   const [models, setModels] = useDataStorage('models', initialContext.models);
   const [presets, setPresets] = useDataStorage('presets', initialContext.presets);
 
-  // ...
-
   const contextValue = useMemo(
     () => ({
       conversations,

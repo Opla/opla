@@ -24,34 +24,34 @@ export default function Prompt({
   conversationId,
   message,
   errorMessage,
-  updateMessage,
-  handleMessage,
+  onUpdatePrompt,
+  onSendMessage,
   isLoading,
 }: {
   conversationId: string;
   message: string;
   isLoading: boolean;
   errorMessage: string;
-  updateMessage: any;
-  handleMessage: any;
+  onUpdatePrompt: any;
+  onSendMessage: any;
 }) {
   const { t } = useTranslation();
 
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
-    handleMessage();
+    onSendMessage();
   };
 
   const handleKeypress = (e: KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleMessage();
+      onSendMessage();
     }
   };
 
   const handleUpdateMessage = (e: ChangeEvent<HTMLTextAreaElement>) => {
     e.preventDefault();
-    updateMessage(e.target.value);
+    onUpdatePrompt(e.target.value);
   };
 
   return (

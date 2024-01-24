@@ -25,6 +25,7 @@ import { getDownloadables, isValidFormat } from '@/utils/data/models';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import Explorer from './Explorer';
 import ModelView from './Model';
+import NewLocalModel from './NewLocalModel';
 
 export default function Models({ selectedModelId }: { selectedModelId?: string }) {
   const { backendContext, updateBackendStore } = useBackend();
@@ -128,3 +129,5 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
     </ResizablePanelGroup>
   );
 }
+
+export { NewLocalModel };

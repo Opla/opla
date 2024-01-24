@@ -96,6 +96,7 @@ export type Conversation = BaseNamedRecord & {
   system?: string;
   model?: string;
   provider?: string;
+  temp?: boolean;
 };
 
 export type Entity = {
@@ -177,7 +178,7 @@ export type Preset = BaseNamedRecord & {
 export type Prompt = BaseNamedRecord & {
   title: string;
   icon?: unknown;
-  prompt: string;
+  value: string;
   tags?: string[];
   temperature?: number;
   nPredict?: number;
@@ -243,7 +244,7 @@ export type ServerConfiguration = {
 };
 
 export type ModelsConfiguration = {
-  defaultModel: string;
+  activeModel: string;
   path?: string;
   items: Array<Model>;
 };
@@ -264,11 +265,11 @@ export type Download = {
   error?: string;
 };
 
-export type OplaContext = {
+export type OplaContext = Readonly<{
   server: OplaServer;
   config: Store;
   downloads?: Download[];
-};
+}>;
 
 export type LlmMessage = {
   role: 'system' | 'user' | 'assistant' | 'tool';

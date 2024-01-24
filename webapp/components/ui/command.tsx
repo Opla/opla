@@ -2,10 +2,11 @@
 import * as React from 'react';
 import { type DialogProps } from '@radix-ui/react-dialog';
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons';
-import { Command as CommandPrimitive } from 'cmdk';
+import { Command as CommandPrimitive, useCommandState } from 'cmdk';
 
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Loader2 } from 'lucide-react';
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -136,6 +137,18 @@ function CommandShortcut({ className, ...props }: React.HTMLAttributes<HTMLSpanE
 }
 CommandShortcut.displayName = 'CommandShortcut';
 
+const CommandLoading = React.forwardRef<
+  React.ElementRef<typeof CommandPrimitive.Loading>,
+  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Loading>
+>(({ ...props }, ref) => (
+  <CommandItem disabled className="text-muted-foreground">
+    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+    <CommandPrimitive.Loading ref={ref} {...props} />
+  </CommandItem>
+));
+
+CommandLoading.displayName = CommandPrimitive.Loading.displayName;
+
 export {
   Command,
   CommandDialog,
@@ -146,4 +159,6 @@ export {
   CommandItem,
   CommandShortcut,
   CommandSeparator,
+  CommandLoading,
+  useCommandState,
 };
