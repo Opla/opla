@@ -251,6 +251,13 @@ impl OplaServer {
         Ok(())
     }
 
+    pub fn remove_model(&mut self) {
+        if self.model.is_some() {
+            self.model = None;
+            self.model_path = None;
+        }
+    }
+
     pub fn get_status(&self) -> Result<Payload, String> {
         let status = match self.status.try_lock() {
             Ok(status) => status.as_str(),

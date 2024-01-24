@@ -36,7 +36,7 @@ const connect = async (
           parameters: {},
         },
         models: {
-          defaultModel: 'None',
+          activeModel: 'None',
           items: [],
         },
       },

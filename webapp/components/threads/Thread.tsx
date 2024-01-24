@@ -54,7 +54,7 @@ function Thread({
   const { providers, conversations, setConversations } = useContext(AppContext);
   const { backendContext } = useBackend();
   logger.info('backendContext', backendContext);
-  const { defaultModel } = backendContext.config.models;
+  const { activeModel } = backendContext.config.models;
   const selectedConversation = conversations.find((c) => c.id === conversationId);
 
   const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>({});
@@ -72,7 +72,7 @@ function Thread({
 
   const showEmptyChat = !conversationId; // messages.length < 1;
 
-  const selectedModel = selectedConversation?.model || defaultModel;
+  const selectedModel = selectedConversation?.model || activeModel;
   const localModelItems = getLocalModelsAsItems(backendContext, selectedModel);
   const cloudModelItems = getProviderModelsAsItems(providers, selectedModel);
   const modelItems = [...localModelItems, ...cloudModelItems];
@@ -150,7 +150,7 @@ function Thread({
       }
     }
     if (!model) {
-      model = findModel(conversation.model || defaultModel, backendContext.config.models.items);
+      model = findModel(conversation.model || activeModel, backendContext.config.models.items);
     }
 
     try {

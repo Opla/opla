@@ -61,7 +61,7 @@ const connectBackend = async (
   const config = await getOplaConfig(); // (await invoke('get_opla_config')) as Store;
 
   logger.info('oplaConfig', config);
-  const { defaultModel } = config.models;
+  const { activeModel } = config.models;
   let server: OplaServer = {
     status: ServerStatus.IDLE,
     stout: [],
@@ -75,7 +75,7 @@ const connectBackend = async (
     logger.error("can't start LlamaCppServer", error);
     server = { ...server, status: ServerStatus.ERROR, message: error as string };
   }
-  const start = async (parameters: any, model = defaultModel) => {
+  const start = async (parameters: any, model = activeModel) => {
     logger.info('start server', parameters);
     return startLLamaCppServer(model, parameters);
   };
@@ -83,7 +83,7 @@ const connectBackend = async (
     logger.info('stop server');
     return stopLLamaCppServer();
   };
-  const restart = async (parameters: any, model = defaultModel) => {
+  const restart = async (parameters: any, model = activeModel) => {
     logger.info('restart server', parameters);
     return restartLLamaCppServer(model, parameters);
   };

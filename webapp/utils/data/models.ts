@@ -17,7 +17,7 @@ import Opla from '@/components/icons/Opla';
 import { getResourceUrl } from '.';
 
 const getSelectedModel = (backendContext: OplaContext) => {
-  const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.defaultModel}`;
+  const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.activeModel}`;
   return selectedPreset;
 };
 

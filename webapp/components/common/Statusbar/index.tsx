@@ -32,7 +32,7 @@ export default function Statusbar() {
     router.push(`/providers`);
   };
 
-  const { defaultModel } = backendContext.config.models;
+  const { activeModel } = backendContext.config.models;
 
   return (
     <div className="m-0 flex w-full grow-0 flex-row gap-4 bg-orange-300 px-2 py-1 text-xs dark:bg-orange-500">
@@ -54,7 +54,7 @@ export default function Statusbar() {
         {(backendContext.server.status === 'init' ||
           backendContext.server.status === 'wait' ||
           backendContext.server.status === 'starting') && <span>{t('Server is starting')}</span>}
-        {backendContext.server.status === 'started' && <span>{defaultModel}</span>}
+        {backendContext.server.status === 'started' && <span>{activeModel}</span>}
         {(backendContext.server.status === 'stopping' ||
           backendContext.server.status === 'stopped') && <span>{t('Server is stopped')}</span>}
         {backendContext.server.status === 'error' && (

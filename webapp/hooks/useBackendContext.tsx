@@ -48,7 +48,7 @@ const initialBackendContext: OplaContext = {
       parameters: {},
     },
     models: {
-      defaultModel: 'None',
+      activeModel: 'None',
       items: [],
       path: '',
     },
@@ -63,7 +63,7 @@ type Context = {
   start: (params: any) => Promise<void>;
   stop: () => Promise<void>;
   restart: (params: any) => Promise<void>;
-  setActivePreset: (preset: string) => Promise<void>;
+  setActiveModel: (preset: string) => Promise<void>;
 };
 
 const BackendContext = createContext<Context>({
@@ -74,7 +74,7 @@ const BackendContext = createContext<Context>({
   start: async () => {},
   stop: async () => {},
   restart: async () => {},
-  setActivePreset: async () => {},
+  setActiveModel: async () => {},
 });
 
 function BackendProvider({ children }: { children: React.ReactNode }) {
@@ -94,9 +94,9 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     logger.info('backend event', event);
     if (event.event === 'opla-server') {
       setBackendContext((context = initialBackendContext) => {
-        let { defaultModel } = context.config.models;
+        let { activeModel } = context.config.models;
         if (event.payload.status === ServerStatus.STARTING) {
-          defaultModel = event.payload.message;
+          activeModel = event.payload.message;
         }
         return {
           ...context,
@@ -104,7 +104,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
             ...context.config,
             models: {
               ...context.config.models,
-              defaultModel,
+              activeModel,
             },
           },
           server: {
@@ -184,13 +184,13 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
 
   const stop = async () => stopRef.current();
 
-  const setActivePreset = async (preset: string) => {
-    logger.info('setActivePreset', preset);
+  const setActiveModel = async (model: string) => {
+    logger.info('setActiveModel', model);
 
     setBackendContext((context = initialBackendContext) => {
       const newContext = {
         ...context,
-        config: { ...context.config, models: { ...context.config.models, defaultModel: preset } },
+        config: { ...context.config, models: { ...context.config.models, activeModel: model } },
       };
       return newContext;
     });
@@ -219,7 +219,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       start,
       stop,
       restart,
-      setActivePreset,
+      setActiveModel,
     }),
     [backendContext, setSettings, startBackend, updateBackendStore],
   );

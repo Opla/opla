@@ -243,7 +243,7 @@ export type ServerConfiguration = {
 };
 
 export type ModelsConfiguration = {
-  defaultModel: string;
+  activeModel: string;
   path?: string;
   items: Array<Model>;
 };
