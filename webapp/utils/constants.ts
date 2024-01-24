@@ -26,6 +26,10 @@ export const AppVersion = '0.1.0';
 
 // mod is the command key on mac, ctrl on windows/linux
 export const defaultShortcuts: KeyBinding[] = [
+  { command: 'display-threads', keys: ['mod+1'], description: 'Display threads panel' },
+  { command: 'display-models', keys: ['mod+2'], description: 'Display models panel' },
+  { command: 'display-providers', keys: ['mod+3'], description: 'Display providers panel' },
+
   { command: 'toggle-explorer', keys: ['mod+e'], description: 'Toggle Explorer' },
   { command: 'toggle-settings', keys: ['mod+t'], description: 'Toggle Settings' },
   { command: 'toggle-shortcuts', keys: ['mod+h'], description: 'Toggle Shortcuts' },

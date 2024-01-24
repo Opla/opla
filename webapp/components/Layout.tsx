@@ -16,14 +16,15 @@
 
 import { useContext, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
-// import { useHotkeys } from 'react-hotkeys-hook';
 import '@/app/globals.css';
 import Sidebar from '@/components/common/Sidebar';
 import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackendContext';
 import useRegisterModals from '@/hooks/useRegisterModals';
+import useShortcuts from '@/hooks/useShortcuts';
 import Modals from '@/modals';
 import { Toaster } from '@/components/ui/Toast';
+import logger from '@/utils/logger';
 import Statusbar from './common/Statusbar';
 import { TooltipProvider } from './ui/tooltip';
 
@@ -62,6 +63,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   /* useShortcuts('info', (e) => {
     logger.info('shortcut', e);
   }); */
+  useShortcuts('#display-threads', (e) => {
+    e.preventDefault();
+    logger.info('shortcut #display-threads', e);
+    router.push('/threads');
+  });
+
+  useShortcuts('#display-models', (e) => {
+    e.preventDefault();
+    logger.info('shortcut #display-models', e);
+    router.push('/models');
+  });
+
+  useShortcuts('#display-providers', (e) => {
+    e.preventDefault();
+    logger.info('shortcut #display-providers', e);
+    router.push('/providers');
+  });
 
   if (!backendContext || !providers || !models || !presets) {
     return <div>Loading...</div>;

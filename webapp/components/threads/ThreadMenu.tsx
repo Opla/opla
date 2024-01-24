@@ -16,7 +16,7 @@
 
 import { useContext, useState } from 'react';
 import { Check, HardDriveDownload, MoreHorizontal, Plug, Plus, Trash } from 'lucide-react';
-import { useRouter } from 'next/router';
+// import { useRouter } from 'next/router';
 import { Button } from '@/components/ui/button';
 import {
   Command,
@@ -49,7 +49,7 @@ import { openAIProviderTemplate } from '@/utils/providers/openai';
 import useShortcuts from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
 import { Badge } from '../ui/badge';
-import { toast } from '../ui/Toast';
+// import { toast } from '../ui/Toast';
 import { ShortcutBadge } from '../common/ShortCut';
 
 export default function ThreadMenu({
@@ -65,7 +65,7 @@ export default function ThreadMenu({
   onSelectModel: (model: string, provider: string) => void;
   onSelectMenu: (menu: string, data: string) => void;
 }) {
-  const router = useRouter();
+  // const router = useRouter();
   const { providers } = useContext(AppContext);
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
@@ -82,15 +82,23 @@ export default function ThreadMenu({
     showModal(ModalIds.OpenAI, chatGPT);
   };
 
+  const onNewLocalModel = () => {
+    showModal(ModalIds.NewLocalModel);
+  };
+
+  const onNewProviderModel = () => {
+    showModal(ModalIds.NewProvider);
+  };
+
   useShortcuts('#install-model', (event) => {
     event.preventDefault();
-    logger.info('shortcut install Model TODO');
-    router.push('/providers');
+    logger.info('shortcut install Model');
+    onNewLocalModel();
   });
-  useShortcuts('#load-model', (event) => {
+  useShortcuts('#new-provider', (event) => {
     event.preventDefault();
-    logger.info('shortcut load Model TODO');
-    toast.message('Load Model TODO');
+    logger.info('shortcut new provider');
+    onNewProviderModel();
   });
   useShortcuts('#config-gpt', (event) => {
     event.preventDefault();
@@ -114,8 +122,9 @@ export default function ThreadMenu({
         <Button
           variant="ghost"
           className="flex h-[20px] w-full items-center justify-between text-sm font-medium leading-none text-red-500 hover:text-red-700"
+          onClick={onNewLocalModel}
         >
-          <span>{t('You must install a local model - click here')}</span>
+          <span>{t('You need to install a local model - click here')}</span>
         </Button>
       )}
       <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -162,7 +171,7 @@ export default function ThreadMenu({
                 <DropdownMenuSeparator />
               </>
             )}
-            <DropdownMenuItem>
+            <DropdownMenuItem onSelect={onNewLocalModel}>
               <HardDriveDownload className="mr-2 h-4 w-4" />
               {t('Install local model')}
               <DropdownMenuShortcut>
@@ -182,7 +191,7 @@ export default function ThreadMenu({
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => {
-                router.push('/providers');
+                onNewProviderModel();
               }}
             >
               <Plus className="mr-2 h-4 w-4" />
