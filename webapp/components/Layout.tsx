@@ -21,8 +21,8 @@ import Sidebar from '@/components/common/Sidebar';
 import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackendContext';
 import useRegisterModals from '@/hooks/useRegisterModals';
-import useShortcuts from '@/hooks/useShortcuts';
-import Modals from '@/modals';
+import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
+import Modals, { ModalIds } from '@/modals';
 import { Toaster } from '@/components/ui/Toast';
 import logger from '@/utils/logger';
 import Statusbar from './common/Statusbar';
@@ -36,7 +36,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const { startBackend, backendContext, setSettings } = useBackend();
 
-  useRegisterModals(Modals);
+  const { showModal } = useRegisterModals(Modals);
 
   useEffect(() => {
     if (firstRender.current && providers) {
@@ -63,22 +63,35 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   /* useShortcuts('info', (e) => {
     logger.info('shortcut', e);
   }); */
-  useShortcuts('#display-threads', (e) => {
+
+  useShortcuts(ShortcutIds.DISPLAY_THREADS, (e) => {
     e.preventDefault();
     logger.info('shortcut #display-threads', e);
     router.push('/threads');
   });
 
-  useShortcuts('#display-models', (e) => {
+  useShortcuts(ShortcutIds.DISPLAY_MODELS, (e) => {
     e.preventDefault();
     logger.info('shortcut #display-models', e);
     router.push('/models');
   });
 
-  useShortcuts('#display-providers', (e) => {
+  useShortcuts(ShortcutIds.DISPLAY_PROVIDERS, (e) => {
     e.preventDefault();
     logger.info('shortcut #display-providers', e);
     router.push('/providers');
+  });
+
+  useShortcuts(ShortcutIds.DISPLAY_SETTINGS, (e) => {
+    e.preventDefault();
+    logger.info('shortcut #display-settings', e);
+    showModal(ModalIds.Settings);
+  });
+
+  useShortcuts(ShortcutIds.DISPLAY_SHORTCUTS, (e) => {
+    e.preventDefault();
+    logger.info('shortcut #display-shortcuts', e);
+    showModal(ModalIds.Shortcuts);
   });
 
   if (!backendContext || !providers || !models || !presets) {

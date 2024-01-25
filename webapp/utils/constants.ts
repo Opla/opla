@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { KeyBinding, PageSettings } from '@/types';
+import { PageSettings } from '@/types';
 
 export const DefaultPageSettings: PageSettings = {
   explorerHidden: false,
@@ -23,83 +23,3 @@ export const DefaultPageSettings: PageSettings = {
 
 export const AppName = 'Opla';
 export const AppVersion = '0.1.0';
-
-// mod is the command key on mac, ctrl on windows/linux
-export const defaultShortcuts: KeyBinding[] = [
-  { command: 'display-threads', keys: ['mod+1'], description: 'Display threads panel' },
-  { command: 'display-models', keys: ['mod+2'], description: 'Display models panel' },
-  { command: 'display-providers', keys: ['mod+3'], description: 'Display providers panel' },
-
-  { command: 'toggle-explorer', keys: ['mod+e'], description: 'Toggle Explorer' },
-  { command: 'toggle-settings', keys: ['mod+t'], description: 'Toggle Settings' },
-  { command: 'toggle-shortcuts', keys: ['mod+h'], description: 'Toggle Shortcuts' },
-  { command: 'toggle-fullscreen', keys: ['mod+f'], description: 'Toggle Fullscreen' },
-  { command: 'toggle-darkmode', keys: ['mod+d'], description: 'Toggle Dark Mode' },
-  { command: 'send-message', keys: ['enter'], description: 'Send message', scope: 'threads' },
-  { command: 'new line', keys: ['mod+enter'], description: 'New line', scope: 'threads' },
-  {
-    command: 'delete-conversation',
-    keys: ['mod+backspace'],
-    description: 'Delete selected conversation',
-    scope: 'threads',
-  },
-  {
-    command: 'clear-conversation',
-    keys: ['mod+shift+backspace'],
-    description: 'Clear selected conversation',
-    scope: 'threads',
-  },
-  {
-    command: 'rename-conversation',
-    keys: ['mod+r'],
-    description: 'Rename selected conversation',
-    scope: 'threads',
-  },
-  {
-    command: 'new-conversation',
-    keys: ['mod+n'],
-    description: 'New conversation',
-    scope: 'threads',
-  },
-  {
-    command: 'delete-message',
-    keys: ['mod+delete'],
-    description: 'Delete selected message',
-    scope: 'threads',
-  },
-  {
-    command: 'edit-message',
-    keys: ['mod+m'],
-    description: 'Edit selected message',
-    scope: 'threads',
-  },
-
-  { command: 'install-model', keys: ['mod+i'], description: 'Install local model' },
-  { command: 'load-model', keys: ['mod+l'], description: 'Load a model' },
-  { command: 'config-gpt', keys: ['mod+g'], description: 'Configure ChatGPT' },
-  {
-    command: 'delete-model',
-    keys: ['mod+shift+delete'],
-    description: 'Delete selected model',
-    scope: 'models',
-  },
-  {
-    command: 'toggle-provider',
-    keys: ['mod+x'],
-    description: 'Toggle selected provider',
-    scope: 'provider',
-  },
-  {
-    command: 'delete-provider',
-    keys: ['mod+shift+delete'],
-    description: 'Delete selected provider',
-    scope: 'provider',
-  },
-  {
-    command: 'save-provider',
-    keys: ['mod+shift+s'],
-    description: 'Save selected provider',
-    scope: 'provider',
-  },
-  { command: 'new-provider', keys: ['mod+p'], description: 'New provider', scope: 'provider' },
-];

@@ -13,11 +13,10 @@
 // limitations under the License.
 
 import useTranslation from '@/hooks/useTranslation';
-import { defaultShortcuts } from '@/utils/constants';
+import { defaultShortcuts } from '@/hooks/useShortcuts';
 import { isMac } from '@/utils/misc';
 
 function ShortcutBadge({ command }: { command: string }) {
-  // ⌘⌫
   const shortcut = defaultShortcuts.find((s) => s.command === command);
   if (!shortcut) {
     return null;

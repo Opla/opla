@@ -34,6 +34,7 @@ import logger from '@/utils/logger';
 import { searchModels } from '@/utils/providers/hf';
 import { deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
 import { getDownloadables, isValidFormat } from '@/utils/data/models';
+import { ShortcutIds } from '@/hooks/useShortcuts';
 import { ShortcutBadge } from '../common/ShortCut';
 import { Checkbox } from '../ui/checkbox';
 import { toast } from '../ui/Toast';
@@ -203,14 +204,14 @@ function NewLocalModel({
                 <Computer className="mr-2 h-4 w-4" />
                 <span>{t('Load a model from your computer')}</span>
                 <CommandShortcut>
-                  <ShortcutBadge command="load-model" />
+                  <ShortcutBadge command={ShortcutIds.LOAD_MODEL} />
                 </CommandShortcut>
               </CommandItem>
               <CommandItem>
                 <BrainCircuit className="mr-2 h-4 w-4" />
                 <span>{t('Manage models')}</span>
                 <CommandShortcut>
-                  <ShortcutBadge command="display-models" />
+                  <ShortcutBadge command={ShortcutIds.DISPLAY_MODELS} />
                 </CommandShortcut>
               </CommandItem>
             </CommandGroup>
