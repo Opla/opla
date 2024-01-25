@@ -51,6 +51,37 @@ const openFileDialog = async (multiple = false, filters?: DialogFilter[]) => {
   } else {
     // user selected a single file
   }
+  return selected;
 };
 
-export { invokeTauri, getPlatformInfos, openFileDialog };
+const saveFileDialog = async (filters?: DialogFilter[]) => {
+  const { save } = await import('@tauri-apps/api/dialog');
+  const selected = await save({
+    filters,
+  });
+  logger.info(selected);
+  if (Array.isArray(selected)) {
+    // user selected multiple files
+  } else if (selected === null) {
+    // user cancelled the selection
+  } else {
+    // user selected a single file
+  }
+  return selected;
+};
+
+const writeTextFile = async (path: string, contents: string) => {
+  const { writeFile: fsWriteFile } = await import('@tauri-apps/api/fs');
+  await fsWriteFile({
+    contents,
+    path,
+  });
+}
+
+const readTextFile = async (path: string) => {
+  const { readTextFile: fsReadTextFile } = await import('@tauri-apps/api/fs');
+  const content = await fsReadTextFile(path);
+  return content;
+}
+
+export { invokeTauri, getPlatformInfos, openFileDialog, saveFileDialog, writeTextFile, readTextFile };

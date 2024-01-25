@@ -88,6 +88,7 @@ export type Conversation = BaseNamedRecord & {
   system?: string;
   model?: string;
   provider?: string;
+  importedFrom?: string;
   temp?: boolean;
 };
 

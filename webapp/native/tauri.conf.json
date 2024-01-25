@@ -20,6 +20,11 @@
           "https://opla.ai/*"
         ]
       },
+      "fs": {
+        "exists": true,
+        "readFile": true,
+        "writeFile": true
+      },
       "window": {
         "all": true
       },

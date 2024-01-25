@@ -92,6 +92,19 @@ const updateConversationMessages = (
   return conversations.map((c) => (c.id === conversationId ? conversation : c)) as Conversation[];
 };
 
+const mergeConversations = (conversations: Conversation[], newConversations: Conversation[]) => {
+  const mergedConversations = [...conversations, ...newConversations];
+
+  const conversationMap = new Map<string, Conversation>();
+  mergedConversations.forEach((c) => {
+    const existingConversation = conversationMap.get(c.id);
+    if (!existingConversation || c.updatedAt >= existingConversation.updatedAt) {
+      conversationMap.set(c.id, c);
+    }
+  });
+  return Array.from(conversationMap.values());
+}
+
 export {
   createMessage,
   updateMessage,
@@ -100,4 +113,5 @@ export {
   updateConversation,
   updateConversationMessages,
   deleteConversation,
+  mergeConversations,
 };

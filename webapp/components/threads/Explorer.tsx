@@ -22,8 +22,18 @@ import { AppContext } from '@/context';
 import { Conversation, MenuItem } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
-import { getConversation, updateConversation } from '@/utils/data/conversations';
+import {
+  getConversation,
+  mergeConversations,
+  updateConversation,
+} from '@/utils/data/conversations';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
+import { openFileDialog, readTextFile, saveFileDialog, writeTextFile } from '@/utils/tauri';
+import {
+  importChatGPTConversation,
+  validateChaGPTConversations,
+} from '@/utils/conversations/openai';
+import { validateConversations } from '@/utils/conversations';
 import { toast } from '../ui/Toast';
 import EditableItem from '../common/EditableItem';
 import { ContextMenu, ContextMenuTrigger } from '../ui/context-menu';
@@ -69,12 +79,53 @@ export default function Explorer({
     logger.info(`onChangeConversationName ${editableConversation} ${value} ${id}`);
   };
 
-  const onImportConversations = () => {
+  const onImportConversations = async () => {
     logger.info('onImportConversations');
+    try {
+      const filePath = await openFileDialog(false, [
+        { name: 'conversations', extensions: ['json'] },
+      ]);
+      if (!filePath) {
+        return;
+      }
+      const content = await readTextFile(filePath as string);
+      const importedConversations = JSON.parse(content);
+      const validate = validateConversations(importedConversations);
+      if (validate.success) {
+        const mergedConversations = mergeConversations(conversations, importedConversations);
+        setConversations(mergedConversations);
+        toast.message(t('Imported and merged'));
+        return;
+      }
+
+      const validateGPT = validateChaGPTConversations(importedConversations);
+      if (!validateGPT.success) {
+        toast.error(`${t('Unable to import')} : ${validateGPT.error}`);
+        return;
+      }
+      const newConversations = importChatGPTConversation(validateGPT.data);
+      const mergedConversations = mergeConversations(conversations, newConversations);
+      setConversations(mergedConversations);
+      toast.message(t('Imported and merged'));
+    } catch (error) {
+      logger.error(error);
+      toast.error(`${t('Unable to import')} : ${error}`);
+    }
   };
 
-  const onExportConversations = () => {
+  const onExportConversations = async () => {
     logger.info('onExportConversations');
+    try {
+      const filePath = await saveFileDialog([{ name: 'conversations', extensions: ['json'] }]);
+      if (!filePath) {
+        return;
+      }
+      const content = JSON.stringify(conversations);
+      await writeTextFile(filePath as string, content);
+    } catch (error) {
+      logger.error(error);
+      toast.error(`Unable to export : ${error}`);
+    }
   };
 
   useShortcuts(ShortcutIds.NEW_CONVERSATION, (event) => {
