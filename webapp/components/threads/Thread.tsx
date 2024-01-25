@@ -88,7 +88,10 @@ function Thread({
     if (_conversationId && tempConversationId) {
       setTempConversationId(undefined);
     }
-  }, [_conversationId, tempConversationId]);
+    if (_conversationId && conversations.find((c) => c.temp)) {
+      setConversations(conversations.filter((c) => !c.temp));
+    }
+  }, [_conversationId, conversations, setConversations, tempConversationId]);
 
   const updateMessages = (
     newMessages: Message[],
@@ -190,14 +193,21 @@ function Thread({
   };
 
   const onUpdatePrompt = (message: string, conversationName = 'Conversation') => {
+    if (message === '') {
+      setConversations(conversations.filter((c) => !c.temp));
+      setTempConversationId(undefined);
+      return;
+    }
     let newConversations: Conversation[];
     // console.log('onUpdatePrompt', conversationId, tempConversationId, conversations);
     const conversation = getConversation(conversationId, conversations) as Conversation;
     if (conversation) {
       conversation.currentPrompt = message;
-      newConversations = updateConversation(conversation, conversations);
+      newConversations = conversations.filter((c) => !(c.temp && c.id !== conversationId));
+      newConversations = updateConversation(conversation, newConversations);
     } else {
-      newConversations = updateConversationMessages(conversationId, conversations, []);
+      newConversations = conversations.filter((c) => !c.temp);
+      newConversations = updateConversationMessages(conversationId, newConversations, []);
       const newConversation = newConversations[newConversations.length - 1];
       newConversation.temp = true;
       newConversation.name = conversationName;
@@ -205,9 +215,6 @@ function Thread({
       setTempConversationId(newConversation.id);
     }
     setConversations(newConversations);
-    /* if (newConversationId) {
-      router.push(`/threads/${newConversationId}`);
-    } */
   };
 
   const onPromptSelected = (prompt: Prompt) => {

@@ -45,16 +45,22 @@ export default function Prompt({
     onSendMessage();
   };
 
-  const handleKeypress = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+  const handleKeypress = (event: KeyboardEvent) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
       onSendMessage();
     }
   };
 
-  const handleUpdateMessage = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    e.preventDefault();
-    onUpdatePrompt(e.target.value);
+  const handleUpdateMessage = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    event.preventDefault();
+    onUpdatePrompt(event.target.value);
+  };
+
+  const handleFocus = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const lengthOfInput = event.target.value.length;
+    event.currentTarget.setSelectionRange(lengthOfInput, lengthOfInput);
+    onUpdatePrompt(event.target.value);
   };
 
   const shortcutSend: KeyBinding = defaultShortcuts.find(
@@ -76,13 +82,15 @@ export default function Prompt({
         <div className="flex w-full flex-row items-center rounded-md border border-black/10 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white">
           <Textarea
             autoresize
+            autoFocus
             value={message}
             key={conversationId}
             tabIndex={0}
             placeholder={t('Send a message...')}
             className="m-0 max-h-[200px] min-h-[32px] w-full resize-none overflow-y-hidden border-0 bg-transparent px-3 py-1.5 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent dark:text-white dark:placeholder-white"
             onChange={handleUpdateMessage}
-            onKeyDown={(e) => handleKeypress(e)}
+            onKeyDown={handleKeypress}
+            onFocus={handleFocus}
           />
           <Tooltip>
             <TooltipTrigger asChild>
