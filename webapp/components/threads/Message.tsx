@@ -19,8 +19,12 @@ import { Message } from '@/types';
 import { Bot, MoreHorizontal, User } from 'lucide-react';
 
 function MessageComponent({ message }: { message: Message }) {
-  const { author, content: text } = message;
-  const content = useMarkdownProcessor(text as string);
+  const { author } = message;
+  let { content } = message;
+  if (typeof content !== 'string') {
+    content = content.parts.join('');
+  }
+  const Content = useMarkdownProcessor(content as string);
   const isUser = author.role === 'user';
 
   return (
@@ -41,12 +45,12 @@ function MessageComponent({ message }: { message: Message }) {
               <div className="flex min-h-20 flex-col items-start gap-4 whitespace-pre-wrap break-words">
                 <div className="w-full break-words">
                   <p className="font-bold capitalize">{author.name}</p>
-                  {!isUser && text === '...' ? (
+                  {!isUser && content === '...' ? (
                     <div className="pt-2">
                       <MoreHorizontal className="h-4 w-4 animate-pulse" />
                     </div>
                   ) : (
-                    <div className="select-auto pt-2">{content}</div>
+                    <div className="select-auto pt-2">{Content}</div>
                   )}
                 </div>
               </div>

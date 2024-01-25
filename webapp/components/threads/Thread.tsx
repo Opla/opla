@@ -67,7 +67,7 @@ function Thread({
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
 
   const messages = useMemo(
-    () => selectedConversation?.messages || [],
+    () => selectedConversation?.messages.filter((m) => !(m.author.role === 'system')) || [],
     [selectedConversation?.messages],
   );
 
@@ -199,7 +199,6 @@ function Thread({
       return;
     }
     let newConversations: Conversation[];
-    // console.log('onUpdatePrompt', conversationId, tempConversationId, conversations);
     const conversation = getConversation(conversationId, conversations) as Conversation;
     if (conversation) {
       conversation.currentPrompt = message;

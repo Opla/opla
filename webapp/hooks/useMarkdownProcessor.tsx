@@ -119,7 +119,9 @@ const useMarkdownProcessor = (content: string) => {
           </p>
         ),
         strong: ({ children }: JSX.IntrinsicElements['strong']) => (
-          <strong className="font-semibold text-neutral-950">{children}</strong>
+          <strong className="font-semibold text-neutral-950 dark:text-neutral-100">
+            {children}
+          </strong>
         ),
         em: ({ children }: JSX.IntrinsicElements['em']) => <em>{children} </em>,
         code: CodeBlock,
@@ -147,7 +149,7 @@ const useMarkdownProcessor = (content: string) => {
               // eslint-disable-next-line react/no-array-index-key
               <li key={index} className="flex items-start gap-2">
                 <div
-                  className="min-w-[1.4ch] shrink-0 font-sans text-sm font-semibold text-neutral-900"
+                  className="min-w-[1.4ch] shrink-0 font-sans text-sm font-semibold text-neutral-900 dark:text-neutral-100"
                   aria-hidden
                 >
                   {index + 1}.

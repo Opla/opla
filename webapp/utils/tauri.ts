@@ -11,8 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+import logger from './logger';
 
-import { InvokeArgs } from '@tauri-apps/api/tauri';
+type InvokeArgs = Record<string, unknown>;
 
 const invokeTauri = async (command: string, args?: any) => {
   const { invoke } = await import('@tauri-apps/api/tauri');
@@ -22,4 +23,72 @@ const invokeTauri = async (command: string, args?: any) => {
 const getPlatformInfos = async () => {
   // TODO
 };
-export { invokeTauri, getPlatformInfos };
+
+interface DialogFilter {
+  /** Filter name. */
+  name: string;
+  /**
+   * Extensions to filter, without a `.` prefix.
+   * @example
+   * ```typescript
+   * extensions: ['svg', 'png']
+   * ```
+   */
+  extensions: string[];
+}
+
+const openFileDialog = async (multiple = false, filters?: DialogFilter[]) => {
+  const { open } = await import('@tauri-apps/api/dialog');
+  const selected = await open({
+    multiple,
+    filters,
+  });
+  logger.info(selected);
+  if (Array.isArray(selected)) {
+    // user selected multiple files
+  } else if (selected === null) {
+    // user cancelled the selection
+  } else {
+    // user selected a single file
+  }
+  return selected;
+};
+
+const saveFileDialog = async (filters?: DialogFilter[]) => {
+  const { save } = await import('@tauri-apps/api/dialog');
+  const selected = await save({
+    filters,
+  });
+  logger.info(selected);
+  if (Array.isArray(selected)) {
+    // user selected multiple files
+  } else if (selected === null) {
+    // user cancelled the selection
+  } else {
+    // user selected a single file
+  }
+  return selected;
+};
+
+const writeTextFile = async (path: string, contents: string) => {
+  const { writeFile: fsWriteFile } = await import('@tauri-apps/api/fs');
+  await fsWriteFile({
+    contents,
+    path,
+  });
+};
+
+const readTextFile = async (path: string) => {
+  const { readTextFile: fsReadTextFile } = await import('@tauri-apps/api/fs');
+  const content = await fsReadTextFile(path);
+  return content;
+};
+
+export {
+  invokeTauri,
+  getPlatformInfos,
+  openFileDialog,
+  saveFileDialog,
+  writeTextFile,
+  readTextFile,
+};
