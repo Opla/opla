@@ -67,7 +67,7 @@ function Thread({
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
 
   const messages = useMemo(
-    () => selectedConversation?.messages || [],
+    () => selectedConversation?.messages.filter((m) => !(m.author.role === 'system')) || [],
     [selectedConversation?.messages],
   );
 
