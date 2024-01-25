@@ -103,7 +103,7 @@ const mergeConversations = (conversations: Conversation[], newConversations: Con
     }
   });
   return Array.from(conversationMap.values());
-}
+};
 
 export {
   createMessage,

@@ -76,12 +76,19 @@ const writeTextFile = async (path: string, contents: string) => {
     contents,
     path,
   });
-}
+};
 
 const readTextFile = async (path: string) => {
   const { readTextFile: fsReadTextFile } = await import('@tauri-apps/api/fs');
   const content = await fsReadTextFile(path);
   return content;
-}
+};
 
-export { invokeTauri, getPlatformInfos, openFileDialog, saveFileDialog, writeTextFile, readTextFile };
+export {
+  invokeTauri,
+  getPlatformInfos,
+  openFileDialog,
+  saveFileDialog,
+  writeTextFile,
+  readTextFile,
+};
