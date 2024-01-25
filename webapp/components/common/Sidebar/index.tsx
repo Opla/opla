@@ -16,9 +16,20 @@
 
 import { useContext } from 'react';
 import Image from 'next/image';
-import { BrainCircuit, MessagesSquare, Package, Server, Settings, UserCircle2 } from 'lucide-react';
+import {
+  BrainCircuit,
+  Keyboard,
+  LucideIcon,
+  MessagesSquare,
+  Package,
+  Server,
+  Settings,
+  Settings2,
+  UserCircle2,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { UpdateIcon } from '@radix-ui/react-icons';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import logger from '@/utils/logger';
@@ -77,18 +88,25 @@ const sidebarItems: Array<Item> = [
         items: [
           {
             name: 'Settings',
+            icon: Settings2,
             href: '/settings',
             shortcut: ShortcutIds.DISPLAY_SETTINGS,
             modal: true,
           },
           {
             name: 'Keyboard shortcuts',
+            icon: Keyboard,
             href: '/shortcuts',
             shortcut: ShortcutIds.DISPLAY_SHORTCUTS,
             modal: true,
           },
           { name: '-' },
-          { name: 'Check for updates...', href: '/updates', modal: true },
+          {
+            name: 'Check for updates...',
+            icon: UpdateIcon as LucideIcon,
+            href: '/updates',
+            modal: true,
+          },
         ],
       },
     ],

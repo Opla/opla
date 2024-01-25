@@ -56,8 +56,9 @@ export default function SidebarItems({
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="p-0" side="right" align="end" alignOffset={-24}>
-              {subItems.map((item) =>
-                item.name === '-' ? (
+              {subItems.map((item) => {
+                const IIcon = item.icon as LucideIcon;
+                return item.name === '-' ? (
                   <DropdownMenuSeparator key={item.name} />
                 ) : (
                   <DropdownMenuItem
@@ -68,6 +69,7 @@ export default function SidebarItems({
                       }
                     }}
                   >
+                    {IIcon && <IIcon className="mr-2 h-4 w-4" />}
                     {item.name}
                     {item.shortcut && (
                       <DropdownMenuShortcut>
@@ -75,8 +77,8 @@ export default function SidebarItems({
                       </DropdownMenuShortcut>
                     )}
                   </DropdownMenuItem>
-                ),
-              )}
+                );
+              })}
             </DropdownMenuContent>
           </DropdownMenu>
         </li>
