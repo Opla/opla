@@ -11,8 +11,9 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+import logger from './logger';
 
-import { InvokeArgs } from '@tauri-apps/api/tauri';
+type InvokeArgs = Record<string, unknown>;
 
 const invokeTauri = async (command: string, args?: any) => {
   const { invoke } = await import('@tauri-apps/api/tauri');
@@ -22,4 +23,34 @@ const invokeTauri = async (command: string, args?: any) => {
 const getPlatformInfos = async () => {
   // TODO
 };
-export { invokeTauri, getPlatformInfos };
+
+interface DialogFilter {
+  /** Filter name. */
+  name: string;
+  /**
+   * Extensions to filter, without a `.` prefix.
+   * @example
+   * ```typescript
+   * extensions: ['svg', 'png']
+   * ```
+   */
+  extensions: string[];
+}
+
+const openFileDialog = async (multiple = false, filters?: DialogFilter[]) => {
+  const { open } = await import('@tauri-apps/api/dialog');
+  const selected = await open({
+    multiple,
+    filters,
+  });
+  logger.info(selected);
+  if (Array.isArray(selected)) {
+    // user selected multiple files
+  } else if (selected === null) {
+    // user cancelled the selection
+  } else {
+    // user selected a single file
+  }
+};
+
+export { invokeTauri, getPlatformInfos, openFileDialog };

@@ -24,7 +24,9 @@
         "all": true
       },
       "dialog": {
-        "all": true
+        "all": true,
+        "open": true,
+        "save": true
       },
       "all": false,
       "path": {

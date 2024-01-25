@@ -69,6 +69,14 @@ export default function Explorer({
     logger.info(`onChangeConversationName ${editableConversation} ${value} ${id}`);
   };
 
+  const onImportConversations = () => {
+    logger.info('onImportConversations');
+  };
+
+  const onExportConversations = () => {
+    logger.info('onExportConversations');
+  };
+
   useShortcuts(ShortcutIds.NEW_CONVERSATION, (event) => {
     if (selectedConversationId) {
       event.preventDefault();
@@ -111,22 +119,29 @@ export default function Explorer({
             <Opla className="mr-2 h-6 w-6" />
             <p>{t('Threads')}</p>
           </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                href="/threads"
-                className="flex flex-shrink-0 cursor-pointer items-center p-1 text-sm text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:border-white/20 dark:text-neutral-400 hover:dark:text-white"
-              >
-                <SquarePen className="h-5 w-5" strokeWidth={1.5} />
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" sideOffset={12} className="mt-1">
-              <div className="flex w-full flex-row gap-2">
-                <p>{t('New conversation')}</p>
-                <ShortcutBadge command={ShortcutIds.NEW_CONVERSATION} />
-              </div>
-            </TooltipContent>
-          </Tooltip>
+          {selectedConversationId && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  disabled={!selectedConversationId}
+                  className="flex flex-shrink-0 cursor-pointer items-center p-1 text-sm text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:border-white/20 dark:text-neutral-400 hover:dark:text-white"
+                >
+                  <Link href="/threads">
+                    <SquarePen className="h-5 w-5" strokeWidth={1.5} />
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" sideOffset={12} className="mt-1">
+                <div className="flex w-full flex-row gap-2">
+                  <p>{t('New conversation')}</p>
+                  <ShortcutBadge command={ShortcutIds.NEW_CONVERSATION} />
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          )}
 
           <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger asChild>
@@ -136,11 +151,11 @@ export default function Explorer({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-full">
               <DropdownMenuGroup>
-                <DropdownMenuItem onSelect={() => {}}>
+                <DropdownMenuItem onSelect={onImportConversations}>
                   <Import className="mr-2 h-4 w-4" />
                   {t('Import')}
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => {}}>
+                <DropdownMenuItem onSelect={onExportConversations}>
                   <FolderInput className="mr-2 h-4 w-4" />
                   {t('Export')}
                 </DropdownMenuItem>
