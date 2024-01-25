@@ -15,6 +15,7 @@
 import Link from 'next/link';
 import { LucideIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ShortcutBadge } from '../ShortCut';
 
 function Content({ icon }: { icon: LucideIcon }) {
   const Icon = icon as LucideIcon;
@@ -30,13 +31,15 @@ export default function SidebarItem({
   selected,
   name,
   icon,
+  shortcut,
   modal,
   onModalClick,
 }: {
-  href: string | undefined;
+  href?: string;
   selected: boolean;
   name: string;
-  icon: LucideIcon | undefined;
+  icon?: LucideIcon;
+  shortcut?: string;
   modal?: boolean;
   onModalClick: (href: string) => void;
 }) {
@@ -70,7 +73,10 @@ export default function SidebarItem({
           )}
         </TooltipTrigger>
         <TooltipContent side="right" sideOffset={12} className="mt-1">
-          <p>{name}</p>
+          <div className="flex w-full flex-row gap-2">
+            <p>{name}</p>
+            {shortcut && <ShortcutBadge command={shortcut} />}
+          </div>
         </TooltipContent>
       </Tooltip>
     </li>

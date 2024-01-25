@@ -23,7 +23,7 @@ import { Conversation, MenuItem } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { getConversation, updateConversation } from '@/utils/data/conversations';
-import useShortcuts from '@/hooks/useShortcuts';
+import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import { toast } from '../ui/Toast';
 import EditableItem from '../common/EditableItem';
 import { ContextMenu, ContextMenuTrigger } from '../ui/context-menu';
@@ -57,7 +57,7 @@ export default function Explorer({
     logger.info(`onChangeConversationName ${editableConversation} ${value} ${id}`);
   };
 
-  useShortcuts('#new-conversation', (event) => {
+  useShortcuts(ShortcutIds.NEW_CONVERSATION, (event) => {
     if (selectedConversationId) {
       event.preventDefault();
       logger.info('shortcut new Conversation');
@@ -65,14 +65,14 @@ export default function Explorer({
       toast.message('New Conversation');
     }
   });
-  useShortcuts('#delete-conversation', (event) => {
+  useShortcuts(ShortcutIds.DELETE_CONVERSATION, (event) => {
     if (selectedConversationId) {
       event.preventDefault();
       logger.info('shortcut delete Conversation');
       onShouldDelete(selectedConversationId);
     }
   });
-  useShortcuts('#rename-conversation', (event) => {
+  useShortcuts(ShortcutIds.RENAME_CONVERSATION, (event) => {
     if (selectedConversationId) {
       event.preventDefault();
       logger.info('shortcut rename Conversation');

@@ -16,7 +16,7 @@ import { useContext, useEffect, useRef } from 'react';
 import { ModalComponentRef, ModalRef, ModalsContext } from '@/context/modals';
 
 const useRegisterModals = (Modals: ModalRef[]) => {
-  const { registerModal } = useContext(ModalsContext);
+  const { registerModal, showModal } = useContext(ModalsContext);
   const firstRender = useRef(true);
 
   useEffect(() => {
@@ -30,6 +30,8 @@ const useRegisterModals = (Modals: ModalRef[]) => {
       });
     }
   }, [registerModal, Modals]);
+
+  return { showModal };
 };
 
 export default useRegisterModals;

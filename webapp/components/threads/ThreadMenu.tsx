@@ -46,7 +46,7 @@ import { ModalIds } from '@/modals';
 import { AppContext } from '@/context';
 import { createProvider } from '@/utils/data/providers';
 import { openAIProviderTemplate } from '@/utils/providers/openai';
-import useShortcuts from '@/hooks/useShortcuts';
+import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
 import { Badge } from '../ui/badge';
 // import { toast } from '../ui/Toast';
@@ -90,17 +90,17 @@ export default function ThreadMenu({
     showModal(ModalIds.NewProvider);
   };
 
-  useShortcuts('#install-model', (event) => {
+  useShortcuts(ShortcutIds.INSTALL_MODEL, (event) => {
     event.preventDefault();
     logger.info('shortcut install Model');
     onNewLocalModel();
   });
-  useShortcuts('#new-provider', (event) => {
+  useShortcuts(ShortcutIds.NEW_PROVIDER, (event) => {
     event.preventDefault();
     logger.info('shortcut new provider');
     onNewProviderModel();
   });
-  useShortcuts('#config-gpt', (event) => {
+  useShortcuts(ShortcutIds.CONFIG_GPT, (event) => {
     event.preventDefault();
     logger.info('shortcut configure ChatGPT');
     onSetupChatGPT();
@@ -175,7 +175,7 @@ export default function ThreadMenu({
               <HardDriveDownload className="mr-2 h-4 w-4" />
               {t('Install local model')}
               <DropdownMenuShortcut>
-                <ShortcutBadge command="install-model" />
+                <ShortcutBadge command={ShortcutIds.INSTALL_MODEL} />
               </DropdownMenuShortcut>
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={onSetupChatGPT}>
@@ -186,7 +186,7 @@ export default function ThreadMenu({
               />
               {t('Configure ChatGPT')}
               <DropdownMenuShortcut>
-                <ShortcutBadge command="config-gpt" />
+                <ShortcutBadge command={ShortcutIds.CONFIG_GPT} />
               </DropdownMenuShortcut>
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -197,7 +197,7 @@ export default function ThreadMenu({
               <Plus className="mr-2 h-4 w-4" />
               {t('Add other AI providers')}
               <DropdownMenuShortcut>
-                <ShortcutBadge command="new-provider" />
+                <ShortcutBadge command={ShortcutIds.NEW_PROVIDER} />
               </DropdownMenuShortcut>
             </DropdownMenuItem>
             {selectedConversationId && <DropdownMenuSeparator />}
@@ -213,7 +213,7 @@ export default function ThreadMenu({
                   <Trash className="mr-2 h-4 w-4" />
                   {t('Delete')}
                   <DropdownMenuShortcut>
-                    <ShortcutBadge command="delete-conversation" />
+                    <ShortcutBadge command={ShortcutIds.DELETE_CONVERSATION} />
                   </DropdownMenuShortcut>
                 </DropdownMenuItem>
               </DropdownMenuGroup>

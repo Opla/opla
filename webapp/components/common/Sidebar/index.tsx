@@ -26,6 +26,7 @@ import { ModalIds } from '@/modals';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import useBackend from '@/hooks/useBackendContext';
 import { Item } from '@/types';
+import { ShortcutIds } from '@/hooks/useShortcuts';
 import SidebarItems from './SidebarItems';
 
 const sidebarItems: Array<Item> = [
@@ -34,20 +35,23 @@ const sidebarItems: Array<Item> = [
     flex: 1,
     items: [
       {
-        name: 'Chats',
+        name: 'Threads',
         href: '/threads',
         page: '/threads',
         icon: MessagesSquare,
+        shortcut: ShortcutIds.DISPLAY_THREADS,
       },
       {
         name: 'Models',
         href: '/models',
         icon: BrainCircuit,
+        shortcut: ShortcutIds.DISPLAY_MODELS,
       },
       {
         name: 'AI Providers',
         href: '/providers',
         icon: Server,
+        shortcut: ShortcutIds.DISPLAY_PROVIDERS,
       },
       {
         name: 'Plugins',
@@ -71,11 +75,16 @@ const sidebarItems: Array<Item> = [
         icon: Settings,
         modal: true,
         items: [
-          { name: 'Settings', href: '/settings', shortcut: 'toggle-settings', modal: true },
+          {
+            name: 'Settings',
+            href: '/settings',
+            shortcut: ShortcutIds.DISPLAY_SETTINGS,
+            modal: true,
+          },
           {
             name: 'Keyboard shortcuts',
             href: '/shortcuts',
-            shortcut: 'toggle-shortcuts',
+            shortcut: ShortcutIds.DISPLAY_SHORTCUTS,
             modal: true,
           },
           { name: '-' },

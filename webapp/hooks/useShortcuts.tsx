@@ -12,10 +12,136 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { toast } from '@/components/ui/Toast';
-import { defaultShortcuts } from '@/utils/constants';
 import logger from '@/utils/logger';
 import { isMac } from '@/utils/misc';
 import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+
+export type KeyBinding = {
+  command: ShortcutIds;
+  keys: string | readonly string[];
+  description: string;
+  scope?: string;
+  innerCommand?: boolean;
+};
+
+export enum ShortcutIds {
+  DISPLAY_THREADS = '#display-threads',
+  DISPLAY_MODELS = '#display-models',
+  DISPLAY_PROVIDERS = '#display-providers',
+  DISPLAY_SETTINGS = '#display-settings',
+  DISPLAY_SHORTCUTS = '#display-shortcuts',
+  TOGGLE_EXPLORER = '#toggle-explorer',
+  TOGGLE_FULLSCREEN = '#toggle-fullscreen',
+  TOGGLE_DARKMODE = '#toggle-darkmode',
+  SEND_MESSAGE = '#send-message',
+  NEW_LINE = '#new line',
+  DELETE_CONVERSATION = '#delete-conversation',
+  CLEAR_CONVERSATION = '#clear-conversation',
+  RENAME_CONVERSATION = '#rename-conversation',
+  NEW_CONVERSATION = '#new-conversation',
+  DELETE_MESSAGE = '#delete-message',
+  EDIT_MESSAGE = '#edit-message',
+  INSTALL_MODEL = '#install-model',
+  LOAD_MODEL = '#load-model',
+  CONFIG_GPT = '#config-gpt',
+  DELETE_MODEL = '#delete-model',
+  TOGGLE_PROVIDER = '#toggle-provider',
+  DELETE_PROVIDER = '#delete-provider',
+  SAVE_PROVIDER = '#save-provider',
+  NEW_PROVIDER = '#new-provider',
+}
+
+// mod is the command key on mac, ctrl on windows/linux
+export const defaultShortcuts: KeyBinding[] = [
+  { command: ShortcutIds.DISPLAY_THREADS, keys: ['mod+1'], description: 'Display threads panel' },
+  { command: ShortcutIds.DISPLAY_MODELS, keys: ['mod+2'], description: 'Display models panel' },
+  {
+    command: ShortcutIds.DISPLAY_PROVIDERS,
+    keys: ['mod+3'],
+    description: 'Display providers panel',
+  },
+  { command: ShortcutIds.DISPLAY_SETTINGS, keys: ['mod+t'], description: 'Toggle Settings' },
+  { command: ShortcutIds.DISPLAY_SHORTCUTS, keys: ['mod+k'], description: 'Toggle Shortcuts' },
+  { command: ShortcutIds.TOGGLE_EXPLORER, keys: ['mod+e'], description: 'Toggle Explorer' },
+  { command: ShortcutIds.TOGGLE_FULLSCREEN, keys: ['mod+f'], description: 'Toggle Fullscreen' },
+  { command: ShortcutIds.TOGGLE_DARKMODE, keys: ['mod+d'], description: 'Toggle Dark Mode' },
+  {
+    command: ShortcutIds.SEND_MESSAGE,
+    keys: ['enter'],
+    description: 'Send message',
+    scope: 'threads',
+  },
+  { command: ShortcutIds.NEW_LINE, keys: ['mod+enter'], description: 'New line', scope: 'threads' },
+  {
+    command: ShortcutIds.DELETE_CONVERSATION,
+    keys: ['mod+backspace'],
+    description: 'Delete selected conversation',
+    scope: 'threads',
+  },
+  {
+    command: ShortcutIds.CLEAR_CONVERSATION,
+    keys: ['mod+shift+backspace'],
+    description: 'Clear selected conversation',
+    scope: 'threads',
+  },
+  {
+    command: ShortcutIds.RENAME_CONVERSATION,
+    keys: ['mod+r'],
+    description: 'Rename selected conversation',
+    scope: 'threads',
+  },
+  {
+    command: ShortcutIds.NEW_CONVERSATION,
+    keys: ['mod+n'],
+    description: 'New conversation',
+    scope: 'threads',
+  },
+  {
+    command: ShortcutIds.DELETE_MESSAGE,
+    keys: ['mod+delete'],
+    description: 'Delete selected message',
+    scope: 'threads',
+  },
+  {
+    command: ShortcutIds.EDIT_MESSAGE,
+    keys: ['mod+m'],
+    description: 'Edit selected message',
+    scope: 'threads',
+  },
+  { command: ShortcutIds.INSTALL_MODEL, keys: ['mod+i'], description: 'Install local model' },
+  { command: ShortcutIds.LOAD_MODEL, keys: ['mod+l'], description: 'Load a model' },
+  { command: ShortcutIds.CONFIG_GPT, keys: ['mod+g'], description: 'Configure ChatGPT' },
+  {
+    command: ShortcutIds.DELETE_MODEL,
+    keys: ['mod+shift+delete'],
+    description: 'Delete selected model',
+    scope: 'models',
+  },
+  {
+    command: ShortcutIds.TOGGLE_PROVIDER,
+    keys: ['mod+x'],
+    description: 'Enable/disable selected provider',
+    scope: 'provider',
+  },
+  {
+    command: ShortcutIds.DELETE_PROVIDER,
+    keys: ['mod+shift+delete'],
+    description: 'Delete selected provider',
+    scope: 'provider',
+  },
+  {
+    command: ShortcutIds.SAVE_PROVIDER,
+    keys: ['mod+shift+s'],
+    description: 'Save selected provider',
+    scope: 'provider',
+  },
+  {
+    command: ShortcutIds.NEW_PROVIDER,
+    keys: ['mod+p'],
+    description: 'New provider',
+    scope: 'provider',
+  },
+];
 
 export type ShortcutCallback = (event: KeyboardEvent) => void;
 export type RefType<T> = T | null;

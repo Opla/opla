@@ -21,9 +21,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import SidebarItem from './SidebarItem';
+import { ShortcutBadge } from '../ShortCut';
 
 export default function SidebarItems({
   items,
@@ -37,7 +39,7 @@ export default function SidebarItems({
   onModal: (href: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  return items.map(({ name, flex, href, page, icon, modal, items: subItems, hidden }) => {
+  return items.map(({ name, flex, href, page, icon, shortcut, modal, items: subItems, hidden }) => {
     if (hidden) return null;
 
     if (modal && subItems) {
@@ -67,6 +69,11 @@ export default function SidebarItems({
                     }}
                   >
                     {item.name}
+                    {item.shortcut && (
+                      <DropdownMenuShortcut>
+                        <ShortcutBadge command={item.shortcut} />
+                      </DropdownMenuShortcut>
+                    )}
                   </DropdownMenuItem>
                 ),
               )}
@@ -92,6 +99,7 @@ export default function SidebarItems({
         href={href}
         name={t(name)}
         icon={icon}
+        shortcut={shortcut}
         onModalClick={onModal}
         modal={modal}
       />

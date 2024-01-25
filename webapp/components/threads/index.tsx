@@ -20,7 +20,7 @@ import useBackend from '@/hooks/useBackendContext';
 import { Conversation, PageSettings } from '@/types';
 import { DefaultPageSettings } from '@/utils/constants';
 import logger from '@/utils/logger';
-import useShortcuts from '@/hooks/useShortcuts';
+import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import { getConversation, deleteConversation } from '@/utils/data/conversations';
 import { ModalIds } from '@/modals';
 import { ModalsContext } from '@/context/modals';
@@ -39,11 +39,11 @@ export default function Threads({ selectedConversationId }: { selectedConversati
   const { conversations, setConversations } = useContext(AppContext);
   const { backendContext, setSettings } = useBackend();
 
-  useShortcuts('#delete-message', (event) => {
+  useShortcuts(ShortcutIds.DELETE_MESSAGE, (event) => {
     event.preventDefault();
     logger.info('delete Message');
   });
-  useShortcuts('#editMessage', (event) => {
+  useShortcuts(ShortcutIds.EDIT_MESSAGE, (event) => {
     event.preventDefault();
     logger.info('edit Message');
   });

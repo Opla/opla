@@ -17,8 +17,11 @@
 import { ChangeEvent, KeyboardEvent, MouseEvent } from 'react';
 import { AlertTriangle, Loader2, SendHorizontal } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
+import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { ShortcutBadge } from '../common/ShortCut';
 
 export default function Prompt({
   conversationId,
@@ -54,6 +57,13 @@ export default function Prompt({
     onUpdatePrompt(e.target.value);
   };
 
+  const shortcutSend: KeyBinding = defaultShortcuts.find(
+    (s) => s.command === ShortcutIds.SEND_MESSAGE,
+  ) as KeyBinding;
+  const shortcutNewLine: KeyBinding = defaultShortcuts.find(
+    (s) => s.command === ShortcutIds.NEW_LINE,
+  ) as KeyBinding;
+
   return (
     <div className="w-full grow-0 !bg-transparent dark:bg-neutral-800">
       <form className="mx-2 flex flex-col gap-2 last:mb-2">
@@ -74,21 +84,35 @@ export default function Prompt({
             onChange={handleUpdateMessage}
             onKeyDown={(e) => handleKeypress(e)}
           />
-          <Button
-            disabled={isLoading || message?.length === 0}
-            type="button"
-            aria-label={t('Send')}
-            onClick={handleSendMessage}
-            className="ml-2"
-            size="icon"
-            variant="outline"
-          >
-            {isLoading ? (
-              <Loader2 strokeWidth={1.5} className="loading-icon h-4 w-4 animate-spin" />
-            ) : (
-              <SendHorizontal className="strokeWidth={1.5} h-4 w-4" />
-            )}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                disabled={isLoading || message?.length === 0}
+                type="button"
+                aria-label={t('Send')}
+                onClick={handleSendMessage}
+                className="ml-2"
+                size="icon"
+                variant="outline"
+              >
+                {isLoading ? (
+                  <Loader2 strokeWidth={1.5} className="loading-icon h-4 w-4 animate-spin" />
+                ) : (
+                  <SendHorizontal className="strokeWidth={1.5} h-4 w-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" sideOffset={12} className="mt-1">
+              <div className="flex w-full flex-row items-center justify-between gap-2 pb-2">
+                <p>{t(shortcutSend.description)}</p>
+                <ShortcutBadge command={shortcutSend.command} />
+              </div>
+              <div className="flex w-full flex-row items-center justify-between gap-2">
+                <p>{t(shortcutNewLine.description)}</p>
+                <ShortcutBadge command={shortcutNewLine.command} />
+              </div>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </form>
     </div>
