@@ -47,7 +47,7 @@ export const completion = async (
   provider: Provider | undefined,
   messages: LlmMessage[],
   system = DEFAULT_SYSTEM,
-  properties = {},
+  properties: Partial<LlmQueryCompletion> = {},
 ): Promise<string> => {
   if (!model) {
     throw new Error('Model not found');
