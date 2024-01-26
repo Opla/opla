@@ -23,11 +23,14 @@ import {
 } from '../providers/llama.cpp';
 import { LlamaCppArguments } from '../providers/llama.cpp/schema';
 import { getOplaConfig, getOplaServerStatus } from './commands';
+import { mapKeys } from '../data';
+import { toCamelCase } from '../string';
 
 export type Backend = {
   unlisten?: () => void;
   unlistenServer?: () => void;
   unlistenDownloader?: () => void;
+  unlistenStream?: () => void;
   context: OplaContext;
   start: (model?: string, parameters?: LlamaCppArguments) => Promise<void>;
   stop: () => Promise<void>;
@@ -37,17 +40,11 @@ export type Backend = {
 const connectBackend = async (
   listener: (payload: unknown) => void,
   downloaderlistener: (payload: unknown) => void,
+  streamListener: (response: unknown) => void,
 ) => {
   const { appWindow } = await import('@tauri-apps/api/window');
-  // const { confirm } = await import('@tauri-apps/api/dialog');
   const { listen } = await import('@tauri-apps/api/event');
   const unlisten = await appWindow.onCloseRequested(async () => {
-    /* const confirmed = await confirm('Are you sure?');
-    if (!confirmed) {
-      // user did not confirm closing the window; let's prevent it
-      event.preventDefault();
-      return;
-    } */
     await stopLLamaCppServer();
   });
   const unlistenServer = await listen('opla-server', (event) => {
@@ -57,6 +54,10 @@ const connectBackend = async (
   const unlistenDownloader = await listen('opla-downloader', (event) => {
     // logger.info('opla-downloader event', event.payload);
     downloaderlistener(event);
+  });
+  const unlistenStream = await listen('opla-sse', (event) => {
+    // logger.info('opla-downloader event', event.payload);
+    streamListener(mapKeys(event, toCamelCase));
   });
   const config = await getOplaConfig(); // (await invoke('get_opla_config')) as Store;
 
@@ -95,6 +96,7 @@ const connectBackend = async (
     unlisten,
     unlistenServer,
     unlistenDownloader,
+    unlistenStream,
     start,
     stop,
     restart,

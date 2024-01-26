@@ -58,6 +58,7 @@ function Thread({
   const conversationId = _conversationId || tempConversationId;
   const selectedConversation = conversations.find((c) => c.id === conversationId);
 
+  const stream = backendContext.streams?.[conversationId as string];
   const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>({});
   const [errorMessage, setErrorMessage] = useState<{ [key: string]: string }>({});
   const { currentPrompt = '' } = selectedConversation || {};
@@ -174,7 +175,7 @@ function Thread({
         // TODO build tokens context
         [toMessage],
         conversation?.system,
-        { stream: true },
+        { stream: true, conversationId: conversation.id },
       );
       fromMessage.content = response;
     } catch (e: any) {
@@ -267,9 +268,13 @@ function Thread({
         </div>
       ) : (
         <ScrollArea className="flex h-full flex-col">
-          {messages.map((msg) => (
-            <MessageView key={msg.id} message={msg} />
-          ))}
+          {messages.map((msg, index) => {
+            let m = msg;
+            if (stream && msg.content === '...' && index === messages.length - 1) {
+              m = { ...msg, content: stream.content };
+            }
+            return <MessageView key={msg.id} message={m} />;
+          })}
           <div className="h-4 w-full" />
           <div ref={bottomOfChatRef} />
         </ScrollArea>

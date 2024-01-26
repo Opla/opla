@@ -54,6 +54,7 @@ pub struct LlmMessage {
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmQueryCompletion {
+    pub conversation_id: Option<String>,
     pub messages: Vec<LlmMessage>,
     pub temperature: Option<f32>,
     pub n_predict: Option<i32>,
@@ -67,9 +68,23 @@ pub struct LlmQuery<T> {
     pub parameters: T,
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmResponse {
+    pub created: i64,
+    pub status: String,
     pub content: String,
+    pub conversation_id: Option<String>,
+}
+impl LlmResponse {
+    pub fn new(created: i64, status: &str, content: &str) -> Self {
+        Self {
+            created,
+            status: status.to_owned(),
+            content: content.to_owned(),
+            conversation_id: None,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -198,9 +213,7 @@ impl OpenAIChatCompletion {
     }
 
     fn to_llm_response(&self) -> LlmResponse {
-        LlmResponse {
-            content: self.choices[0].message.content.clone(),
-        }
+        LlmResponse::new(self.created, "success", &self.choices[0].message.content)
     }
 }
 
@@ -244,14 +257,22 @@ async fn request<R: Runtime>(
 async fn stream_request<R: Runtime>(
     url: String,
     secret_key: &str,
-    parameters: OpenAIQueryCompletion
+    parameters: OpenAIQueryCompletion,
+    callback: Option<impl FnMut(Result<LlmResponse, LlmError>) + Copy>
 ) -> Result<LlmResponse, Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
     let result = client.post(url).bearer_auth(&secret_key).json(&parameters).send().await;
     let response = match result {
         Ok(res) => res,
         Err(error) => {
-            println!("Failed to send: {}", error);
+            let message = format!("Failed to send: {}", error);
+            println!("{}", message);
+            match callback {
+                Some(mut cb) => {
+                    cb(Err(LlmError::new(&message, "BadJson")));
+                }
+                None => (),
+            }
             return Err(Box::new(Error::BadJson));
         }
     };
@@ -260,11 +281,25 @@ async fn stream_request<R: Runtime>(
         let error = match response.json::<LlmResponseError>().await {
             Ok(t) => t,
             Err(error) => {
-                println!("Failed to dezerialize error response: {}", error);
+                let message = format!("Failed to dezerialize error response: {}", error);
+                println!("{}", message);
+                match callback {
+                    Some(mut cb) => {
+                        cb(Err(LlmError::new(&message, "BadJson")));
+                    }
+                    None => (),
+                }
                 return Err(Box::new(Error::BadJson));
             }
         };
-        println!("Failed to get response: {} {:?}", status, error);
+        let message = format!("Failed to get response: {} {:?}", status, error);
+        println!("{}", message);
+        match callback {
+            Some(mut cb) => {
+                cb(Err(LlmError::new(&message, "BadJson")));
+            }
+            None => (),
+        }
         return Err(Box::new(error.error));
     }
     let mut stream = response.bytes_stream().eventsource();
@@ -274,6 +309,20 @@ async fn stream_request<R: Runtime>(
             Ok(event) => {
                 // break the loop at the end of SSE stream
                 if event.data == "[DONE]" {
+                    match callback {
+                        Some(mut cb) => {
+                            cb(
+                                Ok(
+                                    LlmResponse::new(
+                                        chrono::Utc::now().timestamp_millis(),
+                                        "finished",
+                                        "done"
+                                    )
+                                )
+                            );
+                        }
+                        None => (),
+                    }
                     break;
                 }
 
@@ -285,10 +334,34 @@ async fn stream_request<R: Runtime>(
                         return Err(Box::new(Error::BadJson));
                     }
                 };
+                match callback {
+                    Some(mut cb) => {
+                        cb(
+                            Ok(
+                                LlmResponse::new(
+                                    chunk.created,
+                                    "success",
+                                    chunk.choices[0].delta.content
+                                        .as_ref()
+                                        .unwrap_or(&String::from(""))
+                                )
+                            )
+                        );
+                    }
+                    None => (),
+                }
                 chunks.push(chunk);
             }
-            Err(_) => {
-                panic!("Error in event stream");
+            Err(error) => {
+                let message = format!("Error in event stream: {}", error);
+                println!("{}", message);
+                match callback {
+                    Some(mut cb) => {
+                        cb(Err(LlmError::new(&message, "BadJson")));
+                    }
+                    None => (),
+                }
+                return Err(Box::new(Error::BadJson));
             }
         }
     }
@@ -301,7 +374,8 @@ pub async fn call_completion<R: Runtime>(
     api: &str,
     secret_key: &str,
     model: &str,
-    query: LlmQuery<LlmQueryCompletion>
+    query: LlmQuery<LlmQueryCompletion>,
+    callback: Option<impl FnMut(Result<LlmResponse, LlmError>) + Copy>
 ) -> Result<LlmResponse, Box<dyn std::error::Error>> {
     let url = format!("{}/chat/{}s", api, query.command);
     println!(
@@ -323,7 +397,7 @@ pub async fn call_completion<R: Runtime>(
     };
     if stream {
         println!("llm call stream:  {:?}", stream);
-        stream_request::<R>(url, secret_key, parameters).await
+        stream_request::<R>(url, secret_key, parameters, callback).await
     } else {
         request::<R>(url, secret_key, parameters).await
     }

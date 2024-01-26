@@ -19,10 +19,11 @@ import logger from '../logger';
 const connect = async (
   listener: (payload: unknown) => void,
   downloadListener: (payload: unknown) => void,
+  streamListener: (response: unknown) => void,
 ) => {
   if (window?.__TAURI__) {
     const { default: connectBackend } = await import('@/utils/backend/connect');
-    return connectBackend(listener, downloadListener);
+    return connectBackend(listener, downloadListener, streamListener);
   }
   return {
     context: {

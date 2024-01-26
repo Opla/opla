@@ -25,6 +25,7 @@ import {
   ServerStatus,
   Download,
   Settings,
+  LlmResponse,
 } from '@/types';
 import {
   getOplaConfig,
@@ -159,6 +160,39 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const streamListener = async (event: any) => {
+    logger.info('stream event', event);
+    const response = event.payload as LlmResponse;
+    if (response.status === 'success') {
+      setBackendContext((context = initialBackendContext) => {
+        const { streams = {} } = context;
+        const stream = streams[response.conversationId] || {};
+        if (stream.prevContent !== response.content) {
+          const prevContent = stream.content || '';
+          streams[response.conversationId] = {
+            ...response,
+            content: prevContent + response.content,
+            prevContent: response.content,
+          };
+        }
+        return {
+          ...context,
+          streams,
+        };
+      });
+    } else {
+      setBackendContext((context = initialBackendContext) => {
+        const { streams = {} } = context;
+
+        delete streams[response.conversationId];
+        return {
+          ...context,
+          streams,
+        };
+      });
+    }
+  };
+
   const startBackend = useCallback(async () => {
     let opla = providers.find((p) => p.type === ProviderType.opla) as Provider;
     if (!opla) {
@@ -167,7 +201,11 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       opla = createProvider('Opla', provider);
       providers.splice(0, 0, opla);
     }
-    const backendImpl: Backend = await connectBackend(backendListener, downloadListener);
+    const backendImpl: Backend = await connectBackend(
+      backendListener,
+      downloadListener,
+      streamListener,
+    );
     logger.info('backend impl', backendImpl);
     setBackendContext((context = initialBackendContext) => ({
       ...context,

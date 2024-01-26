@@ -28,7 +28,7 @@ use std::sync::Mutex;
 use api::models;
 use data::model::Model;
 use downloader::Downloader;
-use llm::{ LlmQuery, LlmResponse, LlmQueryCompletion, call_completion };
+use llm::{ LlmQuery, LlmResponse, LlmQueryCompletion, call_completion, LlmError };
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
 use store::{ Store, Provider, ProviderType, ProviderMetadata, Settings, ServerConfiguration };
@@ -290,9 +290,32 @@ async fn llm_call_completion<R: Runtime>(
             };
             let model = model.clone();
             let query = query.clone();
-            call_completion::<R>(&api, &secret_key, &model, query).await.map_err(|err|
-                err.to_string()
-            )?
+            let conversation_id = query.parameters.conversation_id.clone();
+            call_completion::<R>(
+                &api,
+                &secret_key,
+                &model,
+                query,
+                Some(|result: Result<LlmResponse, LlmError>| {
+                    match result {
+                        Ok(response) => {
+                            let mut response = response.clone();
+                            response.conversation_id = conversation_id.clone();
+                            let _ = app
+                                .emit_all("opla-sse", response)
+                                .map_err(|err| err.to_string());
+                        }
+                        Err(err) => {
+                            let _ = app
+                                .emit_all("opla-sse", Payload {
+                                    message: err.to_string(),
+                                    status: ServerStatus::Error.as_str().to_string(),
+                                })
+                                .map_err(|err| err.to_string());
+                        }
+                    }
+                })
+            ).await.map_err(|err| err.to_string())?
         };
         return Ok(response);
     }
