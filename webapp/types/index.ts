@@ -274,6 +274,7 @@ export type LlmQueryCompletion = {
   temperature?: number;
   nPredict?: number;
   stop?: string[];
+  stream?: boolean;
 };
 
 export type LlmQuery = {

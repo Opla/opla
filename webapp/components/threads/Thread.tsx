@@ -174,6 +174,7 @@ function Thread({
         // TODO build tokens context
         [toMessage],
         conversation?.system,
+        { stream: true },
       );
       fromMessage.content = response;
     } catch (e: any) {
