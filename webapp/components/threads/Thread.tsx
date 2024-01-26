@@ -137,7 +137,7 @@ function Thread({
     setIsLoading({ ...isLoading, [conversationId]: true });
 
     const toMessage = createMessage({ role: 'user', name: 'you' }, currentPrompt);
-    const fromMessage = createMessage({ role: 'system', name: selectedModel }, '...');
+    const fromMessage = createMessage({ role: 'assistant', name: selectedModel }, '...');
     const { newConversationId, newConversations: nc } = updateMessages([toMessage, fromMessage]);
     let newConversations = nc;
 

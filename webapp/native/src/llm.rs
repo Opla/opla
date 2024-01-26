@@ -106,10 +106,27 @@ pub struct OpenAIChatChoice {
     pub finish_reason: String,
 }
 
+#[serde_with::skip_serializing_none]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LlmChunkMessage {
+    pub content: Option<String>,
+    pub role: Option<String>,
+    pub name: Option<String>,
+}
+
+#[serde_with::skip_serializing_none]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct OpenAIChatChunkChoice {
+    pub delta: LlmChunkMessage,
+    pub index: i32,
+    pub finish_reason: Option<String>,
+}
+
+#[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct OpenAIChatCompletionChunk {
     pub id: String,
-    pub choices: Vec<OpenAIChatChoice>,
+    pub choices: Vec<OpenAIChatChunkChoice>,
     pub model: String,
     pub created: i64,
     pub system_fingerprint: Option<String>,
@@ -122,6 +139,7 @@ pub struct OpenAIChatUsage {
     pub prompt_tokens: i32,
     pub total_tokens: i32,
 }
+#[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct OpenAIChatCompletion {
     pub id: String,
@@ -139,9 +157,32 @@ impl OpenAIChatCompletion {
         let object = chunks[0].object.clone();
         let created = chunks[0].created;
         let system_fingerprint = chunks[0].system_fingerprint.clone();
-        for chunk in chunks {
-            choices.extend(chunk.choices);
+        let finish_reason = match &chunks[chunks.len() - 1].choices[0].finish_reason {
+            Some(f) => f,
+            None => "",
+        };
+        let role = match &chunks[chunks.len() - 1].choices[0].delta.role {
+            Some(f) => f,
+            None => "assistant",
+        };
+        let name = &chunks[chunks.len() - 1].choices[0].delta.name.clone();
+        let mut content = String::new();
+        for chunk in &chunks {
+            // TODO: handle multiple choices index
+            match &chunk.choices[0].delta.content {
+                Some(c) => content.push_str(c),
+                None => (),
+            }
         }
+        choices.push(OpenAIChatChoice {
+            message: LlmMessage {
+                content,
+                role: role.to_owned(),
+                name: name.clone(),
+            },
+            index: 0,
+            finish_reason: finish_reason.to_owned(),
+        });
         Self {
             id,
             choices,
