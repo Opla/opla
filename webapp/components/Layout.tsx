@@ -19,7 +19,7 @@ import { useRouter } from 'next/router';
 import '@/app/globals.css';
 import Sidebar from '@/components/common/Sidebar';
 import { AppContext } from '@/context';
-import useBackend from '@/hooks/useBackendContext';
+import useBackendContext from '@/hooks/useBackendContext';
 import useRegisterModals from '@/hooks/useRegisterModals';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import Modals, { ModalIds } from '@/modals';
@@ -34,7 +34,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { providers, models, presets } = useContext(AppContext);
   const router = useRouter();
 
-  const { startBackend, backendContext, setSettings } = useBackend();
+  const { startBackend, disconnectBackend, backendContext, setSettings } = useBackendContext();
 
   const { showModal } = useRegisterModals(Modals);
 
@@ -43,7 +43,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       firstRender.current = false;
       startBackend();
     }
-  }, [providers, startBackend]);
+    return () => {
+      disconnectBackend();
+    };
+  }, [providers, disconnectBackend, startBackend]);
 
   useEffect(() => {
     const handleRouteChange = (url: any) => {

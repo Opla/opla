@@ -13,10 +13,9 @@
 // limitations under the License.
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import { Backend } from '@/utils/backend/connect';
 import logger from '@/utils/logger';
 import { createProvider } from '@/utils/data/providers';
-import connectBackend from '@/utils/backend';
+import getBackend from '@/utils/backend';
 import {
   Metadata,
   Provider,
@@ -63,6 +62,7 @@ const initialBackendContext: OplaContext = {
 
 type Context = {
   startBackend: () => Promise<void>;
+  disconnectBackend: () => Promise<void>;
   backendContext: OplaContext;
   setSettings: (settings: Settings) => Promise<void>;
   updateBackendStore: () => Promise<void>;
@@ -74,6 +74,7 @@ type Context = {
 
 const BackendContext = createContext<Context>({
   startBackend: async () => {},
+  disconnectBackend: async () => {},
   backendContext: initialBackendContext,
   setSettings: async () => {},
   updateBackendStore: async () => {},
@@ -86,13 +87,13 @@ const BackendContext = createContext<Context>({
 function BackendProvider({ children }: { children: React.ReactNode }) {
   const [backendContext, setBackendContext] = useState<OplaContext>();
   const { providers, setProviders } = useContext(AppContext);
-  const startRef = useRef(async (conf: any) => {
+  const startRef = useRef(async (conf: unknown) => {
     throw new Error(`start not initialized ${conf}`);
   });
   const stopRef = useRef(async () => {
     throw new Error('stop not initialized');
   });
-  const restartRef = useRef(async (conf: any) => {
+  const restartRef = useRef(async (conf: unknown) => {
     throw new Error(`restart not initialized ${conf}`);
   });
 
@@ -201,19 +202,20 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       opla = createProvider('Opla', provider);
       providers.splice(0, 0, opla);
     }
-    const backendImpl: Backend = await connectBackend(
+    const backendImpl = await getBackend();
+    const backendImplContext = await backendImpl.connect(
       backendListener,
       downloadListener,
       streamListener,
     );
-    logger.info('backend impl', backendImpl);
+    logger.info('connected backend impl', backendImpl);
     setBackendContext((context = initialBackendContext) => ({
       ...context,
-      ...backendImpl.context,
+      ...backendImplContext,
     }));
-    logger.info('backend', opla.metadata, backendImpl.context.config.server.parameters);
+    logger.info('start backend', opla.metadata, backendImplContext.config.server.parameters);
     const metadata = opla.metadata as Metadata;
-    metadata.server = backendImpl.context.config.server as Metadata;
+    metadata.server = backendImplContext.config.server as Metadata;
     setProviders(providers);
 
     startRef.current = backendImpl.start as () => Promise<never>;
@@ -241,22 +243,30 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     setBackendContext((context = initialBackendContext) => ({ ...context, config: store }));
   }, [setBackendContext]);
 
-  const setActiveModel = async (model: string) => {
-    logger.info('setActiveModel', model);
-    await setBackendActiveModel(model);
-    await updateBackendStore();
-    setBackendContext((context = initialBackendContext) => {
-      const newContext = {
-        ...context,
-        config: { ...context.config, models: { ...context.config.models, activeModel: model } },
-      };
-      return newContext;
-    });
-  };
+  const setActiveModel = useCallback(
+    async (model: string) => {
+      logger.info('setActiveModel', model);
+      await setBackendActiveModel(model);
+      await updateBackendStore();
+      setBackendContext((context = initialBackendContext) => {
+        const newContext = {
+          ...context,
+          config: { ...context.config, models: { ...context.config.models, activeModel: model } },
+        };
+        return newContext;
+      });
+    },
+    [updateBackendStore],
+  );
 
-  const contextValue = useMemo(
+  const disconnectBackend = useCallback(async () => {
+    // logger.info('unmountBackendProvider');
+  }, []);
+
+  const contextValue = useMemo<Context>(
     () => ({
       startBackend,
+      disconnectBackend,
       backendContext: backendContext as OplaContext,
       setSettings,
       updateBackendStore,
@@ -265,7 +275,14 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       restart,
       setActiveModel,
     }),
-    [backendContext, setSettings, startBackend, updateBackendStore],
+    [
+      backendContext,
+      disconnectBackend,
+      setActiveModel,
+      setSettings,
+      startBackend,
+      updateBackendStore,
+    ],
   );
 
   return <BackendContext.Provider value={contextValue}>{children}</BackendContext.Provider>;
