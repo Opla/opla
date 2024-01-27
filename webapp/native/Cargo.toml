@@ -28,6 +28,8 @@ serde_with = { version = "3.4.0", features = ["json"] }
 uuid = { version = "1.6.1", features = ["v4"] }
 void = "1.0.2"
 thiserror = "1.0.56"
+eventsource-stream = "0.2.3"
+futures-util = "0.3.30"
 
 [features]
 # by default Tauri runs in production mode

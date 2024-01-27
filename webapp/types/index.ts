@@ -262,6 +262,7 @@ export type OplaContext = Readonly<{
   server: OplaServer;
   config: Store;
   downloads?: Download[];
+  streams?: Record<string, LlmStreamResponse>;
 }>;
 
 export type LlmMessage = {
@@ -274,6 +275,8 @@ export type LlmQueryCompletion = {
   temperature?: number;
   nPredict?: number;
   stop?: string[];
+  stream?: boolean;
+  conversationId?: string;
 };
 
 export type LlmQuery = {
@@ -282,5 +285,16 @@ export type LlmQuery = {
 };
 
 export type LlmResponse = {
+  created: number;
+  status: string;
   content: string;
+  conversationId: string;
+};
+
+export type LlmStreamResponse = {
+  created: number;
+  status: string;
+  content: string[];
+  prevContent?: string;
+  conversationId: string;
 };

@@ -12,38 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Backend } from '@/utils/backend/connect';
 import { ServerStatus } from '@/types';
 import logger from '../logger';
 
-const connect = async (
-  listener: (payload: unknown) => void,
-  downloadListener: (payload: unknown) => void,
-) => {
+const context = {
+  config: {
+    settings: {
+      startApp: false,
+      welcomeSplash: false,
+    },
+    server: {
+      name: 'None',
+      parameters: {},
+    },
+    models: {
+      activeModel: 'None',
+      items: [],
+    },
+  },
+  server: {
+    status: ServerStatus.ERROR,
+    message: 'no backend',
+  },
+};
+
+const createBackend = async () => {
   if (window?.__TAURI__) {
-    const { default: connectBackend } = await import('@/utils/backend/connect');
-    return connectBackend(listener, downloadListener);
+    const { default: Backend } = await import('@/utils/backend/Backend');
+    return Backend.getInstance();
   }
   return {
-    context: {
-      config: {
-        settings: {
-          startApp: false,
-          welcomeSplash: false,
-        },
-        server: {
-          name: 'None',
-          parameters: {},
-        },
-        models: {
-          activeModel: 'None',
-          items: [],
-        },
-      },
-      server: {
-        status: ServerStatus.ERROR,
-        message: 'no backend',
-      },
+    context,
+    connect: async () => {
+      logger.error('no backend');
+      return context;
     },
     start: async () => {
       logger.error('no backend');
@@ -54,7 +56,7 @@ const connect = async (
     restart: async () => {
       logger.error('no backend');
     },
-  } as Backend;
+  };
 };
 
-export default connect;
+export default createBackend;

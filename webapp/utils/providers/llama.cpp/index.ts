@@ -26,7 +26,7 @@ const startLLamaCppServer = async (
   model: string,
   metadata: LlamaCppArguments,
   command = 'start_opla_server',
-) => {
+): Promise<unknown> => {
   logger.info(
     command === 'start_opla_server' ? 'start LLama.cpp server' : 'restart LLama.cpp server',
   );
@@ -36,7 +36,10 @@ const startLLamaCppServer = async (
   return response;
 };
 
-const restartLLamaCppServer = async (model: string, metadata: LlamaCppArguments) => {
+const restartLLamaCppServer = async (
+  model: string,
+  metadata: LlamaCppArguments,
+): Promise<unknown> => {
   await stopLLamaCppServer();
   return startLLamaCppServer(model, metadata, 'start_opla_server');
 };

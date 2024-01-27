@@ -9,7 +9,9 @@ import {
   Provider,
   ProviderType,
 } from '@/types';
+import { mapKeys } from '@/utils/data';
 import logger from '@/utils/logger';
+import { toSnakeCase } from '@/utils/string';
 import { invokeTauri } from '@/utils/tauri';
 
 const NAME = 'OpenAI';
@@ -47,7 +49,7 @@ export const completion = async (
   provider: Provider | undefined,
   messages: LlmMessage[],
   system = DEFAULT_SYSTEM,
-  properties = {},
+  properties: Partial<LlmQueryCompletion> = {},
 ): Promise<string> => {
   if (!model) {
     throw new Error('Model not found');
@@ -58,10 +60,13 @@ export const completion = async (
     content: system,
   };
 
-  const parameters: LlmQueryCompletion = {
-    messages: [systemMessage, ...messages],
-    ...properties,
-  };
+  const parameters: LlmQueryCompletion = mapKeys(
+    {
+      messages: [systemMessage, ...messages],
+      ...properties,
+    },
+    toSnakeCase,
+  );
   const response: LlmResponse = (await invokeTauri('llm_call_completion', {
     model: model.id,
     llmProvider: provider,
