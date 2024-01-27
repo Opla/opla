@@ -2,8 +2,8 @@
 //
 
 import { LlmMessage, LlmQueryCompletion, Message, Model, Provider, ProviderType } from '@/types';
-import { completion as openAICompletion } from './openai';
-import { completion as oplaCompletion } from './opla';
+import OpenAI from './openai';
+import Opla from './opla';
 import { findProvider } from '../data/providers';
 import { getContent } from '../data';
 
@@ -26,13 +26,14 @@ const completion = async (
     name: m.author?.name,
   }));
   if (provider?.type === ProviderType.openai) {
-    return openAICompletion(model, provider, messages, system, properties);
+    return OpenAI.completion.invoke(model, provider, messages, system, properties);
   }
-  return oplaCompletion(model, provider, messages, system, properties);
+  return Opla.completion.invoke(model, provider, messages, system, properties);
 };
 
 const models = async (provider: Provider): Promise<Model[]> => {
   if (provider.type === ProviderType.openai) {
+    // TODO: implement
     return [];
   }
   return [];

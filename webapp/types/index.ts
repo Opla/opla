@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { LucideIcon } from 'lucide-react';
+import { ZodSchema } from 'zod';
 
 declare global {
   interface Window {
@@ -109,6 +110,25 @@ export enum ProviderType {
   openai = 'openai',
   proxy = 'proxy',
 }
+
+export type ProviderObject = {
+  name: string;
+  type: ProviderType;
+  description: string;
+  system: string;
+  template: Partial<Provider>;
+  completion: {
+    presetKeys: Record<string, string>;
+    schema: ZodSchema;
+    invoke: (
+      model: Model | undefined,
+      provider: Provider | undefined,
+      messages: LlmMessage[],
+      system?: string,
+      properties?: Partial<LlmQueryCompletion>,
+    ) => Promise<string>;
+  };
+};
 
 export type Provider = BaseNamedRecord & {
   url: string;
