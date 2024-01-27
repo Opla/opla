@@ -271,7 +271,7 @@ function Thread({
           {messages.map((msg, index) => {
             let m = msg;
             if (stream && msg.content === '...' && index === messages.length - 1) {
-              m = { ...msg, content: stream.content };
+              m = { ...msg, content: (stream.content as string[]).join('') };
             }
             return <MessageView key={msg.id} message={m} />;
           })}

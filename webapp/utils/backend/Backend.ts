@@ -14,7 +14,14 @@
 // import { appWindow } from '@tauri-apps/api/window';
 // import { confirm } from '@tauri-apps/api/dialog';
 // import { listen } from '@tauri-apps/api/event';
-import { OplaContext, OplaServer, ServerStatus } from '@/types';
+import {
+  Download,
+  LlmResponse,
+  LlmStreamResponse,
+  OplaContext,
+  OplaServer,
+  ServerStatus,
+} from '@/types';
 import logger from '../logger';
 import {
   restartLLamaCppServer,
@@ -31,7 +38,9 @@ class Backend {
 
   private activeModel?: string;
 
-  public context?: OplaContext;
+  private streams: Record<string, LlmStreamResponse> = {};
+
+  // public context?: OplaContext;
 
   public static getInstance = () => {
     if (!Backend.instance) {
@@ -40,11 +49,107 @@ class Backend {
     return Backend.instance;
   };
 
-  public connect = async (
-    listener: (payload: unknown) => void,
-    downloaderlistener: (payload: unknown) => void,
-    streamListener: (response: unknown) => void,
-  ) => {
+  static getContext = () => ({}) as OplaContext;
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  static setContext = (_callback: (_context: OplaContext) => OplaContext) => {};
+
+  static backendListener = (event: any) => {
+    logger.info('backend event', event);
+    if (event.event === 'opla-server' && Backend.getContext()) {
+      Backend.setContext((context) => {
+        let { activeModel } = context.config.models;
+        if (event.payload.status === ServerStatus.STARTING) {
+          activeModel = event.payload.message;
+        }
+        return {
+          ...context,
+          config: {
+            ...context.config,
+            models: {
+              ...context.config.models,
+              activeModel,
+            },
+          },
+          server: {
+            ...context.server,
+            status: event.payload.status,
+            message: event.payload.message,
+          },
+        };
+      });
+    }
+  };
+
+  static downloadListener = async (event: any) => {
+    // logger.info('downloader event', event);
+    if (event.event === 'opla-downloader') {
+      const [type, download]: [string, Download] = await mapKeys(event.payload, toCamelCase);
+
+      // logger.info('download', type, downloads);
+      if (type === 'progress') {
+        Backend.setContext((context) => {
+          const { downloads = [] } = context;
+          const index = downloads.findIndex((d) => d.id === download.id);
+          if (index === -1) {
+            downloads.push(download);
+          } else {
+            downloads[index] = download;
+          }
+          return {
+            ...context,
+            downloads,
+          };
+        });
+      } else if (type === 'finished') {
+        Backend.setContext((context) => {
+          const { downloads = [] } = context;
+          const index = downloads.findIndex((d) => d.id === download.id);
+          logger.info('download finished', index, download);
+          if (index !== -1) {
+            downloads.splice(index, 1);
+          }
+          return {
+            ...context,
+            downloads,
+          };
+        });
+      }
+    }
+  };
+
+  private streamListener = async (event: any) => {
+    logger.info('stream event', event, Backend.getContext());
+    const response = event.payload as LlmResponse;
+    if (response.status === 'success' && Backend.getContext()) {
+      const stream = this.streams[response.conversationId] || ({} as LlmStreamResponse);
+      if (stream.prevContent !== response.content) {
+        const content = (stream.content || []) as string[];
+        content.push(response.content as string);
+        this.streams[response.conversationId] = {
+          ...response,
+          content,
+          prevContent: response.content as string,
+        };
+        Backend.setContext((context) => ({
+          ...context,
+          streams: this.streams,
+        }));
+      }
+    } else {
+      Backend.setContext((context) => {
+        if (this.streams?.[response.conversationId]) {
+          delete this.streams[response.conversationId];
+        }
+        return {
+          ...context,
+          streams: this.streams,
+        };
+      });
+    }
+  };
+
+  public connect = async () => {
     const { appWindow } = await import('@tauri-apps/api/window');
     const { listen } = await import('@tauri-apps/api/event');
 
@@ -56,20 +161,19 @@ class Backend {
     this.unlistenServer?.();
     this.unlistenServer = await listen('opla-server', (event) => {
       // logger.info('opla-server event', event.payload);
-      listener(event);
+      Backend.backendListener(event);
     });
-
 
     this.unlistenDownloader?.();
     this.unlistenDownloader = await listen('opla-downloader', (event) => {
       // logger.info('opla-downloader event', event.payload);
-      downloaderlistener(event);
+      Backend.downloadListener(event);
     });
 
     this.unlistenStream?.();
     this.unlistenStream = await listen('opla-sse', (event) => {
       // logger.info('opla-downloader event', event.payload);
-      streamListener(mapKeys(event, toCamelCase));
+      this.streamListener(mapKeys(event, toCamelCase));
     });
     const config = await getOplaConfig(); // (await invoke('get_opla_config')) as Store;
 
@@ -105,9 +209,7 @@ class Backend {
       return restartLLamaCppServer(model, parameters);
     };
 
-    this.context = { config, server };
-
-    return this.context;
+    return { config, server };
   };
 
   unlisten?: () => void;
