@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { File, Palette, Settings2 } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
@@ -20,19 +20,30 @@ import useBackend from '@/hooks/useBackendContext';
 import { updateConversation } from '@/utils/data/conversations';
 import { findModel } from '@/utils/data/models';
 import { DEFAULT_SYSTEM } from '@/utils/providers/opla';
+import { getCompletionParametersDefinition } from '@/utils/providers';
+import { findProvider } from '@/utils/data/providers';
+import { Conversation } from '@/types';
+import { toast } from '@/components/ui/Toast';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Textarea } from '../ui/textarea';
+import Parameter from '../common/Parameter';
 
 export default function Settings({ conversationId }: { conversationId?: string }) {
   const { t } = useTranslation();
-  const { conversations, setConversations } = useContext(AppContext);
+  const { conversations, setConversations, providers } = useContext(AppContext);
   const { backendContext } = useBackend();
+  const [params, setParams] = useState<{ [key: string]: string | number | boolean | undefined }>(
+    {},
+  );
+
   logger.info('backendContext', backendContext);
   const selectedConversation = conversations.find((c) => c.id === conversationId);
   const { activeModel } = backendContext.config.models;
   const model = findModel(activeModel, backendContext.config.models.items);
+  const provider = findProvider(selectedConversation?.provider, providers);
+  const parametersDefinition = getCompletionParametersDefinition(provider);
 
   const onNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
@@ -56,9 +67,58 @@ export default function Settings({ conversationId }: { conversationId?: string }
     }
   };
 
+  const onParameterChange = (name: string, _value: string | number | boolean | undefined) => {
+    logger.info('onParameterChange', name, _value);
+    const parameterDef = parametersDefinition[name];
+    let value = _value;
+    const result = parameterDef.z.safeParse(value);
+    if (String(value).length > 0 && !result.success) {
+      if (parameterDef.type === 'number') {
+        setParams({ ...params, [name]: value });
+      } else {
+        logger.error('onParameterChange invalid', result.error);
+        toast.error(result.error.message);
+      }
+      return;
+    }
+    if (result.success) {
+      value = result.data;
+    }
+    if (params[name] !== undefined) {
+      setParams({ ...params, [name]: undefined });
+    }
+    if (
+      parameterDef.defaultValue === _value ||
+      (parameterDef.defaultValue === undefined && _value === '')
+    ) {
+      value = undefined;
+    }
+
+    if (selectedConversation) {
+      let { parameters } = selectedConversation;
+      let newConversation: Conversation | undefined;
+      if (value !== undefined) {
+        parameters = { ...selectedConversation.parameters, [name]: value };
+        newConversation = { ...selectedConversation, parameters };
+      } else if (parameters?.[name] !== undefined) {
+        delete parameters[name];
+        newConversation = { ...selectedConversation, parameters };
+      } else if (parameters && Object.keys(parameters).length === 0) {
+        newConversation = { ...selectedConversation };
+        delete newConversation.parameters;
+      }
+      if (newConversation) {
+        const newConversations = updateConversation(newConversation, conversations);
+        logger.info('onParameterChange save Parameters', value, parameters); // , params);
+        setConversations(newConversations);
+      }
+    }
+  };
+
   const system = selectedConversation?.system ?? model?.system ?? DEFAULT_SYSTEM;
+
   return (
-    <div className="scrollbar-trigger flex h-full w-full bg-neutral-100 px-4 dark:bg-neutral-800/70">
+    <div className="scrollbar-trigger flex h-full w-full bg-neutral-100 px-4 dark:bg-neutral-900">
       <Tabs defaultValue="settings" className="w-full py-3">
         <TabsList className="justify-left w-full gap-4">
           <TabsTrigger value="settings">
@@ -92,9 +152,26 @@ export default function Settings({ conversationId }: { conversationId?: string }
                   />
                 </AccordionContent>
               </AccordionItem>
-              <AccordionItem value="settings-appearance">
-                <AccordionTrigger>Advanced</AccordionTrigger>
-                <AccordionContent>context overflow and others.</AccordionContent>
+              <AccordionItem value="settings-parameters">
+                <AccordionTrigger>Parameters</AccordionTrigger>
+                <AccordionContent>
+                  {Object.keys(parametersDefinition).map((key) => (
+                    <Parameter
+                      key={key}
+                      title={t(parametersDefinition[key].name)}
+                      type={parametersDefinition[key].type}
+                      name={key}
+                      value={
+                        selectedConversation?.parameters?.[key] ||
+                        params[key] ||
+                        parametersDefinition[key].defaultValue
+                      }
+                      description={t(parametersDefinition[key].description)}
+                      inputCss="max-w-20 pl-2"
+                      onChange={onParameterChange}
+                    />
+                  ))}
+                </AccordionContent>
               </AccordionItem>
             </Accordion>
           </ScrollArea>

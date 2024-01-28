@@ -71,16 +71,16 @@ pub struct LlmQuery<T> {
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmResponse {
-    pub created: i64,
-    pub status: String,
+    pub created: Option<i64>,
+    pub status: Option<String>,
     pub content: String,
     pub conversation_id: Option<String>,
 }
 impl LlmResponse {
     pub fn new(created: i64, status: &str, content: &str) -> Self {
         Self {
-            created,
-            status: status.to_owned(),
+            created: Some(created),
+            status: Some(status.to_owned()),
             content: content.to_owned(),
             conversation_id: None,
         }

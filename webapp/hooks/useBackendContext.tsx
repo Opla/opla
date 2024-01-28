@@ -105,17 +105,13 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     const metadata = opla.metadata as Metadata;
     metadata.server = backendImplContext.config.server as Metadata;
     setProviders(providers);
-
-    /* startRef.current = backendImpl.start as () => Promise<never>;
-    stopRef.current = backendImpl.stop as () => Promise<never>;
-    restartRef.current = backendImpl.restart as () => Promise<never>; */
-  }, [providers, setProviders]);
+  }, [getBackendContext, providers, setProviders]);
 
   const restart = async (params: any): Promise<unknown> => backendRef.current?.restart?.(params); // restartRef.current(params);
 
   const start = async (params: any): Promise<unknown> => backendRef.current?.start?.(params); // startRef.current(params);
 
-  const stop = async (): Promise<unknown> => backendRef.current?.stop?.(); // stopRef.current();
+  const stop = async (): Promise<unknown> => backendRef.current?.stop?.();
 
   const setSettings = useCallback(async (settings: Settings) => {
     const store = await saveSettings(settings);

@@ -12,12 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LlmMessage, LlmQueryCompletion, LlmResponse, Model, Provider } from '@/types';
+import {
+  CompletionParametersDefinition,
+  LlmMessage,
+  LlmQueryCompletion,
+  LlmResponse,
+  Model,
+  Provider,
+  ProviderDefinition,
+  ProviderType,
+} from '@/types';
 import logger from '@/utils/logger';
 import { invokeTauri } from '@/utils/tauri';
 
 const NAME = 'Opla';
-// const TYPE = ProviderType.opla;
+const TYPE = ProviderType.opla;
+const DESCRIPTION = 'Opla Open source local LLM';
 const DEFAULT_SYSTEM = 'You are an expert in retrieving information.\n';
 
 const DEFAULT_PROPERTIES: Partial<LlmQueryCompletion> = {
@@ -36,17 +46,6 @@ const completion = async (
   if (!model) {
     throw new Error('Model not found');
   }
-
-  /* let prompt = messages
-    .reduce((acc, m) => {
-      if (m.role === 'user') {
-        return `${acc}\nQuestion: ${m.content}`;
-      }
-      if (m.role === 'assistant') {
-        return `${acc}\nAnswer: ${m.content}`;
-      }
-      return acc;
-    }, ''); */
 
   const systemMessage: LlmMessage = {
     role: 'system',
@@ -73,3 +72,19 @@ const completion = async (
 };
 
 export { DEFAULT_SYSTEM, completion };
+
+export const CompletionParameters: CompletionParametersDefinition = {};
+
+const OplaProvider: ProviderDefinition = {
+  name: NAME,
+  type: TYPE,
+  description: DESCRIPTION,
+  system: DEFAULT_SYSTEM,
+  template: {}, // TODO: add template
+  completion: {
+    parameters: CompletionParameters,
+    invoke: completion,
+  },
+};
+
+export default OplaProvider;
