@@ -84,6 +84,7 @@ export type Conversation = BaseNamedRecord & {
   messages: Message[];
   pluginIds?: string[];
   preset?: Preset;
+  parameters?: Record<string, string | number | boolean>;
   currentPrompt?: string;
   note?: string;
   system?: string;
@@ -111,15 +112,26 @@ export enum ProviderType {
   proxy = 'proxy',
 }
 
-export type ProviderObject = {
+export type CompletionParameterDefinition = {
+  z: ZodSchema;
+  type?: 'text' | 'password' | 'large-text' | 'number' | 'url' | 'select' | 'boolean' | 'switch';
+  defaultValue?: string | number | boolean | undefined;
+  min?: number;
+  max?: number;
+  name: string;
+  description: string;
+};
+
+export type CompletionParametersDefinition = Record<string, CompletionParameterDefinition>;
+
+export type ProviderDefinition = {
   name: string;
   type: ProviderType;
   description: string;
   system: string;
   template: Partial<Provider>;
   completion: {
-    presetKeys: Record<string, string>;
-    schema: ZodSchema;
+    parameters: CompletionParametersDefinition;
     invoke: (
       model: Model | undefined,
       provider: Provider | undefined,

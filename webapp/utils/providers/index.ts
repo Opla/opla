@@ -1,7 +1,15 @@
 // Copyright 2024 mik
 //
 
-import { LlmMessage, LlmQueryCompletion, Message, Model, Provider, ProviderType } from '@/types';
+import {
+  CompletionParametersDefinition,
+  LlmMessage,
+  LlmQueryCompletion,
+  Message,
+  Model,
+  Provider,
+  ProviderType,
+} from '@/types';
 import OpenAI from './openai';
 import Opla from './opla';
 import { findProvider } from '../data/providers';
@@ -39,4 +47,11 @@ const models = async (provider: Provider): Promise<Model[]> => {
   return [];
 };
 
-export { completion, models };
+const getCompletionParametersDefinition = (provider?: Provider): CompletionParametersDefinition => {
+  if (provider?.type === ProviderType.openai) {
+    return OpenAI.completion.parameters;
+  }
+  return Opla.completion.parameters;
+};
+
+export { completion, models, getCompletionParametersDefinition };

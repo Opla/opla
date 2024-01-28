@@ -28,7 +28,7 @@ import {
   updateConversationMessages,
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
-import { completion } from '@/utils/providers';
+import { completion, getCompletionParametersDefinition } from '@/utils/providers';
 import { findModel, getLocalModelsAsItems, getProviderModelsAsItems } from '@/utils/data/models';
 import { findProvider } from '@/utils/data/providers';
 import { toast } from '@/components/ui/Toast';
@@ -167,6 +167,21 @@ function Thread({
       model = findModel(conversation.model || activeModel, backendContext.config.models.items);
     }
 
+    const parameters: Record<string, any> = { stream: true, conversationId: conversation.id };
+    if (conversation.parameters) {
+      const conversationParameters = conversation.parameters;
+      const provider = findProvider(conversation.provider, providers);
+      const parametersDefinition = getCompletionParametersDefinition(provider);
+      Object.keys(conversation.parameters).forEach((key) => {
+        const parameterDef = parametersDefinition[key];
+        if (parameterDef) {
+          const result = parameterDef.z.safeParse(conversationParameters[key]);
+          if (result.success) {
+            parameters[key] = result.data;
+          }
+        }
+      });
+    }
     try {
       const response = await completion(
         model,
@@ -175,7 +190,7 @@ function Thread({
         // TODO build tokens context
         [toMessage],
         conversation?.system,
-        { stream: true, conversationId: conversation.id },
+        parameters,
       );
       fromMessage.content = response;
     } catch (e: any) {
