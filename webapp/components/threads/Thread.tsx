@@ -167,7 +167,7 @@ function Thread({
       model = findModel(conversation.model || activeModel, backendContext.config.models.items);
     }
 
-    const parameters: LlmParameters[] = [{ key: 'stream', value: 'true' }];
+    const parameters: LlmParameters[] = [];
     if (conversation.parameters) {
       const conversationParameters = conversation.parameters;
       const provider = findProvider(conversation.provider, providers);

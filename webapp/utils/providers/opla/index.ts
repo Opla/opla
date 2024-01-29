@@ -36,45 +36,6 @@ const DEFAULT_PROPERTIES: LlmParameters[] = [
   { key: 'stop', value: "['Llama:', 'User:', 'Question:']" },
 ];
 
-const completion = async (
-  model: Model | undefined,
-  provider: Provider | undefined,
-  messages: LlmMessage[],
-  system = DEFAULT_SYSTEM,
-  conversationId?: string,
-  parameters: LlmParameters[] = DEFAULT_PROPERTIES,
-): Promise<string> => {
-  if (!model) {
-    throw new Error('Model not found');
-  }
-
-  const systemMessage: LlmMessage = {
-    role: 'system',
-    content: system,
-  };
-
-  const options: LlmQueryCompletion = {
-    messages: [systemMessage, ...messages],
-    conversationId,
-    parameters,
-  };
-
-  const response: LlmResponse = (await invokeTauri('llm_call_completion', {
-    model: model.name,
-    llmProvider: provider,
-    query: { command: 'completion', options },
-  })) as LlmResponse;
-
-  const { content } = response;
-  if (content) {
-    logger.info(`${NAME} completion response`, content);
-    return content.trim();
-  }
-  throw new Error(`${NAME} completion error ${response}`);
-};
-
-export { DEFAULT_SYSTEM, completion };
-
 // https://github.com/ggerganov/llama.cpp/blob/master/examples/server/README.md
 // TODO: logit_bias, n_probs, image_data, slot_id, cache_prompt, system_prompt
 export const CompletionParameters: CompletionParametersDefinition = {
@@ -245,6 +206,43 @@ export const CompletionParameters: CompletionParametersDefinition = {
     name: 'ignore_eos',
     description: 'Ignore end of stream token and continue generating (default: false).',
   },
+};
+
+const completion = async (
+  model: Model | undefined,
+  provider: Provider | undefined,
+  messages: LlmMessage[],
+  system = DEFAULT_SYSTEM,
+  conversationId?: string,
+  parameters: LlmParameters[] = DEFAULT_PROPERTIES,
+): Promise<string> => {
+  if (!model) {
+    throw new Error('Model not found');
+  }
+
+  const systemMessage: LlmMessage = {
+    role: 'system',
+    content: system,
+  };
+
+  const options: LlmQueryCompletion = {
+    messages: [systemMessage, ...messages],
+    conversationId,
+    parameters,
+  };
+
+  const response: LlmResponse = (await invokeTauri('llm_call_completion', {
+    model: model.name,
+    llmProvider: provider,
+    query: { command: 'completion', options },
+  })) as LlmResponse;
+
+  const { content } = response;
+  if (content) {
+    logger.info(`${NAME} completion response`, content);
+    return content.trim();
+  }
+  throw new Error(`${NAME} completion error ${response}`);
 };
 
 const OplaProvider: ProviderDefinition = {

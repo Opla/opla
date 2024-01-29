@@ -25,12 +25,32 @@ use crate::llm::{ LlmQuery, LlmResponse };
 use std::time::Duration;
 use std::thread;
 
+#[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlamaCppQueryCompletion {
     pub prompt: String,
+    pub stream: Option<bool>,
     pub temperature: Option<f32>,
-    pub n_predict: Option<f32>,
+    pub frequency_penalty: Option<f32>,
+    pub presence_penalty: Option<f32>,
+    pub seed: Option<f32>,
     pub stop: Option<Vec<String>>,
+    pub top_p: Option<f32>,
+    pub top_k: Option<f32>,
+    pub min_p: Option<f32>,
+    pub n_predict: Option<f32>,
+    pub n_keep: Option<f32>,
+    pub tfs_z: Option<f32>,
+    pub typical_p: Option<f32>,
+    pub repeat_penalty: Option<f32>,
+    pub repeat_last_n: Option<f32>,
+    pub penalize_nl: Option<bool>,
+    pub penalty_prompt: Option<Vec<String>>,
+    pub mirostat: Option<f32>,
+    pub mirostat_tau: Option<f32>,
+    pub mirostat_eta: Option<f32>,
+    pub grammar: Option<String>,
+    pub ignore_eos: Option<bool>,
 }
 
 impl LlmQueryCompletion {
@@ -53,9 +73,28 @@ impl LlmQueryCompletion {
         println!("prompt: {}", prompt);
         LlamaCppQueryCompletion {
             prompt,
+            stream: self.get_parameter_as_boolean("stream"),
             temperature: self.get_parameter_as_f32("temperature"),
             stop: self.get_parameter_array("stop"),
+            frequency_penalty: self.get_parameter_as_f32("frequency_penalty"),
+            presence_penalty: self.get_parameter_as_f32("presence_penalty"),
+            seed: self.get_parameter_as_f32("seed"),
+            top_p: self.get_parameter_as_f32("top_p"),
+            top_k: self.get_parameter_as_f32("top_k"),
+            min_p: self.get_parameter_as_f32("min_p"),
             n_predict: self.get_parameter_as_f32("n_predict"),
+            n_keep: self.get_parameter_as_f32("n_keep"),
+            tfs_z: self.get_parameter_as_f32("tfs_z"),
+            typical_p: self.get_parameter_as_f32("typical_p"),
+            repeat_penalty: self.get_parameter_as_f32("repeat_penalty"),
+            repeat_last_n: self.get_parameter_as_f32("repeat_last_n"),
+            penalize_nl: self.get_parameter_as_boolean("penalize_nl"),
+            penalty_prompt: self.get_parameter_array("penalty_prompt"),
+            mirostat: self.get_parameter_as_f32("mirostat"),
+            mirostat_tau: self.get_parameter_as_f32("mirostat_tau"),
+            mirostat_eta: self.get_parameter_as_f32("mirostat_eta"),
+            grammar: self.get_parameter_value("grammar"),
+            ignore_eos: self.get_parameter_as_boolean("ignore_eos"),
         }
     }
 }
@@ -532,6 +571,7 @@ impl OplaServer {
         }
 
         let parameters = query.options.to_llama_cpp_parameters();
+        println!("parameters: {:?}", parameters);
         let api = "http://localhost:8080";
         let client = reqwest::Client::new();
         let res = client
@@ -541,15 +581,17 @@ impl OplaServer {
         let response = match res {
             Ok(res) => res,
             Err(error) => {
-                println!("Failed to download ressource: {}", error);
-                return Err(Box::new(Error::ModelNotLoaded));
+                println!("Failed to get Response: {}", error);
+                return Err(Box::new(Error::BadResponse));
             }
         };
+        let status = response.status();
+        println!("Response Status: {}", status);
         let response = match response.json::<LlmResponse>().await {
             Ok(r) => r,
             Err(error) => {
-                println!("Failed to download ressource: {}", error);
-                return Err(Box::new(Error::ModelNotLoaded));
+                println!("Failed to parse response: {}", error);
+                return Err(Box::new(Error::BadResponse));
             }
         };
         Ok(response)

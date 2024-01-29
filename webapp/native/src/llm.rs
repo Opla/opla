@@ -65,6 +65,7 @@ pub struct LlmQueryCompletion {
     pub messages: Vec<LlmMessage>,
     pub parameters: Option<Vec<LlmParameter>>,
 }
+
 impl LlmQueryCompletion {
     pub fn get_parameter_value(&self, key: &str) -> Option<String> {
         let parameters = match &self.parameters {
@@ -153,22 +154,32 @@ pub struct LlmResponseError {
 
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct OpenAIQueryCompletion {
+pub struct OpenAIBodyCompletion {
     pub model: String,
     pub messages: Vec<LlmMessage>,
-    pub temperature: Option<f32>,
-    pub stop: Option<Vec<String>>,
     pub stream: Option<bool>,
+    pub temperature: Option<f32>,
+    pub frequency_penalty: Option<f32>,
+    pub presence_penalty: Option<f32>,
+    pub seed: Option<f32>,
+    pub stop: Option<Vec<String>>,
+    pub top_p: Option<f32>,
+    pub max_tokens: Option<f32>,
 }
 
-impl OpenAIQueryCompletion {
+impl OpenAIBodyCompletion {
     pub fn new(model: String, from: &LlmQueryCompletion) -> Self {
         Self {
             model,
             messages: from.messages.clone(),
+            stream: from.get_parameter_as_boolean("stream"),
             temperature: from.get_parameter_as_f32("temperature"),
             stop: from.get_parameter_array("stop"),
-            stream: from.get_parameter_as_boolean("stream"),
+            frequency_penalty: from.get_parameter_as_f32("frequency_penalty"),
+            presence_penalty: from.get_parameter_as_f32("presence_penalty"),
+            seed: from.get_parameter_as_f32("seed"),
+            top_p: from.get_parameter_as_f32("top_p"),
+            max_tokens: from.get_parameter_as_f32("max_tokens"),
         }
     }
 }
@@ -279,7 +290,7 @@ impl OpenAIChatCompletion {
 async fn request<R: Runtime>(
     url: String,
     secret_key: &str,
-    parameters: OpenAIQueryCompletion
+    parameters: OpenAIBodyCompletion
 ) -> Result<LlmResponse, Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
     let result = client.post(url).bearer_auth(&secret_key).json(&parameters).send().await;
@@ -316,7 +327,7 @@ async fn request<R: Runtime>(
 async fn stream_request<R: Runtime>(
     url: String,
     secret_key: &str,
-    parameters: OpenAIQueryCompletion,
+    parameters: OpenAIBodyCompletion,
     callback: Option<impl FnMut(Result<LlmResponse, LlmError>) + Copy>
 ) -> Result<LlmResponse, Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
@@ -442,7 +453,7 @@ pub async fn call_completion<R: Runtime>(
         format!("llm call:  {:?} / {:?} / {:?} / {:?}", query.command, url, &model, query.options)
     );
 
-    let parameters = OpenAIQueryCompletion::new(model.to_owned(), &query.options);
+    let parameters = OpenAIBodyCompletion::new(model.to_owned(), &query.options);
     println!("llm call parameters:  {:?}", parameters);
     let stream = match parameters.stream {
         Some(t) => t,
