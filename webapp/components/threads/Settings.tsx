@@ -118,21 +118,23 @@ export default function Settings({ conversationId }: { conversationId?: string }
   const system = selectedConversation?.system ?? model?.system ?? DEFAULT_SYSTEM;
 
   return (
-    <div className="scrollbar-trigger flex h-full w-full bg-neutral-100 px-4 dark:bg-neutral-900">
+    <div className="scrollbar-trigger flex h-full w-full bg-neutral-100 dark:bg-neutral-900">
       <Tabs defaultValue="settings" className="w-full py-3">
-        <TabsList className="justify-left w-full gap-4">
-          <TabsTrigger value="settings">
-            <Settings2 className="h-4 w-4" />
-          </TabsTrigger>
-          <TabsTrigger value="appearance">
-            <Palette className="h-4 w-4" />
-          </TabsTrigger>
-          <TabsTrigger value="documents">
-            <File className="h-4 w-4" />
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="settings" className="py-4">
-          <ScrollArea className="w-full">
+        <div className="px-4">
+          <TabsList className="justify-left w-full gap-4">
+            <TabsTrigger value="settings">
+              <Settings2 className="h-4 w-4" />
+            </TabsTrigger>
+            <TabsTrigger value="appearance">
+              <Palette className="h-4 w-4" />
+            </TabsTrigger>
+            <TabsTrigger value="documents">
+              <File className="h-4 w-4" />
+            </TabsTrigger>
+          </TabsList>
+        </div>
+        <TabsContent value="settings" className="h-full py-4">
+          <ScrollArea className="h-full w-full px-4">
             <Accordion
               type="multiple"
               className="w-full"
@@ -176,8 +178,10 @@ export default function Settings({ conversationId }: { conversationId?: string }
             </Accordion>
           </ScrollArea>
         </TabsContent>
-        <TabsContent value="appearance">Thread / Document view</TabsContent>
-        <TabsContent value="documents">
+        <TabsContent value="appearance" className="px-4">
+          Thread / Document view
+        </TabsContent>
+        <TabsContent value="documents" className="px-4">
           <Textarea
             value={selectedConversation?.note ?? ''}
             placeholder={t('Write a note...')}
