@@ -86,7 +86,7 @@ export const completion = async (
 };
 
 // https://platform.openai.com/docs/api-reference/chat/create
-// TODO tools, tool_choice, user, 
+// TODO tools, tool_choice, user,
 export const CompletionParameters: CompletionParametersDefinition = {
   stream: {
     z: z.boolean().nullable().optional().default(false),

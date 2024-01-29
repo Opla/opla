@@ -82,7 +82,8 @@ export const CompletionParameters: CompletionParametersDefinition = {
     type: 'boolean',
     defaultValue: false,
     name: 'Stream',
-    description: 'It allows receiving each predicted token in real-time instead of waiting for the completion to finish. To enable this, set to true.',
+    description:
+      'It allows receiving each predicted token in real-time instead of waiting for the completion to finish. To enable this, set to true.',
   },
   temperature: {
     z: z.coerce.number().min(0).nullable().optional().default(0.8),
@@ -118,7 +119,8 @@ export const CompletionParameters: CompletionParametersDefinition = {
     z: z.string().nullable().optional().default('[]'),
     name: 'Stop',
     type: 'large-text',
-    description: 'Specify a JSON array of stopping strings. These words will not be included in the completion, so make sure to add them to the prompt for the next iteration (default: []).',
+    description:
+      'Specify a JSON array of stopping strings. These words will not be included in the completion, so make sure to add them to the prompt for the next iteration (default: []).',
   },
   topP: {
     z: z.coerce.number().min(0).nullable().optional().default(0.95),
@@ -126,7 +128,8 @@ export const CompletionParameters: CompletionParametersDefinition = {
     defaultValue: 0.95,
     min: 0,
     name: 'Top_p',
-    description: 'Limit the next token selection to a subset of tokens with a cumulative probability above a threshold P (default: 0.95).',
+    description:
+      'Limit the next token selection to a subset of tokens with a cumulative probability above a threshold P (default: 0.95).',
   },
   topK: {
     z: z.coerce.number().min(0).nullable().optional().default(40),
@@ -142,21 +145,24 @@ export const CompletionParameters: CompletionParametersDefinition = {
     defaultValue: 0.05,
     min: 0,
     name: 'Min_p',
-    description: 'The minimum probability for a token to be considered, relative to the probability of the most likely token (default: 0.05).',
+    description:
+      'The minimum probability for a token to be considered, relative to the probability of the most likely token (default: 0.05).',
   },
   nPredict: {
     z: z.coerce.number().nullable().optional().default(-1),
     type: 'number',
     defaultValue: -1,
     name: 'N_predict',
-    description: 'Set the maximum number of tokens to predict when generating text. Note: May exceed the set limit slightly if the last token is a partial multibyte character. When 0, no tokens will be generated but the prompt is evaluated into the cache. (default: -1, -1 = infinity).',
+    description:
+      'Set the maximum number of tokens to predict when generating text. Note: May exceed the set limit slightly if the last token is a partial multibyte character. When 0, no tokens will be generated but the prompt is evaluated into the cache. (default: -1, -1 = infinity).',
   },
   nKeep: {
     z: z.coerce.number().nullable().optional().default(0),
     type: 'number',
     defaultValue: 0,
     name: 'N_keep',
-    description: 'Specify the number of tokens from the prompt to retain when the context size is exceeded and tokens need to be discarded. By default, this value is set to 0 (meaning no tokens are kept). Use -1 to retain all tokens from the prompt.',
+    description:
+      'Specify the number of tokens from the prompt to retain when the context size is exceeded and tokens need to be discarded. By default, this value is set to 0 (meaning no tokens are kept). Use -1 to retain all tokens from the prompt.',
   },
   tfsZ: {
     z: z.coerce.number().nullable().optional().default(1.0),
@@ -184,27 +190,31 @@ export const CompletionParameters: CompletionParametersDefinition = {
     type: 'number',
     defaultValue: 64,
     name: 'Repeat_last_n',
-    description: 'Last n tokens to consider for penalizing repetition (default: 64, 0 = disabled, -1 = ctx-size).',
+    description:
+      'Last n tokens to consider for penalizing repetition (default: 64, 0 = disabled, -1 = ctx-size).',
   },
   penalizeNL: {
     z: z.coerce.boolean().nullable().optional().default(true),
     type: 'boolean',
     defaultValue: true,
     name: 'Penalize_nl',
-    description: 'Last n tokens to consider for penalizing repetition (default: 64, 0 = disabled, -1 = ctx-size).',
+    description:
+      'Last n tokens to consider for penalizing repetition (default: 64, 0 = disabled, -1 = ctx-size).',
   },
   penaltyPrompt: {
     z: z.coerce.string().nullable().optional(),
     type: 'large-text',
     name: 'Penalty_prompt',
-    description: 'This will replace the prompt for the purpose of the penalty evaluation. Can be either null, a string or an array of numbers representing tokens (default: null = use the original prompt).',
+    description:
+      'This will replace the prompt for the purpose of the penalty evaluation. Can be either null, a string or an array of numbers representing tokens (default: null = use the original prompt).',
   },
   mirostat: {
     z: z.coerce.number().nullable().optional().default(0),
     type: 'number',
     defaultValue: 0,
     name: 'Mirostat',
-    description: 'Enable Mirostat sampling, controlling perplexity during text generation (default: 0, 0 = disabled, 1 = Mirostat, 2 = Mirostat 2.0).',
+    description:
+      'Enable Mirostat sampling, controlling perplexity during text generation (default: 0, 0 = disabled, 1 = Mirostat, 2 = Mirostat 2.0).',
   },
   mirostatTau: {
     z: z.coerce.number().nullable().optional().default(5.0),
