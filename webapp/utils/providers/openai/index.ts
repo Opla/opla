@@ -5,6 +5,7 @@ import { z } from 'zod';
 import {
   CompletionParametersDefinition,
   LlmMessage,
+  LlmParameters,
   LlmQueryCompletion,
   LlmResponse,
   Model,
@@ -53,7 +54,8 @@ export const completion = async (
   provider: Provider | undefined,
   messages: LlmMessage[],
   system = DEFAULT_SYSTEM,
-  properties: Partial<LlmQueryCompletion> = {},
+  conversationId?: string,
+  parameters: LlmParameters[] = [],
 ): Promise<string> => {
   if (!model) {
     throw new Error('Model not found');
@@ -64,17 +66,18 @@ export const completion = async (
     content: system,
   };
 
-  const parameters: LlmQueryCompletion = mapKeys(
+  const options: LlmQueryCompletion = mapKeys(
     {
       messages: [systemMessage, ...messages],
-      ...properties,
+      conversationId,
+      parameters,
     },
     toSnakeCase,
   );
   const response: LlmResponse = (await invokeTauri('llm_call_completion', {
     model: model.id,
     llmProvider: provider,
-    query: { command: 'completion', parameters },
+    query: { command: 'completion', options },
   })) as LlmResponse;
 
   const { content } = response;

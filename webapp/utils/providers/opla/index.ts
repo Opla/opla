@@ -15,6 +15,7 @@
 import {
   CompletionParametersDefinition,
   LlmMessage,
+  LlmParameters,
   LlmQueryCompletion,
   LlmResponse,
   Model,
@@ -31,18 +32,17 @@ const TYPE = ProviderType.opla;
 const DESCRIPTION = 'Opla Open source local LLM';
 const DEFAULT_SYSTEM = 'You are an expert in retrieving information.\n';
 
-const DEFAULT_PROPERTIES: Partial<LlmQueryCompletion> = {
-  nPredict: 200,
-  temperature: 0,
-  stop: ['Llama:', 'User:', 'Question:'],
-};
+const DEFAULT_PROPERTIES: LlmParameters[] = [
+  { key: 'stop', value: "['Llama:', 'User:', 'Question:']" },
+];
 
 const completion = async (
   model: Model | undefined,
   provider: Provider | undefined,
   messages: LlmMessage[],
   system = DEFAULT_SYSTEM,
-  properties: Partial<LlmQueryCompletion> = DEFAULT_PROPERTIES,
+  conversationId?: string,
+  parameters: LlmParameters[] = DEFAULT_PROPERTIES,
 ): Promise<string> => {
   if (!model) {
     throw new Error('Model not found');
@@ -53,15 +53,16 @@ const completion = async (
     content: system,
   };
 
-  const parameters: LlmQueryCompletion = {
+  const options: LlmQueryCompletion = {
     messages: [systemMessage, ...messages],
-    ...properties,
+    conversationId,
+    parameters,
   };
 
   const response: LlmResponse = (await invokeTauri('llm_call_completion', {
     model: model.name,
     llmProvider: provider,
-    query: { command: 'completion', parameters },
+    query: { command: 'completion', options },
   })) as LlmResponse;
 
   const { content } = response;

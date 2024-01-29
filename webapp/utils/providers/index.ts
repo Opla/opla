@@ -4,7 +4,7 @@
 import {
   CompletionParametersDefinition,
   LlmMessage,
-  LlmQueryCompletion,
+  LlmParameters,
   Message,
   Model,
   Provider,
@@ -21,7 +21,8 @@ const completion = async (
   context: { providers: Provider[] },
   threadMessages: Message[],
   system?: string,
-  properties?: Partial<LlmQueryCompletion>,
+  conversationId?: string,
+  parameters?: LlmParameters[],
 ): Promise<string> => {
   if (!model) {
     throw new Error('Model not set');
@@ -34,9 +35,9 @@ const completion = async (
     name: m.author?.name,
   }));
   if (provider?.type === ProviderType.openai) {
-    return OpenAI.completion.invoke(model, provider, messages, system, properties);
+    return OpenAI.completion.invoke(model, provider, messages, system, conversationId, parameters);
   }
-  return Opla.completion.invoke(model, provider, messages, system, properties);
+  return Opla.completion.invoke(model, provider, messages, system, conversationId, parameters);
 };
 
 const models = async (provider: Provider): Promise<Model[]> => {

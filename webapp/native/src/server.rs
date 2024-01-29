@@ -29,7 +29,7 @@ use std::thread;
 pub struct LlamaCppQueryCompletion {
     pub prompt: String,
     pub temperature: Option<f32>,
-    pub n_predict: Option<i32>,
+    pub n_predict: Option<f32>,
     pub stop: Option<Vec<String>>,
 }
 
@@ -53,9 +53,9 @@ impl LlmQueryCompletion {
         println!("prompt: {}", prompt);
         LlamaCppQueryCompletion {
             prompt,
-            temperature: self.temperature.clone(),
-            n_predict: self.n_predict.clone(),
-            stop: self.stop.clone(),
+            temperature: self.get_parameter_as_f32("temperature"),
+            stop: self.get_parameter_array("stop"),
+            n_predict: self.get_parameter_as_f32("n_predict"),
         }
     }
 }
@@ -531,7 +531,7 @@ impl OplaServer {
             println!("Opla server started: available for completion");
         }
 
-        let parameters = query.parameters.to_llama_cpp_parameters();
+        let parameters = query.options.to_llama_cpp_parameters();
         let api = "http://localhost:8080";
         let client = reqwest::Client::new();
         let res = client

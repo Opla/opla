@@ -290,7 +290,7 @@ async fn llm_call_completion<R: Runtime>(
             };
             let model = model.clone();
             let query = query.clone();
-            let conversation_id = query.parameters.conversation_id.clone();
+            let conversation_id = query.options.conversation_id.clone();
             call_completion::<R>(
                 &api,
                 &secret_key,
