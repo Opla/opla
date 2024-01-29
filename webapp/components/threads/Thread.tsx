@@ -18,7 +18,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { PanelRight, PanelRightClose } from 'lucide-react';
 import { AppContext } from '@/context';
-import { Conversation, Message, Model, Prompt, ProviderType } from '@/types';
+import { Conversation, LlmParameters, Message, Model, Prompt, ProviderType } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import {
@@ -167,7 +167,7 @@ function Thread({
       model = findModel(conversation.model || activeModel, backendContext.config.models.items);
     }
 
-    const parameters: Record<string, any> = { stream: true, conversationId: conversation.id };
+    const parameters: LlmParameters[] = [];
     if (conversation.parameters) {
       const conversationParameters = conversation.parameters;
       const provider = findProvider(conversation.provider, providers);
@@ -177,7 +177,7 @@ function Thread({
         if (parameterDef) {
           const result = parameterDef.z.safeParse(conversationParameters[key]);
           if (result.success) {
-            parameters[key] = result.data;
+            parameters.push({ key, value: String(result.data) });
           }
         }
       });
@@ -190,6 +190,7 @@ function Thread({
         // TODO build tokens context
         [toMessage],
         conversation?.system,
+        conversationId,
         parameters,
       );
       fromMessage.content = response;

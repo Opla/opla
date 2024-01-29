@@ -5,6 +5,7 @@ import { z } from 'zod';
 import {
   CompletionParametersDefinition,
   LlmMessage,
+  LlmParameters,
   LlmQueryCompletion,
   LlmResponse,
   Model,
@@ -24,7 +25,7 @@ const DEFAULT_SYSTEM = `
 You are an expert in retrieving information.
 `;
 
-export const openAIProviderTemplate: Partial<Provider> = {
+const openAIProviderTemplate: Partial<Provider> = {
   name: NAME,
   type: TYPE,
   description: DESCRIPTION,
@@ -48,46 +49,9 @@ export const openAIProviderTemplate: Partial<Provider> = {
   ],
 };
 
-export const completion = async (
-  model: Model | undefined,
-  provider: Provider | undefined,
-  messages: LlmMessage[],
-  system = DEFAULT_SYSTEM,
-  properties: Partial<LlmQueryCompletion> = {},
-): Promise<string> => {
-  if (!model) {
-    throw new Error('Model not found');
-  }
-
-  const systemMessage: LlmMessage = {
-    role: 'system',
-    content: system,
-  };
-
-  const parameters: LlmQueryCompletion = mapKeys(
-    {
-      messages: [systemMessage, ...messages],
-      ...properties,
-    },
-    toSnakeCase,
-  );
-  const response: LlmResponse = (await invokeTauri('llm_call_completion', {
-    model: model.id,
-    llmProvider: provider,
-    query: { command: 'completion', parameters },
-  })) as LlmResponse;
-
-  const { content } = response;
-  if (content) {
-    logger.info(`${NAME} completion response`, content);
-    return content.trim();
-  }
-  throw new Error(`${NAME} completion completion error ${response}`);
-};
-
 // https://platform.openai.com/docs/api-reference/chat/create
 // TODO tools, tool_choice, user,
-export const CompletionParameters: CompletionParametersDefinition = {
+const CompletionParameters: CompletionParametersDefinition = {
   stream: {
     z: z.boolean().nullable().optional().default(false),
     name: 'Stream',
@@ -157,6 +121,48 @@ export const CompletionParameters: CompletionParametersDefinition = {
     description:
       'The maximum number of tokens that can be generated in the chat completion. (One token is roughly 4 characters for normal English text)',
   },
+};
+
+const completion = async (
+  model: Model | undefined,
+  provider: Provider | undefined,
+  messages: LlmMessage[],
+  system = DEFAULT_SYSTEM,
+  conversationId?: string,
+  parameters: LlmParameters[] = [],
+): Promise<string> => {
+  if (!model) {
+    throw new Error('Model not found');
+  }
+
+  const systemMessage: LlmMessage = {
+    role: 'system',
+    content: system,
+  };
+
+  if (!parameters.find((p) => p.key === 'stream')) {
+    parameters.push({ key: 'stream', value: String(CompletionParameters.stream.defaultValue) });
+  }
+  const options: LlmQueryCompletion = mapKeys(
+    {
+      messages: [systemMessage, ...messages],
+      conversationId,
+      parameters,
+    },
+    toSnakeCase,
+  );
+  const response: LlmResponse = (await invokeTauri('llm_call_completion', {
+    model: model.id,
+    llmProvider: provider,
+    query: { command: 'completion', options },
+  })) as LlmResponse;
+
+  const { content } = response;
+  if (content) {
+    logger.info(`${NAME} completion response`, content);
+    return content.trim();
+  }
+  throw new Error(`${NAME} completion completion error ${response}`);
 };
 
 const OpenAIProvider: ProviderDefinition = {

@@ -137,7 +137,8 @@ export type ProviderDefinition = {
       provider: Provider | undefined,
       messages: LlmMessage[],
       system?: string,
-      properties?: Partial<LlmQueryCompletion>,
+      conversationId?: string,
+      parameters?: LlmParameters[],
     ) => Promise<string>;
   };
 };
@@ -302,18 +303,21 @@ export type LlmMessage = {
   content: string;
   name?: string;
 };
+
+export type LlmParameters = {
+  key: string;
+  value: string;
+};
+
 export type LlmQueryCompletion = {
-  messages: LlmMessage[];
-  temperature?: number;
-  nPredict?: number;
-  stop?: string[];
-  stream?: boolean;
   conversationId?: string;
+  messages: LlmMessage[];
+  parameters?: LlmParameters[];
 };
 
 export type LlmQuery = {
   command: string;
-  parameters: LlmQueryCompletion;
+  options: LlmQueryCompletion;
 };
 
 export type LlmResponse = {

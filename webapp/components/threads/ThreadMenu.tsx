@@ -45,7 +45,7 @@ import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { AppContext } from '@/context';
 import { createProvider } from '@/utils/data/providers';
-import { openAIProviderTemplate } from '@/utils/providers/openai';
+import OpenAI from '@/utils/providers/openai';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
 import { Badge } from '../ui/badge';
@@ -77,7 +77,7 @@ export default function ThreadMenu({
 
   const onSetupChatGPT = () => {
     if (!chatGPT) {
-      chatGPT = createProvider(openAIProviderTemplate.name as string, openAIProviderTemplate);
+      chatGPT = createProvider(OpenAI.template.name as string, OpenAI.template);
     }
     showModal(ModalIds.OpenAI, chatGPT);
   };

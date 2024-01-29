@@ -51,21 +51,81 @@ pub struct LlmMessage {
     pub role: String,
     pub name: Option<String>,
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LlmParameter {
+    pub key: String,
+    pub value: String,
+}
+
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmQueryCompletion {
     pub conversation_id: Option<String>,
     pub messages: Vec<LlmMessage>,
-    pub temperature: Option<f32>,
-    pub n_predict: Option<i32>,
-    pub stop: Option<Vec<String>>,
-    pub stream: Option<bool>,
+    pub parameters: Option<Vec<LlmParameter>>,
 }
 
+impl LlmQueryCompletion {
+    pub fn get_parameter_value(&self, key: &str) -> Option<String> {
+        let parameters = match &self.parameters {
+            Some(p) => p,
+            None => {
+                return None;
+            }
+        };
+        parameters
+            .iter()
+            .find(|p| p.key == key)
+            .map(|p| Some(p.value.clone()))
+            .unwrap_or(None)
+    }
+
+    pub fn get_parameter_as_boolean(&self, key: &str) -> Option<bool> {
+        let value = match self.get_parameter_value(key) {
+            Some(v) => v,
+            None => {
+                return None;
+            }
+        };
+        match value.as_str() {
+            "true" => Some(true),
+            "false" => Some(false),
+            _ => None,
+        }
+    }
+
+    pub fn get_parameter_as_f32(&self, key: &str) -> Option<f32> {
+        let value = match self.get_parameter_value(key) {
+            Some(v) => v,
+            None => {
+                return None;
+            }
+        };
+        match value.parse::<f32>() {
+            Ok(v) => Some(v),
+            Err(_) => None,
+        }
+    }
+
+    pub fn get_parameter_array(&self, key: &str) -> Option<Vec<String>> {
+        let value = match self.get_parameter_value(key) {
+            Some(v) => v,
+            None => {
+                return None;
+            }
+        };
+        let mut array: Vec<String> = vec![];
+        for item in value.split(",") {
+            array.push(item.to_owned());
+        }
+        Some(array)
+    }
+}
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmQuery<T> {
     pub command: String,
-    pub parameters: T,
+    pub options: T,
 }
 
 #[serde_with::skip_serializing_none]
@@ -94,22 +154,32 @@ pub struct LlmResponseError {
 
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct OpenAIQueryCompletion {
+pub struct OpenAIBodyCompletion {
     pub model: String,
     pub messages: Vec<LlmMessage>,
-    pub temperature: Option<f32>,
-    pub stop: Option<Vec<String>>,
     pub stream: Option<bool>,
+    pub temperature: Option<f32>,
+    pub frequency_penalty: Option<f32>,
+    pub presence_penalty: Option<f32>,
+    pub seed: Option<f32>,
+    pub stop: Option<Vec<String>>,
+    pub top_p: Option<f32>,
+    pub max_tokens: Option<f32>,
 }
 
-impl OpenAIQueryCompletion {
-    pub fn new(model: String, from: LlmQueryCompletion) -> Self {
+impl OpenAIBodyCompletion {
+    pub fn new(model: String, from: &LlmQueryCompletion) -> Self {
         Self {
             model,
-            messages: from.messages,
-            temperature: from.temperature,
-            stop: from.stop,
-            stream: from.stream,
+            messages: from.messages.clone(),
+            stream: from.get_parameter_as_boolean("stream"),
+            temperature: from.get_parameter_as_f32("temperature"),
+            stop: from.get_parameter_array("stop"),
+            frequency_penalty: from.get_parameter_as_f32("frequency_penalty"),
+            presence_penalty: from.get_parameter_as_f32("presence_penalty"),
+            seed: from.get_parameter_as_f32("seed"),
+            top_p: from.get_parameter_as_f32("top_p"),
+            max_tokens: from.get_parameter_as_f32("max_tokens"),
         }
     }
 }
@@ -220,7 +290,7 @@ impl OpenAIChatCompletion {
 async fn request<R: Runtime>(
     url: String,
     secret_key: &str,
-    parameters: OpenAIQueryCompletion
+    parameters: OpenAIBodyCompletion
 ) -> Result<LlmResponse, Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
     let result = client.post(url).bearer_auth(&secret_key).json(&parameters).send().await;
@@ -257,7 +327,7 @@ async fn request<R: Runtime>(
 async fn stream_request<R: Runtime>(
     url: String,
     secret_key: &str,
-    parameters: OpenAIQueryCompletion,
+    parameters: OpenAIBodyCompletion,
     callback: Option<impl FnMut(Result<LlmResponse, LlmError>) + Copy>
 ) -> Result<LlmResponse, Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
@@ -380,16 +450,10 @@ pub async fn call_completion<R: Runtime>(
     let url = format!("{}/chat/{}s", api, query.command);
     println!(
         "{}",
-        format!(
-            "llm call:  {:?} / {:?} / {:?} / {:?}",
-            query.command,
-            url,
-            &model,
-            query.parameters
-        )
+        format!("llm call:  {:?} / {:?} / {:?} / {:?}", query.command, url, &model, query.options)
     );
 
-    let parameters = OpenAIQueryCompletion::new(model.to_owned(), query.parameters);
+    let parameters = OpenAIBodyCompletion::new(model.to_owned(), &query.options);
     println!("llm call parameters:  {:?}", parameters);
     let stream = match parameters.stream {
         Some(t) => t,

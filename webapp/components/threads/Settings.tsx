@@ -19,7 +19,7 @@ import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackendContext';
 import { updateConversation } from '@/utils/data/conversations';
 import { findModel } from '@/utils/data/models';
-import { DEFAULT_SYSTEM } from '@/utils/providers/opla';
+import Opla from '@/utils/providers/opla';
 import { getCompletionParametersDefinition } from '@/utils/providers';
 import { findProvider } from '@/utils/data/providers';
 import { Conversation } from '@/types';
@@ -115,7 +115,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
     }
   };
 
-  const system = selectedConversation?.system ?? model?.system ?? DEFAULT_SYSTEM;
+  const system = selectedConversation?.system ?? model?.system ?? Opla.system;
 
   return (
     <div className="scrollbar-trigger flex h-full w-full bg-neutral-100 dark:bg-neutral-900">
