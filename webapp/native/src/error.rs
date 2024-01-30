@@ -16,6 +16,9 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {
+    #[error("the server has wrong parameters")]
+    BadParameters,
+
     #[error("the provided model is not loaded")]
     ModelNotLoaded,
 
