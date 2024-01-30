@@ -23,8 +23,8 @@ type DataStorage = {
 
 const writeToLocalStorage = async (key: string, value: any) => {
   const localStorageDir = await appLocalDir();
-  console.log('localStorageDir', localStorageDir);
-  await writeTextFile(`${localStorageDir}/Opla/conversations.json`, JSON.stringify(value, null, 2));
+  console.log('localStorageDir', localStorageDir, key);
+  await writeTextFile(`${localStorageDir}/Opla/${key}.json`, JSON.stringify(value, null, 2));
 };
 
 const LocalStorage: DataStorage = {
