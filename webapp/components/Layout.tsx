@@ -27,6 +27,7 @@ import { Toaster } from '@/components/ui/Toast';
 import logger from '@/utils/logger';
 import Statusbar from './common/Statusbar';
 import { TooltipProvider } from './ui/tooltip';
+import Loading from './common/Loading';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const firstRender = useRef(true);
@@ -98,7 +99,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   });
 
   if (!backendContext || !providers || !models || !presets) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   return (
