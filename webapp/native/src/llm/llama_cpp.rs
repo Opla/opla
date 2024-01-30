@@ -107,6 +107,7 @@ impl LlamaCppChatCompletion {
             status: self.status.clone(),
             content: self.content.clone(),
             conversation_id: self.conversation_id.clone(),
+            usage: None,
         }
     }
 }
