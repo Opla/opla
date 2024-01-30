@@ -179,9 +179,21 @@ export default function Settings({ conversationId }: { conversationId?: string }
           </ScrollArea>
         </TabsContent>
         <TabsContent value="appearance" className="px-4">
-          Thread / Document view
+          {t('Thread / Document view')}
         </TabsContent>
         <TabsContent value="documents" className="px-4">
+          {selectedConversation?.updatedAt && (
+            <div className="w-full p-2 text-sm text-neutral-400">
+              <div className="flex flex-row justify-between tabular-nums">
+                <div>{t('Updated')} :</div>
+                <div>{new Date(selectedConversation?.updatedAt).toLocaleString()}</div>
+              </div>
+              <div className="flex w-full flex-row justify-between tabular-nums">
+                <div>{t('Created')} :</div>
+                <div>{new Date(selectedConversation?.createdAt).toLocaleString()}</div>
+              </div>
+            </div>
+          )}
           <Textarea
             value={selectedConversation?.note ?? ''}
             placeholder={t('Write a note...')}
