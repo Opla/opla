@@ -166,9 +166,11 @@ export default function Explorer({
     <div className="scrollbar-trigger flex h-full bg-neutral-100 dark:bg-neutral-800/70">
       <nav className="flex h-full w-full flex-col">
         <div className="flex w-full items-center dark:bg-neutral-800">
-          <div className="flex grow items-center px-2 py-4 text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+          <div className="flex grow items-center px-2 py-4">
             <Opla className="mr-2 h-6 w-6" />
-            <p>{t('Threads')}</p>
+            <p className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+              {t('Threads')}
+            </p>
           </div>
           {selectedConversationId && (
             <Tooltip>
