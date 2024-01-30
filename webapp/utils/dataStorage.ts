@@ -14,10 +14,17 @@
 
 import { toast } from 'sonner';
 import logger from './logger';
+import { appLocalDir, writeTextFile } from './tauri';
 
 type DataStorage = {
   getItem<T>(key: string): T | null;
   setItem<T>(key: string, value: T): void;
+};
+
+const writeToLocalStorage = async (key: string, value: any) => {
+  const localStorageDir = await appLocalDir();
+  console.log('localStorageDir', localStorageDir);
+  await writeTextFile(`${localStorageDir}/Opla/conversations.json`, JSON.stringify(value, null, 2));
 };
 
 const LocalStorage: DataStorage = {
@@ -43,6 +50,7 @@ const LocalStorage: DataStorage = {
     } else {
       localStorage.setItem(key, JSON.stringify(value));
     }
+    writeToLocalStorage(key, value);
   },
 };
 
