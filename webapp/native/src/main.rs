@@ -28,7 +28,7 @@ use std::sync::Mutex;
 use api::models;
 use data::model::Model;
 use downloader::Downloader;
-use llm::{ LlmQuery, LlmResponse, LlmQueryCompletion, call_completion, LlmError };
+use llm::{ LlmQuery, LlmResponse, LlmQueryCompletion, openai::call_completion, LlmError };
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
 use store::{ Store, Provider, ProviderType, ProviderMetadata, Settings, ServerConfiguration };

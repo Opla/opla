@@ -15,7 +15,7 @@ import {
 } from '@/types';
 import { mapKeys } from '@/utils/data';
 import logger from '@/utils/logger';
-import { toSnakeCase } from '@/utils/string';
+import { toCamelCase, toSnakeCase } from '@/utils/string';
 import { invokeTauri } from '@/utils/tauri';
 
 const NAME = 'OpenAI';
@@ -130,7 +130,7 @@ const completion = async (
   system = DEFAULT_SYSTEM,
   conversationId?: string,
   parameters: LlmParameters[] = [],
-): Promise<string> => {
+): Promise<LlmResponse> => {
   if (!model) {
     throw new Error('Model not found');
   }
@@ -160,7 +160,7 @@ const completion = async (
   const { content } = response;
   if (content) {
     logger.info(`${NAME} completion response`, content);
-    return content.trim();
+    return mapKeys(response, toCamelCase);
   }
   throw new Error(`${NAME} completion completion error ${response}`);
 };

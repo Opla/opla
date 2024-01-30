@@ -12,145 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::fmt;
-
 use serde::{ Deserialize, Serialize };
 use crate::error::Error;
 use tauri::Runtime;
 use eventsource_stream::Eventsource;
 use futures_util::stream::StreamExt;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LlmError {
-    pub message: String,
-    pub r#type: String,
-}
-
-impl LlmError {
-    pub fn new(msg: &str, r#type: &str) -> LlmError {
-        LlmError { message: msg.to_string(), r#type: r#type.to_string() }
-    }
-}
-
-impl fmt::Display for LlmError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}: {}", self.r#type, self.message)
-    }
-}
-
-impl std::error::Error for LlmError {
-    fn description(&self) -> &str {
-        &self.message
-    }
-}
-
-#[serde_with::skip_serializing_none]
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LlmMessage {
-    pub content: String,
-    pub role: String,
-    pub name: Option<String>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LlmParameter {
-    pub key: String,
-    pub value: String,
-}
-
-#[serde_with::skip_serializing_none]
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LlmQueryCompletion {
-    pub conversation_id: Option<String>,
-    pub messages: Vec<LlmMessage>,
-    pub parameters: Option<Vec<LlmParameter>>,
-}
-
-impl LlmQueryCompletion {
-    pub fn get_parameter_value(&self, key: &str) -> Option<String> {
-        let parameters = match &self.parameters {
-            Some(p) => p,
-            None => {
-                return None;
-            }
-        };
-        parameters
-            .iter()
-            .find(|p| p.key == key)
-            .map(|p| Some(p.value.clone()))
-            .unwrap_or(None)
-    }
-
-    pub fn get_parameter_as_boolean(&self, key: &str) -> Option<bool> {
-        let value = match self.get_parameter_value(key) {
-            Some(v) => v,
-            None => {
-                return None;
-            }
-        };
-        match value.as_str() {
-            "true" => Some(true),
-            "false" => Some(false),
-            _ => None,
-        }
-    }
-
-    pub fn get_parameter_as_f32(&self, key: &str) -> Option<f32> {
-        let value = match self.get_parameter_value(key) {
-            Some(v) => v,
-            None => {
-                return None;
-            }
-        };
-        match value.parse::<f32>() {
-            Ok(v) => Some(v),
-            Err(_) => None,
-        }
-    }
-
-    pub fn get_parameter_array(&self, key: &str) -> Option<Vec<String>> {
-        let value = match self.get_parameter_value(key) {
-            Some(v) => v,
-            None => {
-                return None;
-            }
-        };
-        let mut array: Vec<String> = vec![];
-        for item in value.split(",") {
-            array.push(item.to_owned());
-        }
-        Some(array)
-    }
-}
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LlmQuery<T> {
-    pub command: String,
-    pub options: T,
-}
-
-#[serde_with::skip_serializing_none]
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LlmResponse {
-    pub created: Option<i64>,
-    pub status: Option<String>,
-    pub content: String,
-    pub conversation_id: Option<String>,
-}
-impl LlmResponse {
-    pub fn new(created: i64, status: &str, content: &str) -> Self {
-        Self {
-            created: Some(created),
-            status: Some(status.to_owned()),
-            content: content.to_owned(),
-            conversation_id: None,
-        }
-    }
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LlmResponseError {
-    pub error: LlmError,
-}
+use crate::llm::{
+    LlmQuery,
+    LlmQueryCompletion,
+    LlmResponse,
+    LlmResponseError,
+    LlmUsage,
+    LlmError,
+    LlmMessage,
+};
 
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -278,12 +154,31 @@ impl OpenAIChatCompletion {
                 completion_tokens: 0,
                 prompt_tokens: 0,
                 total_tokens: 0,
-            }, // TODO implement usage
+            },
+            // TODO implement usage
+            // see : https://community.openai.com/t/why-there-is-no-usage-object-returned-with-streaming-api-call/385160/15
         }
     }
 
     fn to_llm_response(&self) -> LlmResponse {
-        LlmResponse::new(self.created, "success", &self.choices[0].message.content)
+        let mut response = LlmResponse::new(
+            self.created,
+            "success",
+            &self.choices[0].message.content
+        );
+        let usage = LlmUsage {
+            completion_tokens: Some(self.usage.completion_tokens),
+            prompt_tokens: Some(self.usage.prompt_tokens),
+            total_tokens: Some(self.usage.total_tokens),
+            completion_ms: None,
+            prompt_ms: None,
+            total_ms: None,
+            prompt_per_second: None,
+            completion_per_second: None,
+            total_per_second: None,
+        };
+        response.usage = Some(usage);
+        response
     }
 }
 
@@ -447,6 +342,7 @@ pub async fn call_completion<R: Runtime>(
     query: LlmQuery<LlmQueryCompletion>,
     callback: Option<impl FnMut(Result<LlmResponse, LlmError>) + Copy>
 ) -> Result<LlmResponse, Box<dyn std::error::Error>> {
+    let start_time = chrono::Utc::now().timestamp_millis();
     let url = format!("{}/chat/{}s", api, query.command);
     println!(
         "{}",
@@ -459,10 +355,21 @@ pub async fn call_completion<R: Runtime>(
         Some(t) => t,
         None => false,
     };
+    let mut result;
     if stream {
         println!("llm call stream:  {:?}", stream);
-        stream_request::<R>(url, secret_key, parameters, callback).await
+        result = stream_request::<R>(url, secret_key, parameters, callback).await?;
     } else {
-        request::<R>(url, secret_key, parameters).await
+        result = request::<R>(url, secret_key, parameters).await?;
     }
+    let end_time = chrono::Utc::now().timestamp_millis() - start_time;
+    let mut usage = result.usage.unwrap_or(LlmUsage::new());
+    usage.total_ms = Some(end_time);
+    let total_tokens = usage.total_tokens.unwrap_or(0);
+    if total_tokens > 0 && end_time > 0 {
+        usage.total_per_second = Some(((total_tokens as f32) / (end_time as f32)) * 1000.0);
+    }
+    println!("llm call duration:  {:?} usage={:?}", end_time, usage);
+    result.usage = Some(usage);
+    Ok(result)
 }

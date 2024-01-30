@@ -51,7 +51,7 @@ function Thread({
   onSelectMenu: (menu: string, data: string) => void;
 }) {
   const router = useRouter();
-  const { providers, conversations, setConversations } = useContext(AppContext);
+  const { providers, conversations, setConversations, setUsage } = useContext(AppContext);
   const { backendContext, setActiveModel } = useBackend();
   const { activeModel } = backendContext.config.models;
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
@@ -115,7 +115,7 @@ function Thread({
     logger.info(`onSelectModel ${model} ${provider} activeModel=${typeof activeModel}`);
     if (model && selectedConversation) {
       const newConversations = updateConversation(
-        { ...selectedConversation, model, provider },
+        { ...selectedConversation, model, provider, parameters: {} },
         conversations,
       );
       setConversations(newConversations);
@@ -193,7 +193,8 @@ function Thread({
         conversationId,
         parameters,
       );
-      fromMessage.content = response;
+      setUsage(response.usage);
+      fromMessage.content = response.content.trim();
     } catch (e: any) {
       logger.error('sendMessage', e, typeof e);
       setErrorMessage({ ...errorMessage, [conversationId]: String(e) });
