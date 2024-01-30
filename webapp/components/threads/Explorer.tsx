@@ -220,40 +220,42 @@ export default function Explorer({
             <div className="group flex flex-col gap-3 break-all rounded-md px-1 py-3">
               <div className="p1 text-ellipsis break-all text-neutral-600">{t('Recent')}</div>
               <ul className="p1 flex flex-1 flex-col">
-                {conversations.map((conversation) => (
-                  <li
-                    key={conversation.id}
-                    className={`${
-                      conversation.temp || selectedConversationId === conversation.id
-                        ? 'text-black dark:text-white'
-                        : 'text-neutral-400 dark:text-neutral-400'
-                    } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
-                  >
-                    <ContextMenu>
-                      <ContextMenuTrigger>
-                        <Link
-                          href={`/threads/${conversation.id}`}
-                          className="flex cursor-pointer flex-row items-center"
-                        >
-                          <EditableItem
-                            id={conversation.id}
-                            title={
-                              conversation.temp
-                                ? `${conversation.currentPrompt || ''} ...`
-                                : conversation.name
-                            }
-                            editable={
-                              !conversation.temp && conversation.id === selectedConversationId
-                            }
-                            className="max-h-5 flex-1 overflow-hidden text-ellipsis break-all"
-                            onChange={onChangeConversationName}
-                          />
-                        </Link>
-                      </ContextMenuTrigger>
-                      <ContextMenuList data={conversation.id} menu={menu} />
-                    </ContextMenu>
-                  </li>
-                ))}
+                {conversations
+                  .sort((c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt)
+                  .map((conversation) => (
+                    <li
+                      key={conversation.id}
+                      className={`${
+                        conversation.temp || selectedConversationId === conversation.id
+                          ? 'text-black dark:text-white'
+                          : 'text-neutral-400 dark:text-neutral-400'
+                      } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
+                    >
+                      <ContextMenu>
+                        <ContextMenuTrigger>
+                          <Link
+                            href={`/threads/${conversation.id}`}
+                            className="flex cursor-pointer flex-row items-center"
+                          >
+                            <EditableItem
+                              id={conversation.id}
+                              title={
+                                conversation.temp
+                                  ? `${conversation.currentPrompt || ''} ...`
+                                  : conversation.name
+                              }
+                              editable={
+                                !conversation.temp && conversation.id === selectedConversationId
+                              }
+                              className="max-h-5 flex-1 overflow-hidden text-ellipsis break-all"
+                              onChange={onChangeConversationName}
+                            />
+                          </Link>
+                        </ContextMenuTrigger>
+                        <ContextMenuList data={conversation.id} menu={menu} />
+                      </ContextMenu>
+                    </li>
+                  ))}
               </ul>
             </div>
           </div>
