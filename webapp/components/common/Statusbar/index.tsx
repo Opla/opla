@@ -68,7 +68,7 @@ export default function Statusbar() {
         </button>
         {download && (
           <div className="flex flex-row items-center justify-center gap-1">
-            <span className="text-neutral-800 dark:text-neutral-300">
+            <span className="tabular-nums text-neutral-800 dark:text-neutral-300">
               <DownloadCloud className="h-4 w-4" strokeWidth={1.5} />
             </span>
             <span>
@@ -80,7 +80,7 @@ export default function Statusbar() {
       </div>
       {usage && (
         <div className="flex flex-row items-center justify-center gap-1">
-          <span className="text-neutral-800 dark:text-neutral-300">
+          <span className="tabular-nums text-neutral-800 dark:text-neutral-300">
             <BarChart3 className="h-4 w-4" strokeWidth={1.5} />
           </span>
           <span>
