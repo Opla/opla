@@ -5,6 +5,7 @@ import {
   CompletionParametersDefinition,
   LlmMessage,
   LlmParameters,
+  LlmResponse,
   Message,
   Model,
   Provider,
@@ -23,7 +24,7 @@ const completion = async (
   system?: string,
   conversationId?: string,
   parameters?: LlmParameters[],
-): Promise<string> => {
+): Promise<LlmResponse> => {
   if (!model) {
     throw new Error('Model not set');
   }

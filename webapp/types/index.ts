@@ -139,7 +139,7 @@ export type ProviderDefinition = {
       system?: string,
       conversationId?: string,
       parameters?: LlmParameters[],
-    ) => Promise<string>;
+    ) => Promise<LlmResponse>;
   };
 };
 
@@ -320,11 +320,24 @@ export type LlmQuery = {
   options: LlmQueryCompletion;
 };
 
+export type LlmUsage = {
+  completionTokens?: number;
+  promptTokens?: number;
+  totalTokens?: number;
+  completionMs?: number;
+  promptMs?: number;
+  totalMs?: number;
+  promptPerSecond?: number;
+  completionPerSecond?: number;
+  totalPerSecond?: number;
+};
+
 export type LlmResponse = {
-  created: number;
-  status: string;
+  created?: number;
+  status?: string;
   content: string;
-  conversationId: string;
+  conversationId?: string;
+  usage?: LlmUsage;
 };
 
 export type LlmStreamResponse = {

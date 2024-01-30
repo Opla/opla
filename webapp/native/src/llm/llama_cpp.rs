@@ -16,7 +16,7 @@ use crate::{ error::Error, llm::LlmQueryCompletion, store::ServerParameters };
 
 use tauri::Runtime;
 use serde::{ Deserialize, Serialize };
-use crate::llm::{ LlmQuery, LlmResponse };
+use crate::llm::{ LlmQuery, LlmResponse, LlmUsage };
 
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -94,20 +94,46 @@ impl LlmQueryCompletion {
 
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LlamaCppChatCompletion {
-    pub created: Option<i64>,
-    pub status: Option<String>,
-    pub content: String,
-    pub conversation_id: Option<String>,
+pub struct LlamaCppChatTimings {
+    pub predicted_ms: f32,
+    pub predicted_n: i32,
+    pub predicted_per_second: f32,
+    pub predicted_per_token_ms: f32,
+    pub prompt_ms: f32,
+    pub prompt_n: i32,
+    pub prompt_per_second: f32,
+    pub prompt_per_token_ms: f32,
 }
+impl LlamaCppChatTimings {
+    pub fn to_llm_usage(&self) -> LlmUsage {
+        LlmUsage {
+            completion_tokens: Some(self.predicted_n),
+            prompt_tokens: Some(self.prompt_n),
+            total_tokens: Some(self.predicted_n + self.prompt_n),
+            completion_ms: Some(self.predicted_ms as i64),
+            prompt_ms: Some(self.prompt_ms as i64),
+            total_ms: Some((self.predicted_ms + self.prompt_ms) as i64),
+            prompt_per_second: Some(self.prompt_per_second),
+            completion_per_second: Some(self.predicted_per_second),
+            total_per_second: Some(self.predicted_per_second + self.prompt_per_second),
+        }
+    }
+}
+#[serde_with::skip_serializing_none]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LlamaCppChatCompletion {
+    pub content: String,
+    pub timings: LlamaCppChatTimings,
+}
+
 impl LlamaCppChatCompletion {
     pub fn to_llm_response(&self) -> LlmResponse {
         LlmResponse {
-            created: self.created,
-            status: self.status.clone(),
+            created: None,
+            status: None,
             content: self.content.clone(),
-            conversation_id: self.conversation_id.clone(),
-            usage: None,
+            conversation_id: None,
+            usage: Some(self.timings.to_llm_usage()),
         }
     }
 }

@@ -23,7 +23,9 @@ import {
   ProviderDefinition,
   ProviderType,
 } from '@/types';
+import { mapKeys } from '@/utils/data';
 import logger from '@/utils/logger';
+import { toCamelCase } from '@/utils/string';
 import { invokeTauri } from '@/utils/tauri';
 import { z } from 'zod';
 
@@ -215,7 +217,7 @@ const completion = async (
   system = DEFAULT_SYSTEM,
   conversationId?: string,
   parameters: LlmParameters[] = DEFAULT_PROPERTIES,
-): Promise<string> => {
+): Promise<LlmResponse> => {
   if (!model) {
     throw new Error('Model not found');
   }
@@ -239,8 +241,8 @@ const completion = async (
 
   const { content } = response;
   if (content) {
-    logger.info(`${NAME} completion response`, content);
-    return content.trim();
+    logger.info(`${NAME} completion response`, response);
+    return mapKeys(response, toCamelCase);
   }
   throw new Error(`${NAME} completion error ${response}`);
 };

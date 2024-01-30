@@ -121,16 +121,22 @@ class Backend {
   private streamListener = async (event: any) => {
     logger.info('stream event', event, Backend.getContext());
     const response = event.payload as LlmResponse;
+    if (!response.conversationId) {
+      logger.error('stream event without conversationId', response);
+      return;
+    }
+    const { conversationId } = response;
+
     if (response.status === 'success' && Backend.getContext()) {
-      const stream = this.streams[response.conversationId] || ({} as LlmStreamResponse);
+      const stream = this.streams[conversationId] || ({} as LlmStreamResponse);
       if (stream.prevContent !== response.content) {
         const content = (stream.content || []) as string[];
         content.push(response.content as string);
-        this.streams[response.conversationId] = {
+        this.streams[conversationId] = {
           ...response,
           content,
           prevContent: response.content as string,
-        };
+        } as LlmStreamResponse;
         Backend.setContext((context) => ({
           ...context,
           streams: this.streams,
@@ -138,8 +144,8 @@ class Backend {
       }
     } else {
       Backend.setContext((context) => {
-        if (this.streams?.[response.conversationId]) {
-          delete this.streams[response.conversationId];
+        if (this.streams?.[conversationId]) {
+          delete this.streams[conversationId];
         }
         return {
           ...context,
