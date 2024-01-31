@@ -80,6 +80,8 @@ export type Message = BaseRecord & {
   author: Author;
   content: string | Content;
   contentHistory?: (string | Content)[];
+  status?: 'pending' | 'delivered' | 'error';
+  sibling?: string;
 };
 
 export type Conversation = BaseNamedRecord & {

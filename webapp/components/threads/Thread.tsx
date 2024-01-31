@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { PanelRight, PanelRightClose } from 'lucide-react';
 import { AppContext } from '@/context';
@@ -32,6 +32,7 @@ import { completion, getCompletionParametersDefinition } from '@/utils/providers
 import { findModel, getLocalModelsAsItems, getProviderModelsAsItems } from '@/utils/data/models';
 import { findProvider } from '@/utils/data/providers';
 import { toast } from '@/components/ui/Toast';
+import useDebounceFunc from '@/hooks/useDebounceFunc';
 import MessageView from './Message';
 import PromptArea from './Prompt';
 import { ScrollArea } from '../ui/scroll-area';
@@ -57,6 +58,7 @@ function Thread({
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
   const conversationId = _conversationId || tempConversationId;
   const selectedConversation = conversations.find((c) => c.id === conversationId);
+  const [changedPrompt, setChangedPrompt] = useState<string>('');
 
   const stream = backendContext.streams?.[conversationId as string];
   const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>({});
@@ -124,38 +126,10 @@ function Thread({
     }
   };
 
-  const onSendMessage = async () => {
-    if (conversationId === undefined) {
-      return;
-    }
-    if (currentPrompt.trim().length < 1) {
-      const error = { ...errorMessage, [conversationId]: t('Please enter a message.') };
-      setErrorMessage(error);
-      return;
-    }
-    setErrorMessage({ ...errorMessage, [conversationId]: '' });
-
-    setIsLoading({ ...isLoading, [conversationId]: true });
-
-    const toMessage = createMessage({ role: 'user', name: 'you' }, currentPrompt);
-    const fromMessage = createMessage({ role: 'assistant', name: selectedModel }, '...');
-    const { newConversationId, newConversations: nc } = updateMessages([toMessage, fromMessage]);
-    let newConversations = nc;
-
-    const conversation: Conversation = getConversation(
-      newConversationId,
-      newConversations,
-    ) as Conversation;
-    if (conversation.temp) {
-      conversation.name = conversation.currentPrompt as string;
-    }
-    conversation.currentPrompt = '';
-    conversation.temp = false;
-    newConversations = updateConversation(conversation, newConversations);
-    setConversations(newConversations);
-
+  const sendMessage = async (message: Message, context: Message[], conversation: Conversation) => {
     let model: Model | undefined;
     let providerName: string | undefined = model?.provider;
+    const returnedMessage = { ...message };
     if (conversation.provider && conversation.model) {
       const provider = findProvider(conversation.provider, providers);
       model = findModel(conversation.model, provider?.models || []);
@@ -187,23 +161,61 @@ function Thread({
         model,
         providerName,
         { providers },
-        // TODO build tokens context
-        [toMessage],
+        context,
         conversation?.system,
         conversationId,
         parameters,
       );
       setUsage(response.usage);
-      fromMessage.content = response.content.trim();
+      returnedMessage.content = response.content.trim();
     } catch (e: any) {
       logger.error('sendMessage', e, typeof e);
-      setErrorMessage({ ...errorMessage, [conversationId]: String(e) });
-      fromMessage.content = t('Oops, something went wrong.');
+      setErrorMessage({ ...errorMessage, [conversation.id]: String(e) });
+      returnedMessage.content = t('Oops, something went wrong.');
+      returnedMessage.status = 'error';
       toast.error(String(e));
     }
+    returnedMessage.status = 'delivered';
+    return returnedMessage;
+  };
+
+  const onSendMessage = async () => {
+    if (conversationId === undefined) {
+      return;
+    }
+    if (currentPrompt.trim().length < 1) {
+      const error = { ...errorMessage, [conversationId]: t('Please enter a message.') };
+      setErrorMessage(error);
+      return;
+    }
+    setErrorMessage({ ...errorMessage, [conversationId]: '' });
+
+    setIsLoading({ ...isLoading, [conversationId]: true });
+
+    const toMessage = createMessage({ role: 'user', name: 'you' }, currentPrompt);
+    let fromMessage = createMessage({ role: 'assistant', name: selectedModel }, '...');
+    fromMessage.status = 'pending';
+    fromMessage.sibling = toMessage.id;
+    const { newConversationId, newConversations: nc } = updateMessages([toMessage, fromMessage]);
+    let newConversations = nc;
+
+    const conversation: Conversation = getConversation(
+      newConversationId,
+      newConversations,
+    ) as Conversation;
+    if (conversation.temp) {
+      conversation.name = conversation.currentPrompt as string;
+    }
+    conversation.currentPrompt = '';
+    setChangedPrompt('');
+    conversation.temp = false;
+    newConversations = updateConversation(conversation, newConversations);
+    setConversations(newConversations);
+
+    // TODO build tokens context : better than [toMessage]
+    fromMessage = await sendMessage(fromMessage, [toMessage], conversation);
 
     updateMessages([fromMessage], newConversationId, newConversations);
-
     if (tempConversationId) {
       router.push(`/threads/${tempConversationId}`);
     }
@@ -211,28 +223,75 @@ function Thread({
     setIsLoading({ ...isLoading, [conversationId]: false });
   };
 
-  const onUpdatePrompt = (message: string, conversationName = 'Conversation') => {
-    if (message === '') {
-      setConversations(conversations.filter((c) => !c.temp));
-      setTempConversationId(undefined);
+  const onResendMessage = async (message: Message) => {
+    if (conversationId === undefined) {
       return;
     }
-    let newConversations: Conversation[];
-    const conversation = getConversation(conversationId, conversations) as Conversation;
-    if (conversation) {
-      conversation.currentPrompt = message;
-      newConversations = conversations.filter((c) => !(c.temp && c.id !== conversationId));
-      newConversations = updateConversation(conversation, newConversations);
-    } else {
-      newConversations = conversations.filter((c) => !c.temp);
-      newConversations = updateConversationMessages(conversationId, newConversations, []);
-      const newConversation = newConversations[newConversations.length - 1];
-      newConversation.temp = true;
-      newConversation.name = conversationName;
-      newConversation.currentPrompt = message;
-      setTempConversationId(newConversation.id);
+    setErrorMessage({ ...errorMessage, [conversationId]: '' });
+    setIsLoading({ ...isLoading, [conversationId]: true });
+
+    let fromMessage: Message = { ...message, status: 'pending', content: '...' };
+    if (message.content && message.content !== '...' && message.status !== 'error') {
+      const { contentHistory = [] } = message;
+      contentHistory.push(message.content);
+      fromMessage.contentHistory = contentHistory;
     }
-    setConversations(newConversations);
+    const { newConversationId, newConversations } = updateMessages([fromMessage]);
+
+    const conversation: Conversation = getConversation(
+      newConversationId,
+      newConversations,
+    ) as Conversation;
+
+    // TODO build tokens context : better than [toMessage]
+    const context: Message[] = [];
+    const index = conversation.messages.findIndex((m) => m.id === message.id);
+    if (index > 0) {
+      context.push(conversation.messages[index - 1]);
+    }
+
+    fromMessage = await sendMessage(fromMessage, context, conversation);
+
+    updateMessages([fromMessage], newConversationId, newConversations);
+
+    setIsLoading({ ...isLoading, [conversationId]: false });
+  };
+
+  const onUpdatePrompt = useCallback(
+    (message: string, conversationName = 'Conversation') => {
+      if (message === '') {
+        setConversations(conversations.filter((c) => !c.temp));
+        setTempConversationId(undefined);
+        return;
+      }
+      const conversation = getConversation(conversationId, conversations) as Conversation;
+      if (conversation?.currentPrompt === message) {
+        return;
+      }
+      let newConversations: Conversation[];
+      if (conversation) {
+        conversation.currentPrompt = message;
+        newConversations = conversations.filter((c) => !(c.temp && c.id !== conversationId));
+        newConversations = updateConversation(conversation, newConversations);
+      } else {
+        newConversations = conversations.filter((c) => !c.temp);
+        newConversations = updateConversationMessages(conversationId, newConversations, []);
+        const newConversation = newConversations[newConversations.length - 1];
+        newConversation.temp = true;
+        newConversation.name = conversationName;
+        newConversation.currentPrompt = message;
+        setTempConversationId(newConversation.id);
+      }
+      setConversations(newConversations);
+      setChangedPrompt('');
+    },
+    [conversationId, conversations, setConversations],
+  );
+
+  useDebounceFunc(onUpdatePrompt, changedPrompt, 500);
+
+  const onChangePrompt = (text: string) => {
+    setChangedPrompt(text);
   };
 
   const onPromptSelected = (prompt: Prompt) => {
@@ -290,7 +349,15 @@ function Thread({
             if (stream && msg.content === '...' && index === messages.length - 1) {
               m = { ...msg, content: (stream.content as string[]).join('') };
             }
-            return <MessageView key={msg.id} message={m} />;
+            return (
+              <MessageView
+                key={msg.id}
+                message={m}
+                onResendMessage={() => {
+                  onResendMessage(m);
+                }}
+              />
+            );
           })}
           <div className="h-4 w-full" />
           <div ref={bottomOfChatRef} />
@@ -300,11 +367,11 @@ function Thread({
 
       <PromptArea
         conversationId={conversationId as string}
-        message={currentPrompt}
+        message={changedPrompt || currentPrompt}
         isLoading={conversationId ? isLoading[conversationId] : false}
         errorMessage={conversationId ? errorMessage[conversationId] : ''}
         onSendMessage={onSendMessage}
-        onUpdatePrompt={onUpdatePrompt}
+        onUpdatePrompt={onChangePrompt}
       />
     </div>
   );

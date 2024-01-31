@@ -14,11 +14,19 @@
 
 'use client';
 
+import useHover from '@/hooks/useHover';
 import useMarkdownProcessor from '@/hooks/useMarkdownProcessor';
 import { Message } from '@/types';
-import { Bot, MoreHorizontal, User } from 'lucide-react';
+import { Clipboard, Bot, MoreHorizontal, User, Pencil, RotateCcw, Trash2 } from 'lucide-react';
+import { Button } from '../ui/button';
 
-function MessageComponent({ message }: { message: Message }) {
+type MessageComponentProps = {
+  message: Message;
+  onResendMessage: () => void;
+};
+
+function MessageComponent({ message, onResendMessage }: MessageComponentProps) {
+  const [ref, isHover] = useHover();
   const { author } = message;
   let { content } = message;
   if (typeof content !== 'string') {
@@ -28,7 +36,10 @@ function MessageComponent({ message }: { message: Message }) {
   const isUser = author.role === 'user';
 
   return (
-    <div className={`group w-full text-neutral-800 dark:text-neutral-100 ${isUser ? '' : ''}`}>
+    <div
+      ref={ref}
+      className={`group relative w-full text-neutral-800 dark:text-neutral-100 hover:dark:bg-neutral-900 ${isUser ? '' : ''}`}
+    >
       <div className="m-auto flex w-full gap-4 text-base md:max-w-2xl md:gap-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
         <div className="m-auto flex w-full flex-row gap-4 p-4 md:max-w-2xl md:gap-6 md:py-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
           <div className="flex w-8 flex-col items-end">
@@ -50,9 +61,41 @@ function MessageComponent({ message }: { message: Message }) {
                       <MoreHorizontal className="h-4 w-4 animate-pulse" />
                     </div>
                   ) : (
-                    <div className="select-auto pt-2">{Content}</div>
+                    <div className="select-auto pb-4 pt-2">{Content}</div>
                   )}
                 </div>
+                {isHover && (
+                  <div className="left-30 absolute bottom-0">
+                    {isUser ? (
+                      <>
+                        <Button variant="ghost" size="sm">
+                          <Clipboard className="h-4 w-4" strokeWidth={1.5} />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Pencil className="h-4 w-4" strokeWidth={1.5} />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button variant="ghost" size="sm" onClick={onResendMessage}>
+                          <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Clipboard className="h-4 w-4" strokeWidth={1.5} />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Pencil className="h-4 w-4" strokeWidth={1.5} />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
