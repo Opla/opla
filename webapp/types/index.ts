@@ -17,7 +17,9 @@ import { ZodSchema } from 'zod';
 
 declare global {
   interface Window {
-    __TAURI__: any;
+    __TAURI__: {
+      convertFileSrc: (src: string, protocol: string) => string;
+    };
   }
 }
 
