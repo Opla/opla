@@ -20,7 +20,12 @@ import { Message } from '@/types';
 import { Clipboard, Bot, MoreHorizontal, User, Pencil, RotateCcw, Trash2 } from 'lucide-react';
 import { Button } from '../ui/button';
 
-function MessageComponent({ message }: { message: Message }) {
+type MessageComponentProps = {
+  message: Message;
+  onResendMessage: () => void;
+};
+
+function MessageComponent({ message, onResendMessage }: MessageComponentProps) {
   const [ref, isHover] = useHover();
   const { author } = message;
   let { content } = message;
@@ -75,7 +80,7 @@ function MessageComponent({ message }: { message: Message }) {
                       </>
                     ) : (
                       <>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={onResendMessage}>
                           <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
                         </Button>
                         <Button variant="ghost" size="sm">

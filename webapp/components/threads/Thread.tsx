@@ -172,8 +172,10 @@ function Thread({
       logger.error('sendMessage', e, typeof e);
       setErrorMessage({ ...errorMessage, [conversation.id]: String(e) });
       returnedMessage.content = t('Oops, something went wrong.');
+      returnedMessage.status = 'error';
       toast.error(String(e));
     }
+    returnedMessage.status = 'delivered';
     return returnedMessage;
   };
 
@@ -192,6 +194,8 @@ function Thread({
 
     const toMessage = createMessage({ role: 'user', name: 'you' }, currentPrompt);
     let fromMessage = createMessage({ role: 'assistant', name: selectedModel }, '...');
+    fromMessage.status = 'pending';
+    fromMessage.sibling = toMessage.id;
     const { newConversationId, newConversations: nc } = updateMessages([toMessage, fromMessage]);
     let newConversations = nc;
 
@@ -215,6 +219,40 @@ function Thread({
     if (tempConversationId) {
       router.push(`/threads/${tempConversationId}`);
     }
+
+    setIsLoading({ ...isLoading, [conversationId]: false });
+  };
+
+  const onResendMessage = async (message: Message) => {
+    if (conversationId === undefined) {
+      return;
+    }
+    setErrorMessage({ ...errorMessage, [conversationId]: '' });
+    setIsLoading({ ...isLoading, [conversationId]: true });
+
+    let fromMessage: Message = { ...message, status: 'pending', content: '...' };
+    if (message.content && message.content !== '...' && message.status !== 'error') {
+      const { contentHistory = [] } = message;
+      contentHistory.push(message.content);
+      fromMessage.contentHistory = contentHistory;
+    }
+    const { newConversationId, newConversations } = updateMessages([fromMessage]);
+
+    const conversation: Conversation = getConversation(
+      newConversationId,
+      newConversations,
+    ) as Conversation;
+
+    // TODO build tokens context : better than [toMessage]
+    const context: Message[] = [];
+    const index = conversation.messages.findIndex((m) => m.id === message.id);
+    if (index > 0) {
+      context.push(conversation.messages[index - 1]);
+    }
+
+    fromMessage = await sendMessage(fromMessage, context, conversation);
+
+    updateMessages([fromMessage], newConversationId, newConversations);
 
     setIsLoading({ ...isLoading, [conversationId]: false });
   };
@@ -311,7 +349,15 @@ function Thread({
             if (stream && msg.content === '...' && index === messages.length - 1) {
               m = { ...msg, content: (stream.content as string[]).join('') };
             }
-            return <MessageView key={msg.id} message={m} />;
+            return (
+              <MessageView
+                key={msg.id}
+                message={m}
+                onResendMessage={() => {
+                  onResendMessage(m);
+                }}
+              />
+            );
           })}
           <div className="h-4 w-full" />
           <div ref={bottomOfChatRef} />
