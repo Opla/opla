@@ -70,22 +70,20 @@ const saveFileDialog = async (filters?: DialogFilter[]) => {
   return selected;
 };
 
-const appLocalDir = async () => {
-  const { localDataDir } = await import('@tauri-apps/api/path');
-  return localDataDir();
-};
-
-const writeTextFile = async (path: string, contents: string) => {
+const writeTextFile = async (filename: string, contents: string) => {
   const { writeFile: fsWriteFile } = await import('@tauri-apps/api/fs');
+  const dataDir = await invokeTauri('get_data_dir');
   return fsWriteFile({
     contents,
-    path,
+    path: dataDir + filename,
   });
 };
 
-const readTextFile = async (path: string) => {
+const readTextFile = async (filename: string) => {
   const { readTextFile: fsReadTextFile } = await import('@tauri-apps/api/fs');
-  return fsReadTextFile(path);
+  const dataDir = await invokeTauri('get_data_dir');
+
+  return fsReadTextFile(dataDir + filename);
 };
 
 export {
@@ -95,5 +93,4 @@ export {
   saveFileDialog,
   writeTextFile,
   readTextFile,
-  appLocalDir,
 };

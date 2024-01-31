@@ -34,6 +34,7 @@ use serde::Serialize;
 use store::{ Store, Provider, ProviderType, ProviderMetadata, Settings, ServerConfiguration };
 use server::*;
 use tauri::{ Runtime, State, Manager, App, EventLoopMessage };
+use utils::{ get_config_directory, get_data_directory };
 
 pub struct OplaContext {
     pub server: Mutex<OplaServer>,
@@ -77,6 +78,38 @@ async fn save_settings<R: Runtime>(
     // println!("Save settings: {:?}", store.settings);
     store.save().map_err(|err| err.to_string())?;
     Ok(store.clone())
+}
+
+#[tauri::command]
+async fn get_config_dir<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>
+) -> Result<String, String> {
+    let config_dir = get_config_directory()?;
+    let config_dir = match config_dir.to_str() {
+        Some(c) => { c }
+        None => {
+            return Err(format!("Failed to get config directory"));
+        }
+    };
+    println!("Config dir: {:?}", config_dir);
+    Ok(config_dir.to_string())
+}
+
+#[tauri::command]
+async fn get_data_dir<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>
+) -> Result<String, String> {
+    let data_dir = get_data_directory()?;
+    let data_dir = match data_dir.to_str() {
+        Some(d) => { d }
+        None => {
+            return Err(format!("Failed to get data directory"));
+        }
+    };
+    println!("Data dir: {:?}", data_dir);
+    Ok(data_dir.to_string())
 }
 
 #[tauri::command]
@@ -527,6 +560,8 @@ fn main() {
             tauri::generate_handler![
                 get_opla_configuration,
                 save_settings,
+                get_config_dir,
+                get_data_dir,
                 get_provider_template,
                 get_opla_server_status,
                 start_opla_server,

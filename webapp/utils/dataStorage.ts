@@ -14,7 +14,7 @@
 
 import { toast } from 'sonner';
 import logger from './logger';
-import { appLocalDir, readTextFile, writeTextFile } from './tauri';
+import { readTextFile, writeTextFile } from './tauri';
 
 enum StorageType {
   File,
@@ -27,10 +27,9 @@ type DataStorage = {
 };
 
 const readFromLocalStorage = async <T>(key: string) => {
-  const localStorageDir = await appLocalDir();
   let text: string;
   try {
-    text = await readTextFile(`${localStorageDir}/Opla/${key}.json`);
+    text = await readTextFile(`/${key}.json`);
   } catch (e) {
     logger.error(`Failed to read item ${key} from fileStorage`);
     return null;
@@ -46,15 +45,12 @@ const readFromLocalStorage = async <T>(key: string) => {
 };
 
 const writeToLocalStorage = async <T>(key: string, value: T) => {
-  const localStorageDir = await appLocalDir();
-  console.log('localStorageDir', localStorageDir, key);
-  await writeTextFile(`${localStorageDir}/Opla/${key}.json`, JSON.stringify(value, null, 2));
+  await writeTextFile(`/${key}.json`, JSON.stringify(value, null, 2));
 };
 
 const LocalStorage: DataStorage = {
   async getItem<T>(key: string, defaultValue?: T) {
     const item = localStorage.getItem(key);
-    console.log('localStorage.getItem', key, item);
     if (item === null) return defaultValue;
     if (item === 'null') return defaultValue;
     if (item === 'undefined') return defaultValue;
