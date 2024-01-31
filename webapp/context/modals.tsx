@@ -98,7 +98,7 @@ function ModalsProvider({ children }: { children: React.ReactNode }) {
       {children}
       <Portal>
         {Object.entries(modals).map(([name, { render, visible, data }]) =>
-          render({ name, visible, onClose: () => onClose(name), data }),
+          visible ? render({ name, visible, onClose: () => onClose(name), data }) : null,
         )}
       </Portal>
     </ModalsContext.Provider>

@@ -31,8 +31,7 @@ const readFromLocalStorage = async <T>(key: string) => {
   let text: string;
   try {
     text = await readTextFile(`${localStorageDir}/Opla/${key}.json`);
-  }
-  catch (e) {
+  } catch (e) {
     logger.error(`Failed to read item ${key} from fileStorage`);
     return null;
   }
