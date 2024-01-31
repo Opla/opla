@@ -17,17 +17,17 @@ export default function useDataStorage<T>(key: string, defaultValue: T): [T, (va
   const [value, setValue] = useState(undefined as T);
 
   useEffect(() => {
-    const item = dataStorage().getItem(key);
+    const init = async () => {
+      const item = await dataStorage().getItem(key, defaultValue);
 
-    if (!item) {
-      dataStorage().setItem(key, defaultValue);
-    } else {
-      setValue(item as T);
-    }
-
-    function handler(e: StorageEvent) {
+      if (item) {
+        setValue(item as T);
+      }
+    };
+    init();
+    async function handler(e: StorageEvent) {
       if (e.key !== key) return;
-      const i = dataStorage().getItem(key);
+      const i = await dataStorage().getItem(key);
       logger.info('storage event', e, key, i);
       setValue(i as T);
     }

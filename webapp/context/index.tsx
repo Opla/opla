@@ -15,18 +15,14 @@
 'use client';
 
 import { createContext, useMemo, useState } from 'react';
-import { Conversation, LlmUsage, Model, Preset, Provider } from '@/types';
+import { Conversation, LlmUsage, Provider } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
 
 export type Context = {
   conversations: Array<Conversation>;
   providers: Array<Provider>;
-  models: Array<Model>;
-  presets: Array<Preset>;
   setConversations: (newConversations: Conversation[]) => void;
   setProviders: (newProviders: Provider[]) => void;
-  setModels: (newModels: Model[]) => void;
-  setPresets: (newPresets: Preset[]) => void;
   usage: LlmUsage | undefined;
   setUsage: (newUsage: LlmUsage | undefined) => void;
 };
@@ -36,10 +32,6 @@ const initialContext: Context = {
   setConversations: () => {},
   providers: [],
   setProviders: () => {},
-  models: [],
-  setModels: () => {},
-  presets: [],
-  setPresets: () => {},
   usage: undefined,
   setUsage: () => {},
 };
@@ -54,8 +46,6 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
   );
 
   const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
-  const [models, setModels] = useDataStorage('models', initialContext.models);
-  const [presets, setPresets] = useDataStorage('presets', initialContext.presets);
 
   const contextValue = useMemo(
     () => ({
@@ -63,25 +53,10 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       setConversations,
       providers,
       setProviders,
-      models,
-      setModels,
-      presets,
-      setPresets,
       usage,
       setUsage,
     }),
-    [
-      conversations,
-      setConversations,
-      providers,
-      setProviders,
-      models,
-      setModels,
-      presets,
-      setPresets,
-      usage,
-      setUsage,
-    ],
+    [conversations, setConversations, providers, setProviders, usage, setUsage],
   );
 
   return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;

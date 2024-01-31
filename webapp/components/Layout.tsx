@@ -32,7 +32,7 @@ import Loading from './common/Loading';
 export default function Layout({ children }: { children: React.ReactNode }) {
   const firstRender = useRef(true);
 
-  const { providers, models, presets } = useContext(AppContext);
+  const { providers } = useContext(AppContext);
   const router = useRouter();
 
   const { startBackend, disconnectBackend, backendContext, setSettings } = useBackendContext();
@@ -98,7 +98,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     showModal(ModalIds.Shortcuts);
   });
 
-  if (!backendContext || !providers || !models || !presets) {
+  if (!backendContext || !providers) {
     return <Loading />;
   }
 

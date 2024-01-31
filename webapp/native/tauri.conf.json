@@ -23,7 +23,8 @@
       "fs": {
         "exists": true,
         "readFile": true,
-        "writeFile": true
+        "writeFile": true,
+        "scope": ["$LOCALDATA/Opla/*"]
       },
       "window": {
         "all": true
