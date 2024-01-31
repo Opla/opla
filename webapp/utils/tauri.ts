@@ -77,7 +77,7 @@ const appLocalDir = async () => {
 
 const writeTextFile = async (path: string, contents: string) => {
   const { writeFile: fsWriteFile } = await import('@tauri-apps/api/fs');
-  await fsWriteFile({
+  return fsWriteFile({
     contents,
     path,
   });
@@ -85,8 +85,7 @@ const writeTextFile = async (path: string, contents: string) => {
 
 const readTextFile = async (path: string) => {
   const { readTextFile: fsReadTextFile } = await import('@tauri-apps/api/fs');
-  const content = await fsReadTextFile(path);
-  return content;
+  return fsReadTextFile(path);
 };
 
 export {
