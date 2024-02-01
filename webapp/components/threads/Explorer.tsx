@@ -17,7 +17,15 @@
 import { useContext, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { FolderInput, Import, MoreHorizontal, SquarePen } from 'lucide-react';
+import {
+  Archive,
+  Check,
+  FolderClock,
+  FolderInput,
+  Import,
+  MoreHorizontal,
+  SquarePen,
+} from 'lucide-react';
 import { AppContext } from '@/context';
 import { Conversation, MenuItem } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
@@ -44,6 +52,8 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Button } from '../ui/button';
@@ -203,6 +213,30 @@ export default function Explorer({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-full">
+              <DropdownMenuLabel>{t('Views')}</DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  className="flex w-full items-center justify-between"
+                  onSelect={() => {}}
+                >
+                  <div className="flex flex-1 items-center">
+                    <FolderClock className="mr-2 h-4 w-4" />
+                    {t('Recent')}
+                  </div>
+                  <Check className="h-4 w-4" />
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="flex w-full items-center justify-between"
+                  onSelect={() => {}}
+                >
+                  <div className="flex flex-1 items-center">
+                    <Archive className="mr-2 h-4 w-4" />
+                    {t('Archives')}
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>{t('Tools')}</DropdownMenuLabel>
               <DropdownMenuGroup>
                 <DropdownMenuItem onSelect={onImportConversations}>
                   <Import className="mr-2 h-4 w-4" />

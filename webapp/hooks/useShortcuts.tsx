@@ -36,6 +36,7 @@ export enum ShortcutIds {
   SEND_MESSAGE = '#send-message',
   NEW_LINE = '#new line',
   DELETE_CONVERSATION = '#delete-conversation',
+  ARCHIVE_CONVERSATION = '#archive-conversation',
   CLEAR_CONVERSATION = '#clear-conversation',
   RENAME_CONVERSATION = '#rename-conversation',
   NEW_CONVERSATION = '#new-conversation',
@@ -76,6 +77,12 @@ export const defaultShortcuts: KeyBinding[] = [
     command: ShortcutIds.DELETE_CONVERSATION,
     keys: ['mod+backspace'],
     description: 'Delete selected conversation',
+    scope: 'threads',
+  },
+  {
+    command: ShortcutIds.ARCHIVE_CONVERSATION,
+    keys: ['mod+a'],
+    description: 'Archive selected conversation',
     scope: 'threads',
   },
   {

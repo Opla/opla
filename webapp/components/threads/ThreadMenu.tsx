@@ -15,7 +15,7 @@
 'use client';
 
 import { useContext, useState } from 'react';
-import { Check, HardDriveDownload, MoreHorizontal, Plug, Plus, Trash } from 'lucide-react';
+import { Archive, Check, HardDriveDownload, MoreHorizontal, Plug, Plus, Trash } from 'lucide-react';
 // import { useRouter } from 'next/router';
 import { Button } from '@/components/ui/button';
 import {
@@ -206,6 +206,16 @@ export default function ThreadMenu({
             <>
               <DropdownMenuLabel>{t('Thread')}</DropdownMenuLabel>
               <DropdownMenuGroup>
+                <DropdownMenuItem
+                  className=""
+                  onSelect={() => onSelectMenu('delete-conversation', selectedConversationId)}
+                >
+                  <Archive className="mr-2 h-4 w-4" />
+                  {t('Archive')}
+                  <DropdownMenuShortcut>
+                    <ShortcutBadge command={ShortcutIds.ARCHIVE_CONVERSATION} />
+                  </DropdownMenuShortcut>
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-red-600"
                   onSelect={() => onSelectMenu('delete-conversation', selectedConversationId)}
