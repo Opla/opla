@@ -79,7 +79,7 @@ export default function ThreadMenu({
     if (!chatGPT) {
       chatGPT = createProvider(OpenAI.template.name as string, OpenAI.template);
     }
-    showModal(ModalIds.OpenAI, chatGPT);
+    showModal(ModalIds.OpenAI, { item: chatGPT });
   };
 
   const onNewLocalModel = () => {

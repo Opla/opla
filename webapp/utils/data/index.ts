@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { v4 as uuid } from 'uuid';
-import { BaseRecord, BaseNamedRecord, Entity, Resource, Content } from '@/types';
+import { BaseIdRecord, BaseNamedRecord, Entity, Resource, Content } from '@/types';
 
 const createBaseRecord = () => {
-  const item: BaseRecord = {
+  const item: BaseIdRecord = {
     id: uuid(),
     createdAt: Date.now(),
     updatedAt: Date.now(),
@@ -23,7 +23,7 @@ const createBaseRecord = () => {
   return item;
 };
 
-const updateRecord = (item: BaseRecord) => ({
+const updateRecord = (item: BaseIdRecord) => ({
   ...item,
   updatedAt: Date.now(),
 });

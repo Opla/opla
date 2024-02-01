@@ -64,19 +64,19 @@ export type Content = {
   metadata?: Metadata;
 };
 
-export type BaseRecord = {
+export type BaseIdRecord = {
   id: string;
   createdAt: number;
   updatedAt: number;
   metadata?: Metadata;
 };
 
-export type BaseNamedRecord = BaseRecord & {
+export type BaseNamedRecord = BaseIdRecord & {
   name: string;
   description?: string;
 };
 
-export type Message = BaseRecord & {
+export type Message = BaseIdRecord & {
   author: Author;
   content: string | Content;
   contentHistory?: (string | Content)[];

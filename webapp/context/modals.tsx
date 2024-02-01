@@ -14,12 +14,18 @@
 
 import Portal from '@/components/common/Portal';
 import { createContext, useCallback, useMemo, useState } from 'react';
-import { BaseNamedRecord } from '@/types';
+import { BaseIdRecord } from '@/types';
 
+export type ModalData = {
+  item: BaseIdRecord;
+  title?: string;
+  description?: string;
+  onAction?: (action: string, data: ModalData) => void;
+};
 export type ModalComponentRef = {
   visible: boolean;
   onClose: () => void | undefined;
-  data?: { item: BaseNamedRecord };
+  data?: ModalData;
 };
 
 export type ModalRef = {
@@ -34,14 +40,14 @@ type Context = {
         name: string;
         visible: boolean;
         onClose: () => void;
-        data: any;
+        data?: ModalData;
       }) => React.ReactNode;
       visible: boolean;
-      data: any;
+      data?: ModalData;
     };
   };
-  registerModal: (name: string, render: any, visible?: boolean, data?: any) => void;
-  showModal: (modalName: string, data?: any) => void;
+  registerModal: (name: string, render: any, visible?: boolean, data?: ModalData) => void;
+  showModal: (modalName: string, data?: ModalData) => void;
 };
 
 const initialContext: Context = {
@@ -56,7 +62,12 @@ function ModalsProvider({ children }: { children: React.ReactNode }) {
   const [modals, setModals] = useState(initialContext.instances);
 
   const registerModal = useCallback(
-    (name: string, render: () => React.ReactNode, visible = false, data = undefined) => {
+    (
+      name: string,
+      render: () => React.ReactNode,
+      visible = false,
+      data: ModalData | undefined = undefined,
+    ) => {
       if (!modals[name]) {
         setModals((prevModals) => ({ ...prevModals, ...{ [name]: { render, visible, data } } }));
       }
@@ -65,7 +76,7 @@ function ModalsProvider({ children }: { children: React.ReactNode }) {
   );
 
   const showModal = useCallback(
-    (name: string, data = undefined) => {
+    (name: string, data: ModalData | undefined = undefined) => {
       const instance = modals[name];
 
       if (instance) {
