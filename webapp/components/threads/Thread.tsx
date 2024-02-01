@@ -60,7 +60,7 @@ function Thread({
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
   const conversationId = _conversationId || tempConversationId;
   const selectedConversation = conversations.find((c) => c.id === conversationId);
-  const [changedPrompt, setChangedPrompt] = useState<string>('');
+  const [changedPrompt, setChangedPrompt] = useState<string | undefined>(undefined);
   const { showModal } = useContext(ModalsContext);
   const stream = backendContext.streams?.[conversationId as string];
   const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>({});
@@ -121,6 +121,7 @@ function Thread({
       const newConversations = updateConversation(
         { ...selectedConversation, model, provider, parameters: {} },
         conversations,
+        true,
       );
       setConversations(newConversations);
     } else if (model && !activeModel) {
@@ -210,7 +211,7 @@ function Thread({
       conversation.name = conversation.currentPrompt as string;
     }
     conversation.currentPrompt = '';
-    setChangedPrompt('');
+    setChangedPrompt(undefined);
     conversation.temp = false;
     newConversations = updateConversation(conversation, newConversations);
     setConversations(newConversations);
@@ -260,7 +261,7 @@ function Thread({
     setIsLoading({ ...isLoading, [conversationId]: false });
   };
 
-  const onDelete = (action: string, data: ModalData) => {
+  const onDeleteMessages = (action: string, data: ModalData) => {
     if (conversationId === undefined) {
       return;
     }
@@ -283,26 +284,28 @@ function Thread({
     showModal(ModalIds.DeleteItem, {
       title: 'Delete this message and siblings ?',
       item: message,
-      onAction: onDelete,
+      onAction: onDeleteMessages,
     });
   };
 
   const onUpdatePrompt = useCallback(
-    (message: string, conversationName = 'Conversation') => {
-      if (message === '') {
+    (message: string | undefined, conversationName = 'Conversation') => {
+      if (message === '' && tempConversationId) {
+        setChangedPrompt(undefined);
         setConversations(conversations.filter((c) => !c.temp));
         setTempConversationId(undefined);
         return;
       }
       const conversation = getConversation(conversationId, conversations) as Conversation;
-      if (conversation?.currentPrompt === message) {
+      if (conversation && conversation.currentPrompt === message) {
+        setChangedPrompt(undefined);
         return;
       }
       let newConversations: Conversation[];
       if (conversation) {
         conversation.currentPrompt = message;
         newConversations = conversations.filter((c) => !(c.temp && c.id !== conversationId));
-        newConversations = updateConversation(conversation, newConversations);
+        newConversations = updateConversation(conversation, newConversations, true);
       } else {
         newConversations = conversations.filter((c) => !c.temp);
         newConversations = updateConversationMessages(conversationId, newConversations, []);
@@ -313,15 +316,17 @@ function Thread({
         setTempConversationId(newConversation.id);
       }
       setConversations(newConversations);
-      setChangedPrompt('');
+      setChangedPrompt(undefined);
     },
-    [conversationId, conversations, setConversations],
+    [conversationId, conversations, setConversations, tempConversationId],
   );
 
-  useDebounceFunc(onUpdatePrompt, changedPrompt, 500);
+  useDebounceFunc<string | undefined>(onUpdatePrompt, changedPrompt, 500);
 
   const onChangePrompt = (text: string) => {
-    setChangedPrompt(text);
+    if (text !== currentPrompt) {
+      setChangedPrompt(text);
+    }
   };
 
   const onPromptSelected = (prompt: Prompt) => {
@@ -400,7 +405,7 @@ function Thread({
 
       <PromptArea
         conversationId={conversationId as string}
-        message={changedPrompt || currentPrompt}
+        message={changedPrompt === undefined ? currentPrompt : changedPrompt}
         isLoading={conversationId ? isLoading[conversationId] : false}
         errorMessage={conversationId ? errorMessage[conversationId] : ''}
         onSendMessage={onSendMessage}

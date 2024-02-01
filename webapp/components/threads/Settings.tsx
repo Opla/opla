@@ -51,6 +51,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
       const newConversations = updateConversation(
         { ...selectedConversation, note: value },
         conversations,
+        true,
       );
       setConversations(newConversations);
     }
@@ -62,6 +63,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
       const newConversations = updateConversation(
         { ...selectedConversation, system: value },
         conversations,
+        true,
       );
       setConversations(newConversations);
     }
@@ -108,7 +110,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
         delete newConversation.parameters;
       }
       if (newConversation) {
-        const newConversations = updateConversation(newConversation, conversations);
+        const newConversations = updateConversation(newConversation, conversations, true);
         logger.info('onParameterChange save Parameters', value, parameters); // , params);
         setConversations(newConversations);
       }

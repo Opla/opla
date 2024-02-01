@@ -74,7 +74,7 @@ export default function Explorer({
     if (conversation) {
       conversation.name = value;
     }
-    const updatedConversations = updateConversation(conversation, conversations);
+    const updatedConversations = updateConversation(conversation, conversations, true);
     setConversations(updatedConversations);
     logger.info(`onChangeConversationName ${editableConversation} ${value} ${id}`);
   };
