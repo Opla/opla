@@ -33,14 +33,14 @@ import { Button } from '../ui/button';
 
 function ClipboardButton({
   onCopyToClipboard,
-  isCopied,
+  copied,
 }: {
   onCopyToClipboard: () => void;
-  isCopied: boolean;
+  copied: boolean;
 }) {
   return (
-    <Button disabled={isCopied} variant="ghost" size="sm" onClick={onCopyToClipboard}>
-      {isCopied ? (
+    <Button disabled={copied} variant="ghost" size="sm" onClick={onCopyToClipboard}>
+      {copied ? (
         <Check className="h-4 w-4" strokeWidth={1.5} />
       ) : (
         <Clipboard className="h-4 w-4" strokeWidth={1.5} />
@@ -65,7 +65,7 @@ type MessageComponentProps = {
 
 function MessageComponent({ message, onResendMessage, onDeleteMessage }: MessageComponentProps) {
   const [ref, isHover] = useHover();
-  const [isCopied, setIsCopied] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const { author } = message;
   const content = getContent(message.content);
@@ -75,7 +75,7 @@ function MessageComponent({ message, onResendMessage, onDeleteMessage }: Message
   const onCopyToClipboard = () => {
     if (typeof content === 'string') {
       navigator.clipboard.writeText(content);
-      setIsCopied(true);
+      setCopied(true);
     }
   };
 
@@ -107,17 +107,14 @@ function MessageComponent({ message, onResendMessage, onDeleteMessage }: Message
                       <MoreHorizontal className="h-4 w-4 animate-pulse" />
                     </div>
                   ) : (
-                    <div className="select-auto pb-4 pt-2">{Content}</div>
+                    <div className="w-full select-auto pb-4 pt-2">{Content}</div>
                   )}
                 </div>
                 {isHover && !isProcessing && (
                   <div className="left-30 absolute bottom-0">
                     {isUser ? (
                       <>
-                        <ClipboardButton
-                          isCopied={isCopied}
-                          onCopyToClipboard={onCopyToClipboard}
-                        />
+                        <ClipboardButton copied={copied} onCopyToClipboard={onCopyToClipboard} />
                         <Button variant="ghost" size="sm">
                           <Pencil className="h-4 w-4" strokeWidth={1.5} />
                         </Button>
@@ -128,10 +125,7 @@ function MessageComponent({ message, onResendMessage, onDeleteMessage }: Message
                         <Button variant="ghost" size="sm" onClick={onResendMessage}>
                           <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
                         </Button>
-                        <ClipboardButton
-                          isCopied={isCopied}
-                          onCopyToClipboard={onCopyToClipboard}
-                        />
+                        <ClipboardButton copied={copied} onCopyToClipboard={onCopyToClipboard} />
                         <Button variant="ghost" size="sm">
                           <Pencil className="h-4 w-4" strokeWidth={1.5} />
                         </Button>

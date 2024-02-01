@@ -13,8 +13,9 @@
 // limitations under the License.
 
 import { useEffect, useRef, useState } from 'react';
-import { Calculator, Check, Copy, CornerUpRight } from 'lucide-react';
+import { Sigma, Check, Clipboard, PieChart } from 'lucide-react';
 import { Dialog } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import Latex from './Latex';
 import Mermaid from './Mermaid';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -35,22 +36,20 @@ function CodeBlock({ children, className }: JSX.IntrinsicElements['code']) {
     return () => {};
   }, [copied]);
 
-  // Highlight.js adds a `className` so this is a hack to detect if the code block
-  // is a language block wrapped in a `pre` tag.
+  let language = '';
+  if (className && className.indexOf('language-') >= 0) {
+    language = className?.substring(className.indexOf('language-') + 9);
+  }
   if (className) {
-    const isMermaid = className.includes('language-mermaid');
-    const isLatex = className.includes('language-latex');
-
     return (
-      <>
-        <code ref={ref} className={`${className} my-auto flex-shrink flex-grow`}>
-          {children}
-        </code>
-        <div className="flex flex-shrink-0 flex-grow-0 flex-col gap-1">
-          <button
-            type="button"
-            className="border-1 rounded-sm border-neutral-200 p-1 text-neutral-900 transition-colors hover:bg-neutral-200 dark:border-neutral-300 dark:text-neutral-100"
-            aria-label="copy code to clipboard"
+      <div className="m-0 flex w-full flex-col p-0">
+        <div className="flex w-full flex-row items-center justify-end gap-1 bg-neutral-900">
+          <p className="flex-grow pl-4 text-xs text-neutral-400">{language}</p>
+          <Button
+            variant="ghost"
+            className=""
+            size="sm"
+            aria-label="Copy code to clipboard"
             title="Copy code to clipboard"
             onClick={() => {
               if (ref.current) {
@@ -59,21 +58,26 @@ function CodeBlock({ children, className }: JSX.IntrinsicElements['code']) {
               }
             }}
           >
-            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-          </button>
-          {isMermaid ? (
+            {copied ? (
+              <Check className="h-4 w-4 text-neutral-400" strokeWidth={1.5} />
+            ) : (
+              <Clipboard className="h-4 w-4 text-neutral-400" strokeWidth={1.5} />
+            )}
+          </Button>
+          {language === 'mermaid' ? (
             <>
-              <button
-                type="button"
-                className="border-1 rounded-sm border-neutral-200 p-1 text-neutral-900 transition-colors hover:bg-neutral-200 dark:border-neutral-300 dark:text-neutral-100"
+              <Button
+                variant="ghost"
+                className=""
                 aria-label="Open Mermaid preview"
                 title="Open Mermaid preview"
+                size="sm"
                 onClick={() => {
                   setShowMermaidPreview(true);
                 }}
               >
-                <CornerUpRight className="h-4 w-4" />
-              </button>
+                <PieChart className="h-4 w-4 text-neutral-400" strokeWidth={1.5} />
+              </Button>
               <Dialog
                 open={showMermaidPreview}
                 setOpen={setShowMermaidPreview}
@@ -85,19 +89,20 @@ function CodeBlock({ children, className }: JSX.IntrinsicElements['code']) {
               </Dialog>
             </>
           ) : null}
-          {isLatex ? (
+          {language === 'latex' ? (
             <>
-              <button
-                type="button"
-                className="border-1 rounded-sm border-neutral-200 p-1 text-neutral-900 transition-colors hover:bg-neutral-200 dark:border-neutral-300 dark:text-neutral-100"
+              <Button
+                variant="ghost"
+                className=""
+                size="sm"
                 aria-label="Open Latex preview"
                 title="Open Latex preview"
                 onClick={() => {
                   setShowLatexPreview(true);
                 }}
               >
-                <Calculator className="h-4 w-4" />
-              </button>
+                <Sigma className="h-4 w-4 text-neutral-400" strokeWidth={1.5} />
+              </Button>
               <Dialog
                 open={showLatexPreview}
                 setOpen={setShowLatexPreview}
@@ -110,12 +115,15 @@ function CodeBlock({ children, className }: JSX.IntrinsicElements['code']) {
             </>
           ) : null}
         </div>
-      </>
+        <code ref={ref} className={`${className} w-full flex-shrink flex-grow`}>
+          {children}
+        </code>
+      </div>
     );
   }
 
   return (
-    <code className="font-code -my-0.5 inline-block rounded bg-neutral-100 p-0.5 text-neutral-950 dark:bg-neutral-700 dark:text-neutral-100">
+    <code className="font-code inline-block rounded bg-neutral-100 text-neutral-950 dark:bg-neutral-700 dark:text-neutral-100">
       {children}
     </code>
   );
