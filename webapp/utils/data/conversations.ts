@@ -87,7 +87,7 @@ const updateConversationMessages = (
   let conversation = conversations.find((c) => c.id === conversationId);
   if (!conversation) {
     const title: string = (messages[0]?.content as string) || 'Conversation';
-    conversation = createConversation(title.trim().substring(0, 20));
+    conversation = createConversation(title.trim().substring(0, 200));
   }
   conversation.messages = mergeMessages(conversation.messages, messages);
 

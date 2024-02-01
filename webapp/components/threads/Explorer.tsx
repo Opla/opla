@@ -249,7 +249,7 @@ export default function Explorer({
                               editable={
                                 !conversation.temp && conversation.id === selectedConversationId
                               }
-                              className="max-h-5 flex-1 overflow-hidden text-ellipsis break-all"
+                              className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1"
                               onChange={onChangeConversationName}
                             />
                           </Link>
