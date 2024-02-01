@@ -30,7 +30,7 @@ export default function App({ Component }: AppProps) {
     const listener = (e: Event) => {
       e.preventDefault();
     };
-    window.addEventListener('contextmenu', listener, false);
+    // window.addEventListener('contextmenu', listener, false);
 
     return () => {
       window.removeEventListener('contextmenu', listener);
