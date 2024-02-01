@@ -33,6 +33,8 @@ import { findModel, getLocalModelsAsItems, getProviderModelsAsItems } from '@/ut
 import { findProvider } from '@/utils/data/providers';
 import { toast } from '@/components/ui/Toast';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
+import { ModalData, ModalsContext } from '@/context/modals';
+import { ModalIds } from '@/modals';
 import MessageView from './Message';
 import PromptArea from './Prompt';
 import { ScrollArea } from '../ui/scroll-area';
@@ -59,7 +61,7 @@ function Thread({
   const conversationId = _conversationId || tempConversationId;
   const selectedConversation = conversations.find((c) => c.id === conversationId);
   const [changedPrompt, setChangedPrompt] = useState<string>('');
-
+  const { showModal } = useContext(ModalsContext);
   const stream = backendContext.streams?.[conversationId as string];
   const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>({});
   const [errorMessage, setErrorMessage] = useState<{ [key: string]: string }>({});
@@ -195,6 +197,7 @@ function Thread({
     const toMessage = createMessage({ role: 'user', name: 'you' }, currentPrompt);
     let fromMessage = createMessage({ role: 'assistant', name: selectedModel }, '...');
     fromMessage.status = 'pending';
+    toMessage.sibling = fromMessage.id;
     fromMessage.sibling = toMessage.id;
     const { newConversationId, newConversations: nc } = updateMessages([toMessage, fromMessage]);
     let newConversations = nc;
@@ -255,6 +258,33 @@ function Thread({
     updateMessages([fromMessage], newConversationId, newConversations);
 
     setIsLoading({ ...isLoading, [conversationId]: false });
+  };
+
+  const onDelete = (action: string, data: ModalData) => {
+    if (conversationId === undefined) {
+      return;
+    }
+    const message = data?.item as Message;
+    logger.info(`delete ${action} ${data}`);
+    if (message) {
+      if (action === 'Delete') {
+        const conversation = getConversation(conversationId, conversations);
+        if (conversation) {
+          conversation.messages = conversation.messages.filter(
+            (m) => m.id !== message.id && m.id !== message.sibling,
+          );
+          setConversations(updateConversation(conversation, conversations));
+        }
+      }
+    }
+  };
+
+  const onShouldDeleteMessage = (message: Message) => {
+    showModal(ModalIds.DeleteItem, {
+      title: 'Delete this message and siblings ?',
+      item: message,
+      onAction: onDelete,
+    });
   };
 
   const onUpdatePrompt = useCallback(
@@ -355,6 +385,9 @@ function Thread({
                 message={m}
                 onResendMessage={() => {
                   onResendMessage(m);
+                }}
+                onDeleteMessage={() => {
+                  onShouldDeleteMessage(m);
                 }}
               />
             );

@@ -16,6 +16,7 @@ import Dialog from '@/components/common/Modal';
 import OpenAI from '@/components/providers/openai';
 import useProviderState from '@/hooks/useProviderState';
 import { Provider } from '@/types';
+import { ModalData } from '@/context/modals';
 
 function OpenAIDialog({
   id,
@@ -24,11 +25,11 @@ function OpenAIDialog({
   onClose: _onClose,
 }: {
   id: string;
-  data: unknown;
+  data: ModalData;
   open: boolean;
   onClose: () => void | undefined;
 }) {
-  const newProvider = data as Provider;
+  const newProvider = data.item as Provider;
   const { provider, onParametersSave, onParameterChange } = useProviderState(
     newProvider?.id,
     newProvider,

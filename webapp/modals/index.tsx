@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import Dialog from '@/components/common/Modal';
 import AlertDialog from '@/components/common/AlertDialog';
 import { BaseNamedRecord } from '@/types';
-import { ModalRef } from '@/context/modals';
+import { ModalData, ModalRef } from '@/context/modals';
 import { ShortcutSettings } from '@/components/common/ShortCut';
 import SettingsPanel from './settings';
 import NewProviderDialog from './templates/NewProvider';
@@ -119,7 +119,7 @@ const Modals: ModalRef[] = [
           key={ModalIds.OpenAI}
           id={ModalIds.OpenAI}
           open={visible}
-          data={data}
+          data={data as ModalData}
           onClose={onClose}
         />
       );
@@ -134,7 +134,7 @@ const Modals: ModalRef[] = [
         <AlertDialog
           key={ModalIds.DeleteItem}
           id={ModalIds.DeleteItem}
-          title={t('Delete this item?')}
+          title={t(data?.title || 'Delete this item?')}
           actions={[
             { label: t('Delete'), value: 'Delete' },
             { label: t('Cancel'), value: 'Cancel' },
@@ -143,7 +143,7 @@ const Modals: ModalRef[] = [
           onClose={onClose}
           data={data}
         >
-          <div>{item?.name || ''}</div>
+          <div>{data?.description || item?.name || ''}</div>
         </AlertDialog>
       );
     },
