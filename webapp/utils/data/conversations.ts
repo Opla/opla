@@ -45,9 +45,15 @@ const updateMessage = (message: Message, conversationId: string, conversations: 
 
 const mergeMessages = (messages: Message[], newMessages: Message[]) => {
   const newMessagesIds = newMessages.map((m) => m.id);
-  const oldMessages = messages.filter((m) => !newMessagesIds.includes(m.id));
-  const updatedMessages = newMessages.map((m) => ({ ...m, updatedAt: Date.now() }));
-  return [...oldMessages, ...updatedMessages];
+  const freshNewMessages = newMessages.filter((m) => !messages.find((msg) => msg.id === m.id));
+  const mergedMessages = messages.map((m) => {
+    if (newMessagesIds.includes(m.id)) {
+      const updatedMessage = newMessages.find((newMsg) => newMsg.id === m.id);
+      return { ...m, ...updatedMessage, updatedAt: Date.now() };
+    }
+    return m;
+  });
+  return [...mergedMessages, ...freshNewMessages];
 };
 
 const createConversation = (name: string) => {
