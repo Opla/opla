@@ -44,7 +44,6 @@
     "react": "^18",
     "react-dom": "^18",
     "react-i18next": "^14.0.0",
-    "react-icons": "^5.0.1",
     "react-keyed-flatten-children": "^3.0.0",
     "react-resizable-panels": "^1.0.8",
     "rehype-highlight": "^7.0.0",
