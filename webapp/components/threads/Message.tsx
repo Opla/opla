@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   Check,
   Clipboard,
@@ -29,7 +29,9 @@ import { getContent } from '@/utils/data';
 import useHover from '@/hooks/useHover';
 import useMarkdownProcessor from '@/hooks/useMarkdownProcessor';
 import { Message } from '@/types';
+import useTranslation from '@/hooks/useTranslation';
 import { Button } from '../ui/button';
+import { Textarea } from '../ui/textarea';
 
 function ClipboardButton({
   onCopyToClipboard,
@@ -57,15 +59,31 @@ function DeleteButton({ onDeleteMessage }: { onDeleteMessage: () => void }) {
   );
 }
 
+enum MessageState {
+  Markdown,
+  Text,
+  Pending,
+  Edit,
+}
+
 type MessageComponentProps = {
   message: Message;
   onResendMessage: () => void;
   onDeleteMessage: () => void;
+  onChangeContent: (content: string, submit: boolean) => void;
 };
 
-function MessageComponent({ message, onResendMessage, onDeleteMessage }: MessageComponentProps) {
+function MessageComponent({
+  message,
+  onResendMessage,
+  onDeleteMessage,
+  onChangeContent,
+}: MessageComponentProps) {
+  const { t } = useTranslation();
   const [ref, isHover] = useHover();
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const [copied, setCopied] = useState(false);
+  const [edit, setEdit] = useState<string | undefined>(undefined);
 
   const { author } = message;
   const content = getContent(message.content);
@@ -79,14 +97,37 @@ function MessageComponent({ message, onResendMessage, onDeleteMessage }: Message
     }
   };
 
-  const isProcessing = message.status === 'pending';
+  const onEdit = () => {
+    setEdit(content);
+  };
+
+  const onSave = () => {
+    const newContent = inputRef.current?.value;
+    if (newContent && content !== newContent) {
+      onChangeContent(newContent, isUser);
+    }
+    setEdit(undefined);
+  };
+
+  const onCancelEdit = () => {
+    setEdit(undefined);
+  };
+
+  let state = MessageState.Markdown;
+  if (edit !== undefined) {
+    state = MessageState.Edit;
+  } else if (isUser) {
+    state = MessageState.Text;
+  } else if (message.status === 'pending' || content === '...') {
+    state = MessageState.Pending;
+  }
 
   return (
     <div
       ref={ref}
       className={`group relative w-full text-neutral-800 dark:text-neutral-100 hover:dark:bg-neutral-900 ${isUser ? '' : ''}`}
     >
-      <div className="m-auto flex w-full gap-4 text-base md:max-w-2xl md:gap-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
+      <div className="m-auto flex w-full gap-4 font-sans text-sm md:max-w-2xl md:gap-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
         <div className="m-auto flex w-full flex-row gap-4 p-4 md:max-w-2xl md:gap-6 md:py-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
           <div className="flex w-8 flex-col items-end">
             <div className="text-opacity-100r flex h-7 w-7 items-center justify-center rounded-md p-1 text-white">
@@ -101,37 +142,51 @@ function MessageComponent({ message, onResendMessage, onDeleteMessage }: Message
             <div className="flex flex-grow flex-col gap-3">
               <div className="flex min-h-20 flex-col items-start gap-4 whitespace-pre-wrap break-words">
                 <div className="w-full break-words">
-                  <p className="font-bold capitalize">{author.name}</p>
-                  {!isUser && (content === '...' || isProcessing) ? (
-                    <div className="pt-2">
+                  <p className="mx-4 font-bold capitalize">{author.name}</p>
+                  {state === MessageState.Pending && (
+                    <div className="px-4 py-2">
                       <MoreHorizontal className="h-4 w-4 animate-pulse" />
                     </div>
-                  ) : (
-                    <div className="w-full select-auto pb-4 pt-2">{Content}</div>
+                  )}
+                  {state === MessageState.Markdown && (
+                    <div className="my-4 w-full select-auto px-3 py-2">{Content}</div>
+                  )}
+                  {state === MessageState.Text && (
+                    <div className="my-4 w-full select-auto px-3 py-2">{content}</div>
+                  )}
+                  {state === MessageState.Edit && (
+                    <Textarea
+                      ref={inputRef}
+                      className="my-4 w-full resize-none  px-3 py-2 text-sm"
+                      value={edit !== undefined ? edit : content}
+                      onChange={(e) => {
+                        setEdit(e.target.value);
+                      }}
+                    />
                   )}
                 </div>
-                {isHover && !isProcessing && (
+                {(state === MessageState.Markdown || state === MessageState.Text) && isHover && (
                   <div className="left-30 absolute bottom-0">
-                    {isUser ? (
-                      <>
-                        <ClipboardButton copied={copied} onCopyToClipboard={onCopyToClipboard} />
-                        <Button variant="ghost" size="sm">
-                          <Pencil className="h-4 w-4" strokeWidth={1.5} />
-                        </Button>
-                        <DeleteButton onDeleteMessage={onDeleteMessage} />
-                      </>
-                    ) : (
-                      <>
-                        <Button variant="ghost" size="sm" onClick={onResendMessage}>
-                          <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
-                        </Button>
-                        <ClipboardButton copied={copied} onCopyToClipboard={onCopyToClipboard} />
-                        <Button variant="ghost" size="sm">
-                          <Pencil className="h-4 w-4" strokeWidth={1.5} />
-                        </Button>
-                        <DeleteButton onDeleteMessage={onDeleteMessage} />
-                      </>
+                    {!isUser && (
+                      <Button variant="ghost" size="sm" onClick={onResendMessage}>
+                        <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
+                      </Button>
                     )}
+                    <ClipboardButton copied={copied} onCopyToClipboard={onCopyToClipboard} />
+                    <Button variant="ghost" size="sm" onClick={onEdit}>
+                      <Pencil className="h-4 w-4" strokeWidth={1.5} />
+                    </Button>
+                    <DeleteButton onDeleteMessage={onDeleteMessage} />
+                  </div>
+                )}
+                {state === MessageState.Edit && (
+                  <div className="left-30 absolute bottom-0 flex flex-row gap-2">
+                    <Button size="sm" onClick={onSave} disabled={!edit}>
+                      {isUser ? t('Save & submit') : t('Save')}
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={onCancelEdit}>
+                      {t('Cancel')}
+                    </Button>
                   </div>
                 )}
               </div>

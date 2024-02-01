@@ -288,6 +288,30 @@ function Thread({
     });
   };
 
+  const onChangeMessageContent = (message: Message, newContent: string, submit: boolean) => {
+    if (conversationId === undefined) {
+      return;
+    }
+    const conversation = getConversation(conversationId, conversations);
+    if (conversation) {
+      const newMessages = conversation.messages.map((m) => {
+        if (m.id === message.id) {
+          const { contentHistory = [] } = m;
+          contentHistory.push(message.content);
+          return { ...m, content: newContent, contentHistory };
+        }
+        return m;
+      });
+      updateMessages(newMessages, conversationId, conversations);
+    }
+    if (submit) {
+      const sibling = conversation?.messages.find((m) => m.id === message.sibling);
+      if (sibling) {
+        onResendMessage(sibling);
+      }
+    }
+  };
+
   const onUpdatePrompt = useCallback(
     (message: string | undefined, conversationName = 'Conversation') => {
       if (message === '' && tempConversationId) {
@@ -393,6 +417,9 @@ function Thread({
                 }}
                 onDeleteMessage={() => {
                   onShouldDeleteMessage(m);
+                }}
+                onChangeContent={(newContent, submit) => {
+                  onChangeMessageContent(m, newContent, submit);
                 }}
               />
             );
