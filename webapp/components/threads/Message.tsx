@@ -14,10 +14,21 @@
 
 'use client';
 
+import { useState } from 'react';
+import {
+  Check,
+  Clipboard,
+  Bot,
+  MoreHorizontal,
+  User,
+  Pencil,
+  RotateCcw,
+  Trash2,
+} from 'lucide-react';
+import { getContent } from '@/utils/data';
 import useHover from '@/hooks/useHover';
 import useMarkdownProcessor from '@/hooks/useMarkdownProcessor';
 import { Message } from '@/types';
-import { Clipboard, Bot, MoreHorizontal, User, Pencil, RotateCcw, Trash2 } from 'lucide-react';
 import { Button } from '../ui/button';
 
 type MessageComponentProps = {
@@ -25,15 +36,41 @@ type MessageComponentProps = {
   onResendMessage: () => void;
 };
 
+function ClipboardButton({
+  onCopyToClipboard,
+  isCopied,
+}: {
+  onCopyToClipboard: () => void;
+  isCopied: boolean;
+}) {
+  return (
+    <Button disabled={isCopied} variant="ghost" size="sm" onClick={onCopyToClipboard}>
+      {isCopied ? (
+        <Check className="h-4 w-4" strokeWidth={1.5} />
+      ) : (
+        <Clipboard className="h-4 w-4" strokeWidth={1.5} />
+      )}
+    </Button>
+  );
+}
+
 function MessageComponent({ message, onResendMessage }: MessageComponentProps) {
   const [ref, isHover] = useHover();
+  const [isCopied, setIsCopied] = useState(false);
+
   const { author } = message;
-  let { content } = message;
-  if (typeof content !== 'string') {
-    content = content.parts.join('');
-  }
+  const content = getContent(message.content);
   const Content = useMarkdownProcessor(content as string);
   const isUser = author.role === 'user';
+
+  const onCopyToClipboard = () => {
+    if (typeof content === 'string') {
+      navigator.clipboard.writeText(content);
+      setIsCopied(true);
+    }
+  };
+
+  const isProcessing = message.status === 'pending';
 
   return (
     <div
@@ -56,7 +93,7 @@ function MessageComponent({ message, onResendMessage }: MessageComponentProps) {
               <div className="flex min-h-20 flex-col items-start gap-4 whitespace-pre-wrap break-words">
                 <div className="w-full break-words">
                   <p className="font-bold capitalize">{author.name}</p>
-                  {!isUser && content === '...' ? (
+                  {!isUser && (content === '...' || isProcessing) ? (
                     <div className="pt-2">
                       <MoreHorizontal className="h-4 w-4 animate-pulse" />
                     </div>
@@ -64,13 +101,14 @@ function MessageComponent({ message, onResendMessage }: MessageComponentProps) {
                     <div className="select-auto pb-4 pt-2">{Content}</div>
                   )}
                 </div>
-                {isHover && (
+                {isHover && !isProcessing && (
                   <div className="left-30 absolute bottom-0">
                     {isUser ? (
                       <>
-                        <Button variant="ghost" size="sm">
-                          <Clipboard className="h-4 w-4" strokeWidth={1.5} />
-                        </Button>
+                        <ClipboardButton
+                          isCopied={isCopied}
+                          onCopyToClipboard={onCopyToClipboard}
+                        />
                         <Button variant="ghost" size="sm">
                           <Pencil className="h-4 w-4" strokeWidth={1.5} />
                         </Button>
@@ -83,9 +121,10 @@ function MessageComponent({ message, onResendMessage }: MessageComponentProps) {
                         <Button variant="ghost" size="sm" onClick={onResendMessage}>
                           <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
                         </Button>
-                        <Button variant="ghost" size="sm">
-                          <Clipboard className="h-4 w-4" strokeWidth={1.5} />
-                        </Button>
+                        <ClipboardButton
+                          isCopied={isCopied}
+                          onCopyToClipboard={onCopyToClipboard}
+                        />
                         <Button variant="ghost" size="sm">
                           <Pencil className="h-4 w-4" strokeWidth={1.5} />
                         </Button>
