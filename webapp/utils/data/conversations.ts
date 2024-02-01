@@ -67,7 +67,11 @@ const createConversation = (name: string) => {
 const getConversation = (conversationId: string | undefined, conversations: Conversation[]) =>
   conversations.find((c) => c.id === conversationId);
 
-const updateConversation = (conversation: Conversation, conversations: Conversation[], noUpdate = false) => {
+const updateConversation = (
+  conversation: Conversation,
+  conversations: Conversation[],
+  noUpdate = false,
+) => {
   const i = conversations.findIndex((c) => c.id === conversation.id);
   if (i === -1) {
     return conversations;
