@@ -67,10 +67,13 @@ const createConversation = (name: string) => {
 const getConversation = (conversationId: string | undefined, conversations: Conversation[]) =>
   conversations.find((c) => c.id === conversationId);
 
-const updateConversation = (conversation: Conversation, conversations: Conversation[]) => {
+const updateConversation = (conversation: Conversation, conversations: Conversation[], noUpdate = false) => {
   const i = conversations.findIndex((c) => c.id === conversation.id);
   if (i === -1) {
     return conversations;
+  }
+  if (noUpdate) {
+    return conversations.map((c) => (c.id === conversation.id ? conversation : c));
   }
   const updatedConversation = updateRecord(conversation) as Conversation;
   return conversations.map((c) => (c.id === updatedConversation.id ? updatedConversation : c));
