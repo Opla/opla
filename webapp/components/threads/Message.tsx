@@ -31,11 +31,6 @@ import useMarkdownProcessor from '@/hooks/useMarkdownProcessor';
 import { Message } from '@/types';
 import { Button } from '../ui/button';
 
-type MessageComponentProps = {
-  message: Message;
-  onResendMessage: () => void;
-};
-
 function ClipboardButton({
   onCopyToClipboard,
   isCopied,
@@ -54,7 +49,21 @@ function ClipboardButton({
   );
 }
 
-function MessageComponent({ message, onResendMessage }: MessageComponentProps) {
+function DeleteButton({ onDeleteMessage }: { onDeleteMessage: () => void }) {
+  return (
+    <Button variant="ghost" size="sm" onClick={onDeleteMessage}>
+      <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+    </Button>
+  );
+}
+
+type MessageComponentProps = {
+  message: Message;
+  onResendMessage: () => void;
+  onDeleteMessage: () => void;
+};
+
+function MessageComponent({ message, onResendMessage, onDeleteMessage }: MessageComponentProps) {
   const [ref, isHover] = useHover();
   const [isCopied, setIsCopied] = useState(false);
 
@@ -112,9 +121,7 @@ function MessageComponent({ message, onResendMessage }: MessageComponentProps) {
                         <Button variant="ghost" size="sm">
                           <Pencil className="h-4 w-4" strokeWidth={1.5} />
                         </Button>
-                        <Button variant="ghost" size="sm">
-                          <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                        </Button>
+                        <DeleteButton onDeleteMessage={onDeleteMessage} />
                       </>
                     ) : (
                       <>
@@ -128,9 +135,7 @@ function MessageComponent({ message, onResendMessage }: MessageComponentProps) {
                         <Button variant="ghost" size="sm">
                           <Pencil className="h-4 w-4" strokeWidth={1.5} />
                         </Button>
-                        <Button variant="ghost" size="sm">
-                          <Trash2 className="h-4 w-4" strokeWidth={1.5} />
-                        </Button>
+                        <DeleteButton onDeleteMessage={onDeleteMessage} />
                       </>
                     )}
                   </div>

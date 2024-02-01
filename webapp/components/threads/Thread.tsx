@@ -257,6 +257,10 @@ function Thread({
     setIsLoading({ ...isLoading, [conversationId]: false });
   };
 
+  const onShouldDeleteMessage = (message: Message) => {
+    console.log('onShouldDeleteMessage', message);
+  };
+
   const onUpdatePrompt = useCallback(
     (message: string, conversationName = 'Conversation') => {
       if (message === '') {
@@ -355,6 +359,9 @@ function Thread({
                 message={m}
                 onResendMessage={() => {
                   onResendMessage(m);
+                }}
+                onDeleteMessage={() => {
+                  onShouldDeleteMessage(m);
                 }}
               />
             );
