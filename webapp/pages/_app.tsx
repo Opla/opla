@@ -27,6 +27,14 @@ export default function App({ Component }: AppProps) {
   const [initialRenderComplete, setInitialRenderComplete] = useState<boolean>(false);
   useEffect(() => {
     setInitialRenderComplete(true);
+    const listener = (e: Event) => {
+      e.preventDefault();
+    };
+    window.addEventListener('contextmenu', listener, false);
+
+    return () => {
+      window.removeEventListener('contextmenu', listener);
+    };
   }, []);
 
   if (!initialRenderComplete) return <div />;
