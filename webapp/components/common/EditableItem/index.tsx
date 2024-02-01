@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Input } from '@/components/ui/input';
+
 export default function EditableItem({
   id,
   title,
@@ -27,9 +29,9 @@ export default function EditableItem({
 }) {
   if (editable) {
     return (
-      <input
+      <Input
         type="text"
-        className="border-none bg-transparent outline-none"
+        className="line-clamp-1 h-auto w-full text-ellipsis border-none bg-transparent outline-none"
         value={title}
         onChange={(e) => {
           e.preventDefault();
