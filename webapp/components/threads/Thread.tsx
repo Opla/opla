@@ -16,7 +16,7 @@
 
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
-import { PanelRight, PanelRightClose } from 'lucide-react';
+import { PanelLeft, PanelLeftClose, PanelRight, PanelRightClose } from 'lucide-react';
 import { AppContext } from '@/context';
 import { Conversation, LlmParameters, Message, Model, Prompt, ProviderType } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
@@ -38,18 +38,22 @@ import { ModalIds } from '@/modals';
 import MessageView from './Message';
 import PromptArea from './Prompt';
 import { ScrollArea } from '../ui/scroll-area';
-import { Toggle } from '../ui/toggle';
 import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
+import { Button } from '../ui/button';
 
 function Thread({
   conversationId: _conversationId,
+  displayExplorer,
   displaySettings,
+  onChangeDisplayExplorer,
   onChangeDisplaySettings,
   onSelectMenu,
 }: {
   conversationId?: string;
+  displayExplorer: boolean;
   displaySettings: boolean;
+  onChangeDisplayExplorer: (displayExplorer: boolean) => void;
   onChangeDisplaySettings: (displaySettings: boolean) => void;
   onSelectMenu: (menu: string, data: string) => void;
 }) {
@@ -373,23 +377,33 @@ function Thread({
           <div className="flex-1">
             <p className="hidden rounded-md border border-neutral-600 px-3 py-1">-</p>
           </div>
-          <div className="flex-1">
-            <p className="hidden rounded-md border border-neutral-600 px-3 py-1">
-              {t('Preset configuration')}
-            </p>
-          </div>
-          <div>
-            <Toggle
+          <div className="flex flex-1 flex-row justify-end gap-2">
+            <Button
+              aria-label="Toggle thread explorer"
+              variant="ghost"
+              size="sm"
+              className="p-1 text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:border-white/20 dark:text-neutral-400 hover:dark:text-white"
+              onClick={() => onChangeDisplayExplorer(!displayExplorer)}
+            >
+              {displayExplorer ? (
+                <PanelLeftClose strokeWidth={1.5} />
+              ) : (
+                <PanelLeft strokeWidth={1.5} />
+              )}
+            </Button>
+            <Button
               aria-label="Toggle thread settings"
-              pressed={displaySettings}
-              onPressedChange={() => onChangeDisplaySettings(!displaySettings)}
+              variant="ghost"
+              size="sm"
+              className="p-1 text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:border-white/20 dark:text-neutral-400 hover:dark:text-white"
+              onClick={() => onChangeDisplaySettings(!displaySettings)}
             >
               {displaySettings ? (
                 <PanelRightClose strokeWidth={1.5} />
               ) : (
                 <PanelRight strokeWidth={1.5} />
               )}
-            </Toggle>
+            </Button>
           </div>
         </div>
       </div>

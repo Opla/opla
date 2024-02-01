@@ -77,8 +77,11 @@ export default function Threads({ selectedConversationId }: { selectedConversati
     saveSettings({ settingsWidth: size });
   };
 
+  const onChangeDisplayExplorer = (value: boolean) => {
+    saveSettings({ explorerHidden: !value });
+  };
+
   const onChangeDisplaySettings = (value: boolean) => {
-    // setDisplaySettings(value);
     saveSettings({ settingsHidden: !value });
   };
 
@@ -115,6 +118,7 @@ export default function Threads({ selectedConversationId }: { selectedConversati
         minSize={10}
         defaultSize={pageSettings.explorerWidth}
         onResize={onResizeExplorer}
+        className={!pageSettings.explorerHidden ? '' : 'hidden'}
       >
         <Explorer onShouldDelete={onShouldDelete} selectedConversationId={selectedConversationId} />
       </ResizablePanel>
@@ -122,7 +126,9 @@ export default function Threads({ selectedConversationId }: { selectedConversati
       <ResizablePanel>
         <Thread
           conversationId={selectedConversationId}
+          displayExplorer={!pageSettings.explorerHidden}
           displaySettings={!pageSettings.settingsHidden}
+          onChangeDisplayExplorer={onChangeDisplayExplorer}
           onChangeDisplaySettings={onChangeDisplaySettings}
           onSelectMenu={onSelectMenu}
         />
