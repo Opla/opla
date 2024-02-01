@@ -126,8 +126,8 @@ const useMarkdownProcessor = (content: string) => {
         em: ({ children }: JSX.IntrinsicElements['em']) => <em>{children} </em>,
         code: CodeBlock,
         pre: ({ children }: JSX.IntrinsicElements['pre']) => (
-          <div className="relative mb-6">
-            <pre className="font-code border-1 flex items-start overflow-x-auto rounded-sm border-neutral-200  bg-neutral-100 p-4  text-sm dark:border-neutral-800 dark:bg-neutral-900 [&>code.hljs]:bg-transparent [&>code.hljs]:p-0">
+          <div className="relative">
+            <pre className="font-code flex items-start overflow-x-auto rounded-sm border-neutral-200  bg-neutral-100 text-sm dark:border-neutral-800 dark:bg-neutral-900 [&>code.hljs]:bg-transparent [&>code.hljs]:p-0">
               {children}
             </pre>
           </div>
@@ -160,7 +160,7 @@ const useMarkdownProcessor = (content: string) => {
           </ol>
         ),
         li: ({ children }: JSX.IntrinsicElements['li']) => (
-          <div className="font-sans text-sm"> {children} </div>
+          <div className="w-full font-sans text-sm"> {children} </div>
         ),
         table: ({ children }: JSX.IntrinsicElements['table']) => (
           <div className="mb-6 overflow-x-auto">
