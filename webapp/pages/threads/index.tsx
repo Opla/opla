@@ -14,8 +14,20 @@
 
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import useBackend from '@/hooks/useBackendContext';
 import Threads from '@/components/threads';
+import { Page } from '@/types/ui';
 
 export default function DefaultThreads() {
+  const router = useRouter();
+  const { backendContext } = useBackend();
+  useEffect(() => {
+    const { settings } = backendContext.config;
+    if (settings.pages?.[Page.Threads].selectedID) {
+      router.replace(`${Page.Threads}/${settings.pages?.[Page.Threads].selectedID}`);
+    }
+  }, [router, backendContext]);
   return <Threads />;
 }

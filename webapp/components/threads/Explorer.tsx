@@ -80,7 +80,6 @@ export default function Explorer({
 }: ExplorerProps) {
   const router = useRouter();
 
-  // const { conversations, setConversations } = useContext(AppContext);
   const [editableConversation, setEditableConversation] = useState<string | undefined>(undefined);
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -149,6 +148,13 @@ export default function Explorer({
     }
   };
 
+  const onSelectThread = (id: string) => {
+    logger.info(`onSelectThread ${id}`);
+    // href={`${route}/${conversation.id}`}
+    const route = view === ViewName.Archives ? Ui.Page.Archives : Ui.Page.Threads;
+    router.push(`${route}/${id}`);
+  };
+
   useShortcuts(ShortcutIds.NEW_CONVERSATION, (event) => {
     if (selectedThreadId) {
       event.preventDefault();
@@ -182,8 +188,6 @@ export default function Explorer({
       onSelect: onShouldDelete,
     },
   ];
-
-  const route = view === ViewName.Archives ? Ui.Page.Archives : Ui.Page.Threads;
 
   return (
     <div className="scrollbar-trigger flex h-full bg-neutral-100 dark:bg-neutral-800/70">
@@ -287,9 +291,16 @@ export default function Explorer({
                     >
                       <ContextMenu>
                         <ContextMenuTrigger>
-                          <Link
-                            href={`${route}/${conversation.id}`}
+                          <div
+                            aria-label="Select a conversation"
+                            role="button"
+                            onKeyDown={() => {}}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              onSelectThread(conversation.id);
+                            }}
                             className="flex cursor-pointer flex-row items-center"
+                            tabIndex={0}
                           >
                             <EditableItem
                               id={conversation.id}
@@ -302,7 +313,7 @@ export default function Explorer({
                               className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1"
                               onChange={onChangeConversationName}
                             />
-                          </Link>
+                          </div>
                         </ContextMenuTrigger>
                         <ContextMenuList data={conversation.id} menu={menu} />
                       </ContextMenu>

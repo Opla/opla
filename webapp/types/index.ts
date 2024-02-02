@@ -226,6 +226,7 @@ export type OplaServer = {
 };
 
 export type PageSettings = {
+  selectedID?: string;
   explorerHidden: boolean;
   settingsHidden: boolean;
   explorerWidth: number;
@@ -240,7 +241,7 @@ export type Settings = {
     height: number;
     fullscreen: boolean;
   };
-  selectedPage?: string;
+  selectedPage?: Ui.Page;
   pages?: Record<string, PageSettings>;
 };
 
