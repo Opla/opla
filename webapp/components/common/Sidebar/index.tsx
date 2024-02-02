@@ -55,12 +55,14 @@ const sidebarItems: Array<Ui.Item> = [
       {
         name: 'Models',
         href: Ui.Page.Models,
+        page: Ui.Page.Models,
         icon: BrainCircuit,
         shortcut: ShortcutIds.DISPLAY_MODELS,
       },
       {
         name: 'AI Providers',
         href: Ui.Page.Providers,
+        page: Ui.Page.Providers,
         icon: Server,
         shortcut: ShortcutIds.DISPLAY_PROVIDERS,
       },
@@ -120,12 +122,23 @@ function Sidebar() {
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
   const { backendContext } = useBackend();
-  const defaultSettings = backendContext?.config.settings;
-  (sidebarItems[0].items as Ui.Item[])[0].href = defaultSettings?.selectedPage?.startsWith(
-    '/threads',
-  )
-    ? defaultSettings?.selectedPage
-    : '/threads';
+  const settings = backendContext?.config.settings;
+
+  sidebarItems[0].items = (sidebarItems[0].items as Ui.Item[]).map((item) => {
+    let { href } = item;
+    if (item.page && settings?.selectedPage?.startsWith(item.page)) {
+      href = settings?.selectedPage;
+    }
+    if (item.page) {
+      const page = settings?.pages?.[item.page];
+      if (page?.selectedID) {
+        href = `${item.page}/${page.selectedID}`;
+      }
+    }
+
+    return { ...item, href };
+  });
+
   const onModal = (href: string) => {
     if (href === '/settings') {
       showModal(ModalIds.Settings);

@@ -14,13 +14,12 @@
 
 'use client';
 
-import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { Plus } from 'lucide-react';
 import { Ui, Model } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
-import { Page } from '@/types/ui';
 import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
 
 function ModelsExplorer({
@@ -32,8 +31,15 @@ function ModelsExplorer({
   selectedModelId?: string;
   collection: Model[];
 }) {
-  logger.info('models', models);
+  const router = useRouter();
   const { t } = useTranslation();
+
+  const onSelectModel = (id: string) => {
+    logger.info(`onSelectModel ${id}`);
+    const route = Ui.Page.Models;
+    router.push(`${route}/${id}`);
+  };
+
   const menu: Ui.MenuItem[] = [
     {
       label: t('Uninstall'),
@@ -72,7 +78,17 @@ function ModelsExplorer({
                   >
                     <ContextMenu>
                       <ContextMenuTrigger>
-                        <Link href={`${Page.Models}/${model.id}`}>
+                        <div
+                          aria-label="Select a model"
+                          role="button"
+                          onKeyDown={() => {}}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onSelectModel(model.id);
+                          }}
+                          className="flex cursor-pointer flex-row items-center"
+                          tabIndex={0}
+                        >
                           <div>
                             <div className="flex cursor-pointer flex-row items-center">
                               <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
@@ -80,7 +96,7 @@ function ModelsExplorer({
                               </div>
                             </div>
                           </div>
-                        </Link>
+                        </div>
                       </ContextMenuTrigger>
                       <ContextMenuList data={model.id} menu={menu} />
                     </ContextMenu>
@@ -109,7 +125,17 @@ function ModelsExplorer({
                   >
                     <ContextMenu>
                       <ContextMenuTrigger>
-                        <Link href={`${Page.Models}/${model.id}`}>
+                        <div
+                          aria-label="Select a model"
+                          role="button"
+                          onKeyDown={() => {}}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onSelectModel(model.id);
+                          }}
+                          className="flex cursor-pointer flex-row items-center"
+                          tabIndex={0}
+                        >
                           <div>
                             <div className="flex cursor-pointer flex-row items-center">
                               <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
@@ -117,7 +143,7 @@ function ModelsExplorer({
                               </div>
                             </div>
                           </div>
-                        </Link>
+                        </div>
                       </ContextMenuTrigger>
                       <ContextMenuList data={model.id} menu={menu} />
                     </ContextMenu>
