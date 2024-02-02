@@ -93,8 +93,15 @@ function Thread({
   }, [messages]);
 
   useEffect(() => {
+    console.log('useEffect conversationId', _conversationId, tempConversationId);
     if (_conversationId && tempConversationId) {
       setTempConversationId(undefined);
+    }
+    if (!tempConversationId && !_conversationId) {
+      const temp = conversations.find((c) => c.temp);
+      if (temp) {
+        setTempConversationId(temp.id);
+      }
     }
     if (_conversationId && conversations.find((c) => c.temp)) {
       setConversations(conversations.filter((c) => !c.temp));
@@ -360,6 +367,7 @@ function Thread({
     onUpdatePrompt(prompt.value, prompt.name);
   };
 
+  const message = changedPrompt === undefined ? currentPrompt : changedPrompt;
   return (
     <div className="flex h-full flex-col dark:bg-neutral-800/30">
       <div className="grow-0">
@@ -445,7 +453,7 @@ function Thread({
 
       <PromptArea
         conversationId={conversationId as string}
-        message={changedPrompt === undefined ? currentPrompt : changedPrompt}
+        message={message}
         isLoading={conversationId ? isLoading[conversationId] : false}
         errorMessage={conversationId ? errorMessage[conversationId] : ''}
         onSendMessage={onSendMessage}

@@ -55,6 +55,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       const { settings } = backendContext.config;
       if (settings.selectedPage !== url) {
         settings.selectedPage = url;
+        delete settings.pages?.[url]?.selectedID;
         setSettings(settings);
       }
     };

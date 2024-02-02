@@ -34,5 +34,6 @@ import Threads from '@/components/threads';
 export default function ThreadSelected() {
   const router = useRouter();
   const { id } = router.query;
+
   return <Threads selectedThreadId={id as string} />;
 }

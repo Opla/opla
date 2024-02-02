@@ -15,7 +15,6 @@
 'use client';
 
 import { useContext } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Plus, Server } from 'lucide-react';
 import { AppContext } from '@/context';
@@ -73,6 +72,12 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
       providers,
     );
     setProviders(newProviders);
+  };
+
+  const onSelectProvider = (id: string) => {
+    logger.info(`onSelectProvider ${id}`);
+    const route = Ui.Page.Providers;
+    router.push(`${route}/${id}`);
   };
 
   const menu: Ui.MenuItem[] = [
@@ -142,7 +147,17 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
                   >
                     <ContextMenu>
                       <ContextMenuTrigger>
-                        <Link href={`${Page.Providers}/${provider.id}`}>
+                        <div
+                          aria-label="Select a provider"
+                          role="button"
+                          onKeyDown={() => {}}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onSelectProvider(provider.id);
+                          }}
+                          className="w-full"
+                          tabIndex={0}
+                        >
                           <div>
                             <div className="flex cursor-pointer flex-row items-center">
                               <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
@@ -157,7 +172,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
                               </div>
                             </div>
                           </div>
-                        </Link>
+                        </div>
                       </ContextMenuTrigger>
                       <ContextMenuList
                         data={provider.id}
