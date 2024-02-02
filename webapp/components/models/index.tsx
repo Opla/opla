@@ -22,6 +22,7 @@ import { getModelsCollection, installModel, uninstallModel } from '@/utils/backe
 import useBackend from '@/hooks/useBackendContext';
 import { deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
 import { getDownloadables, isValidFormat } from '@/utils/data/models';
+import { Page } from '@/types/ui';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import Explorer from './Explorer';
 import ModelView from './Model';
@@ -74,7 +75,7 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
     );
     await updateBackendStore();
     logger.info(`installed ${id}`);
-    router.push(`/models/${id}`);
+    router.push(`${Page.Models}/${id}`);
   };
 
   const onUninstall = async () => {

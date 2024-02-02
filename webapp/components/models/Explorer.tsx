@@ -20,6 +20,7 @@ import { Ui, Model } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
+import { Page } from '@/types/ui';
 import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
 
 function ModelsExplorer({
@@ -71,7 +72,7 @@ function ModelsExplorer({
                   >
                     <ContextMenu>
                       <ContextMenuTrigger>
-                        <Link href={`/models/${model.id}`}>
+                        <Link href={`${Page.Models}/${model.id}`}>
                           <div>
                             <div className="flex cursor-pointer flex-row items-center">
                               <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
@@ -108,7 +109,7 @@ function ModelsExplorer({
                   >
                     <ContextMenu>
                       <ContextMenuTrigger>
-                        <Link href={`/models/${model.id}`}>
+                        <Link href={`${Page.Models}/${model.id}`}>
                           <div>
                             <div className="flex cursor-pointer flex-row items-center">
                               <div className="relative flex-1 overflow-hidden text-ellipsis break-all">

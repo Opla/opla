@@ -142,7 +142,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
                   >
                     <ContextMenu>
                       <ContextMenuTrigger>
-                        <Link href={`/providers/${provider.id}`}>
+                        <Link href={`${Page.Providers}/${provider.id}`}>
                           <div>
                             <div className="flex cursor-pointer flex-row items-center">
                               <div className="relative flex-1 overflow-hidden text-ellipsis break-all">

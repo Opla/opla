@@ -63,7 +63,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 
 type ExplorerProps = {
   view: Ui.ViewName;
-  selectedConversationId?: string;
+  selectedThreadId?: string;
   threads: Conversation[];
   setThreads: (conversations: Conversation[]) => void;
   onShouldDelete: (id: string) => void;
@@ -72,7 +72,7 @@ type ExplorerProps = {
 
 export default function Explorer({
   view,
-  selectedConversationId,
+  selectedThreadId,
   threads,
   setThreads,
   onShouldDelete,
@@ -150,7 +150,7 @@ export default function Explorer({
   };
 
   useShortcuts(ShortcutIds.NEW_CONVERSATION, (event) => {
-    if (selectedConversationId) {
+    if (selectedThreadId) {
       event.preventDefault();
       logger.info('shortcut new Conversation');
       router.push(Ui.Page.Threads);
@@ -158,17 +158,17 @@ export default function Explorer({
     }
   });
   useShortcuts(ShortcutIds.DELETE_CONVERSATION, (event) => {
-    if (selectedConversationId) {
+    if (selectedThreadId) {
       event.preventDefault();
       logger.info('shortcut delete Conversation');
-      onShouldDelete(selectedConversationId);
+      onShouldDelete(selectedThreadId);
     }
   });
   useShortcuts(ShortcutIds.RENAME_CONVERSATION, (event) => {
-    if (selectedConversationId) {
+    if (selectedThreadId) {
       event.preventDefault();
       logger.info('shortcut rename Conversation');
-      onRename(selectedConversationId);
+      onRename(selectedThreadId);
     }
   });
 
@@ -183,6 +183,8 @@ export default function Explorer({
     },
   ];
 
+  const route = view === ViewName.Archives ? Ui.Page.Archives : Ui.Page.Threads;
+
   return (
     <div className="scrollbar-trigger flex h-full bg-neutral-100 dark:bg-neutral-800/70">
       <nav className="flex h-full w-full flex-col">
@@ -193,14 +195,14 @@ export default function Explorer({
               {t('Threads')}
             </p>
           </div>
-          {selectedConversationId && (
+          {selectedThreadId && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   asChild
                   variant="ghost"
                   size="sm"
-                  disabled={!selectedConversationId}
+                  disabled={!selectedThreadId}
                   className="flex flex-shrink-0 cursor-pointer items-center p-1 text-sm text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:border-white/20 dark:text-neutral-400 hover:dark:text-white"
                 >
                   <Link href={Ui.Page.Threads}>
@@ -278,7 +280,7 @@ export default function Explorer({
                     <li
                       key={conversation.id}
                       className={`${
-                        conversation.temp || selectedConversationId === conversation.id
+                        conversation.temp || selectedThreadId === conversation.id
                           ? 'text-black dark:text-white'
                           : 'text-neutral-400 dark:text-neutral-400'
                       } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
@@ -286,7 +288,7 @@ export default function Explorer({
                       <ContextMenu>
                         <ContextMenuTrigger>
                           <Link
-                            href={`/threads/${conversation.id}`}
+                            href={`${route}/${conversation.id}`}
                             className="flex cursor-pointer flex-row items-center"
                           >
                             <EditableItem
@@ -296,9 +298,7 @@ export default function Explorer({
                                   ? `${conversation.currentPrompt || ''} ...`
                                   : conversation.name
                               }
-                              editable={
-                                !conversation.temp && conversation.id === selectedConversationId
-                              }
+                              editable={!conversation.temp && conversation.id === selectedThreadId}
                               className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1"
                               onChange={onChangeConversationName}
                             />

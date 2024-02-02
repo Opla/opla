@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation';
 import { AppContext } from '@/context';
 import Providers from '@/components/providers';
 import { ProviderType } from '@/types';
+import { Page } from '@/types/ui';
 
 export default function DefaultProviders() {
   const { providers } = useContext(AppContext);
@@ -26,7 +27,7 @@ export default function DefaultProviders() {
   useEffect(() => {
     const oplaProvider = providers.find((p) => p.type === ProviderType.opla);
     if (oplaProvider) {
-      router.replace(`/providers/${oplaProvider.id}`);
+      router.replace(`${Page.Providers}/${oplaProvider.id}`);
     }
   }, [providers, router]);
 
