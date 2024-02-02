@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import { BrainCircuit, Computer } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import { cn } from '@/lib/utils';
@@ -35,6 +36,8 @@ import { searchModels } from '@/utils/providers/hf';
 import { deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
 import { getDownloadables, isValidFormat } from '@/utils/data/models';
 import { ShortcutIds } from '@/hooks/useShortcuts';
+import { Page } from '@/types/ui';
+import { openFileDialog } from '@/utils/tauri';
 import { ShortcutBadge } from '../common/ShortCut';
 import { Checkbox } from '../ui/checkbox';
 import { toast } from '../ui/Toast';
@@ -51,7 +54,6 @@ function SearchHuggingFaceHub({
   onSelected?: (model: Model) => void;
 }) {
   const { t } = useTranslation();
-
   const [searching, setSearching] = useState(false);
   const [result, setResult] = useState<Model[]>([]);
   useEffect(() => {
@@ -104,10 +106,16 @@ function SearchHuggingFaceHub({
 function NewLocalModel({
   className,
   onSelected,
+  onClose,
 }: {
   className?: string;
   onSelected?: (model?: Model) => void;
+  onClose: () => void;
 }) {
+  const router = useRouter();
+  const { pathname } = router;
+  const gotoModels = !pathname.startsWith(Page.Models);
+
   const { updateBackendStore } = useBackend();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -128,6 +136,14 @@ function NewLocalModel({
 
   const onValueChange = (s: string) => {
     setValue(s);
+  };
+
+  const onLocalInstall = async () => {
+    const file = await openFileDialog(false, [
+      { name: t('Choose a model file'), extensions: ['gguf', 'json'] },
+    ]);
+    logger.info('onLocalInstall', file);
+    onClose();
   };
 
   const onInstall = async (parentModel: Model, model?: Model) => {
@@ -200,20 +216,22 @@ function NewLocalModel({
           )}
           {!search && (
             <CommandGroup heading={t('Others')}>
-              <CommandItem>
+              <CommandItem onSelect={onLocalInstall}>
                 <Computer className="mr-2 h-4 w-4" />
                 <span>{t('Load a model from your computer')}</span>
                 <CommandShortcut>
                   <ShortcutBadge command={ShortcutIds.LOAD_MODEL} />
                 </CommandShortcut>
               </CommandItem>
-              <CommandItem>
-                <BrainCircuit className="mr-2 h-4 w-4" />
-                <span>{t('Manage models')}</span>
-                <CommandShortcut>
-                  <ShortcutBadge command={ShortcutIds.DISPLAY_MODELS} />
-                </CommandShortcut>
-              </CommandItem>
+              {gotoModels && (
+                <CommandItem>
+                  <BrainCircuit className="mr-2 h-4 w-4" />
+                  <span>{t('Manage models')}</span>
+                  <CommandShortcut>
+                    <ShortcutBadge command={ShortcutIds.DISPLAY_MODELS} />
+                  </CommandShortcut>
+                </CommandItem>
+              )}
             </CommandGroup>
           )}
         </CommandList>

@@ -14,13 +14,19 @@
 
 'use client';
 
+import { useContext } from 'react';
 import { useRouter } from 'next/router';
-import { Plus } from 'lucide-react';
+import { HardDriveDownload } from 'lucide-react';
 import { Ui, Model } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
+import { ModalsContext } from '@/context/modals';
+import { ModalIds } from '@/types/ui';
 import logger from '@/utils/logger';
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
+import { shortcutAsText } from '@/utils/shortcuts';
+import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
+import { Button } from '../ui/button';
 
 function ModelsExplorer({
   models,
@@ -33,12 +39,23 @@ function ModelsExplorer({
 }) {
   const router = useRouter();
   const { t } = useTranslation();
+  const { showModal } = useContext(ModalsContext);
 
   const onSelectModel = (id: string) => {
     logger.info(`onSelectModel ${id}`);
     const route = Ui.Page.Models;
     router.push(`${route}/${id}`);
   };
+
+  const onNewLocalModel = () => {
+    showModal(ModalIds.NewLocalModel);
+  };
+
+  useShortcuts(ShortcutIds.INSTALL_MODEL, (event) => {
+    event.preventDefault();
+    logger.info('shortcut install Model');
+    onNewLocalModel();
+  });
 
   const menu: Ui.MenuItem[] = [
     {
@@ -57,10 +74,22 @@ function ModelsExplorer({
 
   return (
     <div className="scrollbar-trigger flex h-full w-full flex-1 items-start border-r-[1px] border-neutral-300/30 bg-neutral-100 dark:border-neutral-900 dark:bg-neutral-800/70">
-      <nav className="flex h-full flex-1 flex-col space-y-1 p-1">
-        <div className="m-2 mb-1 flex flex-shrink-0 cursor-pointer items-center gap-2 rounded-md border px-4 py-1 text-sm text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:border-white/20 dark:text-neutral-400 hover:dark:text-white">
-          <Plus className="h-4 w-4" strokeWidth={1.5} />
-          {t('Add a model')}
+      <nav className="flex h-full w-full flex-col">
+        <div className="flex w-full items-center dark:bg-neutral-800">
+          <div className="flex grow items-center p-2">
+            <p className="flex-1 text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+              {t('Models')}
+            </p>
+            <Button
+              aria-label={t('Install local model')}
+              title={`${t('Install local model')} ${shortcutAsText(ShortcutIds.INSTALL_MODEL)}`}
+              variant="ghost"
+              size="icon"
+              onClick={onNewLocalModel}
+            >
+              <HardDriveDownload className="h-4 w-4" strokeWidth={1.5} />
+            </Button>
+          </div>
         </div>
         <div className="flex-1 flex-col overflow-y-auto overflow-x-hidden dark:border-white/20">
           <div className="flex flex-col gap-2 pb-2 text-sm dark:text-neutral-100">

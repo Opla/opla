@@ -14,21 +14,10 @@
 
 import useTranslation from '@/hooks/useTranslation';
 import { defaultShortcuts } from '@/hooks/useShortcuts';
-import { isMac } from '@/utils/misc';
+import { shortcutAsText } from '@/utils/shortcuts';
 
 function ShortcutBadge({ command }: { command: string }) {
-  const shortcut = defaultShortcuts.find((s) => s.command === command);
-  if (!shortcut) {
-    return null;
-  }
-  let keys = Array.isArray(shortcut.keys) ? shortcut.keys.join(' ') : (shortcut.keys as string);
-  keys = keys.replace('mod', isMac() ? '⌘' : 'Ctrl');
-  keys = keys.replace('shift', '⇧');
-  keys = keys.replace('alt', isMac() ? '⌥' : 'Alt');
-  keys = keys.replaceAll('+', '');
-  keys = keys.replace('backspace', '⌫');
-  keys = keys.replace('enter', '⏎');
-  keys = keys.replace('delete', '⌦');
+  const keys = shortcutAsText(command);
 
   return <div className="ml-2 text-neutral-500">{keys.toUpperCase()}</div>;
 }

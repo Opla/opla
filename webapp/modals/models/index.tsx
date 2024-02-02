@@ -34,7 +34,7 @@ function NewLocalModelDialog({
 
   return (
     <Dialog id={id} size="md" open={open} onClose={onClose}>
-      <NewLocalModel className="w-full" onSelected={onSelected} />
+      <NewLocalModel className="w-full" onSelected={onSelected} onClose={onClose} />
     </Dialog>
   );
 }

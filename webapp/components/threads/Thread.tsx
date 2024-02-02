@@ -93,7 +93,6 @@ function Thread({
   }, [messages]);
 
   useEffect(() => {
-    console.log('useEffect conversationId', _conversationId, tempConversationId);
     if (_conversationId && tempConversationId) {
       setTempConversationId(undefined);
     }

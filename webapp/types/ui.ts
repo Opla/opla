@@ -55,3 +55,14 @@ export enum Page {
   Models = '/models',
   Providers = '/providers',
 }
+
+export enum ModalIds {
+  Settings = 'settings',
+  Shortcuts = 'shortcuts',
+  NewProvider = 'newprovider',
+  NewLocalModel = 'newlocalmodel',
+  Welcome = 'welcome',
+  OpenAI = 'openai',
+  DeleteItem = 'deleteitem',
+  DownloadItem = 'downloaditem',
+}
