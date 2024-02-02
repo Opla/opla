@@ -25,6 +25,7 @@ import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import Modals, { ModalIds } from '@/modals';
 import { Toaster } from '@/components/ui/Toast';
 import logger from '@/utils/logger';
+import { Page } from '@/types/ui';
 import Statusbar from './common/Statusbar';
 import { TooltipProvider } from './ui/tooltip';
 import Loading from './common/Loading';
@@ -71,19 +72,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   useShortcuts(ShortcutIds.DISPLAY_THREADS, (e) => {
     e.preventDefault();
     logger.info('shortcut #display-threads', e);
-    router.push('/threads');
+    router.push(Page.Threads);
   });
 
   useShortcuts(ShortcutIds.DISPLAY_MODELS, (e) => {
     e.preventDefault();
     logger.info('shortcut #display-models', e);
-    router.push('/models');
+    router.push(Page.Models);
   });
 
   useShortcuts(ShortcutIds.DISPLAY_PROVIDERS, (e) => {
     e.preventDefault();
     logger.info('shortcut #display-providers', e);
-    router.push('/providers');
+    router.push(Page.Providers);
   });
 
   useShortcuts(ShortcutIds.DISPLAY_SETTINGS, (e) => {

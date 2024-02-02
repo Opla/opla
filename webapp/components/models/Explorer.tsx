@@ -16,7 +16,7 @@
 
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
-import { MenuItem, Model } from '@/types';
+import { Ui, Model } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
@@ -33,7 +33,7 @@ function ModelsExplorer({
 }) {
   logger.info('models', models);
   const { t } = useTranslation();
-  const menu: MenuItem[] = [
+  const menu: Ui.MenuItem[] = [
     {
       label: t('Uninstall'),
       onSelect: (data: string) => {

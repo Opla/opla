@@ -21,6 +21,7 @@ import { DiscordLogoIcon, GitHubLogoIcon } from '@radix-ui/react-icons';
 import Card from '@/components/common/Card';
 import Searchbar from '@/components/common/Searchbar';
 import useTranslation from '@/hooks/useTranslation';
+import { Ui } from '@/types';
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -58,7 +59,7 @@ export default function Dashboard() {
             </h2>
             <p className="mt-8 flex w-full justify-center">
               <Link
-                href="/threads"
+                href={Ui.Page.Threads}
                 className="mx-3 flex h-7 flex-row items-center rounded-md border border-neutral-400 px-2 dark:border-neutral-400 hover:dark:border-neutral-100"
               >
                 <span className="items-center truncate truncate px-3 dark:text-neutral-400 hover:dark:text-neutral-100">

@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useContext, useState } from 'react';
+import { /* useContext, */ useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import {
@@ -26,8 +26,8 @@ import {
   MoreHorizontal,
   SquarePen,
 } from 'lucide-react';
-import { AppContext } from '@/context';
-import { Conversation, MenuItem } from '@/types';
+// import { AppContext } from '@/context';
+import { Conversation, Ui } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import {
@@ -42,6 +42,7 @@ import {
   validateChaGPTConversations,
 } from '@/utils/conversations/openai';
 import { validateConversations } from '@/utils/conversations';
+import { MenuAction, ViewName } from '@/types/ui';
 import { toast } from '../ui/Toast';
 import EditableItem from '../common/EditableItem';
 import { ContextMenu, ContextMenuTrigger } from '../ui/context-menu';
@@ -60,16 +61,26 @@ import { Button } from '../ui/button';
 import { ShortcutBadge } from '../common/ShortCut';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 
-export default function Explorer({
-  selectedConversationId,
-  onShouldDelete,
-}: {
+type ExplorerProps = {
+  view: Ui.ViewName;
   selectedConversationId?: string;
+  threads: Conversation[];
+  setThreads: (conversations: Conversation[]) => void;
   onShouldDelete: (id: string) => void;
-}) {
+  onSelectMenu: (menu: MenuAction, data: string) => void;
+};
+
+export default function Explorer({
+  view,
+  selectedConversationId,
+  threads,
+  setThreads,
+  onShouldDelete,
+  onSelectMenu,
+}: ExplorerProps) {
   const router = useRouter();
 
-  const { conversations, setConversations } = useContext(AppContext);
+  // const { conversations, setConversations } = useContext(AppContext);
   const [editableConversation, setEditableConversation] = useState<string | undefined>(undefined);
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -80,12 +91,12 @@ export default function Explorer({
   };
 
   const onChangeConversationName = (value: string, id: string) => {
-    const conversation = getConversation(id, conversations) as Conversation;
+    const conversation = getConversation(id, threads) as Conversation;
     if (conversation) {
       conversation.name = value;
     }
-    const updatedConversations = updateConversation(conversation, conversations, true);
-    setConversations(updatedConversations);
+    const updatedConversations = updateConversation(conversation, threads, true);
+    setThreads(updatedConversations);
     logger.info(`onChangeConversationName ${editableConversation} ${value} ${id}`);
   };
 
@@ -102,8 +113,8 @@ export default function Explorer({
       const importedConversations = JSON.parse(content);
       const validate = validateConversations(importedConversations);
       if (validate.success) {
-        const mergedConversations = mergeConversations(conversations, importedConversations);
-        setConversations(mergedConversations);
+        const mergedConversations = mergeConversations(threads, importedConversations);
+        setThreads(mergedConversations);
         toast.message(t('Imported and merged'));
         return;
       }
@@ -114,8 +125,8 @@ export default function Explorer({
         return;
       }
       const newConversations = importChatGPTConversation(validateGPT.data);
-      const mergedConversations = mergeConversations(conversations, newConversations);
-      setConversations(mergedConversations);
+      const mergedConversations = mergeConversations(threads, newConversations);
+      setThreads(mergedConversations);
       toast.message(t('Imported and merged'));
     } catch (error) {
       logger.error(error);
@@ -130,7 +141,7 @@ export default function Explorer({
       if (!filePath) {
         return;
       }
-      const content = JSON.stringify(conversations);
+      const content = JSON.stringify(threads);
       await writeTextFile(filePath as string, content);
     } catch (error) {
       logger.error(error);
@@ -142,7 +153,7 @@ export default function Explorer({
     if (selectedConversationId) {
       event.preventDefault();
       logger.info('shortcut new Conversation');
-      router.push('/threads');
+      router.push(Ui.Page.Threads);
       toast.message('New Conversation');
     }
   });
@@ -161,7 +172,7 @@ export default function Explorer({
     }
   });
 
-  const menu: MenuItem[] = [
+  const menu: Ui.MenuItem[] = [
     {
       label: t('Rename'),
       onSelect: onRename,
@@ -192,7 +203,7 @@ export default function Explorer({
                   disabled={!selectedConversationId}
                   className="flex flex-shrink-0 cursor-pointer items-center p-1 text-sm text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:border-white/20 dark:text-neutral-400 hover:dark:text-white"
                 >
-                  <Link href="/threads">
+                  <Link href={Ui.Page.Threads}>
                     <SquarePen className="h-5 w-5" strokeWidth={1.5} />
                   </Link>
                 </Button>
@@ -217,22 +228,27 @@ export default function Explorer({
               <DropdownMenuGroup>
                 <DropdownMenuItem
                   className="flex w-full items-center justify-between"
-                  onSelect={() => {}}
+                  onSelect={() => {
+                    onSelectMenu(MenuAction.ChangeView, ViewName.Recent);
+                  }}
                 >
-                  <div className="flex flex-1 items-center">
+                  <div className="flex flex-1 items-center capitalize">
                     <FolderClock className="mr-2 h-4 w-4" />
-                    {t('Recent')}
+                    {t(ViewName.Recent)}
                   </div>
-                  <Check className="h-4 w-4" />
+                  {view === ViewName.Recent && <Check className="h-4 w-4" />}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="flex w-full items-center justify-between"
-                  onSelect={() => {}}
+                  onSelect={() => {
+                    onSelectMenu(MenuAction.ChangeView, ViewName.Archives);
+                  }}
                 >
-                  <div className="flex flex-1 items-center">
+                  <div className="flex flex-1 items-center capitalize">
                     <Archive className="mr-2 h-4 w-4" />
-                    {t('Archives')}
+                    {t(ViewName.Archives)}
                   </div>
+                  {view === ViewName.Archives && <Check className="h-4 w-4" />}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
@@ -254,9 +270,9 @@ export default function Explorer({
         <div className="flex-1 flex-col space-y-1 overflow-y-auto overflow-x-hidden p-1 dark:border-white/20">
           <div className="flex flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
             <div className="group flex flex-col gap-3 break-all rounded-md px-1 py-3">
-              <div className="p1 text-ellipsis break-all text-neutral-600">{t('Recent')}</div>
+              <div className="p1 text-ellipsis break-all text-neutral-600">{t(view)}</div>
               <ul className="p1 flex flex-1 flex-col">
-                {conversations
+                {threads
                   .sort((c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt)
                   .map((conversation) => (
                     <li

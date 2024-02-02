@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { MenuItem } from '@/types';
+import { Ui } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import { ContextMenuContent, ContextMenuItem } from '../context-menu';
 
-function ContextMenuList({ menu, data }: { menu: MenuItem[]; data: string }) {
+function ContextMenuList({ menu, data }: { menu: Ui.MenuItem[]; data: string }) {
   const { t } = useTranslation();
   return (
     <ContextMenuContent className="w-64">

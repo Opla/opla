@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { MenuItem, Model, OplaContext, Provider } from '@/types';
+import { Ui, Model, OplaContext, Provider } from '@/types';
 import Opla from '@/components/icons/Opla';
 import { getResourceUrl } from '.';
 
@@ -21,7 +21,7 @@ const getSelectedModel = (backendContext: OplaContext) => {
   return selectedPreset;
 };
 
-const getLocalModelsAsItems = (backendContext: OplaContext, modelname: string): MenuItem[] =>
+const getLocalModelsAsItems = (backendContext: OplaContext, modelname: string): Ui.MenuItem[] =>
   backendContext.config.models.items.map((model) => ({
     label: model.title || model.name,
     value: model.name,
@@ -29,7 +29,7 @@ const getLocalModelsAsItems = (backendContext: OplaContext, modelname: string): 
     selected: model.name === modelname,
   }));
 
-const getProviderModelsAsItems = (providers: Provider[], modelname: string): MenuItem[] => {
+const getProviderModelsAsItems = (providers: Provider[], modelname: string): Ui.MenuItem[] => {
   const items = providers.reduce((acc, provider) => {
     if (!provider.models || provider.disabled) return acc;
     const providerItems =
@@ -40,7 +40,7 @@ const getProviderModelsAsItems = (providers: Provider[], modelname: string): Men
         selected: model.name === modelname,
       })) || [];
     return [...acc, ...providerItems];
-  }, [] as MenuItem[]);
+  }, [] as Ui.MenuItem[]);
   return items;
 };
 

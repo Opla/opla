@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { useRouter } from 'next/router';
 import useBackend from '@/hooks/useBackendContext';
 import { Conversation, PageSettings } from '@/types';
@@ -25,6 +25,7 @@ import { getConversation, deleteConversation } from '@/utils/data/conversations'
 import { ModalIds } from '@/modals';
 import { ModalsContext } from '@/context/modals';
 import { AppContext } from '@/context';
+import { MenuAction, Page, ViewName } from '@/types/ui';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import Explorer from './Explorer';
 import Settings from './Settings';
@@ -35,8 +36,9 @@ const getSelectedPage = (selectedConversationId?: string) =>
 
 export default function Threads({ selectedConversationId }: { selectedConversationId?: string }) {
   const router = useRouter();
-
+  const [view, selectView] = useState(ViewName.Recent);
   const { conversations, setConversations } = useContext(AppContext);
+  const { archives, setArchives } = useContext(AppContext);
   const { backendContext, setSettings } = useBackend();
 
   useShortcuts(ShortcutIds.DELETE_MESSAGE, (event) => {
@@ -53,7 +55,7 @@ export default function Threads({ selectedConversationId }: { selectedConversati
   const selectedPage = getSelectedPage(selectedConversationId);
   const pageSettings =
     defaultSettings.pages?.[selectedPage] ||
-    defaultSettings.pages?.['/threads'] ||
+    defaultSettings.pages?.[Page.Threads] ||
     DefaultPageSettings;
 
   const saveSettings = (partialSettings: Partial<PageSettings>) => {
@@ -93,7 +95,7 @@ export default function Threads({ selectedConversationId }: { selectedConversati
         const updatedConversations = deleteConversation(conversation.id, conversations);
         setConversations(updatedConversations);
         if (selectedConversationId && selectedConversationId === conversation.id) {
-          router.replace('/threads');
+          router.replace(Page.Threads);
         }
       }
     }
@@ -105,10 +107,22 @@ export default function Threads({ selectedConversationId }: { selectedConversati
     showModal(ModalIds.DeleteItem, { item: conversation, onAction: onDelete });
   };
 
-  const onSelectMenu = (menu: string, data: string) => {
+  const onSelectMenu = (menu: MenuAction, data: string) => {
     logger.info('onSelectMenu', menu);
-    if (menu === 'delete-conversation') {
+    if (menu === MenuAction.DeleteConversation) {
       onShouldDelete(data);
+    } else if (menu === MenuAction.ArchiveConversation) {
+      const conversation = getConversation(data, conversations) as Conversation;
+      const updatedConversations = deleteConversation(conversation.id, conversations);
+      setConversations(updatedConversations);
+      setArchives([...archives, conversation]);
+    } else if (menu === MenuAction.UnarchiveConversation) {
+      const conversation = getConversation(data, archives) as Conversation;
+      const updatedArchives = deleteConversation(conversation.id, archives);
+      setArchives(updatedArchives);
+      setConversations([...conversations, conversation]);
+    } else if (menu === MenuAction.ChangeView) {
+      selectView(data as ViewName);
     }
   };
 
@@ -120,7 +134,14 @@ export default function Threads({ selectedConversationId }: { selectedConversati
         onResize={onResizeExplorer}
         className={!pageSettings.explorerHidden ? '' : 'hidden'}
       >
-        <Explorer onShouldDelete={onShouldDelete} selectedConversationId={selectedConversationId} />
+        <Explorer
+          view={view}
+          threads={view === ViewName.Recent ? conversations : archives}
+          setThreads={view === ViewName.Recent ? setConversations : setArchives}
+          onSelectMenu={onSelectMenu}
+          onShouldDelete={onShouldDelete}
+          selectedConversationId={selectedConversationId}
+        />
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel>
@@ -138,7 +159,7 @@ export default function Threads({ selectedConversationId }: { selectedConversati
         minSize={20}
         defaultSize={20}
         onResize={onResizeSettings}
-        className={!pageSettings.settingsHidden ? '' : 'hidden'}
+        className={!pageSettings.settingsHidden && view === ViewName.Recent ? '' : 'hidden'}
       >
         <Settings conversationId={selectedConversationId} />
       </ResizablePanel>

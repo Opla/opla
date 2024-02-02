@@ -36,31 +36,31 @@ import logger from '@/utils/logger';
 import { ModalIds } from '@/modals';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import useBackend from '@/hooks/useBackendContext';
-import { Item } from '@/types';
+import { Ui } from '@/types';
 import { ShortcutIds } from '@/hooks/useShortcuts';
 import SidebarItems from './SidebarItems';
 
-const sidebarItems: Array<Item> = [
+const sidebarItems: Array<Ui.Item> = [
   {
     name: 'Tools',
     flex: 1,
     items: [
       {
         name: 'Threads',
-        href: '/threads',
-        page: '/threads',
+        href: Ui.Page.Threads,
+        page: Ui.Page.Threads,
         icon: MessagesSquare,
         shortcut: ShortcutIds.DISPLAY_THREADS,
       },
       {
         name: 'Models',
-        href: '/models',
+        href: Ui.Page.Models,
         icon: BrainCircuit,
         shortcut: ShortcutIds.DISPLAY_MODELS,
       },
       {
         name: 'AI Providers',
-        href: '/providers',
+        href: Ui.Page.Providers,
         icon: Server,
         shortcut: ShortcutIds.DISPLAY_PROVIDERS,
       },
@@ -121,7 +121,9 @@ function Sidebar() {
   const { showModal } = useContext(ModalsContext);
   const { backendContext } = useBackend();
   const defaultSettings = backendContext?.config.settings;
-  (sidebarItems[0].items as Item[])[0].href = defaultSettings?.selectedPage?.startsWith('/threads')
+  (sidebarItems[0].items as Ui.Item[])[0].href = defaultSettings?.selectedPage?.startsWith(
+    '/threads',
+  )
     ? defaultSettings?.selectedPage
     : '/threads';
   const onModal = (href: string) => {

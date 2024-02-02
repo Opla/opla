@@ -19,7 +19,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Plus, Server } from 'lucide-react';
 import { AppContext } from '@/context';
-import { MenuItem, Provider, ProviderType, ServerStatus } from '@/types';
+import { Ui, Provider, ProviderType, ServerStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { ModalsContext } from '@/context/modals';
@@ -27,6 +27,7 @@ import { deleteProvider, findProvider, updateProvider } from '@/utils/data/provi
 import useBackend from '@/hooks/useBackendContext';
 import { ModalIds } from '@/modals';
 import { ContextMenuTrigger } from '@radix-ui/react-context-menu';
+import { Page } from '@/types/ui';
 import { Button } from '../ui/button';
 import { ContextMenu } from '../ui/context-menu';
 import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
@@ -52,7 +53,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
         const updatedProviders = deleteProvider(provider.id, providers);
         setProviders(updatedProviders);
         if (selectedProviderId && selectedProviderId === provider.id) {
-          router.replace('/providers');
+          router.replace(Page.Providers);
         }
       }
     }
@@ -74,7 +75,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
     setProviders(newProviders);
   };
 
-  const menu: MenuItem[] = [
+  const menu: Ui.MenuItem[] = [
     {
       label: t('Disable'),
       onSelect: (data: string) => {
@@ -87,7 +88,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
       onSelect: onToDelete,
     },
   ];
-  const menuDisabled: MenuItem[] = [
+  const menuDisabled: Ui.MenuItem[] = [
     {
       label: t('Enable'),
       onSelect: (data: string) => {

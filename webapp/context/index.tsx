@@ -20,8 +20,10 @@ import useDataStorage from '@/hooks/useDataStorage';
 
 export type Context = {
   conversations: Array<Conversation>;
+  archives: Array<Conversation>;
   providers: Array<Provider>;
   setConversations: (newConversations: Conversation[]) => void;
+  setArchives: (newArchives: Conversation[]) => void;
   setProviders: (newProviders: Provider[]) => void;
   usage: LlmUsage | undefined;
   setUsage: (newUsage: LlmUsage | undefined) => void;
@@ -30,6 +32,8 @@ export type Context = {
 const initialContext: Context = {
   conversations: [],
   setConversations: () => {},
+  archives: [],
+  setArchives: () => {},
   providers: [],
   setProviders: () => {},
   usage: undefined,
@@ -44,6 +48,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
     'conversations',
     initialContext.conversations,
   );
+  const [archives, setArchives] = useDataStorage('archives', initialContext.archives);
 
   const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
 
@@ -51,12 +56,14 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
     () => ({
       conversations,
       setConversations,
+      archives,
+      setArchives,
       providers,
       setProviders,
       usage,
       setUsage,
     }),
-    [conversations, setConversations, providers, setProviders, usage, setUsage],
+    [conversations, setConversations, archives, setArchives, providers, setProviders, usage],
   );
 
   return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;

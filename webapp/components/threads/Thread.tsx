@@ -35,6 +35,7 @@ import { toast } from '@/components/ui/Toast';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { ModalData, ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
+import { MenuAction } from '@/types/ui';
 import MessageView from './Message';
 import PromptArea from './Prompt';
 import { ScrollArea } from '../ui/scroll-area';
@@ -55,7 +56,7 @@ function Thread({
   displaySettings: boolean;
   onChangeDisplayExplorer: (displayExplorer: boolean) => void;
   onChangeDisplaySettings: (displaySettings: boolean) => void;
-  onSelectMenu: (menu: string, data: string) => void;
+  onSelectMenu: (menu: MenuAction, data: string) => void;
 }) {
   const router = useRouter();
   const { providers, conversations, setConversations, setUsage } = useContext(AppContext);
