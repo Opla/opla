@@ -15,14 +15,14 @@
 import { useRef } from 'react';
 import { ChevronDown, LucideIcon } from 'lucide-react';
 import useClickOutside from '@/hooks/useClickOutside';
-import { MenuItem } from '@/types';
+import { Ui } from '@/types';
 import Menu from '../Menu';
 
 export default function Dropdown({
   items,
   onSelect,
 }: {
-  items: MenuItem[];
+  items: Ui.MenuItem[];
   onSelect: (value?: string, data?: string) => void;
 }) {
   const target = useRef<HTMLDivElement>(null);

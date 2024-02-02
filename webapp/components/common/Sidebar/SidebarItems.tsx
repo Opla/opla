@@ -15,7 +15,7 @@
 
 import { useState } from 'react';
 import { LucideIcon } from 'lucide-react';
-import { Item } from '@/types';
+import { Ui } from '@/types';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +33,7 @@ export default function SidebarItems({
   t,
   onModal,
 }: {
-  items: Array<Item>;
+  items: Array<Ui.Item>;
   pathname: string;
   t: any;
   onModal: (href: string) => void;

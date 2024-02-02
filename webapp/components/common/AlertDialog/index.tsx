@@ -14,7 +14,7 @@
 
 'use client';
 
-import { MenuItem } from '@/types';
+import { Ui } from '@/types';
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
@@ -32,7 +32,7 @@ export default function AlertDialog({
   title: string;
   visible: boolean;
   children: React.ReactNode;
-  actions?: MenuItem[];
+  actions?: Ui.MenuItem[];
   onAction?: (action: string, data: any) => void;
   onClose?: (data: any) => void;
   data?: any;

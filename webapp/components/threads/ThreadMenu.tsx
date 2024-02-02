@@ -15,7 +15,7 @@
 'use client';
 
 import { useContext, useState } from 'react';
-import { Check, HardDriveDownload, MoreHorizontal, Plug, Plus, Trash } from 'lucide-react';
+import { Archive, Check, HardDriveDownload, MoreHorizontal, Plug, Plus, Trash } from 'lucide-react';
 // import { useRouter } from 'next/router';
 import { Button } from '@/components/ui/button';
 import {
@@ -39,7 +39,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MenuItem, Provider, ProviderType } from '@/types';
+import { Ui, Provider, ProviderType } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
@@ -48,6 +48,7 @@ import { createProvider } from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
+import { MenuAction } from '@/types/ui';
 import { Badge } from '../ui/badge';
 // import { toast } from '../ui/Toast';
 import { ShortcutBadge } from '../common/ShortCut';
@@ -61,9 +62,9 @@ export default function ThreadMenu({
 }: {
   selectedModel: string;
   selectedConversationId?: string;
-  modelItems: MenuItem[];
+  modelItems: Ui.MenuItem[];
   onSelectModel: (model: string, provider: ProviderType) => void;
-  onSelectMenu: (menu: string, data: string) => void;
+  onSelectMenu: (menu: MenuAction, data: string) => void;
 }) {
   // const router = useRouter();
   const { providers } = useContext(AppContext);
@@ -207,8 +208,22 @@ export default function ThreadMenu({
               <DropdownMenuLabel>{t('Thread')}</DropdownMenuLabel>
               <DropdownMenuGroup>
                 <DropdownMenuItem
+                  className=""
+                  onSelect={() =>
+                    onSelectMenu(MenuAction.ArchiveConversation, selectedConversationId)
+                  }
+                >
+                  <Archive className="mr-2 h-4 w-4" />
+                  {t('Archive')}
+                  <DropdownMenuShortcut>
+                    <ShortcutBadge command={ShortcutIds.ARCHIVE_CONVERSATION} />
+                  </DropdownMenuShortcut>
+                </DropdownMenuItem>
+                <DropdownMenuItem
                   className="text-red-600"
-                  onSelect={() => onSelectMenu('delete-conversation', selectedConversationId)}
+                  onSelect={() =>
+                    onSelectMenu(MenuAction.DeleteConversation, selectedConversationId)
+                  }
                 >
                   <Trash className="mr-2 h-4 w-4" />
                   {t('Delete')}

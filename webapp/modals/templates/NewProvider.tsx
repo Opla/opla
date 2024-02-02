@@ -22,6 +22,7 @@ import { createProvider } from '@/utils/data/providers';
 import logger from '@/utils/logger';
 import { AppContext } from '@/context';
 import { Button } from '@/components/ui/button';
+import { Page } from '@/types/ui';
 import ProviderCreate from './providers';
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
@@ -76,7 +77,7 @@ export default function NewProvider({
     const newProvider = createProvider(provider.name as string, provider);
     setProviders([...providers, newProvider]);
     onClose();
-    router.push(`/providers/${newProvider.id}`);
+    router.push(`${Page.Providers}/${newProvider.id}`);
   };
 
   const onParameterChange = (name: string, value: string | number | boolean) => {

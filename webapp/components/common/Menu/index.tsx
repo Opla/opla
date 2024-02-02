@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import useTranslation from '@/hooks/useTranslation';
-import { MenuItem } from '@/types';
+import { Ui } from '@/types';
 import { Check, LucideIcon } from 'lucide-react';
 
 function Menu({
@@ -22,7 +22,7 @@ function Menu({
   onClose,
   onSelect = () => {},
 }: {
-  items: MenuItem[];
+  items: Ui.MenuItem[];
   data?: string;
   onClose: () => void;
   onSelect?: (value?: string, data?: string) => void;

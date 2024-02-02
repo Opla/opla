@@ -16,10 +16,11 @@
 
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
-import { MenuItem, Model } from '@/types';
+import { Ui, Model } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
+import { Page } from '@/types/ui';
 import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
 
 function ModelsExplorer({
@@ -33,7 +34,7 @@ function ModelsExplorer({
 }) {
   logger.info('models', models);
   const { t } = useTranslation();
-  const menu: MenuItem[] = [
+  const menu: Ui.MenuItem[] = [
     {
       label: t('Uninstall'),
       onSelect: (data: string) => {
@@ -71,7 +72,7 @@ function ModelsExplorer({
                   >
                     <ContextMenu>
                       <ContextMenuTrigger>
-                        <Link href={`/models/${model.id}`}>
+                        <Link href={`${Page.Models}/${model.id}`}>
                           <div>
                             <div className="flex cursor-pointer flex-row items-center">
                               <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
@@ -108,7 +109,7 @@ function ModelsExplorer({
                   >
                     <ContextMenu>
                       <ContextMenuTrigger>
-                        <Link href={`/models/${model.id}`}>
+                        <Link href={`${Page.Models}/${model.id}`}>
                           <div>
                             <div className="flex cursor-pointer flex-row items-center">
                               <div className="relative flex-1 overflow-hidden text-ellipsis break-all">

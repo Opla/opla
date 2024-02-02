@@ -68,6 +68,7 @@ enum MessageState {
 
 type MessageComponentProps = {
   message: Message;
+  disabled?: boolean;
   onResendMessage: () => void;
   onDeleteMessage: () => void;
   onChangeContent: (content: string, submit: boolean) => void;
@@ -75,6 +76,7 @@ type MessageComponentProps = {
 
 function MessageComponent({
   message,
+  disabled = false,
   onResendMessage,
   onDeleteMessage,
   onChangeContent,
@@ -124,7 +126,7 @@ function MessageComponent({
 
   return (
     <div
-      ref={ref}
+      ref={disabled ? undefined : ref}
       className={`group relative w-full text-neutral-800 dark:text-neutral-100 hover:dark:bg-neutral-900 ${isUser ? '' : ''}`}
     >
       <div className="m-auto flex w-full gap-4 font-sans text-sm md:max-w-2xl md:gap-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">

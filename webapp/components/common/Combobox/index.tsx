@@ -24,9 +24,9 @@ import {
   CommandItem,
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { MenuItem } from '@/types';
+import { Ui } from '@/types';
 
-function ComboItem({ item, onSelect }: { item: MenuItem; onSelect: () => void }) {
+function ComboItem({ item, onSelect }: { item: Ui.MenuItem; onSelect: () => void }) {
   const I = item.icon as React.ElementType;
   return (
     <CommandItem
@@ -49,7 +49,7 @@ export default function Combobox({
   searchPlaceholder,
   notFound = 'No results found.',
 }: {
-  items: MenuItem[];
+  items: Ui.MenuItem[];
   placeholder?: string;
   searchPlaceholder?: string;
   notFound?: string;

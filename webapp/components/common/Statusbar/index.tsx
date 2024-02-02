@@ -18,6 +18,7 @@ import useBackend from '@/hooks/useBackendContext';
 import logger from '@/utils/logger';
 import { useContext } from 'react';
 import { AppContext } from '@/context';
+import { Page } from '@/types/ui';
 
 export default function Statusbar() {
   const router = useRouter();
@@ -33,7 +34,7 @@ export default function Statusbar() {
   const download = (backendContext.downloads ?? [undefined])[0];
 
   const displayServer = () => {
-    router.push(`/providers`);
+    router.push(Page.Providers);
   };
 
   const { activeModel } = backendContext.config.models;

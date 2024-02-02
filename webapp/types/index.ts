@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LucideIcon } from 'lucide-react';
 import { ZodSchema } from 'zod';
+import * as Ui from './ui';
 
 declare global {
   interface Window {
@@ -22,29 +22,6 @@ declare global {
     };
   }
 }
-
-// Ui types
-export type Item = {
-  name: string;
-  href?: string;
-  page?: string;
-  icon?: LucideIcon;
-  items?: Array<Item>;
-  flex?: number;
-  hidden?: boolean;
-  modal?: boolean;
-  shortcut?: string;
-};
-
-export type MenuItem = {
-  variant?: 'link' | 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
-  label: string;
-  value?: string;
-  group?: string;
-  icon?: unknown;
-  selected?: boolean;
-  onSelect?: (data: string) => void;
-};
 
 // Model types
 export type Metadata = {
@@ -351,3 +328,5 @@ export type LlmStreamResponse = {
   prevContent?: string;
   conversationId: string;
 };
+
+export { Ui };

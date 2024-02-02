@@ -25,18 +25,25 @@ import { getConversation, deleteConversation } from '@/utils/data/conversations'
 import { ModalIds } from '@/modals';
 import { ModalsContext } from '@/context/modals';
 import { AppContext } from '@/context';
+import { MenuAction, Page, ViewName } from '@/types/ui';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import Explorer from './Explorer';
 import Settings from './Settings';
 import Thread from './Thread';
+import Archive from './Archive';
 
-const getSelectedPage = (selectedConversationId?: string) =>
-  `/threads${selectedConversationId ? `/${selectedConversationId}` : ''}`;
+const getSelectedPage = (selectedThreadId?: string) =>
+  `${Page.Threads}${selectedThreadId ? `/${selectedThreadId}` : ''}`;
 
-export default function Threads({ selectedConversationId }: { selectedConversationId?: string }) {
+type ThreadsProps = {
+  selectedThreadId?: string;
+  view?: ViewName;
+};
+
+export default function Threads({ selectedThreadId, view = ViewName.Recent }: ThreadsProps) {
   const router = useRouter();
-
   const { conversations, setConversations } = useContext(AppContext);
+  const { archives, setArchives } = useContext(AppContext);
   const { backendContext, setSettings } = useBackend();
 
   useShortcuts(ShortcutIds.DELETE_MESSAGE, (event) => {
@@ -50,10 +57,10 @@ export default function Threads({ selectedConversationId }: { selectedConversati
   const { showModal } = useContext(ModalsContext);
 
   const defaultSettings = backendContext.config.settings;
-  const selectedPage = getSelectedPage(selectedConversationId);
+  const selectedPage = getSelectedPage(selectedThreadId);
   const pageSettings =
     defaultSettings.pages?.[selectedPage] ||
-    defaultSettings.pages?.['/threads'] ||
+    defaultSettings.pages?.[Page.Threads] ||
     DefaultPageSettings;
 
   const saveSettings = (partialSettings: Partial<PageSettings>) => {
@@ -92,8 +99,8 @@ export default function Threads({ selectedConversationId }: { selectedConversati
       if (action === 'Delete') {
         const updatedConversations = deleteConversation(conversation.id, conversations);
         setConversations(updatedConversations);
-        if (selectedConversationId && selectedConversationId === conversation.id) {
-          router.replace('/threads');
+        if (selectedThreadId && selectedThreadId === conversation.id) {
+          router.replace(Page.Threads);
         }
       }
     }
@@ -105,10 +112,26 @@ export default function Threads({ selectedConversationId }: { selectedConversati
     showModal(ModalIds.DeleteItem, { item: conversation, onAction: onDelete });
   };
 
-  const onSelectMenu = (menu: string, data: string) => {
+  const onSelectMenu = (menu: MenuAction, data: string) => {
     logger.info('onSelectMenu', menu);
-    if (menu === 'delete-conversation') {
+    if (menu === MenuAction.DeleteConversation) {
       onShouldDelete(data);
+    } else if (menu === MenuAction.ArchiveConversation) {
+      const conversation = getConversation(data, conversations) as Conversation;
+      const updatedConversations = deleteConversation(conversation.id, conversations);
+      setConversations(updatedConversations);
+      setArchives([...archives, conversation]);
+    } else if (menu === MenuAction.UnarchiveConversation) {
+      const conversation = getConversation(data, archives) as Conversation;
+      const updatedArchives = deleteConversation(conversation.id, archives);
+      setArchives(updatedArchives);
+      setConversations([...conversations, conversation]);
+    } else if (menu === MenuAction.ChangeView) {
+      if (data === ViewName.Recent) {
+        router.replace(Page.Threads);
+      } else {
+        router.replace(Page.Archives);
+      }
     }
   };
 
@@ -120,27 +143,39 @@ export default function Threads({ selectedConversationId }: { selectedConversati
         onResize={onResizeExplorer}
         className={!pageSettings.explorerHidden ? '' : 'hidden'}
       >
-        <Explorer onShouldDelete={onShouldDelete} selectedConversationId={selectedConversationId} />
+        <Explorer
+          view={view}
+          threads={view === ViewName.Recent ? conversations : archives}
+          setThreads={view === ViewName.Recent ? setConversations : setArchives}
+          onSelectMenu={onSelectMenu}
+          onShouldDelete={onShouldDelete}
+          selectedThreadId={selectedThreadId}
+        />
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel>
-        <Thread
-          conversationId={selectedConversationId}
-          displayExplorer={!pageSettings.explorerHidden}
-          displaySettings={!pageSettings.settingsHidden}
-          onChangeDisplayExplorer={onChangeDisplayExplorer}
-          onChangeDisplaySettings={onChangeDisplaySettings}
-          onSelectMenu={onSelectMenu}
-        />
+        {view !== ViewName.Archives && (
+          <Thread
+            conversationId={selectedThreadId}
+            displayExplorer={!pageSettings.explorerHidden}
+            displaySettings={!pageSettings.settingsHidden}
+            onChangeDisplayExplorer={onChangeDisplayExplorer}
+            onChangeDisplaySettings={onChangeDisplaySettings}
+            onSelectMenu={onSelectMenu}
+          />
+        )}
+        {view === ViewName.Archives && (
+          <Archive archiveId={selectedThreadId} onSelectMenu={onSelectMenu} />
+        )}
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel
         minSize={20}
         defaultSize={20}
         onResize={onResizeSettings}
-        className={!pageSettings.settingsHidden ? '' : 'hidden'}
+        className={!pageSettings.settingsHidden && view === ViewName.Recent ? '' : 'hidden'}
       >
-        <Settings conversationId={selectedConversationId} />
+        <Settings conversationId={selectedThreadId} />
       </ResizablePanel>
     </ResizablePanelGroup>
   );
