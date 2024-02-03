@@ -16,7 +16,7 @@ import {
 import { mapKeys } from '@/utils/data';
 import logger from '@/utils/logger';
 import { toCamelCase, toSnakeCase } from '@/utils/string';
-import { invokeTauri } from '@/utils/tauri';
+import { invokeTauri } from '@/utils/backend/tauri';
 
 const NAME = 'OpenAI';
 const TYPE = ProviderType.openai;

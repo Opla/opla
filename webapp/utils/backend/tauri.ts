@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import logger from './logger';
+import logger from '../logger';
 
 type InvokeArgs = Record<string, unknown>;
 
@@ -72,19 +72,34 @@ const saveFileDialog = async (filters?: DialogFilter[]) => {
 
 const writeTextFile = async (filename: string, contents: string) => {
   const { writeFile: fsWriteFile } = await import('@tauri-apps/api/fs');
-  const dataDir = await invokeTauri('get_data_dir');
+  const { join } = await import('@tauri-apps/api/path');
+  const dataDir = (await invokeTauri('get_data_dir')) as string;
+  const path = await join(dataDir, filename);
   return fsWriteFile({
     contents,
-    path: dataDir + filename,
+    path,
   });
 };
 
-const readTextFile = async (filename: string) => {
+const readTextFile = async (filename: string, isDatadir = true) => {
   const { readTextFile: fsReadTextFile } = await import('@tauri-apps/api/fs');
-  const dataDir = await invokeTauri('get_data_dir');
-
-  return fsReadTextFile(dataDir + filename);
+  const { join } = await import('@tauri-apps/api/path');
+  let dataDir = '';
+  if (isDatadir) {
+    dataDir = await invokeTauri('get_data_dir') as string;
+  }
+  return fsReadTextFile(await join(dataDir, filename));
 };
+
+const fileExists = async (filename: string, path?: string) => {
+  const { exists } = await import('@tauri-apps/api/fs');
+  const { join } = await import('@tauri-apps/api/path');
+  let dir = path as string;
+  if (!dir) {
+    dir = await invokeTauri('get_data_dir') as string;
+  }
+  return exists(await join(dir, filename));
+}
 
 export {
   invokeTauri,
@@ -93,4 +108,5 @@ export {
   saveFileDialog,
   writeTextFile,
   readTextFile,
+  fileExists,
 };

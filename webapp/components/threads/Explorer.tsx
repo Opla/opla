@@ -36,7 +36,7 @@ import {
   updateConversation,
 } from '@/utils/data/conversations';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
-import { openFileDialog, readTextFile, saveFileDialog, writeTextFile } from '@/utils/tauri';
+import { openFileDialog, readTextFile, saveFileDialog, writeTextFile } from '@/utils/backend/tauri';
 import {
   importChatGPTConversation,
   validateChaGPTConversations,

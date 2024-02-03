@@ -18,7 +18,7 @@ import { toast } from '@/components/ui/Toast';
 import { mapKeys } from '../data';
 import { toCamelCase, toSnakeCase } from '../string';
 import logger from '../logger';
-import { invokeTauri } from '../tauri';
+import { invokeTauri } from './tauri';
 
 export const getOplaServerStatus = async (): Promise<Payload> => {
   const payload = (await invokeTauri('get_opla_server_status')) as Payload;
@@ -66,7 +66,7 @@ export const getModelsCollection = async (): Promise<{ models: [] }> => {
 
 export const installModel = async (
   model: Model,
-  url: String,
+  url: String | undefined,
   path: String,
   fileName: String,
 ): Promise<String> => {

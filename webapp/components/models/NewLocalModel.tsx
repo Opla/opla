@@ -37,7 +37,8 @@ import { deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
 import { getDownloadables, isValidFormat } from '@/utils/data/models';
 import { ShortcutIds } from '@/hooks/useShortcuts';
 import { Page } from '@/types/ui';
-import { openFileDialog } from '@/utils/tauri';
+import { fileExists, openFileDialog } from '@/utils/backend/tauri';
+import { importModel, validateModelsFile } from '@/utils/models';
 import { ShortcutBadge } from '../common/ShortCut';
 import { Checkbox } from '../ui/checkbox';
 import { toast } from '../ui/Toast';
@@ -142,7 +143,41 @@ function NewLocalModel({
     const file = await openFileDialog(false, [
       { name: t('Choose a model file'), extensions: ['gguf', 'json'] },
     ]);
-    logger.info('onLocalInstall', file);
+    if (typeof file === 'string') {
+      const filepath = file.substring(0, file.lastIndexOf('/'));
+      let model: Model | undefined;
+      if (file.endsWith('.json')) {
+        const validate = await validateModelsFile(file);
+        logger.info('onLocalInstall', validate);
+        if (!validate.success) {
+          logger.error('onLocalInstall', validate.error);
+          toast.error(`Not valid file ${file} ${validate.error}`);
+          return;
+        }
+        model = importModel(validate.data);
+      } else if (file.endsWith('.gguf')) {
+        const name = file.substring(file.lastIndexOf('/') + 1, file.lastIndexOf('.'));
+        const filename = file.substring(file.lastIndexOf('/') + 1);
+        logger.info('onLocalInstall gguf', file);
+        model = importModel({ id: name, name, download: filename });
+      }
+      if (model?.download && getResourceUrl(model.download).endsWith('.gguf')) {
+        const download = getResourceUrl(model.download);
+        const isExist = await fileExists(download, filepath);
+        if (!isExist) {
+          logger.error('onLocalInstall file not found', download, filepath);
+          toast.error(`File not found ${file}`);
+          return;
+        }
+        const id = await installModel(model, undefined, filepath, download);
+        await updateBackendStore();
+        logger.info('onLocalInstall', id, model, filepath, download);
+      } else {
+        logger.error('onLocalInstall no download found', model);
+        toast.error(`Not downloadable model file ${file} ${model}`);
+        return;
+      }
+    }
     onClose();
   };
 

@@ -14,7 +14,7 @@
 
 import { toast } from 'sonner';
 import logger from './logger';
-import { readTextFile, writeTextFile } from './tauri';
+import { readTextFile, writeTextFile } from './backend/tauri';
 
 enum StorageType {
   File,
