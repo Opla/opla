@@ -86,7 +86,7 @@ const readTextFile = async (filename: string, isDatadir = true) => {
   const { join } = await import('@tauri-apps/api/path');
   let dataDir = '';
   if (isDatadir) {
-    dataDir = await invokeTauri('get_data_dir') as string;
+    dataDir = (await invokeTauri('get_data_dir')) as string;
   }
   return fsReadTextFile(await join(dataDir, filename));
 };
@@ -96,10 +96,10 @@ const fileExists = async (filename: string, path?: string) => {
   const { join } = await import('@tauri-apps/api/path');
   let dir = path as string;
   if (!dir) {
-    dir = await invokeTauri('get_data_dir') as string;
+    dir = (await invokeTauri('get_data_dir')) as string;
   }
   return exists(await join(dir, filename));
-}
+};
 
 export {
   invokeTauri,
