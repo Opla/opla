@@ -172,6 +172,9 @@ function NewLocalModel({
         const id = await installModel(model, undefined, filepath, download);
         await updateBackendStore();
         logger.info('onLocalInstall', id, model, filepath, download);
+        if (!gotoModels) {
+          router.push(`${Page.Models}/${id}`);
+        }
       } else {
         logger.error('onLocalInstall no download found', model);
         toast.error(`Not downloadable model file ${file} ${model}`);
@@ -199,6 +202,9 @@ function NewLocalModel({
     );
     await updateBackendStore();
     logger.info(`installed ${id}`);
+    if (!gotoModels) {
+      router.push(`${Page.Models}/${id}`);
+    }
   };
 
   let filteredCollection = collection;
