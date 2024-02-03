@@ -173,7 +173,7 @@ export default function ThreadMenu({
               </>
             )}
             <DropdownMenuItem onSelect={onNewLocalModel}>
-              <HardDriveDownload className="mr-2 h-4 w-4" />
+              <HardDriveDownload className="mr-2 h-4 w-4" strokeWidth={1.5} />
               {t('Install local model')}
               <DropdownMenuShortcut>
                 <ShortcutBadge command={ShortcutIds.INSTALL_MODEL} />

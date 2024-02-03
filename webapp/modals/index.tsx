@@ -18,21 +18,11 @@ import AlertDialog from '@/components/common/AlertDialog';
 import { BaseNamedRecord } from '@/types';
 import { ModalData, ModalRef } from '@/context/modals';
 import { ShortcutSettings } from '@/components/common/ShortCut';
+import { ModalIds } from '@/types/ui';
 import SettingsPanel from './settings';
 import NewProviderDialog from './templates/NewProvider';
 import OpenAIDialog from './openai';
 import NewLocalModelDialog from './models';
-
-enum ModalIds {
-  Settings = 'settings',
-  Shortcuts = 'shortcuts',
-  NewProvider = 'newprovider',
-  NewLocalModel = 'newlocalmodel',
-  Welcome = 'welcome',
-  OpenAI = 'openai',
-  DeleteItem = 'deleteitem',
-  DownloadItem = 'downloaditem',
-}
 
 const Modals: ModalRef[] = [
   {

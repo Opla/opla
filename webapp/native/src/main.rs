@@ -200,7 +200,7 @@ async fn install_model<R: Runtime>(
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
     model: Model,
-    url: String,
+    url: Option<String>,
     path: String,
     file_name: String
 ) -> Result<String, String> {
@@ -214,8 +214,13 @@ async fn install_model<R: Runtime>(
             return Err(format!("Install model error: {:?}", err));
         }
     };
-    let downloader = context.downloader.lock().map_err(|err| err.to_string())?;
-    downloader.download_file(model_id.clone(), url, model_path, file_name.as_str(), app);
+    match url {
+        Some(u) => {
+            let downloader = context.downloader.lock().map_err(|err| err.to_string())?;
+            downloader.download_file(model_id.clone(), u, model_path, file_name.as_str(), app);
+        }
+        None => {}
+    }
 
     store.save().map_err(|err| err.to_string())?;
 

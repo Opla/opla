@@ -24,7 +24,7 @@
         "exists": true,
         "readFile": true,
         "writeFile": true,
-        "scope": ["$LOCALDATA/Opla/*"]
+        "scope": ["$LOCALDATA/Opla/**/*", "$HOME/**", "$TEMP/*", "$DESKTOP/*", "$DOWNLOADS/*", "$DOCUMENTS/*"]
       },
       "window": {
         "all": true

@@ -459,7 +459,14 @@ impl OplaServer {
             "{}",
             format!("Opla llm call:  {:?} / {:?} / {:?}", query.command, self.model, &model)
         );
-        if self.model.is_none() || self.model.as_ref().unwrap() != &model {
+        let current_model = match &self.model {
+            Some(m) => m,
+            None => {
+                println!("Opla server error try to read model");
+                return Err(Box::new(Error::ModelNotLoaded));
+            }
+        };
+        if self.model.is_none() || current_model != &model {
             self.stop(&app)?;
             let self_status = Arc::clone(&self.status);
             let mut wouldblock = true;

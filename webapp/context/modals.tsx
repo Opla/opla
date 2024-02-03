@@ -15,6 +15,7 @@
 import Portal from '@/components/common/Portal';
 import { createContext, useCallback, useMemo, useState } from 'react';
 import { BaseIdRecord } from '@/types';
+import { ModalIds } from '@/types/ui';
 
 export type ModalData = {
   item: BaseIdRecord;
@@ -29,25 +30,24 @@ export type ModalComponentRef = {
 };
 
 export type ModalRef = {
-  id: string;
+  id: ModalIds;
   Component: (props: ModalComponentRef) => React.ReactNode;
 };
 
 type Context = {
   instances: {
     [key: string]: {
-      render: (props: {
-        name: string;
-        visible: boolean;
-        onClose: () => void;
-        data?: ModalData;
-      }) => React.ReactNode;
+      render: (
+        props: ModalComponentRef & {
+          name: string;
+        },
+      ) => React.ReactNode;
       visible: boolean;
       data?: ModalData;
     };
   };
-  registerModal: (name: string, render: any, visible?: boolean, data?: ModalData) => void;
-  showModal: (modalName: string, data?: ModalData) => void;
+  registerModal: (name: ModalIds, render: any, visible?: boolean, data?: ModalData) => void;
+  showModal: (modalName: ModalIds, data?: ModalData) => void;
 };
 
 const initialContext: Context = {
@@ -63,7 +63,7 @@ function ModalsProvider({ children }: { children: React.ReactNode }) {
 
   const registerModal = useCallback(
     (
-      name: string,
+      name: ModalIds,
       render: () => React.ReactNode,
       visible = false,
       data: ModalData | undefined = undefined,
@@ -76,7 +76,7 @@ function ModalsProvider({ children }: { children: React.ReactNode }) {
   );
 
   const showModal = useCallback(
-    (name: string, data: ModalData | undefined = undefined) => {
+    (name: ModalIds, data: ModalData | undefined = undefined) => {
       const instance = modals[name];
 
       if (instance) {

@@ -14,50 +14,50 @@
 
 // Made using https://transform.tools/typescript-to-zod
 
-import { Metadata } from '@/types';
 import { SafeParseReturnType, z } from 'zod';
+import { Metadata } from '@/types';
 
-export const metadataSchema: z.ZodSchema<Metadata> = z.lazy(() =>
-  z.record(z.union([z.string(), z.number(), z.boolean(), metadataSchema])),
+export const MetadataSchema: z.ZodSchema<Metadata> = z.lazy(() =>
+  z.record(z.union([z.string(), z.number(), z.boolean(), MetadataSchema])),
 );
 
-export const authorSchema = z.object({
+export const AuthorSchema = z.object({
   role: z.enum(['system', 'user', 'assistant', 'tool']),
   name: z.string(),
   avatarUrl: z.string().optional(),
-  metadata: metadataSchema.optional(),
+  metadata: MetadataSchema.optional(),
 });
 
-export const contentSchema = z.object({
+export const ContentSchema = z.object({
   type: z.enum(['text', 'image', 'video', 'audio', 'file', 'link', 'location', 'contact']),
   parts: z.array(z.string()),
-  metadata: metadataSchema.optional(),
+  metadata: MetadataSchema.optional(),
 });
 
-export const baseRecordSchema = z.object({
+export const BaseRecordSchema = z.object({
   id: z.string(),
   createdAt: z.number(),
   updatedAt: z.number(),
-  metadata: metadataSchema.optional(),
+  metadata: MetadataSchema.optional(),
 });
 
-export const baseNamedRecordSchema = baseRecordSchema.and(
+export const BaseNamedRecordSchema = BaseRecordSchema.and(
   z.object({
     name: z.string(),
     description: z.string().optional(),
   }),
 );
 
-export const messageSchema = baseRecordSchema.and(
+export const MessageSchema = BaseRecordSchema.and(
   z.object({
-    author: authorSchema,
-    content: z.union([z.string(), contentSchema]),
+    author: AuthorSchema,
+    content: z.union([z.string(), ContentSchema]),
   }),
 );
 
-export const ConversationSchema = baseNamedRecordSchema.and(
+export const ConversationSchema = BaseNamedRecordSchema.and(
   z.object({
-    messages: z.array(messageSchema),
+    messages: z.array(MessageSchema),
     pluginIds: z.array(z.string()).optional(),
     currentPrompt: z.string().optional(),
     note: z.string().optional(),

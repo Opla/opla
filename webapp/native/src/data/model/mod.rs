@@ -189,7 +189,14 @@ impl ModelStorage {
 
     fn get_path(&self, path: String) -> Result<PathBuf, String> {
         let models_path = match self.path {
-            Some(ref path) => get_home_directory()?.join(path),
+            Some(ref path) => {
+                let p = PathBuf::from(path);
+                if p.is_absolute() {
+                    p
+                } else {
+                    get_home_directory()?.join(path)
+                }
+            }
             None => get_data_directory()?.join("models"),
         };
         let model_path = models_path.join(path);

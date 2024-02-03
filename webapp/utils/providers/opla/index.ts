@@ -26,7 +26,7 @@ import {
 import { mapKeys } from '@/utils/data';
 import logger from '@/utils/logger';
 import { toCamelCase } from '@/utils/string';
-import { invokeTauri } from '@/utils/tauri';
+import { invokeTauri } from '@/utils/backend/tauri';
 import { z } from 'zod';
 
 const NAME = 'Opla';
