@@ -42,7 +42,6 @@ import { ShortcutBadge } from '../common/ShortCut';
 import { toast } from '../ui/Toast';
 import SearchHuggingFaceHub from './SearchHuggingFaceHub';
 
-
 function NewLocalModel({
   className,
   onSelected,
