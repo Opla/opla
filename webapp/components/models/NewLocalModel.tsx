@@ -32,7 +32,6 @@ import useBackend from '@/hooks/useBackendContext';
 import { getModelsCollection, installModel } from '@/utils/backend/commands';
 import { Model } from '@/types';
 import logger from '@/utils/logger';
-import { searchModels } from '@/utils/providers/hf';
 import { deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
 import { getDownloadables, isValidFormat } from '@/utils/data/models';
 import { ShortcutIds } from '@/hooks/useShortcuts';
@@ -40,69 +39,9 @@ import { Page } from '@/types/ui';
 import { fileExists, openFileDialog } from '@/utils/backend/tauri';
 import { importModel, validateModelsFile } from '@/utils/models';
 import { ShortcutBadge } from '../common/ShortCut';
-import { Checkbox } from '../ui/checkbox';
 import { toast } from '../ui/Toast';
+import SearchHuggingFaceHub from './SearchHuggingFaceHub';
 
-function SearchHuggingFaceHub({
-  search,
-  enabled,
-  onEnable,
-  onSelected,
-}: {
-  search: string;
-  enabled: boolean;
-  onEnable: (enabled: boolean) => void;
-  onSelected?: (model: Model) => void;
-}) {
-  const { t } = useTranslation();
-  const [searching, setSearching] = useState(false);
-  const [result, setResult] = useState<Model[]>([]);
-  useEffect(() => {
-    const searchHub = async () => {
-      setSearching(true);
-      const coll = await searchModels(search);
-      setResult(coll);
-      logger.info('searchModels', coll);
-      setSearching(false);
-    };
-    if (enabled) {
-      searchHub();
-    } else {
-      setResult([]);
-    }
-  }, [search, enabled]);
-  const onEnableSearch = (checked: boolean) => {
-    onEnable(checked);
-  };
-
-  return (
-    <CommandGroup
-      heading={
-        <div className="flex w-full justify-between">
-          <div>
-            <span className="mr-2">🤗</span>HuggingFace Hub
-          </div>
-          <Checkbox onCheckedChange={onEnableSearch} />
-        </div>
-      }
-    >
-      {searching && <CommandLoading>{t('Searching please wait...')}</CommandLoading>}
-      {result.length === 0 && !searching && <CommandEmpty>{t('No model found')}</CommandEmpty>}
-      {result.length > 0 &&
-        !searching &&
-        result.map((m) => (
-          <CommandItem
-            key={m.id}
-            onSelect={() => {
-              onSelected?.(m);
-            }}
-          >
-            {m.name}
-          </CommandItem>
-        ))}
-    </CommandGroup>
-  );
-}
 
 function NewLocalModel({
   className,
