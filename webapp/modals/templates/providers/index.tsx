@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Parameter from '@/components/common/Parameter';
+import Parameter, { ParameterValue } from '@/components/common/Parameter';
 import useTranslation from '@/hooks/useTranslation';
 import { Provider } from '@/types';
 
@@ -22,7 +22,7 @@ function ProviderCreate({
   advanced,
 }: {
   provider: Partial<Provider>;
-  onParameterChange: (name: string, value: string | number | boolean) => void;
+  onParameterChange: (name: string, value: ParameterValue) => void;
   advanced?: boolean;
 }) {
   const { t } = useTranslation();
@@ -45,10 +45,17 @@ function ProviderCreate({
             onChange={onParameterChange}
           />
           <Parameter
-            title={t('Token')}
-            name="token"
+            title={t('Secret key')}
+            name="key"
             value={provider?.key}
             type="text"
+            onChange={onParameterChange}
+          />
+          <Parameter
+            title={t('Models')}
+            name="models"
+            value={provider?.models}
+            type="array"
             onChange={onParameterChange}
           />
         </>

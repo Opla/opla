@@ -18,6 +18,7 @@ import logger from '@/utils/logger';
 import { Provider, ProviderType, ServerConfiguration, ServerStatus } from '@/types';
 import { deepMerge, deepSet } from '@/utils/data';
 import { updateProvider } from '@/utils/data/providers';
+import { ParameterValue } from '@/components/common/Parameter';
 import useBackend from './useBackendContext';
 
 const useProviderState = (providerId?: string, newProvider?: Provider) => {
@@ -50,7 +51,7 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
     return p;
   }, [backendContext, hasParametersChanged, providerId, providers, updatedProvider, newProvider]);
 
-  const onParameterChange = (name: string, value: string | number | boolean) => {
+  const onParameterChange = (name: string, value: ParameterValue) => {
     const mergedProvider = deepSet(updatedProvider, name, value);
     logger.info('onParameterChange', name, value, mergedProvider);
     setUpdatedProvider(mergedProvider);

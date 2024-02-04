@@ -22,14 +22,23 @@ import { Ui, Provider, ProviderType, ServerStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { ModalsContext } from '@/context/modals';
-import { deleteProvider, findProvider, updateProvider } from '@/utils/data/providers';
+import {
+  createProvider,
+  deleteProvider,
+  findProvider,
+  updateProvider,
+} from '@/utils/data/providers';
+import OpenAI from '@/utils/providers/openai';
 import useBackend from '@/hooks/useBackendContext';
 import { ModalIds } from '@/modals';
 import { ContextMenuTrigger } from '@radix-ui/react-context-menu';
 import { Page } from '@/types/ui';
+import { shortcutAsText } from '@/utils/shortcuts';
+import { ShortcutIds } from '@/hooks/useShortcuts';
 import { Button } from '../ui/button';
 import { ContextMenu } from '../ui/context-menu';
 import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
+import OpenAIIcon from '../icons/OpenAI';
 
 function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string }) {
   const { providers, setProviders } = useContext(AppContext);
@@ -38,6 +47,20 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
   const router = useRouter();
+
+  const chatGPT = providers.find(
+    (p: Provider) => p.type === ProviderType.openai && p.name === OpenAI.template.name,
+  );
+  console.log('chatGPT', chatGPT, providers);
+
+  const onSetupChatGPT = () => {
+    let openAI = chatGPT as Provider;
+    if (!chatGPT) {
+      openAI = createProvider(OpenAI.template.name as string, OpenAI.template);
+    }
+    showModal(ModalIds.OpenAI, { item: openAI });
+    router.push(`${Page.Providers}/${openAI.id}`);
+  };
 
   const createNewProvider = () => {
     logger.info('create new provider');
@@ -117,24 +140,42 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
   return (
     <div className="scrollbar-trigger flex h-full w-full flex-1 items-start border-r-[1px] border-neutral-300/30 bg-neutral-100 dark:border-neutral-900 dark:bg-neutral-800/70">
       <nav className="flex h-full flex-1 flex-col space-y-1">
-        <div className="flex w-full flex-row p-3">
-          <Button
-            className="w-full"
-            variant="outline"
-            onClick={(e) => {
-              e.preventDefault();
-              createNewProvider();
-            }}
-          >
-            <Plus className="mr-2 h-4 w-4" strokeWidth={1.5} />
-            {t('New AI provider')}
-          </Button>
+        <div className="flex w-full items-center dark:bg-neutral-800">
+          <div className="flex grow items-center p-2">
+            <p className="flex-1 text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+              {t('Providers')}
+            </p>
+            {!chatGPT && (
+              <Button
+                aria-label={t('Configure ChatGPT')}
+                title={`${t('Configure ChatGPT')} ${shortcutAsText(ShortcutIds.NEW_PROVIDER)}`}
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onSetupChatGPT();
+                }}
+              >
+                <OpenAIIcon className="mr-2 h-4 w-4" strokeWidth={1.5} />
+              </Button>
+            )}
+            <Button
+              aria-label={t('New AI Provider')}
+              title={`${t('New AI Provider')} ${shortcutAsText(ShortcutIds.NEW_PROVIDER)}`}
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.preventDefault();
+                createNewProvider();
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" strokeWidth={1.5} />
+            </Button>
+          </div>
         </div>
-
         <div className="flex-1 flex-col overflow-y-auto overflow-x-hidden dark:border-white/20">
           <div className="flex flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
             <div className="group relative flex flex-col gap-3 break-all rounded-md px-1 py-3">
-              <div className="p1 text-ellipsis break-all text-neutral-600">{t('Providers')}</div>
               <ul className="p1 flex flex-1 flex-col">
                 {providers.map((provider) => (
                   <li

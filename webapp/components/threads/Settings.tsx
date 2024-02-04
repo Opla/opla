@@ -22,21 +22,19 @@ import { findModel } from '@/utils/data/models';
 import Opla from '@/utils/providers/opla';
 import { getCompletionParametersDefinition } from '@/utils/providers';
 import { findProvider } from '@/utils/data/providers';
-import { Conversation } from '@/types';
+import { Conversation, ConversationParameter } from '@/types';
 import { toast } from '@/components/ui/Toast';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Textarea } from '../ui/textarea';
-import Parameter from '../common/Parameter';
+import Parameter, { ParameterValue } from '../common/Parameter';
 
 export default function Settings({ conversationId }: { conversationId?: string }) {
   const { t } = useTranslation();
   const { conversations, setConversations, providers } = useContext(AppContext);
   const { backendContext } = useBackend();
-  const [params, setParams] = useState<{ [key: string]: string | number | boolean | undefined }>(
-    {},
-  );
+  const [params, setParams] = useState<{ [key: string]: ParameterValue | undefined }>({});
 
   logger.info('backendContext', backendContext);
   const selectedConversation = conversations.find((c) => c.id === conversationId);
@@ -69,7 +67,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
     }
   };
 
-  const onParameterChange = (name: string, _value: string | number | boolean | undefined) => {
+  const onParameterChange = (name: string, _value?: ParameterValue) => {
     logger.info('onParameterChange', name, _value);
     const parameterDef = parametersDefinition[name];
     let value = _value;
@@ -100,7 +98,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
       let { parameters } = selectedConversation;
       let newConversation: Conversation | undefined;
       if (value !== undefined) {
-        parameters = { ...selectedConversation.parameters, [name]: value };
+        parameters = { ...selectedConversation.parameters, [name]: value as ConversationParameter };
         newConversation = { ...selectedConversation, parameters };
       } else if (parameters?.[name] !== undefined) {
         delete parameters[name];

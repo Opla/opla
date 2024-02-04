@@ -73,7 +73,7 @@ export default function ThreadMenu({
   const { showModal } = useContext(ModalsContext);
   const selectedItem = modelItems.find((item) => item.value === selectedModel);
   let chatGPT = providers.find(
-    (p: Provider) => p.type === ProviderType.openai && p.name === 'OpenAI API',
+    (p: Provider) => p.type === ProviderType.openai && p.name === OpenAI.template.name,
   );
 
   const onSetupChatGPT = () => {

@@ -94,10 +94,10 @@ pub struct Provider {
     pub name: String,
     pub r#type: String,
     pub url: String,
-    pub description: String,
+    pub description: Option<String>,
     pub doc_url: Option<String>,
     pub key: Option<String>,
-    pub disabled: bool,
+    pub disabled: Option<bool>,
     pub metadata: Option<ProviderMetadata>,
 }
 

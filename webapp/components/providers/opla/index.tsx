@@ -26,7 +26,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Parameter from '@/components/common/Parameter';
+import Parameter, { ParameterValue } from '@/components/common/Parameter';
 import useTranslation from '@/hooks/useTranslation';
 import { Provider } from '@/types';
 import { deepGet } from '@/utils/data';
@@ -36,7 +36,7 @@ export default function Opla({
   onParameterChange,
 }: {
   provider: Provider;
-  onParameterChange: (name: string, value: string | number | boolean) => void;
+  onParameterChange: (name: string, value: ParameterValue) => void;
 }) {
   const { t } = useTranslation();
 
