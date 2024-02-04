@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Parameter from '@/components/common/Parameter';
+import Parameter, { ParameterValue } from '@/components/common/Parameter';
 import useTranslation from '@/hooks/useTranslation';
-import { Provider } from '@/types';
+import { BaseNamedRecord, Provider } from '@/types';
 
 export default function Server({
   provider,
   onParameterChange,
 }: {
   provider: Provider;
-  onParameterChange: (name: string, value: string | number | boolean) => void;
+  onParameterChange: (name: string, value: ParameterValue) => void;
 }) {
   const { t } = useTranslation();
 
@@ -46,6 +46,13 @@ export default function Server({
         name="key"
         value={provider?.key}
         type="text"
+        onChange={onParameterChange}
+      />
+      <Parameter
+        title={t('Models')}
+        name="models"
+        value={provider?.models || ([] as BaseNamedRecord[])}
+        type="array"
         onChange={onParameterChange}
       />
       <Parameter

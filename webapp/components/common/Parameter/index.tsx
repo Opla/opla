@@ -19,7 +19,10 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { BaseNamedRecord } from '@/types';
 import { HelpCircle } from 'lucide-react';
+
+export type ParameterValue = string | number | boolean | BaseNamedRecord[];
 
 export default function Parameter({
   title,
@@ -42,11 +45,20 @@ export default function Parameter({
   inputCss?: string;
   min?: number;
   max?: number;
-  value?: string | number | boolean;
-  type?: 'text' | 'password' | 'large-text' | 'number' | 'url' | 'select' | 'boolean' | 'switch';
+  value?: ParameterValue;
+  type?:
+    | 'text'
+    | 'password'
+    | 'large-text'
+    | 'number'
+    | 'url'
+    | 'select'
+    | 'boolean'
+    | 'switch'
+    | 'array';
   disabled?: boolean;
   children?: React.ReactNode;
-  onChange?: (name: string, value: string | number | boolean) => void;
+  onChange?: (name: string, value: ParameterValue) => void;
 }) {
   const textCss = 'pr-2 w-sm';
   const boxCss =
@@ -73,11 +85,32 @@ export default function Parameter({
         </p>
         <p className="text-sm">{subtitle}</p>
       </div>
-      {type !== 'large-text' && (
+      {type === 'array' && (
+        <div className="flex flex-col gap-2">
+          <div className={cn('flex flex-row', inputCss)}>
+            <Input
+              value={(value as BaseNamedRecord[])?.map((v) => v.name).join(',')}
+              className="w-full"
+              type={type}
+              disabled={disabled}
+              onChange={(e) => {
+                // e.preventDefault();
+                // const v = type === 'number' ? parseInt(e.target.value, 10) : e.target.value;
+                const v = e.target.value as string;
+                onChange(
+                  name,
+                  v.split(',').map((r) => ({ id: name, name: r })) as BaseNamedRecord[],
+                );
+              }}
+            />
+          </div>
+        </div>
+      )}
+      {type !== 'array' && type !== 'large-text' && (
         <div className={cn('flex flex-row', inputCss)}>
           {disabled && type === 'url' && (
             <a href={value as string} target="_blank" className={textCss}>
-              {value}
+              {value as string}
             </a>
           )}
           {type === 'boolean' && (

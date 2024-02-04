@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button } from '@/components/ui/button';
-
 export default function Card({
   title,
   description,
@@ -32,25 +30,27 @@ export default function Card({
   const container = (
     <div className="flex h-full w-full flex-col gap-2 p-4">
       <div className={`${cssTitle}min-h-[24px] w-full text-xl font-bold`}>{title}</div>
-      <p className={`${cssDesc}aspect-[4/3] text-base text-neutral-700 dark:text-neutral-400`}>
-        {description}
-      </p>
+      <div className={`${cssDesc}aspect-[4/3]  text-base text-neutral-700 dark:text-neutral-400`}>
+        <p className="line-clamp-4">{description}</p>
+      </div>
     </div>
   );
-  return onClick && !disabled ? (
-    <Button
-      onClick={onClick}
-      className={`${
-        selected ? 'border-2 border-neutral-800 dark:border-neutral-300' : ''
-      } m-2 h-full w-full overflow-hidden rounded bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-700 hover:dark:bg-neutral-800`}
-    >
-      {container}
-    </Button>
-  ) : (
+  let cname = disabled ? 'cursor-default ' : 'cursor-pointer ';
+  if (disabled) {
+    cname += ' opacity-50 ';
+  } else {
+    cname += ' hover:bg-neutral-200 hover:dark:bg-neutral-800 ';
+  }
+  return (
     <div
+      role="button"
+      aria-label="Card"
+      onKeyDown={() => {}}
+      tabIndex={0}
+      onClick={disabled ? undefined : onClick}
       className={`${
-        selected ? 'border-b border-neutral-100 dark:border-neutral-800' : ''
-      } m-2 h-full w-full overflow-hidden rounded bg-neutral-100 dark:bg-neutral-700`}
+        selected ? `${cname} border-2 border-neutral-800 dark:border-neutral-300` : `${cname}`
+      } m-2 h-full w-full overflow-hidden rounded bg-neutral-100  dark:bg-neutral-700`}
     >
       {container}
     </div>

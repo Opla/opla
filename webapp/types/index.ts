@@ -61,11 +61,13 @@ export type Message = BaseIdRecord & {
   sibling?: string;
 };
 
+export type ConversationParameter = string | number | boolean;
+
 export type Conversation = BaseNamedRecord & {
   messages: Message[];
   pluginIds?: string[];
   preset?: Preset;
-  parameters?: Record<string, string | number | boolean>;
+  parameters?: Record<string, ConversationParameter>;
   currentPrompt?: string;
   note?: string;
   system?: string;

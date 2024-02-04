@@ -46,9 +46,9 @@ pub fn get_opla_provider(server: ServerConfiguration) -> Provider {
     Provider {
         name: "Opla".to_string(),
         r#type: ProviderType::Opla.to_string(),
-        description: "Opla is a free and open source AI assistant.".to_string(),
+        description: Some("Opla is a free and open source AI assistant.".to_string()),
         url: format!("{:}:{:}", server.parameters.host.clone(), server.parameters.port.clone()),
-        disabled: false,
+        disabled: Some(false),
         key: None,
         doc_url: Some("https://opla.ai/docs".to_string()),
         metadata: Option::Some(ProviderMetadata {
@@ -317,13 +317,16 @@ async fn llm_call_completion<R: Runtime>(
         store.save().map_err(|err| err.to_string())?;
         return Ok(response);
     }
-    if llm_provider_type == "openai" {
+    if llm_provider_type == "openai" || llm_provider_type == "server" {
         let response = {
             let api = format!("{:}", llm_provider.url);
             let secret_key = match llm_provider.key {
                 Some(k) => { k }
                 None => {
-                    return Err(format!("llm provider key not set: {:?}", llm_provider_type));
+                    if llm_provider_type == "openai" {
+                        return Err(format!("OpenAI provider key not set: {:?}", llm_provider_type));
+                    }
+                    ' '.to_string()
                 }
             };
             let model = model.clone();

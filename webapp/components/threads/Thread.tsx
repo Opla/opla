@@ -61,7 +61,11 @@ function Thread({
   const router = useRouter();
   const { providers, conversations, setConversations, setUsage } = useContext(AppContext);
   const { backendContext, setActiveModel } = useBackend();
-  const { activeModel } = backendContext.config.models;
+  const { activeModel: aModel } = backendContext.config.models;
+  const [tempModelProvider, setTempModelProvider] = useState<[string, ProviderType] | undefined>(
+    undefined,
+  );
+  const activeModel = tempModelProvider?.[0] || aModel;
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
   const conversationId = _conversationId || tempConversationId;
   const selectedConversation = conversations.find((c) => c.id === conversationId);
@@ -125,7 +129,10 @@ function Thread({
   };
 
   const onSelectModel = async (model?: string, provider = ProviderType.opla) => {
-    logger.info(`onSelectModel ${model} ${provider} activeModel=${typeof activeModel}`);
+    logger.info(
+      `onSelectModel ${model} ${provider} activeModel=${typeof activeModel}`,
+      selectedConversation,
+    );
     if (model && selectedConversation) {
       const newConversations = updateConversation(
         { ...selectedConversation, model, provider, parameters: {} },
@@ -135,6 +142,8 @@ function Thread({
       setConversations(newConversations);
     } else if (model && !activeModel) {
       await setActiveModel(model);
+    } else if (model) {
+      setTempModelProvider([model, provider]);
     }
   };
 
@@ -219,6 +228,7 @@ function Thread({
     if (conversation.temp) {
       conversation.name = conversation.currentPrompt as string;
     }
+    console.log('onSendMessage', conversation);
     conversation.currentPrompt = '';
     setChangedPrompt(undefined);
     conversation.temp = false;
@@ -346,12 +356,16 @@ function Thread({
         newConversation.temp = true;
         newConversation.name = conversationName;
         newConversation.currentPrompt = message;
+        if (tempModelProvider) {
+          [newConversation.model, newConversation.provider] = tempModelProvider;
+          setTempModelProvider(undefined);
+        }
         setTempConversationId(newConversation.id);
       }
       setConversations(newConversations);
       setChangedPrompt(undefined);
     },
-    [conversationId, conversations, setConversations, tempConversationId],
+    [conversationId, conversations, setConversations, tempConversationId, tempModelProvider],
   );
 
   useDebounceFunc<string | undefined>(onUpdatePrompt, changedPrompt, 500);

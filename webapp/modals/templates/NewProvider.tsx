@@ -23,6 +23,7 @@ import logger from '@/utils/logger';
 import { AppContext } from '@/context';
 import { Button } from '@/components/ui/button';
 import { Page } from '@/types/ui';
+import { ParameterValue } from '@/components/common/Parameter';
 import ProviderCreate from './providers';
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
@@ -80,14 +81,14 @@ export default function NewProvider({
     router.push(`${Page.Providers}/${newProvider.id}`);
   };
 
-  const onParameterChange = (name: string, value: string | number | boolean) => {
+  const onParameterChange = (name: string, value: ParameterValue) => {
     const newProvider = { ...provider, [name]: value };
     logger.info('onParameterChange', name, value, newProvider);
     setProvider(newProvider);
   };
 
   return (
-    <Dialog id={id} size="md" open={open} onClose={onClose}>
+    <Dialog id={id} size="lg" open={open} onClose={onClose}>
       <div className="flex h-full w-full flex-col justify-between gap-3 p-2 pb-4">
         {step === 1 && (
           <Panel title={t('Choose a provider')}>
@@ -101,13 +102,14 @@ export default function NewProvider({
               />
               <Card
                 title="OpenAI"
+                disabled={providers.find((p) => p.type === ProviderType.openai) !== undefined}
                 selected={provider?.type === ProviderType.openai}
                 description={t('Using your access token')}
                 onClick={() => onChoose(ProviderType.openai, 'OpenAI')}
               />
               <Card
                 title={t('Server')}
-                description={t('For experts')}
+                description={t('For experts, it needs to be compatible with OpenAI API')}
                 selected={provider?.type === ProviderType.server}
                 onClick={() => onChoose(ProviderType.server, t('Remote server'))}
               />
