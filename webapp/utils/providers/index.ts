@@ -17,8 +17,7 @@ import Opla from './opla';
 import { findProvider } from '../data/providers';
 import { getContent } from '../data';
 
-
-// TODO: code it in Rust 
+// TODO: code it in Rust
 // and use ContextWindowPolicy from webapp/utils/constants.ts
 const buildContext = (conversation: Conversation, index: number): LlmMessage[] => {
   const context: Message[] = [];
@@ -33,7 +32,7 @@ const buildContext = (conversation: Conversation, index: number): LlmMessage[] =
     name: m.author?.name,
   }));
   return messages;
-}
+};
 
 const completion = async (
   model: Model | undefined,

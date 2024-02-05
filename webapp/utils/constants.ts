@@ -28,7 +28,8 @@ export const DefaultContextWindowPolicy: ContextWindowPolicy = ContextWindowPoli
 
 export const ContextWindowPolicies: Record<ContextWindowPolicy, String> = {
   [ContextWindowPolicy.None]: 'Send all messages as context even out of context window size.',
-  [ContextWindowPolicy.Rolling]: 'Use a rolling mechanism to maintain constant context window size.',
+  [ContextWindowPolicy.Rolling]:
+    'Use a rolling mechanism to maintain constant context window size.',
   [ContextWindowPolicy.Stop]: 'Stop if the context window is full.',
   [ContextWindowPolicy.Last]: "Use only the last sent user's message.",
 };
