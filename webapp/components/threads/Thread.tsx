@@ -228,7 +228,7 @@ function Thread({
     if (conversation.temp) {
       conversation.name = conversation.currentPrompt as string;
     }
-    console.log('onSendMessage', conversation);
+    // console.log('onSendMessage', conversation);
     conversation.currentPrompt = '';
     setChangedPrompt(undefined);
     conversation.temp = false;

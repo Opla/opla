@@ -15,9 +15,9 @@ import logger from '../logger';
 
 type InvokeArgs = Record<string, unknown>;
 
-const invokeTauri = async (command: string, args?: any) => {
+const invokeTauri = async <T>(command: string, args?: any) => {
   const { invoke } = await import('@tauri-apps/api/tauri');
-  return invoke(command, args as InvokeArgs);
+  return invoke(command, args as InvokeArgs) as T;
 };
 
 const getPlatformInfos = async () => {
