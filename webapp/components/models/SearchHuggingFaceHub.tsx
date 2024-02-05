@@ -40,7 +40,13 @@ function SearchHuggingFaceHub({
     const searchHub = async () => {
       setSearching(true);
       const coll = await searchModels(search);
-      setResult(coll.filter((m) => m.include?.find((i) => getResourceUrl(i.download)?.toLowerCase().endsWith('.gguf') !== undefined)));
+      setResult(
+        coll.filter((m) =>
+          m.include?.find(
+            (i) => getResourceUrl(i.download)?.toLowerCase().endsWith('.gguf') !== undefined,
+          ),
+        ),
+      );
       logger.info('searchModels', coll);
       setSearching(false);
     };
