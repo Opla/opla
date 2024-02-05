@@ -145,6 +145,44 @@ pub struct Model {
 }
 
 impl Model {
+    pub fn new(name: String) -> Self {
+        Model {
+            id: None,
+            name,
+            base_model: None,
+            created_at: None,
+            updated_at: None,
+            title: None,
+            description: None,
+            summary: None,
+            version: None,
+            creator: None,
+            author: None,
+            publisher: None,
+            license: None,
+            languages: None,
+            tags: None,
+            recommendations: None,
+            recommended: None,
+            deprecated: None,
+            private: None,
+            featured: None,
+            model_type: None,
+            library: None,
+            tensor_type: None,
+            quantization: None,
+            bits: None,
+            size: None,
+            max_ram: None,
+            repository: None,
+            download: None,
+            documentation: None,
+            paper: None,
+            include: None,
+            system: None,
+        }
+    }
+
     pub fn is_same_id(&self, id2: &str) -> bool {
         match self.id {
             Some(ref id) => id == id2,

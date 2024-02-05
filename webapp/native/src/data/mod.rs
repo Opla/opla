@@ -51,13 +51,13 @@ pub mod option_date_format {
     use chrono::{ DateTime, Utc };
     use serde::{ Deserializer, Deserialize };
 
-    const FORMAT: &str = "%Y-%m-%dT%H:%M:%S%.%f%z";
+    // const FORMAT: &str = "%Y-%m-%dT%H:%M:%S%.%f%z";
 
     pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<DateTime<Utc>>, D::Error>
         where D: Deserializer<'de>
     {
         let s = Option::<String>::deserialize(deserializer)?;
-        println!("Parsing date: {:?}", s);
+        // println!("Parsing date: {:?}", s);
         let datetime = match s {
             Some(s) =>
                 DateTime::parse_from_rfc3339(&s)
@@ -67,7 +67,7 @@ pub mod option_date_format {
                 return Ok(None);
             }
         };
-        println!("Parsed date: {:?}", datetime);
+        // println!("Parsed date: {:?}", datetime);
         Ok(Some(datetime))
     }
 
@@ -76,7 +76,9 @@ pub mod option_date_format {
     {
         match date {
             Some(date) => {
-                let s = date.format(FORMAT).to_string();
+                println!("Serializing date: {:?}", date);
+                let s = date.with_timezone(&Utc).to_rfc3339(); // date.format(FORMAT);
+                println!("Serialized date: {}", s);
                 serializer.serialize_str(&s)
             }
             None => serializer.serialize_none(),

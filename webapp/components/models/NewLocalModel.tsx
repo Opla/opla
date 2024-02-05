@@ -14,7 +14,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { BrainCircuit, Computer } from 'lucide-react';
+import { BrainCircuit, Computer, Sparkles } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import { cn } from '@/lib/utils';
 import {
@@ -171,11 +171,17 @@ function NewLocalModel({
 
   return (
     <div className={cn('h-full', className)}>
-      <Command className="rounded-lg border shadow-md" shouldFilter={false}>
+      <Command className="rounded-lg border shadow-md h-full" shouldFilter={false}>
         <CommandInput placeholder={t('Search a model to install')} onValueChange={onValueChange} />
-        <CommandList>
-          <CommandEmpty>{t('No model found')}</CommandEmpty>
-          <CommandGroup heading="Featured">
+        <CommandList className='h-full'>
+          <CommandGroup
+            heading={
+              <div className='flex flex-row'>
+                <Sparkles className="mr-2 h-4 w-4" /> {t('Featured')}
+              </div>
+            }
+          >
+            <CommandEmpty>{t('No model found')}</CommandEmpty>
             {loading && <CommandLoading>{t('Loading please wait...')}</CommandLoading>}
             {!loading &&
               filteredCollection.map((m) => (
@@ -191,7 +197,7 @@ function NewLocalModel({
           </CommandGroup>
           <CommandSeparator />
           {search && (
-            <SearchHuggingFaceHub search={search} enabled={enabled} onEnable={setEnabled} />
+            <SearchHuggingFaceHub search={search} enabled={enabled} onEnable={setEnabled} onSelected={onSelect} />
           )}
           {!search && (
             <CommandGroup heading={t('Others')}>

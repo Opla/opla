@@ -60,12 +60,12 @@ function SearchHuggingFaceHub({
           <div>
             <span className="mr-2">🤗</span>HuggingFace Hub
           </div>
-          <Checkbox onCheckedChange={onEnableSearch} />
+          <div className='flex flex-row gap-2'>{t('Search')}<Checkbox onCheckedChange={onEnableSearch} /></div>
         </div>
       }
     >
       {searching && <CommandLoading>{t('Searching please wait...')}</CommandLoading>}
-      {result.length === 0 && !searching && <CommandEmpty>{t('No model found')}</CommandEmpty>}
+      {result.length === 0 && !searching && enabled && <CommandEmpty>{t('No model found')}</CommandEmpty>}
       {result.length > 0 &&
         !searching &&
         result.map((m) => (

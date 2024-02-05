@@ -25,7 +25,7 @@ pub mod error;
 
 use std::sync::Mutex;
 
-use api::models;
+use api::{ hf::search_hf_models, models };
 use data::model::Model;
 use downloader::Downloader;
 use llm::{ LlmQuery, LlmResponse, LlmQueryCompletion, openai::call_completion, LlmError };
@@ -192,6 +192,20 @@ async fn get_models_collection<R: Runtime>(
     fetch_models_collection("https://opla.github.io/models/all.json").await.map_err(|err|
         err.to_string()
     )
+}
+
+#[tauri::command]
+async fn search_hfhub_models<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    _context: State<'_, OplaContext>,
+    query: String
+) -> Result<ModelsCollection, String>
+    where Result<ModelsCollection, String>: Serialize
+{
+    search_hf_models(&query).await.map_err(|err| {
+        println!("Search HF models error: {:?}", err);
+        err.to_string()})
 }
 
 #[tauri::command]
@@ -575,6 +589,7 @@ fn main() {
                 start_opla_server,
                 stop_opla_server,
                 get_models_collection,
+                search_hfhub_models,
                 install_model,
                 uninstall_model,
                 set_active_model,

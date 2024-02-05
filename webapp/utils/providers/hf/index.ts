@@ -12,19 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Model } from '@/types';
+import { Model, ModelsCollection } from '@/types';
+import { invokeTauri } from '@/utils/backend/tauri';
+import { mapKeys } from '@/utils/data';
 import logger from '@/utils/logger';
+import { toCamelCase } from '@/utils/string';
 
 export const searchModels = async (query: string): Promise<Model[]> => {
-  logger.info('HF searchModels TODO', query);
-  return [
-    {
-      id: 'hf:todo',
-      name: 'TODO: Search need to be implemented',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    },
-  ];
+  let collection = await invokeTauri<ModelsCollection>('search_hfhub_models', { query });
+  collection = await mapKeys(collection, toCamelCase);
+  // TODO filter out models without download gguf files
+  console.log('HF searchModels', collection.models);
+  return collection.models;
 };
 
 export const getModel = async (id: string): Promise<Model> => {
