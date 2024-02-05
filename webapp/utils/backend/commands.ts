@@ -52,7 +52,7 @@ export const getProviderTemplate = async (): Promise<Provider> => {
 
 export const getModelsCollection = async (): Promise<{ models: [] }> => {
   try {
-    const collection = (await invokeTauri<ModelsCollection>('get_models_collection'));
+    const collection = await invokeTauri<ModelsCollection>('get_models_collection');
     logger.info('getCollection', collection);
     return await mapKeys(collection, toCamelCase);
   } catch (error) {

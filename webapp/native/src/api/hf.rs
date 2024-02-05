@@ -64,11 +64,8 @@ impl HFModel {
             Some(name) => name.to_string(),
             None => self.id.clone(),
         };
-        println!("name: {}", name);
         let mut model = Model::new(name);
-        println!("model: {:?}", model.clone());
         model.id = Some(self.id.clone());
-        println!("dates are: {:?} {:?}", self.created_at, self.last_modified);
         model.created_at = self.created_at.clone();
         model.updated_at = self.last_modified.clone();
         model.author = match &self.author {
@@ -79,21 +76,18 @@ impl HFModel {
                 }
             None => None,
         };
-        println!("do siblings");
+
         model.include = match &self.siblings {
             Some(siblings) => {
                 let mut include = Vec::new();
                 let url = "https://huggingface.co/".to_string() + &self.id + "/resolve/main/";
-                println!("url: {}", url);
                 for sibling in siblings {
-                    println!("sibling: {:?}", sibling);
                     let r_filename = match &sibling.r_filename {
                         Some(r_filename) => r_filename,
                         None => {
                             continue;
                         }
                     };
-                    println!("r_filename: {}", r_filename);
                     let mut submodel = Model::new(r_filename.clone());
                     let filename = url.clone() + r_filename;
                     submodel.download = match Resource::from_str(&filename) {
@@ -109,7 +103,6 @@ impl HFModel {
             }
             None => None,
         };
-        // println!("model: {:?}", model.clone());
         model
     }
 }
@@ -121,7 +114,6 @@ pub async fn search_hf_models(
         format!("https://huggingface.co/api/models?search={}&filter=gguf&limit=10&full=true&config=true", query);
     let response = reqwest::get(url).await?;
     let hf_collection = response.json::<Vec<HFModel>>().await?;
-    // println!("Fetched models collection: {:?}", hf_collection);
     let models: Vec<Model> = hf_collection
         .iter()
         .map(|hf_model| {
@@ -129,6 +121,5 @@ pub async fn search_hf_models(
             hf_model.to_model()
         })
         .collect();
-    // println!("Done models: {:?}", models);
     Ok(ModelsCollection { models, created_at: Utc::now(), updated_at: Utc::now() })
 }

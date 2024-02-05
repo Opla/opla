@@ -171,12 +171,12 @@ function NewLocalModel({
 
   return (
     <div className={cn('h-full', className)}>
-      <Command className="rounded-lg border shadow-md h-full" shouldFilter={false}>
+      <Command className="h-full rounded-lg border shadow-md" shouldFilter={false}>
         <CommandInput placeholder={t('Search a model to install')} onValueChange={onValueChange} />
-        <CommandList className='h-full'>
+        <CommandList className="h-full">
           <CommandGroup
             heading={
-              <div className='flex flex-row'>
+              <div className="flex flex-row">
                 <Sparkles className="mr-2 h-4 w-4" /> {t('Featured')}
               </div>
             }
@@ -197,7 +197,12 @@ function NewLocalModel({
           </CommandGroup>
           <CommandSeparator />
           {search && (
-            <SearchHuggingFaceHub search={search} enabled={enabled} onEnable={setEnabled} onSelected={onSelect} />
+            <SearchHuggingFaceHub
+              search={search}
+              enabled={enabled}
+              onEnable={setEnabled}
+              onSelected={onSelect}
+            />
           )}
           {!search && (
             <CommandGroup heading={t('Others')}>

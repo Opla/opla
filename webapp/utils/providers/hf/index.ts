@@ -21,8 +21,7 @@ import { toCamelCase } from '@/utils/string';
 export const searchModels = async (query: string): Promise<Model[]> => {
   let collection = await invokeTauri<ModelsCollection>('search_hfhub_models', { query });
   collection = await mapKeys(collection, toCamelCase);
-  // TODO filter out models without download gguf files
-  console.log('HF searchModels', collection.models);
+  // console.log('HF searchModels', collection.models);
   return collection.models;
 };
 

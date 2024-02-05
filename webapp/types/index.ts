@@ -180,7 +180,7 @@ export type ModelsCollection = {
   updatedAt: number;
   createdAt: number;
   models: Model[];
-}
+};
 
 export type Preset = BaseNamedRecord & {
   title: string;

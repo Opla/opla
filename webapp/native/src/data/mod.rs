@@ -76,9 +76,9 @@ pub mod option_date_format {
     {
         match date {
             Some(date) => {
-                println!("Serializing date: {:?}", date);
+                // println!("Serializing date: {:?}", date);
                 let s = date.with_timezone(&Utc).to_rfc3339(); // date.format(FORMAT);
-                println!("Serialized date: {}", s);
+                // println!("Serialized date: {}", s);
                 serializer.serialize_str(&s)
             }
             None => serializer.serialize_none(),

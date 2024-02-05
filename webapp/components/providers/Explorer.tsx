@@ -51,7 +51,6 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
   const chatGPT = providers.find(
     (p: Provider) => p.type === ProviderType.openai && p.name === OpenAI.template.name,
   );
-  console.log('chatGPT', chatGPT, providers);
 
   const onSetupChatGPT = () => {
     let openAI = chatGPT as Provider;

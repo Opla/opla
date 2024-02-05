@@ -19,6 +19,7 @@ import { CommandEmpty, CommandGroup, CommandItem, CommandLoading } from '@/compo
 import { Model } from '@/types';
 import logger from '@/utils/logger';
 import { searchModels } from '@/utils/providers/hf';
+import { getResourceUrl } from '@/utils/data';
 import { Checkbox } from '../ui/checkbox';
 
 function SearchHuggingFaceHub({
@@ -39,7 +40,7 @@ function SearchHuggingFaceHub({
     const searchHub = async () => {
       setSearching(true);
       const coll = await searchModels(search);
-      setResult(coll);
+      setResult(coll.filter((m) => m.include?.find((i) => getResourceUrl(i.download)?.toLowerCase().endsWith('.gguf') !== undefined)));
       logger.info('searchModels', coll);
       setSearching(false);
     };
@@ -60,12 +61,17 @@ function SearchHuggingFaceHub({
           <div>
             <span className="mr-2">🤗</span>HuggingFace Hub
           </div>
-          <div className='flex flex-row gap-2'>{t('Search')}<Checkbox onCheckedChange={onEnableSearch} /></div>
+          <div className="flex flex-row gap-2">
+            {t('Search')}
+            <Checkbox onCheckedChange={onEnableSearch} />
+          </div>
         </div>
       }
     >
       {searching && <CommandLoading>{t('Searching please wait...')}</CommandLoading>}
-      {result.length === 0 && !searching && enabled && <CommandEmpty>{t('No model found')}</CommandEmpty>}
+      {result.length === 0 && !searching && enabled && (
+        <CommandEmpty>{t('No model found')}</CommandEmpty>
+      )}
       {result.length > 0 &&
         !searching &&
         result.map((m) => (
