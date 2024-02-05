@@ -120,6 +120,8 @@ const mergeConversations = (conversations: Conversation[], newConversations: Con
   return Array.from(conversationMap.values());
 };
 
+const isKeepSystem = (conversation: Conversation | undefined) => typeof conversation?.keepSystem === 'boolean' ? conversation?.keepSystem : true;
+
 export {
   createMessage,
   updateMessage,
@@ -129,4 +131,5 @@ export {
   updateConversationMessages,
   deleteConversation,
   mergeConversations,
+  isKeepSystem,
 };

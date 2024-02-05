@@ -65,7 +65,6 @@ export type ConversationParameter = string | number | boolean;
 
 export enum ContextWindowPolicy {
   None = 'none',
-  Fixed = 'fixed',
   Rolling = 'rolling',
   Stop = 'stop',
   Last = 'last',

@@ -17,14 +17,14 @@ import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackendContext';
-import { updateConversation } from '@/utils/data/conversations';
+import { isKeepSystem, updateConversation } from '@/utils/data/conversations';
 import { findModel } from '@/utils/data/models';
 import Opla from '@/utils/providers/opla';
 import { getCompletionParametersDefinition } from '@/utils/providers';
 import { findProvider } from '@/utils/data/providers';
 import { ContextWindowPolicy, Conversation, ConversationParameter } from '@/types';
 import { toast } from '@/components/ui/Toast';
-import { ContextWindowPolicies } from '@/utils/constants';
+import { ContextWindowPolicies, DefaultContextWindowPolicy } from '@/utils/constants';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -118,7 +118,31 @@ export default function Settings({ conversationId }: { conversationId?: string }
     }
   };
 
+  const onPolicyChange = (policy: ContextWindowPolicy) => {
+    if (selectedConversation) {
+      const newConversations = updateConversation(
+        { ...selectedConversation, contextWindowPolicy: policy },
+        conversations,
+        true,
+      );
+      setConversations(newConversations);
+    }
+  };
+
+  const onKeepSystemChange = (name: string, value: ParameterValue) => {
+    if (selectedConversation) {
+      const newConversations = updateConversation(
+        { ...selectedConversation, keepSystem: value as boolean },
+        conversations,
+        true,
+      );
+
+      setConversations(newConversations);
+    }
+  };
+
   const system = selectedConversation?.system ?? model?.system ?? Opla.system;
+  const selectedPolicy = selectedConversation?.contextWindowPolicy || DefaultContextWindowPolicy;
 
   return (
     <div className="scrollbar-trigger flex h-full w-full bg-neutral-100 dark:bg-neutral-900">
@@ -182,18 +206,14 @@ export default function Settings({ conversationId }: { conversationId?: string }
                 <AccordionTrigger>{t('Context window')}</AccordionTrigger>
                 <AccordionContent>
                   <div className="flex w-full flex-row px-4 py-2">
-                    <Select
-                      defaultValue={
-                        selectedConversation?.contextWindowPolicy || ContextWindowPolicy.Rolling
-                      }
-                    >
+                    <Select defaultValue={selectedPolicy} onValueChange={onPolicyChange}>
                       <SelectTrigger className="grow capitalize">
                         <SelectValue placeholder={t('Select policy')} />
                       </SelectTrigger>
                       <SelectContent>
-                        {ContextWindowPolicies.map((policy) => (
-                          <SelectItem key={policy} value={policy} className="capitalize">
-                            {t(policy)}
+                        {Object.keys(ContextWindowPolicies).map((key) => (
+                          <SelectItem key={key} value={key} className="capitalize">
+                            {t(key)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -203,7 +223,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
                         <HelpCircle className="ml-2 h-4 w-4" />
                       </TooltipTrigger>
                       <TooltipContent side="bottom">
-                        <p className="w-[265px] text-sm">description</p>
+                        <p className="w-[265px] text-sm">{ContextWindowPolicies[selectedPolicy]}</p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
@@ -213,8 +233,9 @@ export default function Settings({ conversationId }: { conversationId?: string }
                     type="boolean"
                     name="keepSystem"
                     inputCss="max-w-20 pl-2"
-                    value={selectedConversation?.keepSystem === false || true}
+                    value={isKeepSystem(selectedConversation)}
                     description={t('Keep system prompts for the final prompt')}
+                    onChange={onKeepSystemChange}
                   />
                 </AccordionContent>
               </AccordionItem>
