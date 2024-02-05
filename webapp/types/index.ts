@@ -68,8 +68,8 @@ export enum ContextWindowPolicy {
   Fixed = 'fixed',
   Rolling = 'rolling',
   Stop = 'stop',
-  Last= 'last',
-};
+  Last = 'last',
+}
 
 export type ConversationUsage = {
   promptTokens?: number;

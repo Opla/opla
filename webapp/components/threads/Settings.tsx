@@ -181,7 +181,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
               <AccordionItem value="contextwindow-parameters">
                 <AccordionTrigger>{t('Context window')}</AccordionTrigger>
                 <AccordionContent>
-                  <div className="flex flex-row px-4 py-2 w-full">
+                  <div className="flex w-full flex-row px-4 py-2">
                     <Select
                       defaultValue={
                         selectedConversation?.contextWindowPolicy || ContextWindowPolicy.Rolling

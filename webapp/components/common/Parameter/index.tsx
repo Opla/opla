@@ -132,10 +132,12 @@ export default function Parameter({
 
   return (
     <div className={boxCss}>
-      <div className="flex flex-grow flex-col justify-center w-full">
-        <div className="flex flex-row items-center justify-between w-full">
-        <div className={`grow flex flex-row ${flex}`}><p>{title} </p>
-                {component}</div>
+      <div className="flex w-full flex-grow flex-col justify-center">
+        <div className="flex w-full flex-row items-center justify-between">
+          <div className={`flex grow flex-row ${flex}`}>
+            <p>{title} </p>
+            {component}
+          </div>
           {description && (
             <Tooltip>
               <TooltipTrigger className="">
@@ -149,7 +151,6 @@ export default function Parameter({
         </div>
         <p className="text-sm">{subtitle}</p>
       </div>
-
     </div>
   );
 }

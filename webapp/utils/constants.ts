@@ -30,4 +30,4 @@ export const ContextWindowPolicies: ContextWindowPolicy[] = [
   ContextWindowPolicy.Rolling,
   ContextWindowPolicy.Stop,
   ContextWindowPolicy.Last,
-]
+];
