@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { Author, Conversation, Message } from '@/types';
+import { Author, ContextWindowPolicy, Conversation, Message } from '@/types';
 import { createBaseRecord, createBaseNamedRecord, updateRecord } from '.';
 
 const createMessage = (author: Author, content: string) => {
@@ -57,9 +57,11 @@ const mergeMessages = (messages: Message[], newMessages: Message[]) => {
 };
 
 const createConversation = (name: string) => {
-  const conversation = {
+  const conversation: Conversation = {
     ...createBaseNamedRecord(name),
     messages: [],
+    contextWindowPolicy: ContextWindowPolicy.Rolling,
+    keepSystem: true,
   };
   return conversation;
 };

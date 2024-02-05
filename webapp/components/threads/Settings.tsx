@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { useContext, useState } from 'react';
-import { File, Palette, Settings2 } from 'lucide-react';
+import { File, HelpCircle, Palette, Settings2 } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { AppContext } from '@/context';
@@ -22,13 +22,16 @@ import { findModel } from '@/utils/data/models';
 import Opla from '@/utils/providers/opla';
 import { getCompletionParametersDefinition } from '@/utils/providers';
 import { findProvider } from '@/utils/data/providers';
-import { Conversation, ConversationParameter } from '@/types';
+import { ContextWindowPolicy, Conversation, ConversationParameter } from '@/types';
 import { toast } from '@/components/ui/Toast';
+import { ContextWindowPolicies } from '@/utils/constants';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Textarea } from '../ui/textarea';
 import Parameter, { ParameterValue } from '../common/Parameter';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 
 export default function Settings({ conversationId }: { conversationId?: string }) {
   const { t } = useTranslation();
@@ -141,11 +144,11 @@ export default function Settings({ conversationId }: { conversationId?: string }
               defaultValue={['settings-model', 'settings-appearance', 'settings-preset']}
             >
               <AccordionItem value="settings-model">
-                <AccordionTrigger>Preset</AccordionTrigger>
+                <AccordionTrigger>{t('Preset')}</AccordionTrigger>
                 <AccordionContent>Choose a default preset.</AccordionContent>
               </AccordionItem>
               <AccordionItem value="settings-preset">
-                <AccordionTrigger>System</AccordionTrigger>
+                <AccordionTrigger>{t('System')}</AccordionTrigger>
                 <AccordionContent>
                   <Textarea
                     value={system}
@@ -155,7 +158,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="settings-parameters">
-                <AccordionTrigger>Parameters</AccordionTrigger>
+                <AccordionTrigger>{t('Parameters')}</AccordionTrigger>
                 <AccordionContent>
                   {Object.keys(parametersDefinition).map((key) => (
                     <Parameter
@@ -173,6 +176,46 @@ export default function Settings({ conversationId }: { conversationId?: string }
                       onChange={onParameterChange}
                     />
                   ))}
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="contextwindow-parameters">
+                <AccordionTrigger>{t('Context window')}</AccordionTrigger>
+                <AccordionContent>
+                  <div className="flex flex-row px-4 py-2 w-full">
+                    <Select
+                      defaultValue={
+                        selectedConversation?.contextWindowPolicy || ContextWindowPolicy.Rolling
+                      }
+                    >
+                      <SelectTrigger className="grow capitalize">
+                        <SelectValue placeholder={t('Select policy')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ContextWindowPolicies.map((policy) => (
+                          <SelectItem key={policy} value={policy} className="capitalize">
+                            {t(policy)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Tooltip>
+                      <TooltipTrigger className="">
+                        <HelpCircle className="ml-2 h-4 w-4" />
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        <p className="w-[265px] text-sm">description</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+
+                  <Parameter
+                    title={t('Keep system')}
+                    type="boolean"
+                    name="keepSystem"
+                    inputCss="max-w-20 pl-2"
+                    value={selectedConversation?.keepSystem === false || true}
+                    description={t('Keep system prompts for the final prompt')}
+                  />
                 </AccordionContent>
               </AccordionItem>
             </Accordion>

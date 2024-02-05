@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PageSettings } from '@/types';
+import { ContextWindowPolicy, PageSettings } from '@/types';
 
 export const DefaultPageSettings: PageSettings = {
   explorerHidden: false,
@@ -23,3 +23,11 @@ export const DefaultPageSettings: PageSettings = {
 
 export const AppName = 'Opla';
 export const AppVersion = '0.1.0';
+
+export const ContextWindowPolicies: ContextWindowPolicy[] = [
+  ContextWindowPolicy.None,
+  ContextWindowPolicy.Fixed,
+  ContextWindowPolicy.Rolling,
+  ContextWindowPolicy.Stop,
+  ContextWindowPolicy.Last,
+]

@@ -46,16 +46,7 @@ export default function Parameter({
   min?: number;
   max?: number;
   value?: ParameterValue;
-  type?:
-    | 'text'
-    | 'password'
-    | 'large-text'
-    | 'number'
-    | 'url'
-    | 'select'
-    | 'boolean'
-    | 'switch'
-    | 'array';
+  type?: 'text' | 'password' | 'large-text' | 'number' | 'url' | 'select' | 'boolean' | 'array';
   disabled?: boolean;
   children?: React.ReactNode;
   onChange?: (name: string, value: ParameterValue) => void;
@@ -66,14 +57,88 @@ export default function Parameter({
       ? 'flex w-full flex-col px-4 pb-4 pt-3'
       : 'flex w-full flex-row px-4 pb-4 pt-3';
 
+  let component = null;
+
+  let flex = 'flex-row items-center justify-between';
+  if (type === 'array') {
+    component = (
+      <div className="flex flex-col gap-2">
+        <div className={cn('flex flex-row', inputCss)}>
+          <Input
+            value={(value as BaseNamedRecord[])?.map((v) => v.name).join(',')}
+            className="w-full"
+            type={type}
+            disabled={disabled}
+            onChange={(e) => {
+              // e.preventDefault();
+              // const v = type === 'number' ? parseInt(e.target.value, 10) : e.target.value;
+              const v = e.target.value as string;
+              onChange(name, v.split(',').map((r) => ({ id: name, name: r })) as BaseNamedRecord[]);
+            }}
+          />
+        </div>
+      </div>
+    );
+  } else if (type === 'large-text') {
+    flex = 'flex-col text-left';
+    component = (
+      <Textarea
+        disabled={disabled}
+        className="mt-2 w-full"
+        value={value as string}
+        onChange={(e) => {
+          e.preventDefault();
+          onChange(name, e.target.value);
+        }}
+      />
+    );
+  } else {
+    component = (
+      <div className={cn('flex flex-row', inputCss)}>
+        {disabled && type === 'url' && (
+          <a href={value as string} target="_blank" className={textCss}>
+            {value as string}
+          </a>
+        )}
+        {type === 'boolean' && (
+          <Switch
+            checked={value as boolean}
+            onCheckedChange={(checked: boolean) => {
+              onChange(name, checked);
+            }}
+          />
+        )}
+        {(type === 'text' || type === 'number' || type === 'url') && (
+          <Input
+            value={value as string}
+            className="w-full"
+            type={type}
+            disabled={disabled}
+            min={min}
+            max={max}
+            step="any"
+            onChange={(e) => {
+              // e.preventDefault();
+              // const v = type === 'number' ? parseInt(e.target.value, 10) : e.target.value;
+              const v = e.target.value;
+              onChange(name, v);
+            }}
+          />
+        )}
+        {children}
+      </div>
+    );
+  }
+
   return (
     <div className={boxCss}>
-      <div className="flex flex-grow flex-col justify-center">
-        <p className="w-full">
+      <div className="flex flex-grow flex-col justify-center w-full">
+        <div className="flex flex-row items-center justify-between w-full">
+        <div className={`grow flex flex-row ${flex}`}><p>{title} </p>
+                {component}</div>
           {description && (
             <Tooltip>
-              <TooltipTrigger className="flex w-full flex-row items-center justify-between">
-                <span>{title} </span>
+              <TooltipTrigger className="">
                 <HelpCircle className="ml-2 h-4 w-4" />
               </TooltipTrigger>
               <TooltipContent side="bottom">
@@ -81,77 +146,10 @@ export default function Parameter({
               </TooltipContent>
             </Tooltip>
           )}
-          {!description && <span>{title}</span>}
-        </p>
+        </div>
         <p className="text-sm">{subtitle}</p>
       </div>
-      {type === 'array' && (
-        <div className="flex flex-col gap-2">
-          <div className={cn('flex flex-row', inputCss)}>
-            <Input
-              value={(value as BaseNamedRecord[])?.map((v) => v.name).join(',')}
-              className="w-full"
-              type={type}
-              disabled={disabled}
-              onChange={(e) => {
-                // e.preventDefault();
-                // const v = type === 'number' ? parseInt(e.target.value, 10) : e.target.value;
-                const v = e.target.value as string;
-                onChange(
-                  name,
-                  v.split(',').map((r) => ({ id: name, name: r })) as BaseNamedRecord[],
-                );
-              }}
-            />
-          </div>
-        </div>
-      )}
-      {type !== 'array' && type !== 'large-text' && (
-        <div className={cn('flex flex-row', inputCss)}>
-          {disabled && type === 'url' && (
-            <a href={value as string} target="_blank" className={textCss}>
-              {value as string}
-            </a>
-          )}
-          {type === 'boolean' && (
-            <Switch
-              checked={value as boolean}
-              onCheckedChange={(checked: boolean) => {
-                onChange(name, checked);
-              }}
-            />
-          )}
-          {(type === 'text' || type === 'number' || type === 'url') && (
-            <Input
-              value={value as string}
-              className="w-full"
-              type={type}
-              disabled={disabled}
-              min={min}
-              max={max}
-              step="any"
-              onChange={(e) => {
-                // e.preventDefault();
-                // const v = type === 'number' ? parseInt(e.target.value, 10) : e.target.value;
-                const v = e.target.value;
-                onChange(name, v);
-              }}
-            />
-          )}
-          {children}
-        </div>
-      )}
-      {type === 'large-text' && (
-        <Textarea
-          disabled={disabled}
-          className="mt-2 w-full"
-          value={value as string}
-          onChange={(e) => {
-            e.preventDefault();
-            onChange(name, e.target.value);
-          }}
-        />
-      )}
+
     </div>
   );
 }
