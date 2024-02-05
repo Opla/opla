@@ -63,6 +63,27 @@ export type Message = BaseIdRecord & {
 
 export type ConversationParameter = string | number | boolean;
 
+export enum ContextWindowPolicy {
+  None = 'none',
+  Rolling = 'rolling',
+  Stop = 'stop',
+  Last = 'last',
+}
+
+export type ConversationUsage = {
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number;
+
+  completionMs?: number;
+  promptMs?: number;
+  totalMs?: number;
+
+  promptPerSecond?: number;
+  completionPerSecond?: number;
+  totalPerSecond?: number;
+};
+
 export type Conversation = BaseNamedRecord & {
   messages: Message[];
   pluginIds?: string[];
@@ -75,6 +96,10 @@ export type Conversation = BaseNamedRecord & {
   provider?: string;
   importedFrom?: string;
   temp?: boolean;
+
+  usage?: ConversationUsage;
+  contextWindowPolicy?: ContextWindowPolicy;
+  keepSystem?: boolean;
 };
 
 export type Entity = {
@@ -97,7 +122,7 @@ export enum ProviderType {
 
 export type CompletionParameterDefinition = {
   z: ZodSchema;
-  type?: 'text' | 'password' | 'large-text' | 'number' | 'url' | 'select' | 'boolean' | 'switch';
+  type?: 'text' | 'password' | 'large-text' | 'number' | 'url' | 'select' | 'boolean';
   defaultValue?: string | number | boolean | undefined;
   min?: number;
   max?: number;
@@ -174,6 +199,7 @@ export type Model = BaseNamedRecord & {
   include?: Model[];
 
   system?: string;
+  contextWindow?: number;
 };
 
 export type ModelsCollection = {

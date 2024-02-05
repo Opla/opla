@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PageSettings } from '@/types';
+import { ContextWindowPolicy, PageSettings } from '@/types';
 
 export const DefaultPageSettings: PageSettings = {
   explorerHidden: false,
@@ -23,3 +23,13 @@ export const DefaultPageSettings: PageSettings = {
 
 export const AppName = 'Opla';
 export const AppVersion = '0.1.0';
+
+export const DefaultContextWindowPolicy: ContextWindowPolicy = ContextWindowPolicy.Rolling;
+
+export const ContextWindowPolicies: Record<ContextWindowPolicy, String> = {
+  [ContextWindowPolicy.None]: 'Send all messages as context even out of context window size.',
+  [ContextWindowPolicy.Rolling]:
+    'Use a rolling mechanism to maintain constant context window size.',
+  [ContextWindowPolicy.Stop]: 'Stop if the context window is full.',
+  [ContextWindowPolicy.Last]: "Use only the last sent user's message.",
+};

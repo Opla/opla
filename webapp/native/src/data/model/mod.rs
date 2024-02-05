@@ -142,6 +142,8 @@ pub struct Model {
     pub include: Option<Vec<Model>>,
 
     pub system: Option<String>,
+
+    pub context_window: Option<i32>,
 }
 
 impl Model {
@@ -180,6 +182,7 @@ impl Model {
             paper: None,
             include: None,
             system: None,
+            context_window: None,
         }
     }
 

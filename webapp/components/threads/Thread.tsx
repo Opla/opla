@@ -28,7 +28,7 @@ import {
   updateConversationMessages,
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
-import { completion, getCompletionParametersDefinition } from '@/utils/providers';
+import { buildContext, completion, getCompletionParametersDefinition } from '@/utils/providers';
 import { findModel, getLocalModelsAsItems, getProviderModelsAsItems } from '@/utils/data/models';
 import { findProvider } from '@/utils/data/providers';
 import { toast } from '@/components/ui/Toast';
@@ -147,7 +147,7 @@ function Thread({
     }
   };
 
-  const sendMessage = async (message: Message, context: Message[], conversation: Conversation) => {
+  const sendMessage = async (message: Message, index: number, conversation: Conversation) => {
     let model: Model | undefined;
     let providerName: string | undefined = model?.provider;
     const returnedMessage = { ...message };
@@ -177,6 +177,9 @@ function Thread({
         }
       });
     }
+
+    const context = buildContext(conversation, index);
+
     try {
       const response = await completion(
         model,
@@ -236,7 +239,8 @@ function Thread({
     setConversations(newConversations);
 
     // TODO build tokens context : better than [toMessage]
-    fromMessage = await sendMessage(fromMessage, [toMessage], conversation);
+    const index = conversation.messages.findIndex((m) => m.id === fromMessage.id);
+    fromMessage = await sendMessage(fromMessage, index, conversation);
 
     updateMessages([fromMessage], newConversationId, newConversations);
     if (tempConversationId) {
@@ -267,13 +271,13 @@ function Thread({
     ) as Conversation;
 
     // TODO build tokens context : better than [toMessage]
-    const context: Message[] = [];
+    // const context: Message[] = [];
     const index = conversation.messages.findIndex((m) => m.id === message.id);
-    if (index > 0) {
+    /* if (index > 0) {
       context.push(conversation.messages[index - 1]);
-    }
+    } */
 
-    fromMessage = await sendMessage(fromMessage, context, conversation);
+    fromMessage = await sendMessage(fromMessage, index, conversation);
 
     updateMessages([fromMessage], newConversationId, newConversations);
 
