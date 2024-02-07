@@ -104,9 +104,9 @@
       "shortDescription": "",
       "targets": "all",
       "windows": {
-        "certificateThumbprint": null,
+        "certificateThumbprint": "85426df0004ce3eeb2978f93387379e2f69781b3",
         "digestAlgorithm": "sha256",
-        "timestampUrl": ""
+        "timestampUrl": "http://timestamp.digicert.com/"
       }
     },
     "security": {
