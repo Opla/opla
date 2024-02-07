@@ -51,16 +51,16 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
     return p;
   }, [backendContext, hasParametersChanged, providerId, providers, updatedProvider, newProvider]);
 
-  const onParameterChange = (name: string, value: ParameterValue) => {
+  const handleParameterChange = (name: string, value: ParameterValue) => {
     const mergedProvider = deepSet(updatedProvider, name, value);
-    logger.info('onParameterChange', name, value, mergedProvider);
+    logger.info('handleParameterChange', name, value, mergedProvider);
     setUpdatedProvider(mergedProvider);
   };
 
-  const onParametersSave = (partialProvider: Partial<Provider> = {}) => {
+  const handleParametersSave = (partialProvider: Partial<Provider> = {}) => {
     const mergedProvider = deepMerge(provider, partialProvider);
     const newProviders = updateProvider(mergedProvider, providers);
-    logger.info('onParametersSave', mergedProvider, newProviders);
+    logger.info('handleParametersSave', mergedProvider, newProviders);
     setProviders(newProviders);
     setUpdatedProvider({ id: providerId });
     if (mergedProvider.type === ProviderType.opla) {
@@ -71,8 +71,7 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
     }
   };
 
-  const onProviderToggle = () => {
-    logger.info('onProviderToggle');
+  const handleProviderToggle = () => {
     if (provider?.type === ProviderType.opla) {
       logger.info('backend.server', backendContext.server);
       if (backendContext.server.status === ServerStatus.STARTED) {
@@ -91,7 +90,13 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
     }
   };
 
-  return { provider, hasParametersChanged, onParameterChange, onParametersSave, onProviderToggle };
+  return {
+    provider,
+    hasParametersChanged,
+    onParameterChange: handleParameterChange,
+    onParametersSave: handleParametersSave,
+    onProviderToggle: handleProviderToggle,
+  };
 };
 
 export default useProviderState;

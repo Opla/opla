@@ -56,7 +56,7 @@ function SearchHuggingFaceHub({
       setResult([]);
     }
   }, [search, enabled]);
-  const onEnableSearch = (checked: boolean) => {
+  const handleEnableSearch = (checked: boolean) => {
     onEnable(checked);
   };
 
@@ -69,7 +69,7 @@ function SearchHuggingFaceHub({
           </div>
           <div className="flex flex-row gap-2">
             {t('Search')}
-            <Checkbox onCheckedChange={onEnableSearch} />
+            <Checkbox onCheckedChange={handleEnableSearch} />
           </div>
         </div>
       }

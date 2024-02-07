@@ -18,23 +18,23 @@ import { NewLocalModel } from '@/components/models';
 function NewLocalModelDialog({
   id,
   open,
-  onClose: _onClose,
+  onClose,
 }: {
   id: string;
   open: boolean;
   onClose: () => void | undefined;
 }) {
-  const onClose = () => {
-    _onClose();
+  const handleClose = () => {
+    onClose();
   };
 
-  const onSelected = () => {
-    _onClose();
+  const handleSelected = () => {
+    onClose();
   };
 
   return (
-    <Dialog id={id} size="md" open={open} onClose={onClose}>
-      <NewLocalModel className="w-full" onSelected={onSelected} onClose={onClose} />
+    <Dialog id={id} size="md" open={open} onClose={handleClose}>
+      <NewLocalModel className="w-full" onSelected={handleSelected} onClose={handleClose} />
     </Dialog>
   );
 }

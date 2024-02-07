@@ -52,7 +52,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
     (p: Provider) => p.type === ProviderType.openai && p.name === OpenAI.template.name,
   );
 
-  const onSetupChatGPT = () => {
+  const handleSetupChatGPT = () => {
     let openAI = chatGPT as Provider;
     if (!chatGPT) {
       openAI = createProvider(OpenAI.template.name as string, OpenAI.template);
@@ -66,7 +66,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
     showModal(ModalIds.NewProvider);
   };
 
-  const onDelete = (action: string, data: any) => {
+  const handleDelete = (action: string, data: any) => {
     const provider = data?.item as Provider;
     logger.info(`delete ${action} ${data}`);
     if (provider) {
@@ -80,13 +80,13 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
     }
   };
 
-  const onToDelete = (data: string) => {
+  const handleToDelete = (data: string) => {
     logger.info(`to delete ${data}`);
     const provider = findProvider(data, providers) as Provider;
-    showModal(ModalIds.DeleteItem, { item: provider, onAction: onDelete });
+    showModal(ModalIds.DeleteItem, { item: provider, onAction: handleDelete });
   };
 
-  const onProviderToggle = (data: string) => {
+  const handleProviderToggle = (data: string) => {
     logger.info('onProviderToggle');
     const provider = findProvider(data, providers) as Provider;
     const newProviders = updateProvider(
@@ -96,7 +96,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
     setProviders(newProviders);
   };
 
-  const onSelectProvider = (id: string) => {
+  const handleSelectProvider = (id: string) => {
     logger.info(`onSelectProvider ${id}`);
     const route = Ui.Page.Providers;
     router.push(`${route}/${id}`);
@@ -107,12 +107,12 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
       label: t('Disable'),
       onSelect: (data: string) => {
         logger.info(`disable ${data}`);
-        onProviderToggle(data);
+        handleProviderToggle(data);
       },
     },
     {
       label: t('Delete'),
-      onSelect: onToDelete,
+      onSelect: handleToDelete,
     },
   ];
   const menuDisabled: Ui.MenuItem[] = [
@@ -120,12 +120,12 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
       label: t('Enable'),
       onSelect: (data: string) => {
         logger.info(`enable ${data}`);
-        onProviderToggle(data);
+        handleProviderToggle(data);
       },
     },
     {
       label: t('Delete'),
-      onSelect: onToDelete,
+      onSelect: handleToDelete,
     },
   ];
 
@@ -152,7 +152,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
                 size="icon"
                 onClick={(e) => {
                   e.preventDefault();
-                  onSetupChatGPT();
+                  handleSetupChatGPT();
                 }}
               >
                 <OpenAIIcon className="mr-2 h-4 w-4" strokeWidth={1.5} />
@@ -193,7 +193,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
                           onKeyDown={() => {}}
                           onClick={(e) => {
                             e.preventDefault();
-                            onSelectProvider(provider.id);
+                            handleSelectProvider(provider.id);
                           }}
                           className="w-full"
                           tabIndex={0}

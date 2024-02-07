@@ -73,11 +73,11 @@ function NewLocalModel({
     getCollection();
   }, []);
 
-  const onValueChange = (s: string) => {
+  const handleValueChange = (s: string) => {
     setValue(s);
   };
 
-  const onLocalInstall = async () => {
+  const handleLocalInstall = async () => {
     const file = await openFileDialog(false, [
       { name: t('Choose a model file'), extensions: ['gguf', 'json'] },
     ]);
@@ -122,7 +122,7 @@ function NewLocalModel({
     onClose();
   };
 
-  const onInstall = async (parentModel: Model, model?: Model) => {
+  const handleInstall = async (parentModel: Model, model?: Model) => {
     const selectedModel: Model = deepMerge(parentModel, model || {}, true);
     logger.info(`install ${model?.name}`, selectedModel);
     if (selectedModel.private === true) {
@@ -152,7 +152,7 @@ function NewLocalModel({
     );
   }
 
-  const onSelect = (m: Model) => {
+  const handleSelect = (m: Model) => {
     const downloadables = getDownloadables(m).filter((d) => d.private !== true && isValidFormat(d));
 
     let item: Model = m;
@@ -161,7 +161,7 @@ function NewLocalModel({
     }
 
     if (isValidFormat(item)) {
-      onInstall(m, item);
+      handleInstall(m, item);
     } else {
       logger.info(`No valid format ${item?.name} ${item?.library}`);
       toast.error(`No valid format ${item?.name} ${item?.library}`);
@@ -172,7 +172,10 @@ function NewLocalModel({
   return (
     <div className={cn('h-full', className)}>
       <Command className="h-full rounded-lg border shadow-md" shouldFilter={false}>
-        <CommandInput placeholder={t('Search a model to install')} onValueChange={onValueChange} />
+        <CommandInput
+          placeholder={t('Search a model to install')}
+          onValueChange={handleValueChange}
+        />
         <CommandList className="h-full">
           <CommandGroup
             heading={
@@ -188,7 +191,7 @@ function NewLocalModel({
                 <CommandItem
                   key={m.id}
                   onSelect={() => {
-                    onSelect(m);
+                    handleSelect(m);
                   }}
                 >
                   <span>{m.name}</span>
@@ -201,12 +204,12 @@ function NewLocalModel({
               search={search}
               enabled={enabled}
               onEnable={setEnabled}
-              onSelected={onSelect}
+              onSelected={handleSelect}
             />
           )}
           {!search && (
             <CommandGroup heading={t('Others')}>
-              <CommandItem onSelect={onLocalInstall}>
+              <CommandItem onSelect={handleLocalInstall}>
                 <Computer className="mr-2 h-4 w-4" />
                 <span>{t('Load a model from your computer')}</span>
                 <CommandShortcut>

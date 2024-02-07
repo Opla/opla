@@ -39,17 +39,17 @@ export default function SplitView({
 
   const splitPaneRef = useRef<HTMLDivElement>(null);
 
-  const onMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = (e: React.MouseEvent) => {
     setSeparatorXPosition(e.clientX);
     setDragging(true);
   };
 
-  const onTouchStart = (e: React.TouchEvent) => {
+  const handleTouchStart = (e: React.TouchEvent) => {
     setSeparatorXPosition(e.touches[0].clientX);
     setDragging(true);
   };
 
-  const onMove = (clientX: number) => {
+  const handleMove = (clientX: number) => {
     if (dragging && leftWidth && separatorXPosition) {
       const newLeftWidth = leftWidth + clientX - separatorXPosition;
       setSeparatorXPosition(clientX);
@@ -72,28 +72,28 @@ export default function SplitView({
     }
   };
 
-  const onMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = (e: MouseEvent) => {
     e.preventDefault();
-    onMove(e.clientX);
+    handleMove(e.clientX);
   };
 
-  const onTouchMove = (e: TouchEvent) => {
-    onMove(e.touches[0].clientX);
+  const handleTouchMove = (e: TouchEvent) => {
+    handleMove(e.touches[0].clientX);
   };
 
-  const onMouseUp = () => {
+  const handleMouseUp = () => {
     setDragging(false);
   };
 
   useEffect(() => {
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('touchmove', onTouchMove);
-    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('touchmove', handleTouchMove);
+    document.addEventListener('mouseup', handleMouseUp);
 
     return () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('touchmove', onTouchMove);
-      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('mouseup', handleMouseUp);
     };
   });
 
@@ -106,9 +106,9 @@ export default function SplitView({
         type="button"
         aria-label="Resize"
         className="flex cursor-col-resize items-center self-stretch"
-        onMouseDown={onMouseDown}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onMouseUp}
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleMouseUp}
       >
         <div className="h-full border-[1px] border-neutral-300 hover:border-orange-500 dark:border-neutral-900" />
       </button>

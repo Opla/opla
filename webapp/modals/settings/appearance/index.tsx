@@ -31,7 +31,7 @@ export default function Appearance() {
     { label: 'Dark', value: 'dark', icon: Moon, selected: !isSystem && theme === 'dark' },
   ];
 
-  const onSelectColorScheme = (value?: string, data?: string) => {
+  const handleSelectColorScheme = (value?: string, data?: string) => {
     logger.info(`onSelectColorScheme ${value} ${data}`);
     setTheme(value as string);
   };
@@ -39,7 +39,7 @@ export default function Appearance() {
   return (
     <>
       <SettingItem title={t('Color scheme')} subtitle={t("Choose Opla's color scheme")}>
-        <Dropdown items={colorSchemes} onSelect={onSelectColorScheme} />
+        <Dropdown items={colorSchemes} onSelect={handleSelectColorScheme} />
       </SettingItem>
       <SettingItem title={t('Accent color')} subtitle={t('Choose the accent color used in app')}>
         Action

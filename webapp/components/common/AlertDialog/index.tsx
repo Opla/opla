@@ -37,7 +37,7 @@ export default function AlertDialog({
   onClose?: (data: any) => void;
   data?: any;
 }) {
-  const onPreAction = (action: string, doAction: (action: string, data: any) => void) => {
+  const handlePreAction = (action: string, doAction: (action: string, data: any) => void) => {
     doAction?.(action, data);
     onClose?.(data);
   };
@@ -62,7 +62,7 @@ export default function AlertDialog({
               variant={action.variant || 'default'}
               onClick={(e) => {
                 e.preventDefault();
-                onPreAction(
+                handlePreAction(
                   action.value || action.label,
                   onAction || (data?.onAction as () => void),
                 );

@@ -46,7 +46,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
   const provider = findProvider(selectedConversation?.provider, providers);
   const parametersDefinition = getCompletionParametersDefinition(provider);
 
-  const onNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
     if (selectedConversation) {
       const newConversations = updateConversation(
@@ -58,7 +58,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
     }
   };
 
-  const onSystemChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleSystemChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
     if (selectedConversation) {
       const newConversations = updateConversation(
@@ -70,8 +70,8 @@ export default function Settings({ conversationId }: { conversationId?: string }
     }
   };
 
-  const onParameterChange = (name: string, _value?: ParameterValue) => {
-    logger.info('onParameterChange', name, _value);
+  const handleParameterChange = (name: string, _value?: ParameterValue) => {
+    logger.info('handleParameterChange', name, _value);
     const parameterDef = parametersDefinition[name];
     let value = _value;
     const result = parameterDef.z.safeParse(value);
@@ -79,7 +79,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
       if (parameterDef.type === 'number') {
         setParams({ ...params, [name]: value });
       } else {
-        logger.error('onParameterChange invalid', result.error);
+        logger.error('handleParameterChange invalid', result.error);
         toast.error(result.error.message);
       }
       return;
@@ -118,7 +118,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
     }
   };
 
-  const onPolicyChange = (policy: ContextWindowPolicy) => {
+  const handlePolicyChange = (policy: ContextWindowPolicy) => {
     if (selectedConversation) {
       const newConversations = updateConversation(
         { ...selectedConversation, contextWindowPolicy: policy },
@@ -129,7 +129,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
     }
   };
 
-  const onKeepSystemChange = (name: string, value: ParameterValue) => {
+  const handleKeepSystemChange = (name: string, value: ParameterValue) => {
     if (selectedConversation) {
       const newConversations = updateConversation(
         { ...selectedConversation, keepSystem: value as boolean },
@@ -176,7 +176,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
                 <AccordionContent>
                   <Textarea
                     value={system}
-                    onChange={onSystemChange}
+                    onChange={handleSystemChange}
                     className="resize-none overflow-y-hidden border-0 bg-transparent p-2 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent"
                   />
                 </AccordionContent>
@@ -197,7 +197,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
                       }
                       description={t(parametersDefinition[key].description)}
                       inputCss="max-w-20 pl-2"
-                      onChange={onParameterChange}
+                      onChange={handleParameterChange}
                     />
                   ))}
                 </AccordionContent>
@@ -206,7 +206,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
                 <AccordionTrigger>{t('Context window')}</AccordionTrigger>
                 <AccordionContent>
                   <div className="flex w-full flex-row px-4 py-2">
-                    <Select defaultValue={selectedPolicy} onValueChange={onPolicyChange}>
+                    <Select defaultValue={selectedPolicy} onValueChange={handlePolicyChange}>
                       <SelectTrigger className="grow capitalize">
                         <SelectValue placeholder={t('Select policy')} />
                       </SelectTrigger>
@@ -235,7 +235,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
                     inputCss="max-w-20 pl-2"
                     value={isKeepSystem(selectedConversation)}
                     description={t('Keep system prompts for the final prompt')}
-                    onChange={onKeepSystemChange}
+                    onChange={handleKeepSystemChange}
                   />
                 </AccordionContent>
               </AccordionItem>
@@ -262,7 +262,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
             value={selectedConversation?.note ?? ''}
             placeholder={t('Write a note...')}
             className="resize-none overflow-y-hidden border-0 bg-transparent p-2 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent"
-            onChange={onNoteChange}
+            onChange={handleNoteChange}
           />
         </TabsContent>
       </Tabs>

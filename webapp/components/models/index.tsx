@@ -57,7 +57,7 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
     ? []
     : getDownloadables(model).filter((d) => d.private !== true && isValidFormat(d));
 
-  const onInstall = async (item?: Model) => {
+  const handleInstall = async (item?: Model) => {
     const selectedModel: Model = deepMerge(model, item || {}, true);
     logger.info(`install ${model.name}`, selectedModel, item);
     if (selectedModel.private === true) {
@@ -78,7 +78,7 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
     router.push(`${Page.Models}/${id}`);
   };
 
-  const onUninstall = async () => {
+  const handleUninstall = async () => {
     logger.info(`Uninstall ${model.name} model.id=${model.id}`);
 
     const nextModelId = models.findLast((m) => m.id !== model.id)?.id;
@@ -87,10 +87,10 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
     router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
   };
 
-  const onChange = (selectedModel?: Model) => {
+  const handleChange = (selectedModel?: Model) => {
     if (local && !selectedModel) {
       // showModal(ModalIds.DeleteItem, { item: model, onAction: onUninstall });
-      onUninstall();
+      handleUninstall();
       return;
     }
     let item: Model = selectedModel || model;
@@ -101,7 +101,7 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
 
     if (isValidFormat(item)) {
       // showModal(ModalIds.DownloadItem, { item, onAction: onInstall });
-      onInstall(item);
+      handleInstall(item);
     } else {
       logger.info(`No valid format ${item?.name} ${item?.library}`);
       // TODO: display toaster
@@ -124,7 +124,7 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
           isDownloading={isDownloading}
           local={local}
           downloadables={downloadables}
-          onChange={onChange}
+          onChange={handleChange}
         />
       </ResizablePanel>
     </ResizablePanelGroup>

@@ -128,9 +128,9 @@ function Thread({
     return { newConversationId, newConversations };
   };
 
-  const onSelectModel = async (model?: string, provider = ProviderType.opla) => {
+  const handleSelectModel = async (model?: string, provider = ProviderType.opla) => {
     logger.info(
-      `onSelectModel ${model} ${provider} activeModel=${typeof activeModel}`,
+      `handleSelectModel ${model} ${provider} activeModel=${typeof activeModel}`,
       selectedConversation,
     );
     if (model && selectedConversation) {
@@ -203,7 +203,7 @@ function Thread({
     return returnedMessage;
   };
 
-  const onSendMessage = async () => {
+  const handleSendMessage = async () => {
     if (conversationId === undefined) {
       return;
     }
@@ -250,7 +250,7 @@ function Thread({
     setIsLoading({ ...isLoading, [conversationId]: false });
   };
 
-  const onResendMessage = async (message: Message) => {
+  const handleResendMessage = async (message: Message) => {
     if (conversationId === undefined) {
       return;
     }
@@ -284,7 +284,7 @@ function Thread({
     setIsLoading({ ...isLoading, [conversationId]: false });
   };
 
-  const onDeleteMessages = (action: string, data: ModalData) => {
+  const handleDeleteMessages = (action: string, data: ModalData) => {
     if (conversationId === undefined) {
       return;
     }
@@ -303,15 +303,15 @@ function Thread({
     }
   };
 
-  const onShouldDeleteMessage = (message: Message) => {
+  const handleShouldDeleteMessage = (message: Message) => {
     showModal(ModalIds.DeleteItem, {
       title: 'Delete this message and siblings ?',
       item: message,
-      onAction: onDeleteMessages,
+      onAction: handleDeleteMessages,
     });
   };
 
-  const onChangeMessageContent = (message: Message, newContent: string, submit: boolean) => {
+  const handleChangeMessageContent = (message: Message, newContent: string, submit: boolean) => {
     if (conversationId === undefined) {
       return;
     }
@@ -330,12 +330,12 @@ function Thread({
     if (submit) {
       const sibling = conversation?.messages.find((m) => m.id === message.sibling);
       if (sibling) {
-        onResendMessage(sibling);
+        handleResendMessage(sibling);
       }
     }
   };
 
-  const onUpdatePrompt = useCallback(
+  const handleUpdatePrompt = useCallback(
     (message: string | undefined, conversationName = 'Conversation') => {
       if (message === '' && tempConversationId) {
         setChangedPrompt(undefined);
@@ -372,16 +372,16 @@ function Thread({
     [conversationId, conversations, setConversations, tempConversationId, tempModelProvider],
   );
 
-  useDebounceFunc<string | undefined>(onUpdatePrompt, changedPrompt, 500);
+  useDebounceFunc<string | undefined>(handleUpdatePrompt, changedPrompt, 500);
 
-  const onChangePrompt = (text: string) => {
+  const handleChangePrompt = (text: string) => {
     if (text !== currentPrompt) {
       setChangedPrompt(text);
     }
   };
 
-  const onPromptSelected = (prompt: Prompt) => {
-    onUpdatePrompt(prompt.value, prompt.name);
+  const handlePromptSelected = (prompt: Prompt) => {
+    handleUpdatePrompt(prompt.value, prompt.name);
   };
 
   const message = changedPrompt === undefined ? currentPrompt : changedPrompt;
@@ -394,7 +394,7 @@ function Thread({
               selectedModel={selectedModel}
               selectedConversationId={conversationId}
               modelItems={modelItems}
-              onSelectModel={onSelectModel}
+              onSelectModel={handleSelectModel}
               onSelectMenu={onSelectMenu}
             />
           </div>
@@ -437,7 +437,7 @@ function Thread({
           <h1 className="flex grow items-center justify-center gap-2 text-center text-2xl font-semibold text-neutral-200 dark:text-neutral-600">
             {t('Chat with your local GPT')}
           </h1>
-          <PromptsGrid onPromptSelected={onPromptSelected} />
+          <PromptsGrid onPromptSelected={handlePromptSelected} />
         </div>
       ) : (
         <ScrollArea className="flex h-full flex-col">
@@ -451,13 +451,13 @@ function Thread({
                 key={msg.id}
                 message={m}
                 onResendMessage={() => {
-                  onResendMessage(m);
+                  handleResendMessage(m);
                 }}
                 onDeleteMessage={() => {
-                  onShouldDeleteMessage(m);
+                  handleShouldDeleteMessage(m);
                 }}
                 onChangeContent={(newContent, submit) => {
-                  onChangeMessageContent(m, newContent, submit);
+                  handleChangeMessageContent(m, newContent, submit);
                 }}
               />
             );
@@ -473,8 +473,8 @@ function Thread({
         message={message}
         isLoading={conversationId ? isLoading[conversationId] : false}
         errorMessage={conversationId ? errorMessage[conversationId] : ''}
-        onSendMessage={onSendMessage}
-        onUpdatePrompt={onChangePrompt}
+        onSendMessage={handleSendMessage}
+        onUpdatePrompt={handleChangePrompt}
       />
     </div>
   );
