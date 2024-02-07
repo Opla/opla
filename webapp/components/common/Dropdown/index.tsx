@@ -27,12 +27,12 @@ export default function Dropdown({
 }) {
   const target = useRef<HTMLDivElement>(null);
   const peer = useRef<HTMLInputElement>(null);
-  const onClose = () => {
+  const handleClose = () => {
     if (peer.current) {
       peer.current.checked = false;
     }
   };
-  const { toggleModal } = useClickOutside(target, onClose);
+  const { toggleModal } = useClickOutside(target, handleClose);
   const selectedItem = items.find((item) => item.selected);
   const itemsWithSelection = items.map((item) => ({
     ...item,
@@ -60,7 +60,7 @@ export default function Dropdown({
           </div>
         </div>
         <div className="z-1000 pointer-events-none absolute left-0 top-7 rounded-lg bg-neutral-300 p-2 opacity-0 shadow-lg transition-all peer-checked:pointer-events-auto peer-checked:opacity-100 dark:bg-neutral-800">
-          <Menu items={itemsWithSelection} onClose={onClose} onSelect={onSelect} />
+          <Menu items={itemsWithSelection} onClose={handleClose} onSelect={onSelect} />
         </div>
       </label>
     </div>

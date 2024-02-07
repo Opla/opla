@@ -41,20 +41,20 @@ function ModelsExplorer({
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
 
-  const onSelectModel = (id: string) => {
+  const handleSelectModel = (id: string) => {
     logger.info(`onSelectModel ${id}`);
     const route = Ui.Page.Models;
     router.push(`${route}/${id}`);
   };
 
-  const onNewLocalModel = () => {
+  const handleNewLocalModel = () => {
     showModal(ModalIds.NewLocalModel);
   };
 
   useShortcuts(ShortcutIds.INSTALL_MODEL, (event) => {
     event.preventDefault();
     logger.info('shortcut install Model');
-    onNewLocalModel();
+    handleNewLocalModel();
   });
 
   const menu: Ui.MenuItem[] = [
@@ -85,7 +85,7 @@ function ModelsExplorer({
               title={`${t('Install local model')} ${shortcutAsText(ShortcutIds.INSTALL_MODEL)}`}
               variant="ghost"
               size="icon"
-              onClick={onNewLocalModel}
+              onClick={handleNewLocalModel}
             >
               <HardDriveDownload className="h-4 w-4" strokeWidth={1.5} />
             </Button>
@@ -113,7 +113,7 @@ function ModelsExplorer({
                           onKeyDown={() => {}}
                           onClick={(e) => {
                             e.preventDefault();
-                            onSelectModel(model.id);
+                            handleSelectModel(model.id);
                           }}
                           className="flex cursor-pointer flex-row items-center"
                           tabIndex={0}
@@ -160,7 +160,7 @@ function ModelsExplorer({
                           onKeyDown={() => {}}
                           onClick={(e) => {
                             e.preventDefault();
-                            onSelectModel(model.id);
+                            handleSelectModel(model.id);
                           }}
                           className="flex cursor-pointer flex-row items-center"
                           tabIndex={0}

@@ -76,35 +76,35 @@ export default function ThreadMenu({
     (p: Provider) => p.type === ProviderType.openai && p.name === OpenAI.template.name,
   );
 
-  const onSetupChatGPT = () => {
+  const handleSetupChatGPT = () => {
     if (!chatGPT) {
       chatGPT = createProvider(OpenAI.template.name as string, OpenAI.template);
     }
     showModal(ModalIds.OpenAI, { item: chatGPT });
   };
 
-  const onNewLocalModel = () => {
+  const handleNewLocalModel = () => {
     showModal(ModalIds.NewLocalModel);
   };
 
-  const onNewProviderModel = () => {
+  const handleNewProviderModel = () => {
     showModal(ModalIds.NewProvider);
   };
 
   useShortcuts(ShortcutIds.INSTALL_MODEL, (event) => {
     event.preventDefault();
     logger.info('shortcut install Model');
-    onNewLocalModel();
+    handleNewLocalModel();
   });
   useShortcuts(ShortcutIds.NEW_PROVIDER, (event) => {
     event.preventDefault();
     logger.info('shortcut new provider');
-    onNewProviderModel();
+    handleNewProviderModel();
   });
   useShortcuts(ShortcutIds.CONFIG_GPT, (event) => {
     event.preventDefault();
     logger.info('shortcut configure ChatGPT');
-    onSetupChatGPT();
+    handleSetupChatGPT();
   });
 
   return (
@@ -123,7 +123,7 @@ export default function ThreadMenu({
         <Button
           variant="ghost"
           className="flex h-[20px] w-full items-center justify-between text-sm font-medium leading-none text-red-500 hover:text-red-700"
-          onClick={onNewLocalModel}
+          onClick={handleNewLocalModel}
         >
           <span>{t('You need to install a local model - click here')}</span>
         </Button>
@@ -172,14 +172,14 @@ export default function ThreadMenu({
                 <DropdownMenuSeparator />
               </>
             )}
-            <DropdownMenuItem onSelect={onNewLocalModel}>
+            <DropdownMenuItem onSelect={handleNewLocalModel}>
               <HardDriveDownload className="mr-2 h-4 w-4" strokeWidth={1.5} />
               {t('Install local model')}
               <DropdownMenuShortcut>
                 <ShortcutBadge command={ShortcutIds.INSTALL_MODEL} />
               </DropdownMenuShortcut>
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={onSetupChatGPT}>
+            <DropdownMenuItem onSelect={handleSetupChatGPT}>
               <Plug
                 className={`mr-2 h-4 w-4 ${
                   chatGPT && !chatGPT.disabled ? 'text-green-500' : 'animate-pulse text-gray-500'
@@ -192,7 +192,7 @@ export default function ThreadMenu({
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => {
-                onNewProviderModel();
+                handleNewProviderModel();
               }}
             >
               <Plus className="mr-2 h-4 w-4" />

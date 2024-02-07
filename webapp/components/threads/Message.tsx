@@ -92,18 +92,18 @@ function MessageComponent({
   const Content = useMarkdownProcessor(content as string);
   const isUser = author.role === 'user';
 
-  const onCopyToClipboard = () => {
+  const handleCopyToClipboard = () => {
     if (typeof content === 'string') {
       navigator.clipboard.writeText(content);
       setCopied(true);
     }
   };
 
-  const onEdit = () => {
+  const handleEdit = () => {
     setEdit(content);
   };
 
-  const onSave = () => {
+  const handleSave = () => {
     const newContent = inputRef.current?.value;
     if (newContent && content !== newContent) {
       onChangeContent(newContent, isUser);
@@ -111,7 +111,7 @@ function MessageComponent({
     setEdit(undefined);
   };
 
-  const onCancelEdit = () => {
+  const handleCancelEdit = () => {
     setEdit(undefined);
   };
 
@@ -174,8 +174,8 @@ function MessageComponent({
                         <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
                       </Button>
                     )}
-                    <ClipboardButton copied={copied} onCopyToClipboard={onCopyToClipboard} />
-                    <Button variant="ghost" size="sm" onClick={onEdit}>
+                    <ClipboardButton copied={copied} onCopyToClipboard={handleCopyToClipboard} />
+                    <Button variant="ghost" size="sm" onClick={handleEdit}>
                       <Pencil className="h-4 w-4" strokeWidth={1.5} />
                     </Button>
                     <DeleteButton onDeleteMessage={onDeleteMessage} />
@@ -183,10 +183,10 @@ function MessageComponent({
                 )}
                 {state === MessageState.Edit && (
                   <div className="left-30 absolute bottom-0 flex flex-row gap-2">
-                    <Button size="sm" onClick={onSave} disabled={!edit}>
+                    <Button size="sm" onClick={handleSave} disabled={!edit}>
                       {isUser ? t('Save & submit') : t('Save')}
                     </Button>
-                    <Button size="sm" variant="outline" onClick={onCancelEdit}>
+                    <Button size="sm" variant="outline" onClick={handleCancelEdit}>
                       {t('Cancel')}
                     </Button>
                   </div>

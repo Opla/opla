@@ -84,12 +84,12 @@ export default function Explorer({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
-  const onRename = (data: string) => {
+  const handleRename = (data: string) => {
     logger.info(`rename ${data}`);
     setEditableConversation(data);
   };
 
-  const onChangeConversationName = (value: string, id: string) => {
+  const handleChangeConversationName = (value: string, id: string) => {
     const conversation = getConversation(id, threads) as Conversation;
     if (conversation) {
       conversation.name = value;
@@ -99,7 +99,7 @@ export default function Explorer({
     logger.info(`onChangeConversationName ${editableConversation} ${value} ${id}`);
   };
 
-  const onImportConversations = async () => {
+  const handleImportConversations = async () => {
     logger.info('onImportConversations');
     try {
       const filePath = await openFileDialog(false, [
@@ -133,7 +133,7 @@ export default function Explorer({
     }
   };
 
-  const onExportConversations = async () => {
+  const handleExportConversations = async () => {
     logger.info('onExportConversations');
     try {
       const filePath = await saveFileDialog([{ name: 'conversations', extensions: ['json'] }]);
@@ -148,7 +148,7 @@ export default function Explorer({
     }
   };
 
-  const onSelectThread = (id: string) => {
+  const handleSelectThread = (id: string) => {
     logger.info(`onSelectThread ${id}`);
     // href={`${route}/${conversation.id}`}
     const route = view === ViewName.Archives ? Ui.Page.Archives : Ui.Page.Threads;
@@ -174,14 +174,14 @@ export default function Explorer({
     if (selectedThreadId) {
       event.preventDefault();
       logger.info('shortcut rename Conversation');
-      onRename(selectedThreadId);
+      handleRename(selectedThreadId);
     }
   });
 
   const menu: Ui.MenuItem[] = [
     {
       label: t('Rename'),
-      onSelect: onRename,
+      onSelect: handleRename,
     },
     {
       label: t('Delete'),
@@ -260,11 +260,11 @@ export default function Explorer({
               <DropdownMenuSeparator />
               <DropdownMenuLabel>{t('Tools')}</DropdownMenuLabel>
               <DropdownMenuGroup>
-                <DropdownMenuItem onSelect={onImportConversations}>
+                <DropdownMenuItem onSelect={handleImportConversations}>
                   <Import className="mr-2 h-4 w-4" />
                   {t('Import')}
                 </DropdownMenuItem>
-                <DropdownMenuItem onSelect={onExportConversations}>
+                <DropdownMenuItem onSelect={handleExportConversations}>
                   <FolderInput className="mr-2 h-4 w-4" />
                   {t('Export')}
                 </DropdownMenuItem>
@@ -297,7 +297,7 @@ export default function Explorer({
                             onKeyDown={() => {}}
                             onClick={(e) => {
                               e.preventDefault();
-                              onSelectThread(conversation.id);
+                              handleSelectThread(conversation.id);
                             }}
                             className="flex cursor-pointer flex-row items-center"
                             tabIndex={0}
@@ -311,7 +311,7 @@ export default function Explorer({
                               }
                               editable={!conversation.temp && conversation.id === selectedThreadId}
                               className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1"
-                              onChange={onChangeConversationName}
+                              onChange={handleChangeConversationName}
                             />
                           </div>
                         </ContextMenuTrigger>

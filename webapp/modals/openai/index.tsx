@@ -22,7 +22,7 @@ function OpenAIDialog({
   id,
   data,
   open,
-  onClose: _onClose,
+  onClose,
 }: {
   id: string;
   data: ModalData;
@@ -35,23 +35,23 @@ function OpenAIDialog({
     newProvider,
   );
 
-  const onClose = () => {
-    _onClose();
-  };
-
-  const onSave = () => {
-    onParametersSave({ disabled: false });
+  const handleClose = () => {
     onClose();
   };
 
+  const handleSave = () => {
+    onParametersSave({ disabled: false });
+    handleClose();
+  };
+
   return (
-    <Dialog id={id} size="md" open={open} onClose={onClose}>
+    <Dialog id={id} size="md" open={open} onClose={handleClose}>
       {provider && (
         <OpenAI
           provider={provider}
           className="w-full"
           onParameterChange={onParameterChange}
-          onSave={onSave}
+          onSave={handleSave}
         />
       )}
     </Dialog>

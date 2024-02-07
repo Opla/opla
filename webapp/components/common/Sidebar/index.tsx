@@ -139,7 +139,7 @@ function Sidebar() {
     return { ...item, href };
   });
 
-  const onModal = (href: string) => {
+  const handleModal = (href: string) => {
     if (href === '/settings') {
       showModal(ModalIds.Settings);
     } else if (href === '/shortcuts') {
@@ -162,7 +162,7 @@ function Sidebar() {
         </Tooltip>
       </div>
       <ul className="p1 flex h-full flex-1 flex-col">
-        <SidebarItems items={sidebarItems} pathname={pathname} t={t} onModal={onModal} />
+        <SidebarItems items={sidebarItems} pathname={pathname} t={t} onModal={handleModal} />
       </ul>
     </aside>
   );

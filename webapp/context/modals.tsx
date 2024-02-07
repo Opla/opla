@@ -89,7 +89,7 @@ function ModalsProvider({ children }: { children: React.ReactNode }) {
     [modals],
   );
 
-  const onClose = (name: string) => {
+  const handleClose = (name: string) => {
     const instance = modals[name];
     if (instance) {
       setModals((prevModals) => ({
@@ -109,7 +109,7 @@ function ModalsProvider({ children }: { children: React.ReactNode }) {
       {children}
       <Portal>
         {Object.entries(modals).map(([name, { render, visible, data }]) =>
-          visible ? render({ name, visible, onClose: () => onClose(name), data }) : null,
+          visible ? render({ name, visible, onClose: () => handleClose(name), data }) : null,
         )}
       </Portal>
     </ModalsContext.Provider>

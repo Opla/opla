@@ -19,7 +19,6 @@ import Dialog from '@/components/common/Modal';
 import useTranslation from '@/hooks/useTranslation';
 import { Provider, ProviderType } from '@/types';
 import { createProvider } from '@/utils/data/providers';
-import logger from '@/utils/logger';
 import { AppContext } from '@/context';
 import { Button } from '@/components/ui/button';
 import { Page } from '@/types/ui';
@@ -38,7 +37,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 export default function NewProvider({
   id,
   open,
-  onClose: _onClose,
+  onClose,
 }: {
   id: string;
   open: boolean;
@@ -52,43 +51,40 @@ export default function NewProvider({
 
   const isOpla = !!providers.find((p) => p.type === ProviderType.opla);
 
-  const onClose = () => {
+  const handleClose = () => {
     setStep(1);
     setProvider({});
-    _onClose();
+    onClose();
   };
 
-  const onChoose = (type: ProviderType, name: string) => {
-    logger.info('onChoose', type, name, step);
+  const handleChoose = (type: ProviderType, name: string) => {
     const newProvider = createProvider(name, { type });
     setProvider(newProvider);
     setStep(2);
   };
 
-  const onBack = () => {
+  const handleBack = () => {
     setStep(step - 1);
   };
 
-  const onNext = () => {
+  const handleNext = () => {
     setStep(step + 1);
   };
 
-  const onCreate = () => {
-    logger.info('onCreate', step, provider);
+  const handleCreate = () => {
     const newProvider = createProvider(provider.name as string, provider);
     setProviders([...providers, newProvider]);
-    onClose();
+    handleClose();
     router.push(`${Page.Providers}/${newProvider.id}`);
   };
 
-  const onParameterChange = (name: string, value: ParameterValue) => {
+  const handleParameterChange = (name: string, value: ParameterValue) => {
     const newProvider = { ...provider, [name]: value };
-    logger.info('onParameterChange', name, value, newProvider);
     setProvider(newProvider);
   };
 
   return (
-    <Dialog id={id} size="lg" open={open} onClose={onClose}>
+    <Dialog id={id} size="lg" open={open} onClose={handleClose}>
       <div className="flex h-full w-full flex-col justify-between gap-3 p-2 pb-4">
         {step === 1 && (
           <Panel title={t('Choose a provider')}>
@@ -98,32 +94,36 @@ export default function NewProvider({
                 disabled={isOpla}
                 selected={provider?.type === ProviderType.opla}
                 description={t('Easy to run on your machine')}
-                onClick={() => onChoose(ProviderType.opla, 'Opla')}
+                onClick={() => handleChoose(ProviderType.opla, 'Opla')}
               />
               <Card
                 title="OpenAI"
                 disabled={providers.find((p) => p.type === ProviderType.openai) !== undefined}
                 selected={provider?.type === ProviderType.openai}
                 description={t('Using your access token')}
-                onClick={() => onChoose(ProviderType.openai, 'OpenAI')}
+                onClick={() => handleChoose(ProviderType.openai, 'OpenAI')}
               />
               <Card
                 title={t('Server')}
                 description={t('For experts, it needs to be compatible with OpenAI API')}
                 selected={provider?.type === ProviderType.server}
-                onClick={() => onChoose(ProviderType.server, t('Remote server'))}
+                onClick={() => handleChoose(ProviderType.server, t('Remote server'))}
               />
             </>
           </Panel>
         )}
         {step === 2 && (
           <Panel title={`${provider.name}: ${t('configuration')}`}>
-            <ProviderCreate provider={provider} onParameterChange={onParameterChange} />
+            <ProviderCreate provider={provider} onParameterChange={handleParameterChange} />
           </Panel>
         )}
         {step === 3 && (
           <Panel title={`${provider.name}: ${t('advanced configuration')}`}>
-            <ProviderCreate provider={provider} onParameterChange={onParameterChange} advanced />
+            <ProviderCreate
+              provider={provider}
+              onParameterChange={handleParameterChange}
+              advanced
+            />
           </Panel>
         )}
         <div className="flex w-full flex-shrink-0 flex-row items-center gap-2 px-2 pt-4">
@@ -133,7 +133,7 @@ export default function NewProvider({
                 type="button"
                 onClick={(e) => {
                   e.preventDefault();
-                  onCreate();
+                  handleCreate();
                 }}
               >
                 {t('Create')}
@@ -147,7 +147,7 @@ export default function NewProvider({
               disabled={!provider?.type || step === 3}
               onClick={(e) => {
                 e.preventDefault();
-                onNext();
+                handleNext();
               }}
               className="disabled:opacity-50"
             >
@@ -158,7 +158,7 @@ export default function NewProvider({
               variant="outline"
               onClick={(e) => {
                 e.preventDefault();
-                onBack();
+                handleBack();
               }}
               className="disabled:opacity-50"
             >

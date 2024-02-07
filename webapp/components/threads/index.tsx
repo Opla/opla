@@ -76,23 +76,23 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     }
   };
 
-  const onResizeExplorer = (size: number) => {
+  const handleResizeExplorer = (size: number) => {
     saveSettings({ explorerWidth: size });
   };
 
-  const onResizeSettings = (size: number) => {
+  const handleResizeSettings = (size: number) => {
     saveSettings({ settingsWidth: size });
   };
 
-  const onChangeDisplayExplorer = (value: boolean) => {
+  const handleChangeDisplayExplorer = (value: boolean) => {
     saveSettings({ explorerHidden: !value });
   };
 
-  const onChangeDisplaySettings = (value: boolean) => {
+  const handleChangeDisplaySettings = (value: boolean) => {
     saveSettings({ settingsHidden: !value });
   };
 
-  const onDelete = (action: string, data: any) => {
+  const handleDelete = (action: string, data: any) => {
     const conversation = data?.item as Conversation;
     logger.info(`delete ${action} ${data}`);
     if (conversation) {
@@ -106,16 +106,16 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     }
   };
 
-  const onShouldDelete = (data: string) => {
+  const handleShouldDelete = (data: string) => {
     logger.info(`to delete ${data}`);
     const conversation = getConversation(data, conversations) as Conversation;
-    showModal(ModalIds.DeleteItem, { item: conversation, onAction: onDelete });
+    showModal(ModalIds.DeleteItem, { item: conversation, onAction: handleDelete });
   };
 
-  const onSelectMenu = (menu: MenuAction, data: string) => {
+  const handleSelectMenu = (menu: MenuAction, data: string) => {
     logger.info('onSelectMenu', menu);
     if (menu === MenuAction.DeleteConversation) {
-      onShouldDelete(data);
+      handleShouldDelete(data);
     } else if (menu === MenuAction.ArchiveConversation) {
       const conversation = getConversation(data, conversations) as Conversation;
       const updatedConversations = deleteConversation(conversation.id, conversations);
@@ -140,15 +140,15 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
       <ResizablePanel
         minSize={10}
         defaultSize={pageSettings.explorerWidth}
-        onResize={onResizeExplorer}
+        onResize={handleResizeExplorer}
         className={!pageSettings.explorerHidden ? '' : 'hidden'}
       >
         <Explorer
           view={view}
           threads={view === ViewName.Recent ? conversations : archives}
           setThreads={view === ViewName.Recent ? setConversations : setArchives}
-          onSelectMenu={onSelectMenu}
-          onShouldDelete={onShouldDelete}
+          onSelectMenu={handleSelectMenu}
+          onShouldDelete={handleShouldDelete}
           selectedThreadId={selectedThreadId}
         />
       </ResizablePanel>
@@ -159,20 +159,20 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
             conversationId={selectedThreadId}
             displayExplorer={!pageSettings.explorerHidden}
             displaySettings={!pageSettings.settingsHidden}
-            onChangeDisplayExplorer={onChangeDisplayExplorer}
-            onChangeDisplaySettings={onChangeDisplaySettings}
-            onSelectMenu={onSelectMenu}
+            onChangeDisplayExplorer={handleChangeDisplayExplorer}
+            onChangeDisplaySettings={handleChangeDisplaySettings}
+            onSelectMenu={handleSelectMenu}
           />
         )}
         {view === ViewName.Archives && (
-          <Archive archiveId={selectedThreadId} onSelectMenu={onSelectMenu} />
+          <Archive archiveId={selectedThreadId} onSelectMenu={handleSelectMenu} />
         )}
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel
         minSize={20}
         defaultSize={20}
-        onResize={onResizeSettings}
+        onResize={handleResizeSettings}
         className={!pageSettings.settingsHidden && view === ViewName.Recent ? '' : 'hidden'}
       >
         <Settings conversationId={selectedThreadId} />
