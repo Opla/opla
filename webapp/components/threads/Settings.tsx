@@ -35,7 +35,11 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 
 export default function Settings({ conversationId }: { conversationId?: string }) {
   const { t } = useTranslation();
-  const { conversations, setConversations, providers } = useContext(AppContext);
+  const {
+    conversations,
+    updateConversations,
+    providers,
+  } = useContext(AppContext);
   const { backendContext } = useBackend();
   const [params, setParams] = useState<{ [key: string]: ParameterValue | undefined }>({});
 
@@ -54,7 +58,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
         conversations,
         true,
       );
-      setConversations(newConversations);
+      updateConversations(newConversations);
     }
   };
 
@@ -66,7 +70,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
         conversations,
         true,
       );
-      setConversations(newConversations);
+      updateConversations(newConversations);
     }
   };
 
@@ -113,7 +117,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
       if (newConversation) {
         const newConversations = updateConversation(newConversation, conversations, true);
         logger.info('onParameterChange save Parameters', value, parameters); // , params);
-        setConversations(newConversations);
+        updateConversations(newConversations);
       }
     }
   };
@@ -125,7 +129,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
         conversations,
         true,
       );
-      setConversations(newConversations);
+      updateConversations(newConversations);
     }
   };
 
@@ -137,7 +141,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
         true,
       );
 
-      setConversations(newConversations);
+      updateConversations(newConversations);
     }
   };
 

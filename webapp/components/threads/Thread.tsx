@@ -63,7 +63,7 @@ function Thread({
   const {
     providers,
     conversations,
-    setConversations,
+    updateConversations,
     getConversationMessages,
     filterConversationMessages,
     updateConversationMessages,
@@ -116,9 +116,9 @@ function Thread({
       }
     }
     if (_conversationId && conversations.find((c) => c.temp)) {
-      setConversations(conversations.filter((c) => !c.temp));
+      updateConversations(conversations.filter((c) => !c.temp));
     }
-  }, [_conversationId, conversations, setConversations, tempConversationId]);
+  }, [_conversationId, conversations, updateConversations, tempConversationId]);
 
   const updateMessages = (
     changedMessages: Message[],
@@ -133,7 +133,7 @@ function Thread({
       changedMessages,
     );
     updateConversationMessages(selectedConversationId, updatedMessages);
-    setConversations(updatedConversations);
+    updateConversations(updatedConversations);
 
     const updatedConversationId = selectedConversationId;
 
@@ -151,7 +151,7 @@ function Thread({
         conversations,
         true,
       );
-      setConversations(newConversations);
+      updateConversations(newConversations);
     } else if (model && !activeModel) {
       await setActiveModel(model);
     } else if (model) {
@@ -251,7 +251,7 @@ function Thread({
     setChangedPrompt(undefined);
     conversation.temp = false;
     updatedConversations = updateConversation(conversation, updatedConversations);
-    setConversations(updatedConversations);
+    updateConversations(updatedConversations);
 
     // TODO build tokens context : better than [toMessage]
     const index = getConversationMessages(conversation.id).findIndex(
@@ -357,7 +357,7 @@ function Thread({
     (message: string | undefined, conversationName = 'Conversation') => {
       if (message === '' && tempConversationId) {
         setChangedPrompt(undefined);
-        setConversations(conversations.filter((c) => !c.temp));
+        updateConversations(conversations.filter((c) => !c.temp));
         setTempConversationId(undefined);
         return;
       }
@@ -386,10 +386,10 @@ function Thread({
         }
         setTempConversationId(newConversation.id);
       }
-      setConversations(updatedConversations);
+      updateConversations(updatedConversations);
       setChangedPrompt(undefined);
     },
-    [conversationId, conversations, setConversations, tempConversationId, tempModelProvider],
+    [conversationId, conversations, updateConversations, tempConversationId, tempModelProvider],
   );
 
   useDebounceFunc<string | undefined>(handleUpdatePrompt, changedPrompt, 500);

@@ -44,7 +44,7 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
   const router = useRouter();
   const {
     conversations,
-    setConversations,
+    updateConversations,
     getConversationMessages,
     updateConversationMessages,
     archives,
@@ -104,7 +104,7 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     if (conversation) {
       if (action === 'Delete') {
         const updatedConversations = deleteConversation(conversation.id, conversations);
-        setConversations(updatedConversations);
+        updateConversations(updatedConversations);
         if (selectedThreadId && selectedThreadId === conversation.id) {
           router.replace(Page.Threads);
         }
@@ -126,13 +126,13 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
       const conversationToArchive = getConversation(data, conversations) as Conversation;
       const messages = getConversationMessages(conversationToArchive.id);
       const updatedConversations = deleteConversation(conversationToArchive.id, conversations);
-      setConversations(updatedConversations);
+      updateConversations(updatedConversations);
       setArchives([...archives, { ...conversationToArchive, messages }]);
     } else if (menu === MenuAction.UnarchiveConversation) {
       const { messages, ...archive } = getConversation(data, archives) as Conversation;
       const updatedArchives = deleteConversation(archive.id, archives);
       setArchives(updatedArchives);
-      setConversations([...conversations, archive as Conversation]);
+      updateConversations([...conversations, archive as Conversation]);
       updateConversationMessages(archive.id, messages || []);
     } else if (menu === MenuAction.ChangeView) {
       if (data === ViewName.Recent) {
@@ -140,6 +140,14 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
       } else {
         router.replace(Page.Archives);
       }
+    }
+  };
+
+  const setThreads = (threads: Conversation[]) => {
+    if (view === ViewName.Recent) {
+      updateConversations(threads);
+    } else {
+      setArchives(threads);
     }
   };
 
@@ -154,7 +162,7 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
         <Explorer
           view={view}
           threads={view === ViewName.Recent ? conversations : archives}
-          setThreads={view === ViewName.Recent ? setConversations : setArchives}
+          setThreads={setThreads}
           onSelectMenu={handleSelectMenu}
           onShouldDelete={handleShouldDelete}
           selectedThreadId={selectedThreadId}

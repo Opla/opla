@@ -18,12 +18,13 @@ import { createContext, useCallback, useMemo, useState } from 'react';
 import { Conversation, LlmUsage, Message, Provider } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
 import { updateConversation } from '@/utils/data/conversations';
+import logger from '@/utils/logger';
 
 export type Context = {
   conversations: Array<Conversation>;
   archives: Array<Conversation>;
   providers: Array<Provider>;
-  setConversations: (newConversations: Conversation[]) => void;
+  updateConversations: (newConversations: Conversation[]) => void;
   getConversationMessages: (id: string | undefined) => Message[];
   filterConversationMessages: (
     id: string | undefined,
@@ -38,7 +39,7 @@ export type Context = {
 
 const initialContext: Context = {
   conversations: [],
-  setConversations: () => {},
+  updateConversations: () => {},
   getConversationMessages: () => [],
   filterConversationMessages: () => [],
   updateConversationMessages: () => {},
@@ -89,10 +90,36 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
     [conversations, setConversations],
   );
 
+  const updateConversations = useCallback(
+    (updatedConversations: Conversation[], needToUpdateMessages = false) => {
+      // Get deleted conversations and delete their messages
+      const deletedConversations = conversations.filter(
+        (c) => !updatedConversations.find((uc) => uc.id === c.id),
+      );
+      if (needToUpdateMessages) {
+        const conversationsWithoutMessages: Conversation[] = updatedConversations.map((c) => {
+          const { messages, ...updatedConversation } = c;
+          if (messages) {
+            updateConversationMessages(c.id, messages);
+          }
+          return updatedConversation as Conversation;
+        });
+        setConversations(conversationsWithoutMessages);
+      } else {
+        setConversations(updatedConversations);
+      }
+      // TODO delete any orphans messages
+      deletedConversations.forEach((c) => {
+        logger.info(`TODO Deleting messages for conversation ${c.id}`);
+        // deleteMessages(c.id);
+      });
+    
+    },[conversations, setConversations, updateConversationMessages]);
+  
   const contextValue = useMemo(
     () => ({
       conversations,
-      setConversations,
+      updateConversations,
       getConversationMessages,
       filterConversationMessages,
       updateConversationMessages,
@@ -105,7 +132,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       conversations,
-      setConversations,
+      updateConversations,
       getConversationMessages,
       filterConversationMessages,
       updateConversationMessages,
