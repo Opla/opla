@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "Opla",
-    "version": "0.1.0"
+    "version": null
   },
   "tauri": {
     "allowlist": {
@@ -105,15 +105,22 @@
       "targets": "all",
       "windows": {
         "certificateThumbprint": "85426df0004ce3eeb2978f93387379e2f69781b3",
-        "digestAlgorithm": "sha256",
-        "timestampUrl": "http://timestamp.digicert.com/"
+        "digestAlgorithm": "sha256"
       }
     },
     "security": {
       "csp": null
     },
     "updater": {
-      "active": false
+      "active": true,
+      "endpoints": [
+        "https://opla.github.io/{{current_version}}"
+      ],
+      "dialog": true,
+      "windows": {
+        "installMode": "passive"
+      },
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDdENDg5MUFCRkFEOEYyMjIKUldRaTh0ajZxNUZJZlhtS040QWxqWmloZFFtZ01hRnpmZjEzWmIvSFdBSFY1UitXT21xYjFoZFAK"
     },
     "windows": [
       {
