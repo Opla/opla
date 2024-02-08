@@ -120,12 +120,12 @@ function Thread({
     }
   }, [_conversationId, conversations, updateConversations, tempConversationId]);
 
-  const updateMessages = (
+  const updateMessages = async (
     changedMessages: Message[],
     selectedConversationId = conversationId,
     selectedConversations = conversations,
   ) => {
-    const conversationMessages = getConversationMessages(selectedConversationId);
+    const conversationMessages = getConversationMessages(selectedConversationId as string);
     const [updatedConversations, updatedMessages] = updateConversationAndMessages(
       selectedConversationId,
       conversationMessages,
@@ -133,8 +133,7 @@ function Thread({
       changedMessages,
     );
     updateConversations(updatedConversations);
-    updateConversationMessages(selectedConversationId, updatedMessages);
-
+    await updateConversationMessages(selectedConversationId, updatedMessages);
 
     const updatedConversationId = selectedConversationId;
 
@@ -234,7 +233,7 @@ function Thread({
     fromMessage.status = 'pending';
     toMessage.sibling = fromMessage.id;
     fromMessage.sibling = toMessage.id;
-    const { updatedConversationId, updatedConversations: uc } = updateMessages([
+    const { updatedConversationId, updatedConversations: uc } = await updateMessages([
       toMessage,
       fromMessage,
     ]);
@@ -255,11 +254,11 @@ function Thread({
     updateConversations(updatedConversations);
 
     // TODO build tokens context : better than [toMessage]
-    const index = getConversationMessages(conversation.id).findIndex(
-      (m) => m.id === fromMessage.id,
-    );
+    const msgs = getConversationMessages(conversation.id);
+    const index = msgs.findIndex((m) => m.id === fromMessage.id);
+    console.log('onSendMessage', index, msgs, conversation);
     fromMessage = await sendMessage(fromMessage, index, conversation);
-    updateMessages([fromMessage], updatedConversationId, updatedConversations);
+    await updateMessages([fromMessage], updatedConversationId, updatedConversations);
     if (tempConversationId) {
       router.push(`${Page.Threads}/${tempConversationId}`);
     }
@@ -280,7 +279,7 @@ function Thread({
       contentHistory.push(message.content);
       fromMessage.contentHistory = contentHistory;
     }
-    const { updatedConversationId, updatedConversations } = updateMessages([fromMessage]);
+    const { updatedConversationId, updatedConversations } = await updateMessages([fromMessage]);
 
     const conversation: Conversation = getConversation(
       updatedConversationId,
@@ -295,12 +294,12 @@ function Thread({
     } */
 
     fromMessage = await sendMessage(fromMessage, index, conversation);
-    updateMessages([fromMessage], updatedConversationId, updatedConversations);
+    await updateMessages([fromMessage], updatedConversationId, updatedConversations);
 
     setIsLoading({ ...isLoading, [conversationId]: false });
   };
 
-  const handleDeleteMessages = (action: string, data: ModalData) => {
+  const handleDeleteMessages = async (action: string, data: ModalData) => {
     if (conversationId === undefined) {
       return;
     }
@@ -310,7 +309,7 @@ function Thread({
       if (action === 'Delete') {
         const conversation = getConversation(conversationId, conversations);
         if (conversation) {
-          const updatedMessages = filterConversationMessages(
+          const updatedMessages = await filterConversationMessages(
             conversationId,
             (m) => m.id !== message.id && m.id !== message.sibling,
           );
@@ -328,7 +327,11 @@ function Thread({
     });
   };
 
-  const handleChangeMessageContent = (message: Message, newContent: string, submit: boolean) => {
+  const handleChangeMessageContent = async (
+    message: Message,
+    newContent: string,
+    submit: boolean,
+  ) => {
     if (conversationId === undefined) {
       return;
     }

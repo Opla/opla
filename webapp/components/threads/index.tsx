@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import useBackend from '@/hooks/useBackendContext';
 import { Conversation, PageSettings } from '@/types';
@@ -51,6 +51,13 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     setArchives,
   } = useContext(AppContext);
   const { backendContext, setSettings } = useBackend();
+  const { readConversationMessages } = useContext(AppContext);
+
+  useEffect(() => {
+    if (selectedThreadId) {
+      readConversationMessages(selectedThreadId, []);
+    }
+  }, [readConversationMessages, selectedThreadId]);
 
   useShortcuts(ShortcutIds.DELETE_MESSAGE, (event) => {
     event.preventDefault();
@@ -118,7 +125,7 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     showModal(ModalIds.DeleteItem, { item: conversation, onAction: handleDelete });
   };
 
-  const handleSelectMenu = (menu: MenuAction, data: string) => {
+  const handleSelectMenu = async (menu: MenuAction, data: string) => {
     logger.info('onSelectMenu', menu);
     if (menu === MenuAction.DeleteConversation) {
       handleShouldDelete(data);

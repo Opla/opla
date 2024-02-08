@@ -19,18 +19,20 @@ import { Conversation, LlmUsage, Message, Provider } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
 import { updateConversation } from '@/utils/data/conversations';
 import logger from '@/utils/logger';
+import useCollectionStorage from '@/hooks/useCollectionStorage';
 
 export type Context = {
   conversations: Array<Conversation>;
   archives: Array<Conversation>;
   providers: Array<Provider>;
   updateConversations: (newConversations: Conversation[]) => void;
+  readConversationMessages: (key: string, defaultValue: Message[]) => Promise<Message[]>;
   getConversationMessages: (id: string | undefined) => Message[];
   filterConversationMessages: (
     id: string | undefined,
     filter: (m: Message) => boolean,
   ) => Message[];
-  updateConversationMessages: (id: string | undefined, messages: Message[]) => void;
+  updateConversationMessages: (id: string | undefined, messages: Message[]) => Promise<void>;
   setArchives: (newArchives: Conversation[]) => void;
   setProviders: (newProviders: Provider[]) => void;
   usage: LlmUsage | undefined;
@@ -41,8 +43,9 @@ const initialContext: Context = {
   conversations: [],
   updateConversations: () => {},
   getConversationMessages: () => [],
+  readConversationMessages: async () => [],
   filterConversationMessages: () => [],
-  updateConversationMessages: () => {},
+  updateConversationMessages: async () => {},
   archives: [],
   setArchives: () => {},
   providers: [],
@@ -63,35 +66,56 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
 
   const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
 
+  const [getStoredConversationMessages, readStoredConversationMessages, storeConversationMessages] =
+    useCollectionStorage<Message[]>('messages');
+
   const getConversationMessages = useCallback(
     (id: string | undefined): Message[] => {
-      const messages: Message[] = conversations.find((c) => c.id === id)?.messages || [];
+      const messages: Message[] = id
+        ? getStoredConversationMessages(id, conversations.find((c) => c.id === id)?.messages || [])
+        : [];
+      // const messages: Message[] = conversations.find((c) => c.id === id)?.messages || [];
       return messages;
     },
-    [conversations],
+    [conversations, getStoredConversationMessages],
+  );
+
+  const readConversationMessages = useCallback(
+    async (id: string | undefined): Promise<Message[]> => {
+      const messages: Message[] = id
+        ? await readStoredConversationMessages(
+            id,
+            conversations.find((c) => c.id === id)?.messages || [],
+          )
+        : [];
+      // const messages: Message[] = conversations.find((c) => c.id === id)?.messages || [];
+      return messages;
+    },
+    [conversations, readStoredConversationMessages],
   );
 
   const filterConversationMessages = useCallback(
     (id: string | undefined, filter: (msg: Message) => boolean): Message[] => {
-      const messages: Message[] = getConversationMessages(id).filter(filter) || [];
+      const messages: Message[] = id ? getConversationMessages(id).filter(filter) : [];
       return messages;
     },
     [getConversationMessages],
   );
 
   const updateConversationMessages = useCallback(
-    (id: string | undefined, messages: Message[]) => {
+    async (id: string | undefined, messages: Message[]): Promise<void> => {
       const conversation = conversations.find((c) => c.id === id);
       if (conversation) {
         conversation.messages = messages;
         setConversations(updateConversation(conversation, conversations));
+        await storeConversationMessages(conversation.id, messages);
       }
     },
-    [conversations, setConversations],
+    [conversations, setConversations, storeConversationMessages],
   );
 
   const updateConversations = useCallback(
-    (updatedConversations: Conversation[], needToUpdateMessages = false) => {
+    async (updatedConversations: Conversation[], needToUpdateMessages = false) => {
       // Get deleted conversations and delete their messages
       const deletedConversations = conversations.filter(
         (c) => !updatedConversations.find((uc) => uc.id === c.id),
@@ -122,6 +146,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       conversations,
       updateConversations,
       getConversationMessages,
+      readConversationMessages,
       filterConversationMessages,
       updateConversationMessages,
       archives,
@@ -135,6 +160,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       conversations,
       updateConversations,
       getConversationMessages,
+      readConversationMessages,
       filterConversationMessages,
       updateConversationMessages,
       archives,

@@ -248,6 +248,10 @@ export default function Settings({ conversationId }: { conversationId?: string }
         <TabsContent value="documents" className="px-4">
           {selectedConversation?.updatedAt && (
             <div className="w-full p-2 text-sm text-neutral-400">
+              <div className="ellipsis flex w-full flex-row justify-between tabular-nums">
+                <div className="text-xs">{t('ID')} :</div>
+                <div className="mb-4 text-xs">{selectedConversation.id}</div>
+              </div>
               <div className="flex flex-row justify-between tabular-nums">
                 <div>{t('Updated')} :</div>
                 <div>{new Date(selectedConversation?.updatedAt).toLocaleString()}</div>

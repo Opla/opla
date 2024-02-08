@@ -113,6 +113,23 @@ async fn get_data_dir<R: Runtime>(
 }
 
 #[tauri::command]
+async fn create_dir<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    path: String,
+    data_dir: String
+) -> Result<(), String> {
+    let dir = std::path::Path::new(data_dir.as_str()).join(path);
+    println!("Create dir: {:?}", dir);
+    if dir.exists() {
+        return Ok(());
+    } else {
+        std::fs::create_dir_all(&dir).map_err(|err| err.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
 async fn get_provider_template<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
@@ -205,7 +222,8 @@ async fn search_hfhub_models<R: Runtime>(
 {
     search_hf_models(&query).await.map_err(|err| {
         println!("Search HF models error: {:?}", err);
-        err.to_string()})
+        err.to_string()
+    })
 }
 
 #[tauri::command]
@@ -584,6 +602,7 @@ fn main() {
                 save_settings,
                 get_config_dir,
                 get_data_dir,
+                create_dir,
                 get_provider_template,
                 get_opla_server_status,
                 start_opla_server,
