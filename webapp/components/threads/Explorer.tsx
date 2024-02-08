@@ -80,9 +80,7 @@ export default function Explorer({
   onSelectMenu,
 }: ExplorerProps) {
   const router = useRouter();
-  const {
-    getConversationMessages,
-  } = useContext(AppContext);
+  const { getConversationMessages } = useContext(AppContext);
 
   const [editableConversation, setEditableConversation] = useState<string | undefined>(undefined);
   const { t } = useTranslation();

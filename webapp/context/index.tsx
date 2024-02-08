@@ -113,9 +113,10 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
         logger.info(`TODO Deleting messages for conversation ${c.id}`);
         // deleteMessages(c.id);
       });
-    
-    },[conversations, setConversations, updateConversationMessages]);
-  
+    },
+    [conversations, setConversations, updateConversationMessages],
+  );
+
   const contextValue = useMemo(
     () => ({
       conversations,
