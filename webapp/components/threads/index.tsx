@@ -42,8 +42,14 @@ type ThreadsProps = {
 
 export default function Threads({ selectedThreadId, view = ViewName.Recent }: ThreadsProps) {
   const router = useRouter();
-  const { conversations, setConversations } = useContext(AppContext);
-  const { archives, setArchives } = useContext(AppContext);
+  const {
+    conversations,
+    setConversations,
+    getConversationMessages,
+    updateConversationMessages,
+    archives,
+    setArchives,
+  } = useContext(AppContext);
   const { backendContext, setSettings } = useBackend();
 
   useShortcuts(ShortcutIds.DELETE_MESSAGE, (event) => {
@@ -117,15 +123,17 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     if (menu === MenuAction.DeleteConversation) {
       handleShouldDelete(data);
     } else if (menu === MenuAction.ArchiveConversation) {
-      const conversation = getConversation(data, conversations) as Conversation;
-      const updatedConversations = deleteConversation(conversation.id, conversations);
+      const conversationToArchive = getConversation(data, conversations) as Conversation;
+      const messages = getConversationMessages(conversationToArchive.id);
+      const updatedConversations = deleteConversation(conversationToArchive.id, conversations);
       setConversations(updatedConversations);
-      setArchives([...archives, conversation]);
+      setArchives([...archives, { ...conversationToArchive, messages }]);
     } else if (menu === MenuAction.UnarchiveConversation) {
-      const conversation = getConversation(data, archives) as Conversation;
-      const updatedArchives = deleteConversation(conversation.id, archives);
+      const { messages, ...archive } = getConversation(data, archives) as Conversation;
+      const updatedArchives = deleteConversation(archive.id, archives);
       setArchives(updatedArchives);
-      setConversations([...conversations, conversation]);
+      setConversations([...conversations, archive as Conversation]);
+      updateConversationMessages(archive.id, messages || []);
     } else if (menu === MenuAction.ChangeView) {
       if (data === ViewName.Recent) {
         router.replace(Page.Threads);

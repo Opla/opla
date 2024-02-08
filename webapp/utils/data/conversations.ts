@@ -23,24 +23,25 @@ const createMessage = (author: Author, content: string) => {
   return message as Message;
 };
 
-const updateMessage = (message: Message, conversationId: string, conversations: Conversation[]) => {
-  const conversation = conversations.find((c) => c.id === conversationId);
+const updateMessage = (message: Message, messages: Message[]): Message[] => {
+  /* const conversation = conversations.find((c) => c.id === conversationId);
   if (!conversation) {
     return conversations;
-  }
-  const { messages } = conversation;
-  const i = conversation.messages.findIndex((m) => m.id === message.id);
+  } */
+  const updatedMessages = [...messages];
+  const i = messages.findIndex((m) => m.id === message.id);
   const updatedMessage = updateRecord(message) as Message;
   if (i === -1) {
-    messages.push(updatedMessage);
+    updatedMessages.push(updatedMessage);
   } else {
-    messages[i] = updatedMessage;
+    updatedMessages[i] = updatedMessage;
   }
-  const newConversation = {
+  /* const newConversation = {
     ...conversation,
     messages,
   };
-  return conversations.map((c) => (c.id === conversationId ? newConversation : c));
+  return conversations.map((c) => (c.id === conversationId ? newConversation : c)); */
+  return updatedMessages;
 };
 
 const mergeMessages = (messages: Message[], newMessages: Message[]) => {
@@ -88,23 +89,26 @@ const updateConversation = (
 const deleteConversation = (conversationId: string, conversations: Conversation[]) =>
   conversations.filter((c) => c.id !== conversationId);
 
-const updateConversationMessages = (
+const updateConversationAndMessages = (
   conversationId: string | undefined,
+  conversationMessages: Message[],
   conversations: Conversation[],
   messages: Message[],
-) => {
+): [Conversation[], Message[]] => {
   let conversation = conversations.find((c) => c.id === conversationId);
-  if (!conversation) {
+  let updatedConversations;
+  if (conversation) {
+    updatedConversations = updateConversation(conversation, conversations, true);
+  } else {
     const title: string = (messages[0]?.content as string) || 'Conversation';
     conversation = createConversation(title.trim().substring(0, 200));
-  }
-  conversation.messages = mergeMessages(conversation.messages, messages);
-
-  if (!conversationId) {
-    return [...conversations, conversation];
+    updatedConversations = [...conversations, conversation];
   }
 
-  return conversations.map((c) => (c.id === conversationId ? conversation : c)) as Conversation[];
+  const updatedMessages = mergeMessages(conversationMessages, messages);
+  // return conversations.map((c) => (c.id === prevConversation.id ? conversation : c)) as Conversation[];
+
+  return [updatedConversations, updatedMessages];
 };
 
 const mergeConversations = (conversations: Conversation[], newConversations: Conversation[]) => {
@@ -129,7 +133,7 @@ export {
   createConversation,
   getConversation,
   updateConversation,
-  updateConversationMessages,
+  updateConversationAndMessages,
   deleteConversation,
   mergeConversations,
   isKeepSystem,

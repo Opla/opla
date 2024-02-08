@@ -22,10 +22,11 @@ import { Conversation, LlmParameters, Message, Model, Prompt, ProviderType } fro
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import {
+  createConversation,
   createMessage,
   getConversation,
   updateConversation,
-  updateConversationMessages,
+  updateConversationAndMessages,
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
 import { buildContext, completion, getCompletionParametersDefinition } from '@/utils/providers';
@@ -59,7 +60,15 @@ function Thread({
   onSelectMenu: (menu: MenuAction, data: string) => void;
 }) {
   const router = useRouter();
-  const { providers, conversations, setConversations, setUsage } = useContext(AppContext);
+  const {
+    providers,
+    conversations,
+    setConversations,
+    getConversationMessages,
+    filterConversationMessages,
+    updateConversationMessages,
+    setUsage,
+  } = useContext(AppContext);
   const { backendContext, setActiveModel } = useBackend();
   const { activeModel: aModel } = backendContext.config.models;
   const [tempModelProvider, setTempModelProvider] = useState<[string, ProviderType] | undefined>(
@@ -79,8 +88,8 @@ function Thread({
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
 
   const messages = useMemo(
-    () => selectedConversation?.messages.filter((m) => !(m.author.role === 'system')) || [],
-    [selectedConversation?.messages],
+    () => filterConversationMessages(conversationId, (m) => !(m.author.role === 'system')),
+    [conversationId, filterConversationMessages],
   );
 
   const showEmptyChat = !conversationId; // messages.length < 1;
@@ -112,20 +121,23 @@ function Thread({
   }, [_conversationId, conversations, setConversations, tempConversationId]);
 
   const updateMessages = (
-    newMessages: Message[],
+    changedMessages: Message[],
     selectedConversationId = conversationId,
     selectedConversations = conversations,
   ) => {
-    const newConversations = updateConversationMessages(
+    const conversationMessages = getConversationMessages(selectedConversationId);
+    const [updatedConversations, updatedMessages] = updateConversationAndMessages(
       selectedConversationId,
+      conversationMessages,
       selectedConversations,
-      newMessages,
+      changedMessages,
     );
-    setConversations(newConversations);
+    updateConversationMessages(selectedConversationId, updatedMessages);
+    setConversations(updatedConversations);
 
-    const newConversationId = selectedConversationId;
+    const updatedConversationId = selectedConversationId;
 
-    return { newConversationId, newConversations };
+    return { updatedConversationId, updatedConversations };
   };
 
   const handleSelectModel = async (model?: string, provider = ProviderType.opla) => {
@@ -177,8 +189,8 @@ function Thread({
         }
       });
     }
-
-    const context = buildContext(conversation, index);
+    const conversationMessages = getConversationMessages(conversation.id);
+    const context = buildContext(conversation, conversationMessages, index);
 
     try {
       const response = await completion(
@@ -221,12 +233,15 @@ function Thread({
     fromMessage.status = 'pending';
     toMessage.sibling = fromMessage.id;
     fromMessage.sibling = toMessage.id;
-    const { newConversationId, newConversations: nc } = updateMessages([toMessage, fromMessage]);
-    let newConversations = nc;
+    const { updatedConversationId, updatedConversations: uc } = updateMessages([
+      toMessage,
+      fromMessage,
+    ]);
+    let updatedConversations = uc;
 
     const conversation: Conversation = getConversation(
-      newConversationId,
-      newConversations,
+      updatedConversationId,
+      updatedConversations,
     ) as Conversation;
     if (conversation.temp) {
       conversation.name = conversation.currentPrompt as string;
@@ -235,14 +250,16 @@ function Thread({
     conversation.currentPrompt = '';
     setChangedPrompt(undefined);
     conversation.temp = false;
-    newConversations = updateConversation(conversation, newConversations);
-    setConversations(newConversations);
+    updatedConversations = updateConversation(conversation, updatedConversations);
+    setConversations(updatedConversations);
 
     // TODO build tokens context : better than [toMessage]
-    const index = conversation.messages.findIndex((m) => m.id === fromMessage.id);
+    const index = getConversationMessages(conversation.id).findIndex(
+      (m) => m.id === fromMessage.id,
+    );
     fromMessage = await sendMessage(fromMessage, index, conversation);
 
-    updateMessages([fromMessage], newConversationId, newConversations);
+    updateMessages([fromMessage], updatedConversationId, updatedConversations);
     if (tempConversationId) {
       router.push(`${Page.Threads}/${tempConversationId}`);
     }
@@ -263,23 +280,23 @@ function Thread({
       contentHistory.push(message.content);
       fromMessage.contentHistory = contentHistory;
     }
-    const { newConversationId, newConversations } = updateMessages([fromMessage]);
+    const { updatedConversationId, updatedConversations } = updateMessages([fromMessage]);
 
     const conversation: Conversation = getConversation(
-      newConversationId,
-      newConversations,
+      updatedConversationId,
+      updatedConversations,
     ) as Conversation;
 
     // TODO build tokens context : better than [toMessage]
     // const context: Message[] = [];
-    const index = conversation.messages.findIndex((m) => m.id === message.id);
+    const index = getConversationMessages(conversation.id).findIndex((m) => m.id === message.id);
     /* if (index > 0) {
       context.push(conversation.messages[index - 1]);
     } */
 
     fromMessage = await sendMessage(fromMessage, index, conversation);
 
-    updateMessages([fromMessage], newConversationId, newConversations);
+    updateMessages([fromMessage], updatedConversationId, updatedConversations);
 
     setIsLoading({ ...isLoading, [conversationId]: false });
   };
@@ -294,10 +311,11 @@ function Thread({
       if (action === 'Delete') {
         const conversation = getConversation(conversationId, conversations);
         if (conversation) {
-          conversation.messages = conversation.messages.filter(
+          const updatedMessages = filterConversationMessages(
+            conversationId,
             (m) => m.id !== message.id && m.id !== message.sibling,
           );
-          setConversations(updateConversation(conversation, conversations));
+          updateConversationMessages(conversationId, updatedMessages);
         }
       }
     }
@@ -317,7 +335,7 @@ function Thread({
     }
     const conversation = getConversation(conversationId, conversations);
     if (conversation) {
-      const newMessages = conversation.messages.map((m) => {
+      const newMessages = getConversationMessages(conversationId).map((m) => {
         if (m.id === message.id) {
           const { contentHistory = [] } = m;
           contentHistory.push(message.content);
@@ -328,7 +346,7 @@ function Thread({
       updateMessages(newMessages, conversationId, conversations);
     }
     if (submit) {
-      const sibling = conversation?.messages.find((m) => m.id === message.sibling);
+      const sibling = getConversationMessages(conversationId).find((m) => m.id === message.sibling);
       if (sibling) {
         handleResendMessage(sibling);
       }
@@ -348,15 +366,17 @@ function Thread({
         setChangedPrompt(undefined);
         return;
       }
-      let newConversations: Conversation[];
+      let updatedConversations: Conversation[];
       if (conversation) {
         conversation.currentPrompt = message;
-        newConversations = conversations.filter((c) => !(c.temp && c.id !== conversationId));
-        newConversations = updateConversation(conversation, newConversations, true);
+        updatedConversations = conversations.filter((c) => !(c.temp && c.id !== conversationId));
+        updatedConversations = updateConversation(conversation, updatedConversations, true);
       } else {
-        newConversations = conversations.filter((c) => !c.temp);
-        newConversations = updateConversationMessages(conversationId, newConversations, []);
-        const newConversation = newConversations[newConversations.length - 1];
+        updatedConversations = conversations.filter((c) => !c.temp);
+        // newConversations = updateConversationAndMessages(conversationId, newConversations, []);
+        // const newConversation = newConversations[newConversations.length - 1];
+        const newConversation = createConversation('Conversation');
+        updatedConversations.push(newConversation);
         newConversation.temp = true;
         newConversation.name = conversationName;
         newConversation.currentPrompt = message;
@@ -366,7 +386,7 @@ function Thread({
         }
         setTempConversationId(newConversation.id);
       }
-      setConversations(newConversations);
+      setConversations(updatedConversations);
       setChangedPrompt(undefined);
     },
     [conversationId, conversations, setConversations, tempConversationId, tempModelProvider],

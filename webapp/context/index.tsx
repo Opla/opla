@@ -14,15 +14,22 @@
 
 'use client';
 
-import { createContext, useMemo, useState } from 'react';
-import { Conversation, LlmUsage, Provider } from '@/types';
+import { createContext, useCallback, useMemo, useState } from 'react';
+import { Conversation, LlmUsage, Message, Provider } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
+import { updateConversation } from '@/utils/data/conversations';
 
 export type Context = {
   conversations: Array<Conversation>;
   archives: Array<Conversation>;
   providers: Array<Provider>;
   setConversations: (newConversations: Conversation[]) => void;
+  getConversationMessages: (id: string | undefined) => Message[];
+  filterConversationMessages: (
+    id: string | undefined,
+    filter: (m: Message) => boolean,
+  ) => Message[];
+  updateConversationMessages: (id: string | undefined, messages: Message[]) => void;
   setArchives: (newArchives: Conversation[]) => void;
   setProviders: (newProviders: Provider[]) => void;
   usage: LlmUsage | undefined;
@@ -32,6 +39,9 @@ export type Context = {
 const initialContext: Context = {
   conversations: [],
   setConversations: () => {},
+  getConversationMessages: () => [],
+  filterConversationMessages: () => [],
+  updateConversationMessages: () => {},
   archives: [],
   setArchives: () => {},
   providers: [],
@@ -52,10 +62,40 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
 
   const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
 
+  const getConversationMessages = useCallback(
+    (id: string | undefined): Message[] => {
+      const messages: Message[] = conversations.find((c) => c.id === id)?.messages || [];
+      return messages;
+    },
+    [conversations],
+  );
+
+  const filterConversationMessages = useCallback(
+    (id: string | undefined, filter: (msg: Message) => boolean): Message[] => {
+      const messages: Message[] = getConversationMessages(id).filter(filter) || [];
+      return messages;
+    },
+    [getConversationMessages],
+  );
+
+  const updateConversationMessages = useCallback(
+    (id: string | undefined, messages: Message[]) => {
+      const conversation = conversations.find((c) => c.id === id);
+      if (conversation) {
+        conversation.messages = messages;
+        setConversations(updateConversation(conversation, conversations));
+      }
+    },
+    [conversations, setConversations],
+  );
+
   const contextValue = useMemo(
     () => ({
       conversations,
       setConversations,
+      getConversationMessages,
+      filterConversationMessages,
+      updateConversationMessages,
       archives,
       setArchives,
       providers,
@@ -63,7 +103,18 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       usage,
       setUsage,
     }),
-    [conversations, setConversations, archives, setArchives, providers, setProviders, usage],
+    [
+      conversations,
+      setConversations,
+      getConversationMessages,
+      filterConversationMessages,
+      updateConversationMessages,
+      archives,
+      setArchives,
+      providers,
+      setProviders,
+      usage,
+    ],
   );
 
   return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
