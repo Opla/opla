@@ -105,8 +105,7 @@
       "targets": "all",
       "windows": {
         "certificateThumbprint": "85426df0004ce3eeb2978f93387379e2f69781b3",
-        "digestAlgorithm": "sha256",
-        "timestampUrl": "http://timestamp.digicert.com/"
+        "digestAlgorithm": "sha256"
       }
     },
     "security": {
