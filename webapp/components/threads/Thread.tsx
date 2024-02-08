@@ -132,8 +132,9 @@ function Thread({
       selectedConversations,
       changedMessages,
     );
-    updateConversationMessages(selectedConversationId, updatedMessages);
     updateConversations(updatedConversations);
+    updateConversationMessages(selectedConversationId, updatedMessages);
+
 
     const updatedConversationId = selectedConversationId;
 
@@ -258,7 +259,6 @@ function Thread({
       (m) => m.id === fromMessage.id,
     );
     fromMessage = await sendMessage(fromMessage, index, conversation);
-
     updateMessages([fromMessage], updatedConversationId, updatedConversations);
     if (tempConversationId) {
       router.push(`${Page.Threads}/${tempConversationId}`);
@@ -295,7 +295,6 @@ function Thread({
     } */
 
     fromMessage = await sendMessage(fromMessage, index, conversation);
-
     updateMessages([fromMessage], updatedConversationId, updatedConversations);
 
     setIsLoading({ ...isLoading, [conversationId]: false });

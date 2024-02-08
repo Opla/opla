@@ -98,7 +98,7 @@ const updateConversationAndMessages = (
   let conversation = conversations.find((c) => c.id === conversationId);
   let updatedConversations;
   if (conversation) {
-    updatedConversations = updateConversation(conversation, conversations, true);
+    updatedConversations = updateConversation(conversation, conversations);
   } else {
     const title: string = (messages[0]?.content as string) || 'Conversation';
     conversation = createConversation(title.trim().substring(0, 200));
