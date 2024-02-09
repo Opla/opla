@@ -53,11 +53,18 @@ export type BaseNamedRecord = BaseIdRecord & {
   description?: string;
 };
 
+export enum MessageState {
+  Pending = 'pending',
+  Stream = 'stream',
+  Delivered = 'delivered',
+  Error = 'error',
+}
+
 export type Message = BaseIdRecord & {
   author: Author;
   content: string | Content;
   contentHistory?: (string | Content)[];
-  status?: 'pending' | 'delivered' | 'error';
+  status?: MessageState;
   sibling?: string;
 };
 
