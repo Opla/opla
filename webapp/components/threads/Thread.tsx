@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { PanelLeft, PanelLeftClose, PanelRight, PanelRightClose } from 'lucide-react';
 import { AppContext } from '@/context';
@@ -72,6 +72,7 @@ function Thread({
   const {
     providers,
     conversations,
+    readConversationMessages,
     updateConversations,
     getConversationMessages,
     filterConversationMessages,
@@ -89,6 +90,7 @@ function Thread({
   const selectedConversation = conversations.find((c) => c.id === conversationId);
   const [changedPrompt, setChangedPrompt] = useState<string | undefined>(undefined);
   const { showModal } = useContext(ModalsContext);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>({});
   const [errorMessage, setErrorMessage] = useState<{ [key: string]: string }>({});
@@ -96,19 +98,29 @@ function Thread({
   const { t } = useTranslation();
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
 
-  const messages = useMemo(() => {
-    const stream = backendContext.streams?.[conversationId as string];
-    const filteredMessages = filterConversationMessages(
-      conversationId,
-      (m) => !(m.author.role === 'system'),
-    );
-    return filteredMessages.map((msg, index) => {
-      if (stream && index === filteredMessages.length - 1) {
-        return { ...msg, status: 'stream', content: stream.content.join('') } as Message;
-      }
-      return msg;
-    });
-  }, [backendContext, conversationId, filterConversationMessages]);
+  useEffect(() => {
+    let newMessages: Message[] = [];
+    if (conversationId) {
+      readConversationMessages(conversationId, []);
+      const stream = backendContext.streams?.[conversationId as string];
+      newMessages = filterConversationMessages(
+        conversationId,
+        (m) => !(m.author.role === 'system'),
+      );
+      newMessages = newMessages.map((msg, index) => {
+        if (stream && index === newMessages.length - 1) {
+          return { ...msg, status: 'stream', content: stream.content.join('') } as Message;
+        }
+        return msg;
+      });
+    }
+    setMessages(newMessages);
+  }, [
+    backendContext.streams,
+    conversationId,
+    filterConversationMessages,
+    readConversationMessages,
+  ]);
 
   const showEmptyChat = !conversationId;
 

@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { useRouter } from 'next/router';
 import useBackend from '@/hooks/useBackendContext';
 import { Conversation, PageSettings } from '@/types';
@@ -51,13 +51,6 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     setArchives,
   } = useContext(AppContext);
   const { backendContext, setSettings } = useBackend();
-  const { readConversationMessages } = useContext(AppContext);
-
-  useEffect(() => {
-    if (selectedThreadId) {
-      readConversationMessages(selectedThreadId, []);
-    }
-  }, [readConversationMessages, selectedThreadId]);
 
   useShortcuts(ShortcutIds.DELETE_MESSAGE, (event) => {
     event.preventDefault();
