@@ -153,7 +153,8 @@ function MessageComponent({
                       <MoreHorizontal className="h-4 w-4 animate-pulse" />
                     </div>
                   )}
-                  {(state === DisplayMessageState.Markdown || state === DisplayMessageState.Streaming) && (
+                  {(state === DisplayMessageState.Markdown ||
+                    state === DisplayMessageState.Streaming) && (
                     <div className="my-4 w-full select-auto px-3 py-2">{Content}</div>
                   )}
                   {state === DisplayMessageState.Text && (

@@ -14,11 +14,7 @@
 // import { appWindow } from '@tauri-apps/api/window';
 // import { confirm } from '@tauri-apps/api/dialog';
 // import { listen } from '@tauri-apps/api/event';
-import {
-  LlmStreamResponse,
-  OplaServer,
-  ServerStatus,
-} from '@/types';
+import { LlmStreamResponse, OplaServer, ServerStatus } from '@/types';
 import logger from '../logger';
 import {
   restartLLamaCppServer,
@@ -53,11 +49,13 @@ class Backend {
     const promises: Promise<void>[] = [];
 
     listenersKeys.forEach((key) => {
-      promises.push((async () => {
-        const listener = listeners[key];
-        Backend.listeners[key]?.();
-        Backend.listeners[key] = await listen(key, listener);
-      })());
+      promises.push(
+        (async () => {
+          const listener = listeners[key];
+          Backend.listeners[key]?.();
+          Backend.listeners[key] = await listen(key, listener);
+        })(),
+      );
     });
     Promise.all(promises);
 

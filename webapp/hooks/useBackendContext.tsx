@@ -97,35 +97,32 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     saveBackendContext((ctx) => ({ ...ctx, ...context }));
   };
 
-  const backendListener = useCallback(
-    async (event: any) => {
-      logger.info('backend event', event);
-      const context = backendContextRef.current;
-      if (event.event === 'opla-server' && context) {
-        let { activeModel } = context.config.models;
-        if (event.payload.status === ServerStatus.STARTING) {
-          activeModel = event.payload.message;
-        }
-
-        setBackendContext({
-              ...context,
-              config: {
-                ...context?.config,
-                models: {
-                  ...context?.config.models,
-                  activeModel,
-                },
-              },
-              server: {
-                ...context?.server,
-                status: event.payload.status,
-                message: event.payload.message,
-              },
-            });
+  const backendListener = useCallback(async (event: any) => {
+    logger.info('backend event', event);
+    const context = backendContextRef.current;
+    if (event.event === 'opla-server' && context) {
+      let { activeModel } = context.config.models;
+      if (event.payload.status === ServerStatus.STARTING) {
+        activeModel = event.payload.message;
       }
-    },
-    [],
-  );
+
+      setBackendContext({
+        ...context,
+        config: {
+          ...context?.config,
+          models: {
+            ...context?.config.models,
+            activeModel,
+          },
+        },
+        server: {
+          ...context?.server,
+          status: event.payload.status,
+          message: event.payload.message,
+        },
+      });
+    }
+  }, []);
 
   const downloadListener = useCallback(
     async (event: any) => {
@@ -144,9 +141,9 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
             downloads[index] = download;
           }
           setBackendContext({
-                ...context,
-                downloads,
-              } as OplaContext);
+            ...context,
+            downloads,
+          } as OplaContext);
         } else if (type === 'finished') {
           const { downloads = [] } = backendContext || {};
           const index = downloads.findIndex((d) => d.id === download.id);
@@ -155,10 +152,9 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
             downloads.splice(index, 1);
           }
           setBackendContext({
-                ...context,
-                downloads,
-              } as OplaContext
-          );
+            ...context,
+            downloads,
+          } as OplaContext);
         }
       }
     },
@@ -191,10 +187,9 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
             prevContent: response.content as string,
           } as LlmStreamResponse;
           setBackendContext({
-                ...context,
-                streams,
-              } as OplaContext
-          );
+            ...context,
+            streams,
+          } as OplaContext);
         }
       } else {
         if (streams?.[conversationId]) {
@@ -243,13 +238,16 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
 
   const stop = async (): Promise<unknown> => backendRef.current?.stop?.();
 
-  const setSettings = useCallback(async (settings: Settings) => {
-    const store = await saveSettings(settings);
-    setBackendContext({
-      ...backendContext,
-      config: store,
-    } as OplaContext);
-  }, [backendContext]);
+  const setSettings = useCallback(
+    async (settings: Settings) => {
+      const store = await saveSettings(settings);
+      setBackendContext({
+        ...backendContext,
+        config: store,
+      } as OplaContext);
+    },
+    [backendContext],
+  );
 
   const updateBackendStore = useCallback(async () => {
     logger.info('updateBackendStore');
@@ -266,9 +264,12 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       await setBackendActiveModel(model);
       await updateBackendStore();
       setBackendContext({
-          ...backendContext,
-          config: { ...backendContext?.config, models: { ...backendContext?.config.models, activeModel: model } },
-        } as OplaContext);
+        ...backendContext,
+        config: {
+          ...backendContext?.config,
+          models: { ...backendContext?.config.models, activeModel: model },
+        },
+      } as OplaContext);
     },
     [backendContext, updateBackendStore],
   );
