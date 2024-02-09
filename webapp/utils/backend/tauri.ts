@@ -78,7 +78,6 @@ const writeTextFile = async (filename: string, contents: string, createDir: bool
     const dataDir = (await invokeTauri('get_data_dir')) as string;
     path = await join(dataDir, filename);
     const filepath = filename.split('/').slice(0, -1).join('/');
-    console.log('filepath', filepath);
     if (filepath.length > 0) {
       await invokeTauri('create_dir', { path: filepath, dataDir });
     }

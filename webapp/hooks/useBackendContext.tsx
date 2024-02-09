@@ -16,7 +16,17 @@ import { createContext, useCallback, useContext, useMemo, useRef, useState } fro
 import logger from '@/utils/logger';
 import { createProvider } from '@/utils/data/providers';
 import getBackend from '@/utils/backend';
-import { Metadata, Provider, ProviderType, OplaContext, ServerStatus, Settings } from '@/types';
+import {
+  Metadata,
+  Provider,
+  ProviderType,
+  OplaContext,
+  ServerStatus,
+  Settings,
+  LlmResponse,
+  LlmStreamResponse,
+  Download,
+} from '@/types';
 import {
   getOplaConfig,
   getProviderTemplate,
@@ -25,6 +35,8 @@ import {
 } from '@/utils/backend/commands';
 import { AppContext } from '@/context';
 import Backend from '@/utils/backend/Backend';
+import { mapKeys } from '@/utils/data';
+import { toCamelCase } from '@/utils/string';
 
 const initialBackendContext: OplaContext = {
   server: {
@@ -75,11 +87,122 @@ const BackendContext = createContext<Context>({
 });
 
 function BackendProvider({ children }: { children: React.ReactNode }) {
-  const [backendContext, setBackendContext] = useState<OplaContext>();
+  const [backendContext, saveBackendContext] = useState<OplaContext>();
+  const backendContextRef = useRef(backendContext);
   const { providers, setProviders } = useContext(AppContext);
   const backendRef = useRef<Backend>();
 
-  const getBackendContext = useCallback(async () => backendContext, [backendContext]);
+  const setBackendContext = (context: OplaContext) => {
+    backendContextRef.current = context;
+    saveBackendContext((ctx) => ({ ...ctx, ...context }));
+  };
+
+  const backendListener = useCallback(async (event: any) => {
+    logger.info('backend event', event);
+    const context = backendContextRef.current;
+    if (event.event === 'opla-server' && context) {
+      let { activeModel } = context.config.models;
+      if (event.payload.status === ServerStatus.STARTING) {
+        activeModel = event.payload.message;
+      }
+
+      setBackendContext({
+        ...context,
+        config: {
+          ...context?.config,
+          models: {
+            ...context?.config.models,
+            activeModel,
+          },
+        },
+        server: {
+          ...context?.server,
+          status: event.payload.status,
+          message: event.payload.message,
+        },
+      });
+    }
+  }, []);
+
+  const downloadListener = useCallback(
+    async (event: any) => {
+      // logger.info('downloader event', event);
+      const context = backendContextRef.current;
+      if (event.event === 'opla-downloader') {
+        const [type, download]: [string, Download] = await mapKeys(event.payload, toCamelCase);
+
+        // logger.info('download', type, downloads);
+        if (type === 'progress') {
+          const { downloads = [] } = backendContext || {};
+          const index = downloads.findIndex((d) => d.id === download.id);
+          if (index === -1) {
+            downloads.push(download);
+          } else {
+            downloads[index] = download;
+          }
+          setBackendContext({
+            ...context,
+            downloads,
+          } as OplaContext);
+        } else if (type === 'finished') {
+          const { downloads = [] } = backendContext || {};
+          const index = downloads.findIndex((d) => d.id === download.id);
+          logger.info('download finished', index, download);
+          if (index !== -1) {
+            downloads.splice(index, 1);
+          }
+          setBackendContext({
+            ...context,
+            downloads,
+          } as OplaContext);
+        }
+      }
+    },
+    [backendContext],
+  );
+
+  const streamListener = useCallback(
+    async (event: any) => {
+      const context = backendContextRef.current;
+      if (!context) {
+        return;
+      }
+      logger.info('stream event', event, backendContext, context);
+      const response = (await mapKeys(event.payload, toCamelCase)) as LlmResponse;
+      if (!response.conversationId) {
+        logger.error('stream event without conversationId', response);
+        return;
+      }
+      const { conversationId } = response;
+
+      const { streams = {} } = backendContext || {};
+      if (response.status === 'success') {
+        const stream = context.streams?.[conversationId] || ({} as LlmStreamResponse);
+        if (stream.prevContent !== response.content) {
+          const content = (stream.content || []) as string[];
+          content.push(response.content as string);
+          streams[conversationId] = {
+            ...response,
+            content,
+            prevContent: response.content as string,
+          } as LlmStreamResponse;
+          setBackendContext({
+            ...context,
+            streams,
+          } as OplaContext);
+        }
+      } else {
+        if (streams?.[conversationId]) {
+          delete streams[conversationId];
+        }
+        setBackendContext({
+          ...backendContext,
+          streams,
+        } as OplaContext);
+      }
+    },
+    [backendContext],
+  );
 
   const startBackend = useCallback(async () => {
     let opla = providers.find((p) => p.type === ProviderType.opla) as Provider;
@@ -91,21 +214,23 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     }
     const backendImpl = await getBackend();
     backendRef.current = backendImpl as Backend;
-    Backend.setContext = setBackendContext as (
-      callback: (context: OplaContext) => OplaContext,
-    ) => void;
-    Backend.getContext = getBackendContext as unknown as () => OplaContext;
-    const backendImplContext = await backendImpl.connect();
+    // Backend.getContext = getBackendContext as unknown as () => Promise<Readonly<OplaContext>>;
+    const listeners = {
+      'opla-server': backendListener,
+      'opla-downloader': downloadListener,
+      'opla-sse': streamListener,
+    };
+    const backendImplContext = await backendImpl.connect(listeners);
     logger.info('connected backend impl', backendImpl);
-    setBackendContext((context = initialBackendContext) => ({
-      ...context,
+    setBackendContext({
+      ...initialBackendContext,
       ...backendImplContext,
-    }));
+    });
     logger.info('start backend', opla.metadata, backendImplContext.config.server.parameters);
     const metadata = opla.metadata as Metadata;
     metadata.server = backendImplContext.config.server as Metadata;
     setProviders(providers);
-  }, [getBackendContext, providers, setProviders]);
+  }, [backendListener, downloadListener, providers, setProviders, streamListener]);
 
   const restart = async (params: any): Promise<unknown> => backendRef.current?.restart?.(params); // restartRef.current(params);
 
@@ -113,37 +238,40 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
 
   const stop = async (): Promise<unknown> => backendRef.current?.stop?.();
 
-  const setSettings = useCallback(async (settings: Settings) => {
-    const store = await saveSettings(settings);
-    setBackendContext((context = initialBackendContext) => ({
-      ...context,
-      config: store,
-    }));
-  }, []);
+  const setSettings = useCallback(
+    async (settings: Settings) => {
+      const store = await saveSettings(settings);
+      setBackendContext({
+        ...backendContext,
+        config: store,
+      } as OplaContext);
+    },
+    [backendContext],
+  );
 
   const updateBackendStore = useCallback(async () => {
     logger.info('updateBackendStore');
     const store = await getOplaConfig();
-    setBackendContext((context = initialBackendContext) => ({
-      ...context,
+    setBackendContext({
+      ...backendContext,
       config: store,
-    }));
-  }, []);
+    } as OplaContext);
+  }, [backendContext]);
 
   const setActiveModel = useCallback(
     async (model: string) => {
       logger.info('setActiveModel', model);
       await setBackendActiveModel(model);
       await updateBackendStore();
-      setBackendContext((context = initialBackendContext) => {
-        const newContext = {
-          ...context,
-          config: { ...context.config, models: { ...context.config.models, activeModel: model } },
-        };
-        return newContext;
-      });
+      setBackendContext({
+        ...backendContext,
+        config: {
+          ...backendContext?.config,
+          models: { ...backendContext?.config.models, activeModel: model },
+        },
+      } as OplaContext);
     },
-    [updateBackendStore],
+    [backendContext, updateBackendStore],
   );
 
   const disconnectBackend = useCallback(async () => {

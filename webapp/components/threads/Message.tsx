@@ -28,7 +28,7 @@ import {
 import { getContent } from '@/utils/data';
 import useHover from '@/hooks/useHover';
 import useMarkdownProcessor from '@/hooks/useMarkdownProcessor';
-import { Message } from '@/types';
+import { Message, MessageState } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
@@ -59,10 +59,11 @@ function DeleteButton({ onDeleteMessage }: { onDeleteMessage: () => void }) {
   );
 }
 
-enum MessageState {
+enum DisplayMessageState {
   Markdown,
   Text,
   Pending,
+  Streaming,
   Edit,
 }
 
@@ -115,13 +116,15 @@ function MessageComponent({
     setEdit(undefined);
   };
 
-  let state = MessageState.Markdown;
+  let state = DisplayMessageState.Markdown;
   if (edit !== undefined) {
-    state = MessageState.Edit;
+    state = DisplayMessageState.Edit;
   } else if (isUser) {
-    state = MessageState.Text;
-  } else if (message.status === 'pending' || content === '...') {
-    state = MessageState.Pending;
+    state = DisplayMessageState.Text;
+  } else if (message.status === MessageState.Pending || content === '...') {
+    state = DisplayMessageState.Pending;
+  } else if (message.status === MessageState.Stream) {
+    state = DisplayMessageState.Streaming;
   }
 
   return (
@@ -145,18 +148,19 @@ function MessageComponent({
               <div className="flex min-h-20 flex-col items-start gap-4 whitespace-pre-wrap break-words">
                 <div className="w-full break-words">
                   <p className="mx-4 font-bold capitalize">{author.name}</p>
-                  {state === MessageState.Pending && (
+                  {state === DisplayMessageState.Pending && (
                     <div className="px-4 py-2">
                       <MoreHorizontal className="h-4 w-4 animate-pulse" />
                     </div>
                   )}
-                  {state === MessageState.Markdown && (
+                  {(state === DisplayMessageState.Markdown ||
+                    state === DisplayMessageState.Streaming) && (
                     <div className="my-4 w-full select-auto px-3 py-2">{Content}</div>
                   )}
-                  {state === MessageState.Text && (
+                  {state === DisplayMessageState.Text && (
                     <div className="my-4 w-full select-auto px-3 py-2">{content}</div>
                   )}
-                  {state === MessageState.Edit && (
+                  {state === DisplayMessageState.Edit && (
                     <Textarea
                       ref={inputRef}
                       className="my-4 w-full resize-none  px-3 py-2 text-sm"
@@ -167,21 +171,22 @@ function MessageComponent({
                     />
                   )}
                 </div>
-                {(state === MessageState.Markdown || state === MessageState.Text) && isHover && (
-                  <div className="left-30 absolute bottom-0">
-                    {!isUser && (
-                      <Button variant="ghost" size="sm" onClick={onResendMessage}>
-                        <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
+                {(state === DisplayMessageState.Markdown || state === DisplayMessageState.Text) &&
+                  isHover && (
+                    <div className="left-30 absolute bottom-0">
+                      {!isUser && (
+                        <Button variant="ghost" size="sm" onClick={onResendMessage}>
+                          <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
+                        </Button>
+                      )}
+                      <ClipboardButton copied={copied} onCopyToClipboard={handleCopyToClipboard} />
+                      <Button variant="ghost" size="sm" onClick={handleEdit}>
+                        <Pencil className="h-4 w-4" strokeWidth={1.5} />
                       </Button>
-                    )}
-                    <ClipboardButton copied={copied} onCopyToClipboard={handleCopyToClipboard} />
-                    <Button variant="ghost" size="sm" onClick={handleEdit}>
-                      <Pencil className="h-4 w-4" strokeWidth={1.5} />
-                    </Button>
-                    <DeleteButton onDeleteMessage={onDeleteMessage} />
-                  </div>
-                )}
-                {state === MessageState.Edit && (
+                      <DeleteButton onDeleteMessage={onDeleteMessage} />
+                    </div>
+                  )}
+                {state === DisplayMessageState.Edit && (
                   <div className="left-30 absolute bottom-0 flex flex-row gap-2">
                     <Button size="sm" onClick={handleSave} disabled={!edit}>
                       {isUser ? t('Save & submit') : t('Save')}
