@@ -89,7 +89,11 @@ const updateConversation = (
 const deleteConversation = (conversationId: string, conversations: Conversation[]) =>
   conversations.filter((c) => c.id !== conversationId);
 
-const updateOrCreateConversation = (conversationId: string | undefined, conversations: Conversation[], title = "Conversation") => { 
+const updateOrCreateConversation = (
+  conversationId: string | undefined,
+  conversations: Conversation[],
+  title = 'Conversation',
+) => {
   let conversation = conversations.find((c) => c.id === conversationId);
   let updatedConversations;
   if (conversation) {

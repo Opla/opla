@@ -72,7 +72,10 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
   const getConversationMessages = useCallback(
     (id: string | undefined): Message[] => {
       const messages: Message[] = id
-        ? getStoredConversationMessages(id, /* conversations.find((c) => c.id === id)?.messages || */ [])
+        ? getStoredConversationMessages(
+            id,
+            /* conversations.find((c) => c.id === id)?.messages || */ [],
+          )
         : [];
       // const messages: Message[] = conversations.find((c) => c.id === id)?.messages || [];
       return messages;

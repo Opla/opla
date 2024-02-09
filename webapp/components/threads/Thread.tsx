@@ -127,7 +127,8 @@ function Thread({
     selectedConversationId = conversationId,
     selectedConversations = conversations,
   ) => {
-    const conversationMessages = _conversationMessages || getConversationMessages(selectedConversationId);
+    const conversationMessages =
+      _conversationMessages || getConversationMessages(selectedConversationId);
     const updatedConversations = updateOrCreateConversation(
       selectedConversationId,
       selectedConversations,
@@ -161,7 +162,12 @@ function Thread({
     }
   };
 
-  const sendMessage = async (message: Message, conversationMessages: Message[], index: number, conversation: Conversation) => {
+  const sendMessage = async (
+    message: Message,
+    conversationMessages: Message[],
+    index: number,
+    conversation: Conversation,
+  ) => {
     let model: Model | undefined;
     let providerName: string | undefined = model?.provider;
     const returnedMessage = { ...message };
@@ -236,10 +242,11 @@ function Thread({
     toMessage.sibling = fromMessage.id;
     fromMessage.sibling = toMessage.id;
 
-    const { updatedConversationId, updatedConversations: uc, updatedMessages } = await updateMessagesAndConversation([
-      toMessage,
-      fromMessage,
-    ]);
+    const {
+      updatedConversationId,
+      updatedConversations: uc,
+      updatedMessages,
+    } = await updateMessagesAndConversation([toMessage, fromMessage]);
     let updatedConversations = uc;
 
     const conversation: Conversation = getConversation(
@@ -261,7 +268,12 @@ function Thread({
     const index = msgs.findIndex((m) => m.id === fromMessage.id);
     console.log('onSendMessage', index, msgs, conversation);
     fromMessage = await sendMessage(fromMessage, updatedMessages, index, conversation);
-    await updateMessagesAndConversation([fromMessage], msgs, updatedConversationId, updatedConversations);
+    await updateMessagesAndConversation(
+      [fromMessage],
+      msgs,
+      updatedConversationId,
+      updatedConversations,
+    );
     if (tempConversationId) {
       router.push(`${Page.Threads}/${tempConversationId}`);
     }
@@ -282,7 +294,8 @@ function Thread({
       contentHistory.push(message.content);
       fromMessage.contentHistory = contentHistory;
     }
-    const { updatedConversationId, updatedConversations, updatedMessages } = await updateMessagesAndConversation([fromMessage]);
+    const { updatedConversationId, updatedConversations, updatedMessages } =
+      await updateMessagesAndConversation([fromMessage]);
 
     const conversation: Conversation = getConversation(
       updatedConversationId,
@@ -298,7 +311,12 @@ function Thread({
     } */
 
     fromMessage = await sendMessage(fromMessage, conversationMessages, index, conversation);
-    await updateMessagesAndConversation([fromMessage], updatedMessages, updatedConversationId, updatedConversations);
+    await updateMessagesAndConversation(
+      [fromMessage],
+      updatedMessages,
+      updatedConversationId,
+      updatedConversations,
+    );
 
     setIsLoading({ ...isLoading, [conversationId]: false });
   };
@@ -350,7 +368,12 @@ function Thread({
         }
         return m;
       });
-      updateMessagesAndConversation(newMessages, conversationMessages, conversationId, conversations);
+      updateMessagesAndConversation(
+        newMessages,
+        conversationMessages,
+        conversationId,
+        conversations,
+      );
     }
     if (submit) {
       const sibling = getConversationMessages(conversationId).find((m) => m.id === message.sibling);
