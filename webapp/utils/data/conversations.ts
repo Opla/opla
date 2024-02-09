@@ -89,27 +89,29 @@ const updateConversation = (
 const deleteConversation = (conversationId: string, conversations: Conversation[]) =>
   conversations.filter((c) => c.id !== conversationId);
 
-const updateConversationAndMessages = (
-  conversationId: string | undefined,
-  conversationMessages: Message[],
-  conversations: Conversation[],
-  messages: Message[],
-): [Conversation[], Message[]] => {
+const updateOrCreateConversation = (conversationId: string | undefined, conversations: Conversation[], title = "Conversation") => { 
   let conversation = conversations.find((c) => c.id === conversationId);
   let updatedConversations;
   if (conversation) {
     updatedConversations = updateConversation(conversation, conversations);
   } else {
-    const title: string = (messages[0]?.content as string) || 'Conversation';
     conversation = createConversation(title.trim().substring(0, 200));
     updatedConversations = [...conversations, conversation];
   }
+  return updatedConversations;
+};
+
+/* const updateMessages = (
+  conversationId: string | undefined,
+  conversationMessages: Message[],
+  conversations: Conversation[],
+  messages: Message[],
+): Message[] => {
+
 
   const updatedMessages = mergeMessages(conversationMessages, messages);
-  // return conversations.map((c) => (c.id === prevConversation.id ? conversation : c)) as Conversation[];
-
-  return [updatedConversations, updatedMessages];
-};
+  return updatedMessages;
+}; */
 
 const mergeConversations = (conversations: Conversation[], newConversations: Conversation[]) => {
   const mergedConversations = [...conversations, ...newConversations];
@@ -133,7 +135,8 @@ export {
   createConversation,
   getConversation,
   updateConversation,
-  updateConversationAndMessages,
+  updateOrCreateConversation,
+  mergeMessages,
   deleteConversation,
   mergeConversations,
   isKeepSystem,

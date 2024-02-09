@@ -26,7 +26,8 @@ import {
   createMessage,
   getConversation,
   updateConversation,
-  updateConversationAndMessages,
+  mergeMessages,
+  updateOrCreateConversation,
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
 import { buildContext, completion, getCompletionParametersDefinition } from '@/utils/providers';
@@ -120,24 +121,25 @@ function Thread({
     }
   }, [_conversationId, conversations, updateConversations, tempConversationId]);
 
-  const updateMessages = async (
+  const updateMessagesAndConversation = async (
     changedMessages: Message[],
+    _conversationMessages?: Message[],
     selectedConversationId = conversationId,
     selectedConversations = conversations,
   ) => {
-    const conversationMessages = getConversationMessages(selectedConversationId as string);
-    const [updatedConversations, updatedMessages] = updateConversationAndMessages(
+    const conversationMessages = _conversationMessages || getConversationMessages(selectedConversationId);
+    const updatedConversations = updateOrCreateConversation(
       selectedConversationId,
-      conversationMessages,
       selectedConversations,
-      changedMessages,
+      messages[0]?.content as string,
     );
+    const updatedMessages = mergeMessages(conversationMessages, changedMessages);
     updateConversations(updatedConversations);
     await updateConversationMessages(selectedConversationId, updatedMessages);
 
     const updatedConversationId = selectedConversationId;
 
-    return { updatedConversationId, updatedConversations };
+    return { updatedConversationId, updatedConversations, updatedMessages };
   };
 
   const handleSelectModel = async (model?: string, provider = ProviderType.opla) => {
@@ -159,7 +161,7 @@ function Thread({
     }
   };
 
-  const sendMessage = async (message: Message, index: number, conversation: Conversation) => {
+  const sendMessage = async (message: Message, conversationMessages: Message[], index: number, conversation: Conversation) => {
     let model: Model | undefined;
     let providerName: string | undefined = model?.provider;
     const returnedMessage = { ...message };
@@ -189,7 +191,7 @@ function Thread({
         }
       });
     }
-    const conversationMessages = getConversationMessages(conversation.id);
+    // const conversationMessages = getConversationMessages(conversation.id);
     const context = buildContext(conversation, conversationMessages, index);
 
     try {
@@ -233,7 +235,8 @@ function Thread({
     fromMessage.status = 'pending';
     toMessage.sibling = fromMessage.id;
     fromMessage.sibling = toMessage.id;
-    const { updatedConversationId, updatedConversations: uc } = await updateMessages([
+
+    const { updatedConversationId, updatedConversations: uc, updatedMessages } = await updateMessagesAndConversation([
       toMessage,
       fromMessage,
     ]);
@@ -254,11 +257,11 @@ function Thread({
     updateConversations(updatedConversations);
 
     // TODO build tokens context : better than [toMessage]
-    const msgs = getConversationMessages(conversation.id);
+    const msgs = updatedMessages; // getConversationMessages(conversation.id);
     const index = msgs.findIndex((m) => m.id === fromMessage.id);
     console.log('onSendMessage', index, msgs, conversation);
-    fromMessage = await sendMessage(fromMessage, index, conversation);
-    await updateMessages([fromMessage], updatedConversationId, updatedConversations);
+    fromMessage = await sendMessage(fromMessage, updatedMessages, index, conversation);
+    await updateMessagesAndConversation([fromMessage], msgs, updatedConversationId, updatedConversations);
     if (tempConversationId) {
       router.push(`${Page.Threads}/${tempConversationId}`);
     }
@@ -279,7 +282,7 @@ function Thread({
       contentHistory.push(message.content);
       fromMessage.contentHistory = contentHistory;
     }
-    const { updatedConversationId, updatedConversations } = await updateMessages([fromMessage]);
+    const { updatedConversationId, updatedConversations, updatedMessages } = await updateMessagesAndConversation([fromMessage]);
 
     const conversation: Conversation = getConversation(
       updatedConversationId,
@@ -288,13 +291,14 @@ function Thread({
 
     // TODO build tokens context : better than [toMessage]
     // const context: Message[] = [];
-    const index = getConversationMessages(conversation.id).findIndex((m) => m.id === message.id);
+    const conversationMessages = getConversationMessages(conversation.id);
+    const index = conversationMessages.findIndex((m) => m.id === message.id);
     /* if (index > 0) {
       context.push(conversation.messages[index - 1]);
     } */
 
-    fromMessage = await sendMessage(fromMessage, index, conversation);
-    await updateMessages([fromMessage], updatedConversationId, updatedConversations);
+    fromMessage = await sendMessage(fromMessage, conversationMessages, index, conversation);
+    await updateMessagesAndConversation([fromMessage], updatedMessages, updatedConversationId, updatedConversations);
 
     setIsLoading({ ...isLoading, [conversationId]: false });
   };
@@ -337,7 +341,8 @@ function Thread({
     }
     const conversation = getConversation(conversationId, conversations);
     if (conversation) {
-      const newMessages = getConversationMessages(conversationId).map((m) => {
+      const conversationMessages = getConversationMessages(conversationId);
+      const newMessages = conversationMessages.map((m) => {
         if (m.id === message.id) {
           const { contentHistory = [] } = m;
           contentHistory.push(message.content);
@@ -345,7 +350,7 @@ function Thread({
         }
         return m;
       });
-      updateMessages(newMessages, conversationId, conversations);
+      updateMessagesAndConversation(newMessages, conversationMessages, conversationId, conversations);
     }
     if (submit) {
       const sibling = getConversationMessages(conversationId).find((m) => m.id === message.sibling);

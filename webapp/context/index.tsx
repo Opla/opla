@@ -17,7 +17,7 @@
 import { createContext, useCallback, useMemo, useState } from 'react';
 import { Conversation, LlmUsage, Message, Provider } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
-import { updateConversation } from '@/utils/data/conversations';
+// import { updateConversation } from '@/utils/data/conversations';
 import logger from '@/utils/logger';
 import useCollectionStorage from '@/hooks/useCollectionStorage';
 
@@ -72,12 +72,12 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
   const getConversationMessages = useCallback(
     (id: string | undefined): Message[] => {
       const messages: Message[] = id
-        ? getStoredConversationMessages(id, conversations.find((c) => c.id === id)?.messages || [])
+        ? getStoredConversationMessages(id, /* conversations.find((c) => c.id === id)?.messages || */ [])
         : [];
       // const messages: Message[] = conversations.find((c) => c.id === id)?.messages || [];
       return messages;
     },
-    [conversations, getStoredConversationMessages],
+    [getStoredConversationMessages],
   );
 
   const readConversationMessages = useCallback(
@@ -85,13 +85,13 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       const messages: Message[] = id
         ? await readStoredConversationMessages(
             id,
-            conversations.find((c) => c.id === id)?.messages || [],
+            /* conversations.find((c) => c.id === id)?.messages || */ [],
           )
         : [];
       // const messages: Message[] = conversations.find((c) => c.id === id)?.messages || [];
       return messages;
     },
-    [conversations, readStoredConversationMessages],
+    [readStoredConversationMessages],
   );
 
   const filterConversationMessages = useCallback(
@@ -104,30 +104,33 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
 
   const updateConversationMessages = useCallback(
     async (id: string | undefined, messages: Message[]): Promise<void> => {
-      const conversation = conversations.find((c) => c.id === id);
-      if (conversation) {
-        conversation.messages = messages;
-        setConversations(updateConversation(conversation, conversations));
-        await storeConversationMessages(conversation.id, messages);
+      // const conversation = conversations.find((c) => c.id === id);
+      if (id) {
+        /* conversation.messages = messages;
+        setConversations(updateConversation(conversation, conversations)); */
+        await storeConversationMessages(id, messages);
       }
     },
-    [conversations, setConversations, storeConversationMessages],
+    [storeConversationMessages],
   );
 
   const updateConversations = useCallback(
-    async (updatedConversations: Conversation[], needToUpdateMessages = false) => {
+    async (updatedConversations: Conversation[], needToUpdateMessages = true) => {
       // Get deleted conversations and delete their messages
       const deletedConversations = conversations.filter(
         (c) => !updatedConversations.find((uc) => uc.id === c.id),
       );
       if (needToUpdateMessages) {
+        const promises: Promise<void>[] = [];
         const conversationsWithoutMessages: Conversation[] = updatedConversations.map((c) => {
           const { messages, ...updatedConversation } = c;
           if (messages) {
-            updateConversationMessages(c.id, messages);
+            promises.push(updateConversationMessages(c.id, messages));
+            // messagesToStore[c.id] = messages;
           }
           return updatedConversation as Conversation;
         });
+        await Promise.all(promises);
         setConversations(conversationsWithoutMessages);
       } else {
         setConversations(updatedConversations);

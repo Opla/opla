@@ -45,7 +45,7 @@ const readFromLocalStorage = async <T>(key: string, path: string) => {
 };
 
 const writeToLocalStorage = async <T>(key: string, value: T, path: string) => {
-  await writeTextFile(`${path}/${key}.json`, JSON.stringify(value, null, 2));
+  await writeTextFile(`${path}/${key}.json`, JSON.stringify(value, null, 2), true);
 };
 
 const LocalStorage: DataStorage = {

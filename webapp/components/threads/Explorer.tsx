@@ -110,7 +110,7 @@ export default function Explorer({
       if (!filePath) {
         return;
       }
-      const content = await readTextFile(filePath as string);
+      const content = await readTextFile(filePath as string, false);
       const importedConversations = JSON.parse(content);
       const validate = validateConversations(importedConversations);
       if (validate.success) {
@@ -151,7 +151,7 @@ export default function Explorer({
         return c;
       });
       const content = JSON.stringify(exportedConversations);
-      await writeTextFile(filePath as string, content);
+      await writeTextFile(filePath as string, content, false);
     } catch (error) {
       logger.error(error);
       toast.error(`Unable to export : ${error}`);

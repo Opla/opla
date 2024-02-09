@@ -108,7 +108,7 @@ async fn get_data_dir<R: Runtime>(
             return Err(format!("Failed to get data directory"));
         }
     };
-    println!("Data dir: {:?}", data_dir);
+    // println!("Data dir: {:?}", data_dir);
     Ok(data_dir.to_string())
 }
 
@@ -120,10 +120,10 @@ async fn create_dir<R: Runtime>(
     data_dir: String
 ) -> Result<(), String> {
     let dir = std::path::Path::new(data_dir.as_str()).join(path);
-    println!("Create dir: {:?}", dir);
     if dir.exists() {
         return Ok(());
     } else {
+        println!("Create dir: {:?}", dir);
         std::fs::create_dir_all(&dir).map_err(|err| err.to_string())?;
     }
     Ok(())
