@@ -61,6 +61,11 @@ export type Message = BaseIdRecord & {
   sibling?: string;
 };
 
+export type Messages = {
+  conversationId: string;
+  messages: Message[];
+};
+
 export type ConversationParameter = string | number | boolean;
 
 export enum ContextWindowPolicy {
@@ -85,7 +90,7 @@ export type ConversationUsage = {
 };
 
 export type Conversation = BaseNamedRecord & {
-  messages: Message[];
+  messages: Message[] | undefined;
   pluginIds?: string[];
   preset?: Preset;
   parameters?: Record<string, ConversationParameter>;

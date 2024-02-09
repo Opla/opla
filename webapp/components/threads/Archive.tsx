@@ -51,7 +51,7 @@ function Archive({
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
 
   const messages = useMemo(
-    () => selectedArchive?.messages.filter((m) => !(m.author.role === 'system')) || [],
+    () => selectedArchive?.messages?.filter((m) => !(m.author.role === 'system')) || [],
     [selectedArchive?.messages],
   );
 

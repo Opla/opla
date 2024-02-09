@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import useBackend from '@/hooks/useBackendContext';
 import { Conversation, PageSettings } from '@/types';
@@ -42,9 +42,22 @@ type ThreadsProps = {
 
 export default function Threads({ selectedThreadId, view = ViewName.Recent }: ThreadsProps) {
   const router = useRouter();
-  const { conversations, setConversations } = useContext(AppContext);
-  const { archives, setArchives } = useContext(AppContext);
+  const {
+    conversations,
+    updateConversations,
+    getConversationMessages,
+    updateConversationMessages,
+    archives,
+    setArchives,
+  } = useContext(AppContext);
   const { backendContext, setSettings } = useBackend();
+  const { readConversationMessages } = useContext(AppContext);
+
+  useEffect(() => {
+    if (selectedThreadId) {
+      readConversationMessages(selectedThreadId, []);
+    }
+  }, [readConversationMessages, selectedThreadId]);
 
   useShortcuts(ShortcutIds.DELETE_MESSAGE, (event) => {
     event.preventDefault();
@@ -98,7 +111,7 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     if (conversation) {
       if (action === 'Delete') {
         const updatedConversations = deleteConversation(conversation.id, conversations);
-        setConversations(updatedConversations);
+        updateConversations(updatedConversations);
         if (selectedThreadId && selectedThreadId === conversation.id) {
           router.replace(Page.Threads);
         }
@@ -112,26 +125,36 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     showModal(ModalIds.DeleteItem, { item: conversation, onAction: handleDelete });
   };
 
-  const handleSelectMenu = (menu: MenuAction, data: string) => {
+  const handleSelectMenu = async (menu: MenuAction, data: string) => {
     logger.info('onSelectMenu', menu);
     if (menu === MenuAction.DeleteConversation) {
       handleShouldDelete(data);
     } else if (menu === MenuAction.ArchiveConversation) {
-      const conversation = getConversation(data, conversations) as Conversation;
-      const updatedConversations = deleteConversation(conversation.id, conversations);
-      setConversations(updatedConversations);
-      setArchives([...archives, conversation]);
+      const conversationToArchive = getConversation(data, conversations) as Conversation;
+      const messages = getConversationMessages(conversationToArchive.id);
+      const updatedConversations = deleteConversation(conversationToArchive.id, conversations);
+      updateConversations(updatedConversations);
+      setArchives([...archives, { ...conversationToArchive, messages }]);
     } else if (menu === MenuAction.UnarchiveConversation) {
-      const conversation = getConversation(data, archives) as Conversation;
-      const updatedArchives = deleteConversation(conversation.id, archives);
+      const { messages, ...archive } = getConversation(data, archives) as Conversation;
+      const updatedArchives = deleteConversation(archive.id, archives);
       setArchives(updatedArchives);
-      setConversations([...conversations, conversation]);
+      updateConversations([...conversations, archive as Conversation]);
+      updateConversationMessages(archive.id, messages || []);
     } else if (menu === MenuAction.ChangeView) {
       if (data === ViewName.Recent) {
         router.replace(Page.Threads);
       } else {
         router.replace(Page.Archives);
       }
+    }
+  };
+
+  const setThreads = (threads: Conversation[]) => {
+    if (view === ViewName.Recent) {
+      updateConversations(threads);
+    } else {
+      setArchives(threads);
     }
   };
 
@@ -146,7 +169,7 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
         <Explorer
           view={view}
           threads={view === ViewName.Recent ? conversations : archives}
-          setThreads={view === ViewName.Recent ? setConversations : setArchives}
+          setThreads={setThreads}
           onSelectMenu={handleSelectMenu}
           onShouldDelete={handleShouldDelete}
           selectedThreadId={selectedThreadId}

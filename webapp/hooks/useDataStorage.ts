@@ -1,12 +1,16 @@
-// Inspiration From
-// https://gist.github.com/Mon4ik/2636100f5b74ee14e35cf283700616fe
-
-/* `useLocalStorage`
- *
- * Features:
- *  - JSON Serializing
- *  - Also value will be updated everywhere, when value updated (via `storage` event)
- */
+// Copyright 2023 Mik Bry
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 import { useEffect, useState } from 'react';
 import dataStorage from '@/utils/dataStorage';
@@ -29,33 +33,15 @@ export default function useDataStorage<T>(key: string, defaultValue: T): [T, (va
     init();
   }, [defaultValue, first, key]);
 
-  /* useEffect(() => {
-    async function handler(e: StorageEvent) {
-      if (e.key !== key) return;
-      // const i = await dataStorage().getItem(key);
-      logger.info('storage event', e, key, value);
-      // setValue(i as T);
-      dataStorage().setItem(key, value);
-    }
-    window.addEventListener('storage', handler);
-
-    return () => {
-      window.removeEventListener('storage', handler);
-    };
-  }, [defaultValue, first, key, value]); */
-
-  const setValueWrap = (v: T) => {
+  const updateValue = (v: T) => {
     try {
       setValue(v);
       dataStorage().setItem(key, v);
-      /* if (typeof window !== 'undefined') {
-        // window.dispatchEvent(new StorageEvent('storage', { key }));
-      } */
     } catch (e) {
       logger.error(e);
       toast.error(`Error saving data ${e}`);
     }
   };
 
-  return [value, setValueWrap];
+  return [value, updateValue];
 }

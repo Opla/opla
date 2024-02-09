@@ -14,7 +14,7 @@
 
 'use client';
 
-import { /* useContext, */ useState } from 'react';
+import { useContext, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import {
@@ -43,6 +43,7 @@ import {
 } from '@/utils/conversations/openai';
 import { validateConversations } from '@/utils/conversations';
 import { MenuAction, ViewName } from '@/types/ui';
+import { AppContext } from '@/context';
 import { toast } from '../ui/Toast';
 import EditableItem from '../common/EditableItem';
 import { ContextMenu, ContextMenuTrigger } from '../ui/context-menu';
@@ -79,6 +80,7 @@ export default function Explorer({
   onSelectMenu,
 }: ExplorerProps) {
   const router = useRouter();
+  const { getConversationMessages } = useContext(AppContext);
 
   const [editableConversation, setEditableConversation] = useState<string | undefined>(undefined);
   const { t } = useTranslation();
@@ -108,7 +110,7 @@ export default function Explorer({
       if (!filePath) {
         return;
       }
-      const content = await readTextFile(filePath as string);
+      const content = await readTextFile(filePath as string, false);
       const importedConversations = JSON.parse(content);
       const validate = validateConversations(importedConversations);
       if (validate.success) {
@@ -140,8 +142,16 @@ export default function Explorer({
       if (!filePath) {
         return;
       }
-      const content = JSON.stringify(threads);
-      await writeTextFile(filePath as string, content);
+      const exportedConversations = threads.map((c) => {
+        let { messages } = c;
+        if (!messages) {
+          messages = getConversationMessages(c.id);
+          return { c, messages };
+        }
+        return c;
+      });
+      const content = JSON.stringify(exportedConversations);
+      await writeTextFile(filePath as string, content, false);
     } catch (error) {
       logger.error(error);
       toast.error(`Unable to export : ${error}`);

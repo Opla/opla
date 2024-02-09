@@ -22,14 +22,14 @@ enum StorageType {
 }
 
 type DataStorage = {
-  getItem<T>(key: string, defaultValue?: T): Promise<T | null>;
-  setItem<T>(key: string, value: T): Promise<void>;
+  getItem<T>(key: string, defaultValue?: T, path?: string): Promise<T | null>;
+  setItem<T>(key: string, value: T, path?: string): Promise<void>;
 };
 
-const readFromLocalStorage = async <T>(key: string) => {
+const readFromLocalStorage = async <T>(key: string, path: string) => {
   let text: string;
   try {
-    text = await readTextFile(`/${key}.json`);
+    text = await readTextFile(`${path}/${key}.json`);
   } catch (e) {
     logger.error(`Failed to read item ${key} from fileStorage`);
     return null;
@@ -44,8 +44,8 @@ const readFromLocalStorage = async <T>(key: string) => {
   return null;
 };
 
-const writeToLocalStorage = async <T>(key: string, value: T) => {
-  await writeTextFile(`/${key}.json`, JSON.stringify(value, null, 2));
+const writeToLocalStorage = async <T>(key: string, value: T, path: string) => {
+  await writeTextFile(`${path}/${key}.json`, JSON.stringify(value, null, 2), true);
 };
 
 const LocalStorage: DataStorage = {
@@ -84,19 +84,19 @@ const MockStorage: DataStorage = {
 };
 
 const FileStorage: DataStorage = {
-  async getItem<T>(key: string, defaultValue?: T) {
-    logger.warn('FileStorage.getItem() called');
-    let value = await readFromLocalStorage<T>(key);
+  async getItem<T>(key: string, defaultValue?: T, path = '') {
+    logger.warn('FileStorage.getItem() called', path);
+    let value = await readFromLocalStorage<T>(key, path);
     if (!value || (Array.isArray(value) && value.length === 0)) {
       value = await LocalStorage.getItem<T>(key, defaultValue);
       if (value || defaultValue) {
-        await writeToLocalStorage(key, value || defaultValue);
+        await writeToLocalStorage(key, value || defaultValue, path);
       }
     }
     return value;
   },
-  async setItem<T>(key: string, value: T) {
-    writeToLocalStorage(key, value);
+  async setItem<T>(key: string, value: T, path = '') {
+    writeToLocalStorage(key, value, path);
   },
 };
 

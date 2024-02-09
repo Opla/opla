@@ -19,19 +19,23 @@ import { getContent } from '../data';
 
 // TODO: code it in Rust
 // and use ContextWindowPolicy from webapp/utils/constants.ts
-const buildContext = (conversation: Conversation, index: number): LlmMessage[] => {
+const buildContext = (
+  conversation: Conversation,
+  messages: Message[],
+  index: number,
+): LlmMessage[] => {
   const context: Message[] = [];
   // Only ContextWindowPolicy.Last is implemented
   if (index > 0) {
-    context.push(conversation.messages[index - 1]);
+    context.push(messages[index - 1]);
   }
 
-  const messages: LlmMessage[] = context.map((m) => ({
+  const llmMessages: LlmMessage[] = context.map((m) => ({
     content: getContent(m.content),
     role: m.author?.role === 'user' ? 'user' : 'assistant',
     name: m.author?.name,
   }));
-  return messages;
+  return llmMessages;
 };
 
 const completion = async (
