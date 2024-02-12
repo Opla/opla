@@ -13,7 +13,6 @@
 // limitations under the License.
 import CodeBlock from './CodeBlock';
 import Mermaid from './Mermaid';
-import Latex from './Latex';
 import { ANCHOR_CLASS_NAME } from './constants';
 
-export { CodeBlock, Mermaid, Latex, ANCHOR_CLASS_NAME };
+export { CodeBlock, Mermaid, ANCHOR_CLASS_NAME };
