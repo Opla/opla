@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Children, createElement, isValidElement, useEffect, useMemo } from 'react';
+import { Children, Fragment, createElement, isValidElement, useEffect, useState } from 'react';
 import { Element, Root } from 'hast';
 import * as prod from 'react/jsx-runtime';
 // import mermaid from 'mermaid';
@@ -182,25 +182,26 @@ const production = {
   },
 };
 
-const useMarkdownProcessor = (content: string) => {
-  useEffect(() => {
-    // mermaid.initialize({ startOnLoad: false, theme: 'forest' });
-  }, []);
+const processor = unified().use(remarkParse)
+.use(remarkMath)
+.use(remarkGfm)
+.use(remarkRehype)
+.use(rehypeKatex)
+.use(rehypeHighlight, { detect: true })
+.use(rehypeListItemParagraphToDiv)
+.use(rehypeReact, production);
 
-  return useMemo(
-    () =>
-      unified()
-        .use(remarkParse)
-        .use(remarkMath)
-        .use(remarkGfm)
-        .use(remarkRehype)
-        .use(rehypeKatex)
-        .use(rehypeHighlight, { detect: true })
-        .use(rehypeListItemParagraphToDiv)
-        .use(rehypeReact, production)
-        .processSync(content).result,
-    [content],
-  );
+const useMarkdownProcessor = (content: string) => {
+  const [Content, setContent] = useState(createElement(Fragment))
+  useEffect(() => {
+    (async function proceed() {
+      const file = await processor
+      .process(content);
+      setContent(file.result);
+    })();
+  }, [content]);
+
+  return Content;
 };
 
 export default useMarkdownProcessor;
