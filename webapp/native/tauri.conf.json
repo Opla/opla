@@ -102,11 +102,7 @@
       },
       "resources": ["assets/opla_default_config.json"],
       "shortDescription": "",
-      "targets": "all",
-      "windows": {
-        "certificateThumbprint": "85426df0004ce3eeb2978f93387379e2f69781b3",
-        "digestAlgorithm": "sha256"
-      }
+      "targets": "all"
     },
     "security": {
       "csp": null

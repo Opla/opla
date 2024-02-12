@@ -12,20 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Sigma, Check, Clipboard, PieChart } from 'lucide-react';
-import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import Latex from './Latex';
+import { BlockMath } from 'react-katex';
 import Mermaid from './Mermaid';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'highlight.js/styles/obsidian.min.css';
-// import 'latex.js/dist/css/katex.css';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import 'katex/dist/katex.min.css';
 
 function CodeBlock({ children, className }: JSX.IntrinsicElements['code']) {
   const [copied, setCopied] = useState(false);
-  const [showMermaidPreview, setShowMermaidPreview] = useState(false);
-  const [showLatexPreview, setShowLatexPreview] = useState(false);
+  const [showMermaidPreview, setShowMermaidPreview] = useState(true);
+  const [showLatexPreview, setShowLatexPreview] = useState(true);
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -36,11 +36,29 @@ function CodeBlock({ children, className }: JSX.IntrinsicElements['code']) {
     return () => {};
   }, [copied]);
 
-  let language = '';
-  if (className && className.indexOf('language-') >= 0) {
-    language = className?.substring(className.indexOf('language-') + 9);
-  }
+  const { noHighlight, content, language } = useMemo(() => {
+    let newNoHighlight = '';
+    let newContent = '';
+    let newLanguage = '';
+    if (className && className.indexOf('language-') >= 0) {
+      newLanguage = className?.substring(className.indexOf('language-') + 9);
+    }
+    if (newLanguage.startsWith('math') || newLanguage === 'latex') {
+      newLanguage = 'math';
+      newNoHighlight = 'no-highlight';
+      const regex = /\\\[(.+)\\\]/g;
+      newContent = children?.toString().replace(regex, (_, latex: string) => `${latex}`) || '';
+    }
+    return { noHighlight: newNoHighlight, content: newContent, language: newLanguage };
+  }, [children, className]);
+
   if (className) {
+    let display = '';
+    if (language === 'math' && showLatexPreview) {
+      display = 'latex';
+    } else if (language === 'mermaid' && showMermaidPreview) {
+      display = 'mermaid';
+    }
     return (
       <div className="m-0 flex w-full flex-col p-0">
         <div className="flex w-full flex-row items-center justify-end gap-1 bg-neutral-900">
@@ -53,7 +71,7 @@ function CodeBlock({ children, className }: JSX.IntrinsicElements['code']) {
             title="Copy code to clipboard"
             onClick={() => {
               if (ref.current) {
-                navigator.clipboard.writeText(ref.current.innerText ?? '');
+                navigator.clipboard.writeText(children?.toString() ?? '');
                 setCopied(true);
               }
             }}
@@ -65,58 +83,42 @@ function CodeBlock({ children, className }: JSX.IntrinsicElements['code']) {
             )}
           </Button>
           {language === 'mermaid' ? (
-            <>
-              <Button
-                variant="ghost"
-                className=""
-                aria-label="Open Mermaid preview"
-                title="Open Mermaid preview"
-                size="sm"
-                onClick={() => {
-                  setShowMermaidPreview(true);
-                }}
-              >
-                <PieChart className="h-4 w-4 text-neutral-400" strokeWidth={1.5} />
-              </Button>
-              <Dialog
-                open={showMermaidPreview}
-                setOpen={setShowMermaidPreview}
-                title="Mermaid diagram preview"
-                size="xl"
-                onClose={() => {}}
-              >
-                <Mermaid content={children?.toString() ?? ''} />
-              </Dialog>
-            </>
+            <Button
+              variant="ghost"
+              className={
+                showMermaidPreview ? 'text-neutral-700 dark:text-neutral-200' : 'text-neutral-400'
+              }
+              aria-label="Toggle Mermaid preview"
+              title="Toggle Mermaid preview"
+              size="sm"
+              onClick={() => {
+                setShowMermaidPreview(!showMermaidPreview);
+              }}
+            >
+              <PieChart className="h-4 w-4 text-neutral-400" strokeWidth={1.5} />
+            </Button>
           ) : null}
-          {language === 'latex' ? (
-            <>
-              <Button
-                variant="ghost"
-                className=""
-                size="sm"
-                aria-label="Open Latex preview"
-                title="Open Latex preview"
-                onClick={() => {
-                  setShowLatexPreview(true);
-                }}
-              >
-                <Sigma className="h-4 w-4 text-neutral-400" strokeWidth={1.5} />
-              </Button>
-              <Dialog
-                open={showLatexPreview}
-                setOpen={setShowLatexPreview}
-                title="Latex diagram preview"
-                size="xl"
-                onClose={() => {}}
-              >
-                <Latex content={children?.toString() ?? ''} />
-              </Dialog>
-            </>
+          {language === 'math' ? (
+            <Button
+              variant="ghost"
+              className={
+                showLatexPreview ? 'text-neutral-700 dark:text-neutral-200' : 'text-neutral-400'
+              }
+              size="sm"
+              aria-label="Toggle Latex preview"
+              title="Toggle Latex preview"
+              onClick={() => {
+                setShowLatexPreview(!showLatexPreview);
+              }}
+            >
+              <Sigma className="h-4 w-4 " strokeWidth={1.5} />
+            </Button>
           ) : null}
         </div>
-        <code ref={ref} className={`${className} w-full flex-shrink flex-grow`}>
-          {children}
+        <code ref={ref} className={`${className} ${noHighlight} w-full flex-shrink flex-grow`}>
+          {display === 'latex' && <BlockMath math={content} />}
+          {display === 'mermaid' && <Mermaid content={children?.toString() ?? ''} />}
+          {display === '' && children}
         </code>
       </div>
     );
