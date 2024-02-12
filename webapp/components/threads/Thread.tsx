@@ -99,22 +99,25 @@ function Thread({
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let newMessages: Message[] = [];
-    if (conversationId) {
-      readConversationMessages(conversationId, []);
-      const stream = backendContext.streams?.[conversationId as string];
-      newMessages = filterConversationMessages(
-        conversationId,
-        (m) => !(m.author.role === 'system'),
-      );
-      newMessages = newMessages.map((msg, index) => {
-        if (stream && index === newMessages.length - 1) {
-          return { ...msg, status: 'stream', content: stream.content.join('') } as Message;
-        }
-        return msg;
-      });
-    }
-    setMessages(newMessages);
+    const getNewMessages = async () => {
+      let newMessages: Message[] = [];
+      if (conversationId) {
+        await readConversationMessages(conversationId, []);
+        const stream = backendContext.streams?.[conversationId as string];
+        newMessages = filterConversationMessages(
+          conversationId,
+          (m) => !(m.author.role === 'system'),
+        );
+        newMessages = newMessages.map((msg, index) => {
+          if (stream && index === newMessages.length - 1) {
+            return { ...msg, status: 'stream', content: stream.content.join('') } as Message;
+          }
+          return msg;
+        });
+      }
+      setMessages(newMessages);
+    };
+    getNewMessages();
   }, [
     backendContext.streams,
     conversationId,
@@ -123,7 +126,6 @@ function Thread({
   ]);
 
   const showEmptyChat = !conversationId;
-
   const selectedModel = selectedConversation?.model || activeModel;
   const localModelItems = getLocalModelsAsItems(backendContext, selectedModel);
   const cloudModelItems = getProviderModelsAsItems(providers, selectedModel);
@@ -301,12 +303,7 @@ function Thread({
     updateConversations(updatedConversations);
     logger.info('onSendMessage', updatedMessages, conversation);
     message = await sendMessage(message, updatedMessages, conversation, updatedConversations);
-    /* await updateMessagesAndConversation(
-      [message],
-      updatedMessages,
-      updatedConversationId,
-      updatedConversations,
-    ); */
+
     if (tempConversationId) {
       router.push(`${Page.Threads}/${tempConversationId}`);
     }
@@ -339,15 +336,7 @@ function Thread({
       updatedConversations,
     ) as Conversation;
 
-    // const conversationMessages = getConversationMessages(conversation.id);
-
     message = await sendMessage(message, updatedMessages, conversation, updatedConversations);
-    /* await updateMessagesAndConversation(
-      [message],
-      updatedMessages,
-      updatedConversationId,
-      updatedConversations,
-    ); */
 
     setIsLoading({ ...isLoading, [conversationId]: false });
   };
@@ -434,8 +423,6 @@ function Thread({
         updatedConversations = updateConversation(conversation, updatedConversations, true);
       } else {
         updatedConversations = conversations.filter((c) => !c.temp);
-        // newConversations = updateConversationAndMessages(conversationId, newConversations, []);
-        // const newConversation = newConversations[newConversations.length - 1];
         const newConversation = createConversation('Conversation');
         updatedConversations.push(newConversation);
         newConversation.temp = true;

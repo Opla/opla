@@ -32,6 +32,7 @@ import { Message, MessageState } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
+import OpenAI from '../icons/OpenAI';
 
 function ClipboardButton({
   onCopyToClipboard,
@@ -59,6 +60,16 @@ function DeleteButton({ onDeleteMessage }: { onDeleteMessage: () => void }) {
   );
 }
 
+function Avatar({ isUser, name }: { isUser: boolean; name: string }) {
+  if (isUser) {
+    return <User className="h-4 w-4 text-white" />;
+  }
+
+  if (name.toLowerCase().startsWith('gpt-')) {
+    return <OpenAI className="h-4 w-4 text-white" />;
+  }
+  return <Bot className="h-4 w-4 text-white" />;
+}
 enum DisplayMessageState {
   Markdown,
   Text,
@@ -134,20 +145,16 @@ function MessageComponent({
     >
       <div className="m-auto flex w-full gap-4 font-sans text-sm md:max-w-2xl md:gap-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
         <div className="m-auto flex w-full flex-row gap-4 p-4 md:max-w-2xl md:gap-6 md:py-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
-          <div className="flex w-8 flex-col items-end">
-            <div className="text-opacity-100r flex h-7 w-7 items-center justify-center rounded-md p-1 text-white">
-              {isUser ? (
-                <User className="h-4 w-4 text-white" />
-              ) : (
-                <Bot className="h-4 w-4 text-white" />
-              )}
+          <div className="flex flex-col items-end">
+            <div className="text-opacity-100r flex h-7 items-center justify-center rounded-md p-1 text-white">
+              <Avatar isUser={isUser} name={author.name} />
             </div>
           </div>
           <div className="flex w-[calc(100%-50px)] flex-col gap-1 md:gap-3 lg:w-[calc(100%-115px)]">
-            <div className="flex flex-grow flex-col gap-3">
-              <div className="flex min-h-20 flex-col items-start gap-4 whitespace-pre-wrap break-words">
+            <div className="flex flex-grow flex-col">
+              <div className="flex min-h-20 flex-col items-start whitespace-pre-wrap break-words">
                 <div className="w-full break-words">
-                  <p className="mx-4 font-bold capitalize">{author.name}</p>
+                  <p className="py-1 font-bold capitalize">{author.name}</p>
                   {state === DisplayMessageState.Pending && (
                     <div className="px-4 py-2">
                       <MoreHorizontal className="h-4 w-4 animate-pulse" />
@@ -155,15 +162,15 @@ function MessageComponent({
                   )}
                   {(state === DisplayMessageState.Markdown ||
                     state === DisplayMessageState.Streaming) && (
-                    <div className="my-4 w-full select-auto px-3 py-2">{Content}</div>
+                    <div className="w-full select-auto px-0 py-2">{Content}</div>
                   )}
                   {state === DisplayMessageState.Text && (
-                    <div className="my-4 w-full select-auto px-3 py-2">{content}</div>
+                    <div className="w-full select-auto px-0 py-2">{content}</div>
                   )}
                   {state === DisplayMessageState.Edit && (
                     <Textarea
                       ref={inputRef}
-                      className="my-4 w-full resize-none  px-3 py-2 text-sm"
+                      className="w-full resize-none  px-0 py-2 text-sm"
                       value={edit !== undefined ? edit : content}
                       onChange={(e) => {
                         setEdit(e.target.value);
@@ -173,7 +180,7 @@ function MessageComponent({
                 </div>
                 {(state === DisplayMessageState.Markdown || state === DisplayMessageState.Text) &&
                   isHover && (
-                    <div className="left-30 absolute bottom-0">
+                    <div className="absolute bottom-0 left-16">
                       {!isUser && (
                         <Button variant="ghost" size="sm" onClick={onResendMessage}>
                           <RotateCcw className="h-4 w-4" strokeWidth={1.5} />

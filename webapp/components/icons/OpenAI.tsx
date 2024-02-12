@@ -27,8 +27,8 @@ function OpenAI({ className, strokeWidth = 1.5 }: { className?: string; strokeWi
       strokeWidth={strokeWidth}
       stroke="currentColor"
       fill="none"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     >
       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
       <path d="M11.217 19.384a3.501 3.501 0 0 0 6.783 -1.217v-5.167l-6 -3.35" />
