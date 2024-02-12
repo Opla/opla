@@ -15,7 +15,7 @@ import { useRouter } from 'next/router';
 import { DownloadCloud, AlertTriangle, Server, BarChart3 } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import useBackend from '@/hooks/useBackendContext';
-import logger from '@/utils/logger';
+// import logger from '@/utils/logger';
 import { useContext } from 'react';
 import { AppContext } from '@/context';
 import { Page } from '@/types/ui';
@@ -26,7 +26,7 @@ export default function Statusbar() {
   const { backendContext } = useBackend();
   const { usage } = useContext(AppContext);
 
-  logger.info('statusbar backendContext', backendContext);
+  // logger.info('statusbar backendContext', backendContext);
 
   const running = backendContext.server.status === 'started';
   const error = backendContext.server.status === 'error';

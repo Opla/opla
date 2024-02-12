@@ -66,6 +66,7 @@ export type Message = BaseIdRecord & {
   contentHistory?: (string | Content)[];
   status?: MessageState;
   sibling?: string;
+  conversationId?: string;
 };
 
 export type Messages = {
@@ -112,6 +113,8 @@ export type Conversation = BaseNamedRecord & {
   usage?: ConversationUsage;
   contextWindowPolicy?: ContextWindowPolicy;
   keepSystem?: boolean;
+
+  scrollPosition?: number;
 };
 
 export type Entity = {
@@ -272,7 +275,7 @@ export type OplaServer = {
 };
 
 export type PageSettings = {
-  selectedID?: string;
+  selectedId?: string;
   explorerHidden: boolean;
   settingsHidden: boolean;
   explorerWidth: number;
