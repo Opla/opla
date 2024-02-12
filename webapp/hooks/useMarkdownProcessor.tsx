@@ -182,21 +182,21 @@ const production = {
   },
 };
 
-const processor = unified().use(remarkParse)
-.use(remarkMath)
-.use(remarkGfm)
-.use(remarkRehype)
-.use(rehypeKatex)
-.use(rehypeHighlight, { detect: true })
-.use(rehypeListItemParagraphToDiv)
-.use(rehypeReact, production);
+const processor = unified()
+  .use(remarkParse)
+  .use(remarkMath)
+  .use(remarkGfm)
+  .use(remarkRehype)
+  .use(rehypeKatex)
+  .use(rehypeHighlight, { detect: true })
+  .use(rehypeListItemParagraphToDiv)
+  .use(rehypeReact, production);
 
 const useMarkdownProcessor = (content: string) => {
-  const [Content, setContent] = useState(createElement(Fragment))
+  const [Content, setContent] = useState(createElement(Fragment));
   useEffect(() => {
     (async function proceed() {
-      const file = await processor
-      .process(content);
+      const file = await processor.process(content);
       setContent(file.result);
     })();
   }, [content]);
