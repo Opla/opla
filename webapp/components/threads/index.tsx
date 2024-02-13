@@ -42,6 +42,8 @@ type ThreadsProps = {
 
 export default function Threads({ selectedThreadId, view = ViewName.Recent }: ThreadsProps) {
   const router = useRouter();
+  const { id } = router.query;
+
   const {
     conversations,
     updateConversations,
@@ -61,6 +63,11 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     logger.info('edit Message');
   });
   const { showModal } = useContext(ModalsContext);
+
+  if (id !== selectedThreadId) {
+    logger.info('conflict in Threads', id, selectedThreadId);
+    return null;
+  }
 
   const defaultSettings = backendContext.config.settings;
   const selectedPage = getSelectedPage(selectedThreadId);
@@ -150,7 +157,7 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
       setArchives(threads);
     }
   };
-
+  logger.info('render Threads', selectedThreadId);
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel

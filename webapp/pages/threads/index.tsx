@@ -25,8 +25,8 @@ export default function DefaultThreads() {
   const { backendContext } = useBackend();
   useEffect(() => {
     const { settings } = backendContext.config;
-    if (settings.pages?.[Page.Threads].selectedID) {
-      router.replace(`${Page.Threads}/${settings.pages?.[Page.Threads].selectedID}`);
+    if (settings.pages?.[Page.Threads].selectedId) {
+      router.replace(`${Page.Threads}/${settings.pages?.[Page.Threads].selectedId}`);
     }
   }, [router, backendContext]);
   return <Threads />;

@@ -24,17 +24,21 @@ const ScrollBar = React.forwardRef<
 ));
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName;
 
+type ScrollAreaProps = {
+  viewPortRef?: React.RefObject<HTMLDivElement> | ((node: HTMLDivElement) => void) | undefined;
+} & ScrollAreaPrimitive.ScrollAreaProps;
+
 const ScrollArea = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>
->(({ className, children, ...props }, ref) => (
+  Omit<ScrollAreaProps & React.RefAttributes<HTMLDivElement>, 'ref'>
+>(({ viewPortRef, className, children, ...props }, ref) => (
   <ScrollAreaPrimitive.Root
     ref={ref}
     className={cn('relative overflow-hidden', className)}
     // eslint-disable-next-line react/jsx-props-no-spreading
     {...props}
   >
-    <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
+    <ScrollAreaPrimitive.Viewport ref={viewPortRef} className="h-full w-full rounded-[inherit]">
       {children}
     </ScrollAreaPrimitive.Viewport>
     <ScrollBar />

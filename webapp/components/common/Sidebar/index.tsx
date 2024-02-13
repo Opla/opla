@@ -32,7 +32,7 @@ import { useRouter } from 'next/router';
 import { UpdateIcon } from '@radix-ui/react-icons';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
-import logger from '@/utils/logger';
+// import logger from '@/utils/logger';
 import { ModalIds } from '@/modals';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import useBackend from '@/hooks/useBackendContext';
@@ -118,7 +118,7 @@ const sidebarItems: Array<Ui.Item> = [
 function Sidebar() {
   const router = useRouter();
   const { pathname } = router;
-  logger.info('pathname', pathname);
+  // logger.info('pathname', pathname);
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
   const { backendContext } = useBackend();
@@ -131,8 +131,8 @@ function Sidebar() {
     }
     if (item.page) {
       const page = settings?.pages?.[item.page];
-      if (page?.selectedID) {
-        href = `${item.page}/${page.selectedID}`;
+      if (page?.selectedId) {
+        href = `${item.page}/${page.selectedId}`;
       }
     }
 

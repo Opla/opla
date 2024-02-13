@@ -160,9 +160,8 @@ export default function Explorer({
 
   const handleSelectThread = (id: string) => {
     logger.info(`onSelectThread ${id}`);
-    // href={`${route}/${conversation.id}`}
     const route = view === ViewName.Archives ? Ui.Page.Archives : Ui.Page.Threads;
-    router.push(`${route}/${id}`);
+    router.push(`${route}/${id}`); // , undefined, { shallow: true });
   };
 
   useShortcuts(ShortcutIds.NEW_CONVERSATION, (event) => {

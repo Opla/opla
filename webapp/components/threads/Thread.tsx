@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { PanelLeft, PanelLeftClose, PanelRight, PanelRightClose } from 'lucide-react';
 import { AppContext } from '@/context';
@@ -46,12 +46,12 @@ import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { ModalData, ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { MenuAction, Page } from '@/types/ui';
-import MessageView from './Message';
+import { KeyedScrollPosition } from '@/hooks/useScroll';
 import PromptArea from './Prompt';
-import { ScrollArea } from '../ui/scroll-area';
 import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
 import { Button } from '../ui/button';
+import ConversationView from './Conversation';
 
 function Thread({
   conversationId: _conversationId,
@@ -90,13 +90,14 @@ function Thread({
   const selectedConversation = conversations.find((c) => c.id === conversationId);
   const [changedPrompt, setChangedPrompt] = useState<string | undefined>(undefined);
   const { showModal } = useContext(ModalsContext);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[] | undefined>(undefined);
+  const [isMessageLoading, setIsMessageLoading] = useState<boolean>(false);
 
-  const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>({});
+  const [isProcessing, setIsProcessing] = useState<{ [key: string]: boolean }>({});
   const [errorMessage, setErrorMessage] = useState<{ [key: string]: string }>({});
   const { currentPrompt = '' } = selectedConversation || {};
   const { t } = useTranslation();
-  const bottomOfChatRef = useRef<HTMLDivElement>(null);
+  // const bottomOfChatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const getNewMessages = async () => {
@@ -112,17 +113,24 @@ function Thread({
           if (stream && index === newMessages.length - 1) {
             return { ...msg, status: 'stream', content: stream.content.join('') } as Message;
           }
-          return msg;
+          return { ...msg, conversationId };
         });
       }
       setMessages(newMessages);
+      setIsMessageLoading(false);
     };
+    if (isMessageLoading) {
+      return;
+    }
+    logger.info('getNewMessages', conversationId, isMessageLoading);
+    setIsMessageLoading(true);
     getNewMessages();
   }, [
     backendContext.streams,
     conversationId,
     filterConversationMessages,
     readConversationMessages,
+    isMessageLoading,
   ]);
 
   const showEmptyChat = !conversationId;
@@ -130,12 +138,6 @@ function Thread({
   const localModelItems = getLocalModelsAsItems(backendContext, selectedModel);
   const cloudModelItems = getProviderModelsAsItems(providers, selectedModel);
   const modelItems = [...localModelItems, ...cloudModelItems];
-
-  useEffect(() => {
-    if (bottomOfChatRef.current) {
-      bottomOfChatRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
 
   useEffect(() => {
     if (_conversationId && tempConversationId) {
@@ -163,7 +165,7 @@ function Thread({
     const updatedConversations = updateOrCreateConversation(
       selectedConversationId,
       selectedConversations,
-      messages[0]?.content as string,
+      messages?.[0]?.content as string,
     );
     const updatedMessages = mergeMessages(conversationMessages, changedMessages);
     updateConversations(updatedConversations);
@@ -272,7 +274,7 @@ function Thread({
     }
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
 
-    setIsLoading({ ...isLoading, [conversationId]: true });
+    setIsProcessing({ ...isProcessing, [conversationId]: true });
 
     const userMessage = createMessage({ role: 'user', name: 'you' }, currentPrompt);
     let message = createMessage({ role: 'assistant', name: selectedModel }, '...');
@@ -308,7 +310,7 @@ function Thread({
       router.push(`${Page.Threads}/${tempConversationId}`);
     }
 
-    setIsLoading({ ...isLoading, [conversationId]: false });
+    setIsProcessing({ ...isProcessing, [conversationId]: false });
   };
 
   const handleResendMessage = async (previousMessage: Message) => {
@@ -316,7 +318,7 @@ function Thread({
       return;
     }
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
-    setIsLoading({ ...isLoading, [conversationId]: true });
+    setIsProcessing({ ...isProcessing, [conversationId]: true });
 
     let message: Message = { ...previousMessage, status: MessageState.Pending, content: '...' };
     if (
@@ -338,7 +340,7 @@ function Thread({
 
     message = await sendMessage(message, updatedMessages, conversation, updatedConversations);
 
-    setIsLoading({ ...isLoading, [conversationId]: false });
+    setIsProcessing({ ...isProcessing, [conversationId]: false });
   };
 
   const handleDeleteMessages = async (action: string, data: ModalData) => {
@@ -452,6 +454,28 @@ function Thread({
     handleUpdatePrompt(prompt.value, prompt.name);
   };
 
+  /* const [updatedScrollPosition, setUpdatedScrollPosition] = useState<KeyedScrollPosition>({
+    key: undefined,
+    position: EmptyPosition,
+  }); */
+
+  const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {
+    const conversation = getConversation(key, conversations);
+    if (conversation && conversation.scrollPosition !== position.y && position.y !== -1) {
+      logger.info(`handleScrollPosition ${key} ${conversationId}`, position);
+      conversation.scrollPosition = position.y;
+      const updatedConversations = updateConversation(conversation, conversations, true);
+      updateConversations(updatedConversations);
+    }
+  };
+
+  // useDebounceFunc<KeyedScrollPosition>(handleScrollPosition, updatedScrollPosition, 500);
+
+  logger.info(
+    `render Thread ${conversationId}`,
+    selectedConversation,
+    selectedConversation?.scrollPosition,
+  );
   const message = changedPrompt === undefined ? currentPrompt : changedPrompt;
   return (
     <div className="flex h-full flex-col dark:bg-neutral-800/30">
@@ -508,36 +532,31 @@ function Thread({
           <PromptsGrid onPromptSelected={handlePromptSelected} />
         </div>
       ) : (
-        <ScrollArea className="flex h-full flex-col">
-          {messages.map((m) => (
-            <MessageView
-              key={m.id}
-              message={m}
-              onResendMessage={() => {
-                handleResendMessage(m);
-              }}
-              onDeleteMessage={() => {
-                handleShouldDeleteMessage(m);
-              }}
-              onChangeContent={(newContent, submit) => {
-                handleChangeMessageContent(m, newContent, submit);
-              }}
-            />
-          ))}
-          <div className="h-4 w-full" />
-          <div ref={bottomOfChatRef} />
-        </ScrollArea>
+        messages &&
+        messages[0]?.conversationId === conversationId && (
+          <ConversationView
+            conversationId={selectedConversation?.id as string}
+            scrollPosition={selectedConversation?.scrollPosition || -1}
+            messages={messages}
+            onScrollPosition={handleScrollPosition}
+            handleResendMessage={handleResendMessage}
+            handleShouldDeleteMessage={handleShouldDeleteMessage}
+            handleChangeMessageContent={handleChangeMessageContent}
+          />
+        )
       )}
       <div className="flex flex-col items-center text-sm dark:bg-neutral-800/30" />
 
-      <PromptArea
-        conversationId={conversationId as string}
-        message={message}
-        isLoading={conversationId ? isLoading[conversationId] : false}
-        errorMessage={conversationId ? errorMessage[conversationId] : ''}
-        onSendMessage={handleSendMessage}
-        onUpdatePrompt={handleChangePrompt}
-      />
+      {messages && messages[0]?.conversationId === conversationId && (
+        <PromptArea
+          conversationId={conversationId as string}
+          message={message}
+          isLoading={conversationId ? isProcessing[conversationId] : false}
+          errorMessage={conversationId ? errorMessage[conversationId] : ''}
+          onSendMessage={handleSendMessage}
+          onUpdatePrompt={handleChangePrompt}
+        />
+      )}
     </div>
   );
 }

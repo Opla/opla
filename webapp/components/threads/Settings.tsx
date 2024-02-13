@@ -39,7 +39,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
   const { backendContext } = useBackend();
   const [params, setParams] = useState<{ [key: string]: ParameterValue | undefined }>({});
 
-  logger.info('backendContext', backendContext);
+  // logger.info('backendContext', backendContext);
   const selectedConversation = conversations.find((c) => c.id === conversationId);
   const { activeModel } = backendContext.config.models;
   const model = findModel(activeModel, backendContext.config.models.items);
