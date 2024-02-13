@@ -46,6 +46,7 @@ import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { ModalData, ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { MenuAction, Page } from '@/types/ui';
+import { EmptyPosition, KeyedScrollPosition } from '@/hooks/useScroll';
 import PromptArea from './Prompt';
 import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
@@ -453,18 +454,22 @@ function Thread({
     handleUpdatePrompt(prompt.value, prompt.name);
   };
 
-  const [updatedScrollPosition, setUpdatedScrollPosition] = useState<number>(-1);
+  const [updatedScrollPosition, setUpdatedScrollPosition] = useState<KeyedScrollPosition>({
+    key: undefined,
+    position: EmptyPosition,
+  });
 
-  const handleScrollPosition = (position: number) => {
-    const conversation = getConversation(conversationId, conversations);
-    if (conversation && conversation.scrollPosition !== position && position !== -1) {
-      conversation.scrollPosition = position;
+  const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {
+    const conversation = getConversation(key, conversations);
+    if (conversation && conversation.scrollPosition !== position.y && position.y !== -1) {
+      logger.info(`handleScrollPosition ${key} ${conversationId}`, position);
+      conversation.scrollPosition = position.y;
       const updatedConversations = updateConversation(conversation, conversations, true);
       updateConversations(updatedConversations);
     }
   };
 
-  useDebounceFunc<number>(handleScrollPosition, updatedScrollPosition, 500);
+  useDebounceFunc<KeyedScrollPosition>(handleScrollPosition, updatedScrollPosition, 500);
 
   logger.info(
     `render Thread ${conversationId}`,
@@ -530,7 +535,8 @@ function Thread({
         messages &&
         messages[0]?.conversationId === conversationId && (
           <ConversationView
-            scrollPosition={selectedConversation?.scrollPosition || 0}
+            conversationId={selectedConversation?.id as string}
+            scrollPosition={selectedConversation?.scrollPosition || -1}
             messages={messages}
             onScrollPosition={setUpdatedScrollPosition}
             handleResendMessage={handleResendMessage}

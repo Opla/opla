@@ -12,23 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useRef } from 'react';
-import { Position2D } from '@/hooks/useScroll';
+import { useEffect, useRef } from 'react';
+import useScroll, { KeyedScrollPosition } from '@/hooks/useScroll';
 import { Message } from '@/types';
 import logger from '@/utils/logger';
 import MessageView from './Message';
-import { ScrollArea } from '../ui/scroll-area';
 
 type ConversationProps = {
+  conversationId: string;
   scrollPosition: number;
   messages: Message[];
-  onScrollPosition: (position: number) => void;
+  onScrollPosition: (props: KeyedScrollPosition) => void;
   handleResendMessage: (m: Message) => void;
   handleShouldDeleteMessage: (m: Message) => void;
   handleChangeMessageContent: (m: Message, newContent: string, submit: boolean) => void;
 };
 
 function Conversation({
+  conversationId,
   scrollPosition,
   messages,
   onScrollPosition,
@@ -39,25 +40,29 @@ function Conversation({
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
   //  const [updatedScrollPosition, setUpdatedScrollPosition] = useState(scrollPosition);
 
-  const handleUpdatePosition = (newPosition: Position2D) => {
+  const handleUpdatePosition = (props: KeyedScrollPosition) => {
     // if (position.y === newPosition.y) return;
-    logger.info('updated newPosition', newPosition);
+    logger.info('updated newPosition', props);
     // onScrollPosition(newPosition.y);
-    onScrollPosition(newPosition.y);
+    onScrollPosition(props);
   };
 
-  const ref = useRef<HTMLDivElement | undefined>(undefined);
+  // const ref = useRef<HTMLDivElement | undefined>(undefined);
+  const [ref, scrollTo] = useScroll(
+    conversationId,
+    { x: scrollPosition === -1 ? -1 : 0, y: scrollPosition },
+    handleUpdatePosition,
+  );
   logger.info(`render Conversation ${messages.length}`, scrollPosition, handleUpdatePosition, ref);
-  // useScroll(ref, { x: 0, y: scrollPosition }, handleUpdatePosition);
 
-  /* useEffect(() => {
+  useEffect(() => {
     scrollTo({ x: 0, y: scrollPosition });
-  },[scrollPosition, scrollTo]); */
+  }, [scrollPosition, scrollTo]);
 
   // useDebounceFunc<number>(onScrollPosition, updatedScrollPosition, 500);
 
-  return (
-    <ScrollArea viewPortRef={undefined} className="flex h-full flex-col">
+  /* return (
+    <ScrollArea viewPortRef={ref} className="flex h-full flex-col">
       {messages.map((m) => (
         <MessageView
           key={m.id}
@@ -76,6 +81,30 @@ function Conversation({
       <div className="h-4 w-full" />
       <div ref={bottomOfChatRef} />
     </ScrollArea>
+  ); */
+  return (
+    <div className="flex grow flex-col overflow-hidden">
+      <div ref={ref} className="overflow-y-auto">
+        {messages.map((m) => (
+          <MessageView
+            key={m.id}
+            message={m}
+            onResendMessage={() => {
+              handleResendMessage(m);
+            }}
+            onDeleteMessage={() => {
+              handleShouldDeleteMessage(m);
+            }}
+            onChangeContent={(newContent, submit) => {
+              handleChangeMessageContent(m, newContent, submit);
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="h-4 w-full" />
+      <div ref={bottomOfChatRef} />
+    </div>
   );
 }
 

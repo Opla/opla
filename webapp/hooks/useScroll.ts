@@ -13,84 +13,157 @@
 // limitations under the License.
 
 import logger from '@/utils/logger';
-import React, { useCallback, MutableRefObject, useEffect } from 'react';
+import { useCallback, useRef, MutableRefObject } from 'react';
 
 export type Position2D = {
   x: number;
   y: number;
 };
 
-/* const emptyPosition: Position2D = {
-    x: -1,
-    y: -1,
-}; */
+type Rect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  top?: number;
+  right?: number;
+  bottom?: number;
+  left?: number;
+};
+
+export type KeyedScrollPosition = { key: string | undefined; position: Position2D; rect?: Rect };
+
+export const EmptyPosition: Position2D = {
+  x: -1,
+  y: -1,
+};
+
+const getBoundingClientRect = (element?: HTMLDivElement): Rect =>
+  element?.getBoundingClientRect() || {
+    x: 0,
+    y: 0,
+    width: 1,
+    height: 1,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  };
+
+const containerRectToPercentage = (element: HTMLDivElement, parent: HTMLDivElement): Rect => {
+  const elementRect = getBoundingClientRect(element);
+  const parentRect = getBoundingClientRect(parent);
+  let width = elementRect.width - parentRect.width;
+  if (width === 0) {
+    width = -1;
+  }
+
+  let height = elementRect.height - parentRect.height;
+  if (height === 0) {
+    height = -1;
+  }
+  console.log('elementRect.y', elementRect.y, parentRect.y, height, elementRect, parentRect);
+  const x = width < 1 ? 0 : +(((-elementRect.x + parentRect.x) / width) * 100).toFixed(2);
+  const y = height < 1 ? 0 : +(((-elementRect.y + parentRect.y) / height) * 100).toFixed(2);
+  return {
+    x,
+    y,
+    width,
+    height,
+  };
+};
 
 export default function useScroll(
-  previousNode: MutableRefObject<HTMLDivElement | undefined>,
+  key: string,
   position: Position2D,
-  onUpdatePosition: (pos: Position2D) => void,
-) {
-  // const position = useRef<Position2D>(defaultPosition);
-  const [firstRender, setFirstRender] = React.useState(true);
+  onUpdatePosition: (props: KeyedScrollPosition) => void,
+): [
+  React.RefCallback<HTMLDivElement>,
+  (scrollPosition: Position2D, forceUpdate?: boolean) => void,
+] {
+  const previousNode: MutableRefObject<HTMLDivElement | undefined> = useRef();
+  const keyedPosition = useRef<KeyedScrollPosition>({ key, position });
 
-  logger.info('useScroll ref', position);
+  logger.info(`useScroll ref ${key}`, position);
 
   const handleScroll = useCallback(() => {
-    if (firstRender) {
-      setFirstRender(false);
-      return;
-    }
-    const element = previousNode.current?.firstChild as Element;
-    const parentRect = previousNode.current?.getBoundingClientRect();
+    const parent = previousNode.current as HTMLDivElement;
+    const element = parent?.firstChild as HTMLDivElement;
+    const parentRect = parent?.getBoundingClientRect();
     if (!element || !parentRect) {
-      // position = emptyPosition;
       return;
     }
-    const elementRect = element?.getBoundingClientRect();
-    let width = (elementRect?.width ?? 0) - (parentRect?.width ?? 0);
-    if (width === 0) {
-      width = 1;
+    const rect: Rect = containerRectToPercentage(element, parent);
+    if (rect.x === position.x && rect.y === position.y) {
+      logger.info('same position');
+      return;
     }
-
-    let height = (elementRect?.height ?? 0) - (parentRect?.height ?? 0);
-    if (height === 0) {
-      height = 1;
+    logger.info(`handleScroll newPosition ${key}`, position, rect);
+    if (rect.width && rect.height) {
+      const newKeyedPosition: KeyedScrollPosition = {
+        key,
+        position: { x: rect.x, y: rect.y },
+        rect,
+      };
+      if (
+        (keyedPosition.current.key === key &&
+          keyedPosition.current.position.x !== newKeyedPosition.position.x) ||
+        keyedPosition.current.position.y !== newKeyedPosition.position.y
+      ) {
+        keyedPosition.current = newKeyedPosition;
+        if (
+          keyedPosition.current.rect?.height === newKeyedPosition.rect?.height &&
+          keyedPosition.current.rect?.width === newKeyedPosition.rect?.width
+        ) {
+          onUpdatePosition(newKeyedPosition);
+        } else {
+          logger.info('skip update', keyedPosition.current, newKeyedPosition);
+        }
+      }
     }
-    const newPosition: Position2D = {
-      x: +(((-(elementRect?.x ?? 0) + (parentRect?.x ?? 0)) / width) * 100).toFixed(2),
-      y: +(((-(elementRect?.y ?? 0) + (parentRect?.y ?? 0)) / height) * 100).toFixed(2),
-    };
-    logger.info('handleScroll newPosition', newPosition, width, height, elementRect, parentRect);
-    if (elementRect) {
-      // position.current = newPosition;
-      onUpdatePosition(newPosition);
-    }
-  }, [firstRender, onUpdatePosition, previousNode]);
+  }, [position, onUpdatePosition, key]);
 
   const scrollTo = useCallback(
     (scrollPosition: Position2D) => {
-      logger.info('scrollTo', scrollPosition, position);
-      const node = previousNode.current;
-      if (node && (scrollPosition.x !== position.x || scrollPosition.y !== position.y)) {
-        const element = node.firstChild as Element;
-        const parentRect = node.getBoundingClientRect();
+      if (scrollPosition.x === -1 && scrollPosition.y === -1) {
+        return;
+      }
+      const parent = previousNode.current as HTMLDivElement;
+      if (parent) {
+        logger.info(`scrollTo ${key} ${parent}`, scrollPosition, position);
+        const element = parent.firstChild as HTMLDivElement;
         if (!element) {
-          // position.current = emptyPosition;
           return;
         }
-        const elementRect = element?.getBoundingClientRect();
-        let width = (elementRect?.width ?? 0) - (parentRect?.width ?? 0);
-        if (width === 0) {
-          width = 1;
+
+        const currentRect: Rect = containerRectToPercentage(
+          element as HTMLDivElement,
+          parent as HTMLDivElement,
+        );
+        logger.info('currentRect', currentRect, scrollPosition, position);
+        if (currentRect.height < 1) {
+          logger.info('not scroll', scrollPosition, currentRect);
+          return;
+        }
+        if (currentRect.x === scrollPosition.x && currentRect.y === scrollPosition.y) {
+          logger.info('same position', scrollPosition, currentRect);
+          return;
         }
 
-        let height = (elementRect?.height ?? 0) - (parentRect?.height ?? 0);
+        const elementRect = getBoundingClientRect(element);
+        const parentRect = getBoundingClientRect(parent);
+        let width = elementRect.width - parentRect.width;
+        if (width === 0) {
+          width = -1;
+        }
+
+        let height = elementRect.height - parentRect.height;
         if (height === 0) {
-          height = 1;
+          height = -1;
         }
         const newPosition: Position2D = {
-          x: (scrollPosition.x / 100) * width,
-          y: (scrollPosition.y / 100) * height,
+          x: width < 1 ? 0 : -(scrollPosition.x / 100) * (width + parentRect.x),
+          y: height < 1 ? 0 : -(scrollPosition.y / 100) * (height + parentRect.y),
         };
         logger.info(
           'scrollTo update',
@@ -101,37 +174,51 @@ export default function useScroll(
           elementRect,
           parentRect,
         );
-        node.scrollTo(newPosition.x, newPosition.y);
-        // position.current = scrollPosition;
+        parent.scrollTo(-newPosition.x, -newPosition.y);
+        const rect = containerRectToPercentage(element, parent);
+        keyedPosition.current = { key, position: { x: rect.x, y: rect.y }, rect };
       }
     },
-    [position, previousNode],
+    [key, position],
   );
 
-  useEffect(() => {
-    if (previousNode.current?.nodeType === Node.ELEMENT_NODE) {
-      previousNode.current.addEventListener('scroll', handleScroll, { passive: true });
-    }
-    return () => {
-      if (previousNode.current) {
-        previousNode.current.removeEventListener('scroll', handleScroll);
+  /* useEffect(() => {
+      if (previousNode.current?.nodeType === Node.ELEMENT_NODE) {
+        previousNode.current.addEventListener('scroll', handleScroll, { passive: true });
       }
-    };
-  }, [handleScroll, previousNode]);
+      return () => {
+        if (previousNode.current) {
+          previousNode.current.removeEventListener('scroll', handleScroll);
+        }
+      };
+    }, [handleScroll, previousNode]); */
 
-  /* const customRef = React.useCallback(
-        (node: HTMLDivElement) => {
-            if (previousNode.current?.nodeType === Node.ELEMENT_NODE) {
-                previousNode.current.removeEventListener('scroll', handleScroll);
-            }
+  const customRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (previousNode.current === node) {
+        return;
+      }
+      const listener = () => {
+        handleScroll();
+      };
 
-            if (node?.nodeType === Node.ELEMENT_NODE) {
-                node.addEventListener('scroll', handleScroll, { passive: true });
-            }
+      const resizeListener = () => {
+        // handleScroll();
+        console.log('resizeListener');
+      };
 
-            previousNode.current = node;
-            handleScroll();
-        },
-        [handleScroll],
-    ); */
+      if (previousNode.current?.nodeType === Node.ELEMENT_NODE) {
+        previousNode.current.removeEventListener('scroll', listener);
+        previousNode.current.firstChild?.removeEventListener('resize', resizeListener);
+      }
+
+      if (node?.nodeType === Node.ELEMENT_NODE) {
+        node.addEventListener('scroll', listener, { passive: true });
+        node.firstChild?.addEventListener('resize', resizeListener);
+      }
+      previousNode.current = node;
+    },
+    [handleScroll],
+  );
+  return [customRef, scrollTo];
 }

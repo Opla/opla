@@ -161,7 +161,7 @@ export default function Explorer({
   const handleSelectThread = (id: string) => {
     logger.info(`onSelectThread ${id}`);
     const route = view === ViewName.Archives ? Ui.Page.Archives : Ui.Page.Threads;
-    router.push(`${route}/${id}`, undefined, { shallow: true });
+    router.push(`${route}/${id}`); // , undefined, { shallow: true });
   };
 
   useShortcuts(ShortcutIds.NEW_CONVERSATION, (event) => {
