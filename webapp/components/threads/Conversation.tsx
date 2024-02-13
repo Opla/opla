@@ -38,7 +38,7 @@ function Conversation({
   handleChangeMessageContent,
 }: ConversationProps) {
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
-  //  const [updatedScrollPosition, setUpdatedScrollPosition] = useState(scrollPosition);
+  // const [updatedScrollPosition, setUpdatedScrollPosition] = useState(scrollPosition);
 
   const handleUpdatePosition = (props: KeyedScrollPosition) => {
     // if (position.y === newPosition.y) return;
@@ -53,7 +53,7 @@ function Conversation({
     { x: scrollPosition === -1 ? -1 : 0, y: scrollPosition },
     handleUpdatePosition,
   );
-  logger.info(`render Conversation ${messages.length}`, scrollPosition, handleUpdatePosition, ref);
+  // logger.info(`render Conversation ${messages.length}`, scrollPosition, ref);
 
   useEffect(() => {
     scrollTo({ x: 0, y: scrollPosition });
@@ -61,45 +61,26 @@ function Conversation({
 
   // useDebounceFunc<number>(onScrollPosition, updatedScrollPosition, 500);
 
-  /* return (
-    <ScrollArea viewPortRef={ref} className="flex h-full flex-col">
-      {messages.map((m) => (
-        <MessageView
-          key={m.id}
-          message={m}
-          onResendMessage={() => {
-            handleResendMessage(m);
-          }}
-          onDeleteMessage={() => {
-            handleShouldDeleteMessage(m);
-          }}
-          onChangeContent={(newContent, submit) => {
-            handleChangeMessageContent(m, newContent, submit);
-          }}
-        />
-      ))}
-      <div className="h-4 w-full" />
-      <div ref={bottomOfChatRef} />
-    </ScrollArea>
-  ); */
   return (
     <div className="flex grow flex-col overflow-hidden">
       <div ref={ref} className="overflow-y-auto">
-        {messages.map((m) => (
-          <MessageView
-            key={m.id}
-            message={m}
-            onResendMessage={() => {
-              handleResendMessage(m);
-            }}
-            onDeleteMessage={() => {
-              handleShouldDeleteMessage(m);
-            }}
-            onChangeContent={(newContent, submit) => {
-              handleChangeMessageContent(m, newContent, submit);
-            }}
-          />
-        ))}
+        <div>
+          {messages.map((m) => (
+            <MessageView
+              key={m.id}
+              message={m}
+              onResendMessage={() => {
+                handleResendMessage(m);
+              }}
+              onDeleteMessage={() => {
+                handleShouldDeleteMessage(m);
+              }}
+              onChangeContent={(newContent, submit) => {
+                handleChangeMessageContent(m, newContent, submit);
+              }}
+            />
+          ))}
+        </div>
       </div>
 
       <div className="h-4 w-full" />

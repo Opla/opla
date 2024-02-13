@@ -46,7 +46,7 @@ import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { ModalData, ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { MenuAction, Page } from '@/types/ui';
-import { EmptyPosition, KeyedScrollPosition } from '@/hooks/useScroll';
+import { KeyedScrollPosition } from '@/hooks/useScroll';
 import PromptArea from './Prompt';
 import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
@@ -454,10 +454,10 @@ function Thread({
     handleUpdatePrompt(prompt.value, prompt.name);
   };
 
-  const [updatedScrollPosition, setUpdatedScrollPosition] = useState<KeyedScrollPosition>({
+  /* const [updatedScrollPosition, setUpdatedScrollPosition] = useState<KeyedScrollPosition>({
     key: undefined,
     position: EmptyPosition,
-  });
+  }); */
 
   const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {
     const conversation = getConversation(key, conversations);
@@ -469,7 +469,7 @@ function Thread({
     }
   };
 
-  useDebounceFunc<KeyedScrollPosition>(handleScrollPosition, updatedScrollPosition, 500);
+  // useDebounceFunc<KeyedScrollPosition>(handleScrollPosition, updatedScrollPosition, 500);
 
   logger.info(
     `render Thread ${conversationId}`,
@@ -538,7 +538,7 @@ function Thread({
             conversationId={selectedConversation?.id as string}
             scrollPosition={selectedConversation?.scrollPosition || -1}
             messages={messages}
-            onScrollPosition={setUpdatedScrollPosition}
+            onScrollPosition={handleScrollPosition}
             handleResendMessage={handleResendMessage}
             handleShouldDeleteMessage={handleShouldDeleteMessage}
             handleChangeMessageContent={handleChangeMessageContent}
