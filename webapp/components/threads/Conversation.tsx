@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
+import { ArrowDown } from 'lucide-react';
 import useScroll, { KeyedScrollPosition } from '@/hooks/useScroll';
 import { Message } from '@/types';
 import logger from '@/utils/logger';
 import MessageView from './Message';
+import { Button } from '../ui/button';
 
 type ConversationProps = {
   conversationId: string;
@@ -37,30 +39,23 @@ function Conversation({
   handleShouldDeleteMessage,
   handleChangeMessageContent,
 }: ConversationProps) {
-  const bottomOfChatRef = useRef<HTMLDivElement>(null);
-  // const [updatedScrollPosition, setUpdatedScrollPosition] = useState(scrollPosition);
 
   const handleUpdatePosition = (props: KeyedScrollPosition) => {
-    // if (position.y === newPosition.y) return;
     logger.info('updated newPosition', props);
-    // onScrollPosition(newPosition.y);
     onScrollPosition(props);
   };
 
-  // const ref = useRef<HTMLDivElement | undefined>(undefined);
   const [ref, scrollTo] = useScroll(
     conversationId,
     { x: scrollPosition === -1 ? -1 : 0, y: scrollPosition },
     handleUpdatePosition,
   );
-  // logger.info(`render Conversation ${messages.length}`, scrollPosition, ref);
 
   useEffect(() => {
     scrollTo({ x: 0, y: scrollPosition });
   }, [scrollPosition, scrollTo]);
 
-  // useDebounceFunc<number>(onScrollPosition, updatedScrollPosition, 500);
-
+  console.log('render Conversation', scrollPosition);
   return (
     <div className="flex grow flex-col overflow-hidden">
       <div ref={ref} className="overflow-y-auto">
@@ -83,8 +78,16 @@ function Conversation({
         </div>
       </div>
 
-      <div className="h-4 w-full" />
-      <div ref={bottomOfChatRef} />
+      <div className="z-100 relative w-full">
+        {(scrollPosition < 99 && scrollPosition > 0) && <Button
+          variant="ghost"
+          size="icon"
+          className="absolute bottom-4 right-8"
+          onClick={() => scrollTo({ x: 0, y: 100 })}
+        >
+          <ArrowDown />
+        </Button>}
+      </div>
     </div>
   );
 }

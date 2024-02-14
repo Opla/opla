@@ -457,11 +457,6 @@ function Thread({
     handleUpdatePrompt(prompt.value, prompt.name);
   };
 
-  /* const [updatedScrollPosition, setUpdatedScrollPosition] = useState<KeyedScrollPosition>({
-    key: undefined,
-    position: EmptyPosition,
-  }); */
-
   const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {
     const conversation = getConversation(key, conversations);
     if (conversation && conversation.scrollPosition !== position.y && position.y !== -1) {
@@ -471,8 +466,6 @@ function Thread({
       updateConversations(updatedConversations);
     }
   };
-
-  // useDebounceFunc<KeyedScrollPosition>(handleScrollPosition, updatedScrollPosition, 500);
 
   logger.info(
     `render Thread ${conversationId}`,
@@ -535,12 +528,12 @@ function Thread({
           <PromptsGrid onPromptSelected={handlePromptSelected} />
         </div>
       ) : (
-        messages &&
-        messages[0]?.conversationId === conversationId && (
+        (message || (messages &&
+        messages[0]?.conversationId === conversationId)) && (
           <ConversationView
             conversationId={selectedConversation?.id as string}
-            scrollPosition={selectedConversation?.scrollPosition || -1}
-            messages={messages}
+            scrollPosition={selectedConversation && selectedConversation.scrollPosition !== undefined ? selectedConversation.scrollPosition : -1}
+            messages={messages || []}
             onScrollPosition={handleScrollPosition}
             handleResendMessage={handleResendMessage}
             handleShouldDeleteMessage={handleShouldDeleteMessage}
@@ -550,7 +543,7 @@ function Thread({
       )}
       <div className="flex flex-col items-center text-sm dark:bg-neutral-800/30" />
 
-      {messages && messages[0]?.conversationId === conversationId && (
+      {(message || (messages && messages[0]?.conversationId === conversationId)) && (
         <PromptArea
           conversationId={conversationId as string}
           message={message}
