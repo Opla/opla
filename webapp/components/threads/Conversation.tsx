@@ -39,7 +39,6 @@ function Conversation({
   handleShouldDeleteMessage,
   handleChangeMessageContent,
 }: ConversationProps) {
-
   const handleUpdatePosition = (props: KeyedScrollPosition) => {
     logger.info('updated newPosition', props);
     onScrollPosition(props);
@@ -79,14 +78,16 @@ function Conversation({
       </div>
 
       <div className="z-100 relative w-full">
-        {(scrollPosition < 99 && scrollPosition > 0) && <Button
-          variant="ghost"
-          size="icon"
-          className="absolute bottom-4 right-8"
-          onClick={() => scrollTo({ x: 0, y: 100 })}
-        >
-          <ArrowDown />
-        </Button>}
+        {scrollPosition < 99 && scrollPosition > 0 && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute bottom-4 right-8"
+            onClick={() => scrollTo({ x: 0, y: 100 })}
+          >
+            <ArrowDown />
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -528,11 +528,14 @@ function Thread({
           <PromptsGrid onPromptSelected={handlePromptSelected} />
         </div>
       ) : (
-        (message || (messages &&
-        messages[0]?.conversationId === conversationId)) && (
+        (message || (messages && messages[0]?.conversationId === conversationId)) && (
           <ConversationView
             conversationId={selectedConversation?.id as string}
-            scrollPosition={selectedConversation && selectedConversation.scrollPosition !== undefined ? selectedConversation.scrollPosition : -1}
+            scrollPosition={
+              selectedConversation && selectedConversation.scrollPosition !== undefined
+                ? selectedConversation.scrollPosition
+                : -1
+            }
             messages={messages || []}
             onScrollPosition={handleScrollPosition}
             handleResendMessage={handleResendMessage}
