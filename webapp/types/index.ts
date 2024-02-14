@@ -173,7 +173,6 @@ export type Provider = BaseNamedRecord & {
   disabled: boolean;
   key: string;
   models?: Model[];
-  isDisabled?: () => boolean;
 };
 
 export type Model = BaseNamedRecord & {

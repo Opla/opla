@@ -15,6 +15,8 @@
 import useTranslation from '@/hooks/useTranslation';
 import { Provider } from '@/types';
 import { Plug } from 'lucide-react';
+import { getProviderState } from '@/utils/data/providers';
+import { getStateColor } from '@/utils/ui';
 import { Button } from '../ui/button';
 
 export default function Toolbar({
@@ -54,7 +56,7 @@ export default function Toolbar({
                 onProviderToggle();
               }}
             >
-              <span className={`${provider?.disabled ? 'text-gray-500' : 'text-green-500'} `}>
+              <span className={getStateColor(getProviderState(provider), 'text')}>
                 <Plug className="mr-2 h-4 w-4 rotate-90" />
               </span>
               <span>{provider?.disabled ? t('Enable') : t('Disable')}</span>

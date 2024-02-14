@@ -15,6 +15,7 @@
 import { Ui, Model, OplaContext, Provider } from '@/types';
 import Opla from '@/components/icons/Opla';
 import { getResourceUrl } from '.';
+import { getProviderState } from './providers';
 
 const getSelectedModel = (backendContext: OplaContext) => {
   const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.activeModel}`;
@@ -26,7 +27,7 @@ const getLocalModelsAsItems = (
   modelname: string,
   localProvider: Provider | undefined,
 ): Ui.MenuItem[] => {
-  const state = !localProvider || localProvider.isDisabled ? 'disabled' : undefined;
+  const state = getProviderState(localProvider);
   return backendContext.config.models.items.map((model) => ({
     label: model.title || model.name,
     value: model.name,
@@ -39,7 +40,7 @@ const getLocalModelsAsItems = (
 const getProviderModelsAsItems = (providers: Provider[], modelname: string): Ui.MenuItem[] => {
   const items = providers.reduce((acc, provider) => {
     if (!provider.models || provider.disabled) return acc;
-    const state = provider.isDisabled ? 'disabled' : undefined;
+    const state = getProviderState(provider);
     const providerItems =
       provider.models.map(
         (model) =>

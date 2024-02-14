@@ -97,7 +97,6 @@ function Thread({
   const [errorMessage, setErrorMessage] = useState<{ [key: string]: string }>({});
   const { currentPrompt = '' } = selectedConversation || {};
   const { t } = useTranslation();
-  // const bottomOfChatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const getNewMessages = async () => {

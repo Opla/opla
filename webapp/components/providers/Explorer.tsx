@@ -18,7 +18,7 @@ import { useContext } from 'react';
 import { useRouter } from 'next/router';
 import { Plus, Server } from 'lucide-react';
 import { AppContext } from '@/context';
-import { Ui, Provider, ProviderType, ServerStatus } from '@/types';
+import { Ui, Provider, ProviderType } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { ModalsContext } from '@/context/modals';
@@ -26,15 +26,17 @@ import {
   createProvider,
   deleteProvider,
   findProvider,
+  getProviderState,
   updateProvider,
 } from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';
 import useBackend from '@/hooks/useBackendContext';
 import { ModalIds } from '@/modals';
 import { ContextMenuTrigger } from '@radix-ui/react-context-menu';
-import { Page } from '@/types/ui';
+import { BasicState, Page } from '@/types/ui';
 import { shortcutAsText } from '@/utils/shortcuts';
 import { ShortcutIds } from '@/hooks/useShortcuts';
+import { getStateColor } from '@/utils/ui';
 import { Button } from '../ui/button';
 import { ContextMenu } from '../ui/context-menu';
 import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
@@ -129,13 +131,6 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
     },
   ];
 
-  const isDisabled = (provider: Provider) => {
-    if (provider?.type === ProviderType.opla) {
-      return backendContext.server?.status !== ServerStatus.STARTED;
-    }
-    return provider?.disabled;
-  };
-
   return (
     <div className="scrollbar-trigger flex h-full w-full flex-1 items-start border-r-[1px] border-neutral-300/30 bg-neutral-100 dark:border-neutral-900 dark:bg-neutral-800/70">
       <nav className="flex h-full flex-1 flex-col space-y-1">
@@ -204,9 +199,10 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
                                 {provider.name}
                               </div>
                               <div
-                                className={`${
-                                  isDisabled(provider) ? 'text-gray-500' : 'text-green-500'
-                                } `}
+                                className={getStateColor(
+                                  getProviderState(provider, backendContext.server?.status),
+                                  'text',
+                                )}
                               >
                                 <Server className="h-4 w-4" />
                               </div>
@@ -216,7 +212,12 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
                       </ContextMenuTrigger>
                       <ContextMenuList
                         data={provider.id}
-                        menu={isDisabled(provider) ? menuDisabled : menu}
+                        menu={
+                          getProviderState(provider, backendContext.server?.status) !==
+                          BasicState.active
+                            ? menuDisabled
+                            : menu
+                        }
                       />
                     </ContextMenu>
                   </li>
