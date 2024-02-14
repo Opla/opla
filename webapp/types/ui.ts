@@ -27,6 +27,8 @@ export type Item = {
   shortcut?: string;
 };
 
+export type MenuItemState = 'disabled' | 'active';
+
 export type MenuItem = {
   variant?: 'link' | 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
   label: string;
@@ -35,6 +37,7 @@ export type MenuItem = {
   icon?: unknown;
   selected?: boolean;
   onSelect?: (data: string) => void;
+  state?: MenuItemState;
 };
 
 export enum MenuAction {

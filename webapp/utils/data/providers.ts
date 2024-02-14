@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Provider } from '@/types';
+import { Provider, ProviderType } from '@/types';
 import { createBaseNamedRecord, updateRecord } from '.';
+
+export const getLocalProviders = (providers: Provider[]) =>
+  providers.find((p) => p.type === ProviderType.opla);
 
 const findProvider = (providerIdOrName: string | undefined, providers: Provider[]) =>
   providers.find((p) => p.id === providerIdOrName || p.name === providerIdOrName);

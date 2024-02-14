@@ -52,6 +52,7 @@ import { MenuAction } from '@/types/ui';
 import { Badge } from '../ui/badge';
 // import { toast } from '../ui/Toast';
 import { ShortcutBadge } from '../common/ShortCut';
+import Dot from '../icons/Dot';
 
 export default function ThreadMenu({
   selectedModel,
@@ -116,7 +117,12 @@ export default function ThreadMenu({
           ) : (
             <span>{t('Select a model')}</span>
           )}
-          <Badge className="mr-4 capitalize">{selectedItem?.group || 'local'}</Badge>
+          <Badge className="mr-4 capitalize">
+            {selectedItem?.group || 'local'}
+            <Dot
+              className={`ml-2 ${selectedItem?.state !== 'disabled' ? 'bg-green-400' : 'bg-neutral-400'} h-3 w-3`}
+            />
+          </Badge>
         </div>
       )}
       {modelItems.length === 0 && (
