@@ -12,8 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Provider } from '@/types';
+import { Provider, ProviderType, ServerStatus } from '@/types';
+import { BasicState } from '@/types/ui';
 import { createBaseNamedRecord, updateRecord } from '.';
+
+export const getProviderState = (
+  provider: Provider | undefined,
+  serverStatus?: ServerStatus,
+): BasicState => {
+  if (serverStatus && provider?.type === ProviderType.opla) {
+    if (serverStatus === ServerStatus.ERROR) return BasicState.error;
+    if (serverStatus !== ServerStatus.STARTED) return BasicState.disabled;
+  }
+  if (provider && !provider.disabled) return BasicState.active;
+  return BasicState.disabled;
+};
+
+export const getLocalProviders = (providers: Provider[]) =>
+  providers.find((p) => p.type === ProviderType.opla);
 
 const findProvider = (providerIdOrName: string | undefined, providers: Provider[]) =>
   providers.find((p) => p.id === providerIdOrName || p.name === providerIdOrName);

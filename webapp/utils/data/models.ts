@@ -15,30 +15,43 @@
 import { Ui, Model, OplaContext, Provider } from '@/types';
 import Opla from '@/components/icons/Opla';
 import { getResourceUrl } from '.';
+import { getProviderState } from './providers';
 
 const getSelectedModel = (backendContext: OplaContext) => {
   const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.activeModel}`;
   return selectedPreset;
 };
 
-const getLocalModelsAsItems = (backendContext: OplaContext, modelname: string): Ui.MenuItem[] =>
-  backendContext.config.models.items.map((model) => ({
+const getLocalModelsAsItems = (
+  backendContext: OplaContext,
+  modelname: string,
+  localProvider: Provider | undefined,
+): Ui.MenuItem[] => {
+  const state = getProviderState(localProvider);
+  return backendContext.config.models.items.map((model) => ({
     label: model.title || model.name,
     value: model.name,
     icon: Opla,
     selected: model.name === modelname,
+    state,
   }));
+};
 
 const getProviderModelsAsItems = (providers: Provider[], modelname: string): Ui.MenuItem[] => {
   const items = providers.reduce((acc, provider) => {
     if (!provider.models || provider.disabled) return acc;
+    const state = getProviderState(provider);
     const providerItems =
-      provider.models.map((model) => ({
-        label: model.title || model.name,
-        value: model.name,
-        group: provider.name,
-        selected: model.name === modelname,
-      })) || [];
+      provider.models.map(
+        (model) =>
+          ({
+            label: model.title || model.name,
+            value: model.name,
+            group: provider.name,
+            selected: model.name === modelname,
+            state,
+          }) as Ui.MenuItem,
+      ) || [];
     return [...acc, ...providerItems];
   }, [] as Ui.MenuItem[]);
   return items;

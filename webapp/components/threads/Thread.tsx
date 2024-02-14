@@ -40,7 +40,7 @@ import {
 import useBackend from '@/hooks/useBackendContext';
 import { buildContext, completion, getCompletionParametersDefinition } from '@/utils/providers';
 import { findModel, getLocalModelsAsItems, getProviderModelsAsItems } from '@/utils/data/models';
-import { findProvider } from '@/utils/data/providers';
+import { findProvider, getLocalProviders } from '@/utils/data/providers';
 import { toast } from '@/components/ui/Toast';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { ModalData, ModalsContext } from '@/context/modals';
@@ -97,7 +97,6 @@ function Thread({
   const [errorMessage, setErrorMessage] = useState<{ [key: string]: string }>({});
   const { currentPrompt = '' } = selectedConversation || {};
   const { t } = useTranslation();
-  // const bottomOfChatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const getNewMessages = async () => {
@@ -135,7 +134,11 @@ function Thread({
 
   const showEmptyChat = !conversationId;
   const selectedModel = selectedConversation?.model || activeModel;
-  const localModelItems = getLocalModelsAsItems(backendContext, selectedModel);
+  const localModelItems = getLocalModelsAsItems(
+    backendContext,
+    selectedModel,
+    getLocalProviders(providers),
+  );
   const cloudModelItems = getProviderModelsAsItems(providers, selectedModel);
   const modelItems = [...localModelItems, ...cloudModelItems];
 

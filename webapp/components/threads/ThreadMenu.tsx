@@ -44,14 +44,16 @@ import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { AppContext } from '@/context';
-import { createProvider } from '@/utils/data/providers';
+import { createProvider, getProviderState } from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
 import { MenuAction } from '@/types/ui';
+import { getStateColor } from '@/utils/ui';
 import { Badge } from '../ui/badge';
 // import { toast } from '../ui/Toast';
 import { ShortcutBadge } from '../common/ShortCut';
+import Dot from '../icons/Dot';
 
 export default function ThreadMenu({
   selectedModel,
@@ -66,7 +68,6 @@ export default function ThreadMenu({
   onSelectModel: (model: string, provider: ProviderType) => void;
   onSelectMenu: (menu: MenuAction, data: string) => void;
 }) {
-  // const router = useRouter();
   const { providers } = useContext(AppContext);
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
@@ -116,7 +117,12 @@ export default function ThreadMenu({
           ) : (
             <span>{t('Select a model')}</span>
           )}
-          <Badge className="mr-4 capitalize">{selectedItem?.group || 'local'}</Badge>
+          <Badge className="mr-4 capitalize">
+            <span className={getStateColor(selectedItem?.state, 'text', true)}>
+              {selectedItem?.group || 'local'}
+            </span>
+            <Dot className={`ml-2 ${getStateColor(selectedItem?.state)} h-3 w-3`} />
+          </Badge>
         </div>
       )}
       {modelItems.length === 0 && (
@@ -161,7 +167,11 @@ export default function ThreadMenu({
                               className="flex w-full items-center justify-between"
                             >
                               <span className="capitalize">{item.label}</span>
-                              <Badge className="ml-4 capitalize">{item.group || 'local'}</Badge>
+                              <Badge
+                                className={`ml-4 capitalize ${getStateColor(item.state, 'text', true)}`}
+                              >
+                                {item.group || 'local'}
+                              </Badge>
                             </CommandItem>
                           ))}
                         </CommandGroup>
@@ -181,9 +191,7 @@ export default function ThreadMenu({
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={handleSetupChatGPT}>
               <Plug
-                className={`mr-2 h-4 w-4 ${
-                  chatGPT && !chatGPT.disabled ? 'text-green-500' : 'animate-pulse text-gray-500'
-                }`}
+                className={`mr-2 h-4 w-4 ${getStateColor(getProviderState(chatGPT), 'text')}`}
               />
               {t('Configure ChatGPT')}
               <DropdownMenuShortcut>

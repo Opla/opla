@@ -14,6 +14,13 @@
 
 import { LucideIcon } from 'lucide-react';
 
+export enum BasicState {
+  disabled = 'disabled',
+  loading = 'loading',
+  error = 'error',
+  active = 'active',
+}
+
 // Ui types
 export type Item = {
   name: string;
@@ -27,6 +34,8 @@ export type Item = {
   shortcut?: string;
 };
 
+export type MenuItemState = BasicState;
+
 export type MenuItem = {
   variant?: 'link' | 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
   label: string;
@@ -35,6 +44,7 @@ export type MenuItem = {
   icon?: unknown;
   selected?: boolean;
   onSelect?: (data: string) => void;
+  state?: MenuItemState;
 };
 
 export enum MenuAction {
