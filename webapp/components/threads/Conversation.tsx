@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect } from 'react';
 import { ArrowDown } from 'lucide-react';
 import useScroll, { KeyedScrollPosition } from '@/hooks/useScroll';
 import { Message } from '@/types';
@@ -44,17 +43,13 @@ function Conversation({
     onScrollPosition(props);
   };
 
+  const position = { x: scrollPosition === -1 ? -1 : 0, y: scrollPosition };
   const [ref, scrollTo] = useScroll(
     conversationId,
-    { x: scrollPosition === -1 ? -1 : 0, y: scrollPosition },
+    position,
     handleUpdatePosition,
   );
 
-  useEffect(() => {
-    scrollTo({ x: 0, y: scrollPosition });
-  }, [scrollPosition, scrollTo]);
-
-  console.log('render Conversation', scrollPosition);
   return (
     <div className="flex grow flex-col overflow-hidden">
       <div ref={ref} className="overflow-y-auto">
