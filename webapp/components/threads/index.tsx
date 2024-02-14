@@ -65,7 +65,6 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
 
   const { showModal } = useContext(ModalsContext);
 
-
   const defaultSettings = backendContext.config.settings;
   const selectedPage = getSelectedPage(selectedThreadId);
   const pageSettings =
