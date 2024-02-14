@@ -198,7 +198,6 @@ const useShortcuts = <T extends HTMLElement>(
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
       const key = Array.isArray(keys) ? keys.join() : (keys as string);
-      // logger.info('shortcut event=', event);
       if (key === 'info') {
         defaultShortcuts.find((shortcut) => {
           // logger.log('shortcut info', event, shortcut);
@@ -220,14 +219,14 @@ const useShortcuts = <T extends HTMLElement>(
         callbackRef.current(event);
       }
       if (key.startsWith('#')) {
-        const command = key.substring(1);
+        const command = key; // .substring(1);
         const shortcut = defaultShortcuts.find((s) => s.command === command);
         if (shortcut) {
           const shortcutKeys = Array.isArray(shortcut.keys)
             ? shortcut.keys.join()
             : (shortcut.keys as string);
           if (shortcut && isShortcutMatchingEvent(shortcutKeys, event)) {
-            logger.info('shortcut found=', shortcut.description);
+            // logger.info('shortcut found=', shortcut.description);
             callbackRef.current(event);
           }
         }
