@@ -14,7 +14,7 @@
 import { cn } from '@/lib/utils';
 
 function Dot({ className }: { className?: string }) {
-  return <span className={cn('rounded-full', className)}> </span>;
+  return <span className={cn("rounded-full h-3 w-3", className)}> </span>;
 }
 
 export default Dot;

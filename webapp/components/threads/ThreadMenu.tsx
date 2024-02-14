@@ -121,7 +121,7 @@ export default function ThreadMenu({
             <span className={getStateColor(selectedItem?.state, 'text', true)}>
               {selectedItem?.group || 'local'}
             </span>
-            <Dot className={`ml-2 ${getStateColor(selectedItem?.state)} h-3 w-3`} />
+            <Dot className={`ml-2 ${getStateColor(selectedItem?.state)}`} />
           </Badge>
         </div>
       )}

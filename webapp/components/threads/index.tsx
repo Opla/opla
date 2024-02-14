@@ -56,18 +56,15 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
 
   useShortcuts(ShortcutIds.DELETE_MESSAGE, (event) => {
     event.preventDefault();
-    logger.info('delete Message');
+    logger.info('TODO delete Message');
   });
   useShortcuts(ShortcutIds.EDIT_MESSAGE, (event) => {
     event.preventDefault();
-    logger.info('edit Message');
+    logger.info('TODO edit Message');
   });
+
   const { showModal } = useContext(ModalsContext);
 
-  if (id !== selectedThreadId) {
-    logger.info('conflict in Threads', id, selectedThreadId);
-    return null;
-  }
 
   const defaultSettings = backendContext.config.settings;
   const selectedPage = getSelectedPage(selectedThreadId);
@@ -88,6 +85,24 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
       });
     }
   };
+
+  useShortcuts(ShortcutIds.TOGGLE_FULLSCREEN, (event) => {
+    event.preventDefault();
+    logger.info('toggle fullscreen');
+    const { settings } = backendContext.config;
+    const pages = settings.pages || {};
+    const page = pages[selectedPage] || DefaultPageSettings;
+    if (page.explorerHidden && page.settingsHidden) {
+      saveSettings({ explorerHidden: false, settingsHidden: false });
+    } else {
+      saveSettings({ explorerHidden: true, settingsHidden: true });
+    }
+  });
+
+  if (id !== selectedThreadId) {
+    logger.info('conflict in Threads', id, selectedThreadId);
+    return null;
+  }
 
   const handleResizeExplorer = (size: number) => {
     saveSettings({ explorerWidth: size });
