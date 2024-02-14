@@ -76,7 +76,11 @@ const containerToPercentage = (element: HTMLDivElement, parent: HTMLDivElement):
   return containerRectToPercentage(elementRect, parentRect);
 };
 
-const percentageToContainerRect = (elementRect: Rect, parent: HTMLDivElement, position: Position2D): Rect => {
+const percentageToContainerRect = (
+  elementRect: Rect,
+  parent: HTMLDivElement,
+  position: Position2D,
+): Rect => {
   const parentRect = getBoundingClientRect(parent);
   let width = elementRect.width - parentRect.width - parentRect.x;
   if (width === 0) {
@@ -111,21 +115,24 @@ export default function useScroll(
   position: Position2D,
   onUpdatePosition: (props: KeyedScrollPosition) => void,
 ): [
-    React.RefCallback<HTMLDivElement>,
-    (scrollPosition: Position2D, forceUpdate?: boolean) => void,
-  ] {
+  React.RefCallback<HTMLDivElement>,
+  (scrollPosition: Position2D, forceUpdate?: boolean) => void,
+] {
   const previousNode: MutableRefObject<HTMLDivElement | undefined> = useRef();
-  const keyedRect = useRef<KeyedScrollPosition>({ key, position: { x: -1, y: -1, width: -1, height: -1 } as Position2D });
+  const keyedRect = useRef<KeyedScrollPosition>({
+    key,
+    position: { x: -1, y: -1, width: -1, height: -1 } as Position2D,
+  });
   const isScrolling = useRef(false);
   const handler = useRef<ReturnType<typeof setTimeout> | undefined>();
   const isResizing = useRef(true);
-  
+
   const handleResize = useCallback(
     (contentRect: Rect) => {
       if (isScrolling.current) {
-            // logger.info('handleResize isScrolling', isScrolling.current);
-            return;
-        }
+        // logger.info('handleResize isScrolling', isScrolling.current);
+        return;
+      }
 
       const currentRect = keyedRect.current.rect;
       const parent = previousNode.current as HTMLDivElement;
@@ -133,7 +140,8 @@ export default function useScroll(
       if (
         parent &&
         (!currentRect ||
-        (contentRect.width !== currentRect.width || contentRect.height !== currentRect.height))
+          contentRect.width !== currentRect.width ||
+          contentRect.height !== currentRect.height)
       ) {
         const rect = percentageToContainerRect(contentRect, parent, position);
         const { width, height, ...xy } = rect;
@@ -160,21 +168,21 @@ export default function useScroll(
     [key, position],
   );
 
-  const handleScrollEnd = useCallback((rect: Rect) => {
-
-    if (rect.x === position.x && rect.y === position.y) {
-      // logger.info('same position');
-      isScrolling.current = false;
-      return;
-    }
-    // logger.info(`handleScroll newPosition ${key}`, keyedRect.current, position, rect);
-    if (rect.width && rect.height) {
-      const newKeyedPosition: KeyedScrollPosition = {
-        key,
-        position: { x: rect.x, y: rect.y },
-        rect,
-      };
-      /* if (
+  const handleScrollEnd = useCallback(
+    (rect: Rect) => {
+      if (rect.x === position.x && rect.y === position.y) {
+        // logger.info('same position');
+        isScrolling.current = false;
+        return;
+      }
+      // logger.info(`handleScroll newPosition ${key}`, keyedRect.current, position, rect);
+      if (rect.width && rect.height) {
+        const newKeyedPosition: KeyedScrollPosition = {
+          key,
+          position: { x: rect.x, y: rect.y },
+          rect,
+        };
+        /* if (
         (keyedRect.current.key === key &&
           keyedRect.current.position.x !== newKeyedPosition.position.x) ||
         keyedRect.current.position.y !== newKeyedPosition.position.y
@@ -187,12 +195,14 @@ export default function useScroll(
           onUpdatePosition(newKeyedPosition);
         }
       } */
-      onUpdatePosition(newKeyedPosition);
-    }
+        onUpdatePosition(newKeyedPosition);
+      }
 
-    isScrolling.current = false;
-    // logger.info('handleScrollEnd isScrolling', isScrolling.current, handler.current);
-  }, [position, onUpdatePosition, key]);
+      isScrolling.current = false;
+      // logger.info('handleScrollEnd isScrolling', isScrolling.current, handler.current);
+    },
+    [position, onUpdatePosition, key],
+  );
 
   const handleScroll = useCallback(() => {
     isScrolling.current = true;
@@ -214,7 +224,7 @@ export default function useScroll(
       }
       const rect: Rect = containerToPercentage(element, parent);
       // const testRect = percentageToContainerRect(elementRect, parent, rect);
-    
+
       handleScrollEnd(rect);
     }, 200);
     // waitAfterScroll(handleScrollEnd);
@@ -300,7 +310,6 @@ export default function useScroll(
         resizeObserver.observe(node.firstChild as Element);
         isScrolling.current = false;
       }
-      
     },
     [handleResize, handleScroll],
   );

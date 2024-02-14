@@ -44,11 +44,7 @@ function Conversation({
   };
 
   const position = { x: scrollPosition === -1 ? -1 : 0, y: scrollPosition };
-  const [ref, scrollTo] = useScroll(
-    conversationId,
-    position,
-    handleUpdatePosition,
-  );
+  const [ref, scrollTo] = useScroll(conversationId, position, handleUpdatePosition);
 
   return (
     <div className="flex grow flex-col overflow-hidden">
