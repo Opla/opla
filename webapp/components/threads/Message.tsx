@@ -169,8 +169,9 @@ function MessageComponent({
                   )}
                   {state === DisplayMessageState.Edit && (
                     <Textarea
+                      autoFocus
                       ref={inputRef}
-                      className="w-full resize-none  px-0 py-2 text-sm"
+                      className="-mx-3 mb-4 mt-0 min-h-[40px] w-full resize-none text-sm"
                       value={edit !== undefined ? edit : content}
                       onChange={(e) => {
                         setEdit(e.target.value);
@@ -180,7 +181,7 @@ function MessageComponent({
                 </div>
                 {(state === DisplayMessageState.Markdown || state === DisplayMessageState.Text) &&
                   isHover && (
-                    <div className="absolute bottom-0 left-16">
+                    <div className="left-34 absolute bottom-0">
                       {!isUser && (
                         <Button variant="ghost" size="sm" onClick={onResendMessage}>
                           <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
@@ -194,11 +195,11 @@ function MessageComponent({
                     </div>
                   )}
                 {state === DisplayMessageState.Edit && (
-                  <div className="left-30 absolute bottom-0 flex flex-row gap-2">
-                    <Button size="sm" onClick={handleSave} disabled={!edit}>
+                  <div className="left-30 absolute -bottom-2 flex flex-row gap-2">
+                    <Button size="sm" onClick={handleSave} disabled={!edit} className="py-2 my-2 h-[28px]">
                       {isUser ? t('Save & submit') : t('Save')}
                     </Button>
-                    <Button size="sm" variant="outline" onClick={handleCancelEdit}>
+                    <Button size="sm" variant="outline" onClick={handleCancelEdit} className="py-2 my-2 h-[28px]">
                       {t('Cancel')}
                     </Button>
                   </div>
