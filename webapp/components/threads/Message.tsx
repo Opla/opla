@@ -196,10 +196,20 @@ function MessageComponent({
                   )}
                 {state === DisplayMessageState.Edit && (
                   <div className="left-30 absolute -bottom-2 flex flex-row gap-2">
-                    <Button size="sm" onClick={handleSave} disabled={!edit} className="py-2 my-2 h-[28px]">
+                    <Button
+                      size="sm"
+                      onClick={handleSave}
+                      disabled={!edit}
+                      className="my-2 h-[28px] py-2"
+                    >
                       {isUser ? t('Save & submit') : t('Save')}
                     </Button>
-                    <Button size="sm" variant="outline" onClick={handleCancelEdit} className="py-2 my-2 h-[28px]">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCancelEdit}
+                      className="my-2 h-[28px] py-2"
+                    >
                       {t('Cancel')}
                     </Button>
                   </div>
