@@ -105,7 +105,7 @@ const FileStorage: DataStorage = {
         await writeToLocalStorage(key, value || defaultValue, path);
       }
     } */
-    return value || defaultValue as T;
+    return value || (defaultValue as T);
   },
   async setItem<T>(key: string, value: T, path = '') {
     if (value === undefined) {
