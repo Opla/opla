@@ -42,15 +42,22 @@ export default function PromptCard({
   const cssTitle = prompt.title ? '' : 'bg-neutral-300/50 dark:bg-neutral-600/50 ';
   const cssDesc = prompt.description ? '' : 'bg-neutral-300/50 dark:bg-neutral-600/50 ';
   const container = (
-    <div className="flex flex-col gap-2 p-3 m-2">
+    <div className="m-2 flex flex-col gap-2 p-3">
       <div className={`${cssTitle} w-full text-sm font-bold`}>{prompt.title}</div>
-      <p className={`${cssDesc} w-full text-balance line-clamp-3 text-xs text-neutral-700 dark:text-neutral-400`}>
+      <p
+        className={`${cssDesc} line-clamp-3 w-full text-balance text-xs text-neutral-700 dark:text-neutral-400`}
+      >
         {prompt.description}
       </p>
     </div>
   );
   return onSelect && !disabled ? (
-    <Button asChild variant="outline" onClick={onSelect} className="cursor-pointer m-2 h-full w-full overflow-hidden ">
+    <Button
+      asChild
+      variant="outline"
+      onClick={onSelect}
+      className="m-2 h-full w-full cursor-pointer overflow-hidden "
+    >
       {container}
     </Button>
   ) : (

@@ -24,7 +24,6 @@ function PromptsGrid({
   className?: string;
   onPromptSelected: (prompt: Prompt) => void;
 }) {
-
   const [prompts] = useFetch<Prompt[]>('https://opla.github.io/prompts/default.json');
 
   return (

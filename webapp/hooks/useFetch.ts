@@ -51,6 +51,6 @@ function useFetch<T>(endpoint: string, options?: ResponseInit): UseFetchResponse
   }, [endpoint, error, options]);
 
   return [fetchedData, isLoading, error];
-};
+}
 
 export default useFetch;
