@@ -14,16 +14,16 @@
 import { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/Toast';
 
-type UseFetchResponse = {
-  fetchedData: unknown;
-  isLoading: boolean;
-  error: Error | null;
-};
+type UseFetchResponse<T> = [
+  fetchedData: T | undefined,
+  isLoading: boolean,
+  error: Error | undefined,
+];
 
-const useFetch = (endpoint: string, options?: ResponseInit): UseFetchResponse => {
-  const [fetchedData, setFetchedData] = useState();
+function useFetch<T>(endpoint: string, options?: ResponseInit): UseFetchResponse<T> {
+  const [fetchedData, setFetchedData] = useState<T | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<Error | undefined>(undefined);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -50,7 +50,7 @@ const useFetch = (endpoint: string, options?: ResponseInit): UseFetchResponse =>
     };
   }, [endpoint, error, options]);
 
-  return { fetchedData, isLoading, error };
-};
+  return [fetchedData, isLoading, error];
+}
 
 export default useFetch;
