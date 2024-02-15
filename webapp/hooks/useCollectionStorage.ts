@@ -48,11 +48,16 @@ export default function useCollectionStorage<T>(
     }
   };
 
-  const getValue = (key: string, defaultValue: T) => collection[key] || defaultValue;
+  const getValue = (key: string, defaultValue: T) => {
+    console.log('getValue', key, defaultValue, collection, collection[key]);
+    return collection[key] || defaultValue
+  };
 
   const deleteValue = async (key: string) => {
     try {
-      delete collection[key];
+      const newCollection = { ...collection };
+      delete newCollection[key];
+      setCollection(newCollection);
       await dataStorage().setItem(collectionId, undefined, key);
     } catch (e) {
       logger.error(e);
