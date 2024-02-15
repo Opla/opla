@@ -20,12 +20,15 @@ import useDataStorage from '@/hooks/useDataStorage';
 // import { updateConversation } from '@/utils/data/conversations';
 import logger from '@/utils/logger';
 import useCollectionStorage from '@/hooks/useCollectionStorage';
+import { removeConversation } from '@/utils/data/conversations';
+// import { deleteConversation } from '@/utils/data/conversations';
 
 export type Context = {
   conversations: Array<Conversation>;
   archives: Array<Conversation>;
   providers: Array<Provider>;
   updateConversations: (newConversations: Conversation[]) => void;
+  deleteConversation: (id: string, cleanup?: (id: string) => Promise<void>) => Promise<void>;
   readConversationMessages: (key: string, defaultValue: Message[]) => Promise<Message[]>;
   getConversationMessages: (id: string | undefined) => Message[];
   filterConversationMessages: (
@@ -34,6 +37,7 @@ export type Context = {
   ) => Message[];
   updateConversationMessages: (id: string | undefined, messages: Message[]) => Promise<void>;
   setArchives: (newArchives: Conversation[]) => void;
+  deleteArchive: (id: string, cleanup?: (id: string) => Promise<void>) => Promise<void>;
   setProviders: (newProviders: Provider[]) => void;
   usage: LlmUsage | undefined;
   setUsage: (newUsage: LlmUsage | undefined) => void;
@@ -42,12 +46,14 @@ export type Context = {
 const initialContext: Context = {
   conversations: [],
   updateConversations: () => {},
+  deleteConversation: async () => {},
   getConversationMessages: () => [],
   readConversationMessages: async () => [],
   filterConversationMessages: () => [],
   updateConversationMessages: async () => {},
   archives: [],
   setArchives: () => {},
+  deleteArchive: async () => {},
   providers: [],
   setProviders: () => {},
   usage: undefined,
@@ -66,7 +72,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
 
   const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
 
-  const [getStoredConversationMessages, readStoredConversationMessages, storeConversationMessages] =
+  const [getStoredConversationMessages, readStoredConversationMessages, storeConversationMessages, deleteConversationMessages] =
     useCollectionStorage<Message[]>('messages');
 
   const getConversationMessages = useCallback(
@@ -74,10 +80,9 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       const messages: Message[] = id
         ? getStoredConversationMessages(
             id,
-            /* conversations.find((c) => c.id === id)?.messages || */ [],
+            [],
           )
         : [];
-      // const messages: Message[] = conversations.find((c) => c.id === id)?.messages || [];
       return messages;
     },
     [getStoredConversationMessages],
@@ -88,10 +93,9 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       const messages: Message[] = id
         ? await readStoredConversationMessages(
             id,
-            /* conversations.find((c) => c.id === id)?.messages || */ [],
+            [],
           )
         : [];
-      // const messages: Message[] = conversations.find((c) => c.id === id)?.messages || [];
       return messages;
     },
     [readStoredConversationMessages],
@@ -107,10 +111,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
 
   const updateConversationMessages = useCallback(
     async (id: string | undefined, messages: Message[]): Promise<void> => {
-      // const conversation = conversations.find((c) => c.id === id);
       if (id) {
-        /* conversation.messages = messages;
-        setConversations(updateConversation(conversation, conversations)); */
         await storeConversationMessages(id, messages);
       }
     },
@@ -129,7 +130,6 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
           const { messages, ...updatedConversation } = c;
           if (messages) {
             promises.push(updateConversationMessages(c.id, messages));
-            // messagesToStore[c.id] = messages;
           }
           return updatedConversation as Conversation;
         });
@@ -147,16 +147,33 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
     [conversations, setConversations, updateConversationMessages],
   );
 
+  const deleteConversation = useCallback(async (id: string, cleanup?: (id: string) => Promise<void>) => {
+    const updatedConversations = removeConversation(id, conversations);
+    setConversations(updatedConversations);
+    // TODO delete any orphans messages
+    deleteConversationMessages(id);
+    return cleanup?.(id);
+  }, [conversations, deleteConversationMessages, setConversations]);
+
+  const deleteArchive = useCallback(async (id: string, cleanup?: (id: string) => Promise<void>) => {
+    const updatedArchives = removeConversation(id, archives);
+    setArchives(updatedArchives);
+
+    return cleanup?.(id);
+  }, [archives, setArchives]);
+
   const contextValue = useMemo(
     () => ({
       conversations,
       updateConversations,
+      deleteConversation,
       getConversationMessages,
       readConversationMessages,
       filterConversationMessages,
       updateConversationMessages,
       archives,
       setArchives,
+      deleteArchive,
       providers,
       setProviders,
       usage,
@@ -165,12 +182,14 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
     [
       conversations,
       updateConversations,
+      deleteConversation,
       getConversationMessages,
       readConversationMessages,
       filterConversationMessages,
       updateConversationMessages,
       archives,
       setArchives,
+      deleteArchive,
       providers,
       setProviders,
       usage,

@@ -23,6 +23,7 @@ export default function useCollectionStorage<T>(
   (key: string, defaultValue: T) => T,
   (key: string, defaultValue: T) => Promise<T>,
   (key: string, value: T) => Promise<void>,
+  (key: string) => Promise<void>,
 ] {
   const [collection, setCollection] = useState<Record<string, T>>({});
 
@@ -49,5 +50,15 @@ export default function useCollectionStorage<T>(
 
   const getValue = (key: string, defaultValue: T) => collection[key] || defaultValue;
 
-  return [getValue, readValue, updateValue];
+  const deleteValue = async (key: string) => {
+    try {
+      delete collection[key];
+      await dataStorage().setItem(collectionId, undefined, key);
+    } catch (e) {
+      logger.error(e);
+      toast.error(`Error deleting data ${e}`);
+    }
+  };
+
+  return [getValue, readValue, updateValue, deleteValue];
 }

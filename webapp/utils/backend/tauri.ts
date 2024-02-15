@@ -98,6 +98,16 @@ const readTextFile = async (filename: string, isDatadir = true) => {
   return fsReadTextFile(await join(dataDir, filename));
 };
 
+const deleteFile = async (filename: string, isDatadir = true) => {
+  const { removeFile: fsRemoveFile } = await import('@tauri-apps/api/fs');
+  const { join } = await import('@tauri-apps/api/path');
+  let dataDir = '';
+  if (isDatadir) {
+    dataDir = (await invokeTauri('get_data_dir')) as string;
+  }
+  return fsRemoveFile(await join(dataDir, filename));
+};
+
 const fileExists = async (filename: string, path?: string) => {
   const { exists } = await import('@tauri-apps/api/fs');
   const { join } = await import('@tauri-apps/api/path');
@@ -115,5 +125,6 @@ export {
   saveFileDialog,
   writeTextFile,
   readTextFile,
+  deleteFile,
   fileExists,
 };

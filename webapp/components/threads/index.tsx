@@ -21,7 +21,7 @@ import { Conversation, PageSettings } from '@/types';
 import { DefaultPageSettings } from '@/utils/constants';
 import logger from '@/utils/logger';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
-import { getConversation, deleteConversation } from '@/utils/data/conversations';
+import { getConversation } from '@/utils/data/conversations';
 import { ModalIds } from '@/modals';
 import { ModalsContext } from '@/context/modals';
 import { AppContext } from '@/context';
@@ -47,10 +47,12 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
   const {
     conversations,
     updateConversations,
+    deleteConversation,
     getConversationMessages,
     updateConversationMessages,
     archives,
     setArchives,
+    deleteArchive,
   } = useContext(AppContext);
   const { backendContext, setSettings } = useBackend();
 
@@ -103,6 +105,10 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     return null;
   }
 
+  const deleteAndCleanupConversation = async (conversationId: string) => {
+    await deleteAndCleanupConversation(conversationId);
+  };
+
   const handleResizeExplorer = (size: number) => {
     saveSettings({ explorerWidth: size });
   };
@@ -124,8 +130,7 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     logger.info(`delete ${action} ${data}`);
     if (conversation) {
       if (action === 'Delete') {
-        const updatedConversations = deleteConversation(conversation.id, conversations);
-        updateConversations(updatedConversations);
+        deleteAndCleanupConversation(conversation.id);
         if (selectedThreadId && selectedThreadId === conversation.id) {
           router.replace(Page.Threads);
         }
@@ -146,13 +151,13 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     } else if (menu === MenuAction.ArchiveConversation) {
       const conversationToArchive = getConversation(data, conversations) as Conversation;
       const messages = getConversationMessages(conversationToArchive.id);
-      const updatedConversations = deleteConversation(conversationToArchive.id, conversations);
-      updateConversations(updatedConversations);
+      await deleteConversation(conversationToArchive.id);
       setArchives([...archives, { ...conversationToArchive, messages }]);
     } else if (menu === MenuAction.UnarchiveConversation) {
       const { messages, ...archive } = getConversation(data, archives) as Conversation;
-      const updatedArchives = deleteConversation(archive.id, archives);
-      setArchives(updatedArchives);
+      await deleteArchive(archive.id, async () => {
+        logger.info('TODO cleanup archive');
+      });
       updateConversations([...conversations, archive as Conversation]);
       updateConversationMessages(archive.id, messages || []);
     } else if (menu === MenuAction.ChangeView) {

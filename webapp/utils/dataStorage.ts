@@ -14,7 +14,7 @@
 
 import { toast } from 'sonner';
 import logger from './logger';
-import { readTextFile, writeTextFile } from './backend/tauri';
+import { deleteFile, readTextFile, writeTextFile } from './backend/tauri';
 
 enum StorageType {
   File,
@@ -26,10 +26,12 @@ type DataStorage = {
   setItem<T>(key: string, value: T, path?: string): Promise<void>;
 };
 
+const createPathAndJsonFile = (key: string, path: string) => (`${path}/${key}.json`);
+
 const readFromLocalStorage = async <T>(key: string, path: string) => {
   let text: string;
   try {
-    text = await readTextFile(`${path}/${key}.json`);
+    text = await readTextFile(createPathAndJsonFile(key, path));
   } catch (e) {
     logger.error(`Failed to read item ${key} from fileStorage`);
     return null;
@@ -45,7 +47,12 @@ const readFromLocalStorage = async <T>(key: string, path: string) => {
 };
 
 const writeToLocalStorage = async <T>(key: string, value: T, path: string) => {
-  await writeTextFile(`${path}/${key}.json`, JSON.stringify(value, null, 2), true);
+  await writeTextFile(createPathAndJsonFile(key, path), JSON.stringify(value, null, 2), true);
+};
+
+const deleteFromLocalStorage = async (key: string, path: string) => {
+  await deleteFile(createPathAndJsonFile(key, path));
+  // TODO delete path if empty
 };
 
 const LocalStorage: DataStorage = {
@@ -70,7 +77,7 @@ const LocalStorage: DataStorage = {
     } else {
       localStorage.setItem(key, JSON.stringify(value));
     }
-  },
+  }
 };
 
 const MockStorage: DataStorage = {
@@ -96,7 +103,10 @@ const FileStorage: DataStorage = {
     return value;
   },
   async setItem<T>(key: string, value: T, path = '') {
-    writeToLocalStorage(key, value, path);
+    if (value === undefined) {
+      return deleteFromLocalStorage(key, path);
+    }
+    return writeToLocalStorage(key, value, path);
   },
 };
 
