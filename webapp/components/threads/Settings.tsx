@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { File, HelpCircle, Palette, Settings2 } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
@@ -22,10 +22,10 @@ import { findModel } from '@/utils/data/models';
 import Opla from '@/utils/providers/opla';
 import { getCompletionParametersDefinition } from '@/utils/providers';
 import { findProvider } from '@/utils/data/providers';
-import { ContextWindowPolicy, Conversation } from '@/types';
+import { ContextWindowPolicy, Conversation, ConversationParameter } from '@/types';
 import { toast } from '@/components/ui/Toast';
 import { ContextWindowPolicies, DefaultContextWindowPolicy } from '@/utils/constants';
-import useDebounceFunc from '@/hooks/useDebounceFunc';
+// import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -33,12 +33,13 @@ import { Textarea } from '../ui/textarea';
 import Parameter, { ParameterValue, ParametersRecord } from '../common/Parameter';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
+import Form from '../common/Form';
 
 export default function Settings({ conversationId }: { conversationId?: string }) {
   const { t } = useTranslation();
   const { conversations, updateConversations, providers } = useContext(AppContext);
   const { backendContext } = useBackend();
-  const [params, setParams] = useState<ParametersRecord>({});
+  // const [params, setParams] = useState<ParametersRecord>({});
 
   const selectedConversation = conversations.find((c) => c.id === conversationId);
   const { activeModel } = backendContext.config.models;
@@ -70,17 +71,18 @@ export default function Settings({ conversationId }: { conversationId?: string }
     }
   };
 
-  const updateParameters = () => {
+  const updateParameters = (params: ParametersRecord): ParametersRecord | undefined => {
+    let newParams: ParametersRecord | undefined;
     if (selectedConversation) {
       const { parameters = {} } = selectedConversation;
       let newConversation: Conversation | undefined;
-      const newParams = { ...params };
+      newParams = { ...params };
       let update = false;
       Object.keys(params).forEach((key) => {
         const value = params[key];
         if (value === undefined) {
           delete parameters[key];
-          delete newParams[key];
+          delete newParams?.[key];
           update = true;
         } else {
           const parameterDef = parametersDefinition[key];
@@ -90,7 +92,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
             toast.error(result.error.message);
           } else {
             parameters[key] = result.data;
-            delete newParams[key];
+            delete newParams?.[key];
             update = true;
           }
         }
@@ -108,14 +110,15 @@ export default function Settings({ conversationId }: { conversationId?: string }
         updateConversations(newConversations);
       }
     }
+    return newParams;
   };
 
-  const handleParameterChange = (name: string, value?: ParameterValue) => {
+  /* const handleParameterChange = (name: string, value?: ParameterValue) => {
     logger.info('handleParameterChange', name, value);
     setParams({ ...params, [name]: value });
   };
 
-  useDebounceFunc<ParametersRecord>(updateParameters, params, 600);
+  useDebounceFunc<ParametersRecord>(updateParameters, params, 600); */
 
   const handlePolicyChange = (policy: ContextWindowPolicy) => {
     if (selectedConversation) {
@@ -183,22 +186,11 @@ export default function Settings({ conversationId }: { conversationId?: string }
               <AccordionItem value="settings-parameters">
                 <AccordionTrigger>{t('Parameters')}</AccordionTrigger>
                 <AccordionContent>
-                  {Object.keys(parametersDefinition).map((key) => (
-                    <Parameter
-                      key={key}
-                      title={t(parametersDefinition[key].name)}
-                      type={parametersDefinition[key].type}
-                      name={key}
-                      value={
-                        params[key] ||
-                        selectedConversation?.parameters?.[key] ||
-                        parametersDefinition[key].defaultValue
-                      }
-                      description={t(parametersDefinition[key].description)}
-                      inputCss="max-w-20 pl-2"
-                      onChange={handleParameterChange}
-                    />
-                  ))}
+                  <Form<ConversationParameter>
+                    parameters={selectedConversation?.parameters}
+                    parametersDefinition={parametersDefinition}
+                    onParametersChanged={updateParameters}
+                  />
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="contextwindow-parameters">

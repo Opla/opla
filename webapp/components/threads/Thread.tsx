@@ -130,6 +130,7 @@ function Thread({
     filterConversationMessages,
     readConversationMessages,
     isMessageLoading,
+    selectedConversation,
   ]);
 
   const showEmptyChat = !conversationId;
@@ -393,7 +394,7 @@ function Thread({
         }
         return m;
       });
-      updateMessagesAndConversation(
+      await updateMessagesAndConversation(
         newMessages,
         conversationMessages,
         conversationId,

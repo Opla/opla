@@ -52,7 +52,9 @@ export default function useCollectionStorage<T>(
 
   const deleteValue = async (key: string) => {
     try {
-      delete collection[key];
+      const newCollection = { ...collection };
+      delete newCollection[key];
+      setCollection(newCollection);
       await dataStorage().setItem(collectionId, undefined, key);
     } catch (e) {
       logger.error(e);

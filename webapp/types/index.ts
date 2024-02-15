@@ -135,7 +135,7 @@ export enum ProviderType {
   proxy = 'proxy',
 }
 
-export type CompletionParameterDefinition = {
+export type ParameterDefinition = {
   z: ZodSchema;
   type?: 'text' | 'password' | 'large-text' | 'number' | 'url' | 'select' | 'boolean';
   defaultValue?: string | number | boolean | undefined;
@@ -144,6 +144,10 @@ export type CompletionParameterDefinition = {
   name: string;
   description: string;
 };
+
+export type ParametersDefinition = Record<string, ParameterDefinition>;
+
+export type CompletionParameterDefinition = ParameterDefinition;
 
 export type CompletionParametersDefinition = Record<string, CompletionParameterDefinition>;
 
