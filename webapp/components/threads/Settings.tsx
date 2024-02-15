@@ -22,14 +22,15 @@ import { findModel } from '@/utils/data/models';
 import Opla from '@/utils/providers/opla';
 import { getCompletionParametersDefinition } from '@/utils/providers';
 import { findProvider } from '@/utils/data/providers';
-import { ContextWindowPolicy, Conversation, ConversationParameter } from '@/types';
+import { ContextWindowPolicy, Conversation } from '@/types';
 import { toast } from '@/components/ui/Toast';
 import { ContextWindowPolicies, DefaultContextWindowPolicy } from '@/utils/constants';
+import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Textarea } from '../ui/textarea';
-import Parameter, { ParameterValue } from '../common/Parameter';
+import Parameter, { ParameterValue, ParametersRecord } from '../common/Parameter';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 
@@ -37,9 +38,8 @@ export default function Settings({ conversationId }: { conversationId?: string }
   const { t } = useTranslation();
   const { conversations, updateConversations, providers } = useContext(AppContext);
   const { backendContext } = useBackend();
-  const [params, setParams] = useState<{ [key: string]: ParameterValue | undefined }>({});
+  const [params, setParams] = useState<ParametersRecord>({});
 
-  // logger.info('backendContext', backendContext);
   const selectedConversation = conversations.find((c) => c.id === conversationId);
   const { activeModel } = backendContext.config.models;
   const model = findModel(activeModel, backendContext.config.models.items);
@@ -70,53 +70,52 @@ export default function Settings({ conversationId }: { conversationId?: string }
     }
   };
 
-  const handleParameterChange = (name: string, _value?: ParameterValue) => {
-    logger.info('handleParameterChange', name, _value);
-    const parameterDef = parametersDefinition[name];
-    let value = _value;
-    const result = parameterDef.z.safeParse(value);
-    if (String(value).length > 0 && !result.success) {
-      if (parameterDef.type === 'number') {
-        setParams({ ...params, [name]: value });
-      } else {
-        logger.error('handleParameterChange invalid', result.error);
-        toast.error(result.error.message);
-      }
-      return;
-    }
-    if (result.success) {
-      value = result.data;
-    }
-    if (params[name] !== undefined) {
-      setParams({ ...params, [name]: undefined });
-    }
-    if (
-      parameterDef.defaultValue === _value ||
-      (parameterDef.defaultValue === undefined && _value === '')
-    ) {
-      value = undefined;
-    }
-
+  const updateParameters = () => {
     if (selectedConversation) {
-      let { parameters } = selectedConversation;
+      const { parameters = {} } = selectedConversation;
       let newConversation: Conversation | undefined;
-      if (value !== undefined) {
-        parameters = { ...selectedConversation.parameters, [name]: value as ConversationParameter };
-        newConversation = { ...selectedConversation, parameters };
-      } else if (parameters?.[name] !== undefined) {
-        delete parameters[name];
-        newConversation = { ...selectedConversation, parameters };
-      } else if (parameters && Object.keys(parameters).length === 0) {
-        newConversation = { ...selectedConversation };
-        delete newConversation.parameters;
-      }
-      if (newConversation) {
+      const newParams = { ...params };
+      let update = false;
+      Object.keys(params).forEach((key) => {
+        const value = params[key];
+        if (value === undefined) {
+          delete parameters[key];
+          delete newParams[key];
+          update = true;
+        } else {
+          const parameterDef = parametersDefinition[key];
+          const result = parameterDef.z.safeParse(value);
+          if (!result.success) {
+            logger.error('updateParameters invalid', result.error);
+            toast.error(result.error.message);
+          } else {
+            parameters[key] = result.data;
+            delete newParams[key];
+            update = true;
+          }
+        }
+      });
+
+      if (update) {
+        if (selectedConversation.parameters && Object.keys(parameters).length === 0) {
+          newConversation = { ...selectedConversation };
+          delete newConversation.parameters;
+        } else {
+          newConversation = { ...selectedConversation, parameters };
+        }
         const newConversations = updateConversation(newConversation, conversations, true);
-        logger.info('onParameterChange save Parameters', value, parameters); // , params);
+        logger.info('onParameterChange save Parameters', params, parameters); // , params);
         updateConversations(newConversations);
       }
     }
   };
+
+  const handleParameterChange = (name: string, value?: ParameterValue) => {
+    logger.info('handleParameterChange', name, value);
+    setParams({ ...params, [name]: value });
+  };
+
+  useDebounceFunc<ParametersRecord>(updateParameters, params, 600);
 
   const handlePolicyChange = (policy: ContextWindowPolicy) => {
     if (selectedConversation) {
@@ -191,8 +190,8 @@ export default function Settings({ conversationId }: { conversationId?: string }
                       type={parametersDefinition[key].type}
                       name={key}
                       value={
-                        selectedConversation?.parameters?.[key] ||
                         params[key] ||
+                        selectedConversation?.parameters?.[key] ||
                         parametersDefinition[key].defaultValue
                       }
                       description={t(parametersDefinition[key].description)}
