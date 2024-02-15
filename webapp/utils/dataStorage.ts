@@ -26,7 +26,7 @@ type DataStorage = {
   setItem<T>(key: string, value: T, path?: string): Promise<void>;
 };
 
-const createPathAndJsonFile = (key: string, path: string) => (`${path}/${key}.json`);
+const createPathAndJsonFile = (key: string, path: string) => `${path}/${key}.json`;
 
 const readFromLocalStorage = async <T>(key: string, path: string) => {
   let text: string;
@@ -77,7 +77,7 @@ const LocalStorage: DataStorage = {
     } else {
       localStorage.setItem(key, JSON.stringify(value));
     }
-  }
+  },
 };
 
 const MockStorage: DataStorage = {

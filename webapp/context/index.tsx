@@ -72,17 +72,16 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
 
   const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
 
-  const [getStoredConversationMessages, readStoredConversationMessages, storeConversationMessages, deleteConversationMessages] =
-    useCollectionStorage<Message[]>('messages');
+  const [
+    getStoredConversationMessages,
+    readStoredConversationMessages,
+    storeConversationMessages,
+    deleteConversationMessages,
+  ] = useCollectionStorage<Message[]>('messages');
 
   const getConversationMessages = useCallback(
     (id: string | undefined): Message[] => {
-      const messages: Message[] = id
-        ? getStoredConversationMessages(
-            id,
-            [],
-          )
-        : [];
+      const messages: Message[] = id ? getStoredConversationMessages(id, []) : [];
       return messages;
     },
     [getStoredConversationMessages],
@@ -90,12 +89,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
 
   const readConversationMessages = useCallback(
     async (id: string | undefined): Promise<Message[]> => {
-      const messages: Message[] = id
-        ? await readStoredConversationMessages(
-            id,
-            [],
-          )
-        : [];
+      const messages: Message[] = id ? await readStoredConversationMessages(id, []) : [];
       return messages;
     },
     [readStoredConversationMessages],
@@ -147,20 +141,26 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
     [conversations, setConversations, updateConversationMessages],
   );
 
-  const deleteConversation = useCallback(async (id: string, cleanup?: (id: string) => Promise<void>) => {
-    const updatedConversations = removeConversation(id, conversations);
-    setConversations(updatedConversations);
-    // TODO delete any orphans messages
-    deleteConversationMessages(id);
-    return cleanup?.(id);
-  }, [conversations, deleteConversationMessages, setConversations]);
+  const deleteConversation = useCallback(
+    async (id: string, cleanup?: (id: string) => Promise<void>) => {
+      const updatedConversations = removeConversation(id, conversations);
+      setConversations(updatedConversations);
+      // TODO delete any orphans messages
+      deleteConversationMessages(id);
+      return cleanup?.(id);
+    },
+    [conversations, deleteConversationMessages, setConversations],
+  );
 
-  const deleteArchive = useCallback(async (id: string, cleanup?: (id: string) => Promise<void>) => {
-    const updatedArchives = removeConversation(id, archives);
-    setArchives(updatedArchives);
+  const deleteArchive = useCallback(
+    async (id: string, cleanup?: (id: string) => Promise<void>) => {
+      const updatedArchives = removeConversation(id, archives);
+      setArchives(updatedArchives);
 
-    return cleanup?.(id);
-  }, [archives, setArchives]);
+      return cleanup?.(id);
+    },
+    [archives, setArchives],
+  );
 
   const contextValue = useMemo(
     () => ({
