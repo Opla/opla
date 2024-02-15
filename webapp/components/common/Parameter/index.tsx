@@ -23,6 +23,7 @@ import { BaseNamedRecord } from '@/types';
 import { HelpCircle } from 'lucide-react';
 
 export type ParameterValue = string | number | boolean | BaseNamedRecord[];
+export type ParametersRecord = Record<string, ParameterValue | undefined>;
 
 export default function Parameter({
   title,
