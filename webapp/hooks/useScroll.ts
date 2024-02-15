@@ -278,7 +278,7 @@ export default function useScroll(
         // isScrolling.current = false;
       }
     },
-    [key, position],
+    [key],
   );
 
   const customRef = useCallback(

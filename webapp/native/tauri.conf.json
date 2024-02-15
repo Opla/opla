@@ -24,6 +24,9 @@
         "exists": true,
         "readFile": true,
         "writeFile": true,
+        "removeDir": true,
+        "createDir": true,
+        "removeFile": true,
         "scope": ["$LOCALDATA/Opla/**/*", "$HOME/**", "$TEMP/*", "$DESKTOP/*", "$DOWNLOADS/*", "$DOCUMENTS/*"]
       },
       "window": {

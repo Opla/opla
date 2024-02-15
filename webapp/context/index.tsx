@@ -145,7 +145,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
     async (id: string, cleanup?: (id: string) => Promise<void>) => {
       const updatedConversations = removeConversation(id, conversations);
       setConversations(updatedConversations);
-      // TODO delete any orphans messages
+      // Delete any orphans messages
       deleteConversationMessages(id);
       return cleanup?.(id);
     },

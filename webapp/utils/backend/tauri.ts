@@ -15,7 +15,7 @@ import logger from '../logger';
 
 type InvokeArgs = Record<string, unknown>;
 
-const invokeTauri = async <T>(command: string, args?: any) => {
+export const invokeTauri = async <T>(command: string, args?: any) => {
   const { invoke } = await import('@tauri-apps/api/tauri');
   return invoke(command, args as InvokeArgs) as T;
 };
@@ -127,5 +127,3 @@ export const fileExists = async (filename: string, path?: string) => {
   }
   return exists(await join(dir, filename));
 };
-
-
