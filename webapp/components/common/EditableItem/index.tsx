@@ -12,7 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
+import useDebounceFunc from '@/hooks/useDebounceFunc';
+
+export type EditableItemProps = {
+  id: string;
+  title: string;
+  className?: string;
+  editable?: boolean;
+  onChange?: (value: string, id: string) => void;
+};
 
 export default function EditableItem({
   id,
@@ -20,22 +30,23 @@ export default function EditableItem({
   className,
   editable = false,
   onChange,
-}: {
-  id: string;
-  title: string;
-  className?: string;
-  editable?: boolean;
-  onChange?: (value: string, id: string) => void;
-}) {
+}: EditableItemProps) {
+  const [changedValue, setChangedValue] = useState<string | undefined>(undefined);
+
+  const onDebouncedChange = (value: string) => {
+    onChange?.(value, id);
+  };
+
+  useDebounceFunc<string>(onDebouncedChange, changedValue, 500);
   if (editable) {
     return (
       <Input
         type="text"
         className="line-clamp-1 h-auto w-full text-ellipsis border-none bg-transparent outline-none"
-        value={title}
+        value={changedValue || title}
         onChange={(e) => {
           e.preventDefault();
-          onChange?.(e.target.value, id);
+          setChangedValue(e.target.value);
         }}
       />
     );
