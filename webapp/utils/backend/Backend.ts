@@ -84,7 +84,7 @@ class Backend {
     }
 
     this.start = async (parameters: LlamaCppArguments, model = activeModel) => {
-      logger.info('start server', parameters);
+      logger.info('start server', model, parameters);
       return startLLamaCppServer(model, parameters);
     };
 
