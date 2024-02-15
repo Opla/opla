@@ -144,7 +144,7 @@ const LlamaCppArgumentsSchema = z.object({
     .describe(
       'use cuBLAS instead of custom mul_mat_q CUDA kernels. Not recommended since this is both slower and uses more VRAM.',
     ),
-  model: z.string().optional().describe('model path (default: models/7B/ggml-model-f16.gguf)'),
+  model: z.string().nullable().optional().describe('model path (default: models/7B/ggml-model-f16.gguf)'),
   alias: z
     .string()
     .optional()

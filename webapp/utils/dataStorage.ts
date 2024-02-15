@@ -98,14 +98,14 @@ const MockStorage: DataStorage = {
 const FileStorage: DataStorage = {
   async getItem<T>(key: string, defaultValue?: T, path = '') {
     logger.warn('FileStorage.getItem() called', path);
-    let value = await readFromLocalStorage<T>(key, path);
-    if (!value || (Array.isArray(value) && value.length === 0)) {
+    const value = await readFromLocalStorage<T>(key, path);
+    /* if (!value || (Array.isArray(value) && value.length === 0)) {
       value = await LocalStorage.getItem<T>(key, defaultValue);
       if (value || defaultValue) {
         await writeToLocalStorage(key, value || defaultValue, path);
       }
-    }
-    return value;
+    } */
+    return value || defaultValue as T;
   },
   async setItem<T>(key: string, value: T, path = '') {
     if (value === undefined) {

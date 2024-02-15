@@ -31,9 +31,7 @@ export default function useCollectionStorage<T>(
     let v = collection[key];
     if (!v) {
       v = (await dataStorage().getItem(collectionId, defaultValue, key)) as T;
-      if (v) {
-        setCollection({ ...collection, [key]: v });
-      }
+      setCollection({ ...collection, [key]: v });
     }
     return v;
   };
