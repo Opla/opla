@@ -14,7 +14,11 @@
 
 import { useEffect } from 'react';
 
-export default function useDebounceFunc<T>(callback: (v: T) => void, value: T | undefined, delay: number) {
+export default function useDebounceFunc<T>(
+  callback: (v: T) => void,
+  value: T | undefined,
+  delay: number,
+) {
   useEffect(() => {
     const handler = setTimeout(() => {
       if (value === undefined) return;

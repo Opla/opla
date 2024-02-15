@@ -32,7 +32,9 @@ export default function Form<T>({
   onParametersChanged,
   debounceDelay = 600,
 }: FormProps<T>) {
-  const [updatedParameters, setUpdatedParameters] = useState<ParametersRecord | undefined>(undefined);
+  const [updatedParameters, setUpdatedParameters] = useState<ParametersRecord | undefined>(
+    undefined,
+  );
   const { t } = useTranslation();
 
   const handleParameterChange = (name: string, value?: ParameterValue) => {
@@ -47,7 +49,7 @@ export default function Form<T>({
     logger.info('updateParameters', newParameters);
     let changedParameters = onParametersChanged(newParameters);
     if (changedParameters && Object.keys(changedParameters).length === 0) {
-        changedParameters = undefined;
+      changedParameters = undefined;
     }
     // TODO handle errors
     setUpdatedParameters(changedParameters);

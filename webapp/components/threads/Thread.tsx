@@ -379,19 +379,16 @@ function Thread({
     newContent: string,
     submit: boolean,
   ) => {
-    console.log('handleChangeMessageContent', conversationId, message, newContent, submit);
     if (conversationId === undefined) {
       return;
     }
     const conversation = getConversation(conversationId, conversations);
     if (conversation) {
       const conversationMessages = getConversationMessages(conversationId);
-      console.log('handleChangeMessageContent', conversationMessages);
       const newMessages = conversationMessages.map((m) => {
         if (m.id === message.id) {
           const { contentHistory = [] } = m;
           contentHistory.push(message.content);
-          console.log('handleChangeMessageContent', contentHistory);
           return { ...m, content: newContent, contentHistory };
         }
         return m;
@@ -405,7 +402,6 @@ function Thread({
     }
     if (submit) {
       const sibling = getConversationMessages(conversationId).find((m) => m.id === message.sibling);
-      console.log('handleChangeMessageContent', sibling);
       if (sibling) {
         handleResendMessage(sibling);
       }

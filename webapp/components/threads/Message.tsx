@@ -117,7 +117,6 @@ function MessageComponent({
 
   const handleSave = () => {
     const newContent = inputRef.current?.value;
-    console.log('newContent', newContent);
     if (newContent && content !== newContent) {
       onChangeContent(newContent, isUser);
     }
