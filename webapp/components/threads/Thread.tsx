@@ -101,7 +101,7 @@ function Thread({
   useEffect(() => {
     const getNewMessages = async () => {
       let newMessages: Message[] = [];
-      if (conversationId) {
+      if (conversationId && selectedConversation) {
         await readConversationMessages(conversationId, []);
         const stream = backendContext.streams?.[conversationId as string];
         newMessages = filterConversationMessages(

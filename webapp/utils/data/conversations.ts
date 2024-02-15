@@ -86,7 +86,7 @@ const updateConversation = (
   return conversations.map((c) => (c.id === updatedConversation.id ? updatedConversation : c));
 };
 
-const deleteConversation = (conversationId: string, conversations: Conversation[]) =>
+const removeConversation = (conversationId: string, conversations: Conversation[]) =>
   conversations.filter((c) => c.id !== conversationId);
 
 const updateOrCreateConversation = (
@@ -104,18 +104,6 @@ const updateOrCreateConversation = (
   }
   return updatedConversations;
 };
-
-/* const updateMessages = (
-  conversationId: string | undefined,
-  conversationMessages: Message[],
-  conversations: Conversation[],
-  messages: Message[],
-): Message[] => {
-
-
-  const updatedMessages = mergeMessages(conversationMessages, messages);
-  return updatedMessages;
-}; */
 
 const mergeConversations = (conversations: Conversation[], newConversations: Conversation[]) => {
   const mergedConversations = [...conversations, ...newConversations];
@@ -141,7 +129,7 @@ export {
   updateConversation,
   updateOrCreateConversation,
   mergeMessages,
-  deleteConversation,
+  removeConversation,
   mergeConversations,
   isKeepSystem,
 };
