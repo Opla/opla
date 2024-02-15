@@ -32,8 +32,8 @@ import Settings from './Settings';
 import Thread from './Thread';
 import Archive from './Archive';
 
-const getSelectedPage = (selectedThreadId?: string) =>
-  `${Page.Threads}${selectedThreadId ? `/${selectedThreadId}` : ''}`;
+const getSelectedPage = (selectedThreadId: string | undefined, view: ViewName) =>
+  `${view === ViewName.Recent ? Page.Threads : Page.Archives}${selectedThreadId ? `/${selectedThreadId}` : ''}`;
 
 type ThreadsProps = {
   selectedThreadId?: string;
@@ -67,23 +67,26 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
 
   const { showModal } = useContext(ModalsContext);
 
-  const defaultSettings = backendContext.config.settings;
-  const selectedPage = getSelectedPage(selectedThreadId);
-  const pageSettings =
-    defaultSettings.pages?.[selectedPage] ||
-    defaultSettings.pages?.[Page.Threads] ||
-    DefaultPageSettings;
+  const selectedPage = getSelectedPage(selectedThreadId, view);
 
-  const saveSettings = (partialSettings: Partial<PageSettings>) => {
+  const saveSettings = (currentPage = selectedPage, partialSettings?: Partial<PageSettings>) => {
     const { settings } = backendContext.config;
-    logger.info('saveSettings', selectedPage, partialSettings, backendContext.config);
+    logger.info('saveSettings', currentPage, partialSettings, backendContext.config);
     if (settings.selectedPage) {
       const pages = settings.pages || {};
-      const page = pages[selectedPage] || DefaultPageSettings;
-      setSettings({
-        ...settings,
-        pages: { ...pages, [selectedPage]: { ...page, ...partialSettings } },
-      });
+      const page = pages[currentPage] || DefaultPageSettings;
+      if (partialSettings) {
+        setSettings({
+          ...settings,
+          pages: { ...pages, [currentPage]: { ...page, ...partialSettings } },
+        });
+      } else if (pages[currentPage]) {
+        delete pages[currentPage];
+        setSettings({
+          ...settings,
+          pages,
+        });
+      }
     }
   };
 
@@ -94,9 +97,9 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     const pages = settings.pages || {};
     const page = pages[selectedPage] || DefaultPageSettings;
     if (page.explorerHidden && page.settingsHidden) {
-      saveSettings({ explorerHidden: false, settingsHidden: false });
+      saveSettings(selectedPage, { explorerHidden: false, settingsHidden: false });
     } else {
-      saveSettings({ explorerHidden: true, settingsHidden: true });
+      saveSettings(selectedPage, { explorerHidden: true, settingsHidden: true });
     }
   });
 
@@ -105,24 +108,26 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     return null;
   }
 
-  const deleteAndCleanupConversation = async (conversationId: string) => {
-    await deleteAndCleanupConversation(conversationId);
-  };
+  const deleteAndCleanupConversation = async (conversationId: string) =>
+    deleteConversation(conversationId, async (cId) => {
+      // Delete associated settings
+      saveSettings(getSelectedPage(cId, ViewName.Recent));
+    });
 
   const handleResizeExplorer = (size: number) => {
-    saveSettings({ explorerWidth: size });
+    saveSettings(selectedPage, { explorerWidth: size });
   };
 
   const handleResizeSettings = (size: number) => {
-    saveSettings({ settingsWidth: size });
+    saveSettings(selectedPage, { settingsWidth: size });
   };
 
   const handleChangeDisplayExplorer = (value: boolean) => {
-    saveSettings({ explorerHidden: !value });
+    saveSettings(selectedPage, { explorerHidden: !value });
   };
 
   const handleChangeDisplaySettings = (value: boolean) => {
-    saveSettings({ settingsHidden: !value });
+    saveSettings(selectedPage, { settingsHidden: !value });
   };
 
   const handleDelete = (action: string, data: any) => {
@@ -151,12 +156,13 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     } else if (menu === MenuAction.ArchiveConversation) {
       const conversationToArchive = getConversation(data, conversations) as Conversation;
       const messages = getConversationMessages(conversationToArchive.id);
-      await deleteConversation(conversationToArchive.id);
+      await deleteAndCleanupConversation(conversationToArchive.id);
       setArchives([...archives, { ...conversationToArchive, messages }]);
     } else if (menu === MenuAction.UnarchiveConversation) {
       const { messages, ...archive } = getConversation(data, archives) as Conversation;
-      await deleteArchive(archive.id, async () => {
-        logger.info('TODO cleanup archive');
+      await deleteArchive(archive.id, async (aId) => {
+        // Delete associated settings
+        saveSettings(getSelectedPage(aId, ViewName.Archives));
       });
       updateConversations([...conversations, archive as Conversation]);
       updateConversationMessages(archive.id, messages || []);
@@ -176,6 +182,13 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
       setArchives(threads);
     }
   };
+
+  const defaultSettings = backendContext.config.settings;
+  const pageSettings =
+    defaultSettings.pages?.[selectedPage] ||
+    defaultSettings.pages?.[Page.Threads] ||
+    DefaultPageSettings;
+
   logger.info('render Threads', selectedThreadId);
   return (
     <ResizablePanelGroup direction="horizontal">
