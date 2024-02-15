@@ -17,12 +17,12 @@ import { Input } from '@/components/ui/input';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
 
 export type EditableItemProps = {
-    id: string;
-    title: string;
-    className?: string;
-    editable?: boolean;
-    onChange?: (value: string, id: string) => void;
-  };
+  id: string;
+  title: string;
+  className?: string;
+  editable?: boolean;
+  onChange?: (value: string, id: string) => void;
+};
 
 export default function EditableItem({
   id,
