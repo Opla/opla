@@ -32,6 +32,7 @@ import { DownloadIcon } from '@radix-ui/react-icons';
 import useTranslation from '@/hooks/useTranslation';
 import { Model } from '@/types';
 import { getEntityName, getResourceUrl } from '@/utils/data';
+import useParameters, { ParametersCallback } from '@/hooks/useParameters';
 import Parameter from '../common/Parameter';
 import { Button } from '../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../ui/table';
@@ -42,20 +43,25 @@ import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '.
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu'; */
 
+export type ModelViewProps = {
+  model: Model;
+  isDownloading: boolean;
+  local: boolean;
+  downloadables: Model[];
+  onChange: (item?: Model) => void;
+  onParametersChange: ParametersCallback;
+};
+
 function ModelView({
   model,
   isDownloading,
   local,
   downloadables,
   onChange,
-}: {
-  model: Model;
-  isDownloading: boolean;
-  local: boolean;
-  downloadables: Model[];
-  onChange: (item?: Model) => void;
-}) {
+  onParametersChange,
+}: ModelViewProps) {
   const { t } = useTranslation();
+  const [updatedParameters, setUpdatedParameters] = useParameters(onParametersChange);
 
   if (!model) {
     return null;
@@ -116,9 +122,10 @@ function ModelView({
                   <Parameter
                     title=""
                     name="description"
-                    value={t(model.description || '')}
-                    disabled
+                    value={updatedParameters?.description || t(model.description || '')}
+                    disabled={!model.editable}
                     type="large-text"
+                    onChange={setUpdatedParameters}
                   />
                   {model.fileName && (
                     <Parameter
@@ -132,10 +139,11 @@ function ModelView({
                   {model.author && (
                     <Parameter
                       title={t('Author')}
-                      name="version"
-                      value={`${getEntityName(model.author)}`}
-                      disabled
+                      name="author"
+                      value={updatedParameters?.author || `${getEntityName(model.author)}`}
+                      disabled={!model.editable}
                       type="text"
+                      onChange={setUpdatedParameters}
                     />
                   )}
                   {getEntityName(model.creator).toLowerCase() !==
@@ -144,7 +152,7 @@ function ModelView({
                       title={t('Creator')}
                       name="version"
                       value={`${getEntityName(model.creator)}`}
-                      disabled
+                      disabled={!model.editable}
                       type="text"
                     />
                   )}
@@ -157,7 +165,7 @@ function ModelView({
                         title={t('Publisher')}
                         name="version"
                         value={`${getEntityName(model.publisher)}`}
-                        disabled
+                        disabled={!model.editable}
                         type="text"
                       />
                     )}
@@ -165,21 +173,21 @@ function ModelView({
                     title={t('Version')}
                     name="version"
                     value={`${model.version}`}
-                    disabled
+                    disabled={!model.editable}
                     type="text"
                   />
                   <Parameter
                     title={t('License')}
                     name="license"
                     value={`${getEntityName(model.license)}`}
-                    disabled
+                    disabled={!model.editable}
                     type="text"
                   />
                   <Parameter
                     title={t('Repository')}
                     name="url"
                     value={`${getResourceUrl(model.repository)}`}
-                    disabled
+                    disabled={!model.editable}
                     type="url"
                   />
                 </div>

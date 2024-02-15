@@ -139,11 +139,17 @@ pub struct Model {
     )]
     pub paper: Option<Resource>,
 
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub include: Option<Vec<Model>>,
 
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub system: Option<String>,
 
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub context_window: Option<i32>,
+
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub editable: Option<bool>,
 }
 
 impl Model {
@@ -183,6 +189,7 @@ impl Model {
             include: None,
             system: None,
             context_window: None,
+            editable: None,
         }
     }
 

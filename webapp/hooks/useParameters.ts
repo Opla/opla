@@ -12,28 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
-import { ParametersDefinition } from '@/types';
-import useTranslation from '@/hooks/useTranslation';
-import useDebounceFunc from '@/hooks/useDebounceFunc';
+import { ParameterValue, ParametersRecord } from '@/components/common/Parameter';
 import logger from '@/utils/logger';
-import Parameter, { ParameterValue, ParametersRecord } from '../Parameter';
+import { useState } from 'react';
+import useDebounceFunc from './useDebounceFunc';
 
-export type FormProps<T> = {
-  parameters: Record<string, T> | undefined;
-  parametersDefinition: ParametersDefinition;
-  debounceDelay?: number;
-  onParametersChanged: (params: ParametersRecord) => ParametersRecord | undefined;
-};
+export type ParametersCallback = (params: ParametersRecord) => ParametersRecord | undefined;
 
-export default function Form<T>({
-  parameters,
-  parametersDefinition,
-  onParametersChanged,
+function useParameters(
+  onParametersChanged: ParametersCallback,
   debounceDelay = 600,
-}: FormProps<T>) {
-  const { t } = useTranslation();
-
+): [ParametersRecord | undefined, (name: string, value?: ParameterValue) => void] {
   const [updatedParameters, setUpdatedParameters] = useState<ParametersRecord | undefined>(
     undefined,
   );
@@ -58,24 +47,7 @@ export default function Form<T>({
 
   useDebounceFunc<ParametersRecord>(updateParameters, updatedParameters, debounceDelay);
 
-  return (
-    <form>
-      {Object.keys(parametersDefinition).map((key) => (
-        <Parameter
-          key={key}
-          title={t(parametersDefinition[key].name)}
-          type={parametersDefinition[key].type}
-          name={key}
-          value={
-            updatedParameters?.[key] ||
-            (parameters?.[key] as ParameterValue) ||
-            parametersDefinition[key].defaultValue
-          }
-          description={t(parametersDefinition[key].description)}
-          inputCss="max-w-20 pl-2"
-          onChange={handleParameterChange}
-        />
-      ))}
-    </form>
-  );
+  return [updatedParameters, handleParameterChange];
 }
+
+export default useParameters;

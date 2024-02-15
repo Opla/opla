@@ -27,6 +27,7 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resi
 import Explorer from './Explorer';
 import ModelView from './Model';
 import NewLocalModel from './NewLocalModel';
+import { ParametersRecord } from '../common/Parameter';
 
 export default function Models({ selectedModelId }: { selectedModelId?: string }) {
   const { backendContext, updateBackendStore } = useBackend();
@@ -108,6 +109,17 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
     }
   };
 
+  const handleParametersChange = (parameters: ParametersRecord) => {
+    logger.info(`change model parameters ${parameters}`);
+    // onParametersChange(id, parameters);
+    return undefined;
+  };
+
+  const handleModelRename = (id: string, name: string) => {
+    logger.info(`change model name ${id} ${name}`);
+    // onModelRename(id, name);
+  };
+
   const { downloads = [] } = backendContext;
 
   const isDownloading = downloads.findIndex((d) => d.id === model?.id) !== -1;
@@ -115,7 +127,12 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel defaultSize={20}>
-        <Explorer models={models} selectedModelId={selectedModelId} collection={collection} />
+        <Explorer
+          models={models}
+          selectedModelId={selectedModelId}
+          collection={collection}
+          onModelRename={handleModelRename}
+        />
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel>
@@ -125,6 +142,7 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
           local={local}
           downloadables={downloadables}
           onChange={handleChange}
+          onParametersChange={handleParametersChange}
         />
       </ResizablePanel>
     </ResizablePanelGroup>
