@@ -14,7 +14,7 @@
 
 import { toast } from 'sonner';
 import logger from './logger';
-import { deleteFile, readTextFile, writeTextFile } from './backend/tauri';
+import { deleteDir, deleteFile, readTextFile, writeTextFile } from './backend/tauri';
 
 enum StorageType {
   File,
@@ -52,7 +52,12 @@ const writeToLocalStorage = async <T>(key: string, value: T, path: string) => {
 
 const deleteFromLocalStorage = async (key: string, path: string) => {
   await deleteFile(createPathAndJsonFile(key, path));
-  // TODO delete path if empty
+  // Delete path if empty
+  try {
+    await deleteDir(path);
+  } catch (e) {
+    logger.error(`Failed to delete path ${path}`);
+  }
 };
 
 const LocalStorage: DataStorage = {

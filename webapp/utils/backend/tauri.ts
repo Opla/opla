@@ -20,7 +20,7 @@ const invokeTauri = async <T>(command: string, args?: any) => {
   return invoke(command, args as InvokeArgs) as T;
 };
 
-const getPlatformInfos = async () => {
+export const getPlatformInfos = async () => {
   // TODO
 };
 
@@ -37,7 +37,7 @@ interface DialogFilter {
   extensions: string[];
 }
 
-const openFileDialog = async (multiple = false, filters?: DialogFilter[]) => {
+export const openFileDialog = async (multiple = false, filters?: DialogFilter[]) => {
   const { open } = await import('@tauri-apps/api/dialog');
   const selected = await open({
     multiple,
@@ -54,7 +54,7 @@ const openFileDialog = async (multiple = false, filters?: DialogFilter[]) => {
   return selected;
 };
 
-const saveFileDialog = async (filters?: DialogFilter[]) => {
+export const saveFileDialog = async (filters?: DialogFilter[]) => {
   const { save } = await import('@tauri-apps/api/dialog');
   const selected = await save({
     filters,
@@ -70,7 +70,7 @@ const saveFileDialog = async (filters?: DialogFilter[]) => {
   return selected;
 };
 
-const writeTextFile = async (filename: string, contents: string, createDir: boolean) => {
+export const writeTextFile = async (filename: string, contents: string, createDir: boolean) => {
   const { writeFile: fsWriteFile } = await import('@tauri-apps/api/fs');
   const { join } = await import('@tauri-apps/api/path');
   let path = filename;
@@ -88,7 +88,7 @@ const writeTextFile = async (filename: string, contents: string, createDir: bool
   });
 };
 
-const readTextFile = async (filename: string, isDatadir = true) => {
+export const readTextFile = async (filename: string, isDatadir = true) => {
   const { readTextFile: fsReadTextFile } = await import('@tauri-apps/api/fs');
   const { join } = await import('@tauri-apps/api/path');
   let dataDir = '';
@@ -98,7 +98,7 @@ const readTextFile = async (filename: string, isDatadir = true) => {
   return fsReadTextFile(await join(dataDir, filename));
 };
 
-const deleteFile = async (filename: string, isDatadir = true) => {
+export const deleteFile = async (filename: string, isDatadir = true) => {
   const { removeFile: fsRemoveFile } = await import('@tauri-apps/api/fs');
   const { join } = await import('@tauri-apps/api/path');
   let dataDir = '';
@@ -108,7 +108,17 @@ const deleteFile = async (filename: string, isDatadir = true) => {
   return fsRemoveFile(await join(dataDir, filename));
 };
 
-const fileExists = async (filename: string, path?: string) => {
+export const deleteDir = async (dirname: string, isDatadir = true, recursive = false) => {
+  const { removeDir: fsRemoveDir } = await import('@tauri-apps/api/fs');
+  const { join } = await import('@tauri-apps/api/path');
+  let dataDir = '';
+  if (isDatadir) {
+    dataDir = (await invokeTauri('get_data_dir')) as string;
+  }
+  return fsRemoveDir(await join(dataDir, dirname), { recursive });
+};
+
+export const fileExists = async (filename: string, path?: string) => {
   const { exists } = await import('@tauri-apps/api/fs');
   const { join } = await import('@tauri-apps/api/path');
   let dir = path as string;
@@ -118,13 +128,4 @@ const fileExists = async (filename: string, path?: string) => {
   return exists(await join(dir, filename));
 };
 
-export {
-  invokeTauri,
-  getPlatformInfos,
-  openFileDialog,
-  saveFileDialog,
-  writeTextFile,
-  readTextFile,
-  deleteFile,
-  fileExists,
-};
+
