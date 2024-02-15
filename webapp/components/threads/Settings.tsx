@@ -83,17 +83,17 @@ export default function Settings({ conversationId }: { conversationId?: string }
           delete newParams[key];
           update = true;
         } else {
-        const parameterDef = parametersDefinition[key];
-        const result = parameterDef.z.safeParse(value);
-        if (!result.success) {
-          logger.error('updateParameters invalid', result.error);
-          toast.error(result.error.message);
-        } else {
-          parameters[key] = result.data;
-          delete newParams[key];
-          update = true;
+          const parameterDef = parametersDefinition[key];
+          const result = parameterDef.z.safeParse(value);
+          if (!result.success) {
+            logger.error('updateParameters invalid', result.error);
+            toast.error(result.error.message);
+          } else {
+            parameters[key] = result.data;
+            delete newParams[key];
+            update = true;
+          }
         }
-      }
       });
 
       if (update) {
