@@ -14,6 +14,7 @@
 import React from 'react';
 import { Prompt } from '@/types';
 import { cn } from '@/lib/utils';
+import useFetch from '@/hooks/useFetch';
 import PromptCard from '../common/PromptCard';
 
 function PromptsGrid({
@@ -23,67 +24,12 @@ function PromptsGrid({
   className?: string;
   onPromptSelected: (prompt: Prompt) => void;
 }) {
-  const prompts: Prompt[] = [
-    {
-      id: '1',
-      name: 'Introduction',
-      description: 'Introduce yourself and your interests.',
-      createdAt: new Date().getTime(),
-      updatedAt: new Date().getTime(),
-      title: 'Introduction',
-      value: 'Hi, my name is [Your Name]. I am interested in [Your Interests].',
-    },
-    {
-      id: '2',
-      name: 'Favorite Book',
-      description: 'Share your favorite book and why you love it.',
-      createdAt: new Date().getTime(),
-      updatedAt: new Date().getTime(),
-      title: 'Favorite Book',
-      value: 'My favorite book is [Book Title]. I love it because [Reason].',
-    },
-    {
-      id: '3',
-      name: 'Dream Vacation',
-      description: 'Describe your dream vacation destination.',
-      createdAt: new Date().getTime(),
-      updatedAt: new Date().getTime(),
-      title: 'Dream Vacation',
-      value:
-        'My dream vacation destination is [Destination]. I would love to visit because [Reason].',
-    },
-    {
-      id: '4',
-      name: 'Hobby',
-      description: 'Tell us about your favorite hobby.',
-      createdAt: new Date().getTime(),
-      updatedAt: new Date().getTime(),
-      title: 'Hobby',
-      value: 'My favorite hobby is [Hobby]. I enjoy it because [Reason].',
-    },
-    {
-      id: '5',
-      name: 'Future Goals',
-      description: 'Share your aspirations and future goals.',
-      createdAt: new Date().getTime(),
-      updatedAt: new Date().getTime(),
-      title: 'Future Goals',
-      value: 'My future goals include [Goals]. I am excited to achieve them because [Reason].',
-    },
-    {
-      id: '6',
-      name: 'Favorite Movie',
-      description: 'Discuss your all-time favorite movie.',
-      createdAt: new Date().getTime(),
-      updatedAt: new Date().getTime(),
-      title: 'Favorite Movie',
-      value: 'My all-time favorite movie is [Movie Title]. I love it because [Reason].',
-    },
-  ];
+
+  const [prompts] = useFetch<Prompt[]>('https://opla.github.io/prompts/default.json');
 
   return (
     <div className={cn('mr-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3', className)}>
-      {prompts.map((prompt) => (
+      {prompts?.map((prompt) => (
         <PromptCard
           key={prompt.id}
           prompt={prompt}
