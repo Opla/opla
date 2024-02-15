@@ -48,9 +48,7 @@ export default function useCollectionStorage<T>(
     }
   };
 
-  const getValue = (key: string, defaultValue: T) => {
-    return collection[key] || defaultValue;
-  };
+  const getValue = (key: string, defaultValue: T) => collection[key] || defaultValue;
 
   const deleteValue = async (key: string) => {
     try {

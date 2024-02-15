@@ -124,13 +124,7 @@ function Thread({
     logger.info('getNewMessages', conversationId, isMessageLoading);
     setIsMessageLoading(true);
     getNewMessages();
-  }, [
-    backendContext.streams,
-    conversationId,
-    filterConversationMessages,
-    readConversationMessages,
-    isMessageLoading,
-  ]);
+  }, [backendContext.streams, conversationId, filterConversationMessages, readConversationMessages, isMessageLoading, selectedConversation]);
 
   const showEmptyChat = !conversationId;
   const selectedModel = selectedConversation?.model || activeModel;
