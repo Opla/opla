@@ -35,7 +35,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 import Form from '../common/Form';
 
-export default function Settings({ conversationId, errors }: { conversationId?: string, errors: string[] }) {
+export default function Settings({
+  conversationId,
+  errors,
+}: {
+  conversationId?: string;
+  errors: string[];
+}) {
   const { t } = useTranslation();
   const { conversations, updateConversations, providers } = useContext(AppContext);
   const { backendContext } = useBackend();
@@ -265,8 +271,11 @@ export default function Settings({ conversationId, errors }: { conversationId?: 
         </TabsContent>
         <TabsContent value="debug" className="px-4">
           {errors.map((error) => (
-            <div key={error.substring(0, 5)} className="text-red-500 p-2 text-xs">
-              <p><AlertTriangle className="h-4 w-4 text-red-500 inline-flex mr-2" /><span>{error}</span></p>
+            <div key={error.substring(0, 5)} className="p-2 text-xs text-red-500">
+              <p>
+                <AlertTriangle className="mr-2 inline-flex h-4 w-4 text-red-500" />
+                <span>{error}</span>
+              </p>
             </div>
           ))}
         </TabsContent>

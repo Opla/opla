@@ -48,7 +48,7 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
   const handleError = (error: string) => {
     setError([...errors, error]);
   };
-  
+
   const {
     conversations,
     updateConversations,
