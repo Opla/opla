@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { useRouter } from 'next/router';
 import useBackend from '@/hooks/useBackendContext';
 import { Conversation, PageSettings } from '@/types';
@@ -43,6 +43,11 @@ type ThreadsProps = {
 export default function Threads({ selectedThreadId, view = ViewName.Recent }: ThreadsProps) {
   const router = useRouter();
   const { id } = router.query;
+
+  const [errors, setError] = useState<string[]>([]);
+  const handleError = (error: string) => {
+    setError([...errors, error]);
+  };
 
   const {
     conversations,
@@ -217,6 +222,7 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
             onChangeDisplayExplorer={handleChangeDisplayExplorer}
             onChangeDisplaySettings={handleChangeDisplaySettings}
             onSelectMenu={handleSelectMenu}
+            onError={handleError}
           />
         )}
         {view === ViewName.Archives && (
@@ -230,7 +236,7 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
         onResize={handleResizeSettings}
         className={!pageSettings.settingsHidden && view === ViewName.Recent ? '' : 'hidden'}
       >
-        <Settings conversationId={selectedThreadId} />
+        <Settings conversationId={selectedThreadId} errors={errors} />
       </ResizablePanel>
     </ResizablePanelGroup>
   );
