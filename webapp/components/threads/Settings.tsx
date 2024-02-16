@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { useContext } from 'react';
-import { File, HelpCircle, Palette, Settings2 } from 'lucide-react';
+import { AlertTriangle, Bug, File, HelpCircle, Palette, Settings2 } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { AppContext } from '@/context';
@@ -35,7 +35,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 import Form from '../common/Form';
 
-export default function Settings({ conversationId }: { conversationId?: string }) {
+export default function Settings({ conversationId, errors }: { conversationId?: string, errors: string[] }) {
   const { t } = useTranslation();
   const { conversations, updateConversations, providers } = useContext(AppContext);
   const { backendContext } = useBackend();
@@ -156,6 +156,9 @@ export default function Settings({ conversationId }: { conversationId?: string }
             <TabsTrigger value="documents">
               <File className="h-4 w-4" />
             </TabsTrigger>
+            <TabsTrigger value="debug">
+              <Bug className="h-4 w-4" />
+            </TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="settings" className="h-full py-4">
@@ -256,6 +259,16 @@ export default function Settings({ conversationId }: { conversationId?: string }
             className="resize-none overflow-y-hidden border-0 bg-transparent p-2 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent"
             onChange={handleNoteChange}
           />
+        </TabsContent>
+        <TabsContent value="debug" className="px-4">
+          {t('Debug')}
+        </TabsContent>
+        <TabsContent value="debug" className="px-4">
+          {errors.map((error) => (
+            <div key={error.substring(0, 5)} className="text-red-500 p-2 text-xs">
+              <p><AlertTriangle className="h-4 w-4 text-red-500 inline-flex mr-2" /><span>{error}</span></p>
+            </div>
+          ))}
         </TabsContent>
       </Tabs>
     </div>

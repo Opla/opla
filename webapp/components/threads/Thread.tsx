@@ -60,6 +60,7 @@ function Thread({
   onChangeDisplayExplorer,
   onChangeDisplaySettings,
   onSelectMenu,
+  onError,
 }: {
   conversationId?: string;
   displayExplorer: boolean;
@@ -67,6 +68,7 @@ function Thread({
   onChangeDisplayExplorer: (displayExplorer: boolean) => void;
   onChangeDisplaySettings: (displaySettings: boolean) => void;
   onSelectMenu: (menu: MenuAction, data: string) => void;
+  onError: (error: string) => void;
 }) {
   const router = useRouter();
   const {
@@ -252,7 +254,9 @@ function Thread({
       returnedMessage.content = response.content.trim();
     } catch (e: any) {
       logger.error('sendMessage', e, typeof e);
-      setErrorMessage({ ...errorMessage, [conversation.id]: String(e) });
+      const error = String(e);
+      onError(error);
+      setErrorMessage({ ...errorMessage, [conversation.id]: error });
       returnedMessage.content = t('Oops, something went wrong.');
       returnedMessage.status = MessageState.Error;
       toast.error(String(e));
