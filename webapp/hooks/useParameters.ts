@@ -17,9 +17,13 @@ import logger from '@/utils/logger';
 import { useState } from 'react';
 import useDebounceFunc from './useDebounceFunc';
 
-export type ParametersCallback = (params: ParametersRecord) => ParametersRecord | undefined;
+export type ParametersCallback = (
+  key: string | undefined,
+  params: ParametersRecord,
+) => Promise<ParametersRecord | undefined>;
 
 function useParameters(
+  key: string | undefined,
   onParametersChanged: ParametersCallback,
   debounceDelay = 600,
 ): [ParametersRecord | undefined, (name: string, value?: ParameterValue) => void] {
@@ -35,9 +39,9 @@ function useParameters(
     }
   };
 
-  const updateParameters = (newParameters: ParametersRecord) => {
+  const updateParameters = async (newParameters: ParametersRecord) => {
     logger.info('updateParameters', newParameters);
-    let changedParameters = onParametersChanged(newParameters);
+    let changedParameters = await onParametersChanged(key, newParameters);
     if (changedParameters && Object.keys(changedParameters).length === 0) {
       changedParameters = undefined;
     }

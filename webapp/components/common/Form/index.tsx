@@ -14,17 +14,19 @@
 
 import { ParametersDefinition } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
-import useParameters from '@/hooks/useParameters';
-import Parameter, { ParameterValue, ParametersRecord } from '../Parameter';
+import useParameters, { ParametersCallback } from '@/hooks/useParameters';
+import Parameter, { ParameterValue } from '../Parameter';
 
 export type FormProps<T> = {
+  id: string | undefined;
   parameters: Record<string, T> | undefined;
   parametersDefinition: ParametersDefinition;
   debounceDelay?: number;
-  onParametersChange: (params: ParametersRecord) => ParametersRecord | undefined;
+  onParametersChange: ParametersCallback;
 };
 
 export default function Form<T>({
+  id,
   parameters,
   parametersDefinition,
   onParametersChange,
@@ -32,6 +34,7 @@ export default function Form<T>({
 }: FormProps<T>) {
   const { t } = useTranslation();
   const [updatedParameters, setUpdatedParameters] = useParameters(
+    id,
     onParametersChange,
     debounceDelay,
   );

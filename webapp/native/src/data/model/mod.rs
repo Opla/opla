@@ -351,14 +351,19 @@ impl ModelStorage {
         self.items.retain(|m| !m.reference.is_same_id(id));
     }
 
-    pub fn update_model(&mut self, model: ModelEntity) {
+    pub fn update_model(&mut self, model: Model) {
         if
             let Some(index) = self.items
                 .iter()
-                .position(|m| m.reference.is_same_model(&model.reference))
+                .position(|m| m.reference.is_same_model(&model))
         {
+            let mut model_entity = match self.items.get(index) {
+                Some(model_entity) => model_entity.clone(),
+                None => return,
+            };
+            model_entity.reference = model;
             self.items.remove(index);
-            self.items.insert(index, model);
+            self.items.insert(index, model_entity.clone());
         }
     }
 }

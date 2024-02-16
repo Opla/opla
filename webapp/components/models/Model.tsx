@@ -61,7 +61,7 @@ function ModelView({
   onParametersChange,
 }: ModelViewProps) {
   const { t } = useTranslation();
-  const [updatedParameters, setUpdatedParameters] = useParameters(onParametersChange);
+  const [updatedParameters, setUpdatedParameters] = useParameters(model?.id, onParametersChange);
 
   if (!model) {
     return null;
@@ -169,27 +169,33 @@ function ModelView({
                         type="text"
                       />
                     )}
-                  <Parameter
-                    title={t('Version')}
-                    name="version"
-                    value={`${model.version}`}
-                    disabled={!model.editable}
-                    type="text"
-                  />
-                  <Parameter
-                    title={t('License')}
-                    name="license"
-                    value={`${getEntityName(model.license)}`}
-                    disabled={!model.editable}
-                    type="text"
-                  />
-                  <Parameter
-                    title={t('Repository')}
-                    name="url"
-                    value={`${getResourceUrl(model.repository)}`}
-                    disabled={!model.editable}
-                    type="url"
-                  />
+                  {model.version && (
+                    <Parameter
+                      title={t('Version')}
+                      name="version"
+                      value={`${model.version}`}
+                      disabled={!model.editable}
+                      type="text"
+                    />
+                  )}
+                  {model.license && (
+                    <Parameter
+                      title={t('License')}
+                      name="license"
+                      value={`${getEntityName(model.license)}`}
+                      disabled={!model.editable}
+                      type="text"
+                    />
+                  )}
+                  {model.repository && (
+                    <Parameter
+                      title={t('Repository')}
+                      name="url"
+                      value={`${getResourceUrl(model.repository)}`}
+                      disabled={!model.editable}
+                      type="url"
+                    />
+                  )}
                 </div>
                 {downloadables.length > 0 && (
                   <div className="flex w-full flex-col text-sm">

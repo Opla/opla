@@ -18,9 +18,14 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Model } from '@/types';
 import logger from '@/utils/logger';
-import { getModelsCollection, installModel, uninstallModel } from '@/utils/backend/commands';
+import {
+  getModelsCollection,
+  installModel,
+  uninstallModel,
+  updateModel,
+} from '@/utils/backend/commands';
 import useBackend from '@/hooks/useBackendContext';
-import { deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
+import { deepCopy, deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
 import { getDownloadables, isValidFormat } from '@/utils/data/models';
 import { Page } from '@/types/ui';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
@@ -45,7 +50,6 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
     };
     getCollection();
   }, []);
-  logger.info('collection: ', collection);
 
   const models = backendContext.config.models.items;
   let local = true;
@@ -59,7 +63,7 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
     : getDownloadables(model).filter((d) => d.private !== true && isValidFormat(d));
 
   const handleInstall = async (item?: Model) => {
-    const selectedModel: Model = deepMerge(model, item || {}, true);
+    const selectedModel: Model = deepMerge<Model>(model, item || {}, true);
     logger.info(`install ${model.name}`, selectedModel, item);
     if (selectedModel.private === true) {
       delete selectedModel.private;
@@ -88,7 +92,7 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
     router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
   };
 
-  const handleChange = (selectedModel?: Model) => {
+  const handleLocalInstall = (selectedModel?: Model) => {
     if (local && !selectedModel) {
       // showModal(ModalIds.DeleteItem, { item: model, onAction: onUninstall });
       handleUninstall();
@@ -109,15 +113,52 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
     }
   };
 
-  const handleParametersChange = (parameters: ParametersRecord) => {
-    logger.info(`change model parameters ${parameters}`);
+  const handleParametersChange = async (id: string | undefined, parameters: ParametersRecord) => {
+    logger.info(`change model parameters ${id} ${parameters}`);
     // onParametersChange(id, parameters);
+    let updatedModel = models.find((m) => m.id === id) as Model;
+    if (updatedModel) {
+      let needUpdate = false;
+      updatedModel = deepCopy<Model>(updatedModel);
+      Object.keys(parameters).forEach((key) => {
+        switch (key) {
+          case 'name':
+            if (parameters[key] !== updatedModel.name) {
+              updatedModel.name = parameters[key] as string;
+              needUpdate = true;
+            }
+            break;
+          case 'description':
+            if (parameters[key] !== updatedModel.description) {
+              updatedModel.description = parameters[key] as string;
+              needUpdate = true;
+            }
+            break;
+          case 'author':
+            if (parameters[key] !== updatedModel.author) {
+              updatedModel.author = parameters[key] as string;
+              needUpdate = true;
+            }
+            break;
+          default:
+            logger.warn(`unknown parameter ${key}`);
+        }
+      });
+      if (needUpdate) {
+        await updateModel(updatedModel);
+        await updateBackendStore();
+      }
+    }
     return undefined;
   };
 
-  const handleModelRename = (id: string, name: string) => {
-    logger.info(`change model name ${id} ${name}`);
-    // onModelRename(id, name);
+  const handleModelRename = async (name: string, id: string) => {
+    const updatedModel = models.find((m) => m.id === id);
+    logger.info(`change model name ${id} ${name}`, updatedModel, models);
+    if (updatedModel && updatedModel.name !== name) {
+      await updateModel({ ...updatedModel, name });
+      await updateBackendStore();
+    }
   };
 
   const { downloads = [] } = backendContext;
@@ -141,7 +182,7 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
           isDownloading={isDownloading}
           local={local}
           downloadables={downloadables}
-          onChange={handleChange}
+          onChange={handleLocalInstall}
           onParametersChange={handleParametersChange}
         />
       </ResizablePanel>

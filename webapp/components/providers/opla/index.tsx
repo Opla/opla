@@ -45,7 +45,7 @@ export default function Opla({
       <Parameter
         title={t('Description')}
         name="description"
-        value={t(deepGet(provider, 'description'))}
+        value={t(deepGet<Provider, string>(provider, 'description'))}
         disabled
         type="large-text"
       />
