@@ -139,11 +139,17 @@ pub struct Model {
     )]
     pub paper: Option<Resource>,
 
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub include: Option<Vec<Model>>,
 
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub system: Option<String>,
 
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub context_window: Option<i32>,
+
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub editable: Option<bool>,
 }
 
 impl Model {
@@ -183,6 +189,7 @@ impl Model {
             include: None,
             system: None,
             context_window: None,
+            editable: None,
         }
     }
 
@@ -344,14 +351,19 @@ impl ModelStorage {
         self.items.retain(|m| !m.reference.is_same_id(id));
     }
 
-    pub fn update_model(&mut self, model: ModelEntity) {
+    pub fn update_model(&mut self, model: Model) {
         if
             let Some(index) = self.items
                 .iter()
-                .position(|m| m.reference.is_same_model(&model.reference))
+                .position(|m| m.reference.is_same_model(&model))
         {
+            let mut model_entity = match self.items.get(index) {
+                Some(model_entity) => model_entity.clone(),
+                None => return,
+            };
+            model_entity.reference = model;
             self.items.remove(index);
-            self.items.insert(index, model);
+            self.items.insert(index, model_entity.clone());
         }
     }
 }

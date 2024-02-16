@@ -71,19 +71,22 @@ export default function Settings({ conversationId }: { conversationId?: string }
     }
   };
 
-  const updateParameters = (params: ParametersRecord): ParametersRecord | undefined => {
+  const updateParameters = async (
+    id: string | undefined,
+    params: ParametersRecord,
+  ): Promise<ParametersRecord | undefined> => {
     let newParams: ParametersRecord | undefined;
-    if (selectedConversation) {
+    if (id && selectedConversation) {
       const { parameters = {} } = selectedConversation;
       let newConversation: Conversation | undefined;
       newParams = { ...params };
-      let update = false;
+      let needUpdate = false;
       Object.keys(params).forEach((key) => {
         const value = params[key];
         if (value === undefined) {
           delete parameters[key];
           delete newParams?.[key];
-          update = true;
+          needUpdate = true;
         } else {
           const parameterDef = parametersDefinition[key];
           const result = parameterDef.z.safeParse(value);
@@ -93,12 +96,12 @@ export default function Settings({ conversationId }: { conversationId?: string }
           } else {
             parameters[key] = result.data;
             delete newParams?.[key];
-            update = true;
+            needUpdate = true;
           }
         }
       });
 
-      if (update) {
+      if (needUpdate) {
         if (selectedConversation.parameters && Object.keys(parameters).length === 0) {
           newConversation = { ...selectedConversation };
           delete newConversation.parameters;
@@ -112,13 +115,6 @@ export default function Settings({ conversationId }: { conversationId?: string }
     }
     return newParams;
   };
-
-  /* const handleParameterChange = (name: string, value?: ParameterValue) => {
-    logger.info('handleParameterChange', name, value);
-    setParams({ ...params, [name]: value });
-  };
-
-  useDebounceFunc<ParametersRecord>(updateParameters, params, 600); */
 
   const handlePolicyChange = (policy: ContextWindowPolicy) => {
     if (selectedConversation) {
@@ -187,9 +183,10 @@ export default function Settings({ conversationId }: { conversationId?: string }
                 <AccordionTrigger>{t('Parameters')}</AccordionTrigger>
                 <AccordionContent>
                   <Form<ConversationParameter>
+                    id={selectedConversation?.id}
                     parameters={selectedConversation?.parameters}
                     parametersDefinition={parametersDefinition}
-                    onParametersChanged={updateParameters}
+                    onParametersChange={updateParameters}
                   />
                 </AccordionContent>
               </AccordionItem>

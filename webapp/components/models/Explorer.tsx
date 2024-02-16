@@ -27,16 +27,21 @@ import { shortcutAsText } from '@/utils/shortcuts';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
 import { Button } from '../ui/button';
+import EditableItem from '../common/EditableItem';
+
+export type ModelsExplorerProps = {
+  models: Model[];
+  selectedModelId?: string;
+  collection: Model[];
+  onModelRename: (id: string, name: string) => void;
+};
 
 function ModelsExplorer({
   models,
   selectedModelId,
   collection,
-}: {
-  models: Model[];
-  selectedModelId?: string;
-  collection: Model[];
-}) {
+  onModelRename,
+}: ModelsExplorerProps) {
   const router = useRouter();
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
@@ -49,6 +54,11 @@ function ModelsExplorer({
 
   const handleNewLocalModel = () => {
     showModal(ModalIds.NewLocalModel);
+  };
+
+  const handleChangeModelName = (id: string, name: string) => {
+    logger.info(`change model name ${id} ${name}`);
+    onModelRename(id, name);
   };
 
   useShortcuts(ShortcutIds.INSTALL_MODEL, (event) => {
@@ -118,13 +128,24 @@ function ModelsExplorer({
                           className="flex cursor-pointer flex-row items-center"
                           tabIndex={0}
                         >
-                          <div>
-                            <div className="flex cursor-pointer flex-row items-center">
-                              <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
-                                {model.title || model.name}
+                          {!model.editable && (
+                            <div>
+                              <div className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1">
+                                <span>{model.title || model.name}</span>
                               </div>
                             </div>
-                          </div>
+                          )}
+                          {model.editable && (
+                            <div>
+                              <EditableItem
+                                id={model.id}
+                                title={model.title || model.name}
+                                editable
+                                className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1"
+                                onChange={handleChangeModelName}
+                              />
+                            </div>
+                          )}
                         </div>
                       </ContextMenuTrigger>
                       <ContextMenuList data={model.id} menu={menu} />
@@ -166,10 +187,8 @@ function ModelsExplorer({
                           tabIndex={0}
                         >
                           <div>
-                            <div className="flex cursor-pointer flex-row items-center">
-                              <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
-                                {model.title || model.name}
-                              </div>
+                            <div className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1">
+                              <span>{model.title || model.name}</span>
                             </div>
                           </div>
                         </div>

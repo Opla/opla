@@ -82,3 +82,12 @@ export const uninstallModel = async (modelId: String) => {
   const id = (await invokeTauri('uninstall_model', { modelId })) as String;
   return id;
 };
+
+export const updateModel = async (model: Model) => {
+  try {
+    await invokeTauri<void>('update_model', { model });
+  } catch (error) {
+    logger.error(error);
+    toast.error(`Error installing model ${error}`);
+  }
+};

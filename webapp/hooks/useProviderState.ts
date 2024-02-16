@@ -52,13 +52,20 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
   }, [backendContext, hasParametersChanged, providerId, providers, updatedProvider, newProvider]);
 
   const handleParameterChange = (name: string, value: ParameterValue) => {
-    const mergedProvider = deepSet(updatedProvider, name, value);
+    const mergedProvider = deepSet<Provider, ParameterValue>(
+      updatedProvider as Provider,
+      name,
+      value,
+    );
     logger.info('handleParameterChange', name, value, mergedProvider);
     setUpdatedProvider(mergedProvider);
   };
 
   const handleParametersSave = (partialProvider: Partial<Provider> = {}) => {
-    const mergedProvider = deepMerge(provider, partialProvider);
+    if (!provider) {
+      return;
+    }
+    const mergedProvider = deepMerge<Provider>(provider, partialProvider);
     const newProviders = updateProvider(mergedProvider, providers);
     logger.info('handleParametersSave', mergedProvider, newProviders);
     setProviders(newProviders);

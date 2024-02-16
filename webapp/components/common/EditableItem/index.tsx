@@ -34,7 +34,10 @@ export default function EditableItem({
   const [changedValue, setChangedValue] = useState<string | undefined>(undefined);
 
   const onDebouncedChange = (value: string) => {
-    onChange?.(value, id);
+    if (value !== title) {
+      onChange?.(value, id);
+    }
+    // setChangedValue(undefined);
   };
 
   useDebounceFunc<string>(onDebouncedChange, changedValue, 500);

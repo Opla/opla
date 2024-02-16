@@ -39,13 +39,16 @@ const createBaseNamedRecord = (name: string, description?: string) => {
   return item;
 };
 
-const deepCopy = (obj: any) =>
-  window?.structuredClone ? window.structuredClone(obj) : JSON.parse(JSON.stringify(obj));
+const deepCopy = <T>(obj: T): T =>
+  window?.structuredClone
+    ? (window.structuredClone(obj) as T)
+    : (JSON.parse(JSON.stringify(obj)) as T);
 
-const deepMerge = (_target: any, source: any, copy = false) => {
-  const target = copy ? deepCopy(_target) : _target;
-  Object.keys(source).forEach((key: string) => {
-    const value = source[key];
+const deepMerge = <T>(_target: T, source: Partial<T>, copy = false): T => {
+  const target = (copy ? deepCopy<T>(_target) : _target) as Record<string, unknown>;
+  const obj = source as Record<string, unknown>;
+  Object.keys(obj).forEach((key: string) => {
+    const value = obj[key];
     if (value !== null && typeof value === 'object') {
       if (typeof target[key] !== 'object') {
         target[key] = {};
@@ -55,14 +58,19 @@ const deepMerge = (_target: any, source: any, copy = false) => {
       target[key] = value;
     }
   });
-  return target;
+  return target as T;
 };
 
-const deepSet = (obj: any, path: string, _value: any, root = path): any => {
+const deepSet = <V, T>(obj: V, path: string, _value: T, root = path): Record<string, T> => {
   const [property, ...properties] = path.split('.');
   let value = _value;
-  if (properties.length) {
-    value = deepSet(obj[property] || {}, properties.join('.'), _value, root);
+  if (typeof obj === 'object' && properties.length) {
+    value = deepSet(
+      (obj as Record<string, T>)[property] || {},
+      properties.join('.'),
+      _value,
+      root,
+    ) as T;
   }
   if (typeof obj !== 'object') {
     throw new Error(`Path '${root}' is not accessible`);
@@ -70,15 +78,19 @@ const deepSet = (obj: any, path: string, _value: any, root = path): any => {
   return { ...obj, [property]: value };
 };
 
-const deepGet = (obj: any, path: string, defaultValue?: any, root = path): any => {
+const deepGet = <T, V>(obj: T, path: string, defaultValue?: V, root = path): V => {
   const [property, ...properties] = path.split('.');
+  if (obj === undefined || obj === null) {
+    return defaultValue as V;
+  }
+  const prop = (obj as Record<string, V>)[property];
   if (properties.length) {
-    return deepGet(obj[property], properties.join('.'), root);
+    return deepGet(prop as Record<string, V>, properties.join('.'), defaultValue, root);
   }
   if (typeof obj !== 'object' || property in obj === false) {
-    return defaultValue;
+    return defaultValue as V;
   }
-  return obj[property];
+  return prop;
 };
 
 // Inspiration: https://github.com/rayepps/radash/blob/31c1397437d7fb7a78e97499c8d46f992c49844c/src/object.ts

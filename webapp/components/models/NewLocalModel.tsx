@@ -107,6 +107,7 @@ function NewLocalModel({
           toast.error(`File not found ${file}`);
           return;
         }
+        model.editable = true;
         const id = await installModel(model, undefined, filepath, download);
         await updateBackendStore();
         logger.info('onLocalInstall', id, model, filepath, download);

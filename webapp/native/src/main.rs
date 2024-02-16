@@ -260,6 +260,22 @@ async fn install_model<R: Runtime>(
 }
 
 #[tauri::command]
+async fn update_model<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>,
+    model: Model,
+) -> Result<(), String> {
+    let mut store = context.store.lock().map_err(|err| err.to_string())?;
+
+    store.models.update_model(model);
+
+    store.save().map_err(|err| err.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
 async fn uninstall_model<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
@@ -611,6 +627,7 @@ fn main() {
                 search_hfhub_models,
                 install_model,
                 uninstall_model,
+                update_model,
                 set_active_model,
                 llm_call_completion
             ]

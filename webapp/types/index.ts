@@ -218,6 +218,7 @@ export type Model = BaseNamedRecord & {
 
   system?: string;
   contextWindow?: number;
+  editable?: boolean;
 };
 
 export type ModelsCollection = {
