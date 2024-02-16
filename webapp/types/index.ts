@@ -383,4 +383,22 @@ export type LlmStreamResponse = {
   conversationId: string;
 };
 
+export type Cpu = {
+  usage: number;
+};
+
+export type Sys = {
+  name: string;
+  kernelVersion: string;
+  osVersion: string;
+  cpuArch: string;
+
+  totalMemory: number;
+  usedMemory: number;
+  totalSwap: number;
+  usedSwap: number;
+
+  cpus: Cpu[];
+};
+
 export { Ui };

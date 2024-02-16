@@ -24,7 +24,7 @@ pub struct Sys {
     pub name: String,
     pub kernel_version: String,
     pub os_version: String,
-
+    pub cpu_arch: String,
     
     pub total_memory: u64,
     pub used_memory: u64,
@@ -40,7 +40,8 @@ impl Sys {
         Self {
             name: System::name().unwrap_or("Unknown".to_owned()),
             kernel_version: System::kernel_version().unwrap_or("Unknown".to_owned()),
-            os_version: System::os_version().unwrap_or("Unknown".to_owned()),
+            os_version: System::long_os_version().unwrap_or("Unknown".to_owned()),
+            cpu_arch: System::cpu_arch().unwrap_or("Unknown".to_owned()),
             total_memory: sys.total_memory(),
             used_memory: sys.used_memory(),
             total_swap: sys.total_swap(),

@@ -11,22 +11,35 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { DownloadCloud, AlertTriangle, Server, BarChart3 } from 'lucide-react';
+import { DownloadCloud, AlertTriangle, Server, BarChart3, Cpu } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import useBackend from '@/hooks/useBackendContext';
 // import logger from '@/utils/logger';
-import { useContext } from 'react';
 import { AppContext } from '@/context';
 import { Page } from '@/types/ui';
+import { getSys } from '@/utils/backend/commands';
+import logger from '@/utils/logger';
+import { Sys } from '@/types';
 
 export default function Statusbar() {
   const router = useRouter();
   const { t } = useTranslation();
   const { backendContext } = useBackend();
   const { usage } = useContext(AppContext);
+  const [sys, setSys] = useState<Sys>();
 
-  // logger.info('statusbar backendContext', backendContext);
+  useEffect(() => {
+    const call = async () => {
+      const s = await getSys();
+      console.log('statusbar sys', s);
+      setSys(s);
+    };
+    call();
+  }, [setSys]);
+
+  logger.info('statusbar sys', sys);
 
   const running = backendContext.server.status === 'started';
   const error = backendContext.server.status === 'error';
@@ -79,35 +92,58 @@ export default function Statusbar() {
           </div>
         )}
       </div>
-      {usage && (
-        <div className="flex flex-row items-center justify-center gap-1">
-          <span className="tabular-nums text-neutral-800 dark:text-neutral-300">
-            <BarChart3 className="h-4 w-4" strokeWidth={1.5} />
-          </span>
-          <span>
-            {usage?.totalTokens ? (
-              <span>
-                {usage.totalTokens} tokens {usage?.totalMs ? '| ' : ''}
-              </span>
-            ) : (
-              <span> </span>
-            )}
-            {usage?.totalMs ? (
-              <span>
-                {String(Math.round(usage.totalMs / 100) / 10)} sec{' '}
-                {usage?.totalPerSecond ? '| ' : ''}
-              </span>
-            ) : (
-              <span> </span>
-            )}
-            {usage?.totalPerSecond ? (
-              <span>{String(Math.round(usage.totalPerSecond * 10) / 10)} tokens/sec</span>
-            ) : (
-              <span> </span>
-            )}
-          </span>
-        </div>
-      )}
+      <div className="flex flex-row gap-2">
+        {sys && (
+          <div className="flex flex-row items-center justify-center gap-1">
+            <span className="tabular-nums text-neutral-800 dark:text-neutral-300">
+              <Cpu className="h-4 w-4" strokeWidth={1.5} />
+            </span>
+            <span>
+              {sys?.cpus ? (
+                <span>
+                  {sys?.cpus.length} CPUs{' '}
+                  {(
+                    (sys?.cpus.reduce((acc, cpu) => acc + cpu.usage, 0) ?? 0) /
+                    (sys?.cpus.length ?? 1)
+                  ).toFixed()}
+                  %
+                </span>
+              ) : (
+                <span> </span>
+              )}
+            </span>
+          </div>
+        )}
+        {usage && (
+          <div className="flex flex-row items-center justify-center gap-1">
+            <span className="tabular-nums text-neutral-800 dark:text-neutral-300">
+              <BarChart3 className="h-4 w-4" strokeWidth={1.5} />
+            </span>
+            <span>
+              {usage?.totalTokens ? (
+                <span>
+                  {usage.totalTokens} tokens {usage?.totalMs ? '| ' : ''}
+                </span>
+              ) : (
+                <span> </span>
+              )}
+              {usage?.totalMs ? (
+                <span>
+                  {String(Math.round(usage.totalMs / 100) / 10)} sec{' '}
+                  {usage?.totalPerSecond ? '| ' : ''}
+                </span>
+              ) : (
+                <span> </span>
+              )}
+              {usage?.totalPerSecond ? (
+                <span>{String(Math.round(usage.totalPerSecond * 10) / 10)} tokens/sec</span>
+              ) : (
+                <span> </span>
+              )}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
