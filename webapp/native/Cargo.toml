@@ -19,7 +19,7 @@ serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "1.5.4", features = [ "fs-remove-file", "fs-create-dir", "fs-remove-dir", "updater", "fs-read-file", "fs-write-file", "fs-exists", "http-all", "dialog-all", "path-all", "shell-execute", "shell-open", "shell-sidecar", "window-all"] }
 tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
-sysinfo = "0.30.5"
+sysinfo = { version = "0.30.5", features = ["apple-app-store"] }
 dirs = "5.0.1"
 rusqlite = "0.30.0"
 reqwest = { version = "0.11.23", features = ["json"] }
