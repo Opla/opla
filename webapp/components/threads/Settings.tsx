@@ -189,7 +189,7 @@ export default function Settings({ conversationId }: { conversationId?: string }
                   <Form<ConversationParameter>
                     parameters={selectedConversation?.parameters}
                     parametersDefinition={parametersDefinition}
-                    onParametersChanged={updateParameters}
+                    onParametersChange={updateParameters}
                   />
                 </AccordionContent>
               </AccordionItem>

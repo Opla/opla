@@ -31,7 +31,10 @@ export default function Form<T>({
   debounceDelay,
 }: FormProps<T>) {
   const { t } = useTranslation();
-  const [updatedParameters, setUpdatedParameters] = useParameters(onParametersChange, debounceDelay);
+  const [updatedParameters, setUpdatedParameters] = useParameters(
+    onParametersChange,
+    debounceDelay,
+  );
 
   return (
     <form>
