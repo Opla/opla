@@ -103,7 +103,9 @@ function MessageComponent({
   const [current, setCurrent] = useState(0);
   const { author } = message;
 
-  const content = getContent(current > 0 && message.contentHistory ? message.contentHistory[current - 1] : message.content);
+  const content = getContent(
+    current > 0 && message.contentHistory ? message.contentHistory[current - 1] : message.content,
+  );
   const Content = useMarkdownProcessor(content as string);
   const isUser = author.role === 'user';
 
@@ -190,7 +192,7 @@ function MessageComponent({
                           <Button
                             variant="ghost"
                             size="sm"
-                            disabled={current  === message.contentHistory?.length}
+                            disabled={current === message.contentHistory?.length}
                             onClick={() => {
                               setCurrent(current + 1);
                             }}
@@ -198,11 +200,15 @@ function MessageComponent({
                           >
                             <ChevronLeft className="h-4 w-4" strokeWidth={1.5} />
                           </Button>
-                          <span className='tabular-nums'> {message.contentHistory.length - current + 1} / {message.contentHistory.length + 1} </span>
+                          <span className="tabular-nums">
+                            {' '}
+                            {message.contentHistory.length - current + 1} /{' '}
+                            {message.contentHistory.length + 1}{' '}
+                          </span>
                           <Button
                             variant="ghost"
                             size="sm"
-                            disabled={current  === 0}
+                            disabled={current === 0}
                             onClick={() => {
                               setCurrent(current - 1);
                             }}

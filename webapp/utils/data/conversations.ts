@@ -58,8 +58,10 @@ export const createConversation = (name: string) => {
   return conversation;
 };
 
-export const getConversation = (conversationId: string | undefined, conversations: Conversation[]) =>
-  conversations.find((c) => c.id === conversationId);
+export const getConversation = (
+  conversationId: string | undefined,
+  conversations: Conversation[],
+) => conversations.find((c) => c.id === conversationId);
 
 export const updateConversation = (
   conversation: Conversation,
@@ -96,7 +98,10 @@ export const updateOrCreateConversation = (
   return updatedConversations;
 };
 
-export const mergeConversations = (conversations: Conversation[], newConversations: Conversation[]) => {
+export const mergeConversations = (
+  conversations: Conversation[],
+  newConversations: Conversation[],
+) => {
   const mergedConversations = [...conversations, ...newConversations];
 
   const conversationMap = new Map<string, Conversation>();
