@@ -17,6 +17,7 @@
 mod server;
 mod store;
 mod downloader;
+mod sys;
 pub mod utils;
 pub mod api;
 pub mod data;
@@ -33,6 +34,7 @@ use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
 use store::{ Store, Provider, ProviderType, ProviderMetadata, Settings, ServerConfiguration };
 use server::*;
+use sys::Sys;
 use tauri::{ Runtime, State, Manager, App, EventLoopMessage };
 use utils::{ get_config_directory, get_data_directory };
 
@@ -40,6 +42,7 @@ pub struct OplaContext {
     pub server: Mutex<OplaServer>,
     pub store: Mutex<Store>,
     pub downloader: Mutex<Downloader>,
+    pub sys: Mutex<Sys>,
 }
 
 pub fn get_opla_provider(server: ServerConfiguration) -> Provider {
@@ -56,6 +59,18 @@ pub fn get_opla_provider(server: ServerConfiguration) -> Provider {
         }),
     }
 }
+
+#[tauri::command]
+async fn get_sys<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>
+) -> Result<Sys, String> {
+    let mut sys: Sys = context.sys.lock().map_err(|err| err.to_string())?.clone(); 
+    sys.refresh();
+    Ok(sys)
+}
+
 #[tauri::command]
 async fn get_opla_configuration<R: Runtime>(
     _app: tauri::AppHandle<R>,
@@ -577,6 +592,7 @@ fn main() {
         server: Mutex::new(OplaServer::new()),
         store: Mutex::new(Store::new()),
         downloader: Mutex::new(Downloader::new()),
+        sys: Mutex::new(Sys::new()),
     };
     tauri::Builder
         ::default()
@@ -614,6 +630,7 @@ fn main() {
         })
         .invoke_handler(
             tauri::generate_handler![
+                get_sys,
                 get_opla_configuration,
                 save_settings,
                 get_config_dir,
