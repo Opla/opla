@@ -14,7 +14,7 @@
 import { Author, ContextWindowPolicy, Conversation, Message } from '@/types';
 import { createBaseRecord, createBaseNamedRecord, updateRecord } from '.';
 
-const createMessage = (author: Author, content: string) => {
+export const createMessage = (author: Author, content: string) => {
   const message = {
     ...createBaseRecord(),
     author,
@@ -23,11 +23,7 @@ const createMessage = (author: Author, content: string) => {
   return message as Message;
 };
 
-const updateMessage = (message: Message, messages: Message[]): Message[] => {
-  /* const conversation = conversations.find((c) => c.id === conversationId);
-  if (!conversation) {
-    return conversations;
-  } */
+/* const updateMessage = (message: Message, messages: Message[]): Message[] => {
   const updatedMessages = [...messages];
   const i = messages.findIndex((m) => m.id === message.id);
   const updatedMessage = updateRecord(message) as Message;
@@ -36,15 +32,10 @@ const updateMessage = (message: Message, messages: Message[]): Message[] => {
   } else {
     updatedMessages[i] = updatedMessage;
   }
-  /* const newConversation = {
-    ...conversation,
-    messages,
-  };
-  return conversations.map((c) => (c.id === conversationId ? newConversation : c)); */
   return updatedMessages;
-};
+}; */
 
-const mergeMessages = (messages: Message[], newMessages: Message[]) => {
+export const mergeMessages = (messages: Message[], newMessages: Message[]) => {
   const newMessagesIds = newMessages.map((m) => m.id);
   const freshNewMessages = newMessages.filter((m) => !messages.find((msg) => msg.id === m.id));
   const mergedMessages = messages.map((m) => {
@@ -57,7 +48,7 @@ const mergeMessages = (messages: Message[], newMessages: Message[]) => {
   return [...mergedMessages, ...freshNewMessages];
 };
 
-const createConversation = (name: string) => {
+export const createConversation = (name: string) => {
   const conversation: Conversation = {
     ...createBaseNamedRecord(name),
     messages: [],
@@ -67,10 +58,12 @@ const createConversation = (name: string) => {
   return conversation;
 };
 
-const getConversation = (conversationId: string | undefined, conversations: Conversation[]) =>
-  conversations.find((c) => c.id === conversationId);
+export const getConversation = (
+  conversationId: string | undefined,
+  conversations: Conversation[],
+) => conversations.find((c) => c.id === conversationId);
 
-const updateConversation = (
+export const updateConversation = (
   conversation: Conversation,
   conversations: Conversation[],
   noUpdate = false,
@@ -86,10 +79,10 @@ const updateConversation = (
   return conversations.map((c) => (c.id === updatedConversation.id ? updatedConversation : c));
 };
 
-const removeConversation = (conversationId: string, conversations: Conversation[]) =>
+export const removeConversation = (conversationId: string, conversations: Conversation[]) =>
   conversations.filter((c) => c.id !== conversationId);
 
-const updateOrCreateConversation = (
+export const updateOrCreateConversation = (
   conversationId: string | undefined,
   conversations: Conversation[],
   title = 'Conversation',
@@ -105,7 +98,10 @@ const updateOrCreateConversation = (
   return updatedConversations;
 };
 
-const mergeConversations = (conversations: Conversation[], newConversations: Conversation[]) => {
+export const mergeConversations = (
+  conversations: Conversation[],
+  newConversations: Conversation[],
+) => {
   const mergedConversations = [...conversations, ...newConversations];
 
   const conversationMap = new Map<string, Conversation>();
@@ -118,18 +114,5 @@ const mergeConversations = (conversations: Conversation[], newConversations: Con
   return Array.from(conversationMap.values());
 };
 
-const isKeepSystem = (conversation: Conversation | undefined) =>
+export const isKeepSystem = (conversation: Conversation | undefined) =>
   typeof conversation?.keepSystem === 'boolean' ? conversation?.keepSystem : true;
-
-export {
-  createMessage,
-  updateMessage,
-  createConversation,
-  getConversation,
-  updateConversation,
-  updateOrCreateConversation,
-  mergeMessages,
-  removeConversation,
-  mergeConversations,
-  isKeepSystem,
-};

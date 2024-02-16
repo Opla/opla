@@ -91,7 +91,7 @@ function Thread({
   const [changedPrompt, setChangedPrompt] = useState<string | undefined>(undefined);
   const { showModal } = useContext(ModalsContext);
   const [messages, setMessages] = useState<Message[] | undefined>(undefined);
-  const [isMessageLoading, setIsMessageLoading] = useState<boolean>(false);
+  const [isMessageUpdating, setIsMessageUpdating] = useState<boolean>(false);
 
   const [isProcessing, setIsProcessing] = useState<{ [key: string]: boolean }>({});
   const [errorMessage, setErrorMessage] = useState<{ [key: string]: string }>({});
@@ -102,34 +102,36 @@ function Thread({
     const getNewMessages = async () => {
       let newMessages: Message[] = [];
       if (conversationId && selectedConversation) {
-        await readConversationMessages(conversationId, []);
+        newMessages = await readConversationMessages(selectedConversation.id, []);
         const stream = backendContext.streams?.[conversationId as string];
-        newMessages = filterConversationMessages(
-          conversationId,
-          (m) => !(m.author.role === 'system'),
-        );
+        newMessages = newMessages.filter((m) => !(m.author.role === 'system'));
         newMessages = newMessages.map((msg, index) => {
           if (stream && index === newMessages.length - 1) {
-            return { ...msg, status: 'stream', content: stream.content.join('') } as Message;
+            return {
+              ...msg,
+              status: 'stream',
+              content: stream.content.join(''),
+              contentHistory: undefined,
+            } as Message;
           }
           return { ...msg, conversationId };
         });
       }
       setMessages(newMessages);
-      setIsMessageLoading(false);
+      setIsMessageUpdating(false);
     };
-    if (isMessageLoading) {
+    if (isMessageUpdating) {
       return;
     }
-    logger.info('getNewMessages', conversationId, isMessageLoading);
-    setIsMessageLoading(true);
+    logger.info('getNewMessages', conversationId, selectedConversation, isMessageUpdating);
+    setIsMessageUpdating(true);
     getNewMessages();
   }, [
     backendContext.streams,
     conversationId,
     filterConversationMessages,
     readConversationMessages,
-    isMessageLoading,
+    isMessageUpdating,
     selectedConversation,
   ]);
 
@@ -160,23 +162,22 @@ function Thread({
 
   const updateMessagesAndConversation = async (
     changedMessages: Message[],
-    _conversationMessages?: Message[],
+    conversationMessages: Message[],
     selectedConversationId = conversationId,
     selectedConversations = conversations,
   ) => {
-    const conversationMessages =
-      _conversationMessages || getConversationMessages(selectedConversationId);
+    // const conversationMessages =
+    //  _conversationMessages || getConversationMessages(selectedConversationId);
     const updatedConversations = updateOrCreateConversation(
       selectedConversationId,
       selectedConversations,
       messages?.[0]?.content as string,
     );
     const updatedMessages = mergeMessages(conversationMessages, changedMessages);
-    updateConversations(updatedConversations);
+    await updateConversations(updatedConversations);
     await updateConversationMessages(selectedConversationId, updatedMessages);
 
     const updatedConversationId = selectedConversationId;
-
     return { updatedConversationId, updatedConversations, updatedMessages };
   };
 
@@ -277,7 +278,6 @@ function Thread({
       return;
     }
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
-
     setIsProcessing({ ...isProcessing, [conversationId]: true });
 
     const userMessage = createMessage({ role: 'user', name: 'you' }, currentPrompt);
@@ -290,7 +290,10 @@ function Thread({
       updatedConversationId,
       updatedConversations: uc,
       updatedMessages,
-    } = await updateMessagesAndConversation([userMessage, message]);
+    } = await updateMessagesAndConversation(
+      [userMessage, message],
+      getConversationMessages(conversationId),
+    );
     let updatedConversations = uc;
 
     const conversation: Conversation = getConversation(
@@ -317,7 +320,10 @@ function Thread({
     setIsProcessing({ ...isProcessing, [conversationId]: false });
   };
 
-  const handleResendMessage = async (previousMessage: Message) => {
+  const handleResendMessage = async (
+    previousMessage: Message,
+    conversationMessages = getConversationMessages(conversationId),
+  ) => {
     if (conversationId === undefined) {
       return;
     }
@@ -334,8 +340,9 @@ function Thread({
       contentHistory.push(previousMessage.content);
       message.contentHistory = contentHistory;
     }
+
     const { updatedConversationId, updatedConversations, updatedMessages } =
-      await updateMessagesAndConversation([message]);
+      await updateMessagesAndConversation([message], conversationMessages);
 
     const conversation: Conversation = getConversation(
       updatedConversationId,
@@ -351,6 +358,7 @@ function Thread({
     if (conversationId === undefined) {
       return;
     }
+
     const message = data?.item as Message;
     logger.info(`delete ${action} ${data}`);
     if (message) {
@@ -383,28 +391,31 @@ function Thread({
     if (conversationId === undefined) {
       return;
     }
+
     const conversation = getConversation(conversationId, conversations);
     if (conversation) {
+      const { contentHistory = [] } = message;
+      contentHistory.push(message.content);
+      const newMessage = { ...message, content: newContent, contentHistory };
       const conversationMessages = getConversationMessages(conversationId);
       const newMessages = conversationMessages.map((m) => {
         if (m.id === message.id) {
-          const { contentHistory = [] } = m;
-          contentHistory.push(message.content);
-          return { ...m, content: newContent, contentHistory };
+          return newMessage;
         }
         return m;
       });
-      await updateMessagesAndConversation(
+      const { updatedMessages } = await updateMessagesAndConversation(
         newMessages,
         conversationMessages,
         conversationId,
         conversations,
       );
-    }
-    if (submit) {
-      const sibling = getConversationMessages(conversationId).find((m) => m.id === message.sibling);
-      if (sibling) {
-        handleResendMessage(sibling);
+
+      if (submit) {
+        const sibling = updatedMessages.find((m) => m.id === message.sibling);
+        if (sibling) {
+          await handleResendMessage(sibling, updatedMessages);
+        }
       }
     }
   };

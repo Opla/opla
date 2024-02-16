@@ -16,6 +16,7 @@ import { useState } from 'react';
 import dataStorage from '@/utils/dataStorage';
 import logger from '@/utils/logger';
 import { toast } from '@/components/ui/Toast';
+import { deepCopy } from '@/utils/data';
 
 export default function useCollectionStorage<T>(
   collectionId: string,
@@ -25,10 +26,10 @@ export default function useCollectionStorage<T>(
   (key: string, value: T) => Promise<void>,
   (key: string) => Promise<void>,
 ] {
-  const [collection, setCollection] = useState<Record<string, T>>({});
+  const [collection, setCollection] = useState<Record<string, T>>();
 
   const readValue = async (key: string, defaultValue: T) => {
-    let v = collection[key];
+    let v = collection?.[key];
     if (!v) {
       v = (await dataStorage().getItem(collectionId, defaultValue, key)) as T;
       setCollection({ ...collection, [key]: v });
@@ -38,19 +39,22 @@ export default function useCollectionStorage<T>(
 
   const updateValue = async (key: string, v: T) => {
     try {
-      setCollection({ ...collection, [key]: v });
+      const newCollection = deepCopy<Record<string, T>>(collection || {});
+      newCollection[key] = v;
+
       await dataStorage().setItem(collectionId, v, key);
+      setCollection(newCollection);
     } catch (e) {
       logger.error(e);
       toast.error(`Error saving data ${e}`);
     }
   };
 
-  const getValue = (key: string, defaultValue: T) => collection[key] || defaultValue;
+  const getValue = (key: string, defaultValue: T) => collection?.[key] || defaultValue;
 
   const deleteValue = async (key: string) => {
     try {
-      const newCollection = { ...collection };
+      const newCollection = deepCopy<Record<string, T>>(collection || {});
       delete newCollection[key];
       setCollection(newCollection);
       await dataStorage().setItem(collectionId, undefined, key);

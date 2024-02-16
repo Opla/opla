@@ -24,6 +24,8 @@ import {
   Pencil,
   RotateCcw,
   Trash2,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { getContent } from '@/utils/data';
 import useHover from '@/hooks/useHover';
@@ -98,9 +100,12 @@ function MessageComponent({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [copied, setCopied] = useState(false);
   const [edit, setEdit] = useState<string | undefined>(undefined);
-
+  const [current, setCurrent] = useState(0);
   const { author } = message;
-  const content = getContent(message.content);
+
+  const content = getContent(
+    current > 0 && message.contentHistory ? message.contentHistory[current - 1] : message.content,
+  );
   const Content = useMarkdownProcessor(content as string);
   const isUser = author.role === 'user';
 
@@ -181,7 +186,38 @@ function MessageComponent({
                 </div>
                 {(state === DisplayMessageState.Markdown || state === DisplayMessageState.Text) &&
                   isHover && (
-                    <div className="left-34 absolute bottom-0">
+                    <div className="left-34 absolute bottom-0 flex flex-row items-center">
+                      {message.contentHistory && message.contentHistory.length > 0 && (
+                        <div className="flex flex-row items-center pt-0 text-xs">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={current === message.contentHistory?.length}
+                            onClick={() => {
+                              setCurrent(current + 1);
+                            }}
+                            className="h-5 w-5 p-1"
+                          >
+                            <ChevronLeft className="h-4 w-4" strokeWidth={1.5} />
+                          </Button>
+                          <span className="tabular-nums">
+                            {' '}
+                            {message.contentHistory.length - current + 1} /{' '}
+                            {message.contentHistory.length + 1}{' '}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={current === 0}
+                            onClick={() => {
+                              setCurrent(current - 1);
+                            }}
+                            className="h-5 w-5 p-1"
+                          >
+                            <ChevronRight className="h-4 w-4" strokeWidth={1.5} />
+                          </Button>
+                        </div>
+                      )}
                       {!isUser && (
                         <Button variant="ghost" size="sm" onClick={onResendMessage}>
                           <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
