@@ -21,13 +21,13 @@ import useDataStorage from '@/hooks/useDataStorage';
 import logger from '@/utils/logger';
 import useCollectionStorage from '@/hooks/useCollectionStorage';
 import { removeConversation } from '@/utils/data/conversations';
-// import { deleteConversation } from '@/utils/data/conversations';
+import { deepCopy } from '@/utils/data';
 
 export type Context = {
   conversations: Array<Conversation>;
   archives: Array<Conversation>;
   providers: Array<Provider>;
-  updateConversations: (newConversations: Conversation[]) => void;
+  updateConversations: (newConversations: Conversation[]) => Promise<void>;
   deleteConversation: (id: string, cleanup?: (id: string) => Promise<void>) => Promise<void>;
   readConversationMessages: (key: string, defaultValue: Message[]) => Promise<Message[]>;
   getConversationMessages: (id: string | undefined) => Message[];
@@ -45,7 +45,7 @@ export type Context = {
 
 const initialContext: Context = {
   conversations: [],
-  updateConversations: () => {},
+  updateConversations: async () => {},
   deleteConversation: async () => {},
   getConversationMessages: () => [],
   readConversationMessages: async () => [],
@@ -106,7 +106,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
   const updateConversationMessages = useCallback(
     async (id: string | undefined, messages: Message[]): Promise<void> => {
       if (id) {
-        await storeConversationMessages(id, messages);
+        await storeConversationMessages(id, deepCopy<Message[]>(messages));
       }
     },
     [storeConversationMessages],

@@ -33,7 +33,6 @@ export default function Statusbar() {
   useEffect(() => {
     const call = async () => {
       const s = await getSys();
-      console.log('statusbar sys', s);
       setSys(s);
     };
     call();
