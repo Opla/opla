@@ -12,51 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
 import { ParametersDefinition } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
-import useDebounceFunc from '@/hooks/useDebounceFunc';
-import logger from '@/utils/logger';
+import useParameters from '@/hooks/useParameters';
 import Parameter, { ParameterValue, ParametersRecord } from '../Parameter';
 
 export type FormProps<T> = {
   parameters: Record<string, T> | undefined;
   parametersDefinition: ParametersDefinition;
   debounceDelay?: number;
-  onParametersChanged: (params: ParametersRecord) => ParametersRecord | undefined;
+  onParametersChange: (params: ParametersRecord) => ParametersRecord | undefined;
 };
 
 export default function Form<T>({
   parameters,
   parametersDefinition,
-  onParametersChanged,
-  debounceDelay = 600,
+  onParametersChange,
+  debounceDelay,
 }: FormProps<T>) {
   const { t } = useTranslation();
-
-  const [updatedParameters, setUpdatedParameters] = useState<ParametersRecord | undefined>(
-    undefined,
-  );
-
-  const handleParameterChange = (name: string, value?: ParameterValue) => {
-    logger.info('handleParameterChange', name, value);
-    const newParams = updatedParameters || {};
-    if (newParams[name] !== value) {
-      setUpdatedParameters({ ...newParams, [name]: value });
-    }
-  };
-
-  const updateParameters = (newParameters: ParametersRecord) => {
-    logger.info('updateParameters', newParameters);
-    let changedParameters = onParametersChanged(newParameters);
-    if (changedParameters && Object.keys(changedParameters).length === 0) {
-      changedParameters = undefined;
-    }
-    // TODO handle errors
-    setUpdatedParameters(changedParameters);
-  };
-
-  useDebounceFunc<ParametersRecord>(updateParameters, updatedParameters, debounceDelay);
+  const [updatedParameters, setUpdatedParameters] = useParameters(onParametersChange, debounceDelay);
 
   return (
     <form>
@@ -73,7 +48,7 @@ export default function Form<T>({
           }
           description={t(parametersDefinition[key].description)}
           inputCss="max-w-20 pl-2"
-          onChange={handleParameterChange}
+          onChange={setUpdatedParameters}
         />
       ))}
     </form>
