@@ -177,6 +177,7 @@ export type Provider = BaseNamedRecord & {
   disabled: boolean;
   key: string;
   models?: Model[];
+  errors?: string[];
 };
 
 export type Model = BaseNamedRecord & {
@@ -263,6 +264,8 @@ export enum ServerStatus {
   STOPPING = 'stopping',
   STOPPED = 'stopped',
   ERROR = 'error',
+  STDOUT = 'stdout',
+  STDERR = 'stderr',
 }
 
 export type Payload = {
@@ -274,8 +277,8 @@ export type OplaServer = {
   status: ServerStatus;
   message?: string;
   name?: string;
-  stout?: string[];
-  sterr?: string[];
+  stdout?: string[];
+  stderr?: string[];
 };
 
 export type PageSettings = {

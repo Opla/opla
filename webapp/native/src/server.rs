@@ -45,6 +45,8 @@ pub enum ServerStatus {
     Stopping,
     Stopped,
     Error,
+    Stdout,
+    Stderr,
 }
 
 impl ServerStatus {
@@ -57,6 +59,8 @@ impl ServerStatus {
             ServerStatus::Stopping => "stopping",
             ServerStatus::Stopped => "stopped",
             ServerStatus::Error => "error",
+            ServerStatus::Stdout => "stdout",
+            ServerStatus::Stderr => "stderr",
         }
     }
 }
@@ -164,9 +168,9 @@ impl OplaServer {
                     println!("{}", line);
                     if
                         app
-                            .emit_all("opla-server-stdout", Payload {
+                            .emit_all("opla-server", Payload {
                                 message: line.clone(),
-                                status: "new-line".to_string(),
+                                status: ServerStatus::Stdout.as_str().to_string(),
                             })
                             .is_err()
                     {
@@ -174,16 +178,6 @@ impl OplaServer {
                     }
                 } else if let CommandEvent::Stderr(line) = event {
                     println!("\x1b[93m{}\x1b[0m", line);
-                    if
-                        app
-                            .emit_all("opla-server-sterr", Payload {
-                                message: line.clone(),
-                                status: "new-line".to_string(),
-                            })
-                            .is_err()
-                    {
-                        println!("Opla server error: {}", "failed to emit stderr");
-                    }
 
                     if line.starts_with("llama server listening") {
                         println!("{}", model);
@@ -215,6 +209,17 @@ impl OplaServer {
                         }
 
                         callback(ServerStatus::Error);
+                    }
+
+                                        if
+                        app
+                            .emit_all("opla-server-stderr", Payload {
+                                message: line.clone(),
+                                status: ServerStatus::Stderr.as_str().to_string(),
+                            })
+                            .is_err()
+                    {
+                        println!("Opla server error: {}", "failed to emit stderr");
                     }
                 }
             }

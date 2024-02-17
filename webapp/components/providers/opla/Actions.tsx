@@ -30,7 +30,7 @@ export default function Actions({
   const { message, status } = backend.server;
   const { t } = useTranslation();
   const waiting = status === 'wait' || status === 'stopping' || status === 'starting';
-  const disabled = (status === 'error' && message === 'no backend') || waiting;
+  const disabled = message === 'no backend'; // (status === 'error' && message === 'no backend') || waiting;
   let tooltipMessage;
   switch (status) {
     case 'wait':

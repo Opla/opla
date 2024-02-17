@@ -71,8 +71,8 @@ class Backend {
     this.activeModel = activeModel;
     let server: OplaServer = {
       status: ServerStatus.IDLE,
-      stout: [],
-      sterr: [],
+      stdout: [],
+      stderr: [],
     };
     try {
       const payload = await getOplaServerStatus();
@@ -90,6 +90,11 @@ class Backend {
 
     this.stop = async () => {
       logger.info('stop server');
+      try {
+        await stopLLamaCppServer();
+      } catch (error) {
+        logger.error('stop server error', error);
+      }
       return stopLLamaCppServer();
     };
 

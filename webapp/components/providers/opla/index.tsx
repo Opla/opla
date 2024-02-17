@@ -41,7 +41,7 @@ export default function Opla({
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col items-center gap-2 px-8 py-4 text-sm">
+    <div className="flex flex-col gap-2 px-8 py-4 text-sm">
       <Parameter
         title={t('Description')}
         name="description"
