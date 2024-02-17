@@ -67,7 +67,7 @@ function Avatar({ isUser, name }: { isUser: boolean; name: string }) {
     return <User className="h-4 w-4 text-white" />;
   }
 
-  if (name.toLowerCase().startsWith('gpt-')) {
+  if (name?.toLowerCase().startsWith('gpt-')) {
     return <OpenAI className="h-4 w-4 text-white" />;
   }
   return <Bot className="h-4 w-4 text-white" />;

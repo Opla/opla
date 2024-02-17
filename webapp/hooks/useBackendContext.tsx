@@ -41,8 +41,8 @@ import { toCamelCase } from '@/utils/string';
 const initialBackendContext: OplaContext = {
   server: {
     status: ServerStatus.IDLE,
-    stout: [],
-    sterr: [],
+    stdout: [],
+    stderr: [],
   },
   config: {
     settings: {
@@ -101,26 +101,55 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     logger.info('backend event', event);
     const context = backendContextRef.current;
     if (event.event === 'opla-server' && context) {
-      let { activeModel } = context.config.models;
-      if (event.payload.status === ServerStatus.STARTING) {
-        activeModel = event.payload.message;
-      }
-
-      setBackendContext({
-        ...context,
-        config: {
-          ...context?.config,
-          models: {
-            ...context?.config.models,
-            activeModel,
+      if (event.payload.status === ServerStatus.STDOUT) {
+        const { stdout = [] } = context.server;
+        const len = stdout.unshift(event.payload.message);
+        if (len > 50) {
+          stdout.pop();
+        }
+        logger.info('stdout', stdout);
+        setBackendContext({
+          ...context,
+          server: {
+            ...context.server,
+            stdout,
           },
-        },
-        server: {
-          ...context?.server,
-          status: event.payload.status,
-          message: event.payload.message,
-        },
-      });
+        });
+      } else if (event.payload.status === ServerStatus.STDERR) {
+        const { stderr = [] } = context.server;
+        const len = stderr.unshift(event.payload.message);
+        if (len > 50) {
+          stderr.pop();
+        }
+        logger.error('stderr', stderr);
+        setBackendContext({
+          ...context,
+          server: {
+            ...context.server,
+            stderr,
+          },
+        });
+      } else {
+        let { activeModel } = context.config.models;
+        if (event.payload.status === ServerStatus.STARTING) {
+          activeModel = event.payload.message;
+        }
+        setBackendContext({
+          ...context,
+          config: {
+            ...context?.config,
+            models: {
+              ...context?.config.models,
+              activeModel,
+            },
+          },
+          server: {
+            ...context?.server,
+            status: event.payload.status,
+            message: event.payload.message,
+          },
+        });
+      }
     }
   }, []);
 

@@ -174,7 +174,7 @@ async fn start_opla_server<R: Runtime>(
     app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
-    model: String,
+    model: Option<String>,
     port: i32,
     host: String,
     context_size: i32,
@@ -183,7 +183,17 @@ async fn start_opla_server<R: Runtime>(
 ) -> Result<Payload, String> {
     println!("Opla try to start ");
     let mut store = context.store.lock().map_err(|err| err.to_string())?;
-    let model_name = model;
+    let model_name = match model {
+        Some(m) => { m }
+        None => {
+            match &store.models.active_model {
+                Some(m) => { m.clone() }
+                None => {
+                    return Err(format!("Opla server not started model not found"));
+                }
+            }
+        }
+    };
 
     let res = store.models.get_model_path(model_name.clone());
     let model_path = match res {

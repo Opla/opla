@@ -80,6 +80,7 @@ function Thread({
     filterConversationMessages,
     updateConversationMessages,
     setUsage,
+    setProviders,
   } = useContext(AppContext);
   const { backendContext, setActiveModel } = useBackend();
   const { activeModel: aModel } = backendContext.config.models;
@@ -259,6 +260,18 @@ function Thread({
       setErrorMessage({ ...errorMessage, [conversation.id]: error });
       returnedMessage.content = t('Oops, something went wrong.');
       returnedMessage.status = MessageState.Error;
+      const provider = findProvider(conversation.provider, providers);
+      if (provider) {
+        const { errors = [] } = provider || { errors: [] };
+        const len = errors.unshift(error);
+        if (len > 50) {
+          errors.pop();
+        }
+        provider.errors = errors;
+        const updatedProviders = providers.map((p) => (p.id === provider.id ? provider : p));
+        setProviders(updatedProviders);
+      }
+
       toast.error(String(e));
     }
     returnedMessage.status = MessageState.Delivered;
