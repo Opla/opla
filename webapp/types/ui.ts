@@ -75,4 +75,5 @@ export enum ModalIds {
   OpenAI = 'openai',
   DeleteItem = 'deleteitem',
   DownloadItem = 'downloaditem',
+  Downloads = 'downloads',
 }

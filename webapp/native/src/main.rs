@@ -66,7 +66,10 @@ async fn get_sys<R: Runtime>(
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>
 ) -> Result<Sys, String> {
-    let mut sys: Sys = context.sys.lock().map_err(|err| err.to_string())?.clone(); 
+    let mut sys: Sys = context.sys
+        .lock()
+        .map_err(|err| err.to_string())?
+        .clone();
     sys.refresh();
     Ok(sys)
 }
@@ -263,7 +266,7 @@ async fn install_model<R: Runtime>(
     };
     match url {
         Some(u) => {
-            let downloader = context.downloader.lock().map_err(|err| err.to_string())?;
+            let mut downloader = context.downloader.lock().map_err(|err| err.to_string())?;
             downloader.download_file(model_id.clone(), u, model_path, file_name.as_str(), app);
         }
         None => {}
@@ -275,11 +278,30 @@ async fn install_model<R: Runtime>(
 }
 
 #[tauri::command]
+async fn cancel_download_model<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>,
+    model_id: String
+) -> Result<(), String> {
+    let mut store = context.store.lock().map_err(|err| err.to_string())?;
+
+    let mut downloader = context.downloader.lock().map_err(|err| err.to_string())?;
+    downloader.cancel_download(&model_id, app);
+
+    store.models.remove_model(model_id.as_str());
+
+    store.save().map_err(|err| err.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
 async fn update_model<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
-    model: Model,
+    model: Model
 ) -> Result<(), String> {
     let mut store = context.store.lock().map_err(|err| err.to_string())?;
 
@@ -643,6 +665,7 @@ fn main() {
                 get_models_collection,
                 search_hfhub_models,
                 install_model,
+                cancel_download_model,
                 uninstall_model,
                 update_model,
                 set_active_model,

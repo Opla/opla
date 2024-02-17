@@ -144,10 +144,10 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
             ...context,
             downloads,
           } as OplaContext);
-        } else if (type === 'finished') {
+        } else if (type === 'finished' || type === 'canceled') {
           const { downloads = [] } = backendContext || {};
           const index = downloads.findIndex((d) => d.id === download.id);
-          logger.info('download finished', index, download);
+          logger.info(`download ${type}`, index, download);
           if (index !== -1) {
             downloads.splice(index, 1);
           }

@@ -92,9 +92,12 @@ export const installModel = async (
   return '';
 };
 
+export const cancelDownloadModel = async (modelId: String) => {
+  await invokeTauri<String>('cancel_download_model', { modelId });
+};
+
 export const uninstallModel = async (modelId: String) => {
-  const id = await invokeTauri<String>('uninstall_model', { modelId });
-  return id;
+  await invokeTauri<String>('uninstall_model', { modelId });
 };
 
 export const updateModel = async (model: Model) => {

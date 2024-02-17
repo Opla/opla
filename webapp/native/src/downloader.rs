@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ fs::File, time::Instant, cmp::min, io::Write, error::Error };
+use std::{ cmp::min, collections::HashMap, error::Error, fs::File, io::Write, time::Instant };
 
 use reqwest::Response;
 use serde::{ Serialize, Deserialize };
-use tauri::{ AppHandle, Manager, Runtime };
+use tauri::{ async_runtime::JoinHandle, AppHandle, Manager, Runtime };
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Download {
@@ -40,6 +40,11 @@ impl Download {
         handle.emit_all("opla-downloader", payload).ok();
     }
 
+    pub fn emit_canceled<R: Runtime>(&self, handle: &AppHandle<R>) {
+        let payload = ("canceled", &self);
+        handle.emit_all("opla-downloader", payload).ok();
+    }
+
     pub fn emit_error<R: Runtime>(&mut self, handle: &AppHandle<R>, error: Box<dyn Error>) {
         self.error = Some(error.to_string());
         let payload = ("error", &self, error.to_string());
@@ -47,18 +52,23 @@ impl Download {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct Downloader {}
+pub struct Downloader {
+    pub downloads: Vec<Download>,
+    handles: HashMap<String, JoinHandle<()>>,
+}
 
 const UPDATE_SPEED: u128 = 50;
 
 impl Downloader {
     pub fn new() -> Self {
-        Downloader {}
+        Downloader {
+            downloads: Vec::new(),
+            handles: HashMap::new(),
+        }
     }
 
     pub fn download_file<EventLoopMessage: Runtime + 'static>(
-        &self,
+        &mut self,
         id: String,
         url: String,
         path: String,
@@ -67,17 +77,20 @@ impl Downloader {
     ) -> () {
         println!("Downloading {}...", url);
         let file_name = file_name.to_string();
-        tauri::async_runtime::spawn(async move {
+
+        let mut download = Download {
+            id: id.to_string(),
+            file_name: file_name.to_string(),
+            file_size: 0,
+            transfered: 0,
+            transfer_rate: 0.0,
+            percentage: 0.0,
+            error: None,
+        };
+        self.downloads.push(download.clone());
+        let join_handle = tauri::async_runtime::spawn(async move {
             let start_time = Instant::now();
-            let mut download = Download {
-                id: id.to_string(),
-                file_name: file_name.to_string(),
-                file_size: 0,
-                transfered: 0,
-                transfer_rate: 0.0,
-                percentage: 0.0,
-                error: None,
-            };
+
             let mut file = match File::create(path.clone()) {
                 Ok(file) => file,
                 Err(error) => {
@@ -113,17 +126,18 @@ impl Downloader {
             }
             download.emit_finished(&handle);
         });
+        self.handles.insert(id, join_handle);
     }
 
     async fn download_chunks<R: Runtime>(
-        progress: &mut Download,
+        download: &mut Download,
         mut file: &File,
         mut response: Response,
         start_time: Instant,
         handle: &AppHandle<R>
     ) -> Result<(), Box<dyn Error>> {
         let mut last_update = Instant::now();
-        progress.file_size = response.content_length().unwrap_or_else(|| 0);
+        download.file_size = response.content_length().unwrap_or_else(|| 0);
 
         while let Some(chunk) = response.chunk().await? {
             let res = file.write_all(&chunk);
@@ -131,38 +145,47 @@ impl Downloader {
                 Ok(_) => {}
                 Err(error) => {
                     println!("Failed to write chunk: {}", error);
-                    progress.emit_error(&handle, Box::new(error));
+                    download.emit_error(&handle, Box::new(error));
                     break;
                 }
             }
-            progress.transfered = min(
-                progress.transfered + (chunk.len() as u64),
-                progress.file_size
+            download.transfered = min(
+                download.transfered + (chunk.len() as u64),
+                download.file_size
             );
             let duration = start_time.elapsed().as_secs_f64();
             let speed = if duration > 0.0 {
-                (progress.transfered as f64) / duration / 1024.0 / 1024.0
+                (download.transfered as f64) / duration / 1024.0 / 1024.0
             } else {
                 0.0
             };
-            progress.percentage = ((progress.transfered * 100) / progress.file_size) as f64;
-            progress.transfer_rate =
-                (progress.transfered as f64) / (start_time.elapsed().as_secs() as f64) +
+            download.percentage = ((download.transfered * 100) / download.file_size) as f64;
+            download.transfer_rate =
+                (download.transfered as f64) / (start_time.elapsed().as_secs() as f64) +
                 ((start_time.elapsed().subsec_nanos() as f64) / 1_000_000_000.0).trunc();
 
             if last_update.elapsed().as_millis() >= UPDATE_SPEED {
-                progress.emit_progress(&handle);
+                download.emit_progress(&handle);
                 last_update = std::time::Instant::now();
             }
 
             println!(
                 "Downloaded {:.2} MB at {:.2} MB/s total: {:.2} MB",
-                (progress.transfered as f64) / 1024.0 / 1024.0,
+                (download.transfered as f64) / 1024.0 / 1024.0,
                 speed,
-                (progress.file_size as f64) / 1024.0 / 1024.0
+                (download.file_size as f64) / 1024.0 / 1024.0
             );
         }
         println!("Download finished");
         Ok(())
+    }
+
+    pub fn cancel_download<R: Runtime>(&mut self, id: &str, app_handle: AppHandle<R>) -> () {
+        if let Some(handle) = self.handles.remove(id) {
+            handle.abort();
+            if let Some(download) = self.downloads.iter_mut().find(|d| d.id == id) {
+                download.emit_canceled(&app_handle);
+            }
+        }
     }
 }

@@ -161,6 +161,29 @@ const Modals: ModalRef[] = [
       );
     },
   },
+  {
+    id: ModalIds.Downloads,
+    Component: function DownloadsDialog({ visible, onClose, data }) {
+      const { t } = useTranslation();
+      const item = data?.item as BaseNamedRecord;
+      return (
+        <AlertDialog
+          key={ModalIds.Downloads}
+          id={ModalIds.Downloads}
+          title={t('Stop the download ?')}
+          actions={[
+            { label: t('Stop'), value: 'Stop' },
+            { label: t('Cancel'), value: 'Cancel' },
+          ]}
+          visible={visible}
+          onClose={onClose}
+          data={data}
+        >
+          <div>{item?.name || ''}</div>
+        </AlertDialog>
+      );
+    },
+  },
 ];
 
 export default Modals;
