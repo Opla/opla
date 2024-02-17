@@ -83,12 +83,7 @@ function ModelView({
                 </span>
               </div>
               <div className="flex flex-row gap-2">
-                <Button
-                  disabled={isDownloading}
-                  variant="secondary"
-                  className=""
-                  onClick={() => onChange()}
-                >
+                <Button variant="secondary" className="" onClick={() => onChange()}>
                   {isDownloading && t('Downloading...')}
                   {!isDownloading && (local ? t('Uninstall') : t('Install'))}
                 </Button>

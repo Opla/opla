@@ -135,7 +135,7 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     saveSettings(selectedPage, { settingsHidden: !value });
   };
 
-  const handleDelete = (action: string, data: any) => {
+  const handleDelete = async (action: string, data: any) => {
     const conversation = data?.item as Conversation;
     logger.info(`delete ${action} ${data}`);
     if (conversation) {

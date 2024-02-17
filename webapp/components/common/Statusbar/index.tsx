@@ -18,10 +18,11 @@ import useTranslation from '@/hooks/useTranslation';
 import useBackend from '@/hooks/useBackendContext';
 // import logger from '@/utils/logger';
 import { AppContext } from '@/context';
-import { Page } from '@/types/ui';
-import { getSys } from '@/utils/backend/commands';
-import logger from '@/utils/logger';
+import { ModalIds, Page } from '@/types/ui';
+import { cancelDownloadModel, getSys } from '@/utils/backend/commands';
 import { Sys } from '@/types';
+import { ModalsContext } from '@/context/modals';
+import logger from '@/utils/logger';
 
 export default function Statusbar() {
   const router = useRouter();
@@ -29,6 +30,7 @@ export default function Statusbar() {
   const { backendContext } = useBackend();
   const { usage } = useContext(AppContext);
   const [sys, setSys] = useState<Sys>();
+  const { showModal } = useContext(ModalsContext);
 
   useEffect(() => {
     const call = async () => {
@@ -38,7 +40,7 @@ export default function Statusbar() {
     call();
   }, [setSys]);
 
-  logger.info('statusbar sys', sys);
+  // logger.info('statusbar sys', sys);
 
   const running = backendContext.server.status === 'started';
   const error = backendContext.server.status === 'error';
@@ -47,6 +49,25 @@ export default function Statusbar() {
 
   const displayServer = () => {
     router.push(Page.Providers);
+  };
+
+  const handleCancelDownload = async (action: string, data: any) => {
+    logger.info(`Cancel download ${action} model.id=${data}`);
+    await cancelDownloadModel(data.item.id);
+  };
+
+  const displayDownloads = () => {
+    const id = download?.id;
+    if (id) {
+      showModal(ModalIds.Downloads, {
+        item: {
+          id,
+          createdAt: 0,
+          updatedAt: 0,
+        },
+        onAction: handleCancelDownload,
+      });
+    }
   };
 
   const { activeModel } = backendContext.config.models;
@@ -79,8 +100,13 @@ export default function Statusbar() {
             <span className="text-red-600">{t('Server error')}</span>
           )}
         </button>
+
         {download && (
-          <div className="flex flex-row items-center justify-center gap-1">
+          <button
+            className="flex flex-row items-center justify-center gap-1"
+            type="button"
+            onClick={displayDownloads}
+          >
             <span className="tabular-nums text-neutral-800 dark:text-neutral-300">
               <DownloadCloud className="h-4 w-4" strokeWidth={1.5} />
             </span>
@@ -88,7 +114,7 @@ export default function Statusbar() {
               <span>{download.fileName} </span>
               <span>{download.percentage} %</span>
             </span>
-          </div>
+          </button>
         )}
       </div>
       <div className="flex flex-row gap-2">

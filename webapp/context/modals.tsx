@@ -21,7 +21,7 @@ export type ModalData = {
   item: BaseIdRecord;
   title?: string;
   description?: string;
-  onAction?: (action: string, data: ModalData) => void;
+  onAction?: (action: string, data: ModalData) => Promise<void>;
 };
 export type ModalComponentRef = {
   visible: boolean;

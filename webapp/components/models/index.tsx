@@ -14,11 +14,12 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { Model } from '@/types';
 import logger from '@/utils/logger';
 import {
+  cancelDownloadModel,
   getModelsCollection,
   installModel,
   uninstallModel,
@@ -27,7 +28,8 @@ import {
 import useBackend from '@/hooks/useBackendContext';
 import { deepCopy, deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
 import { getDownloadables, isValidFormat } from '@/utils/data/models';
-import { Page } from '@/types/ui';
+import { ModalIds, Page } from '@/types/ui';
+import { ModalsContext } from '@/context/modals';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import Explorer from './Explorer';
 import ModelView from './Model';
@@ -37,7 +39,7 @@ import { ParametersRecord } from '../common/Parameter';
 export default function Models({ selectedModelId }: { selectedModelId?: string }) {
   const { backendContext, updateBackendStore } = useBackend();
   const [collection, setCollection] = useState<Model[]>([]);
-  // const { showModal } = useContext(ModalsContext);
+  const { showModal } = useContext(ModalsContext);
   const router = useRouter();
 
   useEffect(() => {
@@ -61,6 +63,10 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
   const downloadables = local
     ? []
     : getDownloadables(model).filter((d) => d.private !== true && isValidFormat(d));
+
+  const { downloads = [] } = backendContext;
+
+  const isDownloading = downloads.findIndex((d) => d.id === model?.id) !== -1;
 
   const handleInstall = async (item?: Model) => {
     const selectedModel: Model = deepMerge<Model>(model, item || {}, true);
@@ -92,9 +98,16 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
     router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
   };
 
+  const handleCancelDownload = async (action: string, data: any) => {
+    logger.info(`Cancel download ${action} model.id=${data}`);
+    await cancelDownloadModel(model.id);
+  };
+
   const handleLocalInstall = (selectedModel?: Model) => {
+    if (isDownloading) {
+      showModal(ModalIds.Downloads, { item: model, onAction: handleCancelDownload });
+    }
     if (local && !selectedModel) {
-      // showModal(ModalIds.DeleteItem, { item: model, onAction: onUninstall });
       handleUninstall();
       return;
     }
@@ -105,7 +118,6 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
     }
 
     if (isValidFormat(item)) {
-      // showModal(ModalIds.DownloadItem, { item, onAction: onInstall });
       handleInstall(item);
     } else {
       logger.info(`No valid format ${item?.name} ${item?.library}`);
@@ -160,10 +172,6 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
       await updateBackendStore();
     }
   };
-
-  const { downloads = [] } = backendContext;
-
-  const isDownloading = downloads.findIndex((d) => d.id === model?.id) !== -1;
 
   return (
     <ResizablePanelGroup direction="horizontal">

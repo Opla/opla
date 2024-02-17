@@ -68,7 +68,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
     showModal(ModalIds.NewProvider);
   };
 
-  const handleDelete = (action: string, data: any) => {
+  const handleDelete = async (action: string, data: any) => {
     const provider = data?.item as Provider;
     logger.info(`delete ${action} ${data}`);
     if (provider) {
