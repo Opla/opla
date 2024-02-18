@@ -15,14 +15,14 @@
 import { OplaContext, Preset } from '@/types';
 import logger from '../logger';
 
-const getSelectedPreset = (backendContext: OplaContext) => {
+export const getSelectedPreset = (backendContext: OplaContext) => {
   const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.activeModel}`;
 
   logger.warn('getSelectedPreset not implemented');
   return selectedPreset;
 };
 
-const getPresets = (backendContext: OplaContext): Preset[] => {
+export const getAllPresets = (backendContext: OplaContext): Preset[] => {
   const presets: Preset[] = backendContext.config.models.items.map((model) => ({
     id: model.id,
     title: model.title || model.name,
@@ -33,8 +33,6 @@ const getPresets = (backendContext: OplaContext): Preset[] => {
   return presets;
 };
 
-const addPreset = () => {
+export const addPreset = () => {
   logger.warn('addPreset not implemented');
 };
-
-export { getSelectedPreset, getPresets, addPreset };

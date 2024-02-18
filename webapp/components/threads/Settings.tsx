@@ -22,7 +22,7 @@ import { findModel } from '@/utils/data/models';
 import Opla from '@/utils/providers/opla';
 import { getCompletionParametersDefinition } from '@/utils/providers';
 import { findProvider } from '@/utils/data/providers';
-import { ContextWindowPolicy, Conversation, ConversationParameter } from '@/types';
+import { ContextWindowPolicy, Conversation, PresetParameter } from '@/types';
 import { toast } from '@/components/ui/Toast';
 import { ContextWindowPolicies, DefaultContextWindowPolicy } from '@/utils/constants';
 // import useDebounceFunc from '@/hooks/useDebounceFunc';
@@ -34,6 +34,7 @@ import Parameter, { ParameterValue, ParametersRecord } from '../common/Parameter
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 import Form from '../common/Form';
+import Presets from './Presets';
 
 export default function Settings({
   conversationId,
@@ -172,13 +173,13 @@ export default function Settings({
             <Accordion
               type="multiple"
               className="w-full"
-              defaultValue={['settings-model', 'settings-appearance', 'settings-preset']}
+              defaultValue={['settings-preset', 'settings-system']}
             >
-              <AccordionItem value="settings-model">
-                <AccordionTrigger>{t('Preset')}</AccordionTrigger>
-                <AccordionContent>Choose a default preset.</AccordionContent>
-              </AccordionItem>
               <AccordionItem value="settings-preset">
+                <AccordionTrigger>{t('Preset')}</AccordionTrigger>
+                <AccordionContent><Presets /></AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="settings-system">
                 <AccordionTrigger>{t('System')}</AccordionTrigger>
                 <AccordionContent>
                   <Textarea
@@ -191,7 +192,7 @@ export default function Settings({
               <AccordionItem value="settings-parameters">
                 <AccordionTrigger>{t('Parameters')}</AccordionTrigger>
                 <AccordionContent>
-                  <Form<ConversationParameter>
+                  <Form<PresetParameter>
                     id={selectedConversation?.id}
                     parameters={selectedConversation?.parameters}
                     parametersDefinition={parametersDefinition}

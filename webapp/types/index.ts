@@ -74,7 +74,7 @@ export type Messages = {
   messages: Message[];
 };
 
-export type ConversationParameter = string | number | boolean;
+export type PresetParameter = string | number | boolean;
 
 export enum ContextWindowPolicy {
   None = 'none',
@@ -82,6 +82,17 @@ export enum ContextWindowPolicy {
   Stop = 'stop',
   Last = 'last',
 }
+
+export type Preset = BaseNamedRecord & {
+  parentId?: string;
+  provider?: string;
+  models?: string[];
+
+  system?: string;
+  parameters?: Record<string, PresetParameter>;
+  contextWindowPolicy?: ContextWindowPolicy;
+  keepSystem?: boolean;
+};
 
 export type ConversationUsage = {
   promptTokens?: number;
@@ -101,16 +112,17 @@ export type Conversation = BaseNamedRecord & {
   messages: Message[] | undefined;
   pluginIds?: string[];
   preset?: Preset;
-  parameters?: Record<string, ConversationParameter>;
   currentPrompt?: string;
   note?: string;
-  system?: string;
   model?: string;
   provider?: string;
   importedFrom?: string;
   temp?: boolean;
 
   usage?: ConversationUsage;
+
+  system?: string;
+  parameters?: Record<string, PresetParameter>;
   contextWindowPolicy?: ContextWindowPolicy;
   keepSystem?: boolean;
 
@@ -133,6 +145,12 @@ export enum ProviderType {
   server = 'server',
   openai = 'openai',
   proxy = 'proxy',
+}
+
+export enum LlmEngine {
+  llamacpp = 'llamacpp',
+  openai = 'openai',
+  unknown = 'unknown',
 }
 
 export type ParameterDefinition = {
@@ -228,22 +246,11 @@ export type ModelsCollection = {
   models: Model[];
 };
 
-export type Preset = BaseNamedRecord & {
-  title: string;
-  ownerId?: string;
-  parentId?: string;
-  providerId?: string;
-  modelIds?: string[];
-};
-
 export type Prompt = BaseNamedRecord & {
   title: string;
   icon?: unknown;
   value: string;
   tags?: string[];
-  temperature?: number;
-  nPredict?: number;
-  stop?: string[];
 };
 
 export type Plugin = BaseNamedRecord & {};
