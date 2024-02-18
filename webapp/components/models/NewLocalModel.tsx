@@ -181,7 +181,7 @@ function NewLocalModel({
           <CommandGroup
             heading={
               <div className="flex flex-row">
-                <Sparkles className="mr-2 h-4 w-4" /> {t('Featured')}
+                <Sparkles className="mr-2 h-4 w-4"  strokeWidth={1.5} /> {t('Featured')}
               </div>
             }
           >
@@ -211,7 +211,7 @@ function NewLocalModel({
           {!search && (
             <CommandGroup heading={t('Others')}>
               <CommandItem onSelect={handleLocalInstall}>
-                <Computer className="mr-2 h-4 w-4" />
+                <Computer className="mr-2 h-4 w-4" strokeWidth={1.5} />
                 <span>{t('Load a model from your computer')}</span>
                 <CommandShortcut>
                   <ShortcutBadge command={ShortcutIds.LOAD_MODEL} />
@@ -219,7 +219,7 @@ function NewLocalModel({
               </CommandItem>
               {gotoModels && (
                 <CommandItem>
-                  <BrainCircuit className="mr-2 h-4 w-4" />
+                  <BrainCircuit className="mr-2 h-4 w-4"  strokeWidth={1.5} />
                   <span>{t('Manage models')}</span>
                   <CommandShortcut>
                     <ShortcutBadge command={ShortcutIds.DISPLAY_MODELS} />

@@ -52,7 +52,7 @@ export default function Dropdown({
         />
         <div className="flex cursor-pointer flex-row rounded-md border border-neutral-300 px-2 py-1 hover:border-neutral-500 peer-checked:[&>*:nth-child(2)]:-rotate-180">
           <div className="flex flex-1 flex-row items-center pr-4 dark:text-neutral-300">
-            {I && <I className="mr-2 h-4 w-4" />}
+            {I && <I className="mr-2 h-4 w-4"  strokeWidth={1.5} />}
             <p className="mr-4 flex-1 truncate text-left">{selectedItem?.label || ' '}</p>
           </div>
           <div className="flex items-center transition-transform">

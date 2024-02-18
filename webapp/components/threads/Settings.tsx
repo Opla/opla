@@ -155,30 +155,23 @@ export default function Settings({
         <div className="px-4">
           <TabsList className="justify-left w-full gap-4">
             <TabsTrigger value="settings">
-              <Settings2 className="h-4 w-4" />
+              <Settings2 className="h-4 w-4" strokeWidth={1.5} />
             </TabsTrigger>
             <TabsTrigger value="appearance">
-              <Palette className="h-4 w-4" />
+              <Palette className="h-4 w-4" strokeWidth={1.5} />
             </TabsTrigger>
             <TabsTrigger value="documents">
-              <File className="h-4 w-4" />
+              <File className="h-4 w-4" strokeWidth={1.5} />
             </TabsTrigger>
             <TabsTrigger value="debug">
-              <Bug className="h-4 w-4" />
+              <Bug className="h-4 w-4" strokeWidth={1.5} />
             </TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="settings" className="h-full py-4">
           <ScrollArea className="h-full w-full px-4">
-            <Accordion
-              type="multiple"
-              className="w-full"
-              defaultValue={['settings-preset', 'settings-system']}
-            >
-              <AccordionItem value="settings-preset">
-                <AccordionTrigger>{t('Preset')}</AccordionTrigger>
-                <AccordionContent><Presets /></AccordionContent>
-              </AccordionItem>
+            <Presets />
+            <Accordion type="multiple" className="w-full px-1" defaultValue={['settings-system']}>
               <AccordionItem value="settings-system">
                 <AccordionTrigger>{t('System')}</AccordionTrigger>
                 <AccordionContent>
@@ -218,7 +211,7 @@ export default function Settings({
                     </Select>
                     <Tooltip>
                       <TooltipTrigger className="">
-                        <HelpCircle className="ml-2 h-4 w-4" />
+                        <HelpCircle className="ml-2 h-4 w-4" strokeWidth={1.5} />
                       </TooltipTrigger>
                       <TooltipContent side="bottom">
                         <p className="w-[265px] text-sm">{ContextWindowPolicies[selectedPolicy]}</p>

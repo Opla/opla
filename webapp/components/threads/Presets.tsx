@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import * as React from 'react';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, Copy, Plus, Trash } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,44 +22,36 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandSeparator,
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useContext } from 'react';
-import { AppContext } from '@/context';
+// import { useContext } from 'react';
+// import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
 
-const frameworks = [
+const presets = [
+  {
+    id: 'Opla',
+    name: 'Opla',
+  },
   {
     id: 'gpt-3.5',
-    value: 'next.js',
-    label: 'Next.js',
+    name: 'ChatGPT-3.5',
   },
   {
-    value: 'sveltekit',
-    label: 'SvelteKit',
-  },
-  {
-    value: 'nuxt.js',
-    label: 'Nuxt.js',
-  },
-  {
-    value: 'remix',
-    label: 'Remix',
-  },
-  {
-    value: 'astro',
-    label: 'Astro',
+    id: 'gpt-4',
+    name: 'ChatGPT-4',
   },
 ];
 
 export default function Presets() {
-  const { presets, setPresets } = useContext(AppContext);
+  // const { presets, setPresets } = useContext(AppContext);
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState('');
 
   return (
-    <div className='w-full'>
+    <div className="w-full pb-4">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -68,9 +60,7 @@ export default function Presets() {
             aria-expanded={open}
             className="w-full justify-between"
           >
-            {value
-              ? frameworks.find((framework) => framework.value === value)?.label
-              : t('Select a preset...')}
+            {value ? presets.find((preset) => preset.id === value)?.name : t('Select a preset...')}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -79,10 +69,10 @@ export default function Presets() {
             <CommandInput placeholder={t('Search preset...')} />
             <CommandEmpty>{t('No preset found.')}</CommandEmpty>
             <CommandGroup>
-              {frameworks.map((preset) => (
+              {presets.map((preset) => (
                 <CommandItem
-                  key={preset.value}
-                  value={preset.value}
+                  key={preset.id}
+                  value={preset.id}
                   onSelect={(currentValue) => {
                     setValue(currentValue === value ? '' : currentValue);
                     setOpen(false);
@@ -91,12 +81,40 @@ export default function Presets() {
                   <Check
                     className={cn(
                       'mr-2 h-4 w-4',
-                      value === preset.value ? 'opacity-100' : 'opacity-0',
+                      value === preset.id ? 'opacity-100' : 'opacity-0',
                     )}
                   />
-                  {preset.label}
+                  {preset.name}
                 </CommandItem>
               ))}
+            </CommandGroup>
+            <CommandSeparator />
+            <CommandGroup>
+              <CommandItem
+                onSelect={() => {
+                  setOpen(false);
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                {t('Create a new preset')}
+              </CommandItem>
+              <CommandItem
+                onSelect={() => {
+                  setOpen(false);
+                }}
+              >
+                <Copy className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                {t('Duplicate selected preset')}
+              </CommandItem>
+              <CommandItem
+                className="text-red-600"
+                onSelect={() => {
+                  setOpen(false);
+                }}
+              >
+                <Trash className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                {t('Delete selected preset')}
+              </CommandItem>
             </CommandGroup>
           </Command>
         </PopoverContent>

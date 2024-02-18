@@ -204,7 +204,7 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
                                   'text',
                                 )}
                               >
-                                <Server className="h-4 w-4" />
+                                <Server className="h-4 w-4"  strokeWidth={1.5} />
                               </div>
                             </div>
                           </div>
