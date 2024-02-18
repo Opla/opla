@@ -248,10 +248,10 @@ export default function Explorer({
                   }}
                 >
                   <div className="flex flex-1 items-center capitalize">
-                    <FolderClock className="mr-2 h-4 w-4"  strokeWidth={1.5} />
+                    <FolderClock className="mr-2 h-4 w-4" strokeWidth={1.5} />
                     {t(ViewName.Recent)}
                   </div>
-                  {view === ViewName.Recent && <Check className="h-4 w-4"  strokeWidth={1.5} />}
+                  {view === ViewName.Recent && <Check className="h-4 w-4" strokeWidth={1.5} />}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="flex w-full items-center justify-between"
@@ -260,21 +260,21 @@ export default function Explorer({
                   }}
                 >
                   <div className="flex flex-1 items-center capitalize">
-                    <Archive className="mr-2 h-4 w-4"  strokeWidth={1.5} />
+                    <Archive className="mr-2 h-4 w-4" strokeWidth={1.5} />
                     {t(ViewName.Archives)}
                   </div>
-                  {view === ViewName.Archives && <Check className="h-4 w-4"  strokeWidth={1.5}/>}
+                  {view === ViewName.Archives && <Check className="h-4 w-4" strokeWidth={1.5} />}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuLabel>{t('Tools')}</DropdownMenuLabel>
               <DropdownMenuGroup>
                 <DropdownMenuItem onSelect={handleImportConversations}>
-                  <Import className="mr-2 h-4 w-4"  strokeWidth={1.5}/>
+                  <Import className="mr-2 h-4 w-4" strokeWidth={1.5} />
                   {t('Import')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={handleExportConversations}>
-                  <FolderInput className="mr-2 h-4 w-4"  strokeWidth={1.5} />
+                  <FolderInput className="mr-2 h-4 w-4" strokeWidth={1.5} />
                   {t('Export')}
                 </DropdownMenuItem>
               </DropdownMenuGroup>

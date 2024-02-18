@@ -181,7 +181,7 @@ function NewLocalModel({
           <CommandGroup
             heading={
               <div className="flex flex-row">
-                <Sparkles className="mr-2 h-4 w-4"  strokeWidth={1.5} /> {t('Featured')}
+                <Sparkles className="mr-2 h-4 w-4" strokeWidth={1.5} /> {t('Featured')}
               </div>
             }
           >
@@ -219,7 +219,7 @@ function NewLocalModel({
               </CommandItem>
               {gotoModels && (
                 <CommandItem>
-                  <BrainCircuit className="mr-2 h-4 w-4"  strokeWidth={1.5} />
+                  <BrainCircuit className="mr-2 h-4 w-4" strokeWidth={1.5} />
                   <span>{t('Manage models')}</span>
                   <CommandShortcut>
                     <ShortcutBadge command={ShortcutIds.DISPLAY_MODELS} />

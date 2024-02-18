@@ -142,7 +142,7 @@ export default function Parameter({
           {description && (
             <Tooltip>
               <TooltipTrigger className="">
-                <HelpCircle className="ml-2 h-4 w-4"  strokeWidth={1.5} />
+                <HelpCircle className="ml-2 h-4 w-4" strokeWidth={1.5} />
               </TooltipTrigger>
               <TooltipContent side="bottom">
                 <p className="w-[265px] text-sm">{description}</p>

@@ -92,7 +92,7 @@ export default function OpenAI({
               className="flex items-center pt-8 underline hover:text-neutral-500"
             >
               <span>{t('Go to OpenAI Platform')}</span>
-              <ExternalLink className="ml-2 h-4 w-4"  strokeWidth={1.5} />
+              <ExternalLink className="ml-2 h-4 w-4" strokeWidth={1.5} />
             </a>
           </div>
         </div>

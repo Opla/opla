@@ -147,7 +147,7 @@ export default function ThreadMenu({
               <>
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
-                    <Check className="mr-2 h-4 w-4"  strokeWidth={1.5} />
+                    <Check className="mr-2 h-4 w-4" strokeWidth={1.5} />
                     <span className="capitalize">{selectedItem?.label || t('Select a model')}</span>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent className="p-0">
@@ -204,7 +204,7 @@ export default function ThreadMenu({
                 handleNewProviderModel();
               }}
             >
-              <Plus className="mr-2 h-4 w-4"  strokeWidth={1.5} />
+              <Plus className="mr-2 h-4 w-4" strokeWidth={1.5} />
               {t('Add other AI providers')}
               <DropdownMenuShortcut>
                 <ShortcutBadge command={ShortcutIds.NEW_PROVIDER} />

@@ -16,7 +16,7 @@ function DialogClose({ className, onClose }: { className?: string; onClose: () =
       type="button"
       onClick={onClose}
     >
-      <X className="h-4 w-4"  strokeWidth={1.5} />
+      <X className="h-4 w-4" strokeWidth={1.5} />
     </Button>
   );
 }
