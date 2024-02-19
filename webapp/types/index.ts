@@ -88,6 +88,8 @@ export type Preset = BaseNamedRecord & {
   provider?: string;
   models?: string[];
 
+  readOnly?: boolean;
+
   system?: string;
   parameters?: Record<string, PresetParameter>;
   contextWindowPolicy?: ContextWindowPolicy;
@@ -111,7 +113,7 @@ export type ConversationUsage = {
 export type Conversation = BaseNamedRecord & {
   messages: Message[] | undefined;
   pluginIds?: string[];
-  preset?: Preset;
+  preset?: string;
   currentPrompt?: string;
   note?: string;
   model?: string;

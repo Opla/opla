@@ -26,6 +26,7 @@ import { ContextWindowPolicy, Conversation, PresetParameter } from '@/types';
 import { toast } from '@/components/ui/Toast';
 import { ContextWindowPolicies, DefaultContextWindowPolicy } from '@/utils/constants';
 // import useDebounceFunc from '@/hooks/useDebounceFunc';
+import { findCompatiblePreset } from '@/utils/data/presets';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -44,7 +45,7 @@ export default function Settings({
   errors: string[];
 }) {
   const { t } = useTranslation();
-  const { conversations, updateConversations, providers } = useContext(AppContext);
+  const { conversations, updateConversations, providers, presets } = useContext(AppContext);
   const { backendContext } = useBackend();
   // const [params, setParams] = useState<ParametersRecord>({});
 
@@ -146,8 +147,21 @@ export default function Settings({
     }
   };
 
+  const handleChangePreset = (preset: string) => {
+    if (selectedConversation) {
+      const newConversations = updateConversation(
+        { ...selectedConversation, preset },
+        conversations,
+        true,
+      );
+      updateConversations(newConversations);
+    }
+  };
+
   const system = selectedConversation?.system ?? model?.system ?? Opla.system;
   const selectedPolicy = selectedConversation?.contextWindowPolicy || DefaultContextWindowPolicy;
+  const modelName = selectedConversation?.model ?? model?.name;
+  const preset = findCompatiblePreset(selectedConversation?.preset, presets, modelName, provider);
 
   return (
     <div className="scrollbar-trigger flex h-full w-full bg-neutral-100 dark:bg-neutral-900">
@@ -170,7 +184,12 @@ export default function Settings({
         </div>
         <TabsContent value="settings" className="h-full py-4">
           <ScrollArea className="h-full w-full px-4">
-            <Presets />
+            <Presets
+              preset={preset}
+              model={modelName}
+              provider={provider}
+              onChangePreset={handleChangePreset}
+            />
             <Accordion type="multiple" className="w-full px-1" defaultValue={['settings-system']}>
               <AccordionItem value="settings-system">
                 <AccordionTrigger>{t('System')}</AccordionTrigger>

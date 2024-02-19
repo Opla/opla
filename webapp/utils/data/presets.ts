@@ -12,14 +12,90 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { OplaContext, Preset } from '@/types';
+import { OplaContext, Preset, Provider } from '@/types';
 import logger from '../logger';
+import { deepEqual } from '.';
 
-export const getSelectedPreset = (backendContext: OplaContext) => {
-  const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.activeModel}`;
+export const defaultPresets: Preset[] = [
+  {
+    id: 'opla',
+    name: 'Opla',
+    readOnly: true,
+    updatedAt: 0,
+    createdAt: 0,
+  },
+  {
+    id: 'openai',
+    name: 'OpenAI',
+    readOnly: true,
+    updatedAt: 0,
+    createdAt: 0,
+  },
+  {
+    id: 'gpt-3.5',
+    parentId: 'openai',
+    name: 'ChatGPT-3.5',
+    readOnly: true,
+    updatedAt: 0,
+    createdAt: 0,
+  },
+  {
+    id: 'gpt-4',
+    parentId: 'openai',
+    name: 'ChatGPT-4',
+    readOnly: true,
+    updatedAt: 0,
+    createdAt: 0,
+  },
+];
 
-  logger.warn('getSelectedPreset not implemented');
-  return selectedPreset;
+export const mergePresets = (presets: Preset[], newPresets: Preset[]) => {
+  const newPresetsIds = newPresets.map((p) => p.id);
+  const freshNewPresets = newPresets.filter((ps) => !presets.find((p) => p.id === ps.id));
+  const mergedPresets = presets.map((ps) => {
+    if (newPresetsIds.includes(ps.id)) {
+      const updatedPreset = newPresets.find((newPreset) => newPreset.id === ps.id);
+      if (!deepEqual(ps, updatedPreset)) {
+        return { ...ps, ...updatedPreset, updatedAt: Date.now() };
+      }
+    }
+    return ps;
+  });
+  return [...mergedPresets, ...freshNewPresets];
+};
+
+export const findCompatiblePreset = (
+  presetId: string | undefined,
+  presets: Preset[],
+  model?: string,
+  provider?: Provider,
+) => {
+  let compatiblePreset = presets.find((p) => p.id === presetId);
+  if (!presetId) {
+    if (model) {
+      compatiblePreset = presets.find((p) => p.id.toLowerCase().indexOf(model.toLowerCase()) > -1);
+      console.log('preset model', model, presets, compatiblePreset);
+    }
+    if (provider && !compatiblePreset) {
+      compatiblePreset = presets.find(
+        (p) => p.id.toLowerCase().indexOf(provider.name.toLowerCase()) > -1,
+      );
+    }
+  }
+  return compatiblePreset;
+};
+
+export const getCompatiblePresets = (presets: Preset[], model?: string, provider?: Provider) => {
+  const compatiblePresets: Record<string, boolean> = {};
+  presets.forEach((p) => {
+    if (model) {
+      compatiblePresets[p.id] = p.id.toLowerCase().indexOf(model.toLowerCase()) > -1;
+    }
+    if (provider && !compatiblePresets[p.id]) {
+      compatiblePresets[p.id] = p.id.toLowerCase().indexOf(provider.name.toLowerCase()) > -1;
+    }
+  });
+  return compatiblePresets;
 };
 
 export const getAllPresets = (backendContext: OplaContext): Preset[] => {

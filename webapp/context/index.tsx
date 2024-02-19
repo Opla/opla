@@ -14,14 +14,14 @@
 
 'use client';
 
-import { createContext, useCallback, useMemo, useState } from 'react';
+import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import { Conversation, LlmUsage, Message, Preset, Provider } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
-// import { updateConversation } from '@/utils/data/conversations';
 import logger from '@/utils/logger';
 import useCollectionStorage from '@/hooks/useCollectionStorage';
 import { removeConversation } from '@/utils/data/conversations';
 import { deepCopy } from '@/utils/data';
+import { defaultPresets, mergePresets } from '@/utils/data/presets';
 
 export type Context = {
   conversations: Array<Conversation>;
@@ -76,6 +76,13 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
 
   const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
   const [presets, setPresets] = useDataStorage('presets', initialContext.presets);
+
+  useEffect(() => {
+    if (presets && !presets?.find((p) => p.id === 'opla')) {
+      const updatedPresets = mergePresets(presets, defaultPresets);
+      setPresets(updatedPresets);
+    }
+  });
 
   const [
     getStoredConversationMessages,
