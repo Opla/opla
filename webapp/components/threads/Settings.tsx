@@ -50,7 +50,9 @@ export default function Settings({
   const selectedConversation = conversations.find((c) => c.id === conversationId);
   const { activeModel } = backendContext.config.models;
   const model = findModel(activeModel, backendContext.config.models.items);
-  const provider = selectedConversation?.provider ? findProvider(selectedConversation?.provider, providers) : getLocalProvider(providers);
+  const provider = selectedConversation?.provider
+    ? findProvider(selectedConversation?.provider, providers)
+    : getLocalProvider(providers);
   const parametersDefinition = getCompletionParametersDefinition(provider);
   const modelName = selectedConversation?.model ?? model?.name;
   const preset = findCompatiblePreset(selectedConversation?.preset, presets, modelName, provider);

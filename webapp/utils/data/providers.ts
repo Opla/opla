@@ -32,7 +32,9 @@ export const getLocalProvider = (providers: Provider[]) =>
   providers.find((p) => p.type === ProviderType.opla);
 
 const findProvider = (providerIdOrName: string | undefined, providers: Provider[]) =>
-  providers.find((p) => p.id === providerIdOrName || p.name.toLowerCase() === providerIdOrName?.toLowerCase());
+  providers.find(
+    (p) => p.id === providerIdOrName || p.name.toLowerCase() === providerIdOrName?.toLowerCase(),
+  );
 
 const createProvider = (name: string, template: Partial<Provider>) => {
   const provider: Provider = {

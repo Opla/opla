@@ -76,8 +76,10 @@ export const mergePresets = (presets: Preset[], newPresets: Preset[]) => {
   return [...mergedPresets, ...freshNewPresets];
 };
 
-export const matchModel = (p: Preset, model: string) => p.id.toLowerCase().indexOf(model.toLowerCase()) > -1;
-export const matchProvider = (p: Preset, provider: Provider) => p.id.toLowerCase().indexOf(provider.name.toLowerCase()) > -1;
+export const matchModel = (p: Preset, model: string) =>
+  p.id.toLowerCase().indexOf(model.toLowerCase()) > -1;
+export const matchProvider = (p: Preset, provider: Provider) =>
+  p.id.toLowerCase().indexOf(provider.name.toLowerCase()) > -1;
 
 export const findCompatiblePreset = (
   presetId: string | undefined,
@@ -91,14 +93,11 @@ export const findCompatiblePreset = (
       compatiblePreset = presets.find((p) => matchModel(p, model));
     }
     if (provider && !compatiblePreset) {
-      compatiblePreset = presets.find(
-        (p) => matchProvider(p, provider)
-      );
+      compatiblePreset = presets.find((p) => matchProvider(p, provider));
     }
   }
   return compatiblePreset;
-}
-
+};
 
 export const getCompatiblePresets = (presets: Preset[], model?: string, provider?: Provider) => {
   const compatiblePresets: Record<string, boolean> = {};
@@ -124,7 +123,10 @@ export const getCompatiblePresets = (presets: Preset[], model?: string, provider
 export const isKeepSystem = (preset: Preset | undefined) =>
   typeof preset?.keepSystem === 'boolean' ? preset?.keepSystem : true;
 
-export const mergeParameters = (parameters: Record<string, PresetParameter> | undefined, newParameters: Record<string, PresetParameter> | undefined) => {
+export const mergeParameters = (
+  parameters: Record<string, PresetParameter> | undefined,
+  newParameters: Record<string, PresetParameter> | undefined,
+) => {
   const mergedParameters: Record<string, PresetParameter> = { ...parameters };
   if (newParameters) {
     Object.keys(newParameters).forEach((p) => {
