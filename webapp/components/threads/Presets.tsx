@@ -31,6 +31,8 @@ import useTranslation from '@/hooks/useTranslation';
 import { Preset, Provider } from '@/types';
 import { createPreset, getCompatiblePresets } from '@/utils/data/presets';
 import { deepMerge } from '@/utils/data';
+import { ModalData, ModalsContext } from '@/context/modals';
+import { ModalIds } from '@/modals';
 
 type PresetsProps = {
   preset: Preset | undefined;
@@ -49,16 +51,28 @@ export default function Presets({
 }: PresetsProps) {
   const { presets, setPresets } = useContext(AppContext);
   const { t } = useTranslation();
+  const { showModal } = useContext(ModalsContext);
   const [open, setOpen] = React.useState(false);
 
   const compatibles = getCompatiblePresets(presets, model, provider);
 
-  const duplicatePreset = (p: Preset) => {
+  const duplicatePreset = (p: Preset, newName?: string) => {
     const { id, name, readOnly, ...rest } = p;
     const template = deepMerge(rest, presetProperties);
-    const newPreset = createPreset(`${p.id}-copy`, p.parentId || id, template);
+    const newPreset = createPreset(newName || `${p.id}-copy`, p.parentId || id, template);
     setPresets([...presets, newPreset]);
     onChangePreset(newPreset.id);
+  };
+
+  const handleDuplicatePreset = (p: Preset) => {
+    showModal(ModalIds.NewPreset, {
+      item: p,
+      onAction: async (action: string, data: ModalData) => {
+        if (action === 'Duplicate') {
+          duplicatePreset(p, data as unknown as string);
+        }
+      },
+    });
   };
 
   const deletePreset = (p: Preset) => {
@@ -116,7 +130,7 @@ export default function Presets({
                 <CommandItem
                   onSelect={() => {
                     setOpen(false);
-                    duplicatePreset(preset);
+                    handleDuplicatePreset(preset);
                   }}
                 >
                   <Copy className="mr-2 h-4 w-4" strokeWidth={1.5} />

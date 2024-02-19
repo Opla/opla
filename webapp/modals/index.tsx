@@ -23,6 +23,7 @@ import SettingsPanel from './settings';
 import NewProviderDialog from './templates/NewProvider';
 import OpenAIDialog from './openai';
 import NewLocalModelDialog from './models';
+import NewPresetDialog from './presets';
 
 const Modals: ModalRef[] = [
   {
@@ -181,6 +182,20 @@ const Modals: ModalRef[] = [
         >
           <div>{item?.name || ''}</div>
         </AlertDialog>
+      );
+    },
+  },
+  {
+    id: ModalIds.NewPreset,
+    Component: function NPDialog({ visible, onClose, data }) {
+      return (
+        <NewPresetDialog
+          key={ModalIds.NewPreset}
+          id={ModalIds.NewPreset}
+          visible={visible}
+          onClose={onClose}
+          data={data}
+        />
       );
     },
   },
