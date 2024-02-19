@@ -21,7 +21,7 @@ import { updateConversation } from '@/utils/data/conversations';
 import { findModel } from '@/utils/data/models';
 import Opla from '@/utils/providers/opla';
 import { getCompletionParametersDefinition } from '@/utils/providers';
-import { findProvider } from '@/utils/data/providers';
+import { findProvider, getLocalProvider } from '@/utils/data/providers';
 import { ContextWindowPolicy, Conversation, Preset, PresetParameter } from '@/types';
 import { toast } from '@/components/ui/Toast';
 import { ContextWindowPolicies, DefaultContextWindowPolicy } from '@/utils/constants';
@@ -50,9 +50,8 @@ export default function Settings({
   const selectedConversation = conversations.find((c) => c.id === conversationId);
   const { activeModel } = backendContext.config.models;
   const model = findModel(activeModel, backendContext.config.models.items);
-  const provider = findProvider(selectedConversation?.provider, providers);
+  const provider = selectedConversation?.provider ? findProvider(selectedConversation?.provider, providers) : getLocalProvider(providers);
   const parametersDefinition = getCompletionParametersDefinition(provider);
-
   const modelName = selectedConversation?.model ?? model?.name;
   const preset = findCompatiblePreset(selectedConversation?.preset, presets, modelName, provider);
   const {
@@ -61,10 +60,6 @@ export default function Settings({
     keepSystem,
     contextWindowPolicy: selectedPolicy = DefaultContextWindowPolicy,
   } = getCompletePresetProperties(preset, selectedConversation, presets);
-  /* const parameters = selectedConversation?.parameters ?? {};
-  const system = selectedConversation?.system ?? preset?.system ?? model?.system ?? Opla.system;
-  const selectedPolicy = selectedConversation?.contextWindowPolicy ?? preset?.contextWindowPolicy ?? DefaultContextWindowPolicy;
-  const keepSystem = preset?.keepSystem ?? isKeepSystem(selectedConversation); */
 
   const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;

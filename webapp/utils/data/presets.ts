@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Conversation, Preset, Provider } from '@/types';
-import { createBaseNamedRecord, deepEqual, deepMerge } from '.';
+import { Conversation, Preset, PresetParameter, Provider } from '@/types';
+import { createBaseNamedRecord, deepEqual } from '.';
 
 export const defaultPresets: Preset[] = [
   {
@@ -76,6 +76,9 @@ export const mergePresets = (presets: Preset[], newPresets: Preset[]) => {
   return [...mergedPresets, ...freshNewPresets];
 };
 
+export const matchModel = (p: Preset, model: string) => p.id.toLowerCase().indexOf(model.toLowerCase()) > -1;
+export const matchProvider = (p: Preset, provider: Provider) => p.id.toLowerCase().indexOf(provider.name.toLowerCase()) > -1;
+
 export const findCompatiblePreset = (
   presetId: string | undefined,
   presets: Preset[],
@@ -83,27 +86,36 @@ export const findCompatiblePreset = (
   provider?: Provider,
 ) => {
   let compatiblePreset = presets.find((p) => p.id === presetId);
-  if (!presetId) {
-    if (model) {
-      compatiblePreset = presets.find((p) => p.id.toLowerCase().indexOf(model.toLowerCase()) > -1);
+  if (!compatiblePreset) {
+    if (model && !compatiblePreset) {
+      compatiblePreset = presets.find((p) => matchModel(p, model));
     }
     if (provider && !compatiblePreset) {
       compatiblePreset = presets.find(
-        (p) => p.id.toLowerCase().indexOf(provider.name.toLowerCase()) > -1,
+        (p) => matchProvider(p, provider)
       );
     }
   }
   return compatiblePreset;
-};
+}
+
 
 export const getCompatiblePresets = (presets: Preset[], model?: string, provider?: Provider) => {
   const compatiblePresets: Record<string, boolean> = {};
   presets.forEach((p) => {
+    if (p.parentId) {
+      compatiblePresets[p.id] = compatiblePresets[p.parentId];
+    }
     if (model) {
-      compatiblePresets[p.id] = p.id.toLowerCase().indexOf(model.toLowerCase()) > -1;
+      compatiblePresets[p.id] = matchModel(p, model);
     }
     if (provider && !compatiblePresets[p.id]) {
-      compatiblePresets[p.id] = p.id.toLowerCase().indexOf(provider.name.toLowerCase()) > -1;
+      compatiblePresets[p.id] = matchProvider(p, provider);
+    }
+  });
+  presets.forEach((p) => {
+    if (p.parentId && compatiblePresets[p.parentId] && !p.readOnly) {
+      compatiblePresets[p.id] = true;
     }
   });
   return compatiblePresets;
@@ -111,6 +123,16 @@ export const getCompatiblePresets = (presets: Preset[], model?: string, provider
 
 export const isKeepSystem = (preset: Preset | undefined) =>
   typeof preset?.keepSystem === 'boolean' ? preset?.keepSystem : true;
+
+export const mergeParameters = (parameters: Record<string, PresetParameter> | undefined, newParameters: Record<string, PresetParameter> | undefined) => {
+  const mergedParameters: Record<string, PresetParameter> = { ...parameters };
+  if (newParameters) {
+    Object.keys(newParameters).forEach((p) => {
+      mergedParameters[p] = newParameters[p];
+    });
+  }
+  return mergedParameters;
+};
 
 export const getCompletePresetProperties = (
   _preset: Preset | undefined,
@@ -123,12 +145,12 @@ export const getCompletePresetProperties = (
   if (includeParent && preset?.parentId) {
     const parentPreset = presets.find((p) => p.id === preset?.parentId);
     if (parentPreset) {
-      parameters = deepMerge(preset?.parameters, conversation?.parameters);
+      parameters = mergeParameters(preset?.parameters, conversation?.parameters);
       system = parentPreset?.system ?? preset?.system;
       keepSystem = parentPreset ? isKeepSystem(parentPreset) : keepSystem;
     }
   }
-  parameters = deepMerge(preset?.parameters, conversation?.parameters);
+  parameters = mergeParameters(preset?.parameters, conversation?.parameters);
   contextWindowPolicy = conversation?.contextWindowPolicy || contextWindowPolicy;
   keepSystem = conversation ? isKeepSystem(conversation as Preset) : keepSystem;
   return { ...preset, parameters, system, contextWindowPolicy, keepSystem };

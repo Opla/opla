@@ -41,7 +41,7 @@ import {
 import useBackend from '@/hooks/useBackendContext';
 import { buildContext, completion, getCompletionParametersDefinition } from '@/utils/providers';
 import { findModel, getLocalModelsAsItems, getProviderModelsAsItems } from '@/utils/data/models';
-import { findProvider, getLocalProviders } from '@/utils/data/providers';
+import { findProvider, getLocalProvider } from '@/utils/data/providers';
 import { toast } from '@/components/ui/Toast';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { ModalData, ModalsContext } from '@/context/modals';
@@ -146,7 +146,7 @@ function Thread({
   const localModelItems = getLocalModelsAsItems(
     backendContext,
     selectedModel,
-    getLocalProviders(providers),
+    getLocalProvider(providers),
   );
   const cloudModelItems = getProviderModelsAsItems(providers, selectedModel);
   const modelItems = [...localModelItems, ...cloudModelItems];
