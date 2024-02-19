@@ -12,9 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const isMac = () =>
+export const isMac = () =>
   typeof window !== 'undefined' && window.navigator.platform.toLowerCase().indexOf('mac') > -1;
-const isWindows =
+export const isWindows =
   typeof window !== 'undefined' && window.navigator.platform.toLowerCase().indexOf('win') > -1;
 
-export { isMac, isWindows };
+export const getFilename = (path: string) => {
+  const parts = path.split('/');
+  return parts[parts.length - 1];
+};

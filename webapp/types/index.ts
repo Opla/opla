@@ -60,13 +60,35 @@ export enum MessageState {
   Error = 'error',
 }
 
+export enum AssetState {
+  Pending = 'pending',
+  Downloading = 'downloading',
+  Ok = 'Ok',
+  Error = 'error',
+}
+
+export type Asset = BaseIdRecord & {
+  metadata?: Metadata;
+  state?: AssetState;
+} & (
+    | {
+        type: 'link';
+        url: string;
+      }
+    | {
+        type: 'file';
+        file: string;
+      }
+  );
+
 export type Message = BaseIdRecord & {
   author: Author;
-  content: string | Content;
+  content: string | Content | undefined;
   contentHistory?: (string | Content)[];
   status?: MessageState;
   sibling?: string;
   conversationId?: string;
+  assets?: string[];
 };
 
 export type Messages = {
@@ -129,6 +151,8 @@ export type Conversation = BaseNamedRecord & {
   keepSystem?: boolean;
 
   scrollPosition?: number;
+
+  assets?: Asset | Asset[];
 };
 
 export type Entity = {

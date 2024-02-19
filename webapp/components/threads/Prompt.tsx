@@ -15,7 +15,7 @@
 'use client';
 
 import { ChangeEvent, KeyboardEvent, MouseEvent } from 'react';
-import { AlertTriangle, Loader2, SendHorizontal } from 'lucide-react';
+import { AlertTriangle, Loader2, Paperclip, SendHorizontal } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts';
 import { Textarea } from '../ui/textarea';
@@ -23,26 +23,35 @@ import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { ShortcutBadge } from '../common/ShortCut';
 
+export type PromptProps = {
+  conversationId: string;
+  message: string;
+  isLoading: boolean;
+  errorMessage: string;
+  onUpdatePrompt: (message: string) => void;
+  onSendMessage: () => void;
+  onUploadFile: () => void;
+};
+
 export default function Prompt({
   conversationId,
   message,
   errorMessage,
   onUpdatePrompt,
   onSendMessage,
+  onUploadFile,
   isLoading,
-}: {
-  conversationId: string;
-  message: string;
-  isLoading: boolean;
-  errorMessage: string;
-  onUpdatePrompt: any;
-  onSendMessage: any;
-}) {
+}: PromptProps) {
   const { t } = useTranslation();
 
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
     onSendMessage();
+  };
+
+  const handleUploadFile = (e: MouseEvent) => {
+    e.preventDefault();
+    onUploadFile();
   };
 
   const handleKeypress = (event: KeyboardEvent) => {
@@ -80,6 +89,17 @@ export default function Prompt({
           </div>
         ) : null}
         <div className="flex w-full flex-row items-center rounded-md border border-black/10 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white">
+          <Button
+            disabled={isLoading}
+            type="button"
+            aria-label={t('Upload')}
+            onClick={handleUploadFile}
+            className=""
+            size="icon"
+            variant="ghost"
+          >
+            <Paperclip className="strokeWidth={1.5} h-4 w-4" />
+          </Button>
           <Textarea
             autoresize
             autoFocus
