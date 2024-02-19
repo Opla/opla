@@ -45,6 +45,7 @@ export type MenuItem = {
   selected?: boolean;
   onSelect?: (data: string) => void;
   state?: MenuItemState;
+  disabled?: boolean;
 };
 
 export enum MenuAction {
@@ -76,4 +77,5 @@ export enum ModalIds {
   DeleteItem = 'deleteitem',
   DownloadItem = 'downloaditem',
   Downloads = 'downloads',
+  NewPreset = 'newpreset',
 }

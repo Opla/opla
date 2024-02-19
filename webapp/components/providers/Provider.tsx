@@ -63,11 +63,11 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
                   <div className="px-4">
                     <TabsList className="gap-4">
                       <TabsTrigger value="settings">
-                        <Settings2 className="mr-2 h-4 w-4" />
+                        <Settings2 className="mr-2 h-4 w-4" strokeWidth={1.5} />
                         {t('Settings')}
                       </TabsTrigger>
                       <TabsTrigger value="debug">
-                        <Bug className="mr-2 h-4 w-4" />
+                        <Bug className="mr-2 h-4 w-4" strokeWidth={1.5} />
                         {t('Logs')}
                       </TabsTrigger>
                     </TabsList>

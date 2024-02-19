@@ -113,6 +113,3 @@ export const mergeConversations = (
   });
   return Array.from(conversationMap.values());
 };
-
-export const isKeepSystem = (conversation: Conversation | undefined) =>
-  typeof conversation?.keepSystem === 'boolean' ? conversation?.keepSystem : true;

@@ -69,7 +69,7 @@ export default function SidebarItems({
                       }
                     }}
                   >
-                    {IIcon && <IIcon className="mr-2 h-4 w-4" />}
+                    {IIcon && <IIcon className="mr-2 h-4 w-4" strokeWidth={1.5} />}
                     {item.name}
                     {item.shortcut && (
                       <DropdownMenuShortcut>

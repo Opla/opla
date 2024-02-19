@@ -25,6 +25,7 @@ import {
   MessageState,
   Model,
   Prompt,
+  Provider,
   ProviderType,
 } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
@@ -40,13 +41,14 @@ import {
 import useBackend from '@/hooks/useBackendContext';
 import { buildContext, completion, getCompletionParametersDefinition } from '@/utils/providers';
 import { findModel, getLocalModelsAsItems, getProviderModelsAsItems } from '@/utils/data/models';
-import { findProvider, getLocalProviders } from '@/utils/data/providers';
+import { findProvider, getLocalProvider } from '@/utils/data/providers';
 import { toast } from '@/components/ui/Toast';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { ModalData, ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { MenuAction, Page } from '@/types/ui';
 import { KeyedScrollPosition } from '@/hooks/useScroll';
+import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
 import PromptArea from './Prompt';
 import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
@@ -81,6 +83,7 @@ function Thread({
     updateConversationMessages,
     setUsage,
     setProviders,
+    presets,
   } = useContext(AppContext);
   const { backendContext, setActiveModel } = useBackend();
   const { activeModel: aModel } = backendContext.config.models;
@@ -143,7 +146,7 @@ function Thread({
   const localModelItems = getLocalModelsAsItems(
     backendContext,
     selectedModel,
-    getLocalProviders(providers),
+    getLocalProvider(providers),
   );
   const cloudModelItems = getProviderModelsAsItems(providers, selectedModel);
   const modelItems = [...localModelItems, ...cloudModelItems];
@@ -212,28 +215,30 @@ function Thread({
     let model: Model | undefined;
     let providerName: string | undefined = model?.provider;
     const returnedMessage = { ...message };
+    let provider: Provider | undefined;
     if (conversation.provider && conversation.model) {
-      const provider = findProvider(conversation.provider, providers);
+      provider = findProvider(conversation.provider, providers);
       model = findModel(conversation.model, provider?.models || []);
       if (provider) {
         providerName = provider.name;
       }
     }
+    const modelName = model?.name || conversation.model || activeModel;
     if (!model) {
-      model = findModel(conversation.model || activeModel, backendContext.config.models.items);
+      model = findModel(modelName, backendContext.config.models.items);
     }
 
-    const parameters: LlmParameters[] = [];
-    if (conversation.parameters) {
-      const conversationParameters = conversation.parameters;
-      const provider = findProvider(conversation.provider, providers);
+    const llmParameters: LlmParameters[] = [];
+    const preset = findCompatiblePreset(selectedConversation?.preset, presets, modelName, provider);
+    const { parameters, system } = getCompletePresetProperties(preset, conversation, presets);
+    if (parameters) {
       const parametersDefinition = getCompletionParametersDefinition(provider);
-      Object.keys(conversation.parameters).forEach((key) => {
+      Object.keys(parameters).forEach((key) => {
         const parameterDef = parametersDefinition[key];
         if (parameterDef) {
-          const result = parameterDef.z.safeParse(conversationParameters[key]);
+          const result = parameterDef.z.safeParse(parameters[key]);
           if (result.success) {
-            parameters.push({ key, value: String(result.data) });
+            llmParameters.push({ key, value: String(result.data) });
           }
         }
       });
@@ -247,9 +252,9 @@ function Thread({
         providerName,
         { providers },
         context,
-        conversation?.system,
+        system,
         conversationId,
-        parameters,
+        llmParameters,
       );
       setUsage(response.usage);
       returnedMessage.content = response.content.trim();
@@ -260,7 +265,6 @@ function Thread({
       setErrorMessage({ ...errorMessage, [conversation.id]: error });
       returnedMessage.content = t('Oops, something went wrong.');
       returnedMessage.status = MessageState.Error;
-      const provider = findProvider(conversation.provider, providers);
       if (provider) {
         const { errors = [] } = provider || { errors: [] };
         const len = errors.unshift(error);
@@ -268,7 +272,7 @@ function Thread({
           errors.pop();
         }
         provider.errors = errors;
-        const updatedProviders = providers.map((p) => (p.id === provider.id ? provider : p));
+        const updatedProviders = providers.map((p) => (p.id === provider?.id ? provider : p));
         setProviders(updatedProviders);
       }
 

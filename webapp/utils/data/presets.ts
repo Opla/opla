@@ -12,29 +12,148 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { OplaContext, Preset } from '@/types';
-import logger from '../logger';
+import { Conversation, Preset, PresetParameter, Provider } from '@/types';
+import { createBaseNamedRecord, deepEqual } from '.';
 
-const getSelectedPreset = (backendContext: OplaContext) => {
-  const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.activeModel}`;
+export const defaultPresets: Preset[] = [
+  {
+    id: 'opla',
+    name: 'Opla',
+    readOnly: true,
+    updatedAt: 0,
+    createdAt: 0,
+  },
+  {
+    id: 'openai',
+    name: 'OpenAI',
+    readOnly: true,
+    updatedAt: 0,
+    createdAt: 0,
+  },
+  {
+    id: 'gpt-3.5',
+    parentId: 'openai',
+    name: 'ChatGPT-3.5',
+    readOnly: true,
+    updatedAt: 0,
+    createdAt: 0,
+  },
+  {
+    id: 'gpt-4',
+    parentId: 'openai',
+    name: 'ChatGPT-4',
+    readOnly: true,
+    updatedAt: 0,
+    createdAt: 0,
+  },
+];
 
-  logger.warn('getSelectedPreset not implemented');
-  return selectedPreset;
+export const createPreset = (
+  name: string,
+  parentId: string | undefined,
+  template: Partial<Preset>,
+) => {
+  const preset: Preset = {
+    ...template,
+    ...createBaseNamedRecord<Preset>(name),
+    parentId,
+  };
+  return preset;
 };
 
-const getPresets = (backendContext: OplaContext): Preset[] => {
-  const presets: Preset[] = backendContext.config.models.items.map((model) => ({
-    id: model.id,
-    title: model.title || model.name,
-    name: `${backendContext.config.server.name}::${model.name}`,
-    createdAt: model.createdAt,
-    updatedAt: model.updatedAt,
-  }));
-  return presets;
+export const mergePresets = (presets: Preset[], newPresets: Preset[]) => {
+  const newPresetsIds = newPresets.map((p) => p.id);
+  const freshNewPresets = newPresets.filter((ps) => !presets.find((p) => p.id === ps.id));
+  const mergedPresets = presets.map((ps) => {
+    if (newPresetsIds.includes(ps.id)) {
+      const updatedPreset = newPresets.find((newPreset) => newPreset.id === ps.id);
+      if (!deepEqual(ps, updatedPreset)) {
+        return { ...ps, ...updatedPreset, updatedAt: Date.now() };
+      }
+    }
+    return ps;
+  });
+  return [...mergedPresets, ...freshNewPresets];
 };
 
-const addPreset = () => {
-  logger.warn('addPreset not implemented');
+export const matchModel = (p: Preset, model: string) =>
+  p.id.toLowerCase().indexOf(model.toLowerCase()) > -1;
+export const matchProvider = (p: Preset, provider: Provider) =>
+  p.id.toLowerCase().indexOf(provider.name.toLowerCase()) > -1;
+
+export const findCompatiblePreset = (
+  presetId: string | undefined,
+  presets: Preset[],
+  model?: string,
+  provider?: Provider,
+) => {
+  let compatiblePreset = presets.find((p) => p.id === presetId);
+  if (!compatiblePreset) {
+    if (model && !compatiblePreset) {
+      compatiblePreset = presets.find((p) => matchModel(p, model));
+    }
+    if (provider && !compatiblePreset) {
+      compatiblePreset = presets.find((p) => matchProvider(p, provider));
+    }
+  }
+  return compatiblePreset;
 };
 
-export { getSelectedPreset, getPresets, addPreset };
+export const getCompatiblePresets = (presets: Preset[], model?: string, provider?: Provider) => {
+  const compatiblePresets: Record<string, boolean> = {};
+  presets.forEach((p) => {
+    if (p.parentId) {
+      compatiblePresets[p.id] = compatiblePresets[p.parentId];
+    }
+    if (model) {
+      compatiblePresets[p.id] = matchModel(p, model);
+    }
+    if (provider && !compatiblePresets[p.id]) {
+      compatiblePresets[p.id] = matchProvider(p, provider);
+    }
+  });
+  presets.forEach((p) => {
+    if (p.parentId && compatiblePresets[p.parentId] && !p.readOnly) {
+      compatiblePresets[p.id] = true;
+    }
+  });
+  return compatiblePresets;
+};
+
+export const isKeepSystem = (preset: Preset | undefined) =>
+  typeof preset?.keepSystem === 'boolean' ? preset?.keepSystem : true;
+
+export const mergeParameters = (
+  parameters: Record<string, PresetParameter> | undefined,
+  newParameters: Record<string, PresetParameter> | undefined,
+) => {
+  const mergedParameters: Record<string, PresetParameter> = { ...parameters };
+  if (newParameters) {
+    Object.keys(newParameters).forEach((p) => {
+      mergedParameters[p] = newParameters[p];
+    });
+  }
+  return mergedParameters;
+};
+
+export const getCompletePresetProperties = (
+  _preset: Preset | undefined,
+  conversation: Conversation | undefined,
+  presets: Preset[],
+  includeParent = false,
+) => {
+  const preset = _preset || presets.find((p) => p.id === conversation?.preset) || ({} as Preset);
+  let { parameters, system, contextWindowPolicy, keepSystem } = preset;
+  if (includeParent && preset?.parentId) {
+    const parentPreset = presets.find((p) => p.id === preset?.parentId);
+    if (parentPreset) {
+      parameters = mergeParameters(preset?.parameters, conversation?.parameters);
+      system = parentPreset?.system ?? preset?.system;
+      keepSystem = parentPreset ? isKeepSystem(parentPreset) : keepSystem;
+    }
+  }
+  parameters = mergeParameters(preset?.parameters, conversation?.parameters);
+  contextWindowPolicy = conversation?.contextWindowPolicy || contextWindowPolicy;
+  keepSystem = conversation ? isKeepSystem(conversation as Preset) : keepSystem;
+  return { ...preset, parameters, system, contextWindowPolicy, keepSystem };
+};

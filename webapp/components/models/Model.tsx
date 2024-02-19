@@ -91,7 +91,7 @@ function ModelView({
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon">
-                        <PiDotsThreeVerticalBold className="h-4 w-4" />
+                        <PiDotsThreeVerticalBold className="h-4 w-4"  strokeWidth={1.5} />
                         <span className="sr-only">{t('More')}</span>
                       </Button>
                     </DropdownMenuTrigger>

@@ -17,15 +17,15 @@ import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackendContext';
-import { isKeepSystem, updateConversation } from '@/utils/data/conversations';
+import { updateConversation } from '@/utils/data/conversations';
 import { findModel } from '@/utils/data/models';
 import Opla from '@/utils/providers/opla';
 import { getCompletionParametersDefinition } from '@/utils/providers';
-import { findProvider } from '@/utils/data/providers';
-import { ContextWindowPolicy, Conversation, ConversationParameter } from '@/types';
+import { findProvider, getLocalProvider } from '@/utils/data/providers';
+import { ContextWindowPolicy, Conversation, Preset, PresetParameter } from '@/types';
 import { toast } from '@/components/ui/Toast';
 import { ContextWindowPolicies, DefaultContextWindowPolicy } from '@/utils/constants';
-// import useDebounceFunc from '@/hooks/useDebounceFunc';
+import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -34,6 +34,7 @@ import Parameter, { ParameterValue, ParametersRecord } from '../common/Parameter
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 import Form from '../common/Form';
+import Presets from './Presets';
 
 export default function Settings({
   conversationId,
@@ -43,15 +44,24 @@ export default function Settings({
   errors: string[];
 }) {
   const { t } = useTranslation();
-  const { conversations, updateConversations, providers } = useContext(AppContext);
+  const { conversations, updateConversations, providers, presets } = useContext(AppContext);
   const { backendContext } = useBackend();
-  // const [params, setParams] = useState<ParametersRecord>({});
 
   const selectedConversation = conversations.find((c) => c.id === conversationId);
   const { activeModel } = backendContext.config.models;
   const model = findModel(activeModel, backendContext.config.models.items);
-  const provider = findProvider(selectedConversation?.provider, providers);
+  const provider = selectedConversation?.provider
+    ? findProvider(selectedConversation?.provider, providers)
+    : getLocalProvider(providers);
   const parametersDefinition = getCompletionParametersDefinition(provider);
+  const modelName = selectedConversation?.model ?? model?.name;
+  const preset = findCompatiblePreset(selectedConversation?.preset, presets, modelName, provider);
+  const {
+    parameters = {},
+    system = model?.system ?? Opla.system,
+    keepSystem,
+    contextWindowPolicy: selectedPolicy = DefaultContextWindowPolicy,
+  } = getCompletePresetProperties(preset, selectedConversation, presets);
 
   const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
@@ -83,7 +93,6 @@ export default function Settings({
   ): Promise<ParametersRecord | undefined> => {
     let newParams: ParametersRecord | undefined;
     if (id && selectedConversation) {
-      const { parameters = {} } = selectedConversation;
       let newConversation: Conversation | undefined;
       newParams = { ...params };
       let needUpdate = false;
@@ -145,8 +154,16 @@ export default function Settings({
     }
   };
 
-  const system = selectedConversation?.system ?? model?.system ?? Opla.system;
-  const selectedPolicy = selectedConversation?.contextWindowPolicy || DefaultContextWindowPolicy;
+  const handleChangePreset = (newPreset: string) => {
+    if (selectedConversation) {
+      const newConversations = updateConversation(
+        { ...selectedConversation, preset: newPreset },
+        conversations,
+        true,
+      );
+      updateConversations(newConversations);
+    }
+  };
 
   return (
     <div className="scrollbar-trigger flex h-full w-full bg-neutral-100 dark:bg-neutral-900">
@@ -154,31 +171,30 @@ export default function Settings({
         <div className="px-4">
           <TabsList className="justify-left w-full gap-4">
             <TabsTrigger value="settings">
-              <Settings2 className="h-4 w-4" />
+              <Settings2 className="h-4 w-4" strokeWidth={1.5} />
             </TabsTrigger>
             <TabsTrigger value="appearance">
-              <Palette className="h-4 w-4" />
+              <Palette className="h-4 w-4" strokeWidth={1.5} />
             </TabsTrigger>
             <TabsTrigger value="documents">
-              <File className="h-4 w-4" />
+              <File className="h-4 w-4" strokeWidth={1.5} />
             </TabsTrigger>
             <TabsTrigger value="debug">
-              <Bug className="h-4 w-4" />
+              <Bug className="h-4 w-4" strokeWidth={1.5} />
             </TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="settings" className="h-full py-4">
           <ScrollArea className="h-full w-full px-4">
-            <Accordion
-              type="multiple"
-              className="w-full"
-              defaultValue={['settings-model', 'settings-appearance', 'settings-preset']}
-            >
-              <AccordionItem value="settings-model">
-                <AccordionTrigger>{t('Preset')}</AccordionTrigger>
-                <AccordionContent>Choose a default preset.</AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="settings-preset">
+            <Presets
+              preset={preset}
+              presetProperties={selectedConversation as Partial<Preset>}
+              model={modelName}
+              provider={provider}
+              onChangePreset={handleChangePreset}
+            />
+            <Accordion type="multiple" className="w-full px-1" defaultValue={['settings-system']}>
+              <AccordionItem value="settings-system">
                 <AccordionTrigger>{t('System')}</AccordionTrigger>
                 <AccordionContent>
                   <Textarea
@@ -191,9 +207,9 @@ export default function Settings({
               <AccordionItem value="settings-parameters">
                 <AccordionTrigger>{t('Parameters')}</AccordionTrigger>
                 <AccordionContent>
-                  <Form<ConversationParameter>
+                  <Form<PresetParameter>
                     id={selectedConversation?.id}
-                    parameters={selectedConversation?.parameters}
+                    parameters={parameters}
                     parametersDefinition={parametersDefinition}
                     onParametersChange={updateParameters}
                   />
@@ -217,7 +233,7 @@ export default function Settings({
                     </Select>
                     <Tooltip>
                       <TooltipTrigger className="">
-                        <HelpCircle className="ml-2 h-4 w-4" />
+                        <HelpCircle className="ml-2 h-4 w-4" strokeWidth={1.5} />
                       </TooltipTrigger>
                       <TooltipContent side="bottom">
                         <p className="w-[265px] text-sm">{ContextWindowPolicies[selectedPolicy]}</p>
@@ -230,7 +246,7 @@ export default function Settings({
                     type="boolean"
                     name="keepSystem"
                     inputCss="max-w-20 pl-2"
-                    value={isKeepSystem(selectedConversation)}
+                    value={keepSystem}
                     description={t('Keep system prompts for the final prompt')}
                     onChange={handleKeepSystemChange}
                   />

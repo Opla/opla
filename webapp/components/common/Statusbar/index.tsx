@@ -82,12 +82,12 @@ export default function Statusbar() {
         >
           {!error && (
             <span className={`${running ? 'text-green-500' : 'text-gray-500'} `}>
-              <Server className="h-4 w-4" />
+              <Server className="h-4 w-4" strokeWidth={1.5} />
             </span>
           )}
           {error && (
             <span className="text-red-600">
-              <AlertTriangle className="h-4 w-4" />
+              <AlertTriangle className="h-4 w-4" strokeWidth={1.5} />
             </span>
           )}
           {(backendContext.server.status === 'init' ||

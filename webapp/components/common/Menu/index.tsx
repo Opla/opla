@@ -50,7 +50,7 @@ function Menu({
               type="button"
               className="flex w-full flex-row items-center"
             >
-              {I && <I className="mr-2 h-4 w-4" />}
+              {I && <I className="mr-2 h-4 w-4" strokeWidth={1.5} />}
               <p className="mr-4 flex-1 truncate text-left">{t(item.label)}</p>
               {selection && item.selected && <Check className="ml-2 h-4 w-4" strokeWidth={1.5} />}
             </button>

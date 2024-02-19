@@ -60,6 +60,7 @@ export default function AlertDialog({
               key={action.label}
               type="button"
               variant={action.variant || 'default'}
+              disabled={action.disabled}
               onClick={(e) => {
                 e.preventDefault();
                 handlePreAction(

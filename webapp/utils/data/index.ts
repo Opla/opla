@@ -28,7 +28,7 @@ const updateRecord = (item: BaseIdRecord) => ({
   updatedAt: Date.now(),
 });
 
-const createBaseNamedRecord = (name: string, description?: string) => {
+const createBaseNamedRecord = <T>(name: string, description?: string) => {
   const item: BaseNamedRecord = {
     ...createBaseRecord(),
     name,
@@ -36,7 +36,7 @@ const createBaseNamedRecord = (name: string, description?: string) => {
   if (description) {
     item.description = description;
   }
-  return item;
+  return item as T;
 };
 
 const deepCopy = <T>(obj: T): T =>
@@ -91,6 +91,28 @@ const deepGet = <T, V>(obj: T, path: string, defaultValue?: V, root = path): V =
     return defaultValue as V;
   }
   return prop;
+};
+
+export const deepEqual = <T>(a: T, b: T): boolean => {
+  if (a === b) return true;
+  if (typeof a !== 'object' || typeof b !== 'object') return false;
+  if (a === null || b === null) return false;
+  if (a === undefined || b === undefined) return false;
+  if (
+    Array.isArray(a) === Array.isArray(b) &&
+    (a as unknown[]).length === (b as unknown[]).length
+  ) {
+    return (a as unknown[]).every((v: unknown, i: number) => deepEqual(v, (b as unknown[])[i]));
+  }
+  if (Object.keys(a).length === Object.keys(b).length) {
+    Object.keys(a).every((key: string) => {
+      if (!(key in b)) return false;
+      if (!deepEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]))
+        return false;
+      return true;
+    });
+  }
+  return false;
 };
 
 // Inspiration: https://github.com/rayepps/radash/blob/31c1397437d7fb7a78e97499c8d46f992c49844c/src/object.ts

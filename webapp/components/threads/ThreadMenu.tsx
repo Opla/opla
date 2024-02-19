@@ -147,7 +147,7 @@ export default function ThreadMenu({
               <>
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
-                    <Check className="mr-2 h-4 w-4" />
+                    <Check className="mr-2 h-4 w-4" strokeWidth={1.5} />
                     <span className="capitalize">{selectedItem?.label || t('Select a model')}</span>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent className="p-0">
@@ -192,6 +192,7 @@ export default function ThreadMenu({
             <DropdownMenuItem onSelect={handleSetupChatGPT}>
               <Plug
                 className={`mr-2 h-4 w-4 ${getStateColor(getProviderState(chatGPT), 'text')}`}
+                strokeWidth={1.5}
               />
               {t('Configure ChatGPT')}
               <DropdownMenuShortcut>
@@ -203,7 +204,7 @@ export default function ThreadMenu({
                 handleNewProviderModel();
               }}
             >
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="mr-2 h-4 w-4" strokeWidth={1.5} />
               {t('Add other AI providers')}
               <DropdownMenuShortcut>
                 <ShortcutBadge command={ShortcutIds.NEW_PROVIDER} />
@@ -221,7 +222,7 @@ export default function ThreadMenu({
                     onSelectMenu(MenuAction.ArchiveConversation, selectedConversationId)
                   }
                 >
-                  <Archive className="mr-2 h-4 w-4" />
+                  <Archive className="mr-2 h-4 w-4" strokeWidth={1.5} />
                   {t('Archive')}
                   <DropdownMenuShortcut>
                     <ShortcutBadge command={ShortcutIds.ARCHIVE_CONVERSATION} />
@@ -233,7 +234,7 @@ export default function ThreadMenu({
                     onSelectMenu(MenuAction.DeleteConversation, selectedConversationId)
                   }
                 >
-                  <Trash className="mr-2 h-4 w-4" />
+                  <Trash className="mr-2 h-4 w-4" strokeWidth={1.5} />
                   {t('Delete')}
                   <DropdownMenuShortcut>
                     <ShortcutBadge command={ShortcutIds.DELETE_CONVERSATION} />

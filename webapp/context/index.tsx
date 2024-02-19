@@ -14,19 +14,20 @@
 
 'use client';
 
-import { createContext, useCallback, useMemo, useState } from 'react';
-import { Conversation, LlmUsage, Message, Provider } from '@/types';
+import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
+import { Conversation, LlmUsage, Message, Preset, Provider } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
-// import { updateConversation } from '@/utils/data/conversations';
 import logger from '@/utils/logger';
 import useCollectionStorage from '@/hooks/useCollectionStorage';
 import { removeConversation } from '@/utils/data/conversations';
 import { deepCopy } from '@/utils/data';
+import { defaultPresets, mergePresets } from '@/utils/data/presets';
 
 export type Context = {
   conversations: Array<Conversation>;
   archives: Array<Conversation>;
   providers: Array<Provider>;
+  presets: Array<Preset>;
   updateConversations: (newConversations: Conversation[]) => Promise<void>;
   deleteConversation: (id: string, cleanup?: (id: string) => Promise<void>) => Promise<void>;
   readConversationMessages: (key: string, defaultValue: Message[]) => Promise<Message[]>;
@@ -39,6 +40,7 @@ export type Context = {
   setArchives: (newArchives: Conversation[]) => void;
   deleteArchive: (id: string, cleanup?: (id: string) => Promise<void>) => Promise<void>;
   setProviders: (newProviders: Provider[]) => void;
+  setPresets: (newPresets: Preset[]) => void;
   usage: LlmUsage | undefined;
   setUsage: (newUsage: LlmUsage | undefined) => void;
 };
@@ -56,6 +58,8 @@ const initialContext: Context = {
   deleteArchive: async () => {},
   providers: [],
   setProviders: () => {},
+  presets: [],
+  setPresets: () => {},
   usage: undefined,
   setUsage: () => {},
 };
@@ -71,6 +75,14 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
   const [archives, setArchives] = useDataStorage('archives', initialContext.archives);
 
   const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
+  const [presets, setPresets] = useDataStorage('presets', initialContext.presets);
+
+  useEffect(() => {
+    if (presets && !presets?.find((p) => p.id === 'opla')) {
+      const updatedPresets = mergePresets(presets, defaultPresets);
+      setPresets(updatedPresets);
+    }
+  });
 
   const [
     getStoredConversationMessages,
@@ -176,6 +188,8 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       deleteArchive,
       providers,
       setProviders,
+      presets,
+      setPresets,
       usage,
       setUsage,
     }),
@@ -192,6 +206,8 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       deleteArchive,
       providers,
       setProviders,
+      presets,
+      setPresets,
       usage,
     ],
   );
