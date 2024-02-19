@@ -70,13 +70,16 @@ export enum AssetState {
 export type Asset = BaseIdRecord & {
   metadata?: Metadata;
   state?: AssetState;
-} & ({
-  type: 'link';
-  url : string;
-} | {
-  type: 'file';
-  file : string;
-});
+} & (
+    | {
+        type: 'link';
+        url: string;
+      }
+    | {
+        type: 'file';
+        file: string;
+      }
+  );
 
 export type Message = BaseIdRecord & {
   author: Author;
