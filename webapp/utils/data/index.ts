@@ -14,13 +14,13 @@
 import { v4 as uuid } from 'uuid';
 import { BaseIdRecord, BaseNamedRecord, Entity, Resource, Content } from '@/types';
 
-const createBaseRecord = () => {
+const createBaseRecord = <T>() => {
   const item: BaseIdRecord = {
     id: uuid(),
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
-  return item;
+  return item as T;
 };
 
 const updateRecord = (item: BaseIdRecord) => ({
@@ -28,9 +28,9 @@ const updateRecord = (item: BaseIdRecord) => ({
   updatedAt: Date.now(),
 });
 
-const createBaseNamedRecord = <T>(name: string, description?: string) => {
+const createBaseNamedRecord = <T>(name: string, description?: string): T => {
   const item: BaseNamedRecord = {
-    ...createBaseRecord(),
+    ...createBaseRecord<BaseNamedRecord>(),
     name,
   };
   if (description) {

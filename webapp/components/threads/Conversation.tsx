@@ -26,6 +26,7 @@ type ConversationProps = {
   onScrollPosition: (props: KeyedScrollPosition) => void;
   handleResendMessage: (m: Message) => void;
   handleShouldDeleteMessage: (m: Message) => void;
+  handleShouldDeleteAssets: (m: Message) => void;
   handleChangeMessageContent: (m: Message, newContent: string, submit: boolean) => void;
 };
 
@@ -36,6 +37,7 @@ function Conversation({
   onScrollPosition,
   handleResendMessage,
   handleShouldDeleteMessage,
+  handleShouldDeleteAssets,
   handleChangeMessageContent,
 }: ConversationProps) {
   const handleUpdatePosition = (props: KeyedScrollPosition) => {
@@ -59,6 +61,9 @@ function Conversation({
               }}
               onDeleteMessage={() => {
                 handleShouldDeleteMessage(m);
+              }}
+              onDeleteAssets={() => {
+                handleShouldDeleteAssets(m);
               }}
               onChangeContent={(newContent, submit) => {
                 handleChangeMessageContent(m, newContent, submit);

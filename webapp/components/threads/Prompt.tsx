@@ -23,21 +23,25 @@ import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { ShortcutBadge } from '../common/ShortCut';
 
+export type PromptProps = {
+  conversationId: string;
+  message: string;
+  isLoading: boolean;
+  errorMessage: string;
+  onUpdatePrompt: (message: string) => void;
+  onSendMessage: () => void;
+  onUploadFile: () => void;
+};
+
 export default function Prompt({
   conversationId,
   message,
   errorMessage,
   onUpdatePrompt,
   onSendMessage,
+  onUploadFile,
   isLoading,
-}: {
-  conversationId: string;
-  message: string;
-  isLoading: boolean;
-  errorMessage: string;
-  onUpdatePrompt: any;
-  onSendMessage: any;
-}) {
+}: PromptProps) {
   const { t } = useTranslation();
 
   const handleSendMessage = (e: MouseEvent) => {
@@ -47,7 +51,7 @@ export default function Prompt({
 
   const handleUploadFile = (e: MouseEvent) => {
     e.preventDefault();
-    console.log('Upload file');
+    onUploadFile();
   };
 
   const handleKeypress = (event: KeyboardEvent) => {

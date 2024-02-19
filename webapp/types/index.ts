@@ -83,12 +83,12 @@ export type Asset = BaseIdRecord & {
 
 export type Message = BaseIdRecord & {
   author: Author;
-  content: string | Content;
+  content: string | Content | undefined;
   contentHistory?: (string | Content)[];
   status?: MessageState;
   sibling?: string;
   conversationId?: string;
-  assets?: string | string[];
+  assets?: string[];
 };
 
 export type Messages = {

@@ -78,6 +78,7 @@ function Archive({
             disabled
             onResendMessage={() => {}}
             onDeleteMessage={() => {}}
+            onDeleteAssets={() => {}}
             onChangeContent={() => {}}
           />
         ))}

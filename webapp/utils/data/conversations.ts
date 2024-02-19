@@ -11,29 +11,53 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { Author, ContextWindowPolicy, Conversation, Message } from '@/types';
+import { Asset, Author, ContextWindowPolicy, Conversation, Message } from '@/types';
 import { createBaseRecord, createBaseNamedRecord, updateRecord } from '.';
 
-export const createMessage = (author: Author, content: string) => {
-  const message = {
-    ...createBaseRecord(),
-    author,
-    content,
+export const getConversationAssets = (conversation: Conversation) =>
+  !conversation.assets || Array.isArray(conversation.assets)
+    ? conversation.assets || []
+    : [conversation.assets];
+
+export const addAssetsToConversation = (
+  conversation: Conversation,
+  assetsAsFile: string | string[],
+) => {
+  const conversationAssets = getConversationAssets(conversation);
+  const updatedAssets = Array.isArray(assetsAsFile)
+    ? assetsAsFile.filter(
+        (a) => !conversationAssets.find((asset) => asset.type === 'file' && asset.file === a),
+      )
+    : [assetsAsFile];
+  const assets = updatedAssets.map<Asset>((a) => ({
+    ...createBaseRecord<Asset>(),
+    type: 'file',
+    file: a,
+  }));
+
+  return {
+    conversation: {
+      ...conversation,
+      assets: [...conversationAssets, ...updatedAssets],
+    } as Conversation,
+    conversationAssets,
+    assets,
   };
-  return message as Message;
 };
 
-/* const updateMessage = (message: Message, messages: Message[]): Message[] => {
-  const updatedMessages = [...messages];
-  const i = messages.findIndex((m) => m.id === message.id);
-  const updatedMessage = updateRecord(message) as Message;
-  if (i === -1) {
-    updatedMessages.push(updatedMessage);
-  } else {
-    updatedMessages[i] = updatedMessage;
-  }
-  return updatedMessages;
-}; */
+export const createMessage = (
+  author: Author,
+  content: string | undefined,
+  assets?: Asset[],
+): Message => {
+  const message = {
+    ...createBaseRecord<Message>(),
+    author,
+    content,
+    assets: assets?.map((a) => a.id),
+  };
+  return message;
+};
 
 export const mergeMessages = (messages: Message[], newMessages: Message[]) => {
   const newMessagesIds = newMessages.map((m) => m.id);

@@ -19,6 +19,7 @@ import { useRouter } from 'next/router';
 import { PanelLeft, PanelLeftClose, PanelRight, PanelRightClose } from 'lucide-react';
 import { AppContext } from '@/context';
 import {
+  Asset,
   Conversation,
   LlmParameters,
   Message,
@@ -37,6 +38,8 @@ import {
   updateConversation,
   mergeMessages,
   updateOrCreateConversation,
+  addAssetsToConversation,
+  getConversationAssets,
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
 import { buildContext, completion, getCompletionParametersDefinition } from '@/utils/providers';
@@ -49,6 +52,7 @@ import { ModalIds } from '@/modals';
 import { MenuAction, Page } from '@/types/ui';
 import { KeyedScrollPosition } from '@/hooks/useScroll';
 import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
+import { openFileDialog } from '@/utils/backend/tauri';
 import PromptArea from './Prompt';
 import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
@@ -391,6 +395,11 @@ function Thread({
             (m) => m.id !== message.id && m.id !== message.sibling,
           );
           updateConversationMessages(conversationId, updatedMessages);
+          if (message.assets) {
+            conversation.assets = getConversationAssets(conversation).filter(
+              (a: Asset) => !message.assets?.find((ma: string) => ma === a.id),
+            );
+          }
         }
       }
     }
@@ -399,6 +408,14 @@ function Thread({
   const handleShouldDeleteMessage = (message: Message) => {
     showModal(ModalIds.DeleteItem, {
       title: 'Delete this message and siblings ?',
+      item: message,
+      onAction: handleDeleteMessages,
+    });
+  };
+
+  const handleShouldDeleteAssets = (message: Message) => {
+    showModal(ModalIds.DeleteItem, {
+      title: 'Delete this message and assets ?',
       item: message,
       onAction: handleDeleteMessages,
     });
@@ -414,7 +431,7 @@ function Thread({
     }
 
     const conversation = getConversation(conversationId, conversations);
-    if (conversation) {
+    if (conversation && message.content) {
       const { contentHistory = [] } = message;
       contentHistory.push(message.content);
       const newMessage = { ...message, content: newContent, contentHistory };
@@ -500,11 +517,49 @@ function Thread({
     }
   };
 
-  logger.info(
-    `render Thread ${conversationId}`,
-    selectedConversation,
-    selectedConversation?.scrollPosition,
-  );
+  const handleUploadFile = async () => {
+    const conversation = getConversation(conversationId, conversations);
+    if (conversation) {
+      const files = await openFileDialog(false, [
+        { name: 'conversations', extensions: ['pdf', 'txt', 'csv', 'json', 'md'] },
+      ]);
+      console.log('handleUploadFile', files);
+      if (files) {
+        const { conversation: updatedConversation, assets } = addAssetsToConversation(
+          conversation,
+          files,
+        );
+        const message = createMessage({ role: 'user', name: 'you' }, undefined, assets);
+        const conversationMessages = getConversationMessages(conversationId);
+        const updatedMessages = mergeMessages(conversationMessages, [message]);
+        updateConversationMessages(conversationId, updatedMessages);
+        const updatedConversations = updateConversation(updatedConversation, conversations, true);
+        updateConversations(updatedConversations);
+      }
+      /* const formData = new FormData();
+      formData.append('file', file);
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await response.json();
+      if (response.ok) {
+        const message = createMessage({ role: 'assistant', name: selectedModel }, data.url);
+        message.status = MessageState.Delivered;
+        const updatedMessages = mergeMessages(conversationMessages, [message]);
+        updateConversationMessages(conversationId, updatedMessages);
+      } else {
+        const message = createMessage(
+          { role: 'assistant', name: selectedModel },
+          'Error uploading file',
+        );
+        message.status = MessageState.Error;
+        const updatedMessages = mergeMessages(conversationMessages, [message]);
+        updateConversationMessages(conversationId, updatedMessages);
+      } */
+    }
+  };
+
   const message = changedPrompt === undefined ? currentPrompt : changedPrompt;
   return (
     <div className="flex h-full flex-col dark:bg-neutral-800/30">
@@ -573,6 +628,7 @@ function Thread({
             onScrollPosition={handleScrollPosition}
             handleResendMessage={handleResendMessage}
             handleShouldDeleteMessage={handleShouldDeleteMessage}
+            handleShouldDeleteAssets={handleShouldDeleteAssets}
             handleChangeMessageContent={handleChangeMessageContent}
           />
         )
@@ -587,6 +643,7 @@ function Thread({
           errorMessage={conversationId ? errorMessage[conversationId] : ''}
           onSendMessage={handleSendMessage}
           onUpdatePrompt={handleChangePrompt}
+          onUploadFile={handleUploadFile}
         />
       )}
     </div>

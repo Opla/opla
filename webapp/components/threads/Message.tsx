@@ -26,6 +26,7 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
+  File,
 } from 'lucide-react';
 import { getContent } from '@/utils/data';
 import useHover from '@/hooks/useHover';
@@ -78,6 +79,7 @@ enum DisplayMessageState {
   Pending,
   Streaming,
   Edit,
+  Asset,
 }
 
 type MessageComponentProps = {
@@ -85,6 +87,7 @@ type MessageComponentProps = {
   disabled?: boolean;
   onResendMessage: () => void;
   onDeleteMessage: () => void;
+  onDeleteAssets: () => void;
   onChangeContent: (content: string, submit: boolean) => void;
 };
 
@@ -94,6 +97,7 @@ function MessageComponent({
   onResendMessage,
   onDeleteMessage,
   onChangeContent,
+  onDeleteAssets,
 }: MessageComponentProps) {
   const { t } = useTranslation();
   const [ref, isHover] = useHover();
@@ -106,7 +110,7 @@ function MessageComponent({
   const content = getContent(
     current > 0 && message.contentHistory ? message.contentHistory[current - 1] : message.content,
   );
-  const Content = useMarkdownProcessor(content as string);
+  const Content = useMarkdownProcessor(content || '');
   const isUser = author.role === 'user';
 
   const handleCopyToClipboard = () => {
@@ -133,7 +137,9 @@ function MessageComponent({
   };
 
   let state = DisplayMessageState.Markdown;
-  if (edit !== undefined) {
+  if (message.assets) {
+    state = DisplayMessageState.Asset;
+  } else if (edit !== undefined) {
     state = DisplayMessageState.Edit;
   } else if (isUser) {
     state = DisplayMessageState.Text;
@@ -160,6 +166,12 @@ function MessageComponent({
               <div className="flex min-h-20 flex-col items-start whitespace-pre-wrap break-words">
                 <div className="w-full break-words">
                   <p className="py-1 font-bold capitalize">{author.name}</p>
+                  {state === DisplayMessageState.Asset && (
+                    <div className="flex w-full select-auto flex-row px-0 py-2">
+                      <File className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                      {t('Document added')}
+                    </div>
+                  )}
                   {state === DisplayMessageState.Pending && (
                     <div className="px-4 py-2">
                       <MoreHorizontal className="h-4 w-4 animate-pulse" />
@@ -184,6 +196,11 @@ function MessageComponent({
                     />
                   )}
                 </div>
+                {state === DisplayMessageState.Asset && isHover && (
+                  <div className="left-34 absolute bottom-0 flex flex-row items-center">
+                    <DeleteButton onDeleteMessage={onDeleteAssets} />
+                  </div>
+                )}
                 {(state === DisplayMessageState.Markdown || state === DisplayMessageState.Text) &&
                   isHover && (
                     <div className="left-34 absolute bottom-0 flex flex-row items-center">
