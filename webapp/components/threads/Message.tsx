@@ -167,9 +167,9 @@ function MessageComponent({
                 <div className="w-full break-words">
                   <p className="py-1 font-bold capitalize">{author.name}</p>
                   {state === DisplayMessageState.Asset && (
-                    <div className="flex w-full select-auto flex-row px-0 py-2">
+                    <div className="flex w-full select-auto flex-row items-center px-0 py-2">
                       <File className="mr-2 h-4 w-4" strokeWidth={1.5} />
-                      {t('Document added')}
+                      <span>{t('Document added')}</span>
                     </div>
                   )}
                   {state === DisplayMessageState.Pending && (

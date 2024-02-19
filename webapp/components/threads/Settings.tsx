@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { useContext } from 'react';
-import { AlertTriangle, Bug, File, HelpCircle, Palette, Settings2 } from 'lucide-react';
+import { AlertTriangle, Bug, File, HelpCircle, Palette, Settings2, X } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackendContext';
-import { updateConversation } from '@/utils/data/conversations';
+import { getConversationAssets, updateConversation } from '@/utils/data/conversations';
 import { findModel } from '@/utils/data/models';
 import Opla from '@/utils/providers/opla';
 import { getCompletionParametersDefinition } from '@/utils/providers';
@@ -26,6 +26,7 @@ import { ContextWindowPolicy, Conversation, Preset, PresetParameter } from '@/ty
 import { toast } from '@/components/ui/Toast';
 import { ContextWindowPolicies, DefaultContextWindowPolicy } from '@/utils/constants';
 import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
+import { getFilename } from '@/utils/misc';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -35,6 +36,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 import Form from '../common/Form';
 import Presets from './Presets';
+import { Button } from '../ui/button';
 
 export default function Settings({
   conversationId,
@@ -135,6 +137,20 @@ export default function Settings({
     if (selectedConversation) {
       const newConversations = updateConversation(
         { ...selectedConversation, contextWindowPolicy: policy },
+        conversations,
+        true,
+      );
+      updateConversations(newConversations);
+    }
+  };
+
+  const deleteConversationAsset = (index: number) => {
+    if (selectedConversation) {
+      const newConversations = updateConversation(
+        {
+          ...selectedConversation,
+          assets: getConversationAssets(selectedConversation).filter((_, i) => i !== index),
+        },
         conversations,
         true,
       );
@@ -262,8 +278,10 @@ export default function Settings({
           {selectedConversation?.updatedAt && (
             <div className="w-full p-2 text-sm text-neutral-400">
               <div className="ellipsis flex w-full flex-row justify-between tabular-nums">
-                <div className="text-xs">{t('ID')} :</div>
-                <div className="mb-4 text-xs">{selectedConversation.id}</div>
+                <div className="line-clamp-1 text-xs">{t('ID')}:</div>
+                <div className="ellipsis mb-4 line-clamp-1 break-all text-xs">
+                  {selectedConversation.id}
+                </div>
               </div>
               <div className="flex flex-row justify-between tabular-nums">
                 <div>{t('Updated')} :</div>
@@ -281,6 +299,29 @@ export default function Settings({
             className="resize-none overflow-y-hidden border-0 bg-transparent p-2 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent"
             onChange={handleNoteChange}
           />
+          {selectedConversation && (
+            <div className="w-full p-2 text-sm text-neutral-400">
+              <div className="py-4">{t('Files')}</div>
+              {getConversationAssets(selectedConversation).map((asset, index) => (
+                <div className="flex w-full flex-row items-center p-1 text-xs" key={asset.id}>
+                  <File className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                  <span className="ellipsis mr-2 line-clamp-1 grow break-all">
+                    {asset.type === 'file' ? getFilename(asset.file) : ''}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 w-7 p-1"
+                    onClick={() => {
+                      deleteConversationAsset(index);
+                    }}
+                  >
+                    <X className="h-4 w-4 text-red-400" strokeWidth={1.5} />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
         </TabsContent>
         <TabsContent value="debug" className="px-4">
           {t('Debug')}

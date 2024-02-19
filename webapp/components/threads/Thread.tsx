@@ -523,7 +523,6 @@ function Thread({
       const files = await openFileDialog(false, [
         { name: 'conversations', extensions: ['pdf', 'txt', 'csv', 'json', 'md'] },
       ]);
-      console.log('handleUploadFile', files);
       if (files) {
         const { conversation: updatedConversation, assets } = addAssetsToConversation(
           conversation,

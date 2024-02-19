@@ -38,7 +38,7 @@ export const addAssetsToConversation = (
   return {
     conversation: {
       ...conversation,
-      assets: [...conversationAssets, ...updatedAssets],
+      assets: [...conversationAssets, ...assets],
     } as Conversation,
     conversationAssets,
     assets,
