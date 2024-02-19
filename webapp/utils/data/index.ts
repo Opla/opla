@@ -28,7 +28,7 @@ const updateRecord = (item: BaseIdRecord) => ({
   updatedAt: Date.now(),
 });
 
-const createBaseNamedRecord = (name: string, description?: string) => {
+const createBaseNamedRecord = <T>(name: string, description?: string) => {
   const item: BaseNamedRecord = {
     ...createBaseRecord(),
     name,
@@ -36,7 +36,7 @@ const createBaseNamedRecord = (name: string, description?: string) => {
   if (description) {
     item.description = description;
   }
-  return item;
+  return item as T;
 };
 
 const deepCopy = <T>(obj: T): T =>

@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { OplaContext, Preset, Provider } from '@/types';
-import logger from '../logger';
-import { deepEqual } from '.';
+import { Conversation, Preset, Provider } from '@/types';
+import { createBaseNamedRecord, deepEqual, deepMerge } from '.';
 
 export const defaultPresets: Preset[] = [
   {
@@ -49,6 +48,19 @@ export const defaultPresets: Preset[] = [
   },
 ];
 
+export const createPreset = (
+  name: string,
+  parentId: string | undefined,
+  template: Partial<Preset>,
+) => {
+  const preset: Preset = {
+    ...template,
+    ...createBaseNamedRecord<Preset>(name),
+    parentId,
+  };
+  return preset;
+};
+
 export const mergePresets = (presets: Preset[], newPresets: Preset[]) => {
   const newPresetsIds = newPresets.map((p) => p.id);
   const freshNewPresets = newPresets.filter((ps) => !presets.find((p) => p.id === ps.id));
@@ -74,7 +86,6 @@ export const findCompatiblePreset = (
   if (!presetId) {
     if (model) {
       compatiblePreset = presets.find((p) => p.id.toLowerCase().indexOf(model.toLowerCase()) > -1);
-      console.log('preset model', model, presets, compatiblePreset);
     }
     if (provider && !compatiblePreset) {
       compatiblePreset = presets.find(
@@ -98,17 +109,27 @@ export const getCompatiblePresets = (presets: Preset[], model?: string, provider
   return compatiblePresets;
 };
 
-export const getAllPresets = (backendContext: OplaContext): Preset[] => {
-  const presets: Preset[] = backendContext.config.models.items.map((model) => ({
-    id: model.id,
-    title: model.title || model.name,
-    name: `${backendContext.config.server.name}::${model.name}`,
-    createdAt: model.createdAt,
-    updatedAt: model.updatedAt,
-  }));
-  return presets;
-};
+export const isKeepSystem = (preset: Preset | undefined) =>
+  typeof preset?.keepSystem === 'boolean' ? preset?.keepSystem : true;
 
-export const addPreset = () => {
-  logger.warn('addPreset not implemented');
+export const getCompletePresetProperties = (
+  _preset: Preset | undefined,
+  conversation: Conversation | undefined,
+  presets: Preset[],
+  includeParent = false,
+) => {
+  const preset = _preset || presets.find((p) => p.id === conversation?.preset) || ({} as Preset);
+  let { parameters, system, contextWindowPolicy, keepSystem } = preset;
+  if (includeParent && preset?.parentId) {
+    const parentPreset = presets.find((p) => p.id === preset?.parentId);
+    if (parentPreset) {
+      parameters = deepMerge(preset?.parameters, conversation?.parameters);
+      system = parentPreset?.system ?? preset?.system;
+      keepSystem = parentPreset ? isKeepSystem(parentPreset) : keepSystem;
+    }
+  }
+  parameters = deepMerge(preset?.parameters, conversation?.parameters);
+  contextWindowPolicy = conversation?.contextWindowPolicy || contextWindowPolicy;
+  keepSystem = conversation ? isKeepSystem(conversation as Preset) : keepSystem;
+  return { ...preset, parameters, system, contextWindowPolicy, keepSystem };
 };

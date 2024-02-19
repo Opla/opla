@@ -17,16 +17,15 @@ import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackendContext';
-import { isKeepSystem, updateConversation } from '@/utils/data/conversations';
+import { updateConversation } from '@/utils/data/conversations';
 import { findModel } from '@/utils/data/models';
 import Opla from '@/utils/providers/opla';
 import { getCompletionParametersDefinition } from '@/utils/providers';
 import { findProvider } from '@/utils/data/providers';
-import { ContextWindowPolicy, Conversation, PresetParameter } from '@/types';
+import { ContextWindowPolicy, Conversation, Preset, PresetParameter } from '@/types';
 import { toast } from '@/components/ui/Toast';
 import { ContextWindowPolicies, DefaultContextWindowPolicy } from '@/utils/constants';
-// import useDebounceFunc from '@/hooks/useDebounceFunc';
-import { findCompatiblePreset } from '@/utils/data/presets';
+import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -47,13 +46,25 @@ export default function Settings({
   const { t } = useTranslation();
   const { conversations, updateConversations, providers, presets } = useContext(AppContext);
   const { backendContext } = useBackend();
-  // const [params, setParams] = useState<ParametersRecord>({});
 
   const selectedConversation = conversations.find((c) => c.id === conversationId);
   const { activeModel } = backendContext.config.models;
   const model = findModel(activeModel, backendContext.config.models.items);
   const provider = findProvider(selectedConversation?.provider, providers);
   const parametersDefinition = getCompletionParametersDefinition(provider);
+
+  const modelName = selectedConversation?.model ?? model?.name;
+  const preset = findCompatiblePreset(selectedConversation?.preset, presets, modelName, provider);
+  const {
+    parameters = {},
+    system = model?.system ?? Opla.system,
+    keepSystem,
+    contextWindowPolicy: selectedPolicy = DefaultContextWindowPolicy,
+  } = getCompletePresetProperties(preset, selectedConversation, presets);
+  /* const parameters = selectedConversation?.parameters ?? {};
+  const system = selectedConversation?.system ?? preset?.system ?? model?.system ?? Opla.system;
+  const selectedPolicy = selectedConversation?.contextWindowPolicy ?? preset?.contextWindowPolicy ?? DefaultContextWindowPolicy;
+  const keepSystem = preset?.keepSystem ?? isKeepSystem(selectedConversation); */
 
   const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
@@ -85,7 +96,6 @@ export default function Settings({
   ): Promise<ParametersRecord | undefined> => {
     let newParams: ParametersRecord | undefined;
     if (id && selectedConversation) {
-      const { parameters = {} } = selectedConversation;
       let newConversation: Conversation | undefined;
       newParams = { ...params };
       let needUpdate = false;
@@ -147,21 +157,16 @@ export default function Settings({
     }
   };
 
-  const handleChangePreset = (preset: string) => {
+  const handleChangePreset = (newPreset: string) => {
     if (selectedConversation) {
       const newConversations = updateConversation(
-        { ...selectedConversation, preset },
+        { ...selectedConversation, preset: newPreset },
         conversations,
         true,
       );
       updateConversations(newConversations);
     }
   };
-
-  const system = selectedConversation?.system ?? model?.system ?? Opla.system;
-  const selectedPolicy = selectedConversation?.contextWindowPolicy || DefaultContextWindowPolicy;
-  const modelName = selectedConversation?.model ?? model?.name;
-  const preset = findCompatiblePreset(selectedConversation?.preset, presets, modelName, provider);
 
   return (
     <div className="scrollbar-trigger flex h-full w-full bg-neutral-100 dark:bg-neutral-900">
@@ -186,6 +191,7 @@ export default function Settings({
           <ScrollArea className="h-full w-full px-4">
             <Presets
               preset={preset}
+              presetProperties={selectedConversation as Partial<Preset>}
               model={modelName}
               provider={provider}
               onChangePreset={handleChangePreset}
@@ -206,7 +212,7 @@ export default function Settings({
                 <AccordionContent>
                   <Form<PresetParameter>
                     id={selectedConversation?.id}
-                    parameters={selectedConversation?.parameters}
+                    parameters={parameters}
                     parametersDefinition={parametersDefinition}
                     onParametersChange={updateParameters}
                   />
@@ -243,7 +249,7 @@ export default function Settings({
                     type="boolean"
                     name="keepSystem"
                     inputCss="max-w-20 pl-2"
-                    value={isKeepSystem(selectedConversation)}
+                    value={keepSystem}
                     description={t('Keep system prompts for the final prompt')}
                     onChange={handleKeepSystemChange}
                   />

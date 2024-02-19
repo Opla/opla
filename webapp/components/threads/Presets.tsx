@@ -29,23 +29,42 @@ import { useContext } from 'react';
 import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
 import { Preset, Provider } from '@/types';
-import { getCompatiblePresets } from '@/utils/data/presets';
+import { createPreset, getCompatiblePresets } from '@/utils/data/presets';
+import { deepMerge } from '@/utils/data';
 
 type PresetsProps = {
   preset: Preset | undefined;
+  presetProperties: Partial<Preset>;
   model: string | undefined;
   provider: Provider | undefined;
   onChangePreset: (preset: string) => void;
 };
 
-export default function Presets({ preset, model, provider, onChangePreset }: PresetsProps) {
-  const { presets } = useContext(AppContext);
+export default function Presets({
+  preset,
+  presetProperties,
+  model,
+  provider,
+  onChangePreset,
+}: PresetsProps) {
+  const { presets, setPresets } = useContext(AppContext);
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
 
   const compatibles = getCompatiblePresets(presets, model, provider);
 
-  console.log('preset', preset);
+  const duplicatePreset = (p: Preset) => {
+    const { id, name, readOnly, ...rest } = p;
+    const template = deepMerge(rest, presetProperties);
+    const newPreset = createPreset(`${p.id}-copy`, p.parentId || id, template);
+    setPresets([...presets, newPreset]);
+    onChangePreset(newPreset.id);
+  };
+
+  const deletePreset = (p: Preset) => {
+    setPresets(presets.filter((ps) => ps.id !== p.id));
+  };
+
   return (
     <div className="w-full pb-4">
       <Popover open={open} onOpenChange={setOpen}>
@@ -92,27 +111,31 @@ export default function Presets({ preset, model, provider, onChangePreset }: Pre
               ))}
             </CommandGroup>
             <CommandSeparator />
-            <CommandGroup>
-              <CommandItem
-                onSelect={() => {
-                  setOpen(false);
-                }}
-              >
-                <Copy className="mr-2 h-4 w-4" strokeWidth={1.5} />
-                {t('Duplicate selected preset')}
-              </CommandItem>
-              {preset && !preset?.readOnly && (
+            {preset && (
+              <CommandGroup>
                 <CommandItem
-                  className="text-red-600 hover:text-red-700"
                   onSelect={() => {
                     setOpen(false);
+                    duplicatePreset(preset);
                   }}
                 >
-                  <Trash className="mr-2 h-4 w-4" strokeWidth={1.5} />
-                  {t('Delete selected preset')}
+                  <Copy className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                  {t('Duplicate selected preset')}
                 </CommandItem>
-              )}
-            </CommandGroup>
+                {!preset?.readOnly && (
+                  <CommandItem
+                    className="text-red-600 hover:text-red-700"
+                    onSelect={() => {
+                      setOpen(false);
+                      deletePreset(preset);
+                    }}
+                  >
+                    <Trash className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                    {t('Delete selected preset')}
+                  </CommandItem>
+                )}
+              </CommandGroup>
+            )}
           </Command>
         </PopoverContent>
       </Popover>
