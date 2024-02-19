@@ -63,6 +63,7 @@ export enum ViewName {
 export enum Page {
   Threads = '/threads',
   Archives = '/archives',
+  Assistants = '/assistants',
   Models = '/models',
   Providers = '/providers',
 }
