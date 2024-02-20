@@ -60,7 +60,8 @@
     "unified": "^11.0.4",
     "unist-util-visit": "^5.0.0",
     "uuid": "^9.0.1",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "zustand": "^4.5.1"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.5.9",

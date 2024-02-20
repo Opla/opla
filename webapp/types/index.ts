@@ -346,6 +346,8 @@ export type ModelsConfiguration = {
   items: Array<Model>;
 };
 
+export type Assistant = BaseNamedRecord & {};
+
 export type Store = {
   settings: Settings;
   server: ServerConfiguration;

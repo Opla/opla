@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use client';
+import { create } from 'zustand';
+import createAssistantSlice, { AssistantSlice } from './assistants';
 
-import Assistants from '@/components/assistants';
-import { useRouter } from 'next/router';
+const useBoundStore = create<AssistantSlice>((...a) => ({
+  ...createAssistantSlice()(...a),
+}));
 
-export default function DefaultAssistants() {
-  const router = useRouter();
-  const { id } = router.query;
-  return <Assistants selectedAssistantId={id as string} />;
-}
+export default useBoundStore;

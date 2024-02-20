@@ -11,14 +11,3 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-'use client';
-
-import Assistants from '@/components/assistants';
-import { useRouter } from 'next/router';
-
-export default function DefaultAssistants() {
-  const router = useRouter();
-  const { id } = router.query;
-  return <Assistants selectedAssistantId={id as string} />;
-}

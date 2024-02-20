@@ -16,6 +16,6 @@
 
 import Assistants from '@/components/assistants';
 
-export default function DefaultModels() {
+export default function DefaultAssistants() {
   return <Assistants />;
 }

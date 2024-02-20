@@ -12,24 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
-import Explorer from './Explorer';
-import Assistant from './Assistant';
+import useTranslation from '@/hooks/useTranslation';
+import logger from '@/utils/logger';
+import useGlobalStore from '@/stores';
+import RecordView from '../common/RecordView';
 
 export type AssistantProps = {
-  selectedAssistantId?: string;
+  assistantId?: string;
 };
 
-export default function Assistants({ selectedAssistantId }: AssistantProps) {
+export default function AssistantView({ assistantId }: AssistantProps) {
+  const { t } = useTranslation();
+  const { getAssistant } = useGlobalStore();
+
+  const assistant = getAssistant(assistantId);
+
+  logger.info('Assistant', assistantId);
+
   return (
-    <ResizablePanelGroup direction="horizontal">
-      <ResizablePanel defaultSize={20}>
-        <Explorer selectedAssistantId={selectedAssistantId} />
-      </ResizablePanel>
-      <ResizableHandle />
-      <ResizablePanel>
-        <Assistant assistantId={selectedAssistantId} />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+    <RecordView title="Assistant" selectedId={assistantId}>
+      <p>{t(assistant?.description || '')}</p>
+    </RecordView>
   );
 }
