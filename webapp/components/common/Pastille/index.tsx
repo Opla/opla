@@ -11,10 +11,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { cn } from '@/lib/utils';
 
-function Dot({ className }: { className?: string }) {
-  return <span className={cn('h-3 w-3 rounded-full', className)}> </span>;
+import { cn } from '@/lib/utils';
+import { BasicState } from '@/types/ui';
+import { getStateColor } from '@/utils/ui';
+
+type PastilleProps = {
+  state?: BasicState;
+  className?: string;
+  defaultEnabled?: boolean;
+};
+
+function Pastille({ state, defaultEnabled = false, className }: PastilleProps) {
+  const color = getStateColor(state, 'bg', defaultEnabled);
+  return <span className={cn('h-2 w-2 rounded-full', color, className)} />;
 }
 
-export default Dot;
+export default Pastille;

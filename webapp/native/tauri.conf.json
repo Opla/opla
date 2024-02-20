@@ -29,6 +29,10 @@
         "removeFile": true,
         "scope": ["$LOCALDATA/Opla/**/*", "$HOME/**", "$TEMP/*", "$DESKTOP/*", "$DOWNLOADS/*", "$DOCUMENTS/*"]
       },
+      "protocol": {
+        "asset": true,
+        "assetScope": ["$LOCALDATA/Opla/**/*", "$HOME/**", "$TEMP/*", "$DESKTOP/*", "$DOWNLOADS/*", "$DOCUMENTS/*"]
+      },
       "window": {
         "all": true
       },

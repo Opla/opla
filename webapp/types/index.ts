@@ -358,8 +358,15 @@ export type AssistantTarget = {
   contextWindowPolicy?: ContextWindowPolicy;
   keepSystem?: boolean;
 };
+
+export type AssistantIcon = {
+  color?: string;
+  url: string;
+};
+
 export type Assistant = BaseNamedRecord & {
   disabled?: boolean;
+  icon?: AssistantIcon;
   parent?: string;
   readonly?: boolean;
   targets?: AssistantTarget[];
