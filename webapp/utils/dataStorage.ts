@@ -16,8 +16,9 @@ import { toast } from 'sonner';
 import logger from './logger';
 import { deleteDir, deleteFile, readTextFile, writeTextFile } from './backend/tauri';
 
-enum StorageType {
-  File,
+export enum StorageType {
+  JSON,
+  TextFile,
   LocalStorage,
 }
 
@@ -28,7 +29,7 @@ type DataStorage = {
 
 const createPathAndJsonFile = (key: string, path: string) => `${path}/${key}.json`;
 
-const readFromLocalStorage = async <T>(key: string, path: string) => {
+const readFromLocalStorage = async <T>(key: string, path: string, json = true) => {
   let text: string;
   try {
     text = await readTextFile(createPathAndJsonFile(key, path));
@@ -37,6 +38,9 @@ const readFromLocalStorage = async <T>(key: string, path: string) => {
     return null;
   }
 
+  if (!json) {
+    return text as T;
+  }
   try {
     return JSON.parse(text) as T;
   } catch (e) {
@@ -46,8 +50,12 @@ const readFromLocalStorage = async <T>(key: string, path: string) => {
   return null;
 };
 
-const writeToLocalStorage = async <T>(key: string, value: T, path: string) => {
-  await writeTextFile(createPathAndJsonFile(key, path), JSON.stringify(value, null, 2), true);
+const writeToLocalStorage = async <T>(key: string, value: T, path: string, json = true) => {
+  await writeTextFile(
+    createPathAndJsonFile(key, path),
+    json ? JSON.stringify(value, null, 2) : (value as string),
+    true,
+  );
 };
 
 const deleteFromLocalStorage = async (key: string, path: string) => {
@@ -95,16 +103,10 @@ const MockStorage: DataStorage = {
   },
 };
 
-const FileStorage: DataStorage = {
+const JsonStorage: DataStorage = {
   async getItem<T>(key: string, defaultValue?: T, path = '') {
-    logger.warn('FileStorage.getItem() called', path);
+    // logger.warn('JsonStorage.getItem() called', path);
     const value = await readFromLocalStorage<T>(key, path);
-    /* if (!value || (Array.isArray(value) && value.length === 0)) {
-      value = await LocalStorage.getItem<T>(key, defaultValue);
-      if (value || defaultValue) {
-        await writeToLocalStorage(key, value || defaultValue, path);
-      }
-    } */
     return value || (defaultValue as T);
   },
   async setItem<T>(key: string, value: T, path = '') {
@@ -115,11 +117,28 @@ const FileStorage: DataStorage = {
   },
 };
 
-const persistentStorage = (type = StorageType.File): DataStorage => {
+const TextFileStorage: DataStorage = {
+  async getItem<T>(key: string, defaultValue?: T, path = '') {
+    // logger.warn('TextFileStorage.getItem() called', path);
+    const value = await readFromLocalStorage<T>(key, path, false);
+    return value || (defaultValue as T);
+  },
+  async setItem<T>(key: string, value: T, path = '') {
+    if (value === undefined) {
+      return deleteFromLocalStorage(key, path);
+    }
+    // logger.info('TextFileStorage.setItem()', key, value, path);
+    return writeToLocalStorage(key, value, path, false);
+  },
+};
+
+const persistentStorage = (type = StorageType.JSON): DataStorage => {
   if (window && window.localStorage) {
     switch (type) {
-      case StorageType.File:
-        return FileStorage;
+      case StorageType.JSON:
+        return JsonStorage;
+      case StorageType.TextFile:
+        return TextFileStorage;
       case StorageType.LocalStorage:
         return LocalStorage;
       default:

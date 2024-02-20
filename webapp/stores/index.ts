@@ -14,8 +14,9 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { Assistant } from '@/types';
 import createAssistantSlice, { AssistantSlice } from './assistants';
-import storage from './storage';
+import Storage from './storage';
 
 export const useAssistantStore = create<AssistantSlice>()(
   persist(
@@ -24,7 +25,7 @@ export const useAssistantStore = create<AssistantSlice>()(
     }),
     {
       name: 'assistant',
-      storage: createJSONStorage(() => storage),
+      storage: createJSONStorage<Assistant>(() => Storage, {}),
     },
   ),
 );
