@@ -57,7 +57,7 @@ export default function Presets({
   const compatibles = getCompatiblePresets(presets, model, provider);
 
   const duplicatePreset = (p: Preset, newName?: string) => {
-    const { id, name, readOnly, ...rest } = p;
+    const { id, name, readonly, ...rest } = p;
     const template = deepMerge(rest, presetProperties);
     const newPreset = createPreset(newName || `${p.id}-copy`, p.parentId || id, template);
     setPresets([...presets, newPreset]);
@@ -136,7 +136,7 @@ export default function Presets({
                   <Copy className="mr-2 h-4 w-4" strokeWidth={1.5} />
                   {t('Duplicate selected preset')}
                 </CommandItem>
-                {!preset?.readOnly && (
+                {!preset?.readonly && (
                   <CommandItem
                     className="text-red-600 hover:text-red-700"
                     onSelect={() => {

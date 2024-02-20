@@ -17,6 +17,7 @@
 import { useContext } from 'react';
 import Image from 'next/image';
 import {
+  Bot,
   BrainCircuit,
   Keyboard,
   LucideIcon,
@@ -51,6 +52,13 @@ const sidebarItems: Array<Ui.Item> = [
         page: Ui.Page.Threads,
         icon: MessagesSquare,
         shortcut: ShortcutIds.DISPLAY_THREADS,
+      },
+      {
+        name: 'Assistants',
+        href: Ui.Page.Assistants,
+        page: Ui.Page.Assistants,
+        icon: Bot,
+        shortcut: ShortcutIds.DISPLAY_ASSISTANTS,
       },
       {
         name: 'Models',

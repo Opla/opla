@@ -27,7 +27,7 @@ import OplaActions from './opla/Actions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { ScrollArea } from '../ui/scroll-area';
 
-function ProviderConfiguration({ providerId }: { providerId?: string }) {
+function ProviderView({ providerId }: { providerId?: string }) {
   const { t } = useTranslation();
 
   const { provider, hasParametersChanged, onParametersSave, onParameterChange, onProviderToggle } =
@@ -145,4 +145,4 @@ function ProviderConfiguration({ providerId }: { providerId?: string }) {
   );
 }
 
-export default ProviderConfiguration;
+export default ProviderView;

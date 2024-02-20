@@ -26,6 +26,7 @@ export type KeyBinding = {
 
 export enum ShortcutIds {
   DISPLAY_THREADS = '#display-threads',
+  DISPLAY_ASSISTANTS = '#display-assistants',
   DISPLAY_MODELS = '#display-models',
   DISPLAY_PROVIDERS = '#display-providers',
   DISPLAY_SETTINGS = '#display-settings',
@@ -55,10 +56,15 @@ export enum ShortcutIds {
 // mod is the command key on mac, ctrl on windows/linux
 export const defaultShortcuts: KeyBinding[] = [
   { command: ShortcutIds.DISPLAY_THREADS, keys: ['mod+1'], description: 'Display threads panel' },
-  { command: ShortcutIds.DISPLAY_MODELS, keys: ['mod+2'], description: 'Display models panel' },
+  {
+    command: ShortcutIds.DISPLAY_ASSISTANTS,
+    keys: ['mod+2'],
+    description: 'Display assistants panel',
+  },
+  { command: ShortcutIds.DISPLAY_MODELS, keys: ['mod+3'], description: 'Display models panel' },
   {
     command: ShortcutIds.DISPLAY_PROVIDERS,
-    keys: ['mod+3'],
+    keys: ['mod+4'],
     description: 'Display providers panel',
   },
   { command: ShortcutIds.DISPLAY_SETTINGS, keys: ['mod+t'], description: 'Toggle Settings' },
