@@ -16,11 +16,13 @@ import { Bug, Settings2 } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { useAssistantStore } from '@/stores';
+import { openFileDialog } from '@/utils/backend/tauri';
 import RecordView from '../common/RecordView';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
 import Parameter, { ParameterValue } from '../common/Parameter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import AssistantIcon from '../common/AssistantIcon';
 
 export type AssistantProps = {
   assistantId?: string;
@@ -33,6 +35,21 @@ export default function AssistantView({ assistantId }: AssistantProps) {
   const assistant = getAssistant(assistantId);
 
   logger.info('Assistant', assistantId);
+
+  const handleChangeIcon = async () => {
+    logger.info('Change icon');
+    const file = await openFileDialog(
+      false,
+      [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'svg'] }],
+      true,
+    );
+    if (typeof file === 'string') {
+      logger.info('File', file);
+      if (assistant) {
+        updateAssistant({ ...assistant, icon: { url: file } });
+      }
+    }
+  };
 
   const handleUpdateParameter = (name: string, value: ParameterValue) => {
     if (assistant) {
@@ -87,13 +104,21 @@ export default function AssistantView({ assistantId }: AssistantProps) {
             <TabsContent value="settings" className="h-full">
               <ScrollArea className="h-full">
                 <div className="flex flex-col items-center gap-2 px-8 py-4 text-sm">
-                  <Parameter
-                    title={t('Name')}
-                    name="name"
-                    value={assistant?.name}
-                    type="text"
-                    onChange={handleUpdateParameter}
-                  />
+                  <div className="flex w-full flex-row items-center gap-4 px-4">
+                    <Button variant="ghost" className="h-16 w-16 p-2" onClick={handleChangeIcon}>
+                      <AssistantIcon
+                        icon={assistant.icon}
+                        name={assistant.name}
+                        className="h-full w-full"
+                      />
+                    </Button>
+                    <Parameter
+                      name="name"
+                      value={assistant?.name}
+                      type="text"
+                      onChange={handleUpdateParameter}
+                    />
+                  </div>
                   <Parameter
                     title={t('Description')}
                     name="description"

@@ -53,7 +53,7 @@ import { getStateColor } from '@/utils/ui';
 import { Badge } from '../ui/badge';
 // import { toast } from '../ui/Toast';
 import { ShortcutBadge } from '../common/ShortCut';
-import Dot from '../icons/Dot';
+import Pastille from '../common/Pastille';
 
 export default function ThreadMenu({
   selectedModel,
@@ -118,10 +118,10 @@ export default function ThreadMenu({
             <span>{t('Select a model')}</span>
           )}
           <Badge className="mr-4 capitalize">
-            <span className={getStateColor(selectedItem?.state, 'text', true)}>
+            <span className={`mr-2  ${getStateColor(selectedItem?.state, 'text', true)}`}>
               {selectedItem?.group || 'local'}
             </span>
-            <Dot className={`ml-2 ${getStateColor(selectedItem?.state)}`} />
+            <Pastille state={selectedItem?.state} />
           </Badge>
         </div>
       )}

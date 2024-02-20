@@ -39,7 +39,7 @@ export default function Parameter({
   children,
   onChange = () => {},
 }: {
-  title: string;
+  title?: string;
   name: string;
   subtitle?: string;
   description?: string;
@@ -136,7 +136,7 @@ export default function Parameter({
       <div className="flex w-full flex-grow flex-col justify-center">
         <div className="flex w-full flex-row items-center justify-between">
           <div className={`flex grow flex-row ${flex}`}>
-            <p>{title} </p>
+            {title && <p>{title} </p>}
             {component}
           </div>
           {description && (

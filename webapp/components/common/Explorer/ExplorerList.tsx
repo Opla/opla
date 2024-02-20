@@ -19,7 +19,9 @@ import { BaseNamedRecord, Ui } from '@/types';
 export type ExplorerListProps<T> = {
   selectedId?: string;
   items: T[];
+  renderLeftSide?: (item: T) => React.ReactNode;
   renderItem?: (item: T) => React.ReactNode;
+  renderRightSide?: (item: T) => React.ReactNode;
   menu?: (item: T) => Ui.MenuItem[];
   onSelectItem?: (id: string) => void;
 };
@@ -27,7 +29,9 @@ export type ExplorerListProps<T> = {
 export default function ExplorerList<T>({
   selectedId,
   items,
+  renderLeftSide,
   renderItem,
+  renderRightSide,
   menu,
   onSelectItem,
 }: ExplorerListProps<T>) {
@@ -40,10 +44,12 @@ export default function ExplorerList<T>({
         e.preventDefault();
         onSelectItem?.(item.id);
       }}
-      className="w-full"
+      className="flex w-full cursor-pointer flex-row items-center gap-2"
       tabIndex={0}
     >
-      {renderItem?.(item as T) ?? item.name}
+      {renderLeftSide?.(item as T)}
+      <div className="grow">{renderItem?.(item as T) ?? item.name}</div>
+      {renderRightSide?.(item as T)}
     </div>
   );
 

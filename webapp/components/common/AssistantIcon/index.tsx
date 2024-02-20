@@ -12,17 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BasicState } from '@/types/ui';
+import { Bot } from 'lucide-react';
+import { AssistantIcon as Icon } from '@/types';
 
-// eslint-disable-next-line import/prefer-default-export
-export const getStateColor = (
-  state: BasicState | undefined,
-  prefix = 'bg',
-  defaultEnabled = false,
-) => {
-  const suffix = prefix === 'bg' ? '500' : '500';
-  if (!state || state === BasicState.disabled) return `${prefix}-gray-400`;
-  if (state === BasicState.loading) return `${prefix}-yellow-${suffix}`;
-  if (state === BasicState.error) return `${prefix}-red-${suffix}`;
-  return defaultEnabled ? '' : `${prefix}-green-500`;
+type AssistantIconProps = {
+  icon?: Icon;
+  name?: string;
+  className?: string;
 };
+function AssistantIcon({ icon, name, className }: AssistantIconProps) {
+  return icon ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={icon.url} alt={name} className={className} />
+  ) : (
+    <Bot className={className} strokeWidth={1.5} />
+  );
+}
+
+export default AssistantIcon;

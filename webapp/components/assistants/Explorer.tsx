@@ -21,9 +21,11 @@ import { Assistant, Ui } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalIds } from '@/modals';
 import { ModalData, ModalsContext } from '@/context/modals';
-import { Page } from '@/types/ui';
+import { BasicState, Page } from '@/types/ui';
 import Explorer, { ExplorerList } from '../common/Explorer';
 import { Button } from '../ui/button';
+import AssistantIcon from '../common/AssistantIcon';
+import Pastille from '../common/Pastille';
 
 export default function AssistantsExplorer({
   selectedAssistantId,
@@ -118,7 +120,11 @@ export default function AssistantsExplorer({
     >
       <ExplorerList<Assistant>
         selectedId={selectedAssistantId}
+        renderLeftSide={(a) => <AssistantIcon icon={a.icon} name={a.name} className="h-6 w-6" />}
         items={assistants}
+        renderRightSide={(a) => (
+          <Pastille state={a.disabled ? BasicState.disabled : BasicState.active} />
+        )}
         onSelectItem={handleSelectItem}
         menu={(assistant) => (assistant.disabled ? menuDisabled : menu)}
       />

@@ -37,9 +37,9 @@ interface DialogFilter {
   extensions: string[];
 }
 
-export const openFileDialog = async (multiple = false, filters?: DialogFilter[]) => {
+export const openFileDialog = async (multiple = false, filters?: DialogFilter[], asset = false) => {
   const { open } = await import('@tauri-apps/api/dialog');
-  const selected = await open({
+  let selected = await open({
     multiple,
     filters,
   });
@@ -50,6 +50,14 @@ export const openFileDialog = async (multiple = false, filters?: DialogFilter[])
     // user cancelled the selection
   } else {
     // user selected a single file
+  }
+  if (asset) {
+    const { convertFileSrc } = await import('@tauri-apps/api/tauri');
+    if (typeof selected === 'string') {
+      selected = convertFileSrc(selected);
+    } else if (Array.isArray(selected)) {
+      selected = selected.map((file) => convertFileSrc(file));
+    }
   }
   return selected;
 };
