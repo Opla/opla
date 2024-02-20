@@ -19,9 +19,10 @@ export type ExplorerProps = {
   icon?: React.ReactNode;
   title?: string;
   children?: React.ReactNode;
+  toolbar?: React.ReactNode;
 };
 
-export default function Explorer({ icon, title = '', children }: ExplorerProps) {
+export default function Explorer({ icon, title = '', children, toolbar }: ExplorerProps) {
   const { t } = useTranslation();
 
   return (
@@ -33,6 +34,7 @@ export default function Explorer({ icon, title = '', children }: ExplorerProps) 
             <p className="flex-1 text-sm font-semibold text-neutral-500 dark:text-neutral-400">
               {t(title)}
             </p>
+            {toolbar}
           </div>
         </div>
         {children}

@@ -23,19 +23,18 @@ const createBaseRecord = <T>() => {
   return item as T;
 };
 
-const updateRecord = (item: BaseIdRecord) => ({
-  ...item,
-  updatedAt: Date.now(),
-});
+const updateRecord = <T>(item: BaseIdRecord) =>
+  ({
+    ...item,
+    updatedAt: Date.now(),
+  }) as T;
 
-const createBaseNamedRecord = <T>(name: string, description?: string): T => {
+const createBaseNamedRecord = <T>(name: string, template?: Partial<BaseNamedRecord>): T => {
   const item: BaseNamedRecord = {
+    ...template,
     ...createBaseRecord<BaseNamedRecord>(),
     name,
   };
-  if (description) {
-    item.description = description;
-  }
   return item as T;
 };
 

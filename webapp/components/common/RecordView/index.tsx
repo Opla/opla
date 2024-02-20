@@ -13,21 +13,22 @@
 // limitations under the License.
 
 // import useTranslation from '@/hooks/useTranslation';
-import Toolbar from './Toolbar';
+import Header from './Header';
 
 export type RecordViewProps = {
-  title: string;
+  title: string | React.ReactNode;
   selectedId?: string;
   children: React.ReactNode;
+  toolbar?: React.ReactNode;
 };
 
-export default function RecordView({ title, selectedId, children }: RecordViewProps) {
+export default function RecordView({ title, selectedId, children, toolbar }: RecordViewProps) {
   // const { t } = useTranslation();
   return (
     <div className="flex h-full max-w-full flex-col dark:bg-neutral-800/30">
       <div className="transition-width relative flex h-full w-full flex-1 flex-col items-stretch overflow-hidden">
         <div className="flex-1 overflow-hidden">
-          <Toolbar title={`${title} ${selectedId || ''}`} />
+          <Header title={title || selectedId || ''} toolbar={toolbar} />
           {children}
         </div>
       </div>

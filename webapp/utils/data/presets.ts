@@ -19,14 +19,14 @@ export const defaultPresets: Preset[] = [
   {
     id: 'opla',
     name: 'Opla',
-    readOnly: true,
+    readonly: true,
     updatedAt: 0,
     createdAt: 0,
   },
   {
     id: 'openai',
     name: 'OpenAI',
-    readOnly: true,
+    readonly: true,
     updatedAt: 0,
     createdAt: 0,
   },
@@ -34,7 +34,7 @@ export const defaultPresets: Preset[] = [
     id: 'gpt-3.5',
     parentId: 'openai',
     name: 'ChatGPT-3.5',
-    readOnly: true,
+    readonly: true,
     updatedAt: 0,
     createdAt: 0,
   },
@@ -42,7 +42,7 @@ export const defaultPresets: Preset[] = [
     id: 'gpt-4',
     parentId: 'openai',
     name: 'ChatGPT-4',
-    readOnly: true,
+    readonly: true,
     updatedAt: 0,
     createdAt: 0,
   },
@@ -113,7 +113,7 @@ export const getCompatiblePresets = (presets: Preset[], model?: string, provider
     }
   });
   presets.forEach((p) => {
-    if (p.parentId && compatiblePresets[p.parentId] && !p.readOnly) {
+    if (p.parentId && compatiblePresets[p.parentId] && !p.readonly) {
       compatiblePresets[p.id] = true;
     }
   });

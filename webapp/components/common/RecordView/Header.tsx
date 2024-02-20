@@ -25,23 +25,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// import useTranslation from '@/hooks/useTranslation';
-
 export type ToolbarProps = {
-  title: string;
-  actions?: React.ReactNode;
+  title: string | React.ReactNode;
+  toolbar?: React.ReactNode;
 };
 
-export default function Toolbar({ title, actions }: ToolbarProps) {
-  // const { t } = useTranslation();
-
+export default function Header({ title, toolbar }: ToolbarProps) {
   return (
     <div className="flex flex-col items-center text-sm">
       <div className="flex w-full flex-row items-center justify-between gap-1 bg-neutral-50 p-2 text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
         <div className="flex flex-row items-center  px-2">
-          <span className="truncate px-2 dark:text-neutral-300">{title}</span>
+          {typeof title === 'string' && (
+            <span className="truncate px-2 dark:text-neutral-300">{title}</span>
+          )}
+          {typeof title !== 'string' && title}
         </div>
-        <div className="flex flex-grow flex-row-reverse items-center gap-4">{actions}</div>
+        <div className="flex flex-grow flex-row-reverse items-center gap-4">{toolbar}</div>
       </div>
     </div>
   );

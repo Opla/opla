@@ -13,10 +13,20 @@
 // limitations under the License.
 
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import createAssistantSlice, { AssistantSlice } from './assistants';
+import storage from './storage';
 
-const useBoundStore = create<AssistantSlice>((...a) => ({
-  ...createAssistantSlice()(...a),
-}));
+export const useAssistantStore = create<AssistantSlice>()(
+  persist(
+    (...a) => ({
+      ...createAssistantSlice()(...a),
+    }),
+    {
+      name: 'assistant',
+      storage: createJSONStorage(() => storage),
+    },
+  ),
+);
 
-export default useBoundStore;
+export default useAssistantStore;

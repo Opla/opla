@@ -110,7 +110,7 @@ export type Preset = BaseNamedRecord & {
   provider?: string;
   models?: string[];
 
-  readOnly?: boolean;
+  readonly?: boolean;
 
   system?: string;
   parameters?: Record<string, PresetParameter>;
@@ -346,7 +346,24 @@ export type ModelsConfiguration = {
   items: Array<Model>;
 };
 
-export type Assistant = BaseNamedRecord & {};
+export type AssistantTarget = {
+  id: string;
+  parent?: string;
+  enabled?: boolean;
+  models?: string[];
+  provider?: string;
+
+  system?: string;
+  parameters?: Record<string, PresetParameter>;
+  contextWindowPolicy?: ContextWindowPolicy;
+  keepSystem?: boolean;
+};
+export type Assistant = BaseNamedRecord & {
+  disabled?: boolean;
+  parent?: string;
+  readonly?: boolean;
+  targets?: AssistantTarget[];
+};
 
 export type Store = {
   settings: Settings;

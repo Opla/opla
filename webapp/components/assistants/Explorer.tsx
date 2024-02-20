@@ -12,11 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useContext } from 'react';
 import { useRouter } from 'next/router';
+import { Plus } from 'lucide-react';
 import logger from '@/utils/logger';
-import useGlobalStore from '@/stores';
-import { Ui } from '@/types';
+import { useAssistantStore } from '@/stores';
+import { Assistant, Ui } from '@/types';
+import useTranslation from '@/hooks/useTranslation';
+import { ModalIds } from '@/modals';
+import { ModalData, ModalsContext } from '@/context/modals';
+import { Page } from '@/types/ui';
 import Explorer, { ExplorerList } from '../common/Explorer';
+import { Button } from '../ui/button';
 
 export default function AssistantsExplorer({
   selectedAssistantId,
@@ -24,8 +31,11 @@ export default function AssistantsExplorer({
   selectedAssistantId?: string;
 }) {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { showModal } = useContext(ModalsContext);
   logger.info('AssistantsExplorer', selectedAssistantId);
-  const { assistants } = useGlobalStore();
+  const { assistants, getAssistant, createAssistant, updateAssistant, deleteAssistant } =
+    useAssistantStore();
 
   const handleSelectItem = (id: string) => {
     logger.info(`onSelectItem ${id}`);
@@ -33,12 +43,84 @@ export default function AssistantsExplorer({
     router.push(`${route}/${id}`);
   };
 
+  const handleToggle = (id: string) => {
+    const assistant = getAssistant(id);
+    if (assistant) {
+      assistant.disabled = !assistant.disabled;
+      updateAssistant(assistant);
+    }
+    logger.info(`onToggle ${id}`);
+  };
+
+  const handleDelete = async (action: string, data: ModalData) => {
+    const { id } = data.item;
+    if (action === 'Delete') {
+      logger.info(`onDelete ${id}`);
+      deleteAssistant(id);
+      if (selectedAssistantId && selectedAssistantId === id) {
+        router.replace(Page.Assistants);
+      }
+    }
+  };
+
+  const handleToDelete = (id: string) => {
+    logger.info(`onToDelete${id}`);
+    const assistant = getAssistant(id);
+    if (assistant) {
+      showModal(ModalIds.DeleteItem, { item: assistant, onAction: handleDelete });
+    }
+  };
+
+  const menu: Ui.MenuItem[] = [
+    {
+      label: t('Disable'),
+      onSelect: (data: string) => {
+        handleToggle(data);
+      },
+    },
+    {
+      label: t('Delete'),
+      onSelect: handleToDelete,
+    },
+  ];
+  const menuDisabled: Ui.MenuItem[] = [
+    {
+      label: t('Enable'),
+      onSelect: (data: string) => {
+        logger.info(`enable ${data}`);
+        handleToggle(data);
+      },
+    },
+    {
+      label: t('Delete'),
+      onSelect: handleToDelete,
+    },
+  ];
+
   return (
-    <Explorer title="Assistants">
-      <ExplorerList
+    <Explorer
+      title="Assistants"
+      toolbar={
+        <Button
+          aria-label={t('New Assistant')}
+          title={t('New Assistant')}
+          variant="ghost"
+          size="icon"
+          onClick={(e) => {
+            e.preventDefault();
+            const assistant = createAssistant(`Assistant ${assistants.length + 1}`);
+            handleSelectItem(assistant.id);
+          }}
+        >
+          <Plus className="mr-2 h-4 w-4" strokeWidth={1.5} />
+        </Button>
+      }
+    >
+      <ExplorerList<Assistant>
         selectedId={selectedAssistantId}
         items={assistants}
         onSelectItem={handleSelectItem}
+        menu={(assistant) => (assistant.disabled ? menuDisabled : menu)}
       />
     </Explorer>
   );

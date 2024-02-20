@@ -14,6 +14,7 @@
 
 import { StateCreator } from 'zustand';
 import { Assistant } from '@/types';
+import { createBaseNamedRecord, updateRecord } from '@/utils/data';
 
 interface AssistantProps {
   assistants: Assistant[];
@@ -21,28 +22,15 @@ interface AssistantProps {
 
 export interface AssistantSlice extends AssistantProps {
   getAssistant: (id: string | undefined) => Assistant | undefined;
-  addAssistant: (newAssistant: Assistant) => void;
+  createAssistant: (name: string, template?: Partial<Assistant>) => Assistant;
+  updateAssistant: (newAssistant: Assistant) => void;
+  deleteAssistant: (id: string) => void;
 }
 
 export type AssistantStore = ReturnType<typeof createAssistantSlice>;
 
 const DEFAULT_PROPS: AssistantProps = {
-  assistants: [
-    {
-      id: '1',
-      name: 'Assistant 1',
-      description: 'This is the first assistant',
-      createdAt: 0,
-      updatedAt: 0,
-    },
-    {
-      id: '2',
-      name: 'Assistant 2',
-      description: 'This is the second assistant',
-      createdAt: 0,
-      updatedAt: 0,
-    },
-  ],
+  assistants: [],
 };
 
 const createAssistantSlice =
@@ -51,8 +39,22 @@ const createAssistantSlice =
     ...DEFAULT_PROPS,
     ...initProps,
     getAssistant: (id: string | undefined) => get().assistants.find((a) => a.id === id),
-    addAssistant: (newAssistant: Assistant) =>
-      set((state: AssistantSlice) => ({ assistants: [...state.assistants, newAssistant] })),
+    createAssistant: (name: string, template?: Partial<Assistant>) => {
+      const newAssistant = createBaseNamedRecord<Assistant>(name, template);
+      set((state: AssistantSlice) => ({ assistants: [...state.assistants, newAssistant] }));
+      return newAssistant;
+    },
+    updateAssistant: (newAssistant: Assistant) => {
+      const updatedAssistant: Assistant = updateRecord<Assistant>(newAssistant);
+      set((state: AssistantSlice) => ({
+        assistants: state.assistants.map((a) =>
+          a.id === updatedAssistant.id ? updatedAssistant : a,
+        ),
+      }));
+    },
+    deleteAssistant: (id: string) => {
+      set((state: AssistantSlice) => ({ assistants: state.assistants.filter((a) => a.id !== id) }));
+    },
   });
 
 export default createAssistantSlice;

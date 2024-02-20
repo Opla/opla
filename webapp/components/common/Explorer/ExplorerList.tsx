@@ -20,7 +20,7 @@ export type ExplorerListProps<T> = {
   selectedId?: string;
   items: T[];
   renderItem?: (item: T) => React.ReactNode;
-  menu?: Ui.MenuItem[];
+  menu?: (item: T) => Ui.MenuItem[];
   onSelectItem?: (id: string) => void;
 };
 
@@ -64,7 +64,7 @@ export default function ExplorerList<T>({
                 {menu ? (
                   <ContextMenu>
                     <ContextMenuTrigger>{itemRendering(item)}</ContextMenuTrigger>
-                    <ContextMenuList data={item.id} menu={menu} />
+                    <ContextMenuList data={item.id} menu={menu(item as T)} />
                   </ContextMenu>
                 ) : (
                   itemRendering(item)
