@@ -37,7 +37,14 @@ export type AssistantProps = {
 
 export default function AssistantView({ assistantId }: AssistantProps) {
   const { t } = useTranslation();
-  const { getAssistant, updateAssistant, createTarget, updateTarget } = useAssistantStore();
+  const {
+    getAssistant,
+    updateAssistant,
+    createTarget,
+    updateTarget,
+    duplicateTarget,
+    deleteTarget,
+  } = useAssistantStore();
   const { showModal } = useContext(ModalsContext);
 
   const assistant = getAssistant(assistantId);
@@ -84,6 +91,28 @@ export default function AssistantView({ assistantId }: AssistantProps) {
     logger.info('Edit target');
     if (assistant) {
       showModal(ModalIds.EditTarget, { item: target, onAction: handleUpdateTarget });
+    }
+  };
+
+  const handleDuplicateTarget = (target: AssistantTarget) => {
+    logger.info('Duplicate target');
+    if (assistant) {
+      const newTarget = duplicateTarget({ ...target, name: '#duplicate' });
+      showModal(ModalIds.EditTarget, { item: newTarget, onAction: handleUpdateTarget });
+    }
+  };
+
+  const handleDeleteTarget = async (action: string, data: ModalData) => {
+    logger.info('Delete target', action);
+    if (action === 'Delete' && assistant && data.item.id) {
+      deleteTarget(assistant, data.item.id);
+    }
+  };
+
+  const handleToDeleteTarget = (target: AssistantTarget) => {
+    logger.info('Delete target');
+    if (assistant) {
+      showModal(ModalIds.DeleteItem, { item: target, onAction: handleDeleteTarget });
     }
   };
 
@@ -209,7 +238,12 @@ export default function AssistantView({ assistantId }: AssistantProps) {
                         />
                       )}
                       {assistant.targets && (
-                        <TargetsTable targets={assistant.targets} onEdit={handleEditTarget} />
+                        <TargetsTable
+                          targets={assistant.targets}
+                          onEdit={handleEditTarget}
+                          onDuplicate={handleDuplicateTarget}
+                          onDelete={handleToDeleteTarget}
+                        />
                       )}
                     </CardContent>
                   </Card>

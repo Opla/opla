@@ -27,6 +27,8 @@ export interface AssistantSlice extends AssistantProps {
   deleteAssistant: (id: string) => void;
   createTarget: () => AssistantTarget;
   updateTarget: (assistant: Assistant, newTarget: AssistantTarget) => void;
+  deleteTarget: (assistant: Assistant, targetId: string) => void;
+  duplicateTarget: (target: AssistantTarget) => AssistantTarget;
 }
 
 export type AssistantStore = ReturnType<typeof createAssistantSlice>;
@@ -78,6 +80,22 @@ const createAssistantSlice =
           a.id === updatedAssistant.id ? updatedAssistant : a,
         ),
       }));
+    },
+    deleteTarget: (assistant: Assistant, targetId: string) => {
+      const targets = assistant.targets?.filter((t) => t.id !== targetId);
+      const updatedAssistant: Assistant = updateRecord<Assistant>({
+        ...assistant,
+        targets,
+      } as Assistant);
+      set((state: AssistantSlice) => ({
+        assistants: state.assistants.map((a) =>
+          a.id === updatedAssistant.id ? updatedAssistant : a,
+        ),
+      }));
+    },
+    duplicateTarget: (target: AssistantTarget) => {
+      const newTarget: AssistantTarget = createBaseRecord<AssistantTarget>();
+      return { ...target, ...newTarget };
     },
   });
 

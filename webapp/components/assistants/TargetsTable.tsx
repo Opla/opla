@@ -29,11 +29,13 @@ import { Button } from '../ui/button';
 type TargetsTableProps = {
   targets: AssistantTarget[];
   onEdit: (target: AssistantTarget) => void;
+  onDuplicate: (target: AssistantTarget) => void;
+  onDelete: (target: AssistantTarget) => void;
 };
 
-function TargetsTable({ targets, onEdit }: TargetsTableProps) {
+function TargetsTable({ targets, onEdit, onDuplicate, onDelete }: TargetsTableProps) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<Record<string, boolean>>({});
 
   return (
     <Table>
@@ -47,19 +49,15 @@ function TargetsTable({ targets, onEdit }: TargetsTableProps) {
       </TableHeader>
       <TableBody>
         {targets.map((target) => (
-          <TableRow
-            key={target.id}
-            className="min-h-[28px]"
-            onClick={(e) => {
-              e.preventDefault();
-              onEdit(target);
-            }}
-          >
+          <TableRow key={target.id} className="min-h-[28px]">
             <TableCell>{target.name || 'undefined'}</TableCell>
             <TableCell>{target.models || 'None'}</TableCell>
             <TableCell>{target.provider || 'None'}</TableCell>
             <TableCell className="text-right">
-              <DropdownMenu open={open} onOpenChange={setOpen}>
+              <DropdownMenu
+                open={open[target.id]}
+                onOpenChange={(value) => setOpen({ ...open, [target.id]: value })}
+              >
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm">
                     <MoreHorizontal />
@@ -67,15 +65,28 @@ function TargetsTable({ targets, onEdit }: TargetsTableProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-full">
                   <DropdownMenuGroup>
-                    <DropdownMenuItem onSelect={() => {}}>
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        onEdit(target);
+                      }}
+                    >
                       <Edit className="mr-2 h-4 w-4" strokeWidth={1.5} />
                       {t('Edit')}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => {}}>
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        onDuplicate(target);
+                      }}
+                    >
                       <Copy className="mr-2 h-4 w-4" strokeWidth={1.5} />
                       {t('Duplicate')}
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600" onSelect={() => {}}>
+                    <DropdownMenuItem
+                      className="text-red-600"
+                      onSelect={() => {
+                        onDelete(target);
+                      }}
+                    >
                       <Trash className="mr-2 h-4 w-4" strokeWidth={1.5} />
                       {t('Delete')}
                     </DropdownMenuItem>

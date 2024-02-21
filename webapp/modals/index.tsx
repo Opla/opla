@@ -19,7 +19,7 @@ import { BaseNamedRecord } from '@/types';
 import { ModalData, ModalRef } from '@/context/modals';
 import { ShortcutSettings } from '@/components/common/ShortCut';
 import { ModalIds } from '@/types/ui';
-import EditTarget from '@/components/assistants/EditTarget';
+import EditTargetDialog from '@/components/assistants/EditTargetDialog';
 import SettingsPanel from './settings';
 import NewProviderDialog from './templates/NewProvider';
 import OpenAIDialog from './openai';
@@ -195,35 +195,22 @@ const Modals: ModalRef[] = [
           id={ModalIds.NewPreset}
           visible={visible}
           onClose={onClose}
-          data={data}
+          data={data as ModalData}
         />
       );
     },
   },
   {
     id: ModalIds.EditTarget,
-    Component: function EditTargetDialog({ visible, onClose, data }) {
-      const { t } = useTranslation();
-      const item = data?.item as BaseNamedRecord;
-      const isNew = !item.name;
-      const handleChange = (target: Partial<BaseNamedRecord>) => {
-        data?.onAction?.('Change', { item: target });
-      };
+    Component: function ETDialog({ visible, onClose, data }) {
       return (
-        <AlertDialog
-          key={ModalIds.Downloads}
-          id={ModalIds.Downloads}
-          title={t(isNew ? 'New target' : 'Edit target')}
-          actions={[
-            { label: isNew ? t('Create') : t('Save'), value: 'Update' },
-            { label: t('Cancel'), value: 'Cancel' },
-          ]}
+        <EditTargetDialog
+          key={ModalIds.EditTarget}
+          id={ModalIds.EditTarget}
           visible={visible}
           onClose={onClose}
           data={data}
-        >
-          <EditTarget target={item} onChange={handleChange} />
-        </AlertDialog>
+        />
       );
     },
   },
