@@ -20,9 +20,9 @@ export const getStateColor = (
   prefix = 'bg',
   defaultEnabled = false,
 ) => {
-  const suffix = prefix === 'bg' ? '500' : '500';
-  if (!state || state === BasicState.disabled) return `${prefix}-gray-400`;
+  const suffix = prefix === 'bg' ? '500' : '400';
+  if (!state || state === BasicState.disabled) return `${prefix}-gray-${suffix}`;
   if (state === BasicState.loading) return `${prefix}-yellow-${suffix}`;
   if (state === BasicState.error) return `${prefix}-red-${suffix}`;
-  return defaultEnabled ? '' : `${prefix}-green-500`;
+  return defaultEnabled ? '' : `${prefix}-green-${suffix}`;
 };

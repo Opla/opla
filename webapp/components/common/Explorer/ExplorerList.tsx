@@ -36,7 +36,7 @@ export default function ExplorerList<T>({
   onSelectItem,
 }: ExplorerListProps<T>) {
   const itemRendering = (item: BaseNamedRecord) => (
-    <div
+    <span
       aria-label="Select an item"
       role="button"
       onKeyDown={() => {}}
@@ -48,9 +48,9 @@ export default function ExplorerList<T>({
       tabIndex={0}
     >
       {renderLeftSide?.(item as T)}
-      <div className="grow">{renderItem?.(item as T) ?? item.name}</div>
+      <span className="grow">{renderItem?.(item as T) ?? item.name}</span>
       {renderRightSide?.(item as T)}
-    </div>
+    </span>
   );
 
   return (

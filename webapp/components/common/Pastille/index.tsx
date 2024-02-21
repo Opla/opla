@@ -24,7 +24,7 @@ type PastilleProps = {
 
 function Pastille({ state, defaultEnabled = false, className }: PastilleProps) {
   const color = getStateColor(state, 'bg', defaultEnabled);
-  return <span className={cn('h-2 w-2 rounded-full', color, className)} />;
+  return <span className={cn('h-2 w-2 flex-shrink-0 rounded-full', color, className)} />;
 }
 
 export default Pastille;

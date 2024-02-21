@@ -63,7 +63,6 @@ export default function AssistantView({ assistantId }: AssistantProps) {
         title={
           assistant ? (
             <div className="flex flex-row items-center gap-4">
-              <div>{assistant.name}</div>
               <TabsList className="gap-4">
                 <TabsTrigger value="settings">
                   <Settings2 className="mr-2 h-4 w-4" strokeWidth={1.5} />
@@ -74,6 +73,7 @@ export default function AssistantView({ assistantId }: AssistantProps) {
                   {t('Logs')}
                 </TabsTrigger>
               </TabsList>
+              <div>{assistant.name}</div>
             </div>
           ) : (
             'Assistant'
