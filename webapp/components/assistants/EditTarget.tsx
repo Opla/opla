@@ -16,7 +16,6 @@ import { AssistantTarget } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import Parameter, { ParameterValue } from '../common/Parameter';
 
-
 type EditTargetProps = {
   target: AssistantTarget;
   onChange: (target: AssistantTarget) => void;
@@ -30,7 +29,13 @@ function EditTarget({ target, onChange }: EditTargetProps) {
   };
   return (
     <div>
-      <Parameter placeholder={t('Insert target name...')} inputCss="w-full" name="name" value={target.name} onChange={handleUpdateParameter} />
+      <Parameter
+        placeholder={t('Insert target name...')}
+        inputCss="w-full"
+        name="name"
+        value={target.name}
+        onChange={handleUpdateParameter}
+      />
     </div>
   );
 }
