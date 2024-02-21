@@ -20,7 +20,7 @@ import { ShortcutBadge } from '../ShortCut';
 function Content({ icon }: { icon: LucideIcon }) {
   const Icon = icon as LucideIcon;
   return (
-    <div className="h-5 w-5 hover:text-neutral-800 dark:hover:text-neutral-100">
+    <div className="hover:primary-foreground h-5 w-5">
       <Icon size="28px" strokeWidth={1.5} />
     </div>
   );
@@ -44,7 +44,7 @@ export default function SidebarItem({
   onModalClick: (href: string) => void;
 }) {
   const className = `flex h-6 w-6 rounded-md ${
-    selected ? 'text-neutral-800 dark:text-neutral-100' : 'text-neutral-400 dark:text-neutral-500'
+    selected ? 'text-primary' : 'text-muted-foreground hover:text-primary'
   } dark:transparent`;
   const content = <Content icon={icon as LucideIcon} />;
   return (

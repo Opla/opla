@@ -45,13 +45,13 @@ export default function SidebarItems({
     if (modal && subItems) {
       const Icon = icon as LucideIcon;
       const className = `flex pb-8 h-6 w-6 rounded-md ${
-        open ? 'text-neutral-800 dark:text-neutral-100' : 'text-neutral-400 dark:text-neutral-500'
+        open ? 'text-primary' : 'text-muted-foreground'
       } dark:transparent`;
       return (
         <li key={name} className={className}>
           <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger>
-              <div className="h-5 w-5 p-0 hover:text-neutral-800 dark:hover:text-neutral-100">
+              <div className="h-5 w-5 p-0 hover:text-primary">
                 <Icon size="28px" strokeWidth={1.5} />
               </div>
             </DropdownMenuTrigger>

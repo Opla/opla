@@ -117,7 +117,7 @@ export default function ThreadMenu({
           ) : (
             <span>{t('Select a model')}</span>
           )}
-          <Badge className="mr-4 capitalize">
+          <Badge className="mr-4 bg-gray-300 capitalize text-gray-600">
             <span className={`mr-2  ${getStateColor(selectedItem?.state, 'text', true)}`}>
               {selectedItem?.group || 'local'}
             </span>
@@ -168,7 +168,8 @@ export default function ThreadMenu({
                             >
                               <span className="capitalize">{item.label}</span>
                               <Badge
-                                className={`ml-4 capitalize ${getStateColor(item.state, 'text', true)}`}
+                                variant="secondary"
+                                className={`ml-4 bg-gray-300 capitalize text-gray-600 ${getStateColor(item.state, 'text', true)}`}
                               >
                                 {item.group || 'local'}
                               </Badge>
