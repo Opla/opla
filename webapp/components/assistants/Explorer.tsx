@@ -56,7 +56,7 @@ export default function AssistantsExplorer({
 
   const handleDelete = async (action: string, data: ModalData) => {
     const { id } = data.item;
-    if (action === 'Delete') {
+    if (action === 'Delete' && id) {
       logger.info(`onDelete ${id}`);
       deleteAssistant(id);
       if (selectedAssistantId && selectedAssistantId === id) {

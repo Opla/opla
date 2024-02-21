@@ -19,6 +19,7 @@ import { BaseNamedRecord } from '@/types';
 import { ModalData, ModalRef } from '@/context/modals';
 import { ShortcutSettings } from '@/components/common/ShortCut';
 import { ModalIds } from '@/types/ui';
+import EditTarget from '@/components/assistants/EditTarget';
 import SettingsPanel from './settings';
 import NewProviderDialog from './templates/NewProvider';
 import OpenAIDialog from './openai';
@@ -196,6 +197,33 @@ const Modals: ModalRef[] = [
           onClose={onClose}
           data={data}
         />
+      );
+    },
+  },
+  {
+    id: ModalIds.EditTarget,
+    Component: function EditTargetDialog({ visible, onClose, data }) {
+      const { t } = useTranslation();
+      const item = data?.item as BaseNamedRecord;
+      const isNew = !item.name;
+      const handleChange = (target: Partial<BaseNamedRecord>) => {
+        data?.onAction?.('Change', { item: target });
+      };
+      return (
+        <AlertDialog
+          key={ModalIds.Downloads}
+          id={ModalIds.Downloads}
+          title={t(isNew ? 'New target' : 'Edit target')}
+          actions={[
+            { label: isNew ? t('Create') : t('Save'), value: 'Update' },
+            { label: t('Cancel'), value: 'Cancel' },
+          ]}
+          visible={visible}
+          onClose={onClose}
+          data={data}
+        >
+          <EditTarget target={item} onChange={handleChange} />
+        </AlertDialog>
       );
     },
   },

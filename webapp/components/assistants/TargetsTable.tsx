@@ -1,0 +1,93 @@
+// Copyright 2024 mik
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { useState } from 'react';
+import { Copy, Edit, MoreHorizontal, Trash } from 'lucide-react';
+import useTranslation from '@/hooks/useTranslation';
+import { AssistantTarget } from '@/types';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '../ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
+import { Button } from '../ui/button';
+
+type TargetsTableProps = {
+  targets: AssistantTarget[];
+  onEdit: (target: AssistantTarget) => void;
+};
+
+function TargetsTable({ targets, onEdit }: TargetsTableProps) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>{t('Name')}</TableHead>
+          <TableHead>{t('Model')}</TableHead>
+          <TableHead>{t('Provider')}</TableHead>
+          <TableHead> </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {targets.map((target) => (
+          <TableRow
+            key={target.id}
+            className="min-h-[28px]"
+            onClick={(e) => {
+              e.preventDefault();
+              onEdit(target);
+            }}
+          >
+            <TableCell>{target.name || 'undefined'}</TableCell>
+            <TableCell>{target.models || 'None'}</TableCell>
+            <TableCell>{target.provider || 'None'}</TableCell>
+            <TableCell className="text-right">
+              <DropdownMenu open={open} onOpenChange={setOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <MoreHorizontal />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-full">
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onSelect={() => {}}>
+                      <Edit className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                      {t('Edit')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => {}}>
+                      <Copy className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                      {t('Duplicate')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="text-red-600" onSelect={() => {}}>
+                      <Trash className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                      {t('Delete')}
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
+export default TargetsTable;

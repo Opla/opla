@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { Assistant } from '@/types';
-import { createBaseNamedRecord, updateRecord } from '@/utils/data';
+import { Assistant, AssistantTarget } from '@/types';
+import { createBaseNamedRecord, createBaseRecord, updateRecord } from '@/utils/data';
 
 interface AssistantProps {
   assistants: Assistant[];
@@ -25,6 +25,8 @@ export interface AssistantSlice extends AssistantProps {
   createAssistant: (name: string, template?: Partial<Assistant>) => Assistant;
   updateAssistant: (newAssistant: Assistant) => void;
   deleteAssistant: (id: string) => void;
+  createTarget: () => AssistantTarget;
+  updateTarget: (assistant: Assistant, newTarget: AssistantTarget) => void;
 }
 
 export type AssistantStore = ReturnType<typeof createAssistantSlice>;
@@ -54,6 +56,28 @@ const createAssistantSlice =
     },
     deleteAssistant: (id: string) => {
       set((state: AssistantSlice) => ({ assistants: state.assistants.filter((a) => a.id !== id) }));
+    },
+    createTarget: () => {
+      const newTarget: AssistantTarget = createBaseRecord<AssistantTarget>();
+      return newTarget;
+    },
+    updateTarget: (assistant: Assistant, newTarget: AssistantTarget) => {
+      const updatedTarget: AssistantTarget = updateRecord<AssistantTarget>(newTarget);
+      let targets = assistant.targets || [];
+      if (targets.find((t) => t.id === updatedTarget.id)) {
+        targets = targets.map((t) => (t.id === updatedTarget.id ? updatedTarget : t));
+      } else {
+        targets = [...targets, updatedTarget];
+      }
+      const updatedAssistant: Assistant = updateRecord<Assistant>({
+        ...assistant,
+        targets,
+      } as Assistant);
+      set((state: AssistantSlice) => ({
+        assistants: state.assistants.map((a) =>
+          a.id === updatedAssistant.id ? updatedAssistant : a,
+        ),
+      }));
     },
   });
 

@@ -18,7 +18,7 @@ import { BaseIdRecord } from '@/types';
 import { ModalIds } from '@/types/ui';
 
 export type ModalData = {
-  item: BaseIdRecord;
+  item: Partial<BaseIdRecord>;
   title?: string;
   description?: string;
   onAction?: (action: string, data: ModalData) => Promise<void>;
