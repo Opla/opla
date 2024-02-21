@@ -73,7 +73,7 @@ export default function Statusbar() {
   const { activeModel } = backendContext.config.models;
 
   return (
-    <div className="m-0 flex w-full flex-row justify-between gap-4 bg-orange-300 px-2 py-1 text-xs dark:bg-orange-500">
+    <div className="m-0 flex w-full flex-row justify-between gap-4 bg-primary text-primary-foreground px-2 py-1 text-xs">
       <div className="flex flex-row items-center">
         <button
           className="flex flex-row items-center justify-center gap-1"
@@ -81,12 +81,12 @@ export default function Statusbar() {
           onClick={displayServer}
         >
           {!error && (
-            <span className={`${running ? 'text-green-500' : 'text-gray-500'} `}>
+            <span className={`${running ? 'accent-foreground' : 'muted-foreground'} `}>
               <Server className="h-4 w-4" strokeWidth={1.5} />
             </span>
           )}
           {error && (
-            <span className="text-red-600">
+            <span className="text-destructive-foreground">
               <AlertTriangle className="h-4 w-4" strokeWidth={1.5} />
             </span>
           )}
@@ -97,7 +97,7 @@ export default function Statusbar() {
           {(backendContext.server.status === 'stopping' ||
             backendContext.server.status === 'stopped') && <span>{t('Server is stopped')}</span>}
           {backendContext.server.status === 'error' && (
-            <span className="text-red-600">{t('Server error')}</span>
+            <span className="text-destructive-foreground">{t('Server error')}</span>
           )}
         </button>
 
@@ -107,7 +107,7 @@ export default function Statusbar() {
             type="button"
             onClick={displayDownloads}
           >
-            <span className="tabular-nums text-neutral-800 dark:text-neutral-300">
+            <span className="tabular-nums">
               <DownloadCloud className="h-4 w-4" strokeWidth={1.5} />
             </span>
             <span>
@@ -120,7 +120,7 @@ export default function Statusbar() {
       <div className="flex flex-row gap-2">
         {sys && (
           <div className="flex flex-row items-center justify-center gap-1">
-            <span className="tabular-nums text-neutral-800 dark:text-neutral-300">
+            <span className="tabular-nums">
               <Cpu className="h-4 w-4" strokeWidth={1.5} />
             </span>
             <span>
@@ -141,7 +141,7 @@ export default function Statusbar() {
         )}
         {usage && (
           <div className="flex flex-row items-center justify-center gap-1">
-            <span className="tabular-nums text-neutral-800 dark:text-neutral-300">
+            <span className="tabular-nums">
               <BarChart3 className="h-4 w-4" strokeWidth={1.5} />
             </span>
             <span>

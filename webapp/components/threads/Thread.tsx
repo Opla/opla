@@ -535,27 +535,6 @@ function Thread({
         const updatedConversations = updateConversation(updatedConversation, conversations, true);
         updateConversations(updatedConversations);
       }
-      /* const formData = new FormData();
-      formData.append('file', file);
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await response.json();
-      if (response.ok) {
-        const message = createMessage({ role: 'assistant', name: selectedModel }, data.url);
-        message.status = MessageState.Delivered;
-        const updatedMessages = mergeMessages(conversationMessages, [message]);
-        updateConversationMessages(conversationId, updatedMessages);
-      } else {
-        const message = createMessage(
-          { role: 'assistant', name: selectedModel },
-          'Error uploading file',
-        );
-        message.status = MessageState.Error;
-        const updatedMessages = mergeMessages(conversationMessages, [message]);
-        updateConversationMessages(conversationId, updatedMessages);
-      } */
     }
   };
 
@@ -581,26 +560,26 @@ function Thread({
               aria-label="Toggle thread explorer"
               variant="ghost"
               size="sm"
-              className="p-1 text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:border-white/20 dark:text-neutral-400 hover:dark:text-white"
+              className="p-1"
               onClick={() => onChangeDisplayExplorer(!displayExplorer)}
             >
               {displayExplorer ? (
-                <PanelLeftClose strokeWidth={1.5} />
+                <PanelLeftClose strokeWidth={1.0} />
               ) : (
-                <PanelLeft strokeWidth={1.5} />
+                <PanelLeft strokeWidth={1.0} />
               )}
             </Button>
             <Button
               aria-label="Toggle thread settings"
               variant="ghost"
               size="sm"
-              className="p-1 text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:border-white/20 dark:text-neutral-400 hover:dark:text-white"
+              className="p-1"
               onClick={() => onChangeDisplaySettings(!displaySettings)}
             >
               {displaySettings ? (
-                <PanelRightClose strokeWidth={1.5} />
+                <PanelRightClose strokeWidth={1.0} />
               ) : (
-                <PanelRight strokeWidth={1.5} />
+                <PanelRight strokeWidth={1.0} />
               )}
             </Button>
           </div>
