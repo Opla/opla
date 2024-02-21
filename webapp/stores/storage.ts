@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StateStorage } from 'zustand/middleware';
+import { PersistStorage, StateStorage, StorageValue } from 'zustand/middleware';
 import dataStorage, { StorageType } from '@/utils/dataStorage';
 
 async function get(name: string): Promise<string | null> {
@@ -29,7 +29,7 @@ async function del(name: string): Promise<void> {
 }
 
 // Custom storage object
-const storage: StateStorage = {
+const Storage: StateStorage = {
   getItem: async (name: string): Promise<string | null> =>
     /* logger.info(name, 'has been retrieved'); */
     (await get(name)) || null,
@@ -43,4 +43,52 @@ const storage: StateStorage = {
   },
 };
 
-export default storage;
+export default Storage;
+
+type JsonStorageOptions = {
+  reviver?: (key: string, value: unknown) => unknown;
+  replacer?: (key: string, value: unknown) => unknown;
+  space?: number;
+};
+
+export function createJSONSliceStorage<S>(
+  getStorage: () => StateStorage,
+  options?: JsonStorageOptions,
+): PersistStorage<S> | undefined {
+  let storage: StateStorage | undefined;
+  try {
+    storage = getStorage();
+  } catch (e) {
+    // prevent error if the storage is not defined (e.g. when server side rendering a page)
+    return undefined;
+  }
+  const persistStorage: PersistStorage<S> = {
+    getItem: (name) => {
+      const parse = (str: string | null) => {
+        if (str === null) {
+          return null;
+        }
+        let value = JSON.parse(str, options?.reviver);
+        if (!value.state) {
+          value = { state: { [name]: value }, version: 0 };
+        }
+        return value as StorageValue<S>;
+      };
+      const str = (storage as StateStorage).getItem(name) ?? null;
+      if (str instanceof Promise) {
+        return str.then(parse);
+      }
+      return parse(str);
+    },
+    setItem: (name, newValue) => {
+      const slice = (newValue as any).state[name];
+      return (storage as StateStorage).setItem(
+        name,
+        JSON.stringify(slice, options?.replacer, options?.space),
+      );
+    },
+    removeItem: (name) => (storage as StateStorage).removeItem(name),
+  };
+
+  return persistStorage;
+}

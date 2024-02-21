@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { persist } from 'zustand/middleware';
 import { Assistant } from '@/types';
 import createAssistantSlice, { AssistantSlice } from './assistants';
-import Storage from './storage';
+import Storage, { createJSONSliceStorage } from './storage';
 
 export const useAssistantStore = create<AssistantSlice>()(
   persist(
@@ -24,8 +24,8 @@ export const useAssistantStore = create<AssistantSlice>()(
       ...createAssistantSlice()(...a),
     }),
     {
-      name: 'assistant',
-      storage: createJSONStorage<Assistant>(() => Storage, {}),
+      name: 'assistants',
+      storage: createJSONSliceStorage<Assistant>(() => Storage, { space: 2 }),
     },
   ),
 );
