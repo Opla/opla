@@ -20,7 +20,7 @@ import { ShortcutBadge } from '../ShortCut';
 function Content({ icon }: { icon: LucideIcon }) {
   const Icon = icon as LucideIcon;
   return (
-    <div className="h-5 w-5 hover:primary-foreground">
+    <div className="hover:primary-foreground h-5 w-5">
       <Icon size="28px" strokeWidth={1.5} />
     </div>
   );

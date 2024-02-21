@@ -73,7 +73,7 @@ export default function Statusbar() {
   const { activeModel } = backendContext.config.models;
 
   return (
-    <div className="m-0 flex w-full flex-row justify-between gap-4 bg-primary text-primary-foreground px-2 py-1 text-xs">
+    <div className="m-0 flex w-full flex-row justify-between gap-4 bg-primary px-2 py-1 text-xs text-primary-foreground">
       <div className="flex flex-row items-center">
         <button
           className="flex flex-row items-center justify-center gap-1"
