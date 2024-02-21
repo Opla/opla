@@ -27,6 +27,7 @@ export type ParametersRecord = Record<string, ParameterValue | undefined>;
 
 export default function Parameter({
   title,
+  placeholder,
   name,
   subtitle = '',
   description,
@@ -40,6 +41,7 @@ export default function Parameter({
   onChange = () => {},
 }: {
   title?: string;
+  placeholder?: string;
   name: string;
   subtitle?: string;
   description?: string;
@@ -87,6 +89,7 @@ export default function Parameter({
         disabled={disabled}
         className="mt-2 w-full"
         value={value as string}
+        placeholder={placeholder}
         onChange={(e) => {
           e.preventDefault();
           onChange(name, e.target.value);
@@ -112,6 +115,7 @@ export default function Parameter({
         {(type === 'text' || type === 'number' || type === 'url') && (
           <Input
             value={value as string}
+            placeholder={placeholder}
             className="w-full"
             type={type}
             disabled={disabled}

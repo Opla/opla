@@ -79,4 +79,5 @@ export enum ModalIds {
   DownloadItem = 'downloaditem',
   Downloads = 'downloads',
   NewPreset = 'newpreset',
+  EditTarget = 'edittarget',
 }

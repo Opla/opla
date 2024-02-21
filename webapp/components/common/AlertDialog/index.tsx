@@ -17,6 +17,7 @@
 import { Ui } from '@/types';
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { ModalData } from '@/context/modals';
 
 export default function AlertDialog({
   id,
@@ -33,11 +34,11 @@ export default function AlertDialog({
   visible: boolean;
   children: React.ReactNode;
   actions?: Ui.MenuItem[];
-  onAction?: (action: string, data: any) => void;
-  onClose?: (data: any) => void;
+  onAction?: (action: string, data: ModalData) => void;
+  onClose?: (data: ModalData) => void;
   data?: any;
 }) {
-  const handlePreAction = (action: string, doAction: (action: string, data: any) => void) => {
+  const handlePreAction = (action: string, doAction: (action: string, data: ModalData) => void) => {
     doAction?.(action, data);
     onClose?.(data);
   };
@@ -63,10 +64,7 @@ export default function AlertDialog({
               disabled={action.disabled}
               onClick={(e) => {
                 e.preventDefault();
-                handlePreAction(
-                  action.value || action.label,
-                  onAction || (data?.onAction as () => void),
-                );
+                handlePreAction(action.value || action.label, onAction || data?.onAction);
               }}
             >
               {action.label}

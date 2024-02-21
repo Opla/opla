@@ -14,11 +14,11 @@
 
 import Portal from '@/components/common/Portal';
 import { createContext, useCallback, useMemo, useState } from 'react';
-import { BaseIdRecord } from '@/types';
+import { BaseNamedRecord } from '@/types';
 import { ModalIds } from '@/types/ui';
 
 export type ModalData = {
-  item: BaseIdRecord;
+  item: Partial<BaseNamedRecord>;
   title?: string;
   description?: string;
   onAction?: (action: string, data: ModalData) => Promise<void>;

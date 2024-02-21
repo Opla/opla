@@ -346,10 +346,9 @@ export type ModelsConfiguration = {
   items: Array<Model>;
 };
 
-export type AssistantTarget = {
-  id: string;
+export type AssistantTarget = BaseNamedRecord & {
   parent?: string;
-  enabled?: boolean;
+  disabled?: boolean;
   models?: string[];
   provider?: string;
 
@@ -368,7 +367,9 @@ export type Assistant = BaseNamedRecord & {
   disabled?: boolean;
   icon?: AssistantIcon;
   parent?: string;
+  version?: string;
   readonly?: boolean;
+  system?: string;
   targets?: AssistantTarget[];
 };
 

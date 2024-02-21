@@ -19,6 +19,7 @@ import { BaseNamedRecord } from '@/types';
 import { ModalData, ModalRef } from '@/context/modals';
 import { ShortcutSettings } from '@/components/common/ShortCut';
 import { ModalIds } from '@/types/ui';
+import EditTargetDialog from '@/components/assistants/EditTargetDialog';
 import SettingsPanel from './settings';
 import NewProviderDialog from './templates/NewProvider';
 import OpenAIDialog from './openai';
@@ -192,6 +193,20 @@ const Modals: ModalRef[] = [
         <NewPresetDialog
           key={ModalIds.NewPreset}
           id={ModalIds.NewPreset}
+          visible={visible}
+          onClose={onClose}
+          data={data as ModalData}
+        />
+      );
+    },
+  },
+  {
+    id: ModalIds.EditTarget,
+    Component: function ETDialog({ visible, onClose, data }) {
+      return (
+        <EditTargetDialog
+          key={ModalIds.EditTarget}
+          id={ModalIds.EditTarget}
           visible={visible}
           onClose={onClose}
           data={data}

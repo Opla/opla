@@ -69,7 +69,7 @@ export default function Presets({
       item: p,
       onAction: async (action: string, data: ModalData) => {
         if (action === 'Duplicate') {
-          duplicatePreset(p, data as unknown as string);
+          duplicatePreset(p, data.item.name as string);
         }
       },
     });

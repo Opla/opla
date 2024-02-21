@@ -12,17 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Bug, Settings2 } from 'lucide-react';
+import { useContext } from 'react';
+import { Bug, Plus, Settings2, Target } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { useAssistantStore } from '@/stores';
 import { openFileDialog } from '@/utils/backend/tauri';
+import { ModalData, ModalsContext } from '@/context/modals';
+import { ModalIds } from '@/modals';
+import { AssistantTarget } from '@/types';
 import RecordView from '../common/RecordView';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
 import Parameter, { ParameterValue } from '../common/Parameter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import AssistantIcon from '../common/AssistantIcon';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
+import EmptyView from '../common/EmptyView';
+import TargetsTable from './TargetsTable';
 
 export type AssistantProps = {
   assistantId?: string;
@@ -30,7 +37,15 @@ export type AssistantProps = {
 
 export default function AssistantView({ assistantId }: AssistantProps) {
   const { t } = useTranslation();
-  const { getAssistant, updateAssistant } = useAssistantStore();
+  const {
+    getAssistant,
+    updateAssistant,
+    createTarget,
+    updateTarget,
+    duplicateTarget,
+    deleteTarget,
+  } = useAssistantStore();
+  const { showModal } = useContext(ModalsContext);
 
   const assistant = getAssistant(assistantId);
 
@@ -54,6 +69,50 @@ export default function AssistantView({ assistantId }: AssistantProps) {
   const handleUpdateParameter = (name: string, value: ParameterValue) => {
     if (assistant) {
       updateAssistant({ ...assistant, [name]: value });
+    }
+  };
+
+  const handleUpdateTarget = async (action: string, data: ModalData) => {
+    if (assistant) {
+      const target = data.item as AssistantTarget;
+      updateTarget(assistant, target);
+    }
+  };
+
+  const handleCreateTarget = () => {
+    logger.info('Create target');
+    if (assistant) {
+      const newTarget = createTarget();
+      showModal(ModalIds.EditTarget, { item: newTarget, onAction: handleUpdateTarget });
+    }
+  };
+
+  const handleEditTarget = (target: AssistantTarget) => {
+    logger.info('Edit target');
+    if (assistant) {
+      showModal(ModalIds.EditTarget, { item: target, onAction: handleUpdateTarget });
+    }
+  };
+
+  const handleDuplicateTarget = (target: AssistantTarget) => {
+    logger.info('Duplicate target');
+    if (assistant) {
+      const newTarget = duplicateTarget({ ...target, name: '#duplicate' });
+      showModal(ModalIds.EditTarget, { item: newTarget, onAction: handleUpdateTarget });
+    }
+  };
+
+  const handleDeleteTarget = async (action: string, data: ModalData) => {
+    logger.info('Delete target', action);
+    if (action === 'Delete' && assistant && data.item.id) {
+      deleteTarget(assistant, data.item.id);
+    }
+  };
+
+  const handleToDeleteTarget = (target: AssistantTarget) => {
+    logger.info('Delete target');
+    if (assistant) {
+      showModal(ModalIds.DeleteItem, { item: target, onAction: handleDeleteTarget });
     }
   };
 
@@ -101,35 +160,97 @@ export default function AssistantView({ assistantId }: AssistantProps) {
       >
         {assistant && (
           <>
-            <TabsContent value="settings" className="h-full">
-              <ScrollArea className="h-full">
-                <div className="flex flex-col items-center gap-2 px-8 py-4 text-sm">
-                  <div className="flex w-full flex-row items-center gap-4 px-4">
-                    <Button variant="ghost" className="h-16 w-16 p-2" onClick={handleChangeIcon}>
-                      <AssistantIcon
-                        icon={assistant.icon}
-                        name={assistant.name}
-                        className="h-full w-full"
+            <TabsContent value="settings" className="m-0 h-full p-0">
+              <ScrollArea className="h-full px-8 py-4">
+                <div className="flex h-full flex-col gap-2 pb-16 text-sm">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex w-full flex-row gap-4">
+                        <Button
+                          variant="ghost"
+                          className="h-16 w-16 p-2"
+                          onClick={handleChangeIcon}
+                        >
+                          <AssistantIcon
+                            icon={assistant.icon}
+                            name={assistant.name}
+                            className="h-full w-full"
+                          />
+                        </Button>
+                        <Parameter
+                          name="name"
+                          value={assistant?.name}
+                          type="text"
+                          onChange={handleUpdateParameter}
+                        />
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <Parameter
+                        title={t('Description')}
+                        name="description"
+                        value={assistant?.description}
+                        type="large-text"
+                        onChange={handleUpdateParameter}
                       />
-                    </Button>
-                    <Parameter
-                      name="name"
-                      value={assistant?.name}
-                      type="text"
-                      onChange={handleUpdateParameter}
-                    />
-                  </div>
-                  <Parameter
-                    title={t('Description')}
-                    name="description"
-                    value={assistant?.description}
-                    type="large-text"
-                    onChange={handleUpdateParameter}
-                  />
+
+                      <Parameter
+                        title={t('Version')}
+                        name="version"
+                        value={assistant?.version}
+                        type="text"
+                        onChange={handleUpdateParameter}
+                      />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>{t('System')}</CardTitle>
+                      <CardDescription>{t('Default system configuration.')}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Parameter
+                        name="system"
+                        value={assistant?.system}
+                        type="large-text"
+                        onChange={handleUpdateParameter}
+                      />
+                    </CardContent>
+                  </Card>
+                  <Card className="min-h-[400px]">
+                    <CardHeader className="flex w-full flex-row items-center">
+                      <div className="grow">
+                        <CardTitle>{t('Targets')}</CardTitle>
+                        <CardDescription>Deploy your assistant to.</CardDescription>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={handleCreateTarget}>
+                        <Plus className="h-4 w-4" strokeWidth={1.5} />
+                      </Button>
+                    </CardHeader>
+                    <CardContent>
+                      {(!assistant.targets || assistant.targets.length === 0) && (
+                        <EmptyView
+                          title={t('No target associated')}
+                          description={t('You have not added any targets. Add one below.')}
+                          icon={<Target className="h-16 w-16 text-muted" />}
+                          buttonLabel={t('Add a target')}
+                          onCreateItem={handleCreateTarget}
+                        />
+                      )}
+                      {assistant.targets && (
+                        <TargetsTable
+                          targets={assistant.targets}
+                          onEdit={handleEditTarget}
+                          onDuplicate={handleDuplicateTarget}
+                          onDelete={handleToDeleteTarget}
+                        />
+                      )}
+                    </CardContent>
+                  </Card>
                 </div>
               </ScrollArea>
             </TabsContent>
-            <TabsContent value="settings" className="h-full">
+            <TabsContent value="settings" className="h-full w-full">
               <div>TODO</div>
             </TabsContent>
           </>

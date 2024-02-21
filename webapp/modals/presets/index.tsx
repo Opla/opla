@@ -28,11 +28,12 @@ import React, { useState } from 'react';
 import AlertDialog from '@/components/common/AlertDialog';
 import useTranslation from '@/hooks/useTranslation';
 import { Input } from '@/components/ui/input';
+import { ModalData } from '@/context/modals';
 
 type NewPresetDialogProps = {
   id: string;
   visible: boolean;
-  data: any;
+  data: ModalData;
   onClose: () => void | undefined;
 };
 
@@ -43,7 +44,7 @@ function NewPresetDialog({ id, visible, data, onClose }: NewPresetDialogProps) {
 
   const handleDuplicate = (action: string) => {
     if (action === 'Duplicate' && value.length > 3) {
-      data.onAction(action, value);
+      data.onAction?.(action, { item: { name: value } });
       onClose();
     }
   };
