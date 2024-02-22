@@ -15,7 +15,13 @@
 'use client';
 
 import { Ui } from '@/types';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ModalData } from '@/context/modals';
 
@@ -53,7 +59,9 @@ export default function AlertDialog({
       }}
     >
       <div className="flex h-full w-full flex-col gap-3 p-4">
-        <DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
         <DialogContent>{children}</DialogContent>
         <DialogFooter>
           {actions?.map((action) => (

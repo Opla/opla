@@ -27,7 +27,6 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Ui } from '@/types';
 
-
 function ComboItem({ item, onSelect }: { item: Ui.MenuItem; onSelect: () => void }) {
   const I = item.icon as React.ElementType;
   return (
@@ -71,7 +70,7 @@ export default function Combobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("min-w-[200px] justify-between", className)}
+          className={cn('min-w-[200px] justify-between', className)}
         >
           {items.find((item) => item.selected)?.label || t(placeholder)}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

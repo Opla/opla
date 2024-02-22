@@ -152,12 +152,10 @@ function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 }
 DialogFooter.displayName = 'DialogFooter';
 
-function DialogTitle(
-  { className, ...props }: React.HTMLAttributes<HTMLDivElement>
-) {
+function DialogTitle({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('text-lg font-semibold leading-none tracking-tight pb-4', className)}
+      className={cn('pb-4 text-lg font-semibold leading-none tracking-tight', className)}
       {...props}
     />
   );
