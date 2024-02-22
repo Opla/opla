@@ -14,11 +14,14 @@
 
 'use client';
 
-import { ChangeEvent, MouseEvent } from 'react';
+import { ChangeEvent, MouseEvent, useContext, useMemo } from 'react';
+import useBackend from '@/hooks/useBackendContext';
 import { AlertTriangle, Loader2, Paperclip, SendHorizontal } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
+import { AppContext } from '@/context';
+import { getModelsAsItems } from '@/utils/data/models';
 import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { ShortcutBadge } from '../common/ShortCut';
@@ -44,6 +47,17 @@ export default function Prompt({
   isLoading,
 }: PromptProps) {
   const { t } = useTranslation();
+  const { providers } = useContext(AppContext);
+  const { backendContext } = useBackend();
+  const modelItems = useMemo(() => {
+    const items = getModelsAsItems(providers, backendContext).map((item) => ({
+      ...item,
+      value: `@${item.value}`,
+      group: 'models',
+    }));
+    items.unshift({ value: '@system', label: '@system', group: 'system' });
+    return items;
+  }, [providers, backendContext]);
 
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
@@ -96,11 +110,7 @@ export default function Prompt({
           </Button>
           <PromptCommand
             value={message}
-            commands={[
-              { label: '@test1', value: '@test1' },
-              { label: '@test2', value: '@test2' },
-              { label: '@test3', value: '@test3' },
-            ]}
+            commands={modelItems}
             placeholder={t('Send a message...')}
             className="m-0 max-h-[200px] min-h-[32px] w-full resize-none overflow-y-hidden border-0 bg-transparent px-3 py-1.5 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent dark:text-white dark:placeholder-white"
             onChange={handleUpdateMessage}

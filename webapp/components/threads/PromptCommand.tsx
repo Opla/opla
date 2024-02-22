@@ -15,41 +15,54 @@
 // Inspiration
 // https://github.com/mxkaske/mxkaske.dev/blob/main/components/craft/fancy-area/write.tsx
 
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getCaretCoordinates, getCurrentWord, replaceWord } from '@/utils/caretPosition';
 import { Ui } from '@/types';
 import { cn } from '@/lib/utils';
 import logger from '@/utils/logger';
-import { Command, CommandGroup, CommandItem } from '../ui/command';
+import useTranslation from '@/hooks/useTranslation';
 import { Textarea } from '../ui/textarea';
+import { Button } from '../ui/button';
+
+export type ParsedPrompt = {
+  raw: string;
+  text: string;
+  mentions: string[];
+};
 
 type PromptCommandProps = {
   value?: string;
   placeholder?: string;
+  notFound?: string;
   commands: Ui.MenuItem[];
   onChange?: (value: string) => void;
   className?: string;
   onFocus?: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  // onCommandSelect: (value: string) => void;
+  onCommandSelect?: (value: string) => void;
 };
 
 function PromptCommand({
   value,
   placeholder,
+  notFound = 'No command found.',
   commands,
   className,
   onChange,
   onFocus,
+  onCommandSelect,
 }: PromptCommandProps) {
+  const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const groupRef = useRef<HTMLInputElement>(null);
   const [commandValue, setCommandValue] = useState('');
 
   const toggleDropdown = (visible = true) => {
     if (visible) {
       dropdownRef.current?.classList.remove('hidden');
     } else {
+      setCommandValue('');
       dropdownRef.current?.classList.add('hidden');
     }
   };
@@ -57,27 +70,20 @@ function PromptCommand({
   const positionDropdown = useCallback(() => {
     const textarea = textareaRef.current;
     const dropdown = dropdownRef.current;
-    if (textarea && dropdown) {
+    const group = groupRef.current;
+    if (textarea && dropdown && group) {
       const caret = getCaretCoordinates(textarea, textarea.selectionEnd);
       const rect = dropdown.getBoundingClientRect();
       logger.info('caret', caret, rect);
-      dropdown.style.left = `${caret.left}px`;
-      dropdown.style.top = `${caret.top - rect.height}px`;
+      dropdown.style.transform = `translate(${caret.left}px, ${-caret.top - caret.height - 4}px)`;
+      dropdown.style.left = `0px`;
+      dropdown.style.bottom = `0px`;
     }
   }, []);
 
   useEffect(() => {
     positionDropdown();
   }, [commandValue, positionDropdown]);
-
-  const handleBlur = useCallback(() => {
-    const dropdown = dropdownRef.current;
-    if (dropdown) {
-      // dropdown.classList.add('hidden');
-      // toggleDropdown(false);
-      setCommandValue('');
-    }
-  }, []);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     const textarea = textareaRef.current;
@@ -108,33 +114,50 @@ function PromptCommand({
 
       if (textarea && dropdown) {
         const currentWord = getCurrentWord(textarea);
-        onChange?.(text);
+        if (value !== text) {
+          onChange?.(text);
+        }
         logger.info({ currentWord });
         if (currentWord.startsWith('@')) {
           setCommandValue(currentWord);
           positionDropdown();
-          // dropdown.classList.remove('hidden');
           toggleDropdown();
         } else if (commandValue !== '') {
-          setCommandValue('');
-          // dropdown.classList.add('hidden');
           toggleDropdown(false);
         }
       }
     },
-    [onChange, commandValue, positionDropdown],
+    [value, commandValue, onChange, positionDropdown],
   );
 
-  const onCommandSelect = useCallback((newValue: string) => {
-    const textarea = textareaRef.current;
+  const handleCommandSelect = useCallback(
+    (newValue: string) => {
+      const textarea = textareaRef.current;
+      const dropdown = dropdownRef.current;
+      if (textarea && dropdown) {
+        replaceWord(textarea, `${newValue}`);
+        toggleDropdown(false);
+        onCommandSelect?.(newValue);
+      }
+    },
+    [onCommandSelect],
+  );
+
+  const handleBlur = useCallback(() => {
     const dropdown = dropdownRef.current;
-    if (textarea && dropdown) {
-      replaceWord(textarea, `${newValue}`);
-      setCommandValue('');
-      // dropdown.classList.add('hidden');
+    if (dropdown) {
       toggleDropdown(false);
     }
   }, []);
+
+  const handleFocus = useCallback(
+    (event: ChangeEvent<HTMLTextAreaElement>) => {
+      logger.info('focus');
+      handleValueChange(event);
+      onFocus?.(event);
+    },
+    [handleValueChange, onFocus],
+  );
 
   const handleMouseDown = useCallback((e: Event) => {
     e.preventDefault();
@@ -148,8 +171,6 @@ function PromptCommand({
       const currentWord = getCurrentWord(textarea);
       logger.info(currentWord);
       if (!currentWord.startsWith('@') && commandValue !== '') {
-        setCommandValue('');
-        // dropdown.classList.add('hidden');
         toggleDropdown(false);
       }
     }
@@ -170,6 +191,13 @@ function PromptCommand({
     };
   }, [handleBlur, handleKeyDown, handleMouseDown, handleSelectionChange]);
 
+  const filteredCommands = useMemo(
+    () =>
+      commands.filter(
+        (c) => !(!c.value || c.value?.toLowerCase().indexOf(commandValue.toLowerCase()) === -1),
+      ),
+    [commands, commandValue],
+  );
   return (
     <div className="relative h-full w-full overflow-visible">
       <Textarea
@@ -184,29 +212,29 @@ function PromptCommand({
         placeholder={placeholder}
         onChange={handleValueChange}
         rows={5}
-        onFocus={onFocus}
+        onFocus={handleFocus}
       />
-      <Command
+      <div
         ref={dropdownRef}
         className={cn(
-          'absolute hidden h-auto max-w-[320px] overflow-visible border border-popover shadow',
+          'absolute hidden h-auto min-w-[240px] max-w-[320px] overflow-visible rounded-md border bg-popover p-0 text-popover-foreground shadow',
         )}
       >
-        {/* REMINDER: className="hidden" won't hide the SearchIcon and border */}
-        {/* <CommandInput ref={inputRef} value={commandValue} /> */}
-        <CommandGroup className="h-full">
-          {commands.map((item) => (
-            <CommandItem
-              key={item.label}
-              value={item.value}
-              onSelect={onCommandSelect}
-              className="ellipsis flex w-full flex-row-reverse items-center gap-2"
-            >
-              <div className="grow">{item.label}</div>
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      </Command>
+        <div ref={groupRef} className="gap-2">
+          {filteredCommands.length === 0 && <div>{t(notFound)}</div>}
+          {filteredCommands.length > 0 &&
+            filteredCommands.map((item) => (
+              <Button
+                variant="ghost"
+                key={item.label}
+                onClick={() => handleCommandSelect(item.value as string)}
+                className="ellipsis flex flex w-full cursor-pointer select-none flex-row-reverse items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+              >
+                <div className="w-full grow">{item.label}</div>
+              </Button>
+            ))}
+        </div>
+      </div>
     </div>
   );
 }
