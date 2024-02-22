@@ -40,11 +40,11 @@ export default function Form<T>({
   );
 
   return (
-    <form>
+    <form className="p-2">
       {Object.keys(parametersDefinition).map((key) => (
         <Parameter
           key={key}
-          title={t(parametersDefinition[key].name)}
+          label={t(parametersDefinition[key].name)}
           type={parametersDefinition[key].type}
           name={key}
           value={

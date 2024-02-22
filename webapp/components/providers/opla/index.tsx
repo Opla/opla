@@ -43,14 +43,14 @@ export default function Opla({
   return (
     <div className="flex flex-col gap-2 px-8 py-4 text-sm">
       <Parameter
-        title={t('Description')}
+        label={t('Description')}
         name="description"
         value={t(deepGet<Provider, string>(provider, 'description'))}
         disabled
         type="large-text"
       />
       <Parameter
-        title={t('Local server')}
+        label={t('Local server')}
         name="metadata.server.name"
         value={deepGet(provider, 'metadata.server.name', '')}
         disabled
@@ -58,35 +58,35 @@ export default function Opla({
         onChange={onParameterChange}
       />
       <Parameter
-        title={t('Host')}
+        label={t('Host')}
         name="metadata.server.parameters.host"
         value={deepGet(provider, 'metadata.server.parameters.host', '')}
         type="text"
         onChange={onParameterChange}
       />
       <Parameter
-        title={t('Port')}
+        label={t('Port')}
         name="metadata.server.parameters.port"
         value={deepGet(provider, 'metadata.server.parameters.port', '')}
         type="number"
         onChange={onParameterChange}
       />
       <Parameter
-        title={t('Context size')}
+        label={t('Context size')}
         name="metadata.server.parameters.contextSize"
         value={deepGet(provider, 'metadata.server.parameters.contextSize', '')}
         type="number"
         onChange={onParameterChange}
       />
       <Parameter
-        title={t('Threads')}
+        label={t('Threads')}
         name="metadata.server.parameters.threads"
         value={deepGet(provider, 'metadata.server.parameters.threads', '')}
         type="number"
         onChange={onParameterChange}
       />
       <Parameter
-        title={t('Number of GPU layers')}
+        label={t('Number of GPU layers')}
         name="metadata.server.parameters.nGpuLayers"
         value={deepGet(provider, 'metadata.server.parameters.nGpuLayers', '')}
         type="number"

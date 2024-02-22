@@ -91,7 +91,10 @@ function Dialog({
       id={id}
       ref={modalRef}
       onCancel={onClose}
-      className={`${cssSize} relative rounded-lg bg-white shadow-lg transition-all backdrop:bg-neutral-950/50 dark:bg-neutral-900`}
+      className={cn(
+        cssSize,
+        `relative rounded-lg shadow-lg transition-all backdrop:bg-neutral-950/70`,
+      )}
     >
       {title && <div>{title}</div>}
       {children}
@@ -152,14 +155,10 @@ function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 }
 DialogFooter.displayName = 'DialogFooter';
 
-function DialogTitle(
-  { className, ...props }: React.HTMLAttributes<HTMLDivElement>,
-  ref: LegacyRef<HTMLDivElement> | undefined,
-) {
+function DialogTitle({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      ref={ref}
-      className={cn('text-lg font-semibold leading-none tracking-tight', className)}
+      className={cn('pb-4 text-lg font-semibold leading-none tracking-tight', className)}
       {...props}
     />
   );

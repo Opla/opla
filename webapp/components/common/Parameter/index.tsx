@@ -14,22 +14,22 @@
 
 'use client';
 
+import { HelpCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { BaseNamedRecord } from '@/types';
-import { HelpCircle } from 'lucide-react';
 
-export type ParameterValue = string | number | boolean | BaseNamedRecord[];
+export type ParameterValue = string | number | boolean | BaseNamedRecord[] | string[];
 export type ParametersRecord = Record<string, ParameterValue | undefined>;
 
 export default function Parameter({
-  title,
+  label,
   placeholder,
   name,
-  subtitle = '',
+  sublabel = '',
   description,
   inputCss,
   value,
@@ -40,10 +40,10 @@ export default function Parameter({
   children,
   onChange = () => {},
 }: {
-  title?: string;
+  label?: string;
   placeholder?: string;
   name: string;
-  subtitle?: string;
+  sublabel?: string;
   description?: string;
   inputCss?: string;
   min?: number;
@@ -56,9 +56,7 @@ export default function Parameter({
 }) {
   const textCss = 'pr-2 w-sm';
   const boxCss =
-    type === 'large-text'
-      ? 'flex w-full flex-col px-4 pb-4 pt-3'
-      : 'flex w-full flex-row px-4 pb-4 pt-3';
+    type === 'large-text' ? 'flex w-full flex-col px-0 py-2' : 'flex w-full flex-row px-0 py-2';
 
   let component = null;
 
@@ -87,7 +85,7 @@ export default function Parameter({
     component = (
       <Textarea
         disabled={disabled}
-        className="mt-2 w-full"
+        className="mt-2 w-full resize-none overflow-y-hidden"
         value={value as string}
         placeholder={placeholder}
         onChange={(e) => {
@@ -140,7 +138,7 @@ export default function Parameter({
       <div className="flex w-full flex-grow flex-col justify-center">
         <div className="flex w-full flex-row items-center justify-between">
           <div className={`flex grow flex-row ${flex}`}>
-            {title && <p>{title} </p>}
+            {label && <p>{label} </p>}
             {component}
           </div>
           {description && (
@@ -154,7 +152,7 @@ export default function Parameter({
             </Tooltip>
           )}
         </div>
-        <p className="text-sm">{subtitle}</p>
+        <p className="text-sm">{sublabel}</p>
       </div>
     </div>
   );

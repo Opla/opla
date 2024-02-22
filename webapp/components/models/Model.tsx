@@ -115,7 +115,7 @@ function ModelView({
                 <h1 className="items-right bold w-full text-xl">{model.title || model.name}</h1>
                 <div className="flex w-full flex-col items-center gap-2 text-sm">
                   <Parameter
-                    title=""
+                    label=""
                     name="description"
                     value={updatedParameters?.description || t(model.description || '')}
                     disabled={!model.editable}
@@ -124,7 +124,7 @@ function ModelView({
                   />
                   {model.fileName && (
                     <Parameter
-                      title={t('File')}
+                      label={t('File')}
                       name="file"
                       value={`${model.path || ''}/${model.fileName || ''}`}
                       disabled
@@ -133,7 +133,7 @@ function ModelView({
                   )}
                   {model.author && (
                     <Parameter
-                      title={t('Author')}
+                      label={t('Author')}
                       name="author"
                       value={updatedParameters?.author || `${getEntityName(model.author)}`}
                       disabled={!model.editable}
@@ -144,7 +144,7 @@ function ModelView({
                   {getEntityName(model.creator).toLowerCase() !==
                     getEntityName(model.author).toLowerCase() && (
                     <Parameter
-                      title={t('Creator')}
+                      label={t('Creator')}
                       name="version"
                       value={`${getEntityName(model.creator)}`}
                       disabled={!model.editable}
@@ -157,7 +157,7 @@ function ModelView({
                     getEntityName(model.publisher).toLowerCase() !==
                       getEntityName(model.creator).toLowerCase() && (
                       <Parameter
-                        title={t('Publisher')}
+                        label={t('Publisher')}
                         name="version"
                         value={`${getEntityName(model.publisher)}`}
                         disabled={!model.editable}
@@ -166,7 +166,7 @@ function ModelView({
                     )}
                   {model.version && (
                     <Parameter
-                      title={t('Version')}
+                      label={t('Version')}
                       name="version"
                       value={`${model.version}`}
                       disabled={!model.editable}
@@ -175,7 +175,7 @@ function ModelView({
                   )}
                   {model.license && (
                     <Parameter
-                      title={t('License')}
+                      label={t('License')}
                       name="license"
                       value={`${getEntityName(model.license)}`}
                       disabled={!model.editable}
@@ -184,7 +184,7 @@ function ModelView({
                   )}
                   {model.repository && (
                     <Parameter
-                      title={t('Repository')}
+                      label={t('Repository')}
                       name="url"
                       value={`${getResourceUrl(model.repository)}`}
                       disabled={!model.editable}

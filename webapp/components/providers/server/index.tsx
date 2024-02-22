@@ -28,42 +28,42 @@ export default function Server({
   return (
     <div className="flex flex-col items-center gap-2 px-8 py-4 text-sm">
       <Parameter
-        title={t('Name')}
+        label={t('Name')}
         name="name"
         value={provider?.name}
         type="text"
         onChange={onParameterChange}
       />
       <Parameter
-        title={t('Url')}
+        label={t('Url')}
         name="url"
         value={provider?.url}
         type="text"
         onChange={onParameterChange}
       />
       <Parameter
-        title={t('Secret key')}
+        label={t('Secret key')}
         name="key"
         value={provider?.key}
         type="text"
         onChange={onParameterChange}
       />
       <Parameter
-        title={t('Models')}
+        label={t('Models')}
         name="models"
         value={provider?.models || ([] as BaseNamedRecord[])}
         type="array"
         onChange={onParameterChange}
       />
       <Parameter
-        title={t('Documentation')}
+        label={t('Documentation')}
         name="docUrl"
         value={provider?.docUrl}
         type="text"
         onChange={onParameterChange}
       />
       <Parameter
-        title={t('Description')}
+        label={t('Description')}
         name="description"
         value={provider?.description}
         type="large-text"

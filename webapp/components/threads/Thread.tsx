@@ -43,8 +43,8 @@ import {
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
 import { buildContext, completion, getCompletionParametersDefinition } from '@/utils/providers';
-import { findModel, getLocalModelsAsItems, getProviderModelsAsItems } from '@/utils/data/models';
-import { findProvider, getLocalProvider } from '@/utils/data/providers';
+import { findModel, getModelsAsItems } from '@/utils/data/models';
+import { findProvider } from '@/utils/data/providers';
 import { toast } from '@/components/ui/Toast';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { ModalData, ModalsContext } from '@/context/modals';
@@ -147,13 +147,14 @@ function Thread({
 
   const showEmptyChat = !conversationId;
   const selectedModel = selectedConversation?.model || activeModel;
-  const localModelItems = getLocalModelsAsItems(
+  /* const localModelItems = getLocalModelsAsItems(
     backendContext,
     selectedModel,
     getLocalProvider(providers),
   );
   const cloudModelItems = getProviderModelsAsItems(providers, selectedModel);
-  const modelItems = [...localModelItems, ...cloudModelItems];
+  const modelItems = [...localModelItems, ...cloudModelItems]; */
+  const modelItems = getModelsAsItems(providers, backendContext, selectedModel);
 
   useEffect(() => {
     if (_conversationId && tempConversationId) {

@@ -212,11 +212,11 @@ export default function Settings({
             <Accordion type="multiple" className="w-full px-1" defaultValue={['settings-system']}>
               <AccordionItem value="settings-system">
                 <AccordionTrigger>{t('System')}</AccordionTrigger>
-                <AccordionContent>
+                <AccordionContent className="m-0 p-2">
                   <Textarea
                     value={system}
                     onChange={handleSystemChange}
-                    className="resize-none overflow-y-hidden border-0 bg-transparent p-2 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent"
+                    className="min-h-[240px] resize-none  overflow-y-hidden"
                   />
                 </AccordionContent>
               </AccordionItem>
@@ -233,8 +233,8 @@ export default function Settings({
               </AccordionItem>
               <AccordionItem value="contextwindow-parameters">
                 <AccordionTrigger>{t('Context window')}</AccordionTrigger>
-                <AccordionContent>
-                  <div className="flex w-full flex-row px-4 py-2">
+                <AccordionContent className=" my-2 px-2 pb-8">
+                  <div className="flex w-full flex-row py-2">
                     <Select defaultValue={selectedPolicy} onValueChange={handlePolicyChange}>
                       <SelectTrigger className="grow capitalize">
                         <SelectValue placeholder={t('Select policy')} />
@@ -258,7 +258,7 @@ export default function Settings({
                   </div>
 
                   <Parameter
-                    title={t('Keep system')}
+                    label={t('Keep system')}
                     type="boolean"
                     name="keepSystem"
                     inputCss="max-w-20 pl-2"
@@ -293,12 +293,16 @@ export default function Settings({
               </div>
             </div>
           )}
-          <Textarea
-            value={selectedConversation?.note ?? ''}
-            placeholder={t('Write a note...')}
-            className="resize-none overflow-y-hidden border-0 bg-transparent p-2 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent"
-            onChange={handleNoteChange}
-          />
+          <div className="w-full p-2">
+            <Textarea
+              value={selectedConversation?.note ?? ''}
+              disabled={!selectedConversation?.temp}
+              placeholder={t('Write a note...')}
+              className="min-h-[240px] resize-none  overflow-y-hidden"
+              onChange={handleNoteChange}
+            />
+          </div>
+
           {selectedConversation && (
             <div className="w-full p-2 text-sm text-neutral-400">
               <div className="py-4">{t('Files')}</div>
