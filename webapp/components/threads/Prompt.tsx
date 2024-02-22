@@ -14,14 +14,15 @@
 
 'use client';
 
-import { ChangeEvent, KeyboardEvent, MouseEvent } from 'react';
+import { ChangeEvent, MouseEvent } from 'react';
 import { AlertTriangle, Loader2, Paperclip, SendHorizontal } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts';
-import { Textarea } from '../ui/textarea';
+import logger from '@/utils/logger';
 import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { ShortcutBadge } from '../common/ShortCut';
+import PromptCommand from './PromptCommand';
 
 export type PromptProps = {
   conversationId: string;
@@ -46,6 +47,7 @@ export default function Prompt({
 
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
+    logger.info('sending message', conversationId);
     onSendMessage();
   };
 
@@ -54,16 +56,8 @@ export default function Prompt({
     onUploadFile();
   };
 
-  const handleKeypress = (event: KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      onSendMessage();
-    }
-  };
-
-  const handleUpdateMessage = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    event.preventDefault();
-    onUpdatePrompt(event.target.value);
+  const handleUpdateMessage = (newValue: string) => {
+    onUpdatePrompt(newValue);
   };
 
   const handleFocus = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -100,16 +94,16 @@ export default function Prompt({
           >
             <Paperclip className="strokeWidth={1.5} h-4 w-4" />
           </Button>
-          <Textarea
-            autoresize
-            autoFocus
+          <PromptCommand
             value={message}
-            key={conversationId}
-            tabIndex={0}
+            commands={[
+              { label: '@test1', value: '@test1' },
+              { label: '@test2', value: '@test2' },
+              { label: '@test3', value: '@test3' },
+            ]}
             placeholder={t('Send a message...')}
             className="m-0 max-h-[200px] min-h-[32px] w-full resize-none overflow-y-hidden border-0 bg-transparent px-3 py-1.5 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent dark:text-white dark:placeholder-white"
             onChange={handleUpdateMessage}
-            onKeyDown={handleKeypress}
             onFocus={handleFocus}
           />
           <Tooltip>
