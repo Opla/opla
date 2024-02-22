@@ -11,9 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import * as React from 'react';
-import { Check, ChevronsUpDown } from 'lucide-react';
 
+import { useState } from 'react';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import useTranslation from '@/hooks/useTranslation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,6 +26,7 @@ import {
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Ui } from '@/types';
+
 
 function ComboItem({ item, onSelect }: { item: Ui.MenuItem; onSelect: () => void }) {
   const I = item.icon as React.ElementType;
@@ -42,20 +44,26 @@ function ComboItem({ item, onSelect }: { item: Ui.MenuItem; onSelect: () => void
     </CommandItem>
   );
 }
+
+type ComboboxProps = {
+  items: Ui.MenuItem[];
+  onSelect: (value?: string) => void;
+  placeholder?: string;
+  searchPlaceholder?: string;
+  notFound?: string;
+  className?: string;
+};
+
 export default function Combobox({
   items,
   onSelect,
   placeholder = 'Select an item',
   searchPlaceholder,
   notFound = 'No results found.',
-}: {
-  items: Ui.MenuItem[];
-  placeholder?: string;
-  searchPlaceholder?: string;
-  notFound?: string;
-  onSelect: (value?: string, data?: string) => void;
-}) {
-  const [open, setOpen] = React.useState(false);
+  className,
+}: ComboboxProps) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -63,15 +71,15 @@ export default function Combobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="min-w-[200px] justify-between"
+          className={cn("min-w-[200px] justify-between", className)}
         >
-          {items.find((item) => item.selected)?.label || placeholder}
+          {items.find((item) => item.selected)?.label || t(placeholder)}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto min-w-[200px] p-0">
         <Command className="">
-          <CommandInput placeholder={searchPlaceholder} />
+          <CommandInput placeholder={searchPlaceholder ? t(searchPlaceholder) : undefined} />
           <CommandEmpty>{notFound}</CommandEmpty>
           <CommandGroup>
             {items.map((item) => (

@@ -17,6 +17,8 @@ import useTranslation from '@/hooks/useTranslation';
 import { BaseNamedRecord } from '@/types';
 import AlertDialog from '../common/AlertDialog';
 import Parameter, { ParameterValue } from '../common/Parameter';
+import Combobox from '../common/Combobox';
+import LabelParameter from '../common/LabelParameter';
 
 type EditTargetDialogProps = {
   id: string;
@@ -53,6 +55,10 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
     onClose();
   };
 
+  const handleSelectModel = (value?: string) => {
+    console.log('handleSelectModel', value);
+  };
+
   return (
     <AlertDialog
       id={id}
@@ -67,13 +73,24 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
       onAction={handleAction}
     >
       <div>
-        <Parameter
-          placeholder={t('Insert target name...')}
-          inputCss="w-full"
-          name="name"
-          value={newParameters.name || targetName || ''}
-          onChange={handleChange}
-        />
+        <LabelParameter label={t('Name')} className="space-y-0">
+          <Parameter
+            placeholder={t('Insert target name...')}
+            inputCss="w-full"
+            name="name"
+            value={newParameters.name || targetName || ''}
+            onChange={handleChange}
+          />
+        </LabelParameter>
+
+        <LabelParameter label={t('Model')}>
+          <Combobox
+            items={[]}
+            onSelect={handleSelectModel}
+            className="w-full bg-transparent"
+            placeholder="Select a model..."
+          />
+        </LabelParameter>
       </div>
     </AlertDialog>
   );

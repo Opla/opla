@@ -187,7 +187,7 @@ export default function AssistantView({ assistantId }: AssistantProps) {
                     </CardHeader>
                     <CardContent>
                       <Parameter
-                        title={t('Description')}
+                        label={t('Description')}
                         name="description"
                         value={assistant?.description}
                         type="large-text"
@@ -195,7 +195,7 @@ export default function AssistantView({ assistantId }: AssistantProps) {
                       />
 
                       <Parameter
-                        title={t('Version')}
+                        label={t('Version')}
                         name="version"
                         value={assistant?.version}
                         type="text"
