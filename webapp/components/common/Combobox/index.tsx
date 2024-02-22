@@ -24,10 +24,23 @@ import {
   CommandInput,
   CommandItem,
 } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverContentExt,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Ui } from '@/types';
 
-function ComboItem({ item, onSelect }: { item: Ui.MenuItem; onSelect: () => void }) {
+function ComboItem({
+  item,
+  selected,
+  onSelect,
+}: {
+  item: Ui.MenuItem;
+  selected?: string;
+  onSelect: () => void;
+}) {
   const I = item.icon as React.ElementType;
   return (
     <CommandItem
@@ -37,7 +50,12 @@ function ComboItem({ item, onSelect }: { item: Ui.MenuItem; onSelect: () => void
         onSelect();
       }}
     >
-      <Check className={cn('mr-2 h-4 w-4', item.selected ? 'opacity-100' : 'opacity-0')} />
+      <Check
+        className={cn(
+          'mr-2 h-4 w-4',
+          item.selected || item.value === selected ? 'opacity-100' : 'opacity-0',
+        )}
+      />
       <div className="grow">{item.label}</div>
       {I && <I className="h-4 w-4 shrink-0 opacity-50" />}
     </CommandItem>
@@ -46,23 +64,28 @@ function ComboItem({ item, onSelect }: { item: Ui.MenuItem; onSelect: () => void
 
 type ComboboxProps = {
   items: Ui.MenuItem[];
-  onSelect: (value?: string) => void;
+  selected?: string;
+  onSelect: (value?: string, index?: number) => void;
   placeholder?: string;
   searchPlaceholder?: string;
   notFound?: string;
   className?: string;
+  portal?: boolean;
 };
 
 export default function Combobox({
   items,
+  selected,
   onSelect,
   placeholder = 'Select an item',
   searchPlaceholder,
   notFound = 'No results found.',
   className,
+  portal = true,
 }: ComboboxProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const Content = portal ? PopoverContent : PopoverContentExt;
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -72,28 +95,30 @@ export default function Combobox({
           aria-expanded={open}
           className={cn('min-w-[200px] justify-between', className)}
         >
-          {items.find((item) => item.selected)?.label || t(placeholder)}
+          {items.find((item) => item.selected)?.label || selected || t(placeholder)}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto min-w-[200px] p-0">
+
+      <Content className="min-w-[200px] p-0">
         <Command className="">
           <CommandInput placeholder={searchPlaceholder ? t(searchPlaceholder) : undefined} />
-          <CommandEmpty>{notFound}</CommandEmpty>
+          <CommandEmpty>{t(notFound)}</CommandEmpty>
           <CommandGroup>
-            {items.map((item) => (
+            {items.map((item, index) => (
               <ComboItem
                 key={item.label}
+                selected={selected}
                 item={item}
                 onSelect={() => {
-                  onSelect(item.value);
+                  onSelect(item.value, index);
                   setOpen(false);
                 }}
               />
             ))}
           </CommandGroup>
         </Command>
-      </PopoverContent>
+      </Content>
     </Popover>
   );
 }

@@ -91,7 +91,10 @@ function Dialog({
       id={id}
       ref={modalRef}
       onCancel={onClose}
-      className={`${cssSize} relative rounded-lg bg-white shadow-lg transition-all backdrop:bg-neutral-950/50 dark:bg-neutral-900`}
+      className={cn(
+        cssSize,
+        `relative rounded-lg shadow-lg transition-all backdrop:bg-neutral-950/70`,
+      )}
     >
       {title && <div>{title}</div>}
       {children}

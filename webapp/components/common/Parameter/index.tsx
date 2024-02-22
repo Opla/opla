@@ -22,7 +22,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { cn } from '@/lib/utils';
 import { BaseNamedRecord } from '@/types';
 
-export type ParameterValue = string | number | boolean | BaseNamedRecord[];
+export type ParameterValue = string | number | boolean | BaseNamedRecord[] | string[];
 export type ParametersRecord = Record<string, ParameterValue | undefined>;
 
 export default function Parameter({
