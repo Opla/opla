@@ -16,7 +16,7 @@
 // https://github.com/mxkaske/mxkaske.dev/blob/main/components/craft/fancy-area/write.tsx
 
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { getCaretCoordinates, getCurrentWord, replaceWord } from '@/utils/caretPosition';
+import { getCaretCoordinates, getCurrentWord } from '@/utils/caretPosition';
 import { Ui } from '@/types';
 import { cn } from '@/lib/utils';
 import logger from '@/utils/logger';
@@ -24,18 +24,53 @@ import useTranslation from '@/hooks/useTranslation';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
 
+export type PromptToken = {
+  type: 'text' | 'mention' | 'hashtag';
+  value: string;
+  index: number;
+};
+
 export type ParsedPrompt = {
   raw: string;
   text: string;
-  mentions: string[];
+  caretPosition: number;
+  currentTokenIndex: number;
+  tokens: PromptToken[];
 };
+
+function parsePrompt(value: string, caretPosition: number): ParsedPrompt {
+  // const { selectionStart, value } = textArea;
+  const pattern = /(?<=^| )[@|#][\p{L}0-9._-]+/gmu;
+  let match = pattern.exec(value);
+  const tokens: PromptToken[] = [];
+  while (match) {
+    const type = match[0][0] === '@' ? 'mention' : 'hashtag';
+    const v = match[0];
+    const {index} = match;
+    tokens.push({ type, value: v, index });
+    console.log('parsePrompt match', type, v, index, match);
+    match = pattern.exec(value);
+  }
+
+  const texts = value.split(pattern).map((t) => t.trim()).filter((t) => t !== '');
+  console.log('parsePrompt texts', texts);
+  const text = texts.join(' ');
+  console.log('parsePrompt', { tokens, text });
+  return {
+    raw: value,
+    text,
+    caretPosition,
+    currentTokenIndex: 0,
+    tokens,
+  };
+}
 
 type PromptCommandProps = {
   value?: string;
   placeholder?: string;
   notFound?: string;
   commands: Ui.MenuItem[];
-  onChange?: (value: string) => void;
+  onChange?: (value: string, parsedPrompt: ParsedPrompt) => void;
   className?: string;
   onFocus?: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onCommandSelect?: (value: string) => void;
@@ -54,8 +89,6 @@ function PromptCommand({
   const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const groupRef = useRef<HTMLInputElement>(null);
   const [commandValue, setCommandValue] = useState('');
 
   const toggleDropdown = (visible = true) => {
@@ -70,8 +103,7 @@ function PromptCommand({
   const positionDropdown = useCallback(() => {
     const textarea = textareaRef.current;
     const dropdown = dropdownRef.current;
-    const group = groupRef.current;
-    if (textarea && dropdown && group) {
+    if (textarea && dropdown) {
       const caret = getCaretCoordinates(textarea, textarea.selectionEnd);
       const rect = dropdown.getBoundingClientRect();
       logger.info('caret', caret, rect);
@@ -85,26 +117,17 @@ function PromptCommand({
     positionDropdown();
   }, [commandValue, positionDropdown]);
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    const textarea = textareaRef.current;
-    const input = inputRef.current;
-    const dropdown = dropdownRef.current;
-    if (textarea && input && dropdown) {
-      const currentWord = getCurrentWord(textarea);
-      const isDropdownHidden = dropdown.classList.contains('hidden');
-      if (currentWord.startsWith('@') && !isDropdownHidden) {
-        if (
-          e.key === 'ArrowUp' ||
-          e.key === 'ArrowDown' ||
-          e.key === 'Enter' ||
-          e.key === 'Escape'
-        ) {
-          e.preventDefault();
-          input.dispatchEvent(new KeyboardEvent('keydown', e));
-        }
+  const handleKeyDown = useCallback(() => {}, []);
+
+  const valueChange = useCallback(
+    (text: string, caretPosition: number) => {
+      const parsedPrompt = parsePrompt(text, caretPosition);
+      if (value !== text) {
+        onChange?.(text, parsedPrompt);
       }
-    }
-  }, []);
+    },
+    [onChange, value],
+  );
 
   const handleValueChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -113,10 +136,8 @@ function PromptCommand({
       const dropdown = dropdownRef.current;
 
       if (textarea && dropdown) {
-        const currentWord = getCurrentWord(textarea);
-        if (value !== text) {
-          onChange?.(text);
-        }
+        const { currentWord, caretStartIndex } = getCurrentWord(textarea);
+        valueChange(text, caretStartIndex);
         logger.info({ currentWord });
         if (currentWord.startsWith('@')) {
           setCommandValue(currentWord);
@@ -127,7 +148,7 @@ function PromptCommand({
         }
       }
     },
-    [value, commandValue, onChange, positionDropdown],
+    [commandValue, positionDropdown, valueChange],
   );
 
   const handleCommandSelect = useCallback(
@@ -135,12 +156,16 @@ function PromptCommand({
       const textarea = textareaRef.current;
       const dropdown = dropdownRef.current;
       if (textarea && dropdown) {
-        replaceWord(textarea, `${newValue}`);
+        const { currentWord, start, text, caretStartIndex } = getCurrentWord(textarea);
+        const newText =
+          text.substring(0, start) + newValue + text.substring(start + currentWord.length);
+        // replaceWord(textarea, `${newValue}`);
+        valueChange(newText, caretStartIndex);
         toggleDropdown(false);
         onCommandSelect?.(newValue);
       }
     },
-    [onCommandSelect],
+    [onCommandSelect, valueChange],
   );
 
   const handleBlur = useCallback(() => {
@@ -168,7 +193,7 @@ function PromptCommand({
     const textarea = textareaRef.current;
     const dropdown = dropdownRef.current;
     if (textarea && dropdown) {
-      const currentWord = getCurrentWord(textarea);
+      const { currentWord } = getCurrentWord(textarea);
       logger.info(currentWord);
       if (!currentWord.startsWith('@') && commandValue !== '') {
         toggleDropdown(false);
@@ -220,14 +245,17 @@ function PromptCommand({
           'absolute hidden h-auto min-w-[240px] max-w-[320px] overflow-visible rounded-md border bg-popover p-0 text-popover-foreground shadow',
         )}
       >
-        <div ref={groupRef} className="gap-2">
+        <div className="gap-2">
           {filteredCommands.length === 0 && <div>{t(notFound)}</div>}
           {filteredCommands.length > 0 &&
             filteredCommands.map((item) => (
               <Button
                 variant="ghost"
                 key={item.label}
-                onClick={() => handleCommandSelect(item.value as string)}
+                onClick={(event) => {
+                  event.preventDefault();
+                  handleCommandSelect(item.value as string);
+                }}
                 className="ellipsis flex flex w-full cursor-pointer select-none flex-row-reverse items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
               >
                 <div className="w-full grow">{item.label}</div>

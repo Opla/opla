@@ -86,9 +86,9 @@ export function getCurrentWord(element: HTMLTextAreaElement) {
     end += 1;
   }
 
-  const w = text.substring(start, end);
+  const currentWord = text.substring(start, end);
 
-  return w;
+  return { currentWord, start, caretStartIndex, text };
 }
 
 export function replaceWord(element: HTMLTextAreaElement, value: string) {

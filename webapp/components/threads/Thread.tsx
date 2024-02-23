@@ -147,13 +147,7 @@ function Thread({
 
   const showEmptyChat = !conversationId;
   const selectedModel = selectedConversation?.model || activeModel;
-  /* const localModelItems = getLocalModelsAsItems(
-    backendContext,
-    selectedModel,
-    getLocalProvider(providers),
-  );
-  const cloudModelItems = getProviderModelsAsItems(providers, selectedModel);
-  const modelItems = [...localModelItems, ...cloudModelItems]; */
+
   const modelItems = getModelsAsItems(providers, backendContext, selectedModel);
 
   useEffect(() => {
@@ -177,8 +171,6 @@ function Thread({
     selectedConversationId = conversationId,
     selectedConversations = conversations,
   ) => {
-    // const conversationMessages =
-    //  _conversationMessages || getConversationMessages(selectedConversationId);
     const updatedConversations = updateOrCreateConversation(
       selectedConversationId,
       selectedConversations,
