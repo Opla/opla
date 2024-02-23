@@ -15,7 +15,8 @@
 // Made using https://transform.tools/typescript-to-zod
 
 import { SafeParseReturnType, z } from 'zod';
-import { Metadata } from '@/types';
+import { Conversation, Metadata } from '@/types';
+import { ParsedPrompt } from '../prompt';
 
 export const MetadataSchema: z.ZodSchema<Metadata> = z.lazy(() =>
   z.record(z.union([z.string(), z.number(), z.boolean(), MetadataSchema])),
@@ -73,7 +74,13 @@ const ConversationsSchema = z.array(ConversationSchema);
 
 export type Conversations = z.infer<typeof ConversationsSchema>;
 
-const validateConversations = (data: unknown): SafeParseReturnType<unknown, Conversations> =>
+export const validateConversations = (data: unknown): SafeParseReturnType<unknown, Conversations> =>
   ConversationsSchema.safeParse(data);
 
-export { validateConversations };
+export const getConversationTitle = (conversation: Conversation) => {
+  if (conversation.temp) {
+    console.log('conversation temp', conversation.currentPrompt);
+    return `${conversation.currentPrompt && typeof conversation.currentPrompt !== 'string' ? (conversation.currentPrompt as ParsedPrompt).text || '' : conversation.currentPrompt || ''} ...`;
+  }
+  return conversation.name;
+}

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { ZodSchema } from 'zod';
+import { ParsedPrompt } from '@/utils/prompt';
 import * as Ui from './ui';
 
 declare global {
@@ -136,7 +137,7 @@ export type Conversation = BaseNamedRecord & {
   messages: Message[] | undefined;
   pluginIds?: string[];
   preset?: string;
-  currentPrompt?: string;
+  currentPrompt?: string | ParsedPrompt;
   note?: string;
   model?: string;
   provider?: string;

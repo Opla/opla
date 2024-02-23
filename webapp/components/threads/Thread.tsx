@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { PanelLeft, PanelLeftClose, PanelRight, PanelRightClose } from 'lucide-react';
 import { AppContext } from '@/context';
@@ -53,12 +53,13 @@ import { MenuAction, Page } from '@/types/ui';
 import { KeyedScrollPosition } from '@/hooks/useScroll';
 import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
 import { openFileDialog } from '@/utils/backend/tauri';
-import { ParsedPrompt, parsePrompt } from '@/utils/prompt';
+import { ParsedPrompt, comparePrompts, parsePrompt, toPrompt } from '@/utils/prompt';
 import PromptArea from './Prompt';
 import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
 import { Button } from '../ui/button';
 import ConversationView from './Conversation';
+import { getConversationTitle } from '@/utils/conversations';
 
 function Thread({
   conversationId: _conversationId,
@@ -106,7 +107,11 @@ function Thread({
 
   const [isProcessing, setIsProcessing] = useState<{ [key: string]: boolean }>({});
   const [errorMessage, setErrorMessage] = useState<{ [key: string]: string }>({});
-  const { currentPrompt = '' } = selectedConversation || {};
+
+  const currentPrompt = useMemo(() => 
+    toPrompt(selectedConversation?.currentPrompt || '')
+  , [selectedConversation?.currentPrompt]);
+
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -291,7 +296,7 @@ function Thread({
     if (conversationId === undefined) {
       return;
     }
-    if (currentPrompt.trim().length < 1) {
+    if (currentPrompt.text.length < 1) {
       const error = { ...errorMessage, [conversationId]: t('Please enter a message.') };
       setErrorMessage(error);
       return;
@@ -299,7 +304,7 @@ function Thread({
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
     setIsProcessing({ ...isProcessing, [conversationId]: true });
 
-    const userMessage = createMessage({ role: 'user', name: 'you' }, currentPrompt);
+    const userMessage = createMessage({ role: 'user', name: 'you' }, currentPrompt.text);
     let message = createMessage({ role: 'assistant', name: selectedModel }, '...');
     message.status = MessageState.Pending;
     userMessage.sibling = message.id;
@@ -320,10 +325,10 @@ function Thread({
       updatedConversations,
     ) as Conversation;
     if (conversation.temp) {
-      conversation.name = conversation.currentPrompt as string;
+      conversation.name = getConversationTitle(conversation);
     }
 
-    conversation.currentPrompt = '';
+    conversation.currentPrompt = undefined;
     setChangedPrompt(undefined);
     conversation.temp = false;
 
@@ -461,13 +466,13 @@ function Thread({
         return;
       }
       const conversation = getConversation(conversationId, conversations) as Conversation;
-      if (conversation && conversation.currentPrompt === prompt?.raw) {
+      if (conversation && comparePrompts(conversation.currentPrompt, prompt)) {
         setChangedPrompt(undefined);
         return;
       }
       let updatedConversations: Conversation[];
       if (conversation) {
-        conversation.currentPrompt = prompt?.raw || '';
+        conversation.currentPrompt = prompt;
         updatedConversations = conversations.filter((c) => !(c.temp && c.id !== conversationId));
         updatedConversations = updateConversation(conversation, updatedConversations, true);
       } else {
@@ -476,7 +481,7 @@ function Thread({
         updatedConversations.push(newConversation);
         newConversation.temp = true;
         newConversation.name = conversationName;
-        newConversation.currentPrompt = prompt?.raw || '';
+        newConversation.currentPrompt = prompt;
         if (tempModelProvider) {
           [newConversation.model, newConversation.provider] = tempModelProvider;
           setTempModelProvider(undefined);
@@ -492,7 +497,7 @@ function Thread({
   useDebounceFunc<ParsedPrompt | undefined>(handleUpdatePrompt, changedPrompt, 500);
 
   const handleChangePrompt = (prompt: ParsedPrompt) => {
-    if (prompt.raw !== currentPrompt) {
+    if (prompt.raw !== currentPrompt.raw) {
       setChangedPrompt(prompt);
     }
   };
@@ -532,7 +537,7 @@ function Thread({
     }
   };
 
-  const prompt = changedPrompt === undefined ? parsePrompt({ text: currentPrompt }) : changedPrompt;
+  const prompt = changedPrompt === undefined ? currentPrompt : changedPrompt;
   return (
     <div className="flex h-full flex-col dark:bg-neutral-800/30">
       <div className="grow-0">

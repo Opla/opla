@@ -247,12 +247,13 @@ export type ParsedPrompt = {
 
 type ParsePromptOptions =
   | {
-      text: string;
-      caretStartIndex?: number;
-    }
+    text: string;
+    caretStartIndex?: number;
+  }
   | {
-      textarea: HTMLTextAreaElement;
-    };
+    textarea: HTMLTextAreaElement;
+  };
+
 
 export function parsePrompt(options: ParsePromptOptions): ParsedPrompt {
   const { text: value, caretStartIndex: caretPosition = 0 } =
@@ -284,4 +285,14 @@ export function parsePrompt(options: ParsePromptOptions): ParsedPrompt {
     currentTokenIndex: 0,
     tokens,
   };
+}
+
+export function toPrompt(textOrPrompt: string | ParsedPrompt): ParsedPrompt {
+  return typeof textOrPrompt === 'string' ? parsePrompt({ text: textOrPrompt }) : textOrPrompt;
+}
+
+export function comparePrompts(prompt1: ParsedPrompt | string | undefined, prompt2: ParsedPrompt | string | undefined) {
+  const raw1 = !prompt1 || typeof prompt1 === 'string' ? prompt1 : prompt1.raw;
+  const raw2 = !prompt2 || typeof prompt2 === 'string' ? prompt2 : prompt2.raw;
+  return raw1 === raw2;
 }
