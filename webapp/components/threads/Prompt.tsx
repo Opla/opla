@@ -22,7 +22,8 @@ import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts'
 import logger from '@/utils/logger';
 import { AppContext } from '@/context';
 import { getModelsAsItems } from '@/utils/data/models';
-import { ParsedPrompt, parsePrompt } from '@/utils/prompt';
+import { ParsedPrompt, PromptToken, parsePrompt } from '@/utils/prompt';
+import { getCaretPosition } from '@/utils/caretposition';
 import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { ShortcutBadge } from '../common/ShortCut';
@@ -36,6 +37,7 @@ export type PromptProps = {
   onUpdatePrompt: (prompt: ParsedPrompt) => void;
   onSendMessage: () => void;
   onUploadFile: () => void;
+  tokenValidate: (token: PromptToken) => PromptToken;
 };
 
 export default function Prompt({
@@ -45,6 +47,7 @@ export default function Prompt({
   onUpdatePrompt,
   onSendMessage,
   onUploadFile,
+  tokenValidate,
   isLoading,
 }: PromptProps) {
   const { t } = useTranslation();
@@ -56,7 +59,6 @@ export default function Prompt({
       value: `@${item.value}`,
       group: 'models',
     }));
-    items.unshift({ value: '@system', label: '@system', group: 'system' });
     return items;
   }, [providers, backendContext]);
 
@@ -71,6 +73,20 @@ export default function Prompt({
     onUploadFile();
   };
 
+  const handleKeypress = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' && e.shiftKey) {
+      e.preventDefault();
+      const textarea = e.target as HTMLTextAreaElement;
+      const { caretStartIndex } = getCaretPosition(textarea);
+      const value = `${textarea.value} \n`;
+      const newPrompt = parsePrompt({ text: value, caretStartIndex }, tokenValidate);
+      onUpdatePrompt(newPrompt);
+    } else if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      onSendMessage();
+    }
+  };
+
   const handleUpdateMessage = (newValue: ParsedPrompt) => {
     onUpdatePrompt(newValue);
   };
@@ -78,7 +94,7 @@ export default function Prompt({
   const handleFocus = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const lengthOfInput = event.target.value.length;
     event.currentTarget.setSelectionRange(lengthOfInput, lengthOfInput);
-    const newPrompt = parsePrompt({ textarea: event.target });
+    const newPrompt = parsePrompt({ textarea: event.target }, tokenValidate);
     onUpdatePrompt(newPrompt);
   };
 
@@ -117,6 +133,8 @@ export default function Prompt({
             className="m-0 max-h-[200px] min-h-[32px] w-full resize-none overflow-y-hidden border-0 bg-transparent px-3 py-1.5 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent dark:text-white dark:placeholder-white"
             onChange={handleUpdateMessage}
             onFocus={handleFocus}
+            onKeyDown={handleKeypress}
+            tokenValidate={tokenValidate}
           />
           <Tooltip>
             <TooltipTrigger asChild>

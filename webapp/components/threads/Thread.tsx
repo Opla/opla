@@ -53,7 +53,7 @@ import { MenuAction, Page } from '@/types/ui';
 import { KeyedScrollPosition } from '@/hooks/useScroll';
 import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
 import { openFileDialog } from '@/utils/backend/tauri';
-import { ParsedPrompt, comparePrompts, parsePrompt, toPrompt } from '@/utils/prompt';
+import { ParsedPrompt, PromptToken, comparePrompts, parsePrompt, toPrompt } from '@/utils/prompt';
 import { getConversationTitle } from '@/utils/conversations';
 import PromptArea from './Prompt';
 import PromptsGrid from './PromptsGrid';
@@ -108,11 +108,6 @@ function Thread({
   const [isProcessing, setIsProcessing] = useState<{ [key: string]: boolean }>({});
   const [errorMessage, setErrorMessage] = useState<{ [key: string]: string }>({});
 
-  const currentPrompt = useMemo(
-    () => toPrompt(selectedConversation?.currentPrompt || ''),
-    [selectedConversation?.currentPrompt],
-  );
-
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -155,7 +150,10 @@ function Thread({
   const showEmptyChat = !conversationId;
   const selectedModel = selectedConversation?.model || activeModel;
 
-  const modelItems = getModelsAsItems(providers, backendContext, selectedModel);
+  const modelItems = useMemo(
+    () => getModelsAsItems(providers, backendContext, selectedModel),
+    [backendContext, providers, selectedModel],
+  );
 
   useEffect(() => {
     if (_conversationId && tempConversationId) {
@@ -171,6 +169,17 @@ function Thread({
       updateConversations(conversations.filter((c) => !c.temp));
     }
   }, [_conversationId, conversations, updateConversations, tempConversationId]);
+
+  const tokenValidator = useCallback((token: PromptToken) => {
+    const valid = true;
+
+    return { ...token, valid };
+  }, []);
+
+  const currentPrompt = useMemo(
+    () => toPrompt(selectedConversation?.currentPrompt || '', tokenValidator),
+    [selectedConversation?.currentPrompt, tokenValidator],
+  );
 
   const updateMessagesAndConversation = async (
     changedMessages: Message[],
@@ -504,7 +513,10 @@ function Thread({
   };
 
   const handlePromptSelected = (prompt: Prompt) => {
-    handleUpdatePrompt(parsePrompt({ text: prompt.value, caretStartIndex: 0 }), prompt.name);
+    handleUpdatePrompt(
+      parsePrompt({ text: prompt.value, caretStartIndex: 0 }, tokenValidator),
+      prompt.name,
+    );
   };
 
   const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {
@@ -622,6 +634,7 @@ function Thread({
           onSendMessage={handleSendMessage}
           onUpdatePrompt={handleChangePrompt}
           onUploadFile={handleUploadFile}
+          tokenValidate={tokenValidator}
         />
       )}
     </div>

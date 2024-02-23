@@ -16,7 +16,8 @@
 // https://github.com/mxkaske/mxkaske.dev/blob/main/components/craft/fancy-area/write.tsx
 
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ParsedPrompt, parsePrompt, getCaretCoordinates, getCurrentWord } from '@/utils/prompt';
+import { ParsedPrompt, parsePrompt, PromptToken } from '@/utils/prompt';
+import { getCaretCoordinates, getCurrentWord } from '@/utils/caretposition';
 import { Ui } from '@/types';
 import { cn } from '@/lib/utils';
 import logger from '@/utils/logger';
@@ -31,9 +32,11 @@ type PromptCommandProps = {
   notFound?: string;
   commands: Ui.MenuItem[];
   onChange?: (parsedPrompt: ParsedPrompt) => void;
+  onKeyDown: (event: KeyboardEvent) => void;
   className?: string;
   onFocus?: (event: ChangeEvent<HTMLTextAreaElement>) => void;
   onCommandSelect?: (value: string) => void;
+  tokenValidate: (token: PromptToken) => PromptToken;
 };
 
 function PromptCommand({
@@ -44,7 +47,9 @@ function PromptCommand({
   className,
   onChange,
   onFocus,
+  onKeyDown,
   onCommandSelect,
+  tokenValidate,
 }: PromptCommandProps) {
   const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -77,16 +82,18 @@ function PromptCommand({
     positionDropdown();
   }, [commandValue, positionDropdown]);
 
-  const handleKeyDown = useCallback(() => {}, []);
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    onKeyDown(event);
+  }, [onKeyDown]);
 
   const valueChange = useCallback(
     (text: string, caretStartIndex: number) => {
-      const parsedPrompt = parsePrompt({ text, caretStartIndex });
+      const parsedPrompt = parsePrompt({ text, caretStartIndex }, tokenValidate);
       if (value?.raw !== text) {
         onChange?.(parsedPrompt);
       }
     },
-    [onChange, value],
+    [onChange, value, tokenValidate],
   );
 
   const handleValueChange = useCallback(
@@ -200,11 +207,15 @@ function PromptCommand({
         onFocus={handleFocus}
       />
       <p className="pointer-events-none absolute bottom-[6px] left-[12px] w-full text-sm">
-        {value?.tokens?.map((token) => (
-          <span key={token.index} className={getTokenColor(token)}>
-            {token.value}
-          </span>
-        ))}
+        {value?.tokens?.map((token) =>
+          token.type !== 'newline' ? (
+            <span key={token.index} className={getTokenColor(token)}>
+              {token.value}
+            </span>
+          ) : (
+            <br key={token.index} />
+          ),
+        )}
       </p>
       <div
         ref={dropdownRef}
