@@ -16,7 +16,7 @@
 // https://github.com/mxkaske/mxkaske.dev/blob/main/components/craft/fancy-area/write.tsx
 
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ParsedPrompt, parsePrompt, PromptToken } from '@/utils/prompt';
+import { ParsedPrompt, parsePrompt, TokenValidator } from '@/utils/prompt';
 import { getCaretCoordinates, getCurrentWord } from '@/utils/caretposition';
 import { Ui } from '@/types';
 import { cn } from '@/lib/utils';
@@ -36,7 +36,7 @@ type PromptCommandProps = {
   className?: string;
   onFocus?: (event: ChangeEvent<HTMLTextAreaElement>) => void;
   onCommandSelect?: (value: string) => void;
-  tokenValidate: (token: PromptToken) => PromptToken;
+  tokenValidate: TokenValidator;
 };
 
 function PromptCommand({
@@ -82,9 +82,12 @@ function PromptCommand({
     positionDropdown();
   }, [commandValue, positionDropdown]);
 
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    onKeyDown(event);
-  }, [onKeyDown]);
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      onKeyDown(event);
+    },
+    [onKeyDown],
+  );
 
   const valueChange = useCallback(
     (text: string, caretStartIndex: number) => {

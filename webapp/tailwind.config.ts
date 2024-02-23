@@ -77,8 +77,9 @@ const config: Config = {
   },
   safelist: [
     {
-      pattern: /(bg|text)-(yellow|red|green|gray|blue|orange)-(500|400)/,
+      pattern: /(bg|text|border)-(yellow|red|green|gray|blue|orange)-(500|400)/,
     },
+    'line-through',
   ],
   // eslint-disable-next-line import/no-extraneous-dependencies, global-require
   plugins: [require('tailwindcss-animate')],

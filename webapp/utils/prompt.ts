@@ -14,10 +14,24 @@
 
 import { getCurrentWord } from './caretposition';
 
+export enum PromptTokenType {
+  Text = 'text',
+  Newline = 'newline',
+  Mention = 'mention',
+  Hashtag = 'hashtag',
+}
+
+export enum PromptTokenState {
+  Ok = 'ok',
+  Error = 'error',
+  Editing = 'editing',
+}
+
 export type PromptToken = {
-  type: 'text' | 'newline' | 'mention' | 'hashtag';
+  type: PromptTokenType;
   value: string;
   index: number;
+  state?: PromptTokenState;
 };
 
 export type ParsedPrompt = {
@@ -30,16 +44,16 @@ export type ParsedPrompt = {
 
 type ParsePromptOptions =
   | {
-      text: string;
-      caretStartIndex?: number;
-    }
+    text: string;
+    caretStartIndex?: number;
+  }
   | {
-      textarea: HTMLTextAreaElement;
-    };
+    textarea: HTMLTextAreaElement;
+  };
 
 export type TokenValidator = (
   token: PromptToken,
-  currentParsedPrompt: Partial<ParsedPrompt>,
+  currentParsedPrompt: ParsedPrompt,
 ) => PromptToken;
 
 export function parsePrompt(options: ParsePromptOptions, validator: TokenValidator): ParsedPrompt {
@@ -58,16 +72,16 @@ export function parsePrompt(options: ParsePromptOptions, validator: TokenValidat
     }
     if (span.startsWith('@') || span.startsWith('#')) {
       token = validator(
-        { type: span[0] === '@' ? 'mention' : 'hashtag', value: span, index },
+        { type: span[0] === '@' ? PromptTokenType.Mention : PromptTokenType.Hashtag, value: span, index },
         parsedPrompt,
       );
     } else if (span !== '') {
       const trimmed = span.trim();
       if (span.indexOf('\n') !== -1) {
-        token = { type: 'newline', value: span, index };
+        token = { type: PromptTokenType.Newline, value: span, index };
         parsedPrompt.text += `\n`;
       } else {
-        token = { type: 'text', value: span, index };
+        token = { type: PromptTokenType.Text, value: span, index };
         if (trimmed !== '') {
           parsedPrompt.text += ` ${trimmed}`;
         }
@@ -78,14 +92,6 @@ export function parsePrompt(options: ParsePromptOptions, validator: TokenValidat
       index += span.length;
     }
   });
-  /* const texts = tokens
-    .filter((t) => t.type === 'text' && t.value.trim() !== '')
-    .map((t) => t.value.trim()); */
-  // console.log('parsePrompt texts', texts);
-  // currentParsedPrompt.text = texts.join(' ');
-  // console.log('parsePrompt', { tokens, text });
-
-  // console.log('parsePrompt spans', spans);
   return parsedPrompt;
 }
 

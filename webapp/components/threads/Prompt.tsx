@@ -22,7 +22,7 @@ import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts'
 import logger from '@/utils/logger';
 import { AppContext } from '@/context';
 import { getModelsAsItems } from '@/utils/data/models';
-import { ParsedPrompt, PromptToken, parsePrompt } from '@/utils/prompt';
+import { ParsedPrompt, TokenValidator, parsePrompt } from '@/utils/prompt';
 import { getCaretPosition } from '@/utils/caretposition';
 import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
@@ -37,7 +37,7 @@ export type PromptProps = {
   onUpdatePrompt: (prompt: ParsedPrompt) => void;
   onSendMessage: () => void;
   onUploadFile: () => void;
-  tokenValidate: (token: PromptToken) => PromptToken;
+  tokenValidate: TokenValidator;
 };
 
 export default function Prompt({

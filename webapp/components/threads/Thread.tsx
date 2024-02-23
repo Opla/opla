@@ -53,7 +53,7 @@ import { MenuAction, Page } from '@/types/ui';
 import { KeyedScrollPosition } from '@/hooks/useScroll';
 import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
 import { openFileDialog } from '@/utils/backend/tauri';
-import { ParsedPrompt, PromptToken, comparePrompts, parsePrompt, toPrompt } from '@/utils/prompt';
+import { ParsedPrompt, PromptToken, PromptTokenState, comparePrompts, parsePrompt, toPrompt } from '@/utils/prompt';
 import { getConversationTitle } from '@/utils/conversations';
 import PromptArea from './Prompt';
 import PromptsGrid from './PromptsGrid';
@@ -170,11 +170,25 @@ function Thread({
     }
   }, [_conversationId, conversations, updateConversations, tempConversationId]);
 
-  const tokenValidator = useCallback((token: PromptToken) => {
-    const valid = true;
-
-    return { ...token, valid };
-  }, []);
+  const tokenValidator = useCallback((token: PromptToken, parsedPrompt: ParsedPrompt): PromptToken => {
+    let state: PromptTokenState = PromptTokenState.Ok;
+    console.log('tokenValidator', token, parsedPrompt, token.value.length+token.index, parsedPrompt.caretPosition);
+    if (token.type === 'mention') {
+      if (token.value.length+token.index === parsedPrompt.caretPosition) {
+        state = PromptTokenState.Editing;
+      } else if (!modelItems.find((m) => m.value === token.value || m.value === token.value.slice(1))) {
+        // this model is not available
+        state = PromptTokenState.Error;
+      } else if (parsedPrompt.tokens.find((to) => to.value === token.value)) {
+        // this mention is already present
+        state = PromptTokenState.Error;
+      } else if (parsedPrompt.tokens.find((to) => to.type === 'mention')) {
+        // only one mention at a time
+        state = PromptTokenState.Error;
+      }
+    }
+    return { ...token, state };
+  }, [modelItems]);
 
   const currentPrompt = useMemo(
     () => toPrompt(selectedConversation?.currentPrompt || '', tokenValidator),

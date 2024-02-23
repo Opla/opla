@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { BasicState } from '@/types/ui';
-import { PromptToken } from './prompt';
+import { PromptToken, PromptTokenState, PromptTokenType } from './prompt';
 
 // eslint-disable-next-line import/prefer-default-export
 export const getStateColor = (
@@ -30,7 +30,18 @@ export const getStateColor = (
 
 export const getTokenColor = (token: PromptToken) => {
   let className = '';
-  if (token.type === 'mention') className = 'text-blue-400 line-through underline';
-  if (token.type === 'hashtag') className = 'text-yellow-400';
+  if (token.type === PromptTokenType.Mention) {
+    switch (token.state) {
+      case PromptTokenState.Error:
+        className = 'text-red-400 line-through';
+        break;
+        case PromptTokenState.Editing:
+          className = 'text-gray-400 animate-pulse';
+          break;
+      default:
+        className = 'text-blue-400 underline';
+    }
+  }
+  if (token.type === PromptTokenType.Hashtag) className = 'text-yellow-400';
   return className;
 };
