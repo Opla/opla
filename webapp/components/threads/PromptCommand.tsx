@@ -46,13 +46,16 @@ function parsePrompt(value: string, caretPosition: number): ParsedPrompt {
   while (match) {
     const type = match[0][0] === '@' ? 'mention' : 'hashtag';
     const v = match[0];
-    const {index} = match;
+    const { index } = match;
     tokens.push({ type, value: v, index });
     console.log('parsePrompt match', type, v, index, match);
     match = pattern.exec(value);
   }
 
-  const texts = value.split(pattern).map((t) => t.trim()).filter((t) => t !== '');
+  const texts = value
+    .split(pattern)
+    .map((t) => t.trim())
+    .filter((t) => t !== '');
   console.log('parsePrompt texts', texts);
   const text = texts.join(' ');
   console.log('parsePrompt', { tokens, text });
