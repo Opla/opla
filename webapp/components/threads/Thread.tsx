@@ -54,12 +54,12 @@ import { KeyedScrollPosition } from '@/hooks/useScroll';
 import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
 import { openFileDialog } from '@/utils/backend/tauri';
 import { ParsedPrompt, comparePrompts, parsePrompt, toPrompt } from '@/utils/prompt';
+import { getConversationTitle } from '@/utils/conversations';
 import PromptArea from './Prompt';
 import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
 import { Button } from '../ui/button';
 import ConversationView from './Conversation';
-import { getConversationTitle } from '@/utils/conversations';
 
 function Thread({
   conversationId: _conversationId,
@@ -108,9 +108,10 @@ function Thread({
   const [isProcessing, setIsProcessing] = useState<{ [key: string]: boolean }>({});
   const [errorMessage, setErrorMessage] = useState<{ [key: string]: string }>({});
 
-  const currentPrompt = useMemo(() => 
-    toPrompt(selectedConversation?.currentPrompt || '')
-  , [selectedConversation?.currentPrompt]);
+  const currentPrompt = useMemo(
+    () => toPrompt(selectedConversation?.currentPrompt || ''),
+    [selectedConversation?.currentPrompt],
+  );
 
   const { t } = useTranslation();
 
