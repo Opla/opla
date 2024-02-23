@@ -16,66 +16,23 @@
 // https://github.com/mxkaske/mxkaske.dev/blob/main/components/craft/fancy-area/write.tsx
 
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { getCaretCoordinates, getCurrentWord } from '@/utils/caretPosition';
+import { ParsedPrompt, parsePrompt, getCaretCoordinates, getCurrentWord } from '@/utils/prompt';
 import { Ui } from '@/types';
 import { cn } from '@/lib/utils';
 import logger from '@/utils/logger';
 import useTranslation from '@/hooks/useTranslation';
+import { getTokenColor } from '@/utils/ui';
 import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
 
-export type PromptToken = {
-  type: 'text' | 'mention' | 'hashtag';
-  value: string;
-  index: number;
-};
-
-export type ParsedPrompt = {
-  raw: string;
-  text: string;
-  caretPosition: number;
-  currentTokenIndex: number;
-  tokens: PromptToken[];
-};
-
-function parsePrompt(value: string, caretPosition: number): ParsedPrompt {
-  // const { selectionStart, value } = textArea;
-  const pattern = /(?<=^| )[@|#][\p{L}0-9._-]+/gmu;
-  let match = pattern.exec(value);
-  const tokens: PromptToken[] = [];
-  while (match) {
-    const type = match[0][0] === '@' ? 'mention' : 'hashtag';
-    const v = match[0];
-    const { index } = match;
-    tokens.push({ type, value: v, index });
-    console.log('parsePrompt match', type, v, index, match);
-    match = pattern.exec(value);
-  }
-
-  const texts = value
-    .split(pattern)
-    .map((t) => t.trim())
-    .filter((t) => t !== '');
-  console.log('parsePrompt texts', texts);
-  const text = texts.join(' ');
-  console.log('parsePrompt', { tokens, text });
-  return {
-    raw: value,
-    text,
-    caretPosition,
-    currentTokenIndex: 0,
-    tokens,
-  };
-}
-
 type PromptCommandProps = {
-  value?: string;
+  value?: ParsedPrompt;
   placeholder?: string;
   notFound?: string;
   commands: Ui.MenuItem[];
-  onChange?: (value: string, parsedPrompt: ParsedPrompt) => void;
+  onChange?: (parsedPrompt: ParsedPrompt) => void;
   className?: string;
-  onFocus?: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onFocus?: (event: ChangeEvent<HTMLTextAreaElement>) => void;
   onCommandSelect?: (value: string) => void;
 };
 
@@ -123,10 +80,10 @@ function PromptCommand({
   const handleKeyDown = useCallback(() => {}, []);
 
   const valueChange = useCallback(
-    (text: string, caretPosition: number) => {
-      const parsedPrompt = parsePrompt(text, caretPosition);
-      if (value !== text) {
-        onChange?.(text, parsedPrompt);
+    (text: string, caretStartIndex: number) => {
+      const parsedPrompt = parsePrompt({ text, caretStartIndex });
+      if (value?.raw !== text) {
+        onChange?.(parsedPrompt);
       }
     },
     [onChange, value],
@@ -235,13 +192,20 @@ function PromptCommand({
         ref={textareaRef}
         autoComplete="off"
         autoCorrect="off"
-        className={className}
-        value={value}
+        className={cn(className, 'text-transparent dark:text-transparent')}
+        value={value?.raw || ''}
         placeholder={placeholder}
         onChange={handleValueChange}
         rows={5}
         onFocus={handleFocus}
       />
+      <p className="pointer-events-none absolute bottom-[6px] left-[12px] w-full text-sm">
+        {value?.tokens?.map((token) => (
+          <span key={token.index} className={getTokenColor(token)}>
+            {token.value}
+          </span>
+        ))}
+      </p>
       <div
         ref={dropdownRef}
         className={cn(

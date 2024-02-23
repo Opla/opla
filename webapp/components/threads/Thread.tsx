@@ -53,6 +53,7 @@ import { MenuAction, Page } from '@/types/ui';
 import { KeyedScrollPosition } from '@/hooks/useScroll';
 import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
 import { openFileDialog } from '@/utils/backend/tauri';
+import { ParsedPrompt, parsePrompt } from '@/utils/prompt';
 import PromptArea from './Prompt';
 import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
@@ -98,7 +99,7 @@ function Thread({
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
   const conversationId = _conversationId || tempConversationId;
   const selectedConversation = conversations.find((c) => c.id === conversationId);
-  const [changedPrompt, setChangedPrompt] = useState<string | undefined>(undefined);
+  const [changedPrompt, setChangedPrompt] = useState<ParsedPrompt | undefined>(undefined);
   const { showModal } = useContext(ModalsContext);
   const [messages, setMessages] = useState<Message[] | undefined>(undefined);
   const [isMessageUpdating, setIsMessageUpdating] = useState<boolean>(false);
@@ -452,21 +453,21 @@ function Thread({
   };
 
   const handleUpdatePrompt = useCallback(
-    (message: string | undefined, conversationName = 'Conversation') => {
-      if (message === '' && tempConversationId) {
+    (prompt: ParsedPrompt | undefined, conversationName = 'Conversation') => {
+      if (prompt?.raw === '' && tempConversationId) {
         setChangedPrompt(undefined);
         updateConversations(conversations.filter((c) => !c.temp));
         setTempConversationId(undefined);
         return;
       }
       const conversation = getConversation(conversationId, conversations) as Conversation;
-      if (conversation && conversation.currentPrompt === message) {
+      if (conversation && conversation.currentPrompt === prompt?.raw) {
         setChangedPrompt(undefined);
         return;
       }
       let updatedConversations: Conversation[];
       if (conversation) {
-        conversation.currentPrompt = message;
+        conversation.currentPrompt = prompt?.raw || '';
         updatedConversations = conversations.filter((c) => !(c.temp && c.id !== conversationId));
         updatedConversations = updateConversation(conversation, updatedConversations, true);
       } else {
@@ -475,7 +476,7 @@ function Thread({
         updatedConversations.push(newConversation);
         newConversation.temp = true;
         newConversation.name = conversationName;
-        newConversation.currentPrompt = message;
+        newConversation.currentPrompt = prompt?.raw || '';
         if (tempModelProvider) {
           [newConversation.model, newConversation.provider] = tempModelProvider;
           setTempModelProvider(undefined);
@@ -485,19 +486,19 @@ function Thread({
       updateConversations(updatedConversations);
       setChangedPrompt(undefined);
     },
-    [conversationId, conversations, updateConversations, tempConversationId, tempModelProvider],
+    [tempConversationId, conversationId, conversations, updateConversations, tempModelProvider],
   );
 
-  useDebounceFunc<string | undefined>(handleUpdatePrompt, changedPrompt, 500);
+  useDebounceFunc<ParsedPrompt | undefined>(handleUpdatePrompt, changedPrompt, 500);
 
-  const handleChangePrompt = (text: string) => {
-    if (text !== currentPrompt) {
-      setChangedPrompt(text);
+  const handleChangePrompt = (prompt: ParsedPrompt) => {
+    if (prompt.raw !== currentPrompt) {
+      setChangedPrompt(prompt);
     }
   };
 
   const handlePromptSelected = (prompt: Prompt) => {
-    handleUpdatePrompt(prompt.value, prompt.name);
+    handleUpdatePrompt(parsePrompt({ text: prompt.value, caretStartIndex: 0 }), prompt.name);
   };
 
   const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {
@@ -531,7 +532,7 @@ function Thread({
     }
   };
 
-  const message = changedPrompt === undefined ? currentPrompt : changedPrompt;
+  const prompt = changedPrompt === undefined ? parsePrompt({ text: currentPrompt }) : changedPrompt;
   return (
     <div className="flex h-full flex-col dark:bg-neutral-800/30">
       <div className="grow-0">
@@ -587,7 +588,7 @@ function Thread({
           <PromptsGrid onPromptSelected={handlePromptSelected} />
         </div>
       ) : (
-        (message || (messages && messages[0]?.conversationId === conversationId)) && (
+        (prompt || (messages && messages[0]?.conversationId === conversationId)) && (
           <ConversationView
             conversationId={selectedConversation?.id as string}
             scrollPosition={
@@ -606,10 +607,10 @@ function Thread({
       )}
       <div className="flex flex-col items-center text-sm dark:bg-neutral-800/30" />
 
-      {(message || (messages && messages[0]?.conversationId === conversationId)) && (
+      {(prompt || (messages && messages[0]?.conversationId === conversationId)) && (
         <PromptArea
           conversationId={conversationId as string}
-          message={message}
+          prompt={prompt}
           isLoading={conversationId ? isProcessing[conversationId] : false}
           errorMessage={conversationId ? errorMessage[conversationId] : ''}
           onSendMessage={handleSendMessage}

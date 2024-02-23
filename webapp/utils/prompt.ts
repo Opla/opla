@@ -230,3 +230,58 @@ export function getCaretCoordinates(
 
   return coordinates;
 }
+
+export type PromptToken = {
+  type: 'text' | 'mention' | 'hashtag';
+  value: string;
+  index: number;
+};
+
+export type ParsedPrompt = {
+  raw: string;
+  text: string;
+  caretPosition: number;
+  currentTokenIndex: number;
+  tokens: PromptToken[];
+};
+
+type ParsePromptOptions =
+  | {
+      text: string;
+      caretStartIndex?: number;
+    }
+  | {
+      textarea: HTMLTextAreaElement;
+    };
+
+export function parsePrompt(options: ParsePromptOptions): ParsedPrompt {
+  const { text: value, caretStartIndex: caretPosition = 0 } =
+    'textarea' in options ? getCurrentWord(options.textarea) : options;
+
+  const tokens: PromptToken[] = [];
+  const spans = value.split(/(?<=^| )([@|#][\p{L}0-9._-]+)/gmu);
+  let index = 0;
+  spans.forEach((span) => {
+    if (span.startsWith('@') || span.startsWith('#')) {
+      tokens.push({ type: span[0] === '@' ? 'mention' : 'hashtag', value: span, index });
+    } else if (span !== '') {
+      tokens.push({ type: 'text', value: span, index });
+    }
+    index += span.length;
+  });
+  const texts = tokens
+    .filter((t) => t.type === 'text' && t.value.trim() !== '')
+    .map((t) => t.value.trim());
+  // console.log('parsePrompt texts', texts);
+  const text = texts.join(' ');
+  // console.log('parsePrompt', { tokens, text });
+
+  // console.log('parsePrompt spans', spans);
+  return {
+    raw: value,
+    text,
+    caretPosition,
+    currentTokenIndex: 0,
+    tokens,
+  };
+}

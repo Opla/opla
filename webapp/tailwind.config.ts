@@ -77,7 +77,7 @@ const config: Config = {
   },
   safelist: [
     {
-      pattern: /(bg|text)-(yellow|red|green|gray)-(500|400)/,
+      pattern: /(bg|text)-(yellow|red|green|gray|blue|orange)-(500|400)/,
     },
   ],
   // eslint-disable-next-line import/no-extraneous-dependencies, global-require

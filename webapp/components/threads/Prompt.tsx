@@ -22,6 +22,7 @@ import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts'
 import logger from '@/utils/logger';
 import { AppContext } from '@/context';
 import { getModelsAsItems } from '@/utils/data/models';
+import { ParsedPrompt, parsePrompt } from '@/utils/prompt';
 import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { ShortcutBadge } from '../common/ShortCut';
@@ -29,17 +30,17 @@ import PromptCommand from './PromptCommand';
 
 export type PromptProps = {
   conversationId: string;
-  message: string;
+  prompt: ParsedPrompt;
   isLoading: boolean;
   errorMessage: string;
-  onUpdatePrompt: (message: string) => void;
+  onUpdatePrompt: (prompt: ParsedPrompt) => void;
   onSendMessage: () => void;
   onUploadFile: () => void;
 };
 
 export default function Prompt({
   conversationId,
-  message,
+  prompt,
   errorMessage,
   onUpdatePrompt,
   onSendMessage,
@@ -70,14 +71,15 @@ export default function Prompt({
     onUploadFile();
   };
 
-  const handleUpdateMessage = (newValue: string) => {
+  const handleUpdateMessage = (newValue: ParsedPrompt) => {
     onUpdatePrompt(newValue);
   };
 
-  const handleFocus = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleFocus = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const lengthOfInput = event.target.value.length;
     event.currentTarget.setSelectionRange(lengthOfInput, lengthOfInput);
-    onUpdatePrompt(event.target.value);
+    const newPrompt = parsePrompt({ textarea: event.target });
+    onUpdatePrompt(newPrompt);
   };
 
   const shortcutSend: KeyBinding = defaultShortcuts.find(
@@ -109,7 +111,7 @@ export default function Prompt({
             <Paperclip className="strokeWidth={1.5} h-4 w-4" />
           </Button>
           <PromptCommand
-            value={message}
+            value={prompt}
             commands={modelItems}
             placeholder={t('Send a message...')}
             className="m-0 max-h-[200px] min-h-[32px] w-full resize-none overflow-y-hidden border-0 bg-transparent px-3 py-1.5 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent dark:text-white dark:placeholder-white"
@@ -119,7 +121,7 @@ export default function Prompt({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                disabled={isLoading || message?.length === 0}
+                disabled={isLoading || prompt?.raw?.length === 0}
                 type="button"
                 aria-label={t('Send')}
                 onClick={handleSendMessage}
