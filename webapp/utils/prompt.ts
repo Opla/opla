@@ -44,17 +44,14 @@ export type ParsedPrompt = {
 
 type ParsePromptOptions =
   | {
-    text: string;
-    caretStartIndex?: number;
-  }
+      text: string;
+      caretStartIndex?: number;
+    }
   | {
-    textarea: HTMLTextAreaElement;
-  };
+      textarea: HTMLTextAreaElement;
+    };
 
-export type TokenValidator = (
-  token: PromptToken,
-  currentParsedPrompt: ParsedPrompt,
-) => PromptToken;
+export type TokenValidator = (token: PromptToken, currentParsedPrompt: ParsedPrompt) => PromptToken;
 
 export function parsePrompt(options: ParsePromptOptions, validator: TokenValidator): ParsedPrompt {
   const { text: value, caretStartIndex: caretPosition = 0 } =
@@ -72,7 +69,11 @@ export function parsePrompt(options: ParsePromptOptions, validator: TokenValidat
     }
     if (span.startsWith('@') || span.startsWith('#')) {
       token = validator(
-        { type: span[0] === '@' ? PromptTokenType.Mention : PromptTokenType.Hashtag, value: span, index },
+        {
+          type: span[0] === '@' ? PromptTokenType.Mention : PromptTokenType.Hashtag,
+          value: span,
+          index,
+        },
         parsedPrompt,
       );
     } else if (span !== '') {
