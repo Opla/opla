@@ -87,7 +87,7 @@ export default function Presets({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between"
+            className="w-full justify-between bg-transparent"
           >
             {preset ? presets.find((p) => p.id === preset?.id)?.name : t('Select a preset...')}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

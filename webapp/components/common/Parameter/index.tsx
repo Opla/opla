@@ -18,6 +18,7 @@ import { HelpCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { BaseNamedRecord } from '@/types';
@@ -114,7 +115,7 @@ export default function Parameter({
           <Input
             value={value as string}
             placeholder={placeholder}
-            className="w-full"
+            className="w-full min-w-[60px]"
             type={type}
             disabled={disabled}
             min={min}
@@ -138,7 +139,7 @@ export default function Parameter({
       <div className="flex w-full flex-grow flex-col justify-center">
         <div className="flex w-full flex-row items-center justify-between">
           <div className={`flex grow flex-row ${flex}`}>
-            {label && <p>{label} </p>}
+            {label && <Label>{label} </Label>}
             {component}
           </div>
           {description && (
