@@ -36,9 +36,19 @@ export type Author = {
   metadata?: Metadata;
 };
 
+export enum ContentType {
+  Text = 'text',
+  /* Image = 'image',
+  Video = 'video',
+  Audio = 'audio',
+  File = 'file',
+  Custom = 'custom', */
+}
+
 export type Content = {
-  type: 'text' | 'image' | 'video' | 'audio' | 'file' | 'custom';
+  type: ContentType;
   parts: string[];
+  raws?: string[];
   metadata?: Metadata;
 };
 

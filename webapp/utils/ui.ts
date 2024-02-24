@@ -36,7 +36,13 @@ export const getTokenColor = (token: PromptToken) => {
         className = 'text-red-400 line-through';
         break;
       case PromptTokenState.Editing:
-        className = 'text-gray-400 animate-pulse';
+        className = 'text-gray-500 animate-pulse';
+        break;
+      case PromptTokenState.Disabled:
+        className = 'text-gray-400';
+        break;
+      case PromptTokenState.Duplicate:
+        className = 'text-gray-400 line-through';
         break;
       default:
         className = 'text-blue-400 underline';

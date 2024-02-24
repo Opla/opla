@@ -43,7 +43,7 @@ import {
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
 import { buildContext, completion, getCompletionParametersDefinition } from '@/utils/providers';
-import { findModel, getModelsAsItems } from '@/utils/data/models';
+import { findModel, findModelInAll, getModelsAsItems } from '@/utils/data/models';
 import { findProvider } from '@/utils/data/providers';
 import { toast } from '@/components/ui/Toast';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
@@ -57,6 +57,8 @@ import {
   ParsedPrompt,
   PromptToken,
   PromptTokenState,
+  PromptTokenType,
+  compareMentions,
   comparePrompts,
   parsePrompt,
   toPrompt,
@@ -180,30 +182,33 @@ function Thread({
   const tokenValidator = useCallback(
     (token: PromptToken, parsedPrompt: ParsedPrompt): PromptToken => {
       let state: PromptTokenState = PromptTokenState.Ok;
-      console.log(
+      logger.info(
         'tokenValidator',
         token,
         parsedPrompt,
         token.value.length + token.index,
         parsedPrompt.caretPosition,
       );
-      if (token.type === 'mention') {
-        if (token.value.length + token.index === parsedPrompt.caretPosition) {
+      const isEditing = token.value.length + token.index === parsedPrompt.caretPosition;
+      let { type } = token;
+      if (type === PromptTokenType.Mention) {
+        if (isEditing) {
           state = PromptTokenState.Editing;
-        } else if (
-          !modelItems.find((m) => m.value === token.value || m.value === token.value.slice(1))
-        ) {
+        } else if (!modelItems.find((m) => compareMentions(m.value, token.value))) {
           // this model is not available
           state = PromptTokenState.Error;
         } else if (parsedPrompt.tokens.find((to) => to.value === token.value)) {
           // this mention is already present
-          state = PromptTokenState.Error;
-        } else if (parsedPrompt.tokens.find((to) => to.type === 'mention')) {
+          state = PromptTokenState.Duplicate;
+        } else if (parsedPrompt.tokens.find((to) => to.type === PromptTokenType.Mention)) {
           // only one mention at a time
-          state = PromptTokenState.Error;
+          state = PromptTokenState.Disabled;
         }
+      } else if (token.value === '@' && isEditing) {
+        state = PromptTokenState.Editing;
+        type = PromptTokenType.Mention;
       }
-      return { ...token, state };
+      return { ...token, type, state };
     },
     [modelItems],
   );
@@ -232,14 +237,18 @@ function Thread({
     return { updatedConversationId, updatedConversations, updatedMessages };
   };
 
-  const handleSelectModel = async (model?: string, provider = ProviderType.opla) => {
+  const handleSelectModel = async (
+    model?: string,
+    provider = ProviderType.opla,
+    partial: Partial<Conversation> = {},
+  ) => {
     logger.info(
       `handleSelectModel ${model} ${provider} activeModel=${typeof activeModel}`,
       selectedConversation,
     );
     if (model && selectedConversation) {
       const newConversations = updateConversation(
-        { ...selectedConversation, model, provider, parameters: {} },
+        { ...selectedConversation, model, provider, parameters: {}, ...partial },
         conversations,
         true,
       );
@@ -268,10 +277,25 @@ function Thread({
         providerName = provider.name;
       }
     }
-    const modelName = model?.name || conversation.model || activeModel;
-    if (!model) {
-      model = findModel(modelName, backendContext.config.models.items);
+    const modelName = message.author.name || model?.name || conversation.model || activeModel;
+    if (!model || model.name !== modelName) {
+      model = findModelInAll(modelName, providers, backendContext);
     }
+    const name = model?.provider || model?.creator;
+    if (name && name !== providerName) {
+      provider = findProvider(name, providers);
+      providerName = provider?.name;
+    }
+    logger.info(
+      'sendMessage',
+      name,
+      model,
+      provider,
+      modelName,
+      providerName,
+      conversation,
+      presets,
+    );
 
     const llmParameters: LlmParameters[] = [];
     const preset = findCompatiblePreset(selectedConversation?.preset, presets, modelName, provider);
@@ -338,16 +362,43 @@ function Thread({
     if (conversationId === undefined) {
       return;
     }
+    const mentions = currentPrompt.tokens.filter((to) => to.type === PromptTokenType.Mention);
+    const modelItem =
+      mentions.length === 1
+        ? modelItems.find((mi) => compareMentions(mi.value, mentions[0].value))
+        : undefined;
+    const modelName = modelItem?.value;
+    // logger.info('send modelName', modelName, modelItem, mentions);
+
     if (currentPrompt.text.length < 1) {
+      if (modelName) {
+        // Change conversation's model if there is only a model mention in the prompt
+        // TODO handle parameters and key
+        handleSelectModel(modelName, modelItem.group as ProviderType, { currentPrompt: undefined });
+        setChangedPrompt(undefined);
+        return;
+      }
       const error = { ...errorMessage, [conversationId]: t('Please enter a message.') };
       setErrorMessage(error);
       return;
     }
+
+    if (mentions.length > 1) {
+      const error = { ...errorMessage, [conversationId]: t('Only one model at a time.') };
+      setErrorMessage(error);
+      return;
+    }
+    if (mentions.length === 1 && (!modelName || mentions[0].state === PromptTokenState.Error)) {
+      const error = { ...errorMessage, [conversationId]: t('This model is not available.') };
+      setErrorMessage(error);
+      return;
+    }
+
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
     setIsProcessing({ ...isProcessing, [conversationId]: true });
 
     const userMessage = createMessage({ role: 'user', name: 'you' }, currentPrompt.text);
-    let message = createMessage({ role: 'assistant', name: selectedModel }, '...');
+    let message = createMessage({ role: 'assistant', name: modelName || selectedModel }, '...');
     message.status = MessageState.Pending;
     userMessage.sibling = message.id;
     message.sibling = userMessage.id;

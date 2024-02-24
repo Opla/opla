@@ -22,7 +22,7 @@ import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts'
 import logger from '@/utils/logger';
 import { AppContext } from '@/context';
 import { getModelsAsItems } from '@/utils/data/models';
-import { ParsedPrompt, TokenValidator, parsePrompt } from '@/utils/prompt';
+import { ParsedPrompt, TokenValidator, getMentionName, parsePrompt } from '@/utils/prompt';
 import { getCaretPosition } from '@/utils/caretposition';
 import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
@@ -56,7 +56,7 @@ export default function Prompt({
   const modelItems = useMemo(() => {
     const items = getModelsAsItems(providers, backendContext).map((item) => ({
       ...item,
-      value: `@${item.value}`,
+      value: getMentionName(item.value as string),
       group: 'models',
     }));
     return items;

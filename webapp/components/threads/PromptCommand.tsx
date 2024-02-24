@@ -127,10 +127,9 @@ function PromptCommand({
       const dropdown = dropdownRef.current;
       if (textarea && dropdown) {
         const { currentWord, start, text, caretStartIndex } = getCurrentWord(textarea);
-        const newText =
-          text.substring(0, start) + newValue + text.substring(start + currentWord.length);
+        const newText = `${text.substring(0, start)}${newValue} ${text.substring(start + currentWord.length)}`;
         // replaceWord(textarea, `${newValue}`);
-        valueChange(newText, caretStartIndex);
+        valueChange(newText, caretStartIndex + 1);
         toggleDropdown(false);
         onCommandSelect?.(newValue);
       }

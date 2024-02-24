@@ -25,6 +25,8 @@ export enum PromptTokenState {
   Ok = 'ok',
   Error = 'error',
   Editing = 'editing',
+  Disabled = 'disabled',
+  Duplicate = 'duplicate',
 }
 
 export type PromptToken = {
@@ -59,7 +61,6 @@ export function parsePrompt(options: ParsePromptOptions, validator: TokenValidat
 
   const tokens: PromptToken[] = [];
   const spans = value.split(/(?<=^| )([@|#][\p{L}0-9._-]+)|(\n)/gu);
-  // console.log('parsePrompt spans', spans);
   let index = 0;
   const parsedPrompt = { tokens, caretPosition, raw: value, text: '', currentTokenIndex: 0 };
   spans.forEach((span) => {
@@ -104,6 +105,12 @@ export function toPrompt(
     ? parsePrompt({ text: textOrPrompt }, tokenValidator)
     : textOrPrompt;
 }
+
+export const getMentionName = (name: string): string =>
+  name?.startsWith('@') ? name : `@${name.replace(/[^\p{L}0-9._-]+/gu, '_')}`;
+
+export const compareMentions = (mention1: string | undefined, mention2: string | undefined) =>
+  getMentionName(mention1 || '1') === getMentionName(mention2 || '2');
 
 export function comparePrompts(
   prompt1: ParsedPrompt | string | undefined,
