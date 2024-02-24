@@ -28,6 +28,7 @@ import {
   Prompt,
   Provider,
   ProviderType,
+  Ui,
 } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
@@ -60,6 +61,7 @@ import {
   PromptTokenType,
   compareMentions,
   comparePrompts,
+  getMentionName,
   parsePrompt,
   toPrompt,
 } from '@/utils/prompt';
@@ -159,10 +161,24 @@ function Thread({
   const showEmptyChat = !conversationId;
   const selectedModel = selectedConversation?.model || activeModel;
 
-  const modelItems = useMemo(
-    () => getModelsAsItems(providers, backendContext, selectedModel),
-    [backendContext, providers, selectedModel],
-  );
+  const { modelItems, commands } = useMemo(() => {
+    const items = getModelsAsItems(providers, backendContext, selectedModel);
+    const parameterItems: Ui.MenuItem[] = [
+      { value: '#provider_key', label: 'Provider key', group: 'parameters' },
+    ];
+    const actionsItems: Ui.MenuItem[] = [{ value: '/system', label: 'System', group: 'actions' }];
+    const cmds = [
+      ...items.map((item) => ({
+        ...item,
+        value: getMentionName(item.value as string),
+        group: 'models',
+      })),
+      ...parameterItems,
+      ...actionsItems,
+    ];
+
+    return { modelItems: items, commands: cmds };
+  }, [backendContext, providers, selectedModel]);
 
   useEffect(() => {
     if (_conversationId && tempConversationId) {
@@ -197,16 +213,27 @@ function Thread({
         } else if (!modelItems.find((m) => compareMentions(m.value, token.value))) {
           // this model is not available
           state = PromptTokenState.Error;
-        } else if (parsedPrompt.tokens.find((to) => to.value === token.value)) {
+        } else if (parsedPrompt.tokens.find((to) => to.value === token.value && to.type === type)) {
           // this mention is already present
           state = PromptTokenState.Duplicate;
         } else if (parsedPrompt.tokens.find((to) => to.type === PromptTokenType.Mention)) {
           // only one mention at a time
           state = PromptTokenState.Disabled;
         }
-      } else if (token.value === '@' && isEditing) {
+      } else if (type === PromptTokenType.Hashtag) {
+        if (isEditing) {
+          state = PromptTokenState.Editing;
+        }
+      } else if (type === PromptTokenType.Action) {
+        if (isEditing) {
+          state = PromptTokenState.Editing;
+        }
+      } else if (token.value.trim() === '@' && isEditing) {
         state = PromptTokenState.Editing;
         type = PromptTokenType.Mention;
+      } else if (token.value === '#' && isEditing) {
+        state = PromptTokenState.Editing;
+        type = PromptTokenType.Hashtag;
       }
       return { ...token, type, state };
     },
@@ -711,6 +738,7 @@ function Thread({
       {(prompt || (messages && messages[0]?.conversationId === conversationId)) && (
         <PromptArea
           conversationId={conversationId as string}
+          commands={commands}
           prompt={prompt}
           isLoading={conversationId ? isProcessing[conversationId] : false}
           errorMessage={conversationId ? errorMessage[conversationId] : ''}

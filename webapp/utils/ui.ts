@@ -30,24 +30,25 @@ export const getStateColor = (
 
 export const getTokenColor = (token: PromptToken) => {
   let className = '';
-  if (token.type === PromptTokenType.Mention) {
-    switch (token.state) {
-      case PromptTokenState.Error:
-        className = 'text-red-400 line-through';
-        break;
-      case PromptTokenState.Editing:
-        className = 'text-gray-500 animate-pulse';
-        break;
-      case PromptTokenState.Disabled:
-        className = 'text-gray-400';
-        break;
-      case PromptTokenState.Duplicate:
-        className = 'text-gray-400 line-through';
-        break;
-      default:
-        className = 'text-blue-400 underline';
-    }
+  switch (token.state) {
+    case PromptTokenState.Error:
+      className = 'text-red-400 line-through';
+      break;
+    case PromptTokenState.Editing:
+      className = 'text-gray-500 animate-pulse';
+      break;
+    case PromptTokenState.Disabled:
+      className = 'text-gray-400';
+      break;
+    case PromptTokenState.Duplicate:
+      className = 'text-gray-400 line-through';
+      break;
+    default:
   }
-  if (token.type === PromptTokenType.Hashtag) className = 'text-yellow-400';
+  if (token.type === PromptTokenType.Mention && className === '') {
+    className = 'text-blue-400 underline';
+  }
+  if (token.type === PromptTokenType.Hashtag && className === '') className = 'text-yellow-400';
+  if (token.type === PromptTokenType.Action && className === '') className = 'text-green-400';
   return className;
 };

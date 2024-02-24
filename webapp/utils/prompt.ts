@@ -19,6 +19,7 @@ export enum PromptTokenType {
   Newline = 'newline',
   Mention = 'mention',
   Hashtag = 'hashtag',
+  Action = 'action',
 }
 
 export enum PromptTokenState {
@@ -55,44 +56,59 @@ type ParsePromptOptions =
 
 export type TokenValidator = (token: PromptToken, currentParsedPrompt: ParsedPrompt) => PromptToken;
 
+export const isHashTag = (word: string) => word.startsWith('#');
+export const isMention = (word: string) => word.startsWith('@');
+export const isAction = (word: string, start: number) => start === 0 && word.startsWith('/');
+export const isCommand = (word: string, start: number) =>
+  isAction(word, start) || isMention(word) || isHashTag(word);
+
+export const getTokenType = (word: string, start: number) => {
+  let type = PromptTokenType.Text;
+  switch (word[0]) {
+    case '#':
+      type = PromptTokenType.Hashtag;
+      break;
+    case '@':
+      type = PromptTokenType.Mention;
+      break;
+    case '/':
+      if (start === 0) {
+        type = PromptTokenType.Action;
+      }
+      break;
+    default:
+      type = PromptTokenType.Text;
+  }
+  return type;
+};
 export function parsePrompt(options: ParsePromptOptions, validator: TokenValidator): ParsedPrompt {
   const { text: value, caretStartIndex: caretPosition = 0 } =
     'textarea' in options ? getCurrentWord(options.textarea) : options;
 
   const tokens: PromptToken[] = [];
-  const spans = value.split(/(?<=^| )([@|#][\p{L}0-9._-]+)|(\n)/gu);
+  const spans = value.split(/(?<=^| )([@|#|/][\p{L}0-9._-]+)|(\n)/gu);
   let index = 0;
   const parsedPrompt = { tokens, caretPosition, raw: value, text: '', currentTokenIndex: 0 };
   spans.forEach((span) => {
-    let token: PromptToken | undefined;
-    if (!span) {
+    if (!span || span === '') {
       return;
     }
-    if (span.startsWith('@') || span.startsWith('#')) {
-      token = validator(
-        {
-          type: span[0] === '@' ? PromptTokenType.Mention : PromptTokenType.Hashtag,
-          value: span,
-          index,
-        },
-        parsedPrompt,
-      );
-    } else if (span !== '') {
+
+    const type = getTokenType(span, parsedPrompt.text.trim().length);
+    let token: PromptToken = { type, value: span, index };
+    if (type !== PromptTokenType.Text) {
+      token = validator(token, parsedPrompt);
+    } else {
       const trimmed = span.trim();
       if (span.indexOf('\n') !== -1) {
-        token = { type: PromptTokenType.Newline, value: span, index };
+        token.type = PromptTokenType.Newline;
         parsedPrompt.text += `\n`;
-      } else {
-        token = { type: PromptTokenType.Text, value: span, index };
-        if (trimmed !== '') {
-          parsedPrompt.text += ` ${trimmed}`;
-        }
+      } else if (trimmed !== '') {
+        parsedPrompt.text += ` ${trimmed}`;
       }
     }
-    if (token) {
-      tokens.push(token);
-      index += span.length;
-    }
+    tokens.push(token);
+    index += span.length;
   });
   return parsedPrompt;
 }
@@ -107,7 +123,7 @@ export function toPrompt(
 }
 
 export const getMentionName = (name: string): string =>
-  name?.startsWith('@') ? name : `@${name.replace(/[^\p{L}0-9._-]+/gu, '_')}`;
+  !name || isMention(name) ? name : `@${name.replace(/[^\p{L}0-9._-]+/gu, '_')}`;
 
 export const compareMentions = (mention1: string | undefined, mention2: string | undefined) =>
   getMentionName(mention1 || '1') === getMentionName(mention2 || '2');

@@ -14,16 +14,17 @@
 
 'use client';
 
-import { ChangeEvent, MouseEvent, useContext, useMemo } from 'react';
-import useBackend from '@/hooks/useBackendContext';
+import { ChangeEvent, MouseEvent } from 'react';
+// import useBackend from '@/hooks/useBackendContext';
 import { AlertTriangle, Loader2, Paperclip, SendHorizontal } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
-import { AppContext } from '@/context';
-import { getModelsAsItems } from '@/utils/data/models';
-import { ParsedPrompt, TokenValidator, getMentionName, parsePrompt } from '@/utils/prompt';
+// import { AppContext } from '@/context';
+// import { getModelsAsItems } from '@/utils/data/models';
+import { ParsedPrompt, TokenValidator, /* getMentionName, */ parsePrompt } from '@/utils/prompt';
 import { getCaretPosition } from '@/utils/caretposition';
+import { Ui } from '@/types';
 import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { ShortcutBadge } from '../common/ShortCut';
@@ -32,6 +33,7 @@ import PromptCommand from './PromptCommand';
 export type PromptProps = {
   conversationId: string;
   prompt: ParsedPrompt;
+  commands: Ui.MenuItem[];
   isLoading: boolean;
   errorMessage: string;
   onUpdatePrompt: (prompt: ParsedPrompt) => void;
@@ -43,6 +45,7 @@ export type PromptProps = {
 export default function Prompt({
   conversationId,
   prompt,
+  commands,
   errorMessage,
   onUpdatePrompt,
   onSendMessage,
@@ -51,7 +54,7 @@ export default function Prompt({
   isLoading,
 }: PromptProps) {
   const { t } = useTranslation();
-  const { providers } = useContext(AppContext);
+  /* const { providers } = useContext(AppContext);
   const { backendContext } = useBackend();
   const modelItems = useMemo(() => {
     const items = getModelsAsItems(providers, backendContext).map((item) => ({
@@ -60,7 +63,7 @@ export default function Prompt({
       group: 'models',
     }));
     return items;
-  }, [providers, backendContext]);
+  }, [providers, backendContext]); */
 
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
@@ -128,7 +131,7 @@ export default function Prompt({
           </Button>
           <PromptCommand
             value={prompt}
-            commands={modelItems}
+            commands={commands}
             placeholder={t('Send a message...')}
             className="m-0 max-h-[200px] min-h-[32px] w-full resize-none overflow-y-hidden border-0 bg-transparent px-3 py-1.5 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent dark:text-white dark:placeholder-white"
             onChange={handleUpdateMessage}
