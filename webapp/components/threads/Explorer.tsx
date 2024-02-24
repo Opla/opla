@@ -41,7 +41,7 @@ import {
   importChatGPTConversation,
   validateChaGPTConversations,
 } from '@/utils/conversations/openai';
-import { validateConversations } from '@/utils/conversations';
+import { getConversationTitle, validateConversations } from '@/utils/conversations';
 import { MenuAction, ViewName } from '@/types/ui';
 import { AppContext } from '@/context';
 import { toast } from '../ui/Toast';
@@ -313,11 +313,7 @@ export default function Explorer({
                           >
                             <EditableItem
                               id={conversation.id}
-                              title={
-                                conversation.temp
-                                  ? `${conversation.currentPrompt || ''} ...`
-                                  : conversation.name
-                              }
+                              title={getConversationTitle(conversation)}
                               editable={!conversation.temp && conversation.id === selectedThreadId}
                               className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1"
                               onChange={handleChangeConversationName}

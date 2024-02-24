@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { BasicState } from '@/types/ui';
+import { PromptToken, PromptTokenState, PromptTokenType } from './prompt';
 
 // eslint-disable-next-line import/prefer-default-export
 export const getStateColor = (
@@ -25,4 +26,28 @@ export const getStateColor = (
   if (state === BasicState.loading) return `${prefix}-yellow-${suffix}`;
   if (state === BasicState.error) return `${prefix}-red-${suffix}`;
   return defaultEnabled ? '' : `${prefix}-green-${suffix}`;
+};
+
+export const getTokenColor = (token: PromptToken) => {
+  let className = '';
+  if (token.type === PromptTokenType.Mention) {
+    switch (token.state) {
+      case PromptTokenState.Error:
+        className = 'text-red-400 line-through';
+        break;
+      case PromptTokenState.Editing:
+        className = 'text-gray-500 animate-pulse';
+        break;
+      case PromptTokenState.Disabled:
+        className = 'text-gray-400';
+        break;
+      case PromptTokenState.Duplicate:
+        className = 'text-gray-400 line-through';
+        break;
+      default:
+        className = 'text-blue-400 underline';
+    }
+  }
+  if (token.type === PromptTokenType.Hashtag) className = 'text-yellow-400';
+  return className;
 };

@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { PanelLeft, PanelLeftClose, PanelRight, PanelRightClose } from 'lucide-react';
 import { AppContext } from '@/context';
@@ -43,7 +43,7 @@ import {
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
 import { buildContext, completion, getCompletionParametersDefinition } from '@/utils/providers';
-import { findModel, getModelsAsItems } from '@/utils/data/models';
+import { findModel, findModelInAll, getModelsAsItems } from '@/utils/data/models';
 import { findProvider } from '@/utils/data/providers';
 import { toast } from '@/components/ui/Toast';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
@@ -53,6 +53,17 @@ import { MenuAction, Page } from '@/types/ui';
 import { KeyedScrollPosition } from '@/hooks/useScroll';
 import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
 import { openFileDialog } from '@/utils/backend/tauri';
+import {
+  ParsedPrompt,
+  PromptToken,
+  PromptTokenState,
+  PromptTokenType,
+  compareMentions,
+  comparePrompts,
+  parsePrompt,
+  toPrompt,
+} from '@/utils/prompt';
+import { getConversationTitle } from '@/utils/conversations';
 import PromptArea from './Prompt';
 import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
@@ -98,14 +109,14 @@ function Thread({
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
   const conversationId = _conversationId || tempConversationId;
   const selectedConversation = conversations.find((c) => c.id === conversationId);
-  const [changedPrompt, setChangedPrompt] = useState<string | undefined>(undefined);
+  const [changedPrompt, setChangedPrompt] = useState<ParsedPrompt | undefined>(undefined);
   const { showModal } = useContext(ModalsContext);
   const [messages, setMessages] = useState<Message[] | undefined>(undefined);
   const [isMessageUpdating, setIsMessageUpdating] = useState<boolean>(false);
 
   const [isProcessing, setIsProcessing] = useState<{ [key: string]: boolean }>({});
   const [errorMessage, setErrorMessage] = useState<{ [key: string]: string }>({});
-  const { currentPrompt = '' } = selectedConversation || {};
+
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -147,14 +158,11 @@ function Thread({
 
   const showEmptyChat = !conversationId;
   const selectedModel = selectedConversation?.model || activeModel;
-  /* const localModelItems = getLocalModelsAsItems(
-    backendContext,
-    selectedModel,
-    getLocalProvider(providers),
+
+  const modelItems = useMemo(
+    () => getModelsAsItems(providers, backendContext, selectedModel),
+    [backendContext, providers, selectedModel],
   );
-  const cloudModelItems = getProviderModelsAsItems(providers, selectedModel);
-  const modelItems = [...localModelItems, ...cloudModelItems]; */
-  const modelItems = getModelsAsItems(providers, backendContext, selectedModel);
 
   useEffect(() => {
     if (_conversationId && tempConversationId) {
@@ -171,14 +179,51 @@ function Thread({
     }
   }, [_conversationId, conversations, updateConversations, tempConversationId]);
 
+  const tokenValidator = useCallback(
+    (token: PromptToken, parsedPrompt: ParsedPrompt): PromptToken => {
+      let state: PromptTokenState = PromptTokenState.Ok;
+      logger.info(
+        'tokenValidator',
+        token,
+        parsedPrompt,
+        token.value.length + token.index,
+        parsedPrompt.caretPosition,
+      );
+      const isEditing = token.value.length + token.index === parsedPrompt.caretPosition;
+      let { type } = token;
+      if (type === PromptTokenType.Mention) {
+        if (isEditing) {
+          state = PromptTokenState.Editing;
+        } else if (!modelItems.find((m) => compareMentions(m.value, token.value))) {
+          // this model is not available
+          state = PromptTokenState.Error;
+        } else if (parsedPrompt.tokens.find((to) => to.value === token.value)) {
+          // this mention is already present
+          state = PromptTokenState.Duplicate;
+        } else if (parsedPrompt.tokens.find((to) => to.type === PromptTokenType.Mention)) {
+          // only one mention at a time
+          state = PromptTokenState.Disabled;
+        }
+      } else if (token.value === '@' && isEditing) {
+        state = PromptTokenState.Editing;
+        type = PromptTokenType.Mention;
+      }
+      return { ...token, type, state };
+    },
+    [modelItems],
+  );
+
+  const currentPrompt = useMemo(
+    () => toPrompt(selectedConversation?.currentPrompt || '', tokenValidator),
+    [selectedConversation?.currentPrompt, tokenValidator],
+  );
+
   const updateMessagesAndConversation = async (
     changedMessages: Message[],
     conversationMessages: Message[],
     selectedConversationId = conversationId,
     selectedConversations = conversations,
   ) => {
-    // const conversationMessages =
-    //  _conversationMessages || getConversationMessages(selectedConversationId);
     const updatedConversations = updateOrCreateConversation(
       selectedConversationId,
       selectedConversations,
@@ -192,14 +237,18 @@ function Thread({
     return { updatedConversationId, updatedConversations, updatedMessages };
   };
 
-  const handleSelectModel = async (model?: string, provider = ProviderType.opla) => {
+  const handleSelectModel = async (
+    model?: string,
+    provider = ProviderType.opla,
+    partial: Partial<Conversation> = {},
+  ) => {
     logger.info(
       `handleSelectModel ${model} ${provider} activeModel=${typeof activeModel}`,
       selectedConversation,
     );
     if (model && selectedConversation) {
       const newConversations = updateConversation(
-        { ...selectedConversation, model, provider, parameters: {} },
+        { ...selectedConversation, model, provider, parameters: {}, ...partial },
         conversations,
         true,
       );
@@ -228,10 +277,25 @@ function Thread({
         providerName = provider.name;
       }
     }
-    const modelName = model?.name || conversation.model || activeModel;
-    if (!model) {
-      model = findModel(modelName, backendContext.config.models.items);
+    const modelName = message.author.name || model?.name || conversation.model || activeModel;
+    if (!model || model.name !== modelName) {
+      model = findModelInAll(modelName, providers, backendContext);
     }
+    const name = model?.provider || model?.creator;
+    if (name && name !== providerName) {
+      provider = findProvider(name, providers);
+      providerName = provider?.name;
+    }
+    logger.info(
+      'sendMessage',
+      name,
+      model,
+      provider,
+      modelName,
+      providerName,
+      conversation,
+      presets,
+    );
 
     const llmParameters: LlmParameters[] = [];
     const preset = findCompatiblePreset(selectedConversation?.preset, presets, modelName, provider);
@@ -298,16 +362,43 @@ function Thread({
     if (conversationId === undefined) {
       return;
     }
-    if (currentPrompt.trim().length < 1) {
+    const mentions = currentPrompt.tokens.filter((to) => to.type === PromptTokenType.Mention);
+    const modelItem =
+      mentions.length === 1
+        ? modelItems.find((mi) => compareMentions(mi.value, mentions[0].value))
+        : undefined;
+    const modelName = modelItem?.value;
+    // logger.info('send modelName', modelName, modelItem, mentions);
+
+    if (currentPrompt.text.length < 1) {
+      if (modelName) {
+        // Change conversation's model if there is only a model mention in the prompt
+        // TODO handle parameters and key
+        handleSelectModel(modelName, modelItem.group as ProviderType, { currentPrompt: undefined });
+        setChangedPrompt(undefined);
+        return;
+      }
       const error = { ...errorMessage, [conversationId]: t('Please enter a message.') };
       setErrorMessage(error);
       return;
     }
+
+    if (mentions.length > 1) {
+      const error = { ...errorMessage, [conversationId]: t('Only one model at a time.') };
+      setErrorMessage(error);
+      return;
+    }
+    if (mentions.length === 1 && (!modelName || mentions[0].state === PromptTokenState.Error)) {
+      const error = { ...errorMessage, [conversationId]: t('This model is not available.') };
+      setErrorMessage(error);
+      return;
+    }
+
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
     setIsProcessing({ ...isProcessing, [conversationId]: true });
 
-    const userMessage = createMessage({ role: 'user', name: 'you' }, currentPrompt);
-    let message = createMessage({ role: 'assistant', name: selectedModel }, '...');
+    const userMessage = createMessage({ role: 'user', name: 'you' }, currentPrompt.text);
+    let message = createMessage({ role: 'assistant', name: modelName || selectedModel }, '...');
     message.status = MessageState.Pending;
     userMessage.sibling = message.id;
     message.sibling = userMessage.id;
@@ -327,10 +418,10 @@ function Thread({
       updatedConversations,
     ) as Conversation;
     if (conversation.temp) {
-      conversation.name = conversation.currentPrompt as string;
+      conversation.name = getConversationTitle(conversation);
     }
 
-    conversation.currentPrompt = '';
+    conversation.currentPrompt = undefined;
     setChangedPrompt(undefined);
     conversation.temp = false;
 
@@ -460,21 +551,21 @@ function Thread({
   };
 
   const handleUpdatePrompt = useCallback(
-    (message: string | undefined, conversationName = 'Conversation') => {
-      if (message === '' && tempConversationId) {
+    (prompt: ParsedPrompt | undefined, conversationName = 'Conversation') => {
+      if (prompt?.raw === '' && tempConversationId) {
         setChangedPrompt(undefined);
         updateConversations(conversations.filter((c) => !c.temp));
         setTempConversationId(undefined);
         return;
       }
       const conversation = getConversation(conversationId, conversations) as Conversation;
-      if (conversation && conversation.currentPrompt === message) {
+      if (conversation && comparePrompts(conversation.currentPrompt, prompt)) {
         setChangedPrompt(undefined);
         return;
       }
       let updatedConversations: Conversation[];
       if (conversation) {
-        conversation.currentPrompt = message;
+        conversation.currentPrompt = prompt;
         updatedConversations = conversations.filter((c) => !(c.temp && c.id !== conversationId));
         updatedConversations = updateConversation(conversation, updatedConversations, true);
       } else {
@@ -483,7 +574,7 @@ function Thread({
         updatedConversations.push(newConversation);
         newConversation.temp = true;
         newConversation.name = conversationName;
-        newConversation.currentPrompt = message;
+        newConversation.currentPrompt = prompt;
         if (tempModelProvider) {
           [newConversation.model, newConversation.provider] = tempModelProvider;
           setTempModelProvider(undefined);
@@ -493,19 +584,22 @@ function Thread({
       updateConversations(updatedConversations);
       setChangedPrompt(undefined);
     },
-    [conversationId, conversations, updateConversations, tempConversationId, tempModelProvider],
+    [tempConversationId, conversationId, conversations, updateConversations, tempModelProvider],
   );
 
-  useDebounceFunc<string | undefined>(handleUpdatePrompt, changedPrompt, 500);
+  useDebounceFunc<ParsedPrompt | undefined>(handleUpdatePrompt, changedPrompt, 500);
 
-  const handleChangePrompt = (text: string) => {
-    if (text !== currentPrompt) {
-      setChangedPrompt(text);
+  const handleChangePrompt = (prompt: ParsedPrompt) => {
+    if (prompt.raw !== currentPrompt.raw) {
+      setChangedPrompt(prompt);
     }
   };
 
   const handlePromptSelected = (prompt: Prompt) => {
-    handleUpdatePrompt(prompt.value, prompt.name);
+    handleUpdatePrompt(
+      parsePrompt({ text: prompt.value, caretStartIndex: 0 }, tokenValidator),
+      prompt.name,
+    );
   };
 
   const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {
@@ -539,7 +633,7 @@ function Thread({
     }
   };
 
-  const message = changedPrompt === undefined ? currentPrompt : changedPrompt;
+  const prompt = changedPrompt === undefined ? currentPrompt : changedPrompt;
   return (
     <div className="flex h-full flex-col dark:bg-neutral-800/30">
       <div className="grow-0">
@@ -595,7 +689,7 @@ function Thread({
           <PromptsGrid onPromptSelected={handlePromptSelected} />
         </div>
       ) : (
-        (message || (messages && messages[0]?.conversationId === conversationId)) && (
+        (prompt || (messages && messages[0]?.conversationId === conversationId)) && (
           <ConversationView
             conversationId={selectedConversation?.id as string}
             scrollPosition={
@@ -614,15 +708,16 @@ function Thread({
       )}
       <div className="flex flex-col items-center text-sm dark:bg-neutral-800/30" />
 
-      {(message || (messages && messages[0]?.conversationId === conversationId)) && (
+      {(prompt || (messages && messages[0]?.conversationId === conversationId)) && (
         <PromptArea
           conversationId={conversationId as string}
-          message={message}
+          prompt={prompt}
           isLoading={conversationId ? isProcessing[conversationId] : false}
           errorMessage={conversationId ? errorMessage[conversationId] : ''}
           onSendMessage={handleSendMessage}
           onUpdatePrompt={handleChangePrompt}
           onUploadFile={handleUploadFile}
+          tokenValidate={tokenValidator}
         />
       )}
     </div>

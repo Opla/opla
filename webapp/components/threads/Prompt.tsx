@@ -14,38 +14,57 @@
 
 'use client';
 
-import { ChangeEvent, KeyboardEvent, MouseEvent } from 'react';
+import { ChangeEvent, MouseEvent, useContext, useMemo } from 'react';
+import useBackend from '@/hooks/useBackendContext';
 import { AlertTriangle, Loader2, Paperclip, SendHorizontal } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts';
-import { Textarea } from '../ui/textarea';
+import logger from '@/utils/logger';
+import { AppContext } from '@/context';
+import { getModelsAsItems } from '@/utils/data/models';
+import { ParsedPrompt, TokenValidator, getMentionName, parsePrompt } from '@/utils/prompt';
+import { getCaretPosition } from '@/utils/caretposition';
 import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { ShortcutBadge } from '../common/ShortCut';
+import PromptCommand from './PromptCommand';
 
 export type PromptProps = {
   conversationId: string;
-  message: string;
+  prompt: ParsedPrompt;
   isLoading: boolean;
   errorMessage: string;
-  onUpdatePrompt: (message: string) => void;
+  onUpdatePrompt: (prompt: ParsedPrompt) => void;
   onSendMessage: () => void;
   onUploadFile: () => void;
+  tokenValidate: TokenValidator;
 };
 
 export default function Prompt({
   conversationId,
-  message,
+  prompt,
   errorMessage,
   onUpdatePrompt,
   onSendMessage,
   onUploadFile,
+  tokenValidate,
   isLoading,
 }: PromptProps) {
   const { t } = useTranslation();
+  const { providers } = useContext(AppContext);
+  const { backendContext } = useBackend();
+  const modelItems = useMemo(() => {
+    const items = getModelsAsItems(providers, backendContext).map((item) => ({
+      ...item,
+      value: getMentionName(item.value as string),
+      group: 'models',
+    }));
+    return items;
+  }, [providers, backendContext]);
 
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
+    logger.info('sending message', conversationId);
     onSendMessage();
   };
 
@@ -54,22 +73,29 @@ export default function Prompt({
     onUploadFile();
   };
 
-  const handleKeypress = (event: KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
+  const handleKeypress = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' && e.shiftKey) {
+      e.preventDefault();
+      const textarea = e.target as HTMLTextAreaElement;
+      const { caretStartIndex } = getCaretPosition(textarea);
+      const value = `${textarea.value} \n`;
+      const newPrompt = parsePrompt({ text: value, caretStartIndex }, tokenValidate);
+      onUpdatePrompt(newPrompt);
+    } else if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
       onSendMessage();
     }
   };
 
-  const handleUpdateMessage = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    event.preventDefault();
-    onUpdatePrompt(event.target.value);
+  const handleUpdateMessage = (newValue: ParsedPrompt) => {
+    onUpdatePrompt(newValue);
   };
 
-  const handleFocus = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleFocus = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const lengthOfInput = event.target.value.length;
     event.currentTarget.setSelectionRange(lengthOfInput, lengthOfInput);
-    onUpdatePrompt(event.target.value);
+    const newPrompt = parsePrompt({ textarea: event.target }, tokenValidate);
+    onUpdatePrompt(newPrompt);
   };
 
   const shortcutSend: KeyBinding = defaultShortcuts.find(
@@ -100,22 +126,20 @@ export default function Prompt({
           >
             <Paperclip className="strokeWidth={1.5} h-4 w-4" />
           </Button>
-          <Textarea
-            autoresize
-            autoFocus
-            value={message}
-            key={conversationId}
-            tabIndex={0}
+          <PromptCommand
+            value={prompt}
+            commands={modelItems}
             placeholder={t('Send a message...')}
             className="m-0 max-h-[200px] min-h-[32px] w-full resize-none overflow-y-hidden border-0 bg-transparent px-3 py-1.5 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent dark:text-white dark:placeholder-white"
             onChange={handleUpdateMessage}
-            onKeyDown={handleKeypress}
             onFocus={handleFocus}
+            onKeyDown={handleKeypress}
+            tokenValidate={tokenValidate}
           />
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                disabled={isLoading || message?.length === 0}
+                disabled={isLoading || prompt?.raw?.length === 0}
                 type="button"
                 aria-label={t('Send')}
                 onClick={handleSendMessage}

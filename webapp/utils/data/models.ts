@@ -18,6 +18,7 @@ import Opla from '@/components/icons/Opla';
 import OpenAI from '@/components/icons/OpenAI';
 import { getResourceUrl } from '.';
 import { getLocalProvider, getProviderState } from './providers';
+import OplaProvider from '../providers/opla';
 
 export const getSelectedModel = (backendContext: OplaContext) => {
   const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.activeModel}`;
@@ -26,23 +27,23 @@ export const getSelectedModel = (backendContext: OplaContext) => {
 
 export const getLocalModelsAsItems = (
   backendContext: OplaContext,
-  modelname?: string,
+  selectedModelname?: string,
   localProvider?: Provider,
 ): Ui.MenuItem[] => {
   const state = getProviderState(localProvider);
   return backendContext.config.models.items.map((model) => ({
     label: model.title || model.name,
     value: model.name,
-    group: localProvider?.name || ProviderType.opla,
+    group: localProvider?.name || OplaProvider.name,
     icon: Opla,
-    selected: model.name === modelname,
+    selected: model.name === selectedModelname,
     state,
   }));
 };
 
 export const getProviderModelsAsItems = (
   providers: Provider[],
-  modelname?: string,
+  selectedModelname?: string,
 ): Ui.MenuItem[] => {
   const items = providers.reduce((acc, provider) => {
     if (!provider.models || provider.disabled) return acc;
@@ -54,7 +55,7 @@ export const getProviderModelsAsItems = (
             label: model.title || model.name,
             value: model.name,
             group: provider.name,
-            selected: model.name === modelname,
+            selected: model.name === selectedModelname,
             icon: provider.type === ProviderType.openai ? OpenAI : BrainCircuit,
             state,
           }) as Ui.MenuItem,
@@ -67,12 +68,29 @@ export const getProviderModelsAsItems = (
 export const getModelsAsItems = (
   providers: Provider[],
   backendContext: OplaContext,
-  modelname?: string,
+  selectedModelname?: string,
 ) => {
   const localProvider = getLocalProvider(providers);
-  const localItems = getLocalModelsAsItems(backendContext, modelname, localProvider);
-  const providerItems = getProviderModelsAsItems(providers, modelname);
+  const localItems = getLocalModelsAsItems(backendContext, selectedModelname, localProvider);
+  const providerItems = getProviderModelsAsItems(providers, selectedModelname);
   return [...localItems, ...providerItems];
+};
+
+export const getLocalModels = (backendContext: OplaContext) =>
+  backendContext.config.models.items.map((model) => model);
+
+export const getProviderModels = (providers: Provider[]) => {
+  const providerModels = providers.reduce((acc, provider) => {
+    if (!provider.models || provider.disabled) return acc;
+    return [...acc, ...provider.models];
+  }, [] as Model[]);
+  return providerModels;
+};
+
+export const getAllModels = (providers: Provider[], backendContext: OplaContext) => {
+  const localModels = getLocalModels(backendContext);
+  const providerModels = getProviderModels(providers);
+  return [...localModels, ...providerModels];
 };
 
 export const getDownloadables = (model: Model, downloads = [] as Array<Model>, parent?: Model) => {
@@ -92,5 +110,16 @@ export const isValidFormat = (m: Model) =>
   m?.name.endsWith('.gguf') ||
   getResourceUrl(m?.download).endsWith('.gguf');
 
-export const findModel = (model: string, models: Model[]): Model | undefined =>
-  models.find((m) => m.name === model || m.id === model);
+export const findModel = (modelIdOrName: string, models: Model[]): Model | undefined =>
+  models.find(
+    (m) => m.name.toLowerCase() === modelIdOrName.toLowerCase() || m.id === modelIdOrName,
+  );
+
+export const findModelInAll = (
+  modelIdOrName: string,
+  providers: Provider[],
+  backendContext: OplaContext,
+) => {
+  const allModels = getAllModels(providers, backendContext);
+  return findModel(modelIdOrName, allModels);
+};

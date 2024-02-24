@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { ZodSchema } from 'zod';
+import { ParsedPrompt } from '@/utils/prompt';
 import * as Ui from './ui';
 
 declare global {
@@ -35,9 +36,19 @@ export type Author = {
   metadata?: Metadata;
 };
 
+export enum ContentType {
+  Text = 'text',
+  /* Image = 'image',
+  Video = 'video',
+  Audio = 'audio',
+  File = 'file',
+  Custom = 'custom', */
+}
+
 export type Content = {
-  type: 'text' | 'image' | 'video' | 'audio' | 'file' | 'custom';
+  type: ContentType;
   parts: string[];
+  raws?: string[];
   metadata?: Metadata;
 };
 
@@ -136,7 +147,7 @@ export type Conversation = BaseNamedRecord & {
   messages: Message[] | undefined;
   pluginIds?: string[];
   preset?: string;
-  currentPrompt?: string;
+  currentPrompt?: string | ParsedPrompt;
   note?: string;
   model?: string;
   provider?: string;
