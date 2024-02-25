@@ -199,9 +199,13 @@ function Thread({
   }, [_conversationId, conversations, updateConversations, tempConversationId]);
 
   const tokenValidator = useCallback(
-    (token: PromptToken, parsedPrompt: ParsedPrompt, _previousToken: PromptToken | undefined): [PromptToken,PromptToken | undefined] => {
+    (
+      token: PromptToken,
+      parsedPrompt: ParsedPrompt,
+      _previousToken: PromptToken | undefined,
+    ): [PromptToken, PromptToken | undefined] => {
       let state: PromptTokenState = PromptTokenState.Ok;
-      let previousToken: PromptToken| undefined;
+      let previousToken: PromptToken | undefined;
       logger.info(
         'tokenValidator',
         token,
@@ -247,8 +251,13 @@ function Thread({
           // this command is not available
           state = PromptTokenState.Error;
         }
-      } else if (type === PromptTokenType.Text && _previousToken?.type === PromptTokenType.Hashtag) {
-        const previousCommand = commands.find((m) => compareHashtags(m.value, _previousToken.value));
+      } else if (
+        type === PromptTokenType.Text &&
+        _previousToken?.type === PromptTokenType.Hashtag
+      ) {
+        const previousCommand = commands.find((m) =>
+          compareHashtags(m.value, _previousToken.value),
+        );
         if (previousCommand && previousCommand.group !== 'parameters-boolean') {
           type = PromptTokenType.ParameterValue;
           previousToken = { ..._previousToken, state: PromptTokenState.Ok };
@@ -256,7 +265,6 @@ function Thread({
             state = PromptTokenState.Editing;
           }
         }
-
       } else if (token.value.trim() === '@' && isEditing) {
         state = PromptTokenState.Editing;
         type = PromptTokenType.Mention;

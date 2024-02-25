@@ -48,7 +48,11 @@ export const getTokenColor = (token: PromptToken) => {
   if (token.type === PromptTokenType.Mention && className === '') {
     className = 'text-blue-400 underline';
   }
-  if ((token.type === PromptTokenType.Hashtag || token.type === PromptTokenType.ParameterValue) && className === '') className = 'text-yellow-400';
+  if (
+    (token.type === PromptTokenType.Hashtag || token.type === PromptTokenType.ParameterValue) &&
+    className === ''
+  )
+    className = 'text-yellow-400';
   if (token.type === PromptTokenType.Action && className === '') className = 'text-green-400';
   return className;
 };

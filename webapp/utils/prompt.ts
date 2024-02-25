@@ -48,14 +48,18 @@ export type ParsedPrompt = {
 
 type ParsePromptOptions =
   | {
-    text: string;
-    caretStartIndex?: number;
-  }
+      text: string;
+      caretStartIndex?: number;
+    }
   | {
-    textarea: HTMLTextAreaElement;
-  };
+      textarea: HTMLTextAreaElement;
+    };
 
-export type TokenValidator = (token: PromptToken, currentParsedPrompt: ParsedPrompt, previousToken: PromptToken | undefined) => [PromptToken, PromptToken | undefined];
+export type TokenValidator = (
+  token: PromptToken,
+  currentParsedPrompt: ParsedPrompt,
+  previousToken: PromptToken | undefined,
+) => [PromptToken, PromptToken | undefined];
 
 export const isHashtag = (word: string) => word.startsWith('#');
 export const isMention = (word: string) => word.startsWith('@');
@@ -150,12 +154,11 @@ export const getHashtagName = (name: string): string =>
 export const compareHashtags = (hashtag1: string | undefined, hashtag2: string | undefined) =>
   getHashtagName(hashtag1 || '1') === getHashtagName(hashtag2 || '2');
 
-  export const getActionName = (name: string): string =>
+export const getActionName = (name: string): string =>
   !name || isHashtag(name) ? name : `/${name.replace(/[^\p{L}0-9._-]+/gu, '_')}`;
 
 export const compareActions = (action1: string | undefined, action2: string | undefined) =>
   getActionName(action1 || '1') === getActionName(action2 || '2');
-
 
 export function comparePrompts(
   prompt1: ParsedPrompt | string | undefined,
