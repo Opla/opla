@@ -16,7 +16,7 @@
 // https://github.com/mxkaske/mxkaske.dev/blob/main/components/craft/fancy-area/write.tsx
 
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ParsedPrompt, parsePrompt, TokenValidator } from '@/utils/prompt';
+import { isCommand, ParsedPrompt, parsePrompt, TokenValidator } from '@/utils/prompt';
 import { getCaretCoordinates, getCurrentWord } from '@/utils/caretposition';
 import { Ui } from '@/types';
 import { cn } from '@/lib/utils';
@@ -108,8 +108,10 @@ function PromptCommand({
       if (textarea && dropdown) {
         const { currentWord, caretStartIndex } = getCurrentWord(textarea);
         valueChange(text, caretStartIndex);
-        logger.info({ currentWord });
-        if (currentWord.startsWith('@')) {
+        const start = value?.text.trim().length || 0;
+        logger.info('value length', start);
+        if (isCommand(currentWord, start)) {
+          logger.info('isCommand', currentWord, start, commandValue);
           setCommandValue(currentWord);
           positionDropdown();
           toggleDropdown();
@@ -118,7 +120,7 @@ function PromptCommand({
         }
       }
     },
-    [commandValue, positionDropdown, valueChange],
+    [commandValue, positionDropdown, value?.text, valueChange],
   );
 
   const handleCommandSelect = useCallback(
@@ -163,12 +165,14 @@ function PromptCommand({
     const dropdown = dropdownRef.current;
     if (textarea && dropdown) {
       const { currentWord } = getCurrentWord(textarea);
-      logger.info(currentWord);
-      if (!currentWord.startsWith('@') && commandValue !== '') {
+
+      const start = value?.text.trim().length || 0;
+      logger.info('isCommand selection change', currentWord, commandValue, start);
+      if (!isCommand(currentWord, start) && commandValue !== '') {
         toggleDropdown(false);
       }
     }
-  }, [commandValue]);
+  }, [commandValue, value?.text]);
 
   useEffect(() => {
     const textarea = textareaRef.current;
