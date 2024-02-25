@@ -59,6 +59,8 @@ import {
   PromptToken,
   PromptTokenState,
   PromptTokenType,
+  compareActions,
+  compareHashtags,
   compareMentions,
   comparePrompts,
   getMentionName,
@@ -164,7 +166,8 @@ function Thread({
   const { modelItems, commands } = useMemo(() => {
     const items = getModelsAsItems(providers, backendContext, selectedModel);
     const parameterItems: Ui.MenuItem[] = [
-      { value: '#provider_key', label: 'Provider key', group: 'parameters' },
+      { value: '#provider_key', label: 'Provider key', group: 'parameters-string' },
+      { value: '#stream', label: 'Stream', group: 'parameters-boolean' },
     ];
     const actionsItems: Ui.MenuItem[] = [{ value: '/system', label: 'System', group: 'actions' }];
     const cmds = [
@@ -196,8 +199,9 @@ function Thread({
   }, [_conversationId, conversations, updateConversations, tempConversationId]);
 
   const tokenValidator = useCallback(
-    (token: PromptToken, parsedPrompt: ParsedPrompt): PromptToken => {
+    (token: PromptToken, parsedPrompt: ParsedPrompt, _previousToken: PromptToken | undefined): [PromptToken,PromptToken | undefined] => {
       let state: PromptTokenState = PromptTokenState.Ok;
+      let previousToken: PromptToken| undefined;
       logger.info(
         'tokenValidator',
         token,
@@ -205,12 +209,13 @@ function Thread({
         token.value.length + token.index,
         parsedPrompt.caretPosition,
       );
-      const isEditing = token.value.length + token.index === parsedPrompt.caretPosition;
       let { type } = token;
+      const isAtCaret = token.value.length + token.index === parsedPrompt.caretPosition;
+      const isEditing = type !== PromptTokenType.Text && isAtCaret;
       if (type === PromptTokenType.Mention) {
         if (isEditing) {
           state = PromptTokenState.Editing;
-        } else if (!modelItems.find((m) => compareMentions(m.value, token.value))) {
+        } else if (!commands.find((m) => compareMentions(m.value, token.value))) {
           // this model is not available
           state = PromptTokenState.Error;
         } else if (parsedPrompt.tokens.find((to) => to.value === token.value && to.type === type)) {
@@ -221,13 +226,37 @@ function Thread({
           state = PromptTokenState.Disabled;
         }
       } else if (type === PromptTokenType.Hashtag) {
+        const command = commands.find((m) => compareHashtags(m.value, token.value));
         if (isEditing) {
           state = PromptTokenState.Editing;
+        } else if (!command) {
+          // this hashtag is not available
+          state = PromptTokenState.Error;
+        } else if (parsedPrompt.tokens.find((to) => to.value === token.value && to.type === type)) {
+          // this hashtag is already present
+          state = PromptTokenState.Duplicate;
+        } else if (command.group !== 'parameters-boolean') {
+          // should wait for next token as value
+          state = PromptTokenState.Disabled;
         }
       } else if (type === PromptTokenType.Action) {
+        const command = commands.find((m) => compareActions(m.value, token.value));
         if (isEditing) {
           state = PromptTokenState.Editing;
+        } else if (!command) {
+          // this command is not available
+          state = PromptTokenState.Error;
         }
+      } else if (type === PromptTokenType.Text && _previousToken?.type === PromptTokenType.Hashtag) {
+        const previousCommand = commands.find((m) => compareHashtags(m.value, _previousToken.value));
+        if (previousCommand && previousCommand.group !== 'parameters-boolean') {
+          type = PromptTokenType.ParameterValue;
+          previousToken = { ..._previousToken, state: PromptTokenState.Ok };
+          if (isAtCaret) {
+            state = PromptTokenState.Editing;
+          }
+        }
+
       } else if (token.value.trim() === '@' && isEditing) {
         state = PromptTokenState.Editing;
         type = PromptTokenType.Mention;
@@ -235,9 +264,9 @@ function Thread({
         state = PromptTokenState.Editing;
         type = PromptTokenType.Hashtag;
       }
-      return { ...token, type, state };
+      return [{ ...token, type, state }, previousToken];
     },
-    [modelItems],
+    [commands],
   );
 
   const currentPrompt = useMemo(
