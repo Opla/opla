@@ -46,7 +46,8 @@ export const getProviderModelsAsItems = (
   selectedModelname?: string,
 ): Ui.MenuItem[] => {
   const items = providers.reduce((acc, provider) => {
-    if (!provider.models || provider.disabled) return acc;
+    const selectedModel = provider.models?.find((model) => model.name === selectedModelname);
+    if (!provider.models || (provider.disabled && !selectedModel)) return acc;
     const state = getProviderState(provider);
     const providerItems =
       provider.models.map(
