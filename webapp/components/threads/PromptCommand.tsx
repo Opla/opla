@@ -130,7 +130,6 @@ function PromptCommand({
       if (textarea && dropdown) {
         const { currentWord, start, text, caretStartIndex } = getCurrentWord(textarea);
         const newText = `${text.substring(0, start)}${newValue} ${text.substring(start + currentWord.length)}`;
-        // replaceWord(textarea, `${newValue}`);
         valueChange(newText, caretStartIndex + 1);
         toggleDropdown(false);
         onCommandSelect?.(newValue);
@@ -212,7 +211,7 @@ function PromptCommand({
         rows={5}
         onFocus={handleFocus}
       />
-      <p className="pointer-events-none absolute bottom-[6px] left-[12px] w-full text-sm">
+      <p className="textarea-overlay pointer-events-none absolute bottom-[6px] left-[12px] w-full text-sm">
         {value?.tokens?.map((token) =>
           token.type !== 'newline' ? (
             <span key={token.index} className={getTokenColor(token)}>

@@ -15,14 +15,11 @@
 'use client';
 
 import { ChangeEvent, MouseEvent } from 'react';
-// import useBackend from '@/hooks/useBackendContext';
 import { AlertTriangle, Loader2, Paperclip, SendHorizontal } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
-// import { AppContext } from '@/context';
-// import { getModelsAsItems } from '@/utils/data/models';
-import { ParsedPrompt, TokenValidator, /* getMentionName, */ parsePrompt } from '@/utils/prompt';
+import { ParsedPrompt, TokenValidator, parsePrompt } from '@/utils/prompt';
 import { getCaretPosition } from '@/utils/caretposition';
 import { Ui } from '@/types';
 import { Button } from '../ui/button';
@@ -54,17 +51,6 @@ export default function Prompt({
   isLoading,
 }: PromptProps) {
   const { t } = useTranslation();
-  /* const { providers } = useContext(AppContext);
-  const { backendContext } = useBackend();
-  const modelItems = useMemo(() => {
-    const items = getModelsAsItems(providers, backendContext).map((item) => ({
-      ...item,
-      value: getMentionName(item.value as string),
-      group: 'models',
-    }));
-    return items;
-  }, [providers, backendContext]); */
-
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
     logger.info('sending message', conversationId);

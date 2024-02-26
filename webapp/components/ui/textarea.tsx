@@ -16,7 +16,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       className,
     );
     if (autoresize) {
-      // We put the textarea inside a div to make sure it doesn't grow too much and "wobbles" upper content
+      // We put the textarea inside a div to make sure it doesn't grow too much and doesn't "wobbles" upper content
       return (
         <div className="textarea-container w-full">
           <textarea
