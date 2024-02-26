@@ -13,22 +13,19 @@
 // limitations under the License.
 
 use tokio::sync::Mutex;
-use std::{ sync::Arc, thread::JoinHandle };
+use std::sync::Arc;
 use crate::{
     error::Error,
     llm::LlmQueryCompletion,
     llm::llama_cpp::LLamaCppServer,
     store::{ ServerParameters, ServerConfiguration },
 };
-use sysinfo::{ System, Pid };
+use sysinfo::System;
+use tauri::async_runtime::JoinHandle;
 use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
 use crate::llm::{ LlmQuery, LlmResponse };
 use std::time::Duration;
 use std::thread;
-
-pub struct ServerImpl {
-    handler: Option<JoinHandle<()>>,
-}
 
 pub struct OplaServer {
     pub pid: Arc<Mutex<usize>>,
@@ -38,7 +35,7 @@ pub struct OplaServer {
     pub status: Arc<Mutex<ServerStatus>>,
     pub parameters: Option<ServerParameters>,
     server: LLamaCppServer,
-    instance: Arc<Mutex<ServerImpl>>,
+    handle: Option<JoinHandle<()>>,
 }
 
 #[derive(Clone, serde::Serialize, Copy, PartialEq, Debug)]
@@ -86,7 +83,7 @@ impl OplaServer {
             model_path: None,
             parameters: None,
             server: LLamaCppServer::new(),
-            instance: Arc::new(Mutex::new(ServerImpl { handler: None })),
+            handle: None,
         }
     }
 
@@ -109,11 +106,10 @@ impl OplaServer {
     }
 
     pub async fn start_llama_cpp_server<EventLoopMessage: Runtime + 'static>(
+        self: &mut Self,
         app: tauri::AppHandle<EventLoopMessage>,
         model: &str,
         arguments: Vec<String>,
-        /* do_started: Box<dyn Future<Output = dyn (Fn(usize) -> ()) + Send>>,
-        callback: Box<dyn Future<Output = dyn (Fn(ServerStatus) -> ()) + Send>> */
         wpid: Arc<Mutex<usize>>,
         wstatus: Arc<Mutex<ServerStatus>>
     ) -> Result<(), String> {
@@ -122,7 +118,7 @@ impl OplaServer {
         )?;
 
         let model = model.to_string();
-        let _future = tauri::async_runtime::spawn(async move {
+        let handle = tauri::async_runtime::spawn(async move {
             let (mut rx, child) = match command.args(arguments).spawn() {
                 Ok((rx, child)) => (rx, child),
                 Err(err) => {
@@ -137,7 +133,6 @@ impl OplaServer {
                     {
                         println!("Opla server error: {}", "failed to emit error");
                     }
-                    // callback(ServerStatus::Error);
                     let mut st = wstatus.lock().await;
                     *st = ServerStatus::Error;
                     return;
@@ -168,13 +163,11 @@ impl OplaServer {
                     {
                         println!("Opla server error: {}", "failed to emit error");
                     }
-                    // callback(ServerStatus::Error);
                     let mut st = wstatus.lock().await;
                     *st = ServerStatus::Error;
                     return;
                 }
             };
-            // do_started(p);
             let mut wp = wpid.lock().await;
             *wp = p;
             drop(wp);
@@ -208,7 +201,6 @@ impl OplaServer {
                             println!("Opla server error: {}", "failed to emit started");
                         }
 
-                        // callback(ServerStatus::Started);
                         let mut st = wstatus.lock().await;
                         *st = ServerStatus::Started;
                     }
@@ -226,7 +218,6 @@ impl OplaServer {
                             println!("Opla server error: {}", "failed to emit error");
                         }
 
-                        // callback(ServerStatus::Error);
                         let mut st = wstatus.lock().await;
                         *st = ServerStatus::Error;
                     }
@@ -244,6 +235,7 @@ impl OplaServer {
                 }
             }
         });
+        self.handle = Some(handle);
         Ok(())
     }
 
@@ -360,20 +352,8 @@ impl OplaServer {
         drop(wstatus);
 
         let wpid = Arc::clone(&self.pid);
-        /* let do_started: Box<dyn Fn(usize) + Send> = Box::new(move |pid: usize| {
-            println!("Opla server just started: {}", pid);
-            let p = wpid.lock().await;
-            *p = pid;
-        }) as Box<dyn Fn(usize) + Send>; */
-
         let wstatus = Arc::clone(&self.status);
-        /* let callback = Box::new(move |status| {
-            async {
-                let st = wstatus.lock().await;
-                *st = status;
-            }
-        }); */
-        OplaServer::start_llama_cpp_server(app, model, arguments, wpid, wstatus).await?;
+        self.start_llama_cpp_server(app, model, arguments, wpid, wstatus).await?;
 
         Ok(Payload { status: status_response, message: self.name.to_string() })
     }
@@ -405,7 +385,7 @@ impl OplaServer {
                 })
                 .map_err(|err| err.to_string())?;
 
-            let sys = System::new_all();
+            /* let sys = System::new_all();
             let pid = self.pid.lock().await.to_owned();
             let process = match sys.process(Pid::from(pid)) {
                 Some(process) => process,
@@ -415,7 +395,16 @@ impl OplaServer {
                 }
             };
             process.kill();
-            println!("Kill Opla server {}", pid);
+            println!("Kill Opla server {}", pid); */
+            match (self.handle).take() {
+                Some(handle) => {
+                    handle.abort();
+                }
+                None => {
+                    println!("Opla server error trying to get handler");
+                    return Err("Opla server can't get handler".to_string());
+                }
+            }
             app
                 .emit_all("opla-server", Payload {
                     message: format!("Opla server killed: {} ", "llama.cpp.server"),
@@ -458,7 +447,6 @@ impl OplaServer {
 
     pub fn init(&mut self, store_server: ServerConfiguration) {
         Self::sysinfo_test();
-        let sys = System::new_all();
         self.kill_previous_processes();
         self.parameters = Some(store_server.parameters);
     }
