@@ -18,7 +18,7 @@ import { Bug, Settings2 } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import useBackend from '@/hooks/useBackendContext';
 import useProviderState from '@/hooks/useProviderState';
-import { ProviderType } from '@/types';
+import { ProviderType, ServerStatus } from '@/types';
 import Toolbar from './Toolbar';
 import Server from './server';
 import OpenAI from './openai';
@@ -93,6 +93,13 @@ function ProviderView({ providerId }: { providerId?: string }) {
                     <ScrollArea>
                       {provider.type === ProviderType.opla && (
                         <>
+                          {backendContext?.server.status === ServerStatus.ERROR && (
+                            <div className="w-full text-sm">
+                              <div className="break-all pb-2 text-red-400 dark:text-red-600">
+                                {t('Server Error')} : {backendContext?.server.message}
+                              </div>
+                            </div>
+                          )}
                           <div className="w-full text-sm">
                             {backendContext?.server.stdout
                               ?.map((log, index) => ({ id: index, log }))

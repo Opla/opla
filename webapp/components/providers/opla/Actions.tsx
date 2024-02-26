@@ -72,7 +72,7 @@ export default function Actions({
             {!waiting && status === 'started' && <Pause strokeWidth={1.5} className="h-4 w-4" />}
             {!waiting && status !== 'started' && <Play strokeWidth={1.5} className="h-4 w-4" />}
             {status === 'error' && (
-              <span className="absolute right-0 top-0 inline-flex translate-x-1 translate-y-5 transform rounded-full bg-red-600 p-[2px]">
+              <span className="absolute right-0 top-0 inline-flex -translate-x-[6px] translate-y-[6px] transform rounded-full bg-red-600 p-[2px]">
                 <AlertTriangle
                   strokeWidth={1.5}
                   className="h-[13px] w-[13px] -translate-y-[1px] text-white"

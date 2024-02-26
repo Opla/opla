@@ -24,6 +24,15 @@ import {
 import { LlamaCppArguments } from '../providers/llama.cpp/schema';
 import { getOplaConfig, getOplaServerStatus } from './commands';
 
+export type BackendResult =
+  | {
+      status: 'error';
+      error: string;
+    }
+  | {
+      status: 'ok';
+    };
+
 class Backend {
   private static instance: Backend;
 
@@ -85,7 +94,13 @@ class Backend {
 
     this.start = async (parameters: LlamaCppArguments, model = activeModel) => {
       logger.info('start server', model, parameters);
-      return startLLamaCppServer(model, parameters);
+      try {
+        await startLLamaCppServer(model, parameters);
+      } catch (error) {
+        logger.error('stop server error', error);
+        return { status: 'error', error: error as string };
+      }
+      return { status: 'ok' };
     };
 
     this.stop = async () => {
@@ -94,13 +109,20 @@ class Backend {
         await stopLLamaCppServer();
       } catch (error) {
         logger.error('stop server error', error);
+        return { status: 'error', error: error as string };
       }
-      return stopLLamaCppServer();
+      return { status: 'ok' };
     };
 
     this.restart = async (parameters: LlamaCppArguments, model = activeModel) => {
       logger.info('restart server', parameters);
-      return restartLLamaCppServer(model, parameters);
+      try {
+        await restartLLamaCppServer(model, parameters);
+      } catch (error) {
+        logger.error('stop server error', error);
+        return { status: 'error', error: error as string };
+      }
+      return { status: 'ok' };
     };
 
     return { config, server };
@@ -110,11 +132,11 @@ class Backend {
 
   static listeners: Record<string, () => void> = {};
 
-  start?: (parameters: LlamaCppArguments, model?: string) => Promise<unknown>;
+  start?: (parameters: LlamaCppArguments, model?: string) => Promise<BackendResult>;
 
-  stop?: () => Promise<void>;
+  stop?: () => Promise<BackendResult>;
 
-  restart?: (parameters: LlamaCppArguments, model?: string) => Promise<unknown>;
+  restart?: (parameters: LlamaCppArguments, model?: string) => Promise<BackendResult>;
 }
 
 export default Backend;

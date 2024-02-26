@@ -19,6 +19,7 @@ import { Provider, ProviderType, ServerConfiguration, ServerStatus } from '@/typ
 import { deepMerge, deepSet } from '@/utils/data';
 import { updateProvider } from '@/utils/data/providers';
 import { ParameterValue } from '@/components/common/Parameter';
+import { toast } from '@/components/ui/Toast';
 import useBackend from './useBackendContext';
 
 const useProviderState = (providerId?: string, newProvider?: Provider) => {
@@ -78,12 +79,18 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
     }
   };
 
-  const handleProviderToggle = () => {
+  const handleProviderToggle = async () => {
     if (provider?.type === ProviderType.opla) {
       logger.info('backend.server', backendContext.server);
       if (backendContext.server.status === ServerStatus.STARTED) {
-        stop();
-      } else if (backendContext.server.status === ServerStatus.STOPPED) {
+        const result = await stop();
+        if (result.status === 'error') {
+          toast.error(`Error stopping server: ${result.error}`);
+        }
+      } else if (
+        backendContext.server.status === ServerStatus.STOPPED ||
+        backendContext.server.status === ServerStatus.ERROR
+      ) {
         const server: any = provider?.metadata?.server;
         const parameters = server?.parameters;
         start(parameters);
