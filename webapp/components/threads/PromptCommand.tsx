@@ -196,7 +196,7 @@ function PromptCommand({
     [commands, commandValue],
   );
   return (
-    <div className="relative h-full w-full overflow-visible">
+    <div className="h-full w-full overflow-visible">
       <Textarea
         autoresize
         autoFocus
@@ -204,14 +204,14 @@ function PromptCommand({
         ref={textareaRef}
         autoComplete="off"
         autoCorrect="off"
-        className={cn(className, 'text-transparent dark:text-transparent')}
+        className={cn(className, 'text-transparent dark:text-red-600')}
         value={value?.raw || ''}
         placeholder={placeholder}
         onChange={handleValueChange}
         rows={5}
         onFocus={handleFocus}
-      />
-      <p className="textarea-overlay pointer-events-none absolute bottom-[6px] left-[12px] w-full text-sm">
+      >
+      <p className="textarea-overlay pointer-events-none absolute -top-[2px] left-[0px] w-full h-full px-3 py-2 text-sm">
         {value?.tokens?.map((token) =>
           token.type !== 'newline' ? (
             <span key={token.index} className={getTokenColor(token)}>
@@ -222,6 +222,7 @@ function PromptCommand({
           ),
         )}
       </p>
+      </Textarea>
       <div
         ref={dropdownRef}
         className={cn(

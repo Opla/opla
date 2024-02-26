@@ -34,7 +34,6 @@ const useAutoResizeTextarea = (ref: React.ForwardedRef<HTMLTextAreaElement>) => 
   const updateTextareaHeight = () => {
     const textarea = textAreaRef?.current;
     if (textarea) {
-
       const computed = window.getComputedStyle(textarea);
       if (textarea.value === '') {
         textarea.style.height = computed.minHeight;
@@ -44,7 +43,7 @@ const useAutoResizeTextarea = (ref: React.ForwardedRef<HTMLTextAreaElement>) => 
         }
         return;
       }
-    
+
       //  textarea.style.overflow = "hidden";
       textarea.style.height = 'auto';
       // textarea.style.height = '0px';
@@ -59,7 +58,17 @@ const useAutoResizeTextarea = (ref: React.ForwardedRef<HTMLTextAreaElement>) => 
         const h = Math.min(textarea.scrollHeight, maxHeight);
         height = `${h}px`;
       }
-      console.log('height', height, style, textarea.scrollHeight, computed.height, textarea.value, computed.maxHeight, computed.maxHeight, pxValueAsNumber(computed.maxHeight, textarea.scrollHeight));
+      console.log(
+        'height',
+        height,
+        style,
+        textarea.scrollHeight,
+        computed.height,
+        textarea.value,
+        computed.maxHeight,
+        computed.maxHeight,
+        pxValueAsNumber(computed.maxHeight, textarea.scrollHeight),
+      );
       textarea.style.height = height;
 
       if (parent?.classList.contains('textarea-container')) {

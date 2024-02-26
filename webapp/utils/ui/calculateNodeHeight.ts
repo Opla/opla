@@ -1,11 +1,11 @@
 // Copyright 2024 mik
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -87,9 +87,9 @@ export function calculateNodeStyling(node: HTMLElement, useCache = false) {
     parseFloat(style.getPropertyValue('border-bottom-width')) +
     parseFloat(style.getPropertyValue('border-top-width'));
 
-  const sizingStyle = SIZING_STYLE.map(
-    (name) => `${name}:${style.getPropertyValue(name)}`,
-  ).join(';');
+  const sizingStyle = SIZING_STYLE.map((name) => `${name}:${style.getPropertyValue(name)}`).join(
+    ';',
+  );
 
   const nodeInfo: NodeType = {
     sizingStyle,
@@ -121,26 +121,22 @@ export default function calculateAutoSizeStyle(
   // Fix wrap="off" issue
   // https://github.com/ant-design/ant-design/issues/6577
   if (uiTextNode.getAttribute('wrap')) {
-    hiddenTextarea.setAttribute(
-      'wrap',
-      uiTextNode.getAttribute('wrap') as string,
-    );
+    hiddenTextarea.setAttribute('wrap', uiTextNode.getAttribute('wrap') as string);
   } else {
     hiddenTextarea.removeAttribute('wrap');
   }
 
   // Copy all CSS properties that have an impact on the height of the content in
   // the textbox
-  const { paddingSize, borderSize, boxSizing, sizingStyle } =
-    calculateNodeStyling(uiTextNode, useCache);
+  const { paddingSize, borderSize, boxSizing, sizingStyle } = calculateNodeStyling(
+    uiTextNode,
+    useCache,
+  );
 
   // Need to have the overflow attribute to hide the scrollbar otherwise
   // text-lines will not calculated properly as the shadow will technically be
   // narrower for content
-  hiddenTextarea.setAttribute(
-    'style',
-    `${sizingStyle};${HIDDEN_TEXTAREA_STYLE}`,
-  );
+  hiddenTextarea.setAttribute('style', `${sizingStyle};${HIDDEN_TEXTAREA_STYLE}`);
   hiddenTextarea.value = uiTextNode.value || uiTextNode.placeholder || '';
 
   let minHeight: number | undefined;
