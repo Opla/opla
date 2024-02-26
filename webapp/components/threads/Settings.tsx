@@ -60,7 +60,7 @@ export default function Settings({
   const preset = findCompatiblePreset(selectedConversation?.preset, presets, modelName, provider);
   const {
     parameters = {},
-    system = model?.system ?? Opla.system,
+    system = selectedConversation?.system ?? model?.system ?? Opla.system,
     keepSystem,
     contextWindowPolicy: selectedPolicy = DefaultContextWindowPolicy,
   } = getCompletePresetProperties(preset, selectedConversation, presets);
@@ -79,6 +79,7 @@ export default function Settings({
 
   const handleSystemChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
+    console.log('handleSystemChange', value);
     if (selectedConversation) {
       const newConversations = updateConversation(
         { ...selectedConversation, system: value },
