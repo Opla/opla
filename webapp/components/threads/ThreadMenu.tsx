@@ -44,12 +44,13 @@ import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { AppContext } from '@/context';
-import { createProvider, getProviderState } from '@/utils/data/providers';
+import { createProvider, findProvider, getProviderState, updateProvider } from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
-import { MenuAction } from '@/types/ui';
+import { BasicState, MenuAction } from '@/types/ui';
 import { getStateColor } from '@/utils/ui';
+import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
 // import { toast } from '../ui/Toast';
 import { ShortcutBadge } from '../common/ShortCut';
@@ -68,7 +69,7 @@ export default function ThreadMenu({
   onSelectModel: (model: string, provider: ProviderType) => void;
   onSelectMenu: (menu: MenuAction, data: string) => void;
 }) {
-  const { providers } = useContext(AppContext);
+  const { providers, setProviders } = useContext(AppContext);
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
@@ -76,6 +77,19 @@ export default function ThreadMenu({
   let chatGPT = providers.find(
     (p: Provider) => p.type === ProviderType.openai && p.name === OpenAI.template.name,
   );
+
+  const handleEnableProvider = () => {
+    if (selectedItem?.group) {
+      const provider = findProvider(selectedItem?.group, providers) as Provider;
+      if (provider && provider.disabled) {
+        const newProviders = updateProvider(
+          { ...(provider as Provider), disabled: !provider?.disabled },
+          providers,
+        );
+        setProviders(newProviders);
+      }
+    }
+  };
 
   const handleSetupChatGPT = () => {
     if (!chatGPT) {
@@ -117,12 +131,15 @@ export default function ThreadMenu({
           ) : (
             <span>{t('Select a model')}</span>
           )}
-          <Badge className="mr-4 bg-gray-300 capitalize text-gray-600">
+          <Button asChild onClick={handleEnableProvider}>
+          <Badge className={cn("mr-4 bg-gray-300 hover:bg-gray-400 capitalize text-gray-600 h-[24px]", selectedItem?.state === (BasicState.disabled || BasicState.error) ? 'cursor-pointer' : '')}>
             <span className={`mr-2  ${getStateColor(selectedItem?.state, 'text', true)}`}>
               {selectedItem?.group || 'local'}
             </span>
             <Pastille state={selectedItem?.state} />
           </Badge>
+          </Button>
+
         </div>
       )}
       {modelItems.length === 0 && (
