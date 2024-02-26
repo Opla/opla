@@ -24,7 +24,8 @@ pub mod data;
 pub mod llm;
 pub mod error;
 
-use std::sync::Mutex;
+use tokio::sync::Mutex;
+use std::sync::Arc;
 
 use api::{ hf::search_hf_models, models };
 use data::model::Model;
@@ -39,7 +40,7 @@ use tauri::{ Runtime, State, Manager, App, EventLoopMessage };
 use utils::{ get_config_directory, get_data_directory };
 
 pub struct OplaContext {
-    pub server: Mutex<OplaServer>,
+    pub server: Arc<Mutex<OplaServer>>,
     pub store: Mutex<Store>,
     pub downloader: Mutex<Downloader>,
     pub sys: Mutex<Sys>,
@@ -66,10 +67,7 @@ async fn get_sys<R: Runtime>(
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>
 ) -> Result<Sys, String> {
-    let mut sys: Sys = context.sys
-        .lock()
-        .map_err(|err| err.to_string())?
-        .clone();
+    let mut sys: Sys = context.sys.lock().await.clone();
     sys.refresh();
     Ok(sys)
 }
@@ -80,7 +78,7 @@ async fn get_opla_configuration<R: Runtime>(
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>
 ) -> Result<Store, String> {
-    let store = context.store.lock().map_err(|err| err.to_string())?;
+    let store = context.store.lock().await;
     Ok(store.clone())
 }
 
@@ -91,7 +89,7 @@ async fn save_settings<R: Runtime>(
     context: State<'_, OplaContext>,
     settings: Settings
 ) -> Result<Store, String> {
-    let mut store = context.store.lock().map_err(|err| err.to_string())?;
+    let mut store = context.store.lock().await;
     store.settings = settings;
     // println!("Save settings: {:?}", store.settings);
     store.save().map_err(|err| err.to_string())?;
@@ -153,7 +151,7 @@ async fn get_provider_template<R: Runtime>(
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>
 ) -> Result<Provider, String> {
-    let store = context.store.lock().map_err(|err| err.to_string())?;
+    let store = context.store.lock().await;
     let server = store.server.clone();
     let template = get_opla_provider(server);
     Ok(template.clone())
@@ -165,7 +163,7 @@ async fn get_opla_server_status<R: Runtime>(
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>
 ) -> Result<Payload, String> {
-    let server = context.server.lock().map_err(|err| err.to_string())?;
+    let server = context.server.lock().await;
     server.get_status()
 }
 
@@ -182,7 +180,7 @@ async fn start_opla_server<R: Runtime>(
     n_gpu_layers: i32
 ) -> Result<Payload, String> {
     println!("Opla try to start ");
-    let mut store = context.store.lock().map_err(|err| err.to_string())?;
+    let mut store = context.store.lock().await;
     let model_name = match model {
         Some(m) => { m }
         None => {
@@ -212,8 +210,8 @@ async fn start_opla_server<R: Runtime>(
 
     // let args = store.server.parameters.to_args(model_path.as_str());
     let parameters = store.server.parameters.clone();
-    let mut server = context.server.lock().map_err(|err| err.to_string())?;
-    server.start(app, &model_name, &model_path, Some(&parameters))
+    let mut server = context.server.lock().await;
+    server.start(app, &model_name, &model_path, Some(&parameters)).await
 }
 
 #[tauri::command]
@@ -222,8 +220,8 @@ async fn stop_opla_server<R: Runtime>(
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>
 ) -> Result<Payload, String> {
-    let mut server = context.server.lock().map_err(|err| err.to_string())?;
-    server.stop(&app)
+    let mut server = context.server.lock().await;
+    server.stop(&app).await
 }
 
 #[tauri::command]
@@ -264,7 +262,7 @@ async fn install_model<R: Runtime>(
     path: String,
     file_name: String
 ) -> Result<String, String> {
-    let mut store = context.store.lock().map_err(|err| err.to_string())?;
+    let mut store = context.store.lock().await;
 
     let model_id = store.models.add_model(model, None, Some(path.clone()), Some(file_name.clone()));
     let res = store.models.create_model_path_filename(path, file_name.clone());
@@ -276,7 +274,7 @@ async fn install_model<R: Runtime>(
     };
     match url {
         Some(u) => {
-            let mut downloader = context.downloader.lock().map_err(|err| err.to_string())?;
+            let mut downloader = context.downloader.lock().await;
             downloader.download_file(model_id.clone(), u, model_path, file_name.as_str(), app);
         }
         None => {}
@@ -294,9 +292,9 @@ async fn cancel_download_model<R: Runtime>(
     context: State<'_, OplaContext>,
     model_id: String
 ) -> Result<(), String> {
-    let mut store = context.store.lock().map_err(|err| err.to_string())?;
+    let mut store = context.store.lock().await;
 
-    let mut downloader = context.downloader.lock().map_err(|err| err.to_string())?;
+    let mut downloader = context.downloader.lock().await;
     downloader.cancel_download(&model_id, app);
 
     store.models.remove_model(model_id.as_str());
@@ -313,7 +311,7 @@ async fn update_model<R: Runtime>(
     context: State<'_, OplaContext>,
     model: Model
 ) -> Result<(), String> {
-    let mut store = context.store.lock().map_err(|err| err.to_string())?;
+    let mut store = context.store.lock().await;
 
     store.models.update_model(model);
 
@@ -329,7 +327,7 @@ async fn uninstall_model<R: Runtime>(
     context: State<'_, OplaContext>,
     model_id: String
 ) -> Result<(), String> {
-    let mut store = context.store.lock().map_err(|err| err.to_string())?;
+    let mut store = context.store.lock().await;
 
     store.models.remove_model(model_id.as_str());
 
@@ -345,7 +343,7 @@ async fn set_active_model<R: Runtime>(
     context: State<'_, OplaContext>,
     model_id: String
 ) -> Result<(), String> {
-    let mut store = context.store.lock().map_err(|err| err.to_string())?;
+    let mut store = context.store.lock().await;
     let result = store.models.get_model(model_id.as_str());
     if result.is_none() {
         return Err(format!("Model not found: {:?}", model_id));
@@ -367,14 +365,16 @@ async fn llm_call_completion<R: Runtime>(
     let (llm_provider, llm_provider_type) = match llm_provider {
         Some(p) => { (p.clone(), p.r#type) }
         None => {
-            let store = context.store.lock().map_err(|err| err.to_string())?;
+            let store = context.store.lock().await;
             let server = store.server.clone();
             (get_opla_provider(server), "opla".to_string())
         }
     };
     if llm_provider_type == "opla" {
+        let context_server = Arc::clone(&context.server);
+
         let (model_name, model_path) = {
-            let store = context.store.lock().map_err(|err| err.to_string())?;
+            let store = context.store.lock().await;
             let result = store.models.get_model(model.as_str());
             let model = match result {
                 Some(model) => model.clone(),
@@ -393,21 +393,17 @@ async fn llm_call_completion<R: Runtime>(
 
             (model.name, model_path)
         };
-
+        let mut server = context_server.lock().await;
+        server.bind::<R>(app, &model_name, &model_path).await.map_err(|err| err.to_string())?;
         let response = {
-            let mut server = context.server
-                .lock()
-                .map_err(|err| err.to_string())?
-                .clone();
-            server
-                .call_completion(app, &model_name, &model_path, query).await
-                .map_err(|err| err.to_string())?
-        };
-        let mut server = context.server.lock().map_err(|err| err.to_string())?;
+                server
+                    .call_completion::<R>(&model_name, query).await
+                    .map_err(|err| err.to_string())?
+            };
         let parameters = server.parameters.clone();
         server.set_parameters(&model, &model_path, parameters);
 
-        let mut store = context.store.lock().map_err(|err| err.to_string())?;
+        let mut store = context.store.lock().await;
         store.models.active_model = Some(model);
         store.save().map_err(|err| err.to_string())?;
         return Ok(response);
@@ -458,18 +454,13 @@ async fn llm_call_completion<R: Runtime>(
     return Err(format!("LLM provider not found: {:?}", llm_provider_type));
 }
 
-fn start_server<R: Runtime>(
+async fn start_server<R: Runtime>(
     app: tauri::AppHandle<R>,
     context: State<'_, OplaContext>
 ) -> Result<(), String> {
     println!("Opla try to start server");
-    let res = context.store.lock();
-    let store = match res {
-        Ok(s) => { s }
-        Err(err) => {
-            return Err(format!("Opla server not started store not found: {:?}", err));
-        }
-    };
+    let store = context.store.lock().await;
+
     let active_model = match &store.models.active_model {
         Some(m) => { m }
         None => {
@@ -484,8 +475,8 @@ fn start_server<R: Runtime>(
     };
     // let args = store.server.parameters.to_args(model_path.as_str());
     let parameters = store.server.parameters.clone();
-    let mut server = context.server.lock().map_err(|err| err.to_string())?;
-    let response = server.start(app, &active_model, &model_path, Some(&parameters));
+    let mut server = context.server.lock().await;
+    let response = server.start(app, &active_model, &model_path, Some(&parameters)).await;
     if response.is_err() {
         return Err(format!("Opla server not started: {:?}", response));
     }
@@ -493,10 +484,10 @@ fn start_server<R: Runtime>(
     Ok(())
 }
 
-fn window_setup<EventLoopMessage>(app: &mut App) -> Result<(), String> {
+async fn window_setup<EventLoopMessage>(app: &mut App) -> Result<(), String> {
     let context = app.state::<OplaContext>();
     let window = app.get_window("main").ok_or("Opla failed to get window")?;
-    let store = context.store.lock().map_err(|err| err.to_string())?;
+    let store = context.store.lock().await;
     // TODO fix window size
     // Instead used https://github.com/tauri-apps/tauri-plugin-window-state
     // but not optimal...
@@ -549,10 +540,10 @@ fn window_setup<EventLoopMessage>(app: &mut App) -> Result<(), String> {
     Ok(())
 }
 
-fn opla_setup(app: &mut App) -> Result<(), String> {
+async fn opla_setup(app: &mut App) -> Result<(), String> {
     println!("Opla setup: ");
     let context = app.state::<OplaContext>();
-    let mut store = context.store.lock().map_err(|err| err.to_string())?;
+    let mut store = context.store.lock().await;
     let resource_path = app.path_resolver().resolve_resource("assets");
     let resource_path = match resource_path {
         Some(r) => { r }
@@ -568,7 +559,7 @@ fn opla_setup(app: &mut App) -> Result<(), String> {
             status: ServerStatus::Init.as_str().to_string(),
         })
         .map_err(|err| err.to_string())?;
-    let mut server = context.server.lock().map_err(|err| err.to_string())?;
+    let mut server = context.server.lock().await;
     server.init(store.server.clone());
     let launch_at_startup = store.server.launch_at_startup;
     let active_model = &String::from("");
@@ -592,11 +583,11 @@ fn opla_setup(app: &mut App) -> Result<(), String> {
                 status: ServerStatus::Wait.as_str().to_string(),
             })
             .map_err(|err| err.to_string())?;
-        let res = start_server(app.app_handle(), app.state::<OplaContext>());
+        let res = start_server(app.app_handle(), app.state::<OplaContext>()).await;
         match res {
             Ok(_) => {}
             Err(err) => {
-                let mut server = context.server.lock().map_err(|err| err.to_string())?;
+                let mut server = context.server.lock().await;
                 server.set_status(ServerStatus::Error).map(|_| "Failed to set server status")?;
                 app
                     .emit_all("opla-server", Payload {
@@ -604,7 +595,6 @@ fn opla_setup(app: &mut App) -> Result<(), String> {
                         status: ServerStatus::Error.as_str().to_string(),
                     })
                     .map_err(|err| err.to_string())?;
-                // return Err(err.into());
             }
         }
     } else {
@@ -621,7 +611,7 @@ fn opla_setup(app: &mut App) -> Result<(), String> {
 
 fn main() {
     let context: OplaContext = OplaContext {
-        server: Mutex::new(OplaServer::new()),
+        server: Arc::new(Mutex::new(OplaServer::new())),
         store: Mutex::new(Store::new()),
         downloader: Mutex::new(Downloader::new()),
         sys: Mutex::new(Sys::new()),
@@ -644,21 +634,35 @@ fn main() {
                 }
             }
 
-            match opla_setup(app) {
-                Ok(_) => {}
-                Err(err) => {
-                    println!("Opla setup error: {:?}", err);
-                    return Err(err.into());
+            let mut error: Option<String> = None;
+            tauri::async_runtime::block_on(async {
+                match opla_setup(app).await {
+                    Ok(_) => {}
+                    Err(err) => {
+                        println!("Opla setup error: {:?}", err);
+                        error = Some(err);
+                    }
                 }
-            }
-            match window_setup::<EventLoopMessage>(app) {
-                Ok(_) => {}
-                Err(err) => {
-                    println!("Window setup error: {:?}", err);
-                    return Err(err.into());
+
+                if error.is_none() {
+                    match window_setup::<EventLoopMessage>(app).await {
+                        Ok(_) => {}
+                        Err(err) => {
+                            println!("Window setup error: {:?}", err);
+                            error = Some(err);
+                        }
+                    }
                 }
+          });
+          
+          match error {
+              Some(err) => {
+                  Err(err.into())
+              }
+              None => {
+                  Ok(())
+              }
             }
-            Ok(())
         })
         .invoke_handler(
             tauri::generate_handler![

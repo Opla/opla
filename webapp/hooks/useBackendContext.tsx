@@ -34,7 +34,7 @@ import {
   saveSettings,
 } from '@/utils/backend/commands';
 import { AppContext } from '@/context';
-import Backend from '@/utils/backend/Backend';
+import Backend, { BackendResult } from '@/utils/backend/Backend';
 import { mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
 
@@ -68,23 +68,25 @@ type Context = {
   backendContext: OplaContext;
   setSettings: (settings: Settings) => Promise<void>;
   updateBackendStore: () => Promise<void>;
-  start: (params: any) => Promise<unknown>;
-  stop: () => Promise<unknown>;
-  restart: (params: any) => Promise<unknown>;
+  start: (params: any) => Promise<BackendResult>;
+  stop: () => Promise<BackendResult>;
+  restart: (params: any) => Promise<BackendResult>;
   setActiveModel: (preset: string) => Promise<void>;
 };
 
-const BackendContext = createContext<Context>({
+const defaultContext: Context = {
   startBackend: async () => {},
   disconnectBackend: async () => {},
   backendContext: initialBackendContext,
   setSettings: async () => {},
   updateBackendStore: async () => {},
-  start: async () => {},
-  stop: async () => {},
-  restart: async () => {},
+  start: async () => ({ status: 'error', error: 'not implemented' }),
+  stop: async () => ({ status: 'error', error: 'not implemented' }),
+  restart: async () => ({ status: 'error', error: 'not implemented' }),
   setActiveModel: async () => {},
-});
+};
+
+const BackendContext = createContext<Context>(defaultContext);
 
 function BackendProvider({ children }: { children: React.ReactNode }) {
   const [backendContext, saveBackendContext] = useState<OplaContext>();
@@ -261,11 +263,50 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     setProviders(providers);
   }, [backendListener, downloadListener, providers, setProviders, streamListener]);
 
-  const restart = async (params: any): Promise<unknown> => backendRef.current?.restart?.(params); // restartRef.current(params);
+  const restart = async (params: any): Promise<BackendResult> => {
+    const result = await (backendRef.current?.restart?.(params) || defaultContext.restart(params));
+    if (result.status === 'error') {
+      setBackendContext({
+        ...backendContext,
+        server: {
+          ...backendContext?.server,
+          status: ServerStatus.ERROR,
+          message: result.error,
+        },
+      } as OplaContext);
+    }
+    return result;
+  };
 
-  const start = async (params: any): Promise<unknown> => backendRef.current?.start?.(params); // startRef.current(params);
+  const start = async (params: any): Promise<BackendResult> => {
+    const result = await (backendRef.current?.start?.(params) || defaultContext.start(params));
+    if (result.status === 'error') {
+      setBackendContext({
+        ...backendContext,
+        server: {
+          ...backendContext?.server,
+          status: ServerStatus.ERROR,
+          message: result.error,
+        },
+      } as OplaContext);
+    }
+    return result;
+  };
 
-  const stop = async (): Promise<unknown> => backendRef.current?.stop?.();
+  const stop = async (): Promise<BackendResult> => {
+    const result = await (backendRef.current?.stop?.() || defaultContext.stop());
+    if (result.status === 'error') {
+      setBackendContext({
+        ...backendContext,
+        server: {
+          ...backendContext?.server,
+          status: ServerStatus.ERROR,
+          message: result.error,
+        },
+      } as OplaContext);
+    }
+    return result;
+  };
 
   const setSettings = useCallback(
     async (settings: Settings) => {
