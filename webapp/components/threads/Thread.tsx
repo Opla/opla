@@ -171,11 +171,13 @@ function Thread({
     ];
     const actionsItems: Ui.MenuItem[] = [{ value: '/system', label: 'System', group: 'actions' }];
     const cmds = [
-      ...items.filter((item)=> !item.selected).map((item) => ({
-        ...item,
-        value: getMentionName(item.value as string),
-        group: 'models',
-      })),
+      ...items
+        .filter((item) => !item.selected)
+        .map((item) => ({
+          ...item,
+          value: getMentionName(item.value as string),
+          group: 'models',
+        })),
       ...parameterItems,
       ...actionsItems,
     ];

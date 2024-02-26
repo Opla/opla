@@ -44,7 +44,12 @@ import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { AppContext } from '@/context';
-import { createProvider, findProvider, getProviderState, updateProvider } from '@/utils/data/providers';
+import {
+  createProvider,
+  findProvider,
+  getProviderState,
+  updateProvider,
+} from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
@@ -132,14 +137,20 @@ export default function ThreadMenu({
             <span>{t('Select a model')}</span>
           )}
           <Button asChild onClick={handleEnableProvider}>
-          <Badge className={cn("mr-4 bg-gray-300 hover:bg-gray-400 capitalize text-gray-600 h-[24px]", selectedItem?.state === (BasicState.disabled || BasicState.error) ? 'cursor-pointer' : '')}>
-            <span className={`mr-2  ${getStateColor(selectedItem?.state, 'text', true)}`}>
-              {selectedItem?.group || 'local'}
-            </span>
-            <Pastille state={selectedItem?.state} />
-          </Badge>
+            <Badge
+              className={cn(
+                'mr-4 h-[24px] bg-gray-300 capitalize text-gray-600 hover:bg-gray-400',
+                selectedItem?.state === (BasicState.disabled || BasicState.error)
+                  ? 'cursor-pointer'
+                  : '',
+              )}
+            >
+              <span className={`mr-2  ${getStateColor(selectedItem?.state, 'text', true)}`}>
+                {selectedItem?.group || 'local'}
+              </span>
+              <Pastille state={selectedItem?.state} />
+            </Badge>
           </Button>
-
         </div>
       )}
       {modelItems.length === 0 && (
