@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
 
 export type EditableItemProps = {
   id: string;
   title: string;
+  titleElement?: React.ReactNode;
   className?: string;
   editable?: boolean;
   onChange?: (value: string, id: string) => void;
@@ -27,6 +28,7 @@ export type EditableItemProps = {
 export default function EditableItem({
   id,
   title,
+  titleElement,
   className,
   editable = false,
   onChange,
@@ -54,5 +56,5 @@ export default function EditableItem({
       />
     );
   }
-  return <div className={className}>{title}</div>;
+  return <div className={className}>{titleElement || title}</div>;
 }

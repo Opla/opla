@@ -313,7 +313,8 @@ export default function Explorer({
                           >
                             <EditableItem
                               id={conversation.id}
-                              title={getConversationTitle(conversation)}
+                              title={`${getConversationTitle(conversation)}${conversation.temp ? '...' : ''}`}
+                              titleElement={<><span>{getConversationTitle(conversation)}</span>{conversation.temp ? <span className='ml-2 animate-pulse'>...</span> : ''}</>}
                               editable={!conversation.temp && conversation.id === selectedThreadId}
                               className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1"
                               onChange={handleChangeConversationName}
