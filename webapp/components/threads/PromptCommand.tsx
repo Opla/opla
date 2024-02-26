@@ -211,17 +211,17 @@ function PromptCommand({
         rows={5}
         onFocus={handleFocus}
       >
-      <p className="textarea-overlay pointer-events-none absolute -top-[2px] left-[0px] w-full h-full px-3 py-2 text-sm">
-        {value?.tokens?.map((token) =>
-          token.type !== 'newline' ? (
-            <span key={token.index} className={getTokenColor(token)}>
-              {token.value}
-            </span>
-          ) : (
-            <br key={token.index} />
-          ),
-        )}
-      </p>
+        <p className="textarea-overlay pointer-events-none absolute -top-[2px] left-[0px] h-full w-full px-3 py-2 text-sm">
+          {value?.tokens?.map((token) =>
+            token.type !== 'newline' ? (
+              <span key={token.index} className={getTokenColor(token)}>
+                {token.value}
+              </span>
+            ) : (
+              <br key={token.index} />
+            ),
+          )}
+        </p>
       </Textarea>
       <div
         ref={dropdownRef}
