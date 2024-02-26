@@ -79,7 +79,9 @@ export const validateConversations = (data: unknown): SafeParseReturnType<unknow
 
 export const getConversationTitle = (conversation: Conversation) => {
   if (conversation.temp) {
-    return `${conversation.currentPrompt && typeof conversation.currentPrompt !== 'string' ? (conversation.currentPrompt as ParsedPrompt).text || '' : conversation.currentPrompt || ''} ...`;
+    return conversation.currentPrompt && typeof conversation.currentPrompt !== 'string'
+      ? (conversation.currentPrompt as ParsedPrompt).text || ''
+      : conversation.currentPrompt || '';
   }
   return conversation.name;
 };
