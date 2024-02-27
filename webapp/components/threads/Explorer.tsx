@@ -23,6 +23,7 @@ import {
   FolderClock,
   FolderInput,
   Import,
+  MessageSquareWarning,
   MoreHorizontal,
   SquarePen,
 } from 'lucide-react';
@@ -61,6 +62,8 @@ import {
 import { Button } from '../ui/button';
 import { ShortcutBadge } from '../common/ShortCut';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
+import { Separator } from '../ui/separator';
+import EmptyView from '../common/EmptyView';
 
 type ExplorerProps = {
   view: Ui.ViewName;
@@ -201,12 +204,10 @@ export default function Explorer({
   return (
     <div className="scrollbar-trigger flex h-full bg-neutral-100 dark:bg-neutral-800/70">
       <nav className="flex h-full w-full flex-col">
-        <div className="flex w-full items-center dark:bg-neutral-800">
+        <div className="flex w-full items-center">
           <div className="flex grow items-center px-2 py-4">
             <Opla className="mr-2 h-6 w-6" />
-            <p className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
-              {t('Threads')}
-            </p>
+            <h1 className="text-l font-extrabold">{t('Threads')}</h1>
           </div>
           {selectedThreadId && (
             <Tooltip>
@@ -216,10 +217,10 @@ export default function Explorer({
                   variant="ghost"
                   size="sm"
                   disabled={!selectedThreadId}
-                  className="flex flex-shrink-0 cursor-pointer items-center p-1 text-sm text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:border-white/20 dark:text-neutral-400 hover:dark:text-white"
+                  className="cursor-pointer items-center p-1"
                 >
                   <Link href={Ui.Page.Threads}>
-                    <SquarePen className="h-5 w-5" strokeWidth={1.5} />
+                    <SquarePen className="h-4 w-4" strokeWidth={1.5} />
                   </Link>
                 </Button>
               </TooltipTrigger>
@@ -281,61 +282,80 @@ export default function Explorer({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-
+        <Separator />
         <div className="flex-1 flex-col space-y-1 overflow-y-auto overflow-x-hidden p-1 dark:border-white/20">
-          <div className="flex flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
-            <div className="group flex flex-col gap-3 break-all rounded-md px-1 py-3">
-              <div className="p1 text-ellipsis break-all text-neutral-600">{t(view)}</div>
-              <ul className="p1 flex flex-1 flex-col">
-                {threads
-                  .sort((c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt)
-                  .map((conversation) => (
-                    <li
-                      key={conversation.id}
-                      className={`${
-                        conversation.temp || selectedThreadId === conversation.id
-                          ? 'text-black dark:text-white'
-                          : 'text-neutral-400 dark:text-neutral-400'
-                      } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
-                    >
-                      <ContextMenu>
-                        <ContextMenuTrigger>
-                          <div
-                            aria-label="Select a conversation"
-                            role="button"
-                            onKeyDown={() => {}}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleSelectThread(conversation.id);
-                            }}
-                            className="flex cursor-pointer flex-row items-center"
-                            tabIndex={0}
-                          >
-                            <EditableItem
-                              id={conversation.id}
-                              title={`${getConversationTitle(conversation)}${conversation.temp ? '...' : ''}`}
-                              titleElement={
-                                <>
-                                  <span>{getConversationTitle(conversation)}</span>
-                                  {conversation.temp ? (
-                                    <span className="ml-2 animate-pulse">...</span>
-                                  ) : (
-                                    ''
-                                  )}
-                                </>
-                              }
-                              editable={!conversation.temp && conversation.id === selectedThreadId}
-                              className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1"
-                              onChange={handleChangeConversationName}
-                            />
-                          </div>
-                        </ContextMenuTrigger>
-                        <ContextMenuList data={conversation.id} menu={menu} />
-                      </ContextMenu>
-                    </li>
-                  ))}
-              </ul>
-            </div>
+          <div className="flex h-full grow flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
+            {threads.length === 0 && (
+              <EmptyView
+                title={t('No threads')}
+                description={t("Don't be shy, say hi!")}
+                icon={
+                  <MessageSquareWarning
+                    className="h-12 w-12 text-muted-foreground"
+                    strokeWidth={1.5}
+                  />
+                }
+                className="h-full flex-1 grow"
+              />
+            )}
+            {threads.length > 0 && (
+              <div className="group flex flex-col gap-3 break-all rounded-md px-1 py-3">
+                <div className="p1 text-ellipsis break-all capitalize text-muted-foreground">
+                  {t(view)}
+                </div>
+                <ul className="p1 flex flex-1 flex-col">
+                  {threads
+                    .sort((c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt)
+                    .map((conversation) => (
+                      <li
+                        key={conversation.id}
+                        className={`${
+                          conversation.temp || selectedThreadId === conversation.id
+                            ? 'text-black dark:text-white'
+                            : 'text-neutral-400 dark:text-neutral-400'
+                        } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
+                      >
+                        <ContextMenu>
+                          <ContextMenuTrigger>
+                            <div
+                              aria-label="Select a conversation"
+                              role="button"
+                              onKeyDown={() => {}}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleSelectThread(conversation.id);
+                              }}
+                              className="flex cursor-pointer flex-row items-center"
+                              tabIndex={0}
+                            >
+                              <EditableItem
+                                id={conversation.id}
+                                title={`${getConversationTitle(conversation)}${conversation.temp ? '...' : ''}`}
+                                titleElement={
+                                  <>
+                                    <span>{getConversationTitle(conversation)}</span>
+                                    {conversation.temp ? (
+                                      <span className="ml-2 animate-pulse">...</span>
+                                    ) : (
+                                      ''
+                                    )}
+                                  </>
+                                }
+                                editable={
+                                  !conversation.temp && conversation.id === selectedThreadId
+                                }
+                                className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1"
+                                onChange={handleChangeConversationName}
+                              />
+                            </div>
+                          </ContextMenuTrigger>
+                          <ContextMenuList data={conversation.id} menu={menu} />
+                        </ContextMenu>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </nav>

@@ -20,9 +20,11 @@ import PromptCard from '../common/PromptCard';
 function PromptsGrid({
   className,
   onPromptSelected,
+  disabled,
 }: {
   className?: string;
   onPromptSelected: (prompt: Prompt) => void;
+  disabled: boolean;
 }) {
   const [prompts] = useFetch<Prompt[]>('https://opla.github.io/prompts/default.json');
 
@@ -32,6 +34,7 @@ function PromptsGrid({
         <PromptCard
           key={prompt.id}
           prompt={prompt}
+          disabled={disabled}
           onSelect={() => {
             onPromptSelected(prompt);
           }}

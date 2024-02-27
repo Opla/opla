@@ -208,6 +208,13 @@ impl Model {
     pub fn is_same_model(&self, another_model: &Model) -> bool {
         self.id.is_some() & another_model.id.is_some() && self.id == another_model.id
     }
+
+    pub fn is_some_id_or_name(&self, id_or_name: &Option<String>) -> bool {
+        match id_or_name {
+            Some(id_or_name) => self.is_same_id_or_name(&id_or_name),
+            None => false,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -327,39 +334,47 @@ impl ModelStorage {
         self.get_model_path_filename(path, file_name)
     }
 
-    pub fn add_model(
+    pub fn create_model(
         &mut self,
         model: Model,
         state: Option<String>,
         path: Option<String>,
         file_name: Option<String>
-    ) -> String {
+    ) -> (ModelEntity, String) {
         let mut model = model.clone();
         model.base_model = model.id;
         let uuid = Uuid::new_v4().to_string();
         model.id = Some(uuid.clone());
-        self.items.push(ModelEntity {
+        
+        (ModelEntity {
             reference: model,
             state,
             path,
             file_name,
-        });
-        uuid
+        }, uuid)
     }
 
-    pub fn remove_model(&mut self, id: &str) {
-        self.items.retain(|m| !m.reference.is_same_id(id));
+    pub fn add_model(
+        &mut self,
+        model: ModelEntity,
+    ) {
+        self.items.push(model);
+    }
+
+    pub fn remove_model(&mut self, id: &str) -> Option<Model> {
+        self.items
+            .iter()
+            .position(|m| m.reference.is_same_id_or_name(id))
+            .map(|index| self.items.remove(index).reference)
     }
 
     pub fn update_model(&mut self, model: Model) {
-        if
-            let Some(index) = self.items
-                .iter()
-                .position(|m| m.reference.is_same_model(&model))
-        {
+        if let Some(index) = self.items.iter().position(|m| m.reference.is_same_model(&model)) {
             let mut model_entity = match self.items.get(index) {
                 Some(model_entity) => model_entity.clone(),
-                None => return,
+                None => {
+                    return;
+                }
             };
             model_entity.reference = model;
             self.items.remove(index);

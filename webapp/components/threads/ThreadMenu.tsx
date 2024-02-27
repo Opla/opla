@@ -156,10 +156,10 @@ export default function ThreadMenu({
       {modelItems.length === 0 && (
         <Button
           variant="ghost"
-          className="flex h-[20px] w-full items-center justify-between text-sm font-medium leading-none text-red-500 hover:text-red-700"
+          className="flex h-[20px] w-full items-center justify-between text-sm font-medium leading-none text-primary"
           onClick={handleNewLocalModel}
         >
-          <span>{t('You need to install a local model - click here')}</span>
+          <span>{t('You need to install a local model')}</span>
         </Button>
       )}
       <DropdownMenu open={open} onOpenChange={setOpen}>

@@ -33,22 +33,26 @@ impl Download {
     pub fn emit_progress<R: Runtime>(&self, handle: &AppHandle<R>) {
         let payload = ("progress", &self);
         handle.emit_all("opla-downloader", payload).ok();
+        handle.trigger_global("opla-downloader", Some(format!("progress:{}",self.id.clone())));
     }
 
     pub fn emit_finished<R: Runtime>(&self, handle: &AppHandle<R>) {
         let payload = ("finished", &self);
         handle.emit_all("opla-downloader", payload).ok();
+        handle.trigger_global("opla-downloader", Some(format!("ok:{}",self.id.clone())));
     }
 
     pub fn emit_canceled<R: Runtime>(&self, handle: &AppHandle<R>) {
         let payload = ("canceled", &self);
         handle.emit_all("opla-downloader", payload).ok();
+        handle.trigger_global("opla-downloader", Some(format!("canceled:{}",self.id.clone())));
     }
 
     pub fn emit_error<R: Runtime>(&mut self, handle: &AppHandle<R>, error: Box<dyn Error>) {
         self.error = Some(error.to_string());
         let payload = ("error", &self, error.to_string());
         handle.emit_all("opla-downloader", payload).ok();
+        handle.trigger_global("opla-downloader", Some(format!("error:{}",self.id.clone())));
     }
 }
 
@@ -180,7 +184,7 @@ impl Downloader {
         Ok(())
     }
 
-    pub fn cancel_download<R: Runtime>(&mut self, id: &str, app_handle: AppHandle<R>) -> () {
+    pub fn cancel_download<R: Runtime>(&mut self, id: &str, app_handle: &AppHandle<R>) -> () {
         if let Some(handle) = self.handles.remove(id) {
             handle.abort();
             if let Some(download) = self.downloads.iter_mut().find(|d| d.id == id) {

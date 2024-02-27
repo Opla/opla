@@ -39,13 +39,13 @@ export default function PromptCard({
   disabled?: boolean;
   onSelect?: () => void;
 }) {
-  const cssTitle = prompt.title ? '' : 'bg-neutral-300/50 dark:bg-neutral-600/50 ';
-  const cssDesc = prompt.description ? '' : 'bg-neutral-300/50 dark:bg-neutral-600/50 ';
+  const cssTitle = prompt.title ? '' : 'bg-muted';
+  const cssDesc = prompt.description ? '' : 'bg-muted';
   const container = (
     <div className="m-2 flex flex-col gap-2 p-3">
       <div className={`${cssTitle} w-full text-sm font-bold`}>{prompt.title}</div>
       <p
-        className={`${cssDesc} line-clamp-3 w-full text-balance text-xs text-neutral-700 dark:text-neutral-400`}
+        className={`${cssDesc} dark:text-muted-foreground-dark line-clamp-3 w-full text-balance text-xs text-muted-foreground`}
       >
         {prompt.description}
       </p>
@@ -56,15 +56,15 @@ export default function PromptCard({
       asChild
       variant="outline"
       onClick={onSelect}
-      className="m-2 h-full w-full cursor-pointer overflow-hidden "
+      className="m-2 h-full w-full cursor-pointer overflow-hidden bg-muted"
     >
       {container}
     </Button>
   ) : (
     <div
       className={`${
-        selected ? 'border-b border-neutral-100 dark:border-neutral-800' : ''
-      } m-2 h-full w-full overflow-hidden rounded bg-neutral-100 dark:bg-neutral-700`}
+        selected ? 'border border-primary' : ''
+      } m-2 h-full w-full overflow-hidden rounded border border-muted`}
     >
       {container}
     </div>

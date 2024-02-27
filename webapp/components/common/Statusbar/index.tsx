@@ -103,7 +103,7 @@ export default function Statusbar() {
 
         {download && (
           <button
-            className="flex flex-row items-center justify-center gap-1"
+            className="ml-4 flex flex-row items-center justify-center gap-1"
             type="button"
             onClick={displayDownloads}
           >

@@ -33,6 +33,7 @@ export type PromptProps = {
   commands: Ui.MenuItem[];
   isLoading: boolean;
   errorMessage: string;
+  disabled: boolean;
   onUpdatePrompt: (prompt: ParsedPrompt) => void;
   onSendMessage: () => void;
   onUploadFile: () => void;
@@ -44,6 +45,7 @@ export default function Prompt({
   prompt,
   commands,
   errorMessage,
+  disabled,
   onUpdatePrompt,
   onSendMessage,
   onUploadFile,
@@ -105,7 +107,7 @@ export default function Prompt({
         ) : null}
         <div className="flex w-full flex-row items-center rounded-md border border-black/10 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white">
           <Button
-            disabled={isLoading}
+            disabled={disabled || isLoading}
             type="button"
             aria-label={t('Upload')}
             onClick={handleUploadFile}

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import useTranslation from '@/hooks/useTranslation';
+import { Separator } from '@/components/ui/separator';
 import ExplorerList from './ExplorerList';
 
 export type ExplorerProps = {
@@ -28,15 +29,14 @@ export default function Explorer({ icon, title = '', children, toolbar }: Explor
   return (
     <div className="scrollbar-trigger flex h-full w-full flex-1 items-start border-r-[1px] border-neutral-300/30 bg-neutral-100 dark:border-neutral-900 dark:bg-neutral-800/70">
       <nav className="flex h-full flex-1 flex-col space-y-1">
-        <div className="flex w-full items-center dark:bg-neutral-800">
+        <div className="flex w-full items-center">
           <div className="flex grow items-center p-2">
             {icon}
-            <p className="flex-1 text-sm font-semibold text-neutral-500 dark:text-neutral-400">
-              {t(title)}
-            </p>
+            <h1 className="text-l flex-1 font-extrabold">{t(title)}</h1>
             {toolbar}
           </div>
         </div>
+        <Separator />
         {children}
       </nav>
     </div>
