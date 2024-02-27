@@ -263,37 +263,44 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     setProviders(providers);
   }, [backendListener, downloadListener, providers, setProviders, streamListener]);
 
-  const restart = async (params: any): Promise<BackendResult> => {
-    const result = await (backendRef.current?.restart?.(params) || defaultContext.restart(params));
-    if (result.status === 'error') {
-      setBackendContext({
-        ...backendContext,
-        server: {
-          ...backendContext?.server,
-          status: ServerStatus.ERROR,
-          message: result.error,
-        },
-      } as OplaContext);
-    }
-    return result;
-  };
+  const restart = useCallback(
+    async (params: any): Promise<BackendResult> => {
+      const result = await (backendRef.current?.restart?.(params) ||
+        defaultContext.restart(params));
+      if (result.status === 'error') {
+        setBackendContext({
+          ...backendContext,
+          server: {
+            ...backendContext?.server,
+            status: ServerStatus.ERROR,
+            message: result.error,
+          },
+        } as OplaContext);
+      }
+      return result;
+    },
+    [backendContext],
+  );
 
-  const start = async (params: any): Promise<BackendResult> => {
-    const result = await (backendRef.current?.start?.(params) || defaultContext.start(params));
-    if (result.status === 'error') {
-      setBackendContext({
-        ...backendContext,
-        server: {
-          ...backendContext?.server,
-          status: ServerStatus.ERROR,
-          message: result.error,
-        },
-      } as OplaContext);
-    }
-    return result;
-  };
+  const start = useCallback(
+    async (params: any): Promise<BackendResult> => {
+      const result = await (backendRef.current?.start?.(params) || defaultContext.start(params));
+      if (result.status === 'error') {
+        setBackendContext({
+          ...backendContext,
+          server: {
+            ...backendContext?.server,
+            status: ServerStatus.ERROR,
+            message: result.error,
+          },
+        } as OplaContext);
+      }
+      return result;
+    },
+    [backendContext],
+  );
 
-  const stop = async (): Promise<BackendResult> => {
+  const stop = useCallback(async (): Promise<BackendResult> => {
     const result = await (backendRef.current?.stop?.() || defaultContext.stop());
     if (result.status === 'error') {
       setBackendContext({
@@ -306,7 +313,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       } as OplaContext);
     }
     return result;
-  };
+  }, [backendContext]);
 
   const setSettings = useCallback(
     async (settings: Settings) => {
@@ -363,9 +370,12 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     [
       backendContext,
       disconnectBackend,
+      restart,
       setActiveModel,
       setSettings,
+      start,
       startBackend,
+      stop,
       updateBackendStore,
     ],
   );

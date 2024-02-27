@@ -119,7 +119,7 @@ export default function Prompt({
             value={prompt}
             commands={commands}
             placeholder={t('Send a message...')}
-            className="m-0 max-h-[200px] min-h-[32px] w-full resize-none overflow-y-hidden border-0 bg-transparent px-3 py-1.5 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent dark:text-white dark:placeholder-white"
+            className="m-0 max-h-[240px] min-h-[36px] "
             onChange={handleUpdateMessage}
             onFocus={handleFocus}
             onKeyDown={handleKeypress}
