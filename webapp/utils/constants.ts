@@ -15,7 +15,7 @@
 import { ContextWindowPolicy, PageSettings } from '@/types';
 
 export const DefaultPageSettings: PageSettings = {
-  explorerHidden: false,
+  explorerHidden: true,
   settingsHidden: true,
   explorerWidth: 20,
   settingsWidth: 20,

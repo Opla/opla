@@ -13,22 +13,36 @@
 // limitations under the License.
 
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 type EmptyViewProps = {
   title: string;
   description: string;
   icon: React.ReactNode;
-  buttonLabel: string;
+  buttonLabel?: string;
   onCreateItem?: () => void;
+  className?: string;
 };
-function EmptyView({ title, description, icon, buttonLabel, onCreateItem }: EmptyViewProps) {
+function EmptyView({
+  title,
+  description,
+  icon,
+  buttonLabel,
+  className,
+  onCreateItem,
+}: EmptyViewProps) {
   return (
-    <div className="flex h-[350px] shrink-0 items-center justify-center rounded-md border border-dashed">
+    <div
+      className={cn(
+        'flex h-[350px] shrink-0 items-center justify-center rounded-md border border-dashed',
+        className,
+      )}
+    >
       <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
         {icon}
         <h3 className="mt-4 text-lg font-semibold">{title}</h3>
         <p className="mb-4 mt-2 text-sm text-muted-foreground">{description}</p>
-        <Button onClick={onCreateItem}>{buttonLabel}</Button>
+        {buttonLabel && <Button onClick={onCreateItem}>{buttonLabel}</Button>}
       </div>
     </div>
   );

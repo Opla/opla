@@ -138,7 +138,7 @@ impl OplaServer {
                     return;
                 }
             };
-            println!("Opla server started: {} / {}", "0", model);
+            println!("Opla server started:{}", model);
             if
                 app
                     .emit_all("opla-server", Payload {
@@ -322,12 +322,22 @@ impl OplaServer {
             }
         };
         let arguments = parameters.to_args(&model_path);
-
+        println!("Opla server arguments: {}", arguments.join(" "));
         if
-            status == ServerStatus::Started.as_str().to_string() ||
             status == ServerStatus::Starting.as_str().to_string()
         {
-            println!("Opla server already started {}", status);
+            println!("Opla server is starting: stop it");
+            match self.stop(&app).await {
+                Ok(_) => {}
+                Err(e) => {
+                    return Err(e);
+                }
+            }
+
+        } else if
+            status == ServerStatus::Started.as_str().to_string()
+        {
+            println!("Opla server already started ");
             return Ok(Payload {
                 status: status.to_string(),
                 message: "llama.cpp.server".to_string(),
@@ -368,7 +378,7 @@ impl OplaServer {
                 return Err("Opla server can't read status".to_string());
             }
         };
-        if status == "started" && pid.to_owned() != 0 {
+        if (status == "started" || status == "starting") && pid.to_owned() != 0 {
             let mut wstatus = match self.status.try_lock() {
                 Ok(status) => status,
                 Err(_) => {

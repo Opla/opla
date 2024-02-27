@@ -180,7 +180,7 @@ impl Downloader {
         Ok(())
     }
 
-    pub fn cancel_download<R: Runtime>(&mut self, id: &str, app_handle: AppHandle<R>) -> () {
+    pub fn cancel_download<R: Runtime>(&mut self, id: &str, app_handle: &AppHandle<R>) -> () {
         if let Some(handle) = self.handles.remove(id) {
             handle.abort();
             if let Some(download) = self.downloads.iter_mut().find(|d| d.id == id) {

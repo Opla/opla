@@ -73,6 +73,8 @@ import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
 import { Button } from '../ui/button';
 import ConversationView from './Conversation';
+import EmptyView from '../common/EmptyView';
+import Opla from '../icons/Opla';
 
 function Thread({
   conversationId: _conversationId,
@@ -122,6 +124,8 @@ function Thread({
   const [errorMessage, setErrorMessage] = useState<{ [key: string]: string }>({});
 
   const { t } = useTranslation();
+
+  const disabled = !activeModel;
 
   useEffect(() => {
     const getNewMessages = async () => {
@@ -748,11 +752,15 @@ function Thread({
       </div>
 
       {showEmptyChat ? (
-        <div className="flex grow flex-col py-10">
-          <h1 className="flex grow items-center justify-center gap-2 text-center text-2xl font-semibold text-neutral-200 dark:text-neutral-600">
-            {t('Chat with your local GPT')}
-          </h1>
-          <PromptsGrid onPromptSelected={handlePromptSelected} />
+        <div className="flex grow flex-col pb-10">
+          <EmptyView
+            className="m-2 grow"
+            title={t('Chat with your private local GPT')}
+            description={t('Opla works using your machine processing power.')}
+            buttonLabel={disabled ? t('Start a conversation') : undefined}
+            icon={<Opla className="h-10 w-10 animate-pulse" />}
+          />
+          <PromptsGrid onPromptSelected={handlePromptSelected} disabled={disabled} />
         </div>
       ) : (
         (prompt || (messages && messages[0]?.conversationId === conversationId)) && (
@@ -777,6 +785,7 @@ function Thread({
       {(prompt || (messages && messages[0]?.conversationId === conversationId)) && (
         <PromptArea
           conversationId={conversationId as string}
+          disabled={disabled}
           commands={commands}
           prompt={prompt}
           isLoading={conversationId ? isProcessing[conversationId] : false}

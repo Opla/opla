@@ -201,7 +201,7 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
         minSize={10}
         defaultSize={pageSettings.explorerWidth}
         onResize={handleResizeExplorer}
-        className={!pageSettings.explorerHidden ? '' : 'hidden'}
+        className={pageSettings.explorerHidden === true ? 'hidden' : ''}
       >
         <Explorer
           view={view}

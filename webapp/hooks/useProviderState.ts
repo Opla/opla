@@ -82,7 +82,10 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
   const handleProviderToggle = async () => {
     if (provider?.type === ProviderType.opla) {
       logger.info('backend.server', backendContext.server);
-      if (backendContext.server.status === ServerStatus.STARTED) {
+      if (
+        backendContext.server.status === ServerStatus.STARTED ||
+        backendContext.server.status === ServerStatus.STARTING
+      ) {
         const result = await stop();
         if (result.status === 'error') {
           toast.error(`Error stopping server: ${result.error}`);

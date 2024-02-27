@@ -102,7 +102,7 @@ function PromptCommand({
         onChange?.(parsedPrompt);
       }
     },
-    [onChange, value, tokenValidate],
+    [tokenValidate, value?.raw, onChange],
   );
 
   const handleValueChange = useCallback(

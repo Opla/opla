@@ -263,8 +263,15 @@ async fn install_model<R: Runtime>(
     file_name: String
 ) -> Result<String, String> {
     let mut store = context.store.lock().await;
-
-    let model_id = store.models.add_model(model, None, Some(path.clone()), Some(file_name.clone()));
+    let was_empty = store.models.items.is_empty();
+    let model_name = model.name.clone();
+    let (mut model_entity, model_id) = store.models.create_model(
+        model,
+        None,
+        Some(path.clone()),
+        Some(file_name.clone())
+    );
+    // let model_id = store.models.add_model(model, None, Some(path.clone()), Some(file_name.clone()));
     let res = store.models.create_model_path_filename(path, file_name.clone());
     let model_path = match res {
         Ok(m) => { m }
@@ -272,15 +279,35 @@ async fn install_model<R: Runtime>(
             return Err(format!("Install model error: {:?}", err));
         }
     };
+    if was_empty {
+        store.models.active_model = Some(model_name);
+    }
+
     match url {
         Some(u) => {
+            model_entity.state = Some("downloading".to_string());
+            store.models.add_model(model_entity);
+            store.save().map_err(|err| err.to_string())?;
+            drop(store);
             let mut downloader = context.downloader.lock().await;
             downloader.download_file(model_id.clone(), u, model_path, file_name.as_str(), app);
         }
-        None => {}
+        None => {
+            model_entity.state = Some("ok".to_string());
+            store.models.add_model(model_entity);
+            store.save().map_err(|err| err.to_string())?;
+            drop(store);
+            if was_empty && url.is_none() {
+                let res = start_server(app, context).await;
+                match res {
+                    Ok(_) => {}
+                    Err(err) => {
+                        return Err(format!("Install model error: {:?}", err));
+                    }
+                }
+            }
+        }
     }
-
-    store.save().map_err(|err| err.to_string())?;
 
     Ok(model_id.clone())
 }
@@ -290,16 +317,33 @@ async fn cancel_download_model<R: Runtime>(
     app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
-    model_id: String
+    model_name_or_id: String
 ) -> Result<(), String> {
     let mut store = context.store.lock().await;
 
     let mut downloader = context.downloader.lock().await;
-    downloader.cancel_download(&model_id, app);
+    downloader.cancel_download(&model_name_or_id, &app);
 
-    store.models.remove_model(model_id.as_str());
+    let model = store.models.get_model(model_name_or_id.as_str());
+    match model {
+        Some(m) => {
+            store.models.remove_model(model_name_or_id.as_str());
 
-    store.save().map_err(|err| err.to_string())?;
+            if store.models.active_model == Some(model_name_or_id.clone()) {
+                store.models.active_model = None;
+            }
+            store.save().map_err(|err| err.to_string())?;
+            drop(store);
+
+            let mut server = context.server.lock().await;
+            if m.is_some_id_or_name(&server.model) {
+                let _res = server.stop(&app).await;
+            }
+        }
+        None => {
+            return Err(format!("Model not found: {:?}", model_name_or_id));
+        }
+    }
 
     Ok(())
 }
@@ -322,14 +366,27 @@ async fn update_model<R: Runtime>(
 
 #[tauri::command]
 async fn uninstall_model<R: Runtime>(
-    _app: tauri::AppHandle<R>,
+    app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
     model_id: String
 ) -> Result<(), String> {
     let mut store = context.store.lock().await;
 
-    store.models.remove_model(model_id.as_str());
+    match store.models.remove_model(model_id.as_str()) {
+        Some(model) => {
+            if store.models.active_model == Some(model.name.clone()) {
+                store.models.active_model = None;
+            }
+            let mut server = context.server.lock().await;
+            if model.is_some_id_or_name(&server.model) {
+                let _res = server.stop(&app).await;
+            }
+        }
+        None => {
+            return Err(format!("Model not found: {:?}", model_id));
+        }
+    }
 
     store.save().map_err(|err| err.to_string())?;
 
@@ -396,10 +453,8 @@ async fn llm_call_completion<R: Runtime>(
         let mut server = context_server.lock().await;
         server.bind::<R>(app, &model_name, &model_path).await.map_err(|err| err.to_string())?;
         let response = {
-                server
-                    .call_completion::<R>(&model_name, query).await
-                    .map_err(|err| err.to_string())?
-            };
+            server.call_completion::<R>(&model_name, query).await.map_err(|err| err.to_string())?
+        };
         let parameters = server.parameters.clone();
         server.set_parameters(&model, &model_path, parameters);
 
@@ -474,6 +529,35 @@ async fn start_server<R: Runtime>(
         }
     };
     // let args = store.server.parameters.to_args(model_path.as_str());
+    let parameters = store.server.parameters.clone();
+    let mut server = context.server.lock().await;
+    let response = server.start(app, &active_model, &model_path, Some(&parameters)).await;
+    if response.is_err() {
+        return Err(format!("Opla server not started: {:?}", response));
+    }
+    println!("Opla server started: {:?}", response);
+    Ok(())
+}
+
+async fn set_first_model<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    context: State<'_, OplaContext>,
+    model_id: String,
+) -> Result<(), String> {
+    let store = context.store.lock().await;
+    let model = store.models.get_model_entity(model_id.as_str());
+    let active_model = match &store.models.active_model {
+        Some(m) => { m }
+        None => {
+            return Err(format!("Opla server not started default model not set"));
+        }
+    };
+    let model_path = match store.models.get_model_path(active_model.clone()) {
+        Ok(m) => { m }
+        Err(err) => {
+            return Err(format!("Opla server not started model path not found: {:?}", err));
+        }
+    };
     let parameters = store.server.parameters.clone();
     let mut server = context.server.lock().await;
     let response = server.start(app, &active_model, &model_path, Some(&parameters)).await;
@@ -653,15 +737,17 @@ fn main() {
                         }
                     }
                 }
-          });
-          
-          match error {
-              Some(err) => {
-                  Err(err.into())
-              }
-              None => {
-                  Ok(())
-              }
+            });
+
+            if !error.is_some() {
+                let _id = app.listen_global("opla-downloader", |event| {
+                    println!("got event-name with payload {:?}", event.payload());
+                });
+            }
+
+            match error {
+                Some(err) => { Err(err.into()) }
+                None => { Ok(()) }
             }
         })
         .invoke_handler(
