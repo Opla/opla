@@ -46,15 +46,13 @@ const rehypeListItemParagraphToDiv: Plugin<[], Root> = () => (tree) => {
   });
   return tree;
 };
-
+const p = prod as any; // Fix ts errors
 const production = {
   createElement,
-  // @ts-expect-error: the react types are missing.
-  Fragment: prod.Fragment,
-  // @ts-expect-error: the react types are missing.
-  jsx: prod.jsx,
-  // @ts-expect-error: the react types are missing.
-  jsxs: prod.jsxs,
+
+  Fragment: p.Fragment,
+  jsx: p.jsx,
+  jsxs: p.jsxs,
   components: {
     a: ({ href, children }: JSX.IntrinsicElements['a']) => (
       <a href={href} target="_blank" rel="noreferrer" className={ANCHOR_CLASS_NAME}>

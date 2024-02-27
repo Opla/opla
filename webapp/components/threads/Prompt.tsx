@@ -15,14 +15,11 @@
 'use client';
 
 import { ChangeEvent, MouseEvent } from 'react';
-// import useBackend from '@/hooks/useBackendContext';
 import { AlertTriangle, Loader2, Paperclip, SendHorizontal } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
-// import { AppContext } from '@/context';
-// import { getModelsAsItems } from '@/utils/data/models';
-import { ParsedPrompt, TokenValidator, /* getMentionName, */ parsePrompt } from '@/utils/prompt';
+import { ParsedPrompt, TokenValidator, parsePrompt } from '@/utils/prompt';
 import { getCaretPosition } from '@/utils/caretposition';
 import { Ui } from '@/types';
 import { Button } from '../ui/button';
@@ -54,17 +51,6 @@ export default function Prompt({
   isLoading,
 }: PromptProps) {
   const { t } = useTranslation();
-  /* const { providers } = useContext(AppContext);
-  const { backendContext } = useBackend();
-  const modelItems = useMemo(() => {
-    const items = getModelsAsItems(providers, backendContext).map((item) => ({
-      ...item,
-      value: getMentionName(item.value as string),
-      group: 'models',
-    }));
-    return items;
-  }, [providers, backendContext]); */
-
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
     logger.info('sending message', conversationId);
@@ -133,7 +119,7 @@ export default function Prompt({
             value={prompt}
             commands={commands}
             placeholder={t('Send a message...')}
-            className="m-0 max-h-[200px] min-h-[32px] w-full resize-none overflow-y-hidden border-0 bg-transparent px-3 py-1.5 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 dark:bg-transparent dark:text-white dark:placeholder-white"
+            className="m-0 max-h-[240px] min-h-[36px] "
             onChange={handleUpdateMessage}
             onFocus={handleFocus}
             onKeyDown={handleKeypress}

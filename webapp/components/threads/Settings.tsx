@@ -79,7 +79,6 @@ export default function Settings({
 
   const handleSystemChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
-    console.log('handleSystemChange', value);
     if (selectedConversation) {
       const newConversations = updateConversation(
         { ...selectedConversation, system: value },

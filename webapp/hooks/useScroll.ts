@@ -14,41 +14,9 @@
 
 // import logger from '@/utils/logger';
 import { useCallback, useRef, MutableRefObject } from 'react';
-
-export type Position2D = {
-  x: number;
-  y: number;
-};
-
-type Rect = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  top?: number;
-  right?: number;
-  bottom?: number;
-  left?: number;
-};
+import { Position2D, Rect, getBoundingClientRect } from '@/utils/ui';
 
 export type KeyedScrollPosition = { key: string | undefined; position: Position2D; rect?: Rect };
-
-export const EmptyPosition: Position2D = {
-  x: -1,
-  y: -1,
-};
-
-const getBoundingClientRect = (element?: HTMLDivElement): Rect =>
-  element?.getBoundingClientRect() || {
-    x: 0,
-    y: 0,
-    width: 1,
-    height: 1,
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-  };
 
 const containerRectToPercentage = (elementRect: Rect, parentRect: Rect): Rect => {
   let width = elementRect.width - parentRect.width - parentRect.x;

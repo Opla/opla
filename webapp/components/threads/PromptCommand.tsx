@@ -69,12 +69,18 @@ function PromptCommand({
     const textarea = textareaRef.current;
     const dropdown = dropdownRef.current;
     if (textarea && dropdown) {
+      const parent = textarea.parentElement as HTMLElement;
+      const parentRect = parent.getBoundingClientRect();
       const caret = getCaretCoordinates(textarea, textarea.selectionEnd);
       const rect = dropdown.getBoundingClientRect();
       logger.info('caret', caret, rect);
-      dropdown.style.transform = `translate(${caret.left}px, ${-caret.top - caret.height - 4}px)`;
+      let x = parentRect.left + caret.left;
+      if (x + rect.width > window.innerWidth) {
+        x = window.innerWidth - rect.width - 8;
+      }
+      dropdown.style.transform = `translate(${x}px, ${0 - caret.height}px)`;
       dropdown.style.left = `0px`;
-      dropdown.style.bottom = `0px`;
+      dropdown.style.bottom = `56px`;
     }
   }, []);
 
@@ -130,7 +136,6 @@ function PromptCommand({
       if (textarea && dropdown) {
         const { currentWord, start, text, caretStartIndex } = getCurrentWord(textarea);
         const newText = `${text.substring(0, start)}${newValue} ${text.substring(start + currentWord.length)}`;
-        // replaceWord(textarea, `${newValue}`);
         valueChange(newText, caretStartIndex + 1);
         toggleDropdown(false);
         onCommandSelect?.(newValue);
@@ -197,7 +202,7 @@ function PromptCommand({
     [commands, commandValue],
   );
   return (
-    <div className="relative h-full w-full overflow-visible">
+    <div className="h-full w-full overflow-visible">
       <Textarea
         autoresize
         autoFocus
@@ -205,24 +210,24 @@ function PromptCommand({
         ref={textareaRef}
         autoComplete="off"
         autoCorrect="off"
-        className={cn(className, 'text-transparent dark:text-transparent')}
+        className={cn(className, 'border-0 text-transparent')}
         value={value?.raw || ''}
         placeholder={placeholder}
         onChange={handleValueChange}
-        rows={5}
         onFocus={handleFocus}
-      />
-      <p className="pointer-events-none absolute bottom-[6px] left-[12px] w-full text-sm">
-        {value?.tokens?.map((token) =>
-          token.type !== 'newline' ? (
-            <span key={token.index} className={getTokenColor(token)}>
-              {token.value}
-            </span>
-          ) : (
-            <br key={token.index} />
-          ),
-        )}
-      </p>
+      >
+        <p className="textarea-overlay pointer-events-none absolute left-[1px] top-[1px] h-full w-full px-3 py-2 text-sm">
+          {value?.tokens?.map((token) =>
+            token.type !== 'newline' ? (
+              <span key={token.index} className={getTokenColor(token)}>
+                {token.value}
+              </span>
+            ) : (
+              <br key={token.index} />
+            ),
+          )}
+        </p>
+      </Textarea>
       <div
         ref={dropdownRef}
         className={cn(

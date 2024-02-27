@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { BasicState } from '@/types/ui';
-import { PromptToken, PromptTokenState, PromptTokenType } from './prompt';
+import { PromptToken, PromptTokenState, PromptTokenType } from '../prompt';
 
 // eslint-disable-next-line import/prefer-default-export
 export const getStateColor = (
@@ -55,4 +55,48 @@ export const getTokenColor = (token: PromptToken) => {
     className = 'text-yellow-400';
   if (token.type === PromptTokenType.Action && className === '') className = 'text-green-400';
   return className;
+};
+
+export type Position2D = {
+  x: number;
+  y: number;
+};
+
+export type Rect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  top?: number;
+  right?: number;
+  bottom?: number;
+  left?: number;
+};
+
+export const EmptyPosition: Position2D = {
+  x: -1,
+  y: -1,
+};
+
+export const getBoundingClientRect = (element?: Element): Rect =>
+  element?.getBoundingClientRect() || {
+    x: 0,
+    y: 0,
+    width: 1,
+    height: 1,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  };
+
+export const pxValueAsNumber = (px: string, defaultValue: number) => {
+  if (px.indexOf('px') !== -1) {
+    try {
+      return parseInt(px.replace('px', ''), 10);
+    } catch (e) {
+      // ignore
+    }
+  }
+  return defaultValue;
 };
