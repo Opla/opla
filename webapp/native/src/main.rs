@@ -381,6 +381,7 @@ async fn uninstall_model<R: Runtime>(
             let mut server = context.server.lock().await;
             if model.is_some_id_or_name(&server.model) {
                 let _res = server.stop(&app).await;
+                server.remove_model();
             }
         }
         None => {
@@ -539,32 +540,37 @@ async fn start_server<R: Runtime>(
     Ok(())
 }
 
-async fn set_first_model<R: Runtime>(
+async fn model_download<R: Runtime>(
     app: tauri::AppHandle<R>,
-    context: State<'_, OplaContext>,
     model_id: String,
+    state: String
 ) -> Result<(), String> {
+    let handle = app.app_handle();
+    let context = app.state::<OplaContext>();
     let store = context.store.lock().await;
     let model = store.models.get_model_entity(model_id.as_str());
-    let active_model = match &store.models.active_model {
-        Some(m) => { m }
+    match model {
+        Some(mut m) => {
+            m.state = Some(state.clone());
+            store.save().map_err(|err| err.to_string())?;
+            drop(store);
+            println!("model_download {} {}", state, model_id);
+            let server = context.server.lock().await;
+            if state == "ok" && (m.reference.is_some_id_or_name(&server.model) || server.model.is_none()) {
+                drop(server);
+                let res = start_server(handle, context).await;
+                match res {
+                    Ok(_) => {}
+                    Err(err) => {
+                        return Err(format!("Model download start server error: {:?}", err));
+                    }
+                }
+            }
+        }
         None => {
-            return Err(format!("Opla server not started default model not set"));
+            return Err(format!("Model not found: {:?}", model_id));
         }
-    };
-    let model_path = match store.models.get_model_path(active_model.clone()) {
-        Ok(m) => { m }
-        Err(err) => {
-            return Err(format!("Opla server not started model path not found: {:?}", err));
-        }
-    };
-    let parameters = store.server.parameters.clone();
-    let mut server = context.server.lock().await;
-    let response = server.start(app, &active_model, &model_path, Some(&parameters)).await;
-    if response.is_err() {
-        return Err(format!("Opla server not started: {:?}", response));
     }
-    println!("Opla server started: {:?}", response);
     Ok(())
 }
 
@@ -622,6 +628,22 @@ async fn window_setup<EventLoopMessage>(app: &mut App) -> Result<(), String> {
         }
     });*/
     Ok(())
+}
+
+fn handle_download_event<EventLoopMessage>(app: &tauri::AppHandle, payload: &str) {
+    let vec: Vec<&str> = payload.split(':').collect();
+    let (state, id) = (vec[0].to_string(), vec[1].to_string());
+
+        let handler = app.app_handle();    
+    tauri::async_runtime::spawn(async move {
+        let handler = handler.app_handle();
+        match model_download(handler, id.to_string(), state.to_string()).await {
+            Ok(_) => {}
+            Err(err) => {
+                println!("Model downloaded error: {:?}", err);
+            }
+        }
+    });
 }
 
 async fn opla_setup(app: &mut App) -> Result<(), String> {
@@ -690,6 +712,7 @@ async fn opla_setup(app: &mut App) -> Result<(), String> {
             })
             .map_err(|err| err.to_string())?;
     }
+
     Ok(())
 }
 
@@ -740,8 +763,16 @@ fn main() {
             });
 
             if !error.is_some() {
-                let _id = app.listen_global("opla-downloader", |event| {
-                    println!("got event-name with payload {:?}", event.payload());
+                println!("Opla setup done");
+                let handle = app.handle();
+                let _id = app.listen_global("opla-downloader", move |event| {
+                    let payload = match event.payload() {
+                        Some(p) => { p }
+                        None => {
+                            return;
+                        }
+                    };
+                    handle_download_event::<EventLoopMessage>(&handle, payload);
                 });
             }
 
