@@ -29,7 +29,7 @@
 'use client';
 
 import { useRouter } from 'next/router';
-import Threads from '@/components/threads';
+import Threads from '@/components/views/Threads';
 import logger from '@/utils/logger';
 
 export default function ThreadSelected() {

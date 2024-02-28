@@ -17,7 +17,7 @@ import { Provider } from '@/types';
 import { Plug } from 'lucide-react';
 import { getProviderState } from '@/utils/data/providers';
 import { getStateColor } from '@/utils/ui';
-import { Button } from '../ui/button';
+import { Button } from '../../ui/button';
 
 export default function Toolbar({
   provider,

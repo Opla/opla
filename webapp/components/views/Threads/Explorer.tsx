@@ -45,11 +45,11 @@ import {
 import { getConversationTitle, validateConversations } from '@/utils/conversations';
 import { MenuAction, ViewName } from '@/types/ui';
 import { AppContext } from '@/context';
-import { toast } from '../ui/Toast';
-import EditableItem from '../common/EditableItem';
-import { ContextMenu, ContextMenuTrigger } from '../ui/context-menu';
-import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
-import Opla from '../icons/Opla';
+import { toast } from '../../ui/Toast';
+import EditableItem from '../../common/EditableItem';
+import { ContextMenu, ContextMenuTrigger } from '../../ui/context-menu';
+import ContextMenuList from '../../ui/ContextMenu/ContextMenuList';
+import Opla from '../../icons/Opla';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,12 +58,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { Button } from '../ui/button';
-import { ShortcutBadge } from '../common/ShortCut';
-import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
-import { Separator } from '../ui/separator';
-import EmptyView from '../common/EmptyView';
+} from '../../ui/dropdown-menu';
+import { Button } from '../../ui/button';
+import { ShortcutBadge } from '../../common/ShortCut';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
+import { Separator } from '../../ui/separator';
+import EmptyView from '../../common/EmptyView';
 
 type ExplorerProps = {
   view: Ui.ViewName;

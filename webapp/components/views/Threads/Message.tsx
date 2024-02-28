@@ -33,9 +33,9 @@ import useHover from '@/hooks/useHover';
 import useMarkdownProcessor from '@/hooks/useMarkdownProcessor';
 import { Message, MessageStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
-import { Button } from '../ui/button';
-import { Textarea } from '../ui/textarea';
-import OpenAI from '../icons/OpenAI';
+import { Button } from '../../ui/button';
+import { Textarea } from '../../ui/textarea';
+import OpenAI from '../../icons/OpenAI';
 
 function ClipboardButton({
   onCopyToClipboard,

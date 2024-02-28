@@ -15,7 +15,7 @@ import React from 'react';
 import { PromptTemplate } from '@/types';
 import { cn } from '@/lib/utils';
 import useFetch from '@/hooks/useFetch';
-import PromptCard from '../common/PromptCard';
+import PromptCard from '../../common/PromptCard';
 
 function PromptsGrid({
   className,

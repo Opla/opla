@@ -24,8 +24,8 @@ import Server from './server';
 import OpenAI from './openai';
 import Opla from './opla';
 import OplaActions from './opla/Actions';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { ScrollArea } from '../ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
+import { ScrollArea } from '../../ui/scroll-area';
 
 function ProviderView({ providerId }: { providerId?: string }) {
   const { t } = useTranslation();

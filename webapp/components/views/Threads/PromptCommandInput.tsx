@@ -23,8 +23,8 @@ import { cn } from '@/lib/utils';
 import logger from '@/utils/logger';
 import useTranslation from '@/hooks/useTranslation';
 import { getTokenColor } from '@/utils/ui';
-import { Textarea } from '../ui/textarea';
-import { Button } from '../ui/button';
+import { Textarea } from '../../ui/textarea';
+import { Button } from '../../ui/button';
 
 type PromptCommandProps = {
   value?: ParsedPrompt;

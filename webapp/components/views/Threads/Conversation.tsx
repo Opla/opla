@@ -17,7 +17,7 @@ import useScroll, { KeyedScrollPosition } from '@/hooks/useScroll';
 import { Message } from '@/types';
 import logger from '@/utils/logger';
 import MessageView from './Message';
-import { Button } from '../ui/button';
+import { Button } from '../../ui/button';
 
 type ConversationProps = {
   conversationId: string;

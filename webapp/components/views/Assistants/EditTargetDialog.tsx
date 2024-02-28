@@ -19,10 +19,10 @@ import { AssistantTarget } from '@/types';
 import { AppContext } from '@/context';
 import { getModelsAsItems } from '@/utils/data/models';
 import logger from '@/utils/logger';
-import AlertDialog from '../common/AlertDialog';
-import Parameter, { ParameterValue } from '../common/Parameter';
-import Combobox from '../common/Combobox';
-import LabelParameter from '../common/LabelParameter';
+import AlertDialog from '../../common/AlertDialog';
+import Parameter, { ParameterValue } from '../../common/Parameter';
+import Combobox from '../../common/Combobox';
+import LabelParameter from '../../common/LabelParameter';
 
 type EditTargetDialogProps = {
   id: string;

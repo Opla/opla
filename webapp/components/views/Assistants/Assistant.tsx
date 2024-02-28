@@ -21,14 +21,14 @@ import { openFileDialog } from '@/utils/backend/tauri';
 import { ModalData, ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { AssistantTarget } from '@/types';
-import RecordView from '../common/RecordView';
-import { Button } from '../ui/button';
-import { ScrollArea } from '../ui/scroll-area';
-import Parameter, { ParameterValue } from '../common/Parameter';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import AssistantIcon from '../common/AssistantIcon';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
-import EmptyView from '../common/EmptyView';
+import RecordView from '../../common/RecordView';
+import { Button } from '../../ui/button';
+import { ScrollArea } from '../../ui/scroll-area';
+import Parameter, { ParameterValue } from '../../common/Parameter';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
+import AssistantIcon from '../../common/AssistantIcon';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../ui/card';
+import EmptyView from '../../common/EmptyView';
 import TargetsTable from './TargetsTable';
 
 export type AssistantProps = {

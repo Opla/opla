@@ -25,10 +25,10 @@ import logger from '@/utils/logger';
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { shortcutAsText } from '@/utils/shortcuts';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
-import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
-import { Button } from '../ui/button';
-import EditableItem from '../common/EditableItem';
-import ModelInfos from '../common/ModelInfos';
+import ContextMenuList from '../../ui/ContextMenu/ContextMenuList';
+import { Button } from '../../ui/button';
+import EditableItem from '../../common/EditableItem';
+import ModelInfos from '../../common/ModelInfos';
 
 export type ModelsExplorerProps = {
   models: Model[];
