@@ -38,8 +38,8 @@ import { ShortcutIds } from '@/hooks/useShortcuts';
 import { Page } from '@/types/ui';
 import { fileExists, openFileDialog } from '@/utils/backend/tauri';
 import { importModel, validateModelsFile } from '@/utils/models';
-import { ShortcutBadge } from '../common/ShortCut';
-import { toast } from '../ui/Toast';
+import { ShortcutBadge } from '../../common/ShortCut';
+import { toast } from '../../ui/Toast';
 import SearchHuggingFaceHub from './SearchHuggingFaceHub';
 
 function NewLocalModel({

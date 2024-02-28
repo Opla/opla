@@ -30,11 +30,11 @@ import { deepCopy, deepMerge, getEntityName, getResourceUrl } from '@/utils/data
 import { getDownloadables, isValidFormat } from '@/utils/data/models';
 import { ModalIds, Page } from '@/types/ui';
 import { ModalsContext } from '@/context/modals';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../../ui/resizable';
 import Explorer from './Explorer';
 import ModelView from './Model';
 import NewLocalModel from './NewLocalModel';
-import { ParametersRecord } from '../common/Parameter';
+import { ParametersRecord } from '../../common/Parameter';
 
 export default function Models({ selectedModelId }: { selectedModelId?: string }) {
   const { backendContext, updateBackendStore } = useBackend();

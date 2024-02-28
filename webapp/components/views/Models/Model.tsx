@@ -33,10 +33,10 @@ import useTranslation from '@/hooks/useTranslation';
 import { Model } from '@/types';
 import { getEntityName, getResourceUrl } from '@/utils/data';
 import useParameters, { ParametersCallback } from '@/hooks/useParameters';
-import Parameter from '../common/Parameter';
-import { Button } from '../ui/button';
-import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../ui/table';
-import ModelInfos from '../common/ModelInfos';
+import Parameter from '../../common/Parameter';
+import { Button } from '../../ui/button';
+import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../../ui/table';
+import ModelInfos from '../../common/ModelInfos';
 /* import {
   DropdownMenu,
   DropdownMenuContent,

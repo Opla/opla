@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../../ui/resizable';
 import Explorer from './Explorer';
 import Assistant from './Assistant';
 

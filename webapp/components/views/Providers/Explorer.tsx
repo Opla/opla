@@ -37,10 +37,10 @@ import { BasicState, Page } from '@/types/ui';
 import { shortcutAsText } from '@/utils/shortcuts';
 import { ShortcutIds } from '@/hooks/useShortcuts';
 import { getStateColor } from '@/utils/ui';
-import { Button } from '../ui/button';
-import { ContextMenu } from '../ui/context-menu';
-import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
-import OpenAIIcon from '../icons/OpenAI';
+import { Button } from '../../ui/button';
+import { ContextMenu } from '../../ui/context-menu';
+import ContextMenuList from '../../ui/ContextMenu/ContextMenuList';
+import OpenAIIcon from '../../icons/OpenAI';
 
 function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string }) {
   const { providers, setProviders } = useContext(AppContext);

@@ -16,15 +16,15 @@ import { useState } from 'react';
 import { Copy, Edit, MoreHorizontal, Trash } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import { AssistantTarget } from '@/types';
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '../ui/table';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '../../ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { Button } from '../ui/button';
+} from '../../ui/dropdown-menu';
+import { Button } from '../../ui/button';
 
 type TargetsTableProps = {
   targets: AssistantTarget[];

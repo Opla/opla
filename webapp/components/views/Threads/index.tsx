@@ -26,7 +26,7 @@ import { ModalIds } from '@/modals';
 import { ModalsContext } from '@/context/modals';
 import { AppContext } from '@/context';
 import { MenuAction, Page, ViewName } from '@/types/ui';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../../ui/resizable';
 import Explorer from './Explorer';
 import Settings from './Settings';
 import Thread from './Thread';

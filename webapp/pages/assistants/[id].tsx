@@ -14,7 +14,7 @@
 
 'use client';
 
-import Assistants from '@/components/assistants';
+import Assistants from '@/components/views/Assistants';
 import { useRouter } from 'next/router';
 
 export default function DefaultAssistants() {

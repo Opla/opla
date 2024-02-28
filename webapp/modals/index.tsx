@@ -19,7 +19,7 @@ import { BaseNamedRecord } from '@/types';
 import { ModalData, ModalRef } from '@/context/modals';
 import { ShortcutSettings } from '@/components/common/ShortCut';
 import { ModalIds } from '@/types/ui';
-import EditTargetDialog from '@/components/assistants/EditTargetDialog';
+import EditTargetDialog from '@/components/views/Assistants/EditTargetDialog';
 import SettingsPanel from './settings';
 import NewProviderDialog from './templates/NewProvider';
 import OpenAIDialog from './openai';

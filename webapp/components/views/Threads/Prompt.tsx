@@ -22,9 +22,9 @@ import logger from '@/utils/logger';
 import { ParsedPrompt, TokenValidator, parsePrompt } from '@/utils/parsers';
 import { getCaretPosition } from '@/utils/caretposition';
 import { Ui } from '@/types';
-import { Button } from '../ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
-import { ShortcutBadge } from '../common/ShortCut';
+import { Button } from '../../ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
+import { ShortcutBadge } from '../../common/ShortCut';
 import PromptCommandInput from './PromptCommandInput';
 
 export type PromptProps = {

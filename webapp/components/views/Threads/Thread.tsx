@@ -69,10 +69,10 @@ import { createMessage, changeMessageContent, mergeMessages } from '@/utils/data
 import PromptArea from './Prompt';
 import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
-import { Button } from '../ui/button';
+import { Button } from '../../ui/button';
 import ConversationView from './Conversation';
-import EmptyView from '../common/EmptyView';
-import Opla from '../icons/Opla';
+import EmptyView from '../../common/EmptyView';
+import Opla from '../../icons/Opla';
 
 function Thread({
   conversationId: _conversationId,

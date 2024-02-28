@@ -20,7 +20,7 @@ import { Model } from '@/types';
 import logger from '@/utils/logger';
 import { searchModels } from '@/utils/providers/hf';
 import { getResourceUrl } from '@/utils/data';
-import { Checkbox } from '../ui/checkbox';
+import { Checkbox } from '../../ui/checkbox';
 
 function SearchHuggingFaceHub({
   search,

@@ -33,8 +33,8 @@ import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
 import { MenuAction } from '@/types/ui';
 import MessageView from './Message';
-import { ScrollArea } from '../ui/scroll-area';
-import { Button } from '../ui/button';
+import { ScrollArea } from '../../ui/scroll-area';
+import { Button } from '../../ui/button';
 
 function Archive({
   archiveId,

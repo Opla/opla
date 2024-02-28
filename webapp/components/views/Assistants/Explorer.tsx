@@ -22,10 +22,10 @@ import useTranslation from '@/hooks/useTranslation';
 import { ModalIds } from '@/modals';
 import { ModalData, ModalsContext } from '@/context/modals';
 import { BasicState, Page } from '@/types/ui';
-import Explorer, { ExplorerList } from '../common/Explorer';
-import { Button } from '../ui/button';
-import AssistantIcon from '../common/AssistantIcon';
-import Pastille from '../common/Pastille';
+import Explorer, { ExplorerList } from '../../common/Explorer';
+import { Button } from '../../ui/button';
+import AssistantIcon from '../../common/AssistantIcon';
+import Pastille from '../../common/Pastille';
 
 export default function AssistantsExplorer({
   selectedAssistantId,

@@ -57,11 +57,11 @@ import logger from '@/utils/logger';
 import { BasicState, MenuAction } from '@/types/ui';
 import { getStateColor } from '@/utils/ui';
 import { cn } from '@/lib/utils';
-import { Badge } from '../ui/badge';
+import { Badge } from '../../ui/badge';
 // import { toast } from '../ui/Toast';
-import { ShortcutBadge } from '../common/ShortCut';
-import Pastille from '../common/Pastille';
-import ModelInfos from '../common/ModelInfos';
+import { ShortcutBadge } from '../../common/ShortCut';
+import Pastille from '../../common/Pastille';
+import ModelInfos from '../../common/ModelInfos';
 
 export default function ThreadMenu({
   selectedModelName,

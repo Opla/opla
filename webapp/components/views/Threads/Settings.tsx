@@ -27,16 +27,16 @@ import { toast } from '@/components/ui/Toast';
 import { ContextWindowPolicies, DefaultContextWindowPolicy } from '@/utils/constants';
 import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
 import { getFilename } from '@/utils/misc';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import { ScrollArea } from '../ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Textarea } from '../ui/textarea';
-import Parameter, { ParameterValue, ParametersRecord } from '../common/Parameter';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
-import Form from '../common/Form';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../ui/accordion';
+import { ScrollArea } from '../../ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
+import { Textarea } from '../../ui/textarea';
+import Parameter, { ParameterValue, ParametersRecord } from '../../common/Parameter';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
+import Form from '../../common/Form';
 import Presets from './Presets';
-import { Button } from '../ui/button';
+import { Button } from '../../ui/button';
 
 export default function Settings({
   conversationId,

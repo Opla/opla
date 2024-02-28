@@ -13,7 +13,7 @@
 // limitations under the License.
 import React from 'react';
 import Dialog from '@/components/common/Modal';
-import OpenAI from '@/components/providers/openai';
+import OpenAI from '@/components/views/Providers/openai';
 import useProviderState from '@/hooks/useProviderState';
 import { Provider } from '@/types';
 import { ModalData } from '@/context/modals';
