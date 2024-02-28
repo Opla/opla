@@ -235,6 +235,9 @@ export type Provider = BaseNamedRecord & {
   key: string;
   models?: Model[];
   errors?: string[];
+  metadata?: {
+    server: ServerConfiguration;
+  };
 };
 
 export type Model = BaseNamedRecord & {
@@ -347,10 +350,14 @@ export type Settings = {
   pages?: Record<string, PageSettings>;
 };
 
+export type ServerParameters = {
+  [key: string]: string | number | boolean;
+};
+
 export type ServerConfiguration = {
   name: string;
   binary?: string;
-  parameters: { [key: string]: string | number | boolean };
+  parameters: ServerParameters;
 };
 
 export type ModelsConfiguration = {

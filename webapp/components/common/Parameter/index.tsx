@@ -123,8 +123,8 @@ export default function Parameter({
             step="any"
             onChange={(e) => {
               // e.preventDefault();
-              // const v = type === 'number' ? parseInt(e.target.value, 10) : e.target.value;
-              const v = e.target.value;
+              const v = type === 'number' ? parseInt(e.target.value, 10) : e.target.value;
+              // const v = e.target.value;
               onChange(name, v);
             }}
           />
