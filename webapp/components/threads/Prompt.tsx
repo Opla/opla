@@ -19,13 +19,13 @@ import { AlertTriangle, Loader2, Paperclip, SendHorizontal } from 'lucide-react'
 import useTranslation from '@/hooks/useTranslation';
 import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
-import { ParsedPrompt, TokenValidator, parsePrompt } from '@/utils/prompt';
+import { ParsedPrompt, TokenValidator, parsePrompt } from '@/utils/parsers';
 import { getCaretPosition } from '@/utils/caretposition';
 import { Ui } from '@/types';
 import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { ShortcutBadge } from '../common/ShortCut';
-import PromptCommand from './PromptCommand';
+import PromptCommandInput from './PromptCommandInput';
 
 export type PromptProps = {
   conversationId: string;
@@ -117,7 +117,7 @@ export default function Prompt({
           >
             <Paperclip className="strokeWidth={1.5} h-4 w-4" />
           </Button>
-          <PromptCommand
+          <PromptCommandInput
             value={prompt}
             commands={commands}
             placeholder={t('Send a message...')}

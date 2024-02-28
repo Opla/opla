@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import React from 'react';
-import { Prompt } from '@/types';
+import { PromptTemplate } from '@/types';
 import { cn } from '@/lib/utils';
 import useFetch from '@/hooks/useFetch';
 import PromptCard from '../common/PromptCard';
@@ -23,10 +23,10 @@ function PromptsGrid({
   disabled,
 }: {
   className?: string;
-  onPromptSelected: (prompt: Prompt) => void;
+  onPromptSelected: (prompt: PromptTemplate) => void;
   disabled: boolean;
 }) {
-  const [prompts] = useFetch<Prompt[]>('https://opla.github.io/prompts/default.json');
+  const [prompts] = useFetch<PromptTemplate[]>('https://opla.github.io/prompts/default.json');
 
   return (
     <div className={cn('mr-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3', className)}>

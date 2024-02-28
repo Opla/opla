@@ -26,7 +26,7 @@
 // limitations under the License.
 
 import { Button } from '@/components/ui/button';
-import { Prompt } from '@/types';
+import { PromptTemplate } from '@/types';
 
 export default function PromptCard({
   prompt,
@@ -34,7 +34,7 @@ export default function PromptCard({
   disabled = false,
   onSelect,
 }: {
-  prompt: Prompt;
+  prompt: PromptTemplate;
   selected?: boolean;
   disabled?: boolean;
   onSelect?: () => void;

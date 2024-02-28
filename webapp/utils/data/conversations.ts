@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { Asset, Author, ContextWindowPolicy, Conversation, Message } from '@/types';
+import { Asset, ContextWindowPolicy, Conversation } from '@/types';
 import { createBaseRecord, createBaseNamedRecord, updateRecord } from '.';
 
 export const getConversationAssets = (conversation: Conversation) =>
@@ -43,33 +43,6 @@ export const addAssetsToConversation = (
     conversationAssets,
     assets,
   };
-};
-
-export const createMessage = (
-  author: Author,
-  content: string | undefined,
-  assets?: Asset[],
-): Message => {
-  const message = {
-    ...createBaseRecord<Message>(),
-    author,
-    content,
-    assets: assets?.map((a) => a.id),
-  };
-  return message;
-};
-
-export const mergeMessages = (messages: Message[], newMessages: Message[]) => {
-  const newMessagesIds = newMessages.map((m) => m.id);
-  const freshNewMessages = newMessages.filter((m) => !messages.find((msg) => msg.id === m.id));
-  const mergedMessages = messages.map((m) => {
-    if (newMessagesIds.includes(m.id)) {
-      const updatedMessage = newMessages.find((newMsg) => newMsg.id === m.id);
-      return { ...m, ...updatedMessage, updatedAt: Date.now() };
-    }
-    return m;
-  });
-  return [...mergedMessages, ...freshNewMessages];
 };
 
 export const createConversation = (name: string) => {

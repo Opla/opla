@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { ZodSchema } from 'zod';
-import { ParsedPrompt } from '@/utils/prompt';
+import { ParsedPrompt } from '@/utils/parsers';
 import * as Ui from './ui';
 
 declare global {
@@ -23,6 +23,18 @@ declare global {
     };
   }
 }
+
+export type BaseIdRecord = {
+  id: string;
+  createdAt: number;
+  updatedAt: number;
+  metadata?: Metadata;
+};
+
+export type BaseNamedRecord = BaseIdRecord & {
+  name: string;
+  description?: string;
+};
 
 // Model types
 export type Metadata = {
@@ -45,26 +57,16 @@ export enum ContentType {
   Custom = 'custom', */
 }
 
-export type Content = {
-  type: ContentType;
-  parts: string[];
-  raws?: string[];
-  metadata?: Metadata;
-};
+export type Content =
+  | string
+  | {
+      type: ContentType;
+      parts: string[];
+      raw?: string[];
+      metadata?: Metadata;
+    };
 
-export type BaseIdRecord = {
-  id: string;
-  createdAt: number;
-  updatedAt: number;
-  metadata?: Metadata;
-};
-
-export type BaseNamedRecord = BaseIdRecord & {
-  name: string;
-  description?: string;
-};
-
-export enum MessageState {
+export enum MessageStatus {
   Pending = 'pending',
   Stream = 'stream',
   Delivered = 'delivered',
@@ -94,9 +96,9 @@ export type Asset = BaseIdRecord & {
 
 export type Message = BaseIdRecord & {
   author: Author;
-  content: string | Content | undefined;
-  contentHistory?: (string | Content)[];
-  status?: MessageState;
+  content: Content | undefined;
+  contentHistory?: Content[];
+  status?: MessageStatus;
   sibling?: string;
   conversationId?: string;
   assets?: string[];
@@ -283,7 +285,7 @@ export type ModelsCollection = {
   models: Model[];
 };
 
-export type Prompt = BaseNamedRecord & {
+export type PromptTemplate = BaseNamedRecord & {
   title: string;
   icon?: unknown;
   value: string;

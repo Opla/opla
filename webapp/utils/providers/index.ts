@@ -15,7 +15,7 @@ import {
 import OpenAI from './openai';
 import Opla from './opla';
 import { findProvider } from '../data/providers';
-import { getContent } from '../data';
+import { getMessageContentAsString } from '../data/messages';
 
 // TODO: code it in Rust
 // and use ContextWindowPolicy from webapp/utils/constants.ts
@@ -31,7 +31,7 @@ const buildContext = (
   }
 
   const llmMessages: LlmMessage[] = context.map((m) => ({
-    content: getContent(m.content),
+    content: getMessageContentAsString(m),
     role: m.author?.role === 'user' ? 'user' : 'assistant',
     name: m.author?.name,
   }));
