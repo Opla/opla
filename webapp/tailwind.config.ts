@@ -17,6 +17,10 @@ const config: Config = {
       },
     },
     extend: {
+      fontSize: {
+        '2xs': ['0.625rem', { lineHeight: '1rem' }],
+        '3xs': ['0.5rem', { lineHeight: '0.75rem' }],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',

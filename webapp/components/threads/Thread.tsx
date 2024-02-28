@@ -641,7 +641,7 @@ function Thread({
         <div className="justify-left flex w-full flex-row items-center gap-4 bg-neutral-50 p-3 text-xs text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
           <div className="flex grow flex-row items-center">
             <ThreadMenu
-              selectedModel={selectedModel}
+              selectedModelName={selectedModel}
               selectedConversationId={conversationId}
               modelItems={modelItems}
               onSelectModel={handleSelectModel}

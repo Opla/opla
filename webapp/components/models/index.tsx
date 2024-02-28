@@ -175,7 +175,7 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
 
   return (
     <ResizablePanelGroup direction="horizontal">
-      <ResizablePanel defaultSize={20}>
+      <ResizablePanel defaultSize={24} minSize={20}>
         <Explorer
           models={models}
           selectedModelId={selectedModelId}
