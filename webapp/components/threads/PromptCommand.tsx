@@ -219,8 +219,8 @@ function PromptCommand({
         <p className="textarea-overlay pointer-events-none absolute left-[1px] top-[1px] h-full w-full px-3 py-2 text-sm">
           {value?.tokens?.map((token) =>
             token.type !== 'newline' ? (
-              <span key={token.index} className={getTokenColor(token)}>
-                {token.value}
+              <span key={token.index} className={cn('', getTokenColor(token))}>
+                {token.value.replaceAll(' ', '\u00a0')}
               </span>
             ) : (
               <br key={token.index} />
