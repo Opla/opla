@@ -40,6 +40,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Ui, Provider, ProviderType } from '@/types';
+import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
@@ -60,25 +61,30 @@ import { Badge } from '../ui/badge';
 // import { toast } from '../ui/Toast';
 import { ShortcutBadge } from '../common/ShortCut';
 import Pastille from '../common/Pastille';
+import ModelInfos from '../common/ModelInfos';
 
 export default function ThreadMenu({
-  selectedModel,
+  selectedModelName,
   selectedConversationId,
   modelItems,
   onSelectModel,
   onSelectMenu,
 }: {
-  selectedModel: string;
+  selectedModelName: string;
   selectedConversationId?: string;
   modelItems: Ui.MenuItem[];
   onSelectModel: (model: string, provider: ProviderType) => void;
   onSelectMenu: (menu: MenuAction, data: string) => void;
 }) {
   const { providers, setProviders } = useContext(AppContext);
+  const { backendContext } = useBackend();
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
-  const selectedItem = modelItems.find((item) => item.value === selectedModel);
+  const selectedItem = modelItems.find((item) => item.value === selectedModelName);
+  const selectedModel = backendContext.config.models.items.find(
+    (model) => model.name === selectedModelName,
+  );
   let chatGPT = providers.find(
     (p: Provider) => p.type === ProviderType.openai && p.name === OpenAI.template.name,
   );
@@ -132,7 +138,12 @@ export default function ThreadMenu({
       {modelItems.length > 0 && (
         <div className="flex w-full items-center justify-between text-sm font-medium leading-none">
           {selectedItem?.label ? (
-            <span className="capitalize text-muted-foreground">{selectedItem?.label}</span>
+            <>
+              <div className="grow capitalize text-foreground">
+                {selectedModel && <ModelInfos model={selectedModel} />}
+              </div>
+              <div className="flex-1" />
+            </>
           ) : (
             <span>{t('Select a model')}</span>
           )}

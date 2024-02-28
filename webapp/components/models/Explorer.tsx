@@ -28,6 +28,7 @@ import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import ContextMenuList from '../ui/ContextMenu/ContextMenuList';
 import { Button } from '../ui/button';
 import EditableItem from '../common/EditableItem';
+import ModelInfos from '../common/ModelInfos';
 
 export type ModelsExplorerProps = {
   models: Model[];
@@ -113,7 +114,7 @@ function ModelsExplorer({
                       selectedModelId === model.id
                         ? 'text-black dark:text-white'
                         : 'text-neutral-400 dark:text-neutral-400'
-                    } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
+                    } rounded-md p-2 transition-colors duration-200 hover:bg-neutral-500/10`}
                   >
                     <ContextMenu>
                       <ContextMenuTrigger>
@@ -125,14 +126,15 @@ function ModelsExplorer({
                             e.preventDefault();
                             handleSelectModel(model.id);
                           }}
-                          className="flex cursor-pointer flex-row items-center"
+                          className="flex w-full cursor-pointer flex-row items-center"
                           tabIndex={0}
                         >
                           {!model.editable && (
-                            <div>
-                              <div className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1">
-                                <span>{model.title || model.name}</span>
+                            <div className="flex w-full grow flex-row items-center justify-between overflow-hidden  px-3 py-1">
+                              <div className="flex-1 text-ellipsis break-all">
+                                {model.title || model.name}
                               </div>
+                              <ModelInfos model={model} displayName={false} stateAsIcon />
                             </div>
                           )}
                           {model.editable && (

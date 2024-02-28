@@ -36,6 +36,7 @@ import useParameters, { ParametersCallback } from '@/hooks/useParameters';
 import Parameter from '../common/Parameter';
 import { Button } from '../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../ui/table';
+import ModelInfos from '../common/ModelInfos';
 /* import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,14 +74,15 @@ function ModelView({
         <div className="flex-1 overflow-hidden">
           <div className="flex flex-col items-center text-xs">
             <div className="justify-left flex w-full w-full flex-row items-center justify-between gap-1 bg-neutral-50 p-3 text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
-              <div className="mx-3 flex h-7 flex-row items-center px-2">
+              <div className="mx-3 flex flex h-7 grow flex-row items-center px-2">
                 <span className="gap-1 py-1 capitalize text-neutral-700 dark:text-neutral-500">
                   {`${model.creator || getEntityName(model.author)}`}
                 </span>
                 <span className="pl-2">/</span>
-                <span className="items-center truncate truncate px-2 dark:text-neutral-300">
-                  {model.name}
-                </span>
+                <div className="flex grow items-center gap-2 truncate truncate px-2 dark:text-neutral-300">
+                  <span>{model.name}</span>
+                  <ModelInfos model={model} displayName={false} />
+                </div>
               </div>
               <div className="flex flex-row gap-2">
                 <Button variant="secondary" className="" onClick={() => onChange()}>
@@ -199,8 +201,9 @@ function ModelView({
                       <TableHeader>
                         <TableRow>
                           <TableHead>{t('File')}</TableHead>
-                          <TableHead>{t('Size')}</TableHead>
+                          {/* <TableHead>{t('Size')}</TableHead> */}
                           <TableHead>{t('Description')}</TableHead>
+                          <TableHead>{t('Parameters')}</TableHead>
                           <TableHead>{t('Action')}</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -212,11 +215,14 @@ function ModelView({
                             className="hover:bg-neutral-100 dark:hover:bg-neutral-800"
                           >
                             <TableCell className="truncate">{download.name}</TableCell>
-                            <TableCell className="truncate">
+                            {/* <TableCell className="truncate">
                               <span>{`${(download.size || 0).toFixed(1)}Gb`}</span>
-                            </TableCell>
+                        </TableCell> */}
                             <TableCell className="truncate">
                               <span>{download.recommendations || ''}</span>
+                            </TableCell>
+                            <TableCell className="truncate">
+                              <ModelInfos model={download} displayName={false} />
                             </TableCell>
                             <TableCell aria-label={t('Download')}>
                               <Button

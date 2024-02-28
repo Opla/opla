@@ -240,6 +240,13 @@ export type Provider = BaseNamedRecord & {
   };
 };
 
+export enum ModelState {
+  Pending = 'pending',
+  Downloading = 'downloading',
+  Ok = 'Ok',
+  Error = 'error',
+}
+
 export type Model = BaseNamedRecord & {
   base_model?: string;
   title?: string;
@@ -271,6 +278,7 @@ export type Model = BaseNamedRecord & {
   documentation?: Resource | string;
   paper?: Resource | string;
 
+  state?: ModelState;
   path?: Resource | string; // local path
   fileName?: string; // local file name
   provider?: string; // provider id or name
