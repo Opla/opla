@@ -60,11 +60,11 @@ export enum ContentType {
 export type Content =
   | string
   | {
-      type: ContentType;
-      parts: string[];
-      raw?: string[];
-      metadata?: Metadata;
-    };
+    type: ContentType;
+    parts: string[];
+    raw?: string[];
+    metadata?: Metadata;
+  };
 
 export enum MessageStatus {
   Pending = 'pending',
@@ -85,13 +85,13 @@ export type Asset = BaseIdRecord & {
   state?: AssetState;
 } & (
     | {
-        type: 'link';
-        url: string;
-      }
+      type: 'link';
+      url: string;
+    }
     | {
-        type: 'file';
-        file: string;
-      }
+      type: 'file';
+      file: string;
+    }
   );
 
 export type Message = BaseIdRecord & {
@@ -235,6 +235,9 @@ export type Provider = BaseNamedRecord & {
   key: string;
   models?: Model[];
   errors?: string[];
+  metadata?: {
+    server: ServerConfiguration
+  };
 };
 
 export type Model = BaseNamedRecord & {
@@ -347,10 +350,14 @@ export type Settings = {
   pages?: Record<string, PageSettings>;
 };
 
+export type ServerParameters = {
+  [key: string]: string | number | boolean;
+};
+
 export type ServerConfiguration = {
   name: string;
   binary?: string;
-  parameters: { [key: string]: string | number | boolean };
+  parameters: ServerParameters;
 };
 
 export type ModelsConfiguration = {

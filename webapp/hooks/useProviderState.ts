@@ -15,7 +15,7 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { AppContext } from '@/context';
 import logger from '@/utils/logger';
-import { Provider, ProviderType, ServerConfiguration, ServerStatus } from '@/types';
+import { Provider, ProviderType, ServerStatus } from '@/types';
 import { deepMerge, deepSet } from '@/utils/data';
 import { updateProvider } from '@/utils/data/providers';
 import { ParameterValue } from '@/components/common/Parameter';
@@ -72,7 +72,7 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
     setProviders(newProviders);
     setUpdatedProvider({ id: providerId });
     if (mergedProvider.type === ProviderType.opla) {
-      const server: ServerConfiguration = mergedProvider.metadata?.server as ServerConfiguration;
+      const server = mergedProvider.metadata?.server;
       const parameters = server?.parameters; // deepCopy(provider?.metadata?.parameters);
       logger.info('params', parameters);
       restart(parameters);
@@ -94,7 +94,7 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
         backendContext.server.status === ServerStatus.STOPPED ||
         backendContext.server.status === ServerStatus.ERROR
       ) {
-        const server: any = provider?.metadata?.server;
+        const server = provider?.metadata?.server;
         const parameters = server?.parameters;
         start(parameters);
       }
