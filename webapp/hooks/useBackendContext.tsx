@@ -39,6 +39,7 @@ import Backend, { BackendResult } from '@/utils/backend/Backend';
 import { mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
 import { LlamaCppArgumentsSchema } from '@/utils/providers/llama.cpp/schema';
+// import { toast } from '@/components/ui/Toast';
 
 const initialBackendContext: OplaContext = {
   server: {
@@ -268,17 +269,24 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   const restart = useCallback(
     async (params: ServerParameters | undefined = {}): Promise<BackendResult> => {
       const llmParameters = LlamaCppArgumentsSchema.parse(params);
-      const result = await (backendRef.current?.restart?.(llmParameters) ||
-        defaultContext.restart(params));
-      if (result.status === 'error') {
-        setBackendContext({
-          ...backendContext,
-          server: {
-            ...backendContext?.server,
-            status: ServerStatus.ERROR,
-            message: result.error,
-          },
-        } as OplaContext);
+      let result: BackendResult;
+      try {
+        result = await (backendRef.current?.restart?.(llmParameters) ||
+          defaultContext.restart(params));
+        if (result.status === 'error') {
+          setBackendContext({
+            ...backendContext,
+            server: {
+              ...backendContext?.server,
+              status: ServerStatus.ERROR,
+              message: result.error,
+            },
+          } as OplaContext);
+        }
+      } catch (error: any) {
+        // logger.error('trstart error', error);
+        // toast.error(error.toString());
+        result = { status: 'error', error: error.toString() };
       }
       return result;
     },
@@ -288,17 +296,23 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   const start = useCallback(
     async (params: ServerParameters | undefined = {}): Promise<BackendResult> => {
       const llmParameters = LlamaCppArgumentsSchema.parse(params);
-      const result = await (backendRef.current?.start?.(llmParameters) ||
-        defaultContext.start(params));
-      if (result.status === 'error') {
-        setBackendContext({
-          ...backendContext,
-          server: {
-            ...backendContext?.server,
-            status: ServerStatus.ERROR,
-            message: result.error,
-          },
-        } as OplaContext);
+      let result: BackendResult;
+      try {
+        result = await (backendRef.current?.start?.(llmParameters) || defaultContext.start(params));
+        if (result.status === 'error') {
+          setBackendContext({
+            ...backendContext,
+            server: {
+              ...backendContext?.server,
+              status: ServerStatus.ERROR,
+              message: result.error,
+            },
+          } as OplaContext);
+        }
+      } catch (error: any) {
+        // logger.error('trstart error', error);
+        // toast.error(error.toString());
+        result = { status: 'error', error: error.toString() };
       }
       return result;
     },
