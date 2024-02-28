@@ -100,7 +100,7 @@ export function parsePrompt(options: ParsePromptOptions, validator: TokenValidat
     if (!span) {
       return;
     }
-    let text = span || " ";
+    let text = span || ' ';
     const type = getTokenType(text, parsedPrompt.text.trim().length);
     let token: PromptToken = { type, value: text, index };
     if (type !== PromptTokenType.Text || previousToken?.type === PromptTokenType.Hashtag) {
