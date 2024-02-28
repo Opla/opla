@@ -16,7 +16,7 @@
 
 import { SafeParseReturnType, z } from 'zod';
 import { Conversation, Metadata } from '@/types';
-import { ParsedPrompt } from '../prompt';
+import { ParsedPrompt } from '../parsers';
 
 export const MetadataSchema: z.ZodSchema<Metadata> = z.lazy(() =>
   z.record(z.union([z.string(), z.number(), z.boolean(), MetadataSchema])),

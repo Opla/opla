@@ -28,10 +28,10 @@ import {
   ChevronRight,
   File,
 } from 'lucide-react';
-import { getContent } from '@/utils/data';
+import { getMessageContentHistoryAsString } from '@/utils/data/messages';
 import useHover from '@/hooks/useHover';
 import useMarkdownProcessor from '@/hooks/useMarkdownProcessor';
-import { Message, MessageState } from '@/types';
+import { Message, MessageStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
@@ -107,9 +107,10 @@ function MessageComponent({
   const [current, setCurrent] = useState(0);
   const { author } = message;
 
-  const content = getContent(
+  /* const content = getContent(
     current > 0 && message.contentHistory ? message.contentHistory[current - 1] : message.content,
-  );
+  ); */
+  const content = getMessageContentHistoryAsString(message, current, edit !== undefined);
   const Content = useMarkdownProcessor(content || '');
   const isUser = author.role === 'user';
 
@@ -121,7 +122,8 @@ function MessageComponent({
   };
 
   const handleEdit = () => {
-    setEdit(content);
+    const raw = getMessageContentHistoryAsString(message, current, true);
+    setEdit(raw);
   };
 
   const handleSave = () => {
@@ -143,9 +145,9 @@ function MessageComponent({
     state = DisplayMessageState.Edit;
   } else if (isUser) {
     state = DisplayMessageState.Text;
-  } else if (message.status === MessageState.Pending || content === '...') {
+  } else if (message.status === MessageStatus.Pending || content === '...') {
     state = DisplayMessageState.Pending;
-  } else if (message.status === MessageState.Stream) {
+  } else if (message.status === MessageStatus.Stream) {
     state = DisplayMessageState.Streaming;
   }
 

@@ -23,9 +23,9 @@ import {
   Conversation,
   LlmParameters,
   Message,
-  MessageState,
+  MessageStatus,
   Model,
-  Prompt,
+  PromptTemplate,
   Provider,
   ProviderType,
   Ui,
@@ -34,10 +34,8 @@ import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import {
   createConversation,
-  createMessage,
   getConversation,
   updateConversation,
-  mergeMessages,
   updateOrCreateConversation,
   addAssetsToConversation,
   getConversationAssets,
@@ -59,15 +57,15 @@ import {
   PromptToken,
   PromptTokenState,
   PromptTokenType,
-  compareActions,
-  compareHashtags,
   compareMentions,
   comparePrompts,
   getMentionName,
   parsePrompt,
   toPrompt,
-} from '@/utils/prompt';
+} from '@/utils/parsers';
 import { getConversationTitle } from '@/utils/conversations';
+import validator from '@/utils/parsers/validator';
+import { createMessage, changeMessageContent, mergeMessages } from '@/utils/data/messages';
 import PromptArea from './Prompt';
 import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
@@ -209,77 +207,8 @@ function Thread({
       token: PromptToken,
       parsedPrompt: ParsedPrompt,
       _previousToken: PromptToken | undefined,
-    ): [PromptToken, PromptToken | undefined] => {
-      let state: PromptTokenState = PromptTokenState.Ok;
-      let previousToken: PromptToken | undefined;
-      logger.info(
-        'tokenValidator',
-        token,
-        parsedPrompt,
-        token.value.length + token.index,
-        parsedPrompt.caretPosition,
-      );
-      let { type } = token;
-      const isAtCaret = token.value.length + token.index === parsedPrompt.caretPosition;
-      const isEditing = type !== PromptTokenType.Text && isAtCaret;
-      if (type === PromptTokenType.Mention) {
-        if (isEditing) {
-          state = PromptTokenState.Editing;
-        } else if (!commands.find((m) => compareMentions(m.value, token.value))) {
-          // this model is not available
-          state = PromptTokenState.Error;
-        } else if (parsedPrompt.tokens.find((to) => to.value === token.value && to.type === type)) {
-          // this mention is already present
-          state = PromptTokenState.Duplicate;
-        } else if (parsedPrompt.tokens.find((to) => to.type === PromptTokenType.Mention)) {
-          // only one mention at a time
-          state = PromptTokenState.Disabled;
-        }
-      } else if (type === PromptTokenType.Hashtag) {
-        const command = commands.find((m) => compareHashtags(m.value, token.value));
-        if (isEditing) {
-          state = PromptTokenState.Editing;
-        } else if (!command) {
-          // this hashtag is not available
-          state = PromptTokenState.Error;
-        } else if (parsedPrompt.tokens.find((to) => to.value === token.value && to.type === type)) {
-          // this hashtag is already present
-          state = PromptTokenState.Duplicate;
-        } else if (command.group !== 'parameters-boolean') {
-          // should wait for next token as value
-          state = PromptTokenState.Disabled;
-        }
-      } else if (type === PromptTokenType.Action) {
-        const command = commands.find((m) => compareActions(m.value, token.value));
-        if (isEditing) {
-          state = PromptTokenState.Editing;
-        } else if (!command) {
-          // this command is not available
-          state = PromptTokenState.Error;
-        }
-      } else if (
-        type === PromptTokenType.Text &&
-        _previousToken?.type === PromptTokenType.Hashtag
-      ) {
-        const previousCommand = commands.find((m) =>
-          compareHashtags(m.value, _previousToken.value),
-        );
-        if (previousCommand && previousCommand.group !== 'parameters-boolean') {
-          type = PromptTokenType.ParameterValue;
-          previousToken = { ..._previousToken, state: PromptTokenState.Ok };
-          if (isAtCaret) {
-            state = PromptTokenState.Editing;
-          }
-        }
-      } else if (token.value.trim() === '@' && isEditing) {
-        state = PromptTokenState.Editing;
-        type = PromptTokenType.Mention;
-      } else if (token.value === '#' && isEditing) {
-        state = PromptTokenState.Editing;
-        type = PromptTokenType.Hashtag;
-      }
-      return [{ ...token, type, state }, previousToken];
-    },
+    ): [PromptToken, PromptToken | undefined] =>
+      validator(commands, token, parsedPrompt, _previousToken),
     [commands],
   );
 
@@ -384,7 +313,7 @@ function Thread({
     }
     const index = conversationMessages.findIndex((m) => m.id === message.id);
     const context = buildContext(conversation, conversationMessages, index);
-
+    logger.info('sendMessage context', context, llmParameters, parameters, system);
     try {
       const response = await completion(
         model,
@@ -403,7 +332,7 @@ function Thread({
       onError(error);
       setErrorMessage({ ...errorMessage, [conversation.id]: error });
       returnedMessage.content = t('Oops, something went wrong.');
-      returnedMessage.status = MessageState.Error;
+      returnedMessage.status = MessageStatus.Error;
       if (provider) {
         const { errors = [] } = provider || { errors: [] };
         const len = errors.unshift(error);
@@ -417,7 +346,7 @@ function Thread({
 
       toast.error(String(e));
     }
-    returnedMessage.status = MessageState.Delivered;
+    returnedMessage.status = MessageStatus.Delivered;
 
     await updateMessagesAndConversation(
       [returnedMessage],
@@ -467,9 +396,13 @@ function Thread({
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
     setIsProcessing({ ...isProcessing, [conversationId]: true });
 
-    const userMessage = createMessage({ role: 'user', name: 'you' }, currentPrompt.text);
+    const userMessage = createMessage(
+      { role: 'user', name: 'you' },
+      currentPrompt.text,
+      currentPrompt.raw,
+    );
     let message = createMessage({ role: 'assistant', name: modelName || selectedModel }, '...');
-    message.status = MessageState.Pending;
+    message.status = MessageStatus.Pending;
     userMessage.sibling = message.id;
     message.sibling = userMessage.id;
 
@@ -517,16 +450,12 @@ function Thread({
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
     setIsProcessing({ ...isProcessing, [conversationId]: true });
 
-    let message: Message = { ...previousMessage, status: MessageState.Pending, content: '...' };
-    if (
-      previousMessage.content &&
-      previousMessage.content !== '...' &&
-      previousMessage.status !== 'error'
-    ) {
-      const { contentHistory = [] } = previousMessage;
-      contentHistory.push(previousMessage.content);
-      message.contentHistory = contentHistory;
-    }
+    let message: Message = changeMessageContent(
+      previousMessage,
+      '...',
+      '...',
+      MessageStatus.Pending,
+    );
 
     const { updatedConversationId, updatedConversations, updatedMessages } =
       await updateMessagesAndConversation([message], conversationMessages);
@@ -552,7 +481,7 @@ function Thread({
       if (action === 'Delete') {
         const conversation = getConversation(conversationId, conversations);
         if (conversation) {
-          const updatedMessages = await filterConversationMessages(
+          const updatedMessages = filterConversationMessages(
             conversationId,
             (m) => m.id !== message.id && m.id !== message.sibling,
           );
@@ -594,9 +523,11 @@ function Thread({
 
     const conversation = getConversation(conversationId, conversations);
     if (conversation && message.content) {
-      const { contentHistory = [] } = message;
+      /* const { contentHistory = [] } = message;
       contentHistory.push(message.content);
-      const newMessage = { ...message, content: newContent, contentHistory };
+      const newMessage = { ...message, content: newContent, contentHistory }; */
+      const parsedContent = parsePrompt({ text: newContent }, tokenValidator);
+      const newMessage = changeMessageContent(message, parsedContent.text, parsedContent.raw);
       const conversationMessages = getConversationMessages(conversationId);
       const newMessages = conversationMessages.map((m) => {
         if (m.id === message.id) {
@@ -665,7 +596,7 @@ function Thread({
     }
   };
 
-  const handlePromptSelected = (prompt: Prompt) => {
+  const handlePromptTemplateSelected = (prompt: PromptTemplate) => {
     handleUpdatePrompt(
       parsePrompt({ text: prompt.value, caretStartIndex: 0 }, tokenValidator),
       prompt.name,
@@ -693,7 +624,7 @@ function Thread({
           conversation,
           files,
         );
-        const message = createMessage({ role: 'user', name: 'you' }, undefined, assets);
+        const message = createMessage({ role: 'user', name: 'you' }, undefined, undefined, assets);
         const conversationMessages = getConversationMessages(conversationId);
         const updatedMessages = mergeMessages(conversationMessages, [message]);
         updateConversationMessages(conversationId, updatedMessages);
@@ -760,7 +691,7 @@ function Thread({
             buttonLabel={disabled ? t('Start a conversation') : undefined}
             icon={<Opla className="h-10 w-10 animate-pulse" />}
           />
-          <PromptsGrid onPromptSelected={handlePromptSelected} disabled={disabled} />
+          <PromptsGrid onPromptSelected={handlePromptTemplateSelected} disabled={disabled} />
         </div>
       ) : (
         (prompt || (messages && messages[0]?.conversationId === conversationId)) && (

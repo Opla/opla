@@ -16,9 +16,9 @@
 // https://github.com/mxkaske/mxkaske.dev/blob/main/components/craft/fancy-area/write.tsx
 
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { isCommand, ParsedPrompt, parsePrompt, TokenValidator } from '@/utils/prompt';
+import { isCommand, ParsedPrompt, parsePrompt, TokenValidator } from '@/utils/parsers';
+import { PromptCommand } from '@/utils/parsers/promptCommand';
 import { getCaretCoordinates, getCurrentWord } from '@/utils/caretposition';
-import { Ui } from '@/types';
 import { cn } from '@/lib/utils';
 import logger from '@/utils/logger';
 import useTranslation from '@/hooks/useTranslation';
@@ -30,7 +30,7 @@ type PromptCommandProps = {
   value?: ParsedPrompt;
   placeholder?: string;
   notFound?: string;
-  commands: Ui.MenuItem[];
+  commands: PromptCommand[];
   onChange?: (parsedPrompt: ParsedPrompt) => void;
   onKeyDown: (event: KeyboardEvent) => void;
   className?: string;
@@ -39,7 +39,7 @@ type PromptCommandProps = {
   tokenValidate: TokenValidator;
 };
 
-function PromptCommand({
+function PromptCommandInput({
   value,
   placeholder,
   notFound = 'No command found.',
@@ -256,4 +256,4 @@ function PromptCommand({
   );
 }
 
-export default PromptCommand;
+export default PromptCommandInput;

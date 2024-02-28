@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { v4 as uuid } from 'uuid';
-import { BaseIdRecord, BaseNamedRecord, Entity, Resource, Content } from '@/types';
+import { BaseIdRecord, BaseNamedRecord, Entity, Resource } from '@/types';
 
 const createBaseRecord = <T>() => {
   const item: BaseIdRecord = {
@@ -145,9 +145,6 @@ const getEntityName = (entity: string | Entity | undefined) =>
 const getResourceUrl = (resource: string | Resource | undefined) =>
   ((resource as Resource)?.url || resource || '') as string;
 
-const getContent = (content: string | Content | undefined) =>
-  ((content as Content)?.parts?.join('\n') || content || '') as string;
-
 export {
   createBaseRecord,
   createBaseNamedRecord,
@@ -158,5 +155,4 @@ export {
   deepSet,
   getEntityName,
   getResourceUrl,
-  getContent,
 };
