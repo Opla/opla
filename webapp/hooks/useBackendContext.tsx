@@ -288,7 +288,8 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   const start = useCallback(
     async (params: ServerParameters | undefined = {}): Promise<BackendResult> => {
       const llmParameters = LlamaCppArgumentsSchema.parse(params);
-      const result = await (backendRef.current?.start?.(llmParameters) || defaultContext.start(params));
+      const result = await (backendRef.current?.start?.(llmParameters) ||
+        defaultContext.start(params));
       if (result.status === 'error') {
         setBackendContext({
           ...backendContext,
