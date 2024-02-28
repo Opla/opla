@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { getCurrentWord } from './caretposition';
+// import logger from './logger';
 
 export enum PromptTokenType {
   Text = 'text',
@@ -96,20 +97,20 @@ export function parsePrompt(options: ParsePromptOptions, validator: TokenValidat
   const parsedPrompt = { tokens, caretPosition, raw: value, text: '', currentTokenIndex: 0 };
   let previousToken: PromptToken | undefined;
   spans.forEach((span) => {
-    if (!span || span === '') {
+    if (!span) {
       return;
     }
-    let text = span;
-    const type = getTokenType(span, parsedPrompt.text.trim().length);
-    let token: PromptToken = { type, value: span, index };
+    let text = span || ' ';
+    const type = getTokenType(text, parsedPrompt.text.trim().length);
+    let token: PromptToken = { type, value: text, index };
     if (type !== PromptTokenType.Text || previousToken?.type === PromptTokenType.Hashtag) {
       [token, previousToken] = validator(token, parsedPrompt, previousToken);
       if (previousToken) {
-        const space = span.indexOf(' ', span.length === 1 ? 0 : 1);
+        const space = text.indexOf(' ', text.length === 1 ? 0 : 1);
         if (space > 0) {
           tokens[tokens.length - 1] = previousToken;
-          token.value = span.substring(0, space);
-          text = span.substring(space);
+          token.value = text.substring(0, space);
+          text = text.substring(space);
           token.state = PromptTokenState.Ok;
           tokens.push(token);
           token = { type, value: text, index: index + space };
