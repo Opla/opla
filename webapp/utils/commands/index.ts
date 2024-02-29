@@ -23,7 +23,15 @@ const actionsItems: Command[] = [
     type: CommandType.Action,
     validate: () => true,
   },
+  {
+    value: '/imagine',
+    label: 'Imagine',
+    group: 'actions',
+    type: CommandType.Action,
+    validate: () => true,
+  },
 ];
+
 const parameterItems: Command[] = [
   {
     value: '#provider_key',

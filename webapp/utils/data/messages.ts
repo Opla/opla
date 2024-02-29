@@ -35,7 +35,7 @@ export const createTextContent = (
 export const createMessage = (
   author: Author,
   content: string | string[] | undefined,
-  rawContent?: string,
+  rawContent = content,
   assets?: Asset[],
 ): Message => {
   const message: Message = {
