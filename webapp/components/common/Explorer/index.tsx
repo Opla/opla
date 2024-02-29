@@ -15,6 +15,7 @@
 import useTranslation from '@/hooks/useTranslation';
 import { Separator } from '@/components/ui/separator';
 import ExplorerList from './ExplorerList';
+import ExplorerGroup from './ExplorerGroup';
 
 export type ExplorerProps = {
   icon?: React.ReactNode;
@@ -43,4 +44,4 @@ export default function Explorer({ icon, title = '', children, toolbar }: Explor
   );
 }
 
-export { ExplorerList };
+export { ExplorerList, ExplorerGroup };

@@ -39,7 +39,6 @@ export default function EditableItem({
     if (value !== title) {
       onChange?.(value, id);
     }
-    // setChangedValue(undefined);
   };
 
   useDebounceFunc<string>(onDebouncedChange, changedValue, 500);

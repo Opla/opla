@@ -15,25 +15,34 @@
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
 import ContextMenuList from '@/components/ui/ContextMenu/ContextMenuList';
 import { BaseNamedRecord, Ui } from '@/types';
+import EditableItem from '../EditableItem';
 
 export type ExplorerListProps<T> = {
   selectedId?: string;
   items: T[];
+  editable?: boolean;
+  isEditable?: (item: T) => boolean;
+  getItemTitle?: (item: T) => string;
   renderLeftSide?: (item: T) => React.ReactNode;
   renderItem?: (item: T) => React.ReactNode;
   renderRightSide?: (item: T) => React.ReactNode;
   menu?: (item: T) => Ui.MenuItem[];
   onSelectItem?: (id: string) => void;
+  onChange?: (value: string, id: string) => void;
 };
 
 export default function ExplorerList<T>({
   selectedId,
   items,
+  editable,
+  isEditable,
+  getItemTitle,
   renderLeftSide,
   renderItem,
   renderRightSide,
   menu,
   onSelectItem,
+  onChange,
 }: ExplorerListProps<T>) {
   const itemRendering = (item: BaseNamedRecord) => (
     <span
@@ -48,11 +57,23 @@ export default function ExplorerList<T>({
       tabIndex={0}
     >
       {renderLeftSide?.(item as T)}
-      <span className="grow">{renderItem?.(item as T) ?? item.name}</span>
+      <span className="grow">
+        {renderItem?.(item as T) ?? getItemTitle?.(item as T) ?? item.name}
+      </span>
       {renderRightSide?.(item as T)}
     </span>
   );
 
+  const editableItemRendering = (item: BaseNamedRecord) => (
+    <EditableItem
+      id={item.id}
+      title={getItemTitle?.(item as T) ?? item.name}
+      titleElement={<span className="grow">{renderItem?.(item as T) ?? item.name}</span>}
+      editable={isEditable?.(item as T) ?? editable}
+      className="line-clamp-1 h-auto w-full overflow-hidden text-ellipsis break-all"
+      onChange={onChange}
+    />
+  );
   return (
     <div className="flex-1 flex-col overflow-y-auto overflow-x-hidden dark:border-white/20">
       <div className="flex flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
@@ -69,7 +90,9 @@ export default function ExplorerList<T>({
               >
                 {menu ? (
                   <ContextMenu>
-                    <ContextMenuTrigger>{itemRendering(item)}</ContextMenuTrigger>
+                    <ContextMenuTrigger>
+                      {editable ? editableItemRendering(item) : itemRendering(item)}
+                    </ContextMenuTrigger>
                     <ContextMenuList data={item.id} menu={menu(item as T)} />
                   </ContextMenu>
                 ) : (

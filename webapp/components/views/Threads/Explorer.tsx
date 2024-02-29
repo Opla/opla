@@ -45,11 +45,8 @@ import {
 import { getConversationTitle, validateConversations } from '@/utils/conversations';
 import { MenuAction, ViewName } from '@/types/ui';
 import { AppContext } from '@/context';
+import Explorer, { ExplorerList, ExplorerGroup } from '@/components/common/Explorer';
 import { toast } from '../../ui/Toast';
-import EditableItem from '../../common/EditableItem';
-import { ContextMenu, ContextMenuTrigger } from '../../ui/context-menu';
-import ContextMenuList from '../../ui/ContextMenu/ContextMenuList';
-import Opla from '../../icons/Opla';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -62,7 +59,6 @@ import {
 import { Button } from '../../ui/button';
 import { ShortcutBadge } from '../../common/ShortCut';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
-import { Separator } from '../../ui/separator';
 import EmptyView from '../../common/EmptyView';
 
 type ExplorerProps = {
@@ -74,7 +70,7 @@ type ExplorerProps = {
   onSelectMenu: (menu: MenuAction, data: string) => void;
 };
 
-export default function Explorer({
+export default function ThreadsExplorer({
   view,
   selectedThreadId,
   threads,
@@ -202,13 +198,10 @@ export default function Explorer({
   ];
 
   return (
-    <div className="scrollbar-trigger flex h-full bg-neutral-100 dark:bg-neutral-800/70">
-      <nav className="flex h-full w-full flex-col">
-        <div className="flex w-full items-center">
-          <div className="flex grow items-center px-2 py-4">
-            <Opla className="mr-2 h-6 w-6" />
-            <h1 className="text-l font-extrabold">{t('Threads')}</h1>
-          </div>
+    <Explorer
+      title="Threads"
+      toolbar={
+        <>
           {selectedThreadId && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -281,84 +274,49 @@ export default function Explorer({
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
-        <Separator />
-        <div className="flex-1 flex-col space-y-1 overflow-y-auto overflow-x-hidden p-1 dark:border-white/20">
-          <div className="flex h-full grow flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
-            {threads.length === 0 && (
-              <EmptyView
-                title={t('No threads')}
-                description={t("Don't be shy, say hi!")}
-                icon={
-                  <MessageSquareWarning
-                    className="h-12 w-12 text-muted-foreground"
-                    strokeWidth={1.5}
-                  />
-                }
-                className="h-full flex-1 grow"
+        </>
+      }
+    >
+      <div className="flex-1 flex-col space-y-1 overflow-y-auto overflow-x-hidden p-1 dark:border-white/20">
+        <div className="flex h-full grow flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
+          {threads.length === 0 && (
+            <EmptyView
+              title={t('No threads')}
+              description={t("Don't be shy, say hi!")}
+              icon={
+                <MessageSquareWarning
+                  className="h-12 w-12 text-muted-foreground"
+                  strokeWidth={1.5}
+                />
+              }
+              className="h-full flex-1 grow"
+            />
+          )}
+
+          {threads.length > 0 && (
+            <ExplorerGroup title={t(view)}>
+              <ExplorerList<Conversation>
+                selectedId={selectedThreadId}
+                items={threads.sort(
+                  (c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt,
+                )}
+                editable
+                getItemTitle={(c) => `${getConversationTitle(c)}${c.temp ? '...' : ''}`}
+                isEditable={(c) => !c.temp && c.id === selectedThreadId}
+                renderItem={(c) => (
+                  <>
+                    <span>{getConversationTitle(c)}</span>
+                    {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
+                  </>
+                )}
+                onSelectItem={handleSelectThread}
+                onChange={handleChangeConversationName}
+                menu={() => menu}
               />
-            )}
-            {threads.length > 0 && (
-              <div className="group flex flex-col gap-3 break-all rounded-md px-1 py-3">
-                <div className="p1 text-ellipsis break-all capitalize text-muted-foreground">
-                  {t(view)}
-                </div>
-                <ul className="p1 flex flex-1 flex-col">
-                  {threads
-                    .sort((c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt)
-                    .map((conversation) => (
-                      <li
-                        key={conversation.id}
-                        className={`${
-                          conversation.temp || selectedThreadId === conversation.id
-                            ? 'text-black dark:text-white'
-                            : 'text-neutral-400 dark:text-neutral-400'
-                        } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
-                      >
-                        <ContextMenu>
-                          <ContextMenuTrigger>
-                            <div
-                              aria-label="Select a conversation"
-                              role="button"
-                              onKeyDown={() => {}}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                handleSelectThread(conversation.id);
-                              }}
-                              className="flex cursor-pointer flex-row items-center"
-                              tabIndex={0}
-                            >
-                              <EditableItem
-                                id={conversation.id}
-                                title={`${getConversationTitle(conversation)}${conversation.temp ? '...' : ''}`}
-                                titleElement={
-                                  <>
-                                    <span>{getConversationTitle(conversation)}</span>
-                                    {conversation.temp ? (
-                                      <span className="ml-2 animate-pulse">...</span>
-                                    ) : (
-                                      ''
-                                    )}
-                                  </>
-                                }
-                                editable={
-                                  !conversation.temp && conversation.id === selectedThreadId
-                                }
-                                className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1"
-                                onChange={handleChangeConversationName}
-                              />
-                            </div>
-                          </ContextMenuTrigger>
-                          <ContextMenuList data={conversation.id} menu={menu} />
-                        </ContextMenu>
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            )}
-          </div>
+            </ExplorerGroup>
+          )}
         </div>
-      </nav>
-    </div>
+      </div>
+    </Explorer>
   );
 }
