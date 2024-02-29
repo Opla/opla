@@ -74,7 +74,6 @@ const validator = (
       }
       blockOtherCommands = command?.validate?.();
     }
-
   } else if (type === PromptTokenType.Text && _previousToken?.type === PromptTokenType.Hashtag) {
     const previousCommand = commandManager.getCommand(_previousToken.value, _previousToken.type);
     if (previousCommand && previousCommand.group !== 'parameters-boolean') {

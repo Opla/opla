@@ -96,7 +96,13 @@ export function parsePrompt(options: ParsePromptOptions, validator: TokenValidat
   const tokens: PromptToken[] = [];
   const spans = value.split(/(?<=^| )([@|#|/][\p{L}0-9._-]+)|(\n)/gu);
   let index = 0;
-  const parsedPrompt: ParsedPrompt = { tokens, caretPosition, raw: value, text: '', currentTokenIndex: 0 };
+  const parsedPrompt: ParsedPrompt = {
+    tokens,
+    caretPosition,
+    raw: value,
+    text: '',
+    currentTokenIndex: 0,
+  };
   let previousToken: PromptToken | undefined;
   let locked: boolean | undefined;
   spans.forEach((span) => {
@@ -104,7 +110,9 @@ export function parsePrompt(options: ParsePromptOptions, validator: TokenValidat
       return;
     }
     let text = span || ' ';
-    const type = locked ? PromptTokenType.Text : getTokenType(text, parsedPrompt.text.trim().length);
+    const type = locked
+      ? PromptTokenType.Text
+      : getTokenType(text, parsedPrompt.text.trim().length);
     let token: PromptToken = { type, value: text, index };
     if (type !== PromptTokenType.Text || previousToken?.type === PromptTokenType.Hashtag) {
       [token, previousToken] = validator(token, parsedPrompt, previousToken);
@@ -135,7 +143,7 @@ export function parsePrompt(options: ParsePromptOptions, validator: TokenValidat
     tokens.push(token);
     index += text.length;
   });
-  if (locked){
+  if (locked) {
     parsedPrompt.locked = true;
   }
   return parsedPrompt;

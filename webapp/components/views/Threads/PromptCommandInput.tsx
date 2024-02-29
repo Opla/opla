@@ -113,7 +113,7 @@ function PromptCommandInput({
       if (textarea && dropdown) {
         const { currentWord, caretStartIndex } = getCurrentWord(textarea);
         valueChange(text, caretStartIndex);
-        const start = text.trim().length -currentWord.length;
+        const start = text.trim().length - currentWord.length;
         if (value && !value.locked && isCommand(currentWord, start)) {
           setCommandValue(currentWord);
           positionDropdown();
