@@ -21,7 +21,7 @@ import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts'
 import logger from '@/utils/logger';
 import { ParsedPrompt, TokenValidator, parsePrompt } from '@/utils/parsers';
 import { getCaretPosition } from '@/utils/caretposition';
-import { Command } from '@/utils/commands/Command';
+import { CommandManager } from '@/utils/commands/types';
 import { Button } from '../../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
 import { ShortcutBadge } from '../../common/ShortCut';
@@ -30,7 +30,7 @@ import PromptCommandInput from './PromptCommandInput';
 export type PromptProps = {
   conversationId: string;
   prompt: ParsedPrompt;
-  commands: Command[];
+  commandManager: CommandManager;
   isLoading: boolean;
   errorMessage: string;
   disabled: boolean;
@@ -43,7 +43,7 @@ export type PromptProps = {
 export default function Prompt({
   conversationId,
   prompt,
-  commands,
+  commandManager,
   errorMessage,
   disabled,
   onUpdatePrompt,
@@ -119,7 +119,7 @@ export default function Prompt({
           </Button>
           <PromptCommandInput
             value={prompt}
-            commands={commands}
+            commandManager={commandManager}
             placeholder={t('Send a message...')}
             className="m-0 max-h-[240px] min-h-[36px] "
             onChange={handleUpdateMessage}

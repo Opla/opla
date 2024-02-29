@@ -22,4 +22,13 @@ export enum CommandType {
 
 export type Command = Ui.MenuItem & {
   type: CommandType;
+  execute?: (value: string) => void;
+  postValidate?: (value?: string) => boolean;
+  validate?: (value?: string) => boolean;
+};
+
+export type CommandManager = {
+  commands: Command[];
+  getCommand: (value: string, type: string) => Command | undefined;
+  filterCommands: (commandValue: string) => Command[];
 };

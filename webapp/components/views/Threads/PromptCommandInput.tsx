@@ -17,7 +17,7 @@
 
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isCommand, ParsedPrompt, parsePrompt, TokenValidator } from '@/utils/parsers';
-import { Command } from '@/utils/commands/Command';
+import { CommandManager } from '@/utils/commands/types';
 import { getCaretCoordinates, getCurrentWord } from '@/utils/caretposition';
 import { cn } from '@/lib/utils';
 import logger from '@/utils/logger';
@@ -30,7 +30,7 @@ import { Button } from '../../ui/button';
 type PromptCommandProps = {
   value?: ParsedPrompt;
   placeholder?: string;
-  commands: Command[];
+  commandManager: CommandManager;
   onChange?: (parsedPrompt: ParsedPrompt) => void;
   onKeyDown: (event: KeyboardEvent) => void;
   className?: string;
@@ -42,7 +42,7 @@ type PromptCommandProps = {
 function PromptCommandInput({
   value,
   placeholder,
-  commands,
+  commandManager,
   className,
   onChange,
   onFocus,
@@ -194,11 +194,8 @@ function PromptCommandInput({
   }, [handleBlur, handleKeyDown, handleMouseDown, handleSelectionChange]);
 
   const filteredCommands = useMemo(
-    () =>
-      commands.filter(
-        (c) => !(!c.value || c.value?.toLowerCase().indexOf(commandValue.toLowerCase()) === -1),
-      ),
-    [commands, commandValue],
+    () => commandManager.filterCommands(commandValue),
+    [commandManager, commandValue],
   );
   const commandType = getCommandType(commandValue);
   const notFound = commandType ? `No ${commandType}s found.` : '';

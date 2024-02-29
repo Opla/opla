@@ -37,6 +37,7 @@ export type PromptToken = {
   value: string;
   index: number;
   state?: PromptTokenState;
+  blockOtherCommands?: boolean;
 };
 
 export type ParsedPrompt = {

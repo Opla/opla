@@ -64,7 +64,7 @@ import {
 import { getConversationTitle } from '@/utils/conversations';
 import validator from '@/utils/parsers/validator';
 import { createMessage, changeMessageContent, mergeMessages } from '@/utils/data/messages';
-import { getCommands } from '@/utils/commands';
+import { getCommandManager } from '@/utils/commands';
 import PromptArea from './Prompt';
 import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
@@ -164,10 +164,10 @@ function Thread({
   const showEmptyChat = !conversationId;
   const selectedModel = selectedConversation?.model || activeModel;
 
-  const { modelItems, commands } = useMemo(() => {
+  const { modelItems, commandManager } = useMemo(() => {
     const items = getModelsAsItems(providers, backendContext, selectedModel);
-    const cmds = getCommands(items);
-    return { modelItems: items, commands: cmds };
+    const manager = getCommandManager(items);
+    return { modelItems: items, commandManager: manager };
   }, [backendContext, providers, selectedModel]);
 
   useEffect(() => {
@@ -191,8 +191,8 @@ function Thread({
       parsedPrompt: ParsedPrompt,
       _previousToken: PromptToken | undefined,
     ): [PromptToken, PromptToken | undefined] =>
-      validator(commands, token, parsedPrompt, _previousToken),
-    [commands],
+      validator(commandManager, token, parsedPrompt, _previousToken),
+    [commandManager],
   );
 
   const currentPrompt = useMemo(
@@ -700,7 +700,7 @@ function Thread({
         <PromptArea
           conversationId={conversationId as string}
           disabled={disabled}
-          commands={commands}
+          commandManager={commandManager}
           prompt={prompt}
           isLoading={conversationId ? isProcessing[conversationId] : false}
           errorMessage={conversationId ? errorMessage[conversationId] : ''}

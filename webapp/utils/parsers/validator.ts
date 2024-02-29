@@ -13,19 +13,11 @@
 // limitations under the License.
 
 import logger from '../logger';
-import {
-  ParsedPrompt,
-  PromptToken,
-  PromptTokenState,
-  PromptTokenType,
-  compareActions,
-  compareHashtags,
-  compareMentions,
-} from '.';
-import { Command } from '../commands/Command';
+import { ParsedPrompt, PromptToken, PromptTokenState, PromptTokenType } from '.';
+import { CommandManager } from '../commands/types';
 
 const validator = (
-  commands: Command[],
+  commandManager: CommandManager,
   token: PromptToken,
   parsedPrompt: ParsedPrompt,
   _previousToken: PromptToken | undefined,
@@ -42,10 +34,12 @@ const validator = (
   let { type } = token;
   const isAtCaret = token.value.length + token.index === parsedPrompt.caretPosition;
   const isEditing = type !== PromptTokenType.Text && isAtCaret;
+  let blockOtherCommands: boolean | undefined;
+  const command = commandManager.getCommand(token.value, type);
   if (type === PromptTokenType.Mention) {
     if (isEditing) {
       state = PromptTokenState.Editing;
-    } else if (!commands.find((m) => compareMentions(m.value, token.value))) {
+    } else if (!command) {
       // this model is not available
       state = PromptTokenState.Error;
     } else if (parsedPrompt.tokens.find((to) => to.value === token.value && to.type === type)) {
@@ -56,7 +50,6 @@ const validator = (
       state = PromptTokenState.Disabled;
     }
   } else if (type === PromptTokenType.Hashtag) {
-    const command = commands.find((m) => compareHashtags(m.value, token.value));
     if (isEditing) {
       state = PromptTokenState.Editing;
     } else if (!command) {
@@ -70,15 +63,16 @@ const validator = (
       state = PromptTokenState.Disabled;
     }
   } else if (type === PromptTokenType.Action) {
-    const command = commands.find((m) => compareActions(m.value, token.value));
     if (isEditing) {
       state = PromptTokenState.Editing;
     } else if (!command) {
       // this command is not available
       state = PromptTokenState.Error;
+    } else {
+      blockOtherCommands = command.validate?.();
     }
   } else if (type === PromptTokenType.Text && _previousToken?.type === PromptTokenType.Hashtag) {
-    const previousCommand = commands.find((m) => compareHashtags(m.value, _previousToken.value));
+    const previousCommand = commandManager.getCommand(_previousToken.value, _previousToken.type);
     if (previousCommand && previousCommand.group !== 'parameters-boolean') {
       type = PromptTokenType.ParameterValue;
       previousToken = { ..._previousToken, state: PromptTokenState.Ok };
@@ -93,7 +87,7 @@ const validator = (
     state = PromptTokenState.Editing;
     type = PromptTokenType.Hashtag;
   }
-  return [{ ...token, type, state }, previousToken];
+  return [{ ...token, type, state, blockOtherCommands }, previousToken];
 };
 
 export default validator;

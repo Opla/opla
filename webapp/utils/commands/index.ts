@@ -13,10 +13,16 @@
 // limitations under the License.
 
 import { getMentionName } from '../parsers';
-import { Command, CommandType } from './Command';
+import { Command, CommandManager, CommandType } from './types';
 
 const actionsItems: Command[] = [
-  { value: '/system', label: 'System', group: 'actions', type: CommandType.Action },
+  {
+    value: '/system',
+    label: 'System',
+    group: 'actions',
+    type: CommandType.Action,
+    validate: () => false,
+  },
 ];
 const parameterItems: Command[] = [
   {
@@ -38,7 +44,30 @@ export const getHashtagCommands = (): Command[] => {
   return parameters;
 };
 
-export const getCommands = (mentionItems: Partial<Command>[]): Command[] => {
+export const getCommandType = (value: string | undefined): CommandType | undefined => {
+  if (value?.startsWith('/')) {
+    return CommandType.Action;
+  }
+  if (value?.startsWith('#')) {
+    return CommandType.Parameter;
+  }
+  if (value?.startsWith('@')) {
+    return CommandType.Mention;
+  }
+  return undefined;
+};
+
+export const compareCommands = (
+  command1: string | undefined,
+  command2: string | string,
+  type?: CommandType,
+): boolean => {
+  const type1 = getCommandType(command1);
+  const type2 = getCommandType(command2);
+  return (!type || (type === type1 && type === type2)) && command1 === command2;
+};
+
+export const getCommandManager = (mentionItems: Partial<Command>[]): CommandManager => {
   const commands = [
     ...mentionItems
       .filter((item) => !item.selected)
@@ -54,18 +83,15 @@ export const getCommands = (mentionItems: Partial<Command>[]): Command[] => {
     ...getHashtagCommands(),
     ...getActionCommands(),
   ];
-  return commands;
-};
-
-export const getCommandType = (value: string): CommandType | undefined => {
-  if (value.startsWith('/')) {
-    return CommandType.Action;
-  }
-  if (value.startsWith('#')) {
-    return CommandType.Parameter;
-  }
-  if (value.startsWith('@')) {
-    return CommandType.Mention;
-  }
-  return undefined;
+  return {
+    commands,
+    getCommand: (value: string, type: string) => {
+      const command = commands.find((m) => compareCommands(m.value, value, type as CommandType));
+      return command;
+    },
+    filterCommands: (commandValue: string): Command[] =>
+      commands.filter(
+        (c) => !(!c.value || c.value?.toLowerCase().indexOf(commandValue.toLowerCase()) === -1),
+      ),
+  };
 };
