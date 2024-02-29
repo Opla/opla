@@ -168,13 +168,13 @@ function PromptCommandInput({
     if (textarea && dropdown) {
       const { currentWord } = getCurrentWord(textarea);
 
-      const start = value?.text.trim().length || 0;
-      logger.info('isCommand selection change', currentWord, commandValue, start);
+      const start = textarea.value.trim().length - currentWord.length;
+
       if (!isCommand(currentWord, start) && commandValue !== '') {
         toggleDropdown(false);
       }
     }
-  }, [commandValue, value?.text]);
+  }, [commandValue]);
 
   useEffect(() => {
     const textarea = textareaRef.current;

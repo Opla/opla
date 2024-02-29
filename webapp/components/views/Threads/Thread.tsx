@@ -340,10 +340,53 @@ function Thread({
     return returnedMessage;
   };
 
+  const clearPrompt = (conversation: Conversation | undefined, newConversations = conversations) => {
+    setChangedPrompt(undefined);
+
+    let updatedConversations = newConversations;
+    if (conversation) {
+      updatedConversations = updateConversation({ ...conversation, currentPrompt: undefined, temp: false }, newConversations);
+      updateConversations(updatedConversations);
+    }
+    return updatedConversations;
+  }
+
   const handleSendMessage = async () => {
     if (conversationId === undefined) {
       return;
     }
+    const action = currentPrompt.tokens.find((to) => to.type === PromptTokenType.Action);
+
+
+    if (action) {
+      let updatedConversation = selectedConversation;
+      let updatedConversations = conversations;
+      const command = commandManager.getCommand(action.value, action.type);
+      // logger.info('command action', command, action.value, action.type, currentPrompt.text);
+      if (command) {
+        command.execute?.(action.value);
+        if (command.label === 'System') {
+          const message = createMessage({ role: 'system', name: 'system' }, currentPrompt.text, currentPrompt.raw);
+          let updatedConversationId: string | undefined;
+          ({
+            updatedConversationId,
+            updatedConversations,
+          } = await updateMessagesAndConversation(
+            [message],
+            getConversationMessages(conversationId),
+          ));
+      
+          updatedConversation = getConversation(
+            updatedConversationId,
+            updatedConversations,
+          ) as Conversation;
+        
+        }
+      }
+      clearPrompt(updatedConversation, updatedConversations);
+      return;
+    };
+  
     const mentions = currentPrompt.tokens.filter((to) => to.type === PromptTokenType.Mention);
     const modelItem =
       mentions.length === 1
@@ -407,12 +450,14 @@ function Thread({
       conversation.name = getConversationTitle(conversation);
     }
 
-    conversation.currentPrompt = undefined;
+    /* conversation.currentPrompt = undefined;
     setChangedPrompt(undefined);
     conversation.temp = false;
 
     updatedConversations = updateConversation(conversation, updatedConversations);
-    updateConversations(updatedConversations);
+    updateConversations(updatedConversations); */
+    updatedConversations = clearPrompt(conversation, updatedConversations);
+  
     logger.info('onSendMessage', updatedMessages, conversation);
     message = await sendMessage(message, updatedMessages, conversation, updatedConversations);
 
@@ -506,9 +551,6 @@ function Thread({
 
     const conversation = getConversation(conversationId, conversations);
     if (conversation && message.content) {
-      /* const { contentHistory = [] } = message;
-      contentHistory.push(message.content);
-      const newMessage = { ...message, content: newContent, contentHistory }; */
       const parsedContent = parsePrompt({ text: newContent }, tokenValidator);
       const newMessage = changeMessageContent(message, parsedContent.text, parsedContent.raw);
       const conversationMessages = getConversationMessages(conversationId);
