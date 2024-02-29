@@ -64,7 +64,7 @@ export type TokenValidator = (
 
 export const isHashtag = (word: string) => word.startsWith('#');
 export const isMention = (word: string) => word.startsWith('@');
-export const isAction = (word: string, start: number) => start === 0 && word.startsWith('/');
+export const isAction = (word: string, start = 0) => start === 0 && word.startsWith('/');
 export const isCommand = (word: string, start: number) =>
   isAction(word, start) || isMention(word) || isHashtag(word);
 

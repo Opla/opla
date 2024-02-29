@@ -22,10 +22,10 @@ import {
   compareHashtags,
   compareMentions,
 } from '.';
-import { PromptCommand } from './promptCommand';
+import { Command } from '../commands/Command';
 
 const validator = (
-  commands: PromptCommand[],
+  commands: Command[],
   token: PromptToken,
   parsedPrompt: ParsedPrompt,
   _previousToken: PromptToken | undefined,

@@ -14,4 +14,12 @@
 
 import { Ui } from '@/types';
 
-export type PromptCommand = Ui.MenuItem;
+export enum CommandType {
+  Action = 'action',
+  Parameter = 'parameter',
+  Mention = 'mention',
+}
+
+export type Command = Ui.MenuItem & {
+  type: CommandType;
+};

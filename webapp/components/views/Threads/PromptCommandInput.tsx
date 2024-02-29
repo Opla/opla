@@ -17,20 +17,20 @@
 
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isCommand, ParsedPrompt, parsePrompt, TokenValidator } from '@/utils/parsers';
-import { PromptCommand } from '@/utils/parsers/promptCommand';
+import { Command } from '@/utils/commands/Command';
 import { getCaretCoordinates, getCurrentWord } from '@/utils/caretposition';
 import { cn } from '@/lib/utils';
 import logger from '@/utils/logger';
 import useTranslation from '@/hooks/useTranslation';
 import { getTokenColor } from '@/utils/ui';
+import { getCommandType } from '@/utils/commands';
 import { Textarea } from '../../ui/textarea';
 import { Button } from '../../ui/button';
 
 type PromptCommandProps = {
   value?: ParsedPrompt;
   placeholder?: string;
-  notFound?: string;
-  commands: PromptCommand[];
+  commands: Command[];
   onChange?: (parsedPrompt: ParsedPrompt) => void;
   onKeyDown: (event: KeyboardEvent) => void;
   className?: string;
@@ -42,7 +42,6 @@ type PromptCommandProps = {
 function PromptCommandInput({
   value,
   placeholder,
-  notFound = 'No command found.',
   commands,
   className,
   onChange,
@@ -201,6 +200,8 @@ function PromptCommandInput({
       ),
     [commands, commandValue],
   );
+  const commandType = getCommandType(commandValue);
+  const notFound = commandType ? `No ${commandType}s found.` : '';
   return (
     <div className="h-full w-full overflow-visible">
       <Textarea
@@ -235,7 +236,11 @@ function PromptCommandInput({
         )}
       >
         <div className="gap-2">
-          {filteredCommands.length === 0 && <div>{t(notFound)}</div>}
+          {filteredCommands.length === 0 && (
+            <div className="rounded-sm px-2 py-1.5 text-left text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+              {t(notFound)}
+            </div>
+          )}
           {filteredCommands.length > 0 &&
             filteredCommands.map((item) => (
               <Button

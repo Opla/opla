@@ -28,7 +28,6 @@ import {
   PromptTemplate,
   Provider,
   ProviderType,
-  Ui,
 } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
@@ -59,13 +58,13 @@ import {
   PromptTokenType,
   compareMentions,
   comparePrompts,
-  getMentionName,
   parsePrompt,
   toPrompt,
 } from '@/utils/parsers';
 import { getConversationTitle } from '@/utils/conversations';
 import validator from '@/utils/parsers/validator';
 import { createMessage, changeMessageContent, mergeMessages } from '@/utils/data/messages';
+import { getCommands } from '@/utils/commands';
 import PromptArea from './Prompt';
 import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
@@ -167,23 +166,7 @@ function Thread({
 
   const { modelItems, commands } = useMemo(() => {
     const items = getModelsAsItems(providers, backendContext, selectedModel);
-    const parameterItems: Ui.MenuItem[] = [
-      { value: '#provider_key', label: 'Provider key', group: 'parameters-string' },
-      { value: '#stream', label: 'Stream', group: 'parameters-boolean' },
-    ];
-    const actionsItems: Ui.MenuItem[] = [{ value: '/system', label: 'System', group: 'actions' }];
-    const cmds = [
-      ...items
-        .filter((item) => !item.selected)
-        .map((item) => ({
-          ...item,
-          value: getMentionName(item.value as string),
-          group: 'models',
-        })),
-      ...parameterItems,
-      ...actionsItems,
-    ];
-
+    const cmds = getCommands(items);
     return { modelItems: items, commands: cmds };
   }, [backendContext, providers, selectedModel]);
 

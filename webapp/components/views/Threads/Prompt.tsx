@@ -21,7 +21,7 @@ import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts'
 import logger from '@/utils/logger';
 import { ParsedPrompt, TokenValidator, parsePrompt } from '@/utils/parsers';
 import { getCaretPosition } from '@/utils/caretposition';
-import { Ui } from '@/types';
+import { Command } from '@/utils/commands/Command';
 import { Button } from '../../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
 import { ShortcutBadge } from '../../common/ShortCut';
@@ -30,7 +30,7 @@ import PromptCommandInput from './PromptCommandInput';
 export type PromptProps = {
   conversationId: string;
   prompt: ParsedPrompt;
-  commands: Ui.MenuItem[];
+  commands: Command[];
   isLoading: boolean;
   errorMessage: string;
   disabled: boolean;
