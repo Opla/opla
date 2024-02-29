@@ -63,7 +63,10 @@ const validator = (
       state = PromptTokenState.Disabled;
     }
   } else if (type === PromptTokenType.Action) {
-    if (parsedPrompt.text.trim().length > 0 || (previousToken && previousToken.type !== PromptTokenType.Text)) {
+    if (
+      parsedPrompt.text.trim().length > 0 ||
+      (previousToken && previousToken.type !== PromptTokenType.Text)
+    ) {
       type = PromptTokenType.Text;
     } else {
       if (isEditing) {

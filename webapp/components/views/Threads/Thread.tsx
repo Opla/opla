@@ -340,23 +340,28 @@ function Thread({
     return returnedMessage;
   };
 
-  const clearPrompt = (conversation: Conversation | undefined, newConversations = conversations) => {
+  const clearPrompt = (
+    conversation: Conversation | undefined,
+    newConversations = conversations,
+  ) => {
     setChangedPrompt(undefined);
 
     let updatedConversations = newConversations;
     if (conversation) {
-      updatedConversations = updateConversation({ ...conversation, currentPrompt: undefined, temp: false }, newConversations);
+      updatedConversations = updateConversation(
+        { ...conversation, currentPrompt: undefined, temp: false },
+        newConversations,
+      );
       updateConversations(updatedConversations);
     }
     return updatedConversations;
-  }
+  };
 
   const handleSendMessage = async () => {
     if (conversationId === undefined) {
       return;
     }
     const action = currentPrompt.tokens.find((to) => to.type === PromptTokenType.Action);
-
 
     if (action) {
       let updatedConversation = selectedConversation;
@@ -366,27 +371,27 @@ function Thread({
       if (command) {
         command.execute?.(action.value);
         if (command.label === 'System') {
-          const message = createMessage({ role: 'system', name: 'system' }, currentPrompt.text, currentPrompt.raw);
+          const message = createMessage(
+            { role: 'system', name: 'system' },
+            currentPrompt.text,
+            currentPrompt.raw,
+          );
           let updatedConversationId: string | undefined;
-          ({
-            updatedConversationId,
-            updatedConversations,
-          } = await updateMessagesAndConversation(
+          ({ updatedConversationId, updatedConversations } = await updateMessagesAndConversation(
             [message],
             getConversationMessages(conversationId),
           ));
-      
+
           updatedConversation = getConversation(
             updatedConversationId,
             updatedConversations,
           ) as Conversation;
-        
         }
       }
       clearPrompt(updatedConversation, updatedConversations);
       return;
-    };
-  
+    }
+
     const mentions = currentPrompt.tokens.filter((to) => to.type === PromptTokenType.Mention);
     const modelItem =
       mentions.length === 1
@@ -457,7 +462,7 @@ function Thread({
     updatedConversations = updateConversation(conversation, updatedConversations);
     updateConversations(updatedConversations); */
     updatedConversations = clearPrompt(conversation, updatedConversations);
-  
+
     logger.info('onSendMessage', updatedMessages, conversation);
     message = await sendMessage(message, updatedMessages, conversation, updatedConversations);
 
