@@ -361,6 +361,14 @@ function Thread({
     if (conversationId === undefined) {
       return;
     }
+
+    const mentions = currentPrompt.tokens.filter((to) => to.type === PromptTokenType.Mention);
+    const modelItem =
+      mentions.length === 1
+        ? modelItems.find((mi) => compareMentions(mi.value, mentions[0].value))
+        : undefined;
+    const modelName = modelItem?.value;
+
     const action = currentPrompt.tokens.find((to) => to.type === PromptTokenType.Action);
 
     if (action) {
@@ -386,18 +394,32 @@ function Thread({
             updatedConversationId,
             updatedConversations,
           ) as Conversation;
+        } else if (command.label === 'Imagine') {
+          const userMessage = createMessage(
+            { role: 'user', name: 'You' },
+            currentPrompt.raw,
+            currentPrompt.raw,
+          );
+          const message = createMessage(
+            { role: 'assistant', name: modelName || selectedModel },
+            t("Soon, I'll be able to imagine wonderfull images..."),
+          );
+          let updatedConversationId: string | undefined;
+          ({ updatedConversationId, updatedConversations } = await updateMessagesAndConversation(
+            [userMessage, message],
+            getConversationMessages(conversationId),
+          ));
+
+          updatedConversation = getConversation(
+            updatedConversationId,
+            updatedConversations,
+          ) as Conversation;
         }
       }
       clearPrompt(updatedConversation, updatedConversations);
       return;
     }
 
-    const mentions = currentPrompt.tokens.filter((to) => to.type === PromptTokenType.Mention);
-    const modelItem =
-      mentions.length === 1
-        ? modelItems.find((mi) => compareMentions(mi.value, mentions[0].value))
-        : undefined;
-    const modelName = modelItem?.value;
     // logger.info('send modelName', modelName, modelItem, mentions);
 
     if (currentPrompt.text.length < 1) {
