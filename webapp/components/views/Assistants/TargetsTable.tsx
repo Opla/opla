@@ -12,10 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Copy, Edit, MoreHorizontal, Trash } from 'lucide-react';
+import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
 import { AssistantTarget } from '@/types';
+import { getAllModels } from '@/utils/data/models';
+import { AppContext } from '@/context';
+import ModelInfos from '@/components/common/ModelInfos';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '../../ui/table';
 import {
   DropdownMenu,
@@ -36,7 +40,19 @@ type TargetsTableProps = {
 function TargetsTable({ targets, onEdit, onDuplicate, onDelete }: TargetsTableProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState<Record<string, boolean>>({});
-
+  const { backendContext } = useBackend();
+  const { providers } = useContext(AppContext);
+  const models = getAllModels(providers, backendContext);
+  const renderModel = (targetModels: string[] | undefined) => {
+    const model = targetModels ? models.find((m) => m.name === targetModels[0]) : undefined;
+    if (!model) return <div>{t('Model not found')}</div>;
+    return (
+      <div className="flex w-full justify-between gap-2 pr-4">
+        {model.title || model.name}
+        <ModelInfos model={model} displayName={false} />
+      </div>
+    );
+  };
   return (
     <Table>
       <TableHeader>
@@ -51,7 +67,7 @@ function TargetsTable({ targets, onEdit, onDuplicate, onDelete }: TargetsTablePr
         {targets.map((target) => (
           <TableRow key={target.id} className="min-h-[28px]">
             <TableCell>{target.name || 'undefined'}</TableCell>
-            <TableCell>{target.models || 'None'}</TableCell>
+            <TableCell>{renderModel(target.models)}</TableCell>
             <TableCell>{target.provider || 'None'}</TableCell>
             <TableCell className="text-right">
               <DropdownMenu
