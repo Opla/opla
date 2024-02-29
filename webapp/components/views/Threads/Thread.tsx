@@ -28,7 +28,6 @@ import {
   PromptTemplate,
   Provider,
   ProviderType,
-  Ui,
 } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
@@ -59,13 +58,13 @@ import {
   PromptTokenType,
   compareMentions,
   comparePrompts,
-  getMentionName,
   parsePrompt,
   toPrompt,
 } from '@/utils/parsers';
 import { getConversationTitle } from '@/utils/conversations';
 import validator from '@/utils/parsers/validator';
 import { createMessage, changeMessageContent, mergeMessages } from '@/utils/data/messages';
+import { getCommandManager } from '@/utils/commands';
 import PromptArea from './Prompt';
 import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
@@ -165,26 +164,10 @@ function Thread({
   const showEmptyChat = !conversationId;
   const selectedModel = selectedConversation?.model || activeModel;
 
-  const { modelItems, commands } = useMemo(() => {
+  const { modelItems, commandManager } = useMemo(() => {
     const items = getModelsAsItems(providers, backendContext, selectedModel);
-    const parameterItems: Ui.MenuItem[] = [
-      { value: '#provider_key', label: 'Provider key', group: 'parameters-string' },
-      { value: '#stream', label: 'Stream', group: 'parameters-boolean' },
-    ];
-    const actionsItems: Ui.MenuItem[] = [{ value: '/system', label: 'System', group: 'actions' }];
-    const cmds = [
-      ...items
-        .filter((item) => !item.selected)
-        .map((item) => ({
-          ...item,
-          value: getMentionName(item.value as string),
-          group: 'models',
-        })),
-      ...parameterItems,
-      ...actionsItems,
-    ];
-
-    return { modelItems: items, commands: cmds };
+    const manager = getCommandManager(items);
+    return { modelItems: items, commandManager: manager };
   }, [backendContext, providers, selectedModel]);
 
   useEffect(() => {
@@ -208,8 +191,8 @@ function Thread({
       parsedPrompt: ParsedPrompt,
       _previousToken: PromptToken | undefined,
     ): [PromptToken, PromptToken | undefined] =>
-      validator(commands, token, parsedPrompt, _previousToken),
-    [commands],
+      validator(commandManager, token, parsedPrompt, _previousToken),
+    [commandManager],
   );
 
   const currentPrompt = useMemo(
@@ -357,10 +340,58 @@ function Thread({
     return returnedMessage;
   };
 
+  const clearPrompt = (
+    conversation: Conversation | undefined,
+    newConversations = conversations,
+  ) => {
+    setChangedPrompt(undefined);
+
+    let updatedConversations = newConversations;
+    if (conversation) {
+      updatedConversations = updateConversation(
+        { ...conversation, currentPrompt: undefined, temp: false },
+        newConversations,
+      );
+      updateConversations(updatedConversations);
+    }
+    return updatedConversations;
+  };
+
   const handleSendMessage = async () => {
     if (conversationId === undefined) {
       return;
     }
+    const action = currentPrompt.tokens.find((to) => to.type === PromptTokenType.Action);
+
+    if (action) {
+      let updatedConversation = selectedConversation;
+      let updatedConversations = conversations;
+      const command = commandManager.getCommand(action.value, action.type);
+      // logger.info('command action', command, action.value, action.type, currentPrompt.text);
+      if (command) {
+        command.execute?.(action.value);
+        if (command.label === 'System') {
+          const message = createMessage(
+            { role: 'system', name: 'system' },
+            currentPrompt.text,
+            currentPrompt.raw,
+          );
+          let updatedConversationId: string | undefined;
+          ({ updatedConversationId, updatedConversations } = await updateMessagesAndConversation(
+            [message],
+            getConversationMessages(conversationId),
+          ));
+
+          updatedConversation = getConversation(
+            updatedConversationId,
+            updatedConversations,
+          ) as Conversation;
+        }
+      }
+      clearPrompt(updatedConversation, updatedConversations);
+      return;
+    }
+
     const mentions = currentPrompt.tokens.filter((to) => to.type === PromptTokenType.Mention);
     const modelItem =
       mentions.length === 1
@@ -424,12 +455,14 @@ function Thread({
       conversation.name = getConversationTitle(conversation);
     }
 
-    conversation.currentPrompt = undefined;
+    /* conversation.currentPrompt = undefined;
     setChangedPrompt(undefined);
     conversation.temp = false;
 
     updatedConversations = updateConversation(conversation, updatedConversations);
-    updateConversations(updatedConversations);
+    updateConversations(updatedConversations); */
+    updatedConversations = clearPrompt(conversation, updatedConversations);
+
     logger.info('onSendMessage', updatedMessages, conversation);
     message = await sendMessage(message, updatedMessages, conversation, updatedConversations);
 
@@ -523,9 +556,6 @@ function Thread({
 
     const conversation = getConversation(conversationId, conversations);
     if (conversation && message.content) {
-      /* const { contentHistory = [] } = message;
-      contentHistory.push(message.content);
-      const newMessage = { ...message, content: newContent, contentHistory }; */
       const parsedContent = parsePrompt({ text: newContent }, tokenValidator);
       const newMessage = changeMessageContent(message, parsedContent.text, parsedContent.raw);
       const conversationMessages = getConversationMessages(conversationId);
@@ -717,7 +747,7 @@ function Thread({
         <PromptArea
           conversationId={conversationId as string}
           disabled={disabled}
-          commands={commands}
+          commandManager={commandManager}
           prompt={prompt}
           isLoading={conversationId ? isProcessing[conversationId] : false}
           errorMessage={conversationId ? errorMessage[conversationId] : ''}

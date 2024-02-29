@@ -17,20 +17,20 @@
 
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isCommand, ParsedPrompt, parsePrompt, TokenValidator } from '@/utils/parsers';
-import { PromptCommand } from '@/utils/parsers/promptCommand';
+import { CommandManager } from '@/utils/commands/types';
 import { getCaretCoordinates, getCurrentWord } from '@/utils/caretposition';
 import { cn } from '@/lib/utils';
 import logger from '@/utils/logger';
 import useTranslation from '@/hooks/useTranslation';
 import { getTokenColor } from '@/utils/ui';
+import { getCommandType } from '@/utils/commands';
 import { Textarea } from '../../ui/textarea';
 import { Button } from '../../ui/button';
 
 type PromptCommandProps = {
   value?: ParsedPrompt;
   placeholder?: string;
-  notFound?: string;
-  commands: PromptCommand[];
+  commandManager: CommandManager;
   onChange?: (parsedPrompt: ParsedPrompt) => void;
   onKeyDown: (event: KeyboardEvent) => void;
   className?: string;
@@ -42,8 +42,7 @@ type PromptCommandProps = {
 function PromptCommandInput({
   value,
   placeholder,
-  notFound = 'No command found.',
-  commands,
+  commandManager,
   className,
   onChange,
   onFocus,
@@ -114,10 +113,8 @@ function PromptCommandInput({
       if (textarea && dropdown) {
         const { currentWord, caretStartIndex } = getCurrentWord(textarea);
         valueChange(text, caretStartIndex);
-        const start = value?.text.trim().length || 0;
-        logger.info('value length', start);
-        if (isCommand(currentWord, start)) {
-          logger.info('isCommand', currentWord, start, commandValue);
+        const start = text.trim().length - currentWord.length;
+        if (value && !value.locked && isCommand(currentWord, start)) {
           setCommandValue(currentWord);
           positionDropdown();
           toggleDropdown();
@@ -126,7 +123,7 @@ function PromptCommandInput({
         }
       }
     },
-    [commandValue, positionDropdown, value?.text, valueChange],
+    [commandValue, positionDropdown, value, valueChange],
   );
 
   const handleCommandSelect = useCallback(
@@ -171,13 +168,13 @@ function PromptCommandInput({
     if (textarea && dropdown) {
       const { currentWord } = getCurrentWord(textarea);
 
-      const start = value?.text.trim().length || 0;
-      logger.info('isCommand selection change', currentWord, commandValue, start);
+      const start = textarea.value.trim().length - currentWord.length;
+
       if (!isCommand(currentWord, start) && commandValue !== '') {
         toggleDropdown(false);
       }
     }
-  }, [commandValue, value?.text]);
+  }, [commandValue]);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -195,12 +192,11 @@ function PromptCommandInput({
   }, [handleBlur, handleKeyDown, handleMouseDown, handleSelectionChange]);
 
   const filteredCommands = useMemo(
-    () =>
-      commands.filter(
-        (c) => !(!c.value || c.value?.toLowerCase().indexOf(commandValue.toLowerCase()) === -1),
-      ),
-    [commands, commandValue],
+    () => commandManager.filterCommands(commandValue),
+    [commandManager, commandValue],
   );
+  const commandType = getCommandType(commandValue);
+  const notFound = commandType ? `No ${commandType}s found.` : '';
   return (
     <div className="h-full w-full overflow-visible">
       <Textarea
@@ -235,7 +231,11 @@ function PromptCommandInput({
         )}
       >
         <div className="gap-2">
-          {filteredCommands.length === 0 && <div>{t(notFound)}</div>}
+          {filteredCommands.length === 0 && (
+            <div className="rounded-sm px-2 py-1.5 text-left text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+              {t(notFound)}
+            </div>
+          )}
           {filteredCommands.length > 0 &&
             filteredCommands.map((item) => (
               <Button

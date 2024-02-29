@@ -14,4 +14,21 @@
 
 import { Ui } from '@/types';
 
-export type PromptCommand = Ui.MenuItem;
+export enum CommandType {
+  Action = 'action',
+  Parameter = 'hashtag',
+  Mention = 'mention',
+}
+
+export type Command = Ui.MenuItem & {
+  type: CommandType;
+  execute?: (value: string) => void;
+  postValidate?: (value?: string) => boolean;
+  validate?: (value?: string) => boolean;
+};
+
+export type CommandManager = {
+  commands: Command[];
+  getCommand: (value: string, type: string) => Command | undefined;
+  filterCommands: (commandValue: string) => Command[];
+};
