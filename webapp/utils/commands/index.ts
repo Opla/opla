@@ -21,7 +21,7 @@ const actionsItems: Command[] = [
     label: 'System',
     group: 'actions',
     type: CommandType.Action,
-    validate: () => false,
+    validate: () => true,
   },
 ];
 const parameterItems: Command[] = [

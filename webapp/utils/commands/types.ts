@@ -16,7 +16,7 @@ import { Ui } from '@/types';
 
 export enum CommandType {
   Action = 'action',
-  Parameter = 'parameter',
+  Parameter = 'hashtag',
   Mention = 'mention',
 }
 

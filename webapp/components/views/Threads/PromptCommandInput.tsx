@@ -113,10 +113,8 @@ function PromptCommandInput({
       if (textarea && dropdown) {
         const { currentWord, caretStartIndex } = getCurrentWord(textarea);
         valueChange(text, caretStartIndex);
-        const start = value?.text.trim().length || 0;
-        logger.info('value length', start);
-        if (isCommand(currentWord, start)) {
-          logger.info('isCommand', currentWord, start, commandValue);
+        const start = text.trim().length -currentWord.length;
+        if (value && !value.locked && isCommand(currentWord, start)) {
           setCommandValue(currentWord);
           positionDropdown();
           toggleDropdown();
@@ -125,7 +123,7 @@ function PromptCommandInput({
         }
       }
     },
-    [commandValue, positionDropdown, value?.text, valueChange],
+    [commandValue, positionDropdown, value, valueChange],
   );
 
   const handleCommandSelect = useCallback(

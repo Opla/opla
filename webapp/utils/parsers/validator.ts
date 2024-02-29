@@ -63,14 +63,18 @@ const validator = (
       state = PromptTokenState.Disabled;
     }
   } else if (type === PromptTokenType.Action) {
-    if (isEditing) {
-      state = PromptTokenState.Editing;
-    } else if (!command) {
-      // this command is not available
-      state = PromptTokenState.Error;
+    if (parsedPrompt.text.trim().length > 0 || previousToken?.type !== PromptTokenType.Text) {
+      type = PromptTokenType.Text;
     } else {
-      blockOtherCommands = command.validate?.();
+      if (isEditing) {
+        state = PromptTokenState.Editing;
+      } else if (!command) {
+        // this command is not available
+        state = PromptTokenState.Error;
+      }
+      blockOtherCommands = command?.validate?.();
     }
+
   } else if (type === PromptTokenType.Text && _previousToken?.type === PromptTokenType.Hashtag) {
     const previousCommand = commandManager.getCommand(_previousToken.value, _previousToken.type);
     if (previousCommand && previousCommand.group !== 'parameters-boolean') {
