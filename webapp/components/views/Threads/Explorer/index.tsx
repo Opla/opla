@@ -46,7 +46,7 @@ import { getConversationTitle, validateConversations } from '@/utils/conversatio
 import { MenuAction, ViewName } from '@/types/ui';
 import { AppContext } from '@/context';
 import Explorer, { ExplorerList, ExplorerGroup } from '@/components/common/Explorer';
-import { toast } from '../../ui/Toast';
+import { toast } from '../../../ui/Toast';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,11 +55,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../../ui/dropdown-menu';
-import { Button } from '../../ui/button';
-import { ShortcutBadge } from '../../common/ShortCut';
-import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
-import EmptyView from '../../common/EmptyView';
+} from '../../../ui/dropdown-menu';
+import { Button } from '../../../ui/button';
+import { ShortcutBadge } from '../../../common/ShortCut';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../../ui/tooltip';
+import EmptyView from '../../../common/EmptyView';
+import AssistantsList from './AssistantsList';
 
 type ExplorerProps = {
   view: Ui.ViewName;
@@ -293,6 +294,7 @@ export default function ThreadsExplorer({
             />
           )}
 
+          <AssistantsList />
           {threads.length > 0 && (
             <ExplorerGroup title={t(view)}>
               <ExplorerList<Conversation>

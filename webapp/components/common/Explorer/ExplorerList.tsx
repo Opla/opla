@@ -15,6 +15,7 @@
 import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
 import ContextMenuList from '@/components/ui/ContextMenu/ContextMenuList';
 import { BaseNamedRecord, Ui } from '@/types';
+import { cn } from '@/lib/utils';
 import EditableItem from '../EditableItem';
 
 export type ExplorerListProps<T> = {
@@ -29,6 +30,7 @@ export type ExplorerListProps<T> = {
   menu?: (item: T) => Ui.MenuItem[];
   onSelectItem?: (id: string) => void;
   onChange?: (value: string, id: string) => void;
+  className?: string;
 };
 
 export default function ExplorerList<T>({
@@ -43,6 +45,7 @@ export default function ExplorerList<T>({
   menu,
   onSelectItem,
   onChange,
+  className,
 }: ExplorerListProps<T>) {
   const itemRendering = (item: BaseNamedRecord) => (
     <span
@@ -75,10 +78,12 @@ export default function ExplorerList<T>({
     />
   );
   return (
-    <div className="flex-1 flex-col overflow-y-auto overflow-x-hidden dark:border-white/20">
-      <div className="flex flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
-        <div className="group relative flex flex-col gap-3 break-all rounded-md px-1 py-3">
-          <ul className="p1 flex flex-1 flex-col">
+    <div
+      className={cn('flex-col overflow-y-auto overflow-x-hidden dark:border-white/20', className)}
+    >
+      <div className="flex flex-col gap-1 pb-2 text-sm dark:text-neutral-100">
+        <div className="group relative flex flex-col break-all rounded-md px-1 py-3">
+          <ul className="flex flex-col">
             {(items as BaseNamedRecord[]).map((item: BaseNamedRecord) => (
               <li
                 key={item.id}

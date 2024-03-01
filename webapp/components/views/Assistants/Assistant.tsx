@@ -49,8 +49,6 @@ export default function AssistantView({ assistantId }: AssistantProps) {
 
   const assistant = getAssistant(assistantId);
 
-  logger.info('Assistant', assistantId);
-
   const handleChangeIcon = async () => {
     logger.info('Change icon');
     const file = await openFileDialog(
