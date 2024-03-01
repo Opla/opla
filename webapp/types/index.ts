@@ -145,14 +145,39 @@ export type ConversationUsage = {
   totalPerSecond?: number;
 };
 
+export enum ConversationConnectorType {
+  Model = 'model',
+  Assistant = 'assistant',
+}
+
+export type ConversationConnector = {
+  disabled?: boolean;
+} & (
+  | {
+      type: ConversationConnectorType.Model;
+      modelId: string;
+      provider?: ProviderType;
+    }
+  | {
+      type: ConversationConnectorType.Assistant;
+      assistantId: string;
+      targetId?: string;
+    }
+);
+
 export type Conversation = BaseNamedRecord & {
   messages: Message[] | undefined;
   pluginIds?: string[];
   preset?: string;
   currentPrompt?: string | ParsedPrompt;
   note?: string;
+
+  // Deprecated replaced by connectors
   model?: string;
   provider?: string;
+
+  connectors?: ConversationConnector[];
+
   importedFrom?: string;
   temp?: boolean;
 
