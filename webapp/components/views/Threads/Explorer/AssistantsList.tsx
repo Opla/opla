@@ -34,7 +34,7 @@ export default function AssistantsList({ selectedId }: AssistantsListProps) {
     <ExplorerGroup
       title="Assistants"
       toolbar={
-        <Button variant="outline" size="sm" className="text-primary">
+        <Button variant="outline" size="sm">
           <Store className="mr-2 h-4 w-4" strokeWidth={1.5} />
           {t('Explore the store')}
         </Button>
@@ -43,9 +43,6 @@ export default function AssistantsList({ selectedId }: AssistantsListProps) {
       <ExplorerList<Assistant>
         selectedId={selectedId || OplaAssistant.id}
         items={assistants}
-        getItemTitle={(assistant) =>
-          assistant.id === OplaAssistant.id ? t('Use your local AI Models') : assistant.name
-        }
         renderLeftSide={(assistant) =>
           assistant.id === OplaAssistant.id ? (
             <Opla className="h-4 w-4" />
