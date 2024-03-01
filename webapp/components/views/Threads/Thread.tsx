@@ -114,8 +114,7 @@ function Thread({
   const { activeModel: aModel } = backendContext.config.models;
   /* const [tempModelProvider, setTempModelProvider] = useState<[string, ProviderType] | undefined>(
     undefined,
-  ); 
-  */
+  ); */
   const [connector, setConnector] = useState<ConversationConnector | undefined>(undefined);
   const activeModel = getConnectorModelId(connector) || aModel;
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
