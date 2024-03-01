@@ -47,8 +47,21 @@ export default function ExplorerList<T>({
   onChange,
   className,
 }: ExplorerListProps<T>) {
+  const itemClassName =
+    'line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1';
+  const editableItemRendering = (item: BaseNamedRecord) => (
+    <EditableItem
+      id={item.id}
+      title={getItemTitle?.(item as T) ?? item.name}
+      titleElement={<span className="grow">{renderItem?.(item as T) ?? item.name}</span>}
+      editable={isEditable?.(item as T) ?? editable}
+      className={itemClassName}
+      onChange={onChange}
+    />
+  );
+
   const itemRendering = (item: BaseNamedRecord) => (
-    <span
+    <div
       aria-label="Select an item"
       role="button"
       onKeyDown={() => {}}
@@ -56,26 +69,21 @@ export default function ExplorerList<T>({
         e.preventDefault();
         onSelectItem?.(item.id);
       }}
-      className="flex w-full cursor-pointer flex-row items-center gap-2"
+      className="flex w-full cursor-pointer flex-row items-center justify-between gap-2"
       tabIndex={0}
     >
+      <div className="flex grow flex-row items-center gap-2">
       {renderLeftSide?.(item as T)}
-      <span className="grow">
-        {renderItem?.(item as T) ?? getItemTitle?.(item as T) ?? item.name}
-      </span>
+      {editable ? (
+        editableItemRendering(item)
+      ) : (
+        <div className={className}>
+          <span>{renderItem?.(item as T) ?? getItemTitle?.(item as T) ?? item.name}</span>
+        </div>
+      )}
+      </div>
       {renderRightSide?.(item as T)}
-    </span>
-  );
-
-  const editableItemRendering = (item: BaseNamedRecord) => (
-    <EditableItem
-      id={item.id}
-      title={getItemTitle?.(item as T) ?? item.name}
-      titleElement={<span className="grow">{renderItem?.(item as T) ?? item.name}</span>}
-      editable={isEditable?.(item as T) ?? editable}
-      className="line-clamp-1 h-auto w-full overflow-hidden text-ellipsis break-all"
-      onChange={onChange}
-    />
+    </div>
   );
   return (
     <div
@@ -95,9 +103,7 @@ export default function ExplorerList<T>({
               >
                 {menu ? (
                   <ContextMenu>
-                    <ContextMenuTrigger>
-                      {editable ? editableItemRendering(item) : itemRendering(item)}
-                    </ContextMenuTrigger>
+                    <ContextMenuTrigger>{itemRendering(item)}</ContextMenuTrigger>
                     <ContextMenuList data={item.id} menu={menu(item as T)} />
                   </ContextMenu>
                 ) : (

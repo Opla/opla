@@ -15,6 +15,7 @@
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
+import { cn } from '@/lib/utils';
 
 export type EditableItemProps = {
   id: string;
@@ -46,7 +47,7 @@ export default function EditableItem({
     return (
       <Input
         type="text"
-        className="line-clamp-1 h-auto w-full text-ellipsis border-none bg-transparent outline-none"
+        className={cn("border-none bg-transparent", className)}
         value={changedValue || title}
         onChange={(e) => {
           e.preventDefault();

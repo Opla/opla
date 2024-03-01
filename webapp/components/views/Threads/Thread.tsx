@@ -72,6 +72,7 @@ import { getConversationTitle } from '@/utils/conversations';
 import validator from '@/utils/parsers/validator';
 import { createMessage, changeMessageContent, mergeMessages } from '@/utils/data/messages';
 import { getCommandManager } from '@/utils/commands';
+import ContentView from '@/components/common/ContentView';
 import PromptArea from './Prompt';
 import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
@@ -112,9 +113,7 @@ function Thread({
   } = useContext(AppContext);
   const { backendContext, setActiveModel } = useBackend();
   const { activeModel: aModel } = backendContext.config.models;
-  /* const [tempModelProvider, setTempModelProvider] = useState<[string, ProviderType] | undefined>(
-    undefined,
-  ); */
+
   const [connector, setConnector] = useState<ConversationConnector | undefined>(undefined);
   const activeModel = getConnectorModelId(connector) || aModel;
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
@@ -252,7 +251,6 @@ function Thread({
     } else if (model && !activeModel) {
       await setActiveModel(model);
     } else if (model) {
-      // setTempModelProvider([model, provider]);
       setConnector(newConnector);
     }
   };
@@ -437,8 +435,6 @@ function Thread({
       return;
     }
 
-    // logger.info('send modelName', modelName, modelItem, mentions);
-
     if (currentPrompt.text.length < 1) {
       if (modelName) {
         // Change conversation's model if there is only a model mention in the prompt
@@ -494,12 +490,6 @@ function Thread({
       conversation.name = getConversationTitle(conversation);
     }
 
-    /* conversation.currentPrompt = undefined;
-    setChangedPrompt(undefined);
-    conversation.temp = false;
-
-    updatedConversations = updateConversation(conversation, updatedConversations);
-    updateConversations(updatedConversations); */
     updatedConversations = clearPrompt(conversation, updatedConversations);
 
     logger.info('onSendMessage', updatedMessages, conversation);
@@ -709,52 +699,47 @@ function Thread({
 
   const prompt = changedPrompt === undefined ? currentPrompt : changedPrompt;
   return (
-    <div className="flex h-full flex-col dark:bg-neutral-800/30">
-      <div className="grow-0">
-        <div className="justify-left flex w-full flex-row items-center gap-4 bg-neutral-50 p-3 text-xs text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
-          <div className="flex grow flex-row items-center">
-            <ThreadMenu
-              selectedModelName={selectedModel}
-              selectedConversationId={conversationId}
-              modelItems={modelItems}
-              onSelectModel={handleSelectModel}
-              onSelectMenu={onSelectMenu}
-            />
-          </div>
-          <div className="flex-1">
-            <p className="hidden rounded-md border border-neutral-600 px-3 py-1">-</p>
-          </div>
-          <div className="flex flex-1 flex-row justify-end gap-2">
-            <Button
-              aria-label="Toggle thread explorer"
-              variant="ghost"
-              size="sm"
-              className="p-1"
-              onClick={() => onChangeDisplayExplorer(!displayExplorer)}
-            >
-              {displayExplorer ? (
-                <PanelLeftClose strokeWidth={1.0} />
-              ) : (
-                <PanelLeft strokeWidth={1.0} />
-              )}
-            </Button>
-            <Button
-              aria-label="Toggle thread settings"
-              variant="ghost"
-              size="sm"
-              className="p-1"
-              onClick={() => onChangeDisplaySettings(!displaySettings)}
-            >
-              {displaySettings ? (
-                <PanelRightClose strokeWidth={1.0} />
-              ) : (
-                <PanelRight strokeWidth={1.0} />
-              )}
-            </Button>
-          </div>
+    <ContentView
+      header={
+        <ThreadMenu
+          selectedModelName={selectedModel}
+          selectedConversationId={conversationId}
+          modelItems={modelItems}
+          onSelectModel={handleSelectModel}
+          onSelectMenu={onSelectMenu}
+        />
+      }
+      toolbar={
+        <div className="flex flex-1 flex-row justify-end gap-2">
+          <Button
+            aria-label="Toggle thread explorer"
+            variant="ghost"
+            size="sm"
+            className="p-1"
+            onClick={() => onChangeDisplayExplorer(!displayExplorer)}
+          >
+            {displayExplorer ? (
+              <PanelLeftClose strokeWidth={1.0} />
+            ) : (
+              <PanelLeft strokeWidth={1.0} />
+            )}
+          </Button>
+          <Button
+            aria-label="Toggle thread settings"
+            variant="ghost"
+            size="sm"
+            className="p-1"
+            onClick={() => onChangeDisplaySettings(!displaySettings)}
+          >
+            {displaySettings ? (
+              <PanelRightClose strokeWidth={1.0} />
+            ) : (
+              <PanelRight strokeWidth={1.0} />
+            )}
+          </Button>
         </div>
-      </div>
-
+      }
+    >
       {showEmptyChat ? (
         <div className="flex grow flex-col pb-10">
           <EmptyView
@@ -800,7 +785,7 @@ function Thread({
           tokenValidate={tokenValidator}
         />
       )}
-    </div>
+    </ContentView>
   );
 }
 
