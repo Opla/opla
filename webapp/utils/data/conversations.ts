@@ -33,8 +33,8 @@ export const addAssetsToConversation = (
   const conversationAssets = getConversationAssets(conversation);
   const updatedAssets = Array.isArray(assetsAsFile)
     ? assetsAsFile.filter(
-      (a) => !conversationAssets.find((asset) => asset.type === 'file' && asset.file === a),
-    )
+        (a) => !conversationAssets.find((asset) => asset.type === 'file' && asset.file === a),
+      )
     : [assetsAsFile];
   const assets = updatedAssets.map<Asset>((a) => ({
     ...createBaseRecord<Asset>(),
