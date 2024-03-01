@@ -26,22 +26,21 @@
 // limitations under the License.
 
 export type ToolbarProps = {
-  title: string | React.ReactNode;
+  header: string | React.ReactNode;
   toolbar?: React.ReactNode;
 };
 
-export default function Header({ title, toolbar }: ToolbarProps) {
+export default function Header({ header, toolbar }: ToolbarProps) {
   return (
-    <div className="flex flex-col items-center text-sm">
-      <div className="flex w-full flex-row items-center justify-between gap-1 bg-neutral-50 p-2 text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
-        <div className="flex flex-row items-center  px-2">
-          {typeof title === 'string' && (
-            <span className="truncate px-2 dark:text-neutral-300">{title}</span>
-          )}
-          {typeof title !== 'string' && title}
-        </div>
-        <div className="flex flex-grow flex-row-reverse items-center gap-4">{toolbar}</div>
+    <div className="flex w-full flex-row items-center justify-between gap-1 bg-neutral-50 p-2 text-sm text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
+      <div className="grow flex-row items-center px-2">
+        {typeof header === 'string' && (
+          <span className="truncate px-2 dark:text-neutral-300">{header}</span>
+        )}
+        {typeof header !== 'string' && header}
       </div>
+      <div className="flex-1" />
+      <div className="flex-0 flex-row-reverse items-center gap-4">{toolbar}</div>
     </div>
   );
 }

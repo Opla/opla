@@ -307,7 +307,7 @@ export default function ThreadsExplorer({
                 isEditable={(c) => !c.temp && c.id === selectedThreadId}
                 renderItem={(c) => (
                   <>
-                    <span>{getConversationTitle(c)}</span>
+                    <span>{getConversationTitle(c).replaceAll(' ', '\u00a0')}</span>
                     {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
                   </>
                 )}

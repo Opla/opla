@@ -21,7 +21,7 @@ import { openFileDialog } from '@/utils/backend/tauri';
 import { ModalData, ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { AssistantTarget } from '@/types';
-import RecordView from '../../common/RecordView';
+import ContentView from '../../common/ContentView';
 import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
 import Parameter, { ParameterValue } from '../../common/Parameter';
@@ -116,8 +116,8 @@ export default function AssistantView({ assistantId }: AssistantProps) {
 
   return (
     <Tabs defaultValue="settings" className="h-full">
-      <RecordView
-        title={
+      <ContentView
+        header={
           assistant ? (
             <div className="flex flex-row items-center gap-4">
               <TabsList className="gap-4">
@@ -253,7 +253,7 @@ export default function AssistantView({ assistantId }: AssistantProps) {
             </TabsContent>
           </>
         )}
-      </RecordView>
+      </ContentView>
     </Tabs>
   );
 }

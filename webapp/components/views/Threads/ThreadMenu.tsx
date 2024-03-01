@@ -136,7 +136,7 @@ export default function ThreadMenu({
   return (
     <div className="flex w-full flex-col items-start justify-between rounded-md border px-4 py-0 sm:flex-row sm:items-center">
       {modelItems.length > 0 && (
-        <div className="flex w-full items-center justify-between text-sm font-medium leading-none">
+        <div className="flex grow items-center justify-between text-sm font-medium leading-none">
           {selectedItem?.label ? (
             <>
               <div className="grow capitalize text-foreground">

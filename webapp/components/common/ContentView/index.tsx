@@ -15,23 +15,19 @@
 // import useTranslation from '@/hooks/useTranslation';
 import Header from './Header';
 
-export type RecordViewProps = {
-  title: string | React.ReactNode;
+export type ContentViewProps = {
+  header: string | React.ReactNode;
   selectedId?: string;
   children: React.ReactNode;
   toolbar?: React.ReactNode;
 };
 
-export default function RecordView({ title, selectedId, children, toolbar }: RecordViewProps) {
+export default function ContentView({ header, selectedId, children, toolbar }: ContentViewProps) {
   // const { t } = useTranslation();
   return (
-    <div className="flex h-full max-w-full flex-col dark:bg-neutral-800/30">
-      <div className="transition-width relative flex h-full w-full flex-1 flex-col items-stretch overflow-hidden">
-        <div className="flex-1 overflow-hidden">
-          <Header title={title || selectedId || ''} toolbar={toolbar} />
-          {children}
-        </div>
-      </div>
+    <div className="flex h-full flex-col dark:bg-neutral-800/30">
+      <Header header={header || selectedId || ''} toolbar={toolbar} />
+      {children}
     </div>
   );
 }
