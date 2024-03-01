@@ -24,9 +24,10 @@ import { OplaAssistant } from '@/stores/assistants';
 
 type AssistantsListProps = {
   selectedId?: string;
+  onSelect?: (id: string) => void;
 };
 
-export default function AssistantsList({ selectedId }: AssistantsListProps) {
+export default function AssistantsList({ selectedId, onSelect }: AssistantsListProps) {
   const { t } = useTranslation();
   const { getAllAssistants } = useAssistantStore();
   const assistants = getAllAssistants();
@@ -60,6 +61,7 @@ export default function AssistantsList({ selectedId }: AssistantsListProps) {
             </Button>
           )
         }
+        onSelectItem={onSelect}
       />
     </ExplorerGroup>
   );

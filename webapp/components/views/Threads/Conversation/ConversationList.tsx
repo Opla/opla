@@ -16,30 +16,30 @@ import { ArrowDown } from 'lucide-react';
 import useScroll, { KeyedScrollPosition } from '@/hooks/useScroll';
 import { Message } from '@/types';
 import logger from '@/utils/logger';
-import MessageView from './Message';
-import { Button } from '../../ui/button';
+import MessageView from '../Message';
+import { Button } from '../../../ui/button';
 
-type ConversationProps = {
+type ConversationListProps = {
   conversationId: string;
   scrollPosition: number;
   messages: Message[];
   onScrollPosition: (props: KeyedScrollPosition) => void;
-  handleResendMessage: (m: Message) => void;
-  handleShouldDeleteMessage: (m: Message) => void;
-  handleShouldDeleteAssets: (m: Message) => void;
-  handleChangeMessageContent: (m: Message, newContent: string, submit: boolean) => void;
+  onResendMessage: (m: Message) => void;
+  onDeleteMessage: (m: Message) => void;
+  onDeleteAssets: (m: Message) => void;
+  onChangeMessageContent: (m: Message, newContent: string, submit: boolean) => void;
 };
 
-function Conversation({
+function ConversationList({
   conversationId,
   scrollPosition,
   messages,
   onScrollPosition,
-  handleResendMessage,
-  handleShouldDeleteMessage,
-  handleShouldDeleteAssets,
-  handleChangeMessageContent,
-}: ConversationProps) {
+  onResendMessage,
+  onDeleteMessage,
+  onDeleteAssets,
+  onChangeMessageContent,
+}: ConversationListProps) {
   const handleUpdatePosition = (props: KeyedScrollPosition) => {
     logger.info('updated newPosition', props);
     onScrollPosition(props);
@@ -57,16 +57,16 @@ function Conversation({
               key={m.id}
               message={m}
               onResendMessage={() => {
-                handleResendMessage(m);
+                onResendMessage(m);
               }}
               onDeleteMessage={() => {
-                handleShouldDeleteMessage(m);
+                onDeleteMessage(m);
               }}
               onDeleteAssets={() => {
-                handleShouldDeleteAssets(m);
+                onDeleteAssets(m);
               }}
               onChangeContent={(newContent, submit) => {
-                handleChangeMessageContent(m, newContent, submit);
+                onChangeMessageContent(m, newContent, submit);
               }}
             />
           ))}
@@ -89,4 +89,4 @@ function Conversation({
   );
 }
 
-export default Conversation;
+export default ConversationList;

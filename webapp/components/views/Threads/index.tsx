@@ -31,6 +31,7 @@ import Explorer from './Explorer';
 import Settings from './Settings';
 import Thread from './Thread';
 import Archive from './Archive';
+import ToolbarTogglePanels from './ToolbarTogglePanels';
 
 const getSelectedPage = (selectedThreadId: string | undefined, view: ViewName) =>
   `${view === ViewName.Recent ? Page.Threads : Page.Archives}${selectedThreadId ? `/${selectedThreadId}` : ''}`;
@@ -218,10 +219,14 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
         {view !== ViewName.Archives && (
           <Thread
             conversationId={selectedThreadId}
-            displayExplorer={!pageSettings.explorerHidden}
-            displaySettings={!pageSettings.settingsHidden}
-            onChangeDisplayExplorer={handleChangeDisplayExplorer}
-            onChangeDisplaySettings={handleChangeDisplaySettings}
+            leftToolbar={
+              <ToolbarTogglePanels
+                displayExplorer={!pageSettings.explorerHidden}
+                displaySettings={!pageSettings.settingsHidden}
+                onChangeDisplayExplorer={handleChangeDisplayExplorer}
+                onChangeDisplaySettings={handleChangeDisplaySettings}
+              />
+            }
             onSelectMenu={handleSelectMenu}
             onError={handleError}
           />

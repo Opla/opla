@@ -27,7 +27,6 @@ import {
   MoreHorizontal,
   SquarePen,
 } from 'lucide-react';
-// import { AppContext } from '@/context';
 import { Conversation, Ui } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
@@ -46,6 +45,7 @@ import { getConversationTitle, validateConversations } from '@/utils/conversatio
 import { MenuAction, ViewName } from '@/types/ui';
 import { AppContext } from '@/context';
 import Explorer, { ExplorerList, ExplorerGroup } from '@/components/common/Explorer';
+import { OplaAssistant } from '@/stores/assistants';
 import { toast } from '../../../ui/Toast';
 import {
   DropdownMenu,
@@ -162,6 +162,15 @@ export default function ThreadsExplorer({
     logger.info(`onSelectThread ${id}`);
     const route = view === ViewName.Archives ? Ui.Page.Archives : Ui.Page.Threads;
     router.push(`${route}/${id}`); // , undefined, { shallow: true });
+  };
+
+  const handleSelectAssistant = (id: string) => {
+    logger.info(`onSelectAssistant ${id}`);
+    if (id === OplaAssistant.id) {
+      router.push(Ui.Page.Assistants);
+      return;
+    }
+    router.push(`${Ui.Page.Assistants}/?a=${id}`);
   };
 
   useShortcuts(ShortcutIds.NEW_CONVERSATION, (event) => {
@@ -294,7 +303,7 @@ export default function ThreadsExplorer({
             />
           )}
 
-          <AssistantsList />
+          <AssistantsList onSelect={handleSelectAssistant} />
           {threads.length > 0 && (
             <ExplorerGroup title={t(view)}>
               <ExplorerList<Conversation>

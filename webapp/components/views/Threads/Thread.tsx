@@ -16,7 +16,6 @@
 
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { PanelLeft, PanelLeftClose, PanelRight, PanelRightClose } from 'lucide-react';
 import { AppContext } from '@/context';
 import {
   Asset,
@@ -27,7 +26,6 @@ import {
   Message,
   MessageStatus,
   Model,
-  PromptTemplate,
   Provider,
   ProviderType,
 } from '@/types';
@@ -37,8 +35,6 @@ import {
   createConversation,
   getConversation,
   updateConversation,
-  updateOrCreateConversation,
-  addAssetsToConversation,
   getConversationAssets,
   getConnectorModelId,
   getConversationModelId,
@@ -55,9 +51,7 @@ import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { ModalData, ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { MenuAction, Page } from '@/types/ui';
-import { KeyedScrollPosition } from '@/hooks/useScroll';
 import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
-import { openFileDialog } from '@/utils/backend/tauri';
 import {
   ParsedPrompt,
   PromptToken,
@@ -70,31 +64,21 @@ import {
 } from '@/utils/parsers';
 import { getConversationTitle } from '@/utils/conversations';
 import validator from '@/utils/parsers/validator';
-import { createMessage, changeMessageContent, mergeMessages } from '@/utils/data/messages';
+import { createMessage, changeMessageContent } from '@/utils/data/messages';
 import { getCommandManager } from '@/utils/commands';
 import ContentView from '@/components/common/ContentView';
 import PromptArea from './Prompt';
-import PromptsGrid from './PromptsGrid';
 import ThreadMenu from './ThreadMenu';
-import { Button } from '../../ui/button';
-import ConversationView from './Conversation';
-import EmptyView from '../../common/EmptyView';
-import Opla from '../../icons/Opla';
+import { ConversationPanel } from './Conversation';
 
 function Thread({
   conversationId: _conversationId,
-  displayExplorer,
-  displaySettings,
-  onChangeDisplayExplorer,
-  onChangeDisplaySettings,
+  leftToolbar,
   onSelectMenu,
   onError,
 }: {
   conversationId?: string;
-  displayExplorer: boolean;
-  displaySettings: boolean;
-  onChangeDisplayExplorer: (displayExplorer: boolean) => void;
-  onChangeDisplaySettings: (displaySettings: boolean) => void;
+  leftToolbar: React.ReactNode;
   onSelectMenu: (menu: MenuAction, data: string) => void;
   onError: (error: string) => void;
 }) {
@@ -107,6 +91,7 @@ function Thread({
     getConversationMessages,
     filterConversationMessages,
     updateConversationMessages,
+    updateMessagesAndConversation,
     setUsage,
     setProviders,
     presets,
@@ -168,7 +153,8 @@ function Thread({
     selectedConversation,
   ]);
 
-  const showEmptyChat = !conversationId;
+  const tempConversationName = messages?.[0]?.content as string;
+
   const selectedModel = getConversationModelId(selectedConversation) || activeModel;
 
   const { modelItems, commandManager } = useMemo(() => {
@@ -207,24 +193,8 @@ function Thread({
     [selectedConversation?.currentPrompt, tokenValidator],
   );
 
-  const updateMessagesAndConversation = async (
-    changedMessages: Message[],
-    conversationMessages: Message[],
-    selectedConversationId = conversationId,
-    selectedConversations = conversations,
-  ) => {
-    const updatedConversations = updateOrCreateConversation(
-      selectedConversationId,
-      selectedConversations,
-      messages?.[0]?.content as string,
-    );
-    const updatedMessages = mergeMessages(conversationMessages, changedMessages);
-    await updateConversations(updatedConversations);
-    await updateConversationMessages(selectedConversationId, updatedMessages);
-
-    const updatedConversationId = selectedConversationId;
-    return { updatedConversationId, updatedConversations, updatedMessages };
-  };
+  const parseAndValidatePrompt = (text: string, caretStartIndex = 0) =>
+    parsePrompt({ text, caretStartIndex }, tokenValidator);
 
   const handleSelectModel = async (
     model?: string,
@@ -349,6 +319,7 @@ function Thread({
     await updateMessagesAndConversation(
       [returnedMessage],
       conversationMessages,
+      conversation.name,
       conversation.id,
       updatedConversations,
     );
@@ -390,7 +361,6 @@ function Thread({
       let updatedConversation = selectedConversation;
       let updatedConversations = conversations;
       const command = commandManager.getCommand(action.value, action.type);
-      // logger.info('command action', command, action.value, action.type, currentPrompt.text);
       if (command) {
         command.execute?.(action.value);
         if (command.label === 'System') {
@@ -403,6 +373,8 @@ function Thread({
           ({ updatedConversationId, updatedConversations } = await updateMessagesAndConversation(
             [message],
             getConversationMessages(conversationId),
+            tempConversationName,
+            conversationId,
           ));
 
           updatedConversation = getConversation(
@@ -423,6 +395,8 @@ function Thread({
           ({ updatedConversationId, updatedConversations } = await updateMessagesAndConversation(
             [userMessage, message],
             getConversationMessages(conversationId),
+            tempConversationName,
+            conversationId,
           ));
 
           updatedConversation = getConversation(
@@ -479,6 +453,8 @@ function Thread({
     } = await updateMessagesAndConversation(
       [userMessage, message],
       getConversationMessages(conversationId),
+      tempConversationName,
+      conversationId,
     );
     let updatedConversations = uc;
 
@@ -520,7 +496,12 @@ function Thread({
     );
 
     const { updatedConversationId, updatedConversations, updatedMessages } =
-      await updateMessagesAndConversation([message], conversationMessages);
+      await updateMessagesAndConversation(
+        [message],
+        conversationMessages,
+        tempConversationName,
+        conversationId,
+      );
 
     const conversation: Conversation = getConversation(
       updatedConversationId,
@@ -585,7 +566,7 @@ function Thread({
 
     const conversation = getConversation(conversationId, conversations);
     if (conversation && message.content) {
-      const parsedContent = parsePrompt({ text: newContent }, tokenValidator);
+      const parsedContent = parseAndValidatePrompt(newContent); // parsePrompt({ text: newContent }, tokenValidator);
       const newMessage = changeMessageContent(message, parsedContent.text, parsedContent.raw);
       const conversationMessages = getConversationMessages(conversationId);
       const newMessages = conversationMessages.map((m) => {
@@ -597,6 +578,7 @@ function Thread({
       const { updatedMessages } = await updateMessagesAndConversation(
         newMessages,
         conversationMessages,
+        tempConversationName,
         conversationId,
         conversations,
       );
@@ -635,10 +617,6 @@ function Thread({
         newConversation.temp = true;
         newConversation.name = conversationName;
         newConversation.currentPrompt = prompt;
-        /* if (tempModelProvider) {
-          [newConversation.model, newConversation.provider] = tempModelProvider;
-          setTempModelProvider(undefined);
-        } */
         if (connector) {
           addConversationConnector(newConversation, connector);
           setConnector(undefined);
@@ -659,44 +637,6 @@ function Thread({
     }
   };
 
-  const handlePromptTemplateSelected = (prompt: PromptTemplate) => {
-    handleUpdatePrompt(
-      parsePrompt({ text: prompt.value, caretStartIndex: 0 }, tokenValidator),
-      prompt.name,
-    );
-  };
-
-  const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {
-    const conversation = getConversation(key, conversations);
-    if (conversation && conversation.scrollPosition !== position.y && position.y !== -1) {
-      logger.info(`handleScrollPosition ${key} ${conversationId}`, position);
-      conversation.scrollPosition = position.y;
-      const updatedConversations = updateConversation(conversation, conversations, true);
-      updateConversations(updatedConversations);
-    }
-  };
-
-  const handleUploadFile = async () => {
-    const conversation = getConversation(conversationId, conversations);
-    if (conversation) {
-      const files = await openFileDialog(false, [
-        { name: 'conversations', extensions: ['pdf', 'txt', 'csv', 'json', 'md'] },
-      ]);
-      if (files) {
-        const { conversation: updatedConversation, assets } = addAssetsToConversation(
-          conversation,
-          files,
-        );
-        const message = createMessage({ role: 'user', name: 'you' }, undefined, undefined, assets);
-        const conversationMessages = getConversationMessages(conversationId);
-        const updatedMessages = mergeMessages(conversationMessages, [message]);
-        updateConversationMessages(conversationId, updatedMessages);
-        const updatedConversations = updateConversation(updatedConversation, conversations, true);
-        updateConversations(updatedConversations);
-      }
-    }
-  };
-
   const prompt = changedPrompt === undefined ? currentPrompt : changedPrompt;
   return (
     <ContentView
@@ -709,68 +649,20 @@ function Thread({
           onSelectMenu={onSelectMenu}
         />
       }
-      toolbar={
-        <div className="flex flex-1 flex-row justify-end gap-2">
-          <Button
-            aria-label="Toggle thread explorer"
-            variant="ghost"
-            size="sm"
-            className="p-1"
-            onClick={() => onChangeDisplayExplorer(!displayExplorer)}
-          >
-            {displayExplorer ? (
-              <PanelLeftClose strokeWidth={1.0} />
-            ) : (
-              <PanelLeft strokeWidth={1.0} />
-            )}
-          </Button>
-          <Button
-            aria-label="Toggle thread settings"
-            variant="ghost"
-            size="sm"
-            className="p-1"
-            onClick={() => onChangeDisplaySettings(!displaySettings)}
-          >
-            {displaySettings ? (
-              <PanelRightClose strokeWidth={1.0} />
-            ) : (
-              <PanelRight strokeWidth={1.0} />
-            )}
-          </Button>
-        </div>
-      }
+      toolbar={leftToolbar}
     >
-      {showEmptyChat ? (
-        <div className="flex grow flex-col pb-10">
-          <EmptyView
-            className="m-2 grow"
-            title={t('Chat with your private local GPT')}
-            description={t('Opla works using your machine processing power.')}
-            buttonLabel={disabled ? t('Start a conversation') : undefined}
-            icon={<Opla className="h-10 w-10 animate-pulse" />}
-          />
-          <PromptsGrid onPromptSelected={handlePromptTemplateSelected} disabled={disabled} />
-        </div>
-      ) : (
-        (prompt || (messages && messages[0]?.conversationId === conversationId)) && (
-          <ConversationView
-            conversationId={selectedConversation?.id as string}
-            scrollPosition={
-              selectedConversation && selectedConversation.scrollPosition !== undefined
-                ? selectedConversation.scrollPosition
-                : -1
-            }
-            messages={messages || []}
-            onScrollPosition={handleScrollPosition}
-            handleResendMessage={handleResendMessage}
-            handleShouldDeleteMessage={handleShouldDeleteMessage}
-            handleShouldDeleteAssets={handleShouldDeleteAssets}
-            handleChangeMessageContent={handleChangeMessageContent}
-          />
-        )
-      )}
-      <div className="flex flex-col items-center text-sm dark:bg-neutral-800/30" />
-
+      <ConversationPanel
+        selectedConversation={selectedConversation}
+        messages={messages}
+        disabled={disabled}
+        isPrompt={!!prompt}
+        onResendMessage={handleResendMessage}
+        onDeleteMessage={handleShouldDeleteMessage}
+        onDeleteAssets={handleShouldDeleteAssets}
+        onChangeMessageContent={handleChangeMessageContent}
+        onSelectPrompt={handleUpdatePrompt}
+        parseAndValidatePrompt={parseAndValidatePrompt}
+      />
       {(prompt || (messages && messages[0]?.conversationId === conversationId)) && (
         <PromptArea
           conversationId={conversationId as string}
@@ -781,7 +673,6 @@ function Thread({
           errorMessage={conversationId ? errorMessage[conversationId] : ''}
           onSendMessage={handleSendMessage}
           onUpdatePrompt={handleChangePrompt}
-          onUploadFile={handleUploadFile}
           tokenValidate={tokenValidator}
         />
       )}
