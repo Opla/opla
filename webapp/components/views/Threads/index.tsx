@@ -198,7 +198,8 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel
-        minSize={10}
+        minSize={14}
+        maxSize={40}
         defaultSize={pageSettings.explorerWidth}
         onResize={handleResizeExplorer}
         className={pageSettings.explorerHidden === true ? 'hidden' : ''}
@@ -233,6 +234,7 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
       <ResizablePanel
         minSize={20}
         defaultSize={20}
+        maxSize={50}
         onResize={handleResizeSettings}
         className={!pageSettings.settingsHidden && view === ViewName.Recent ? '' : 'hidden'}
       >
