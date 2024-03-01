@@ -47,7 +47,7 @@ export default function EditableItem({
     return (
       <Input
         type="text"
-        className={cn("border-none bg-transparent", className)}
+        className={cn('border-none bg-transparent', className)}
         value={changedValue || title}
         onChange={(e) => {
           e.preventDefault();

@@ -73,14 +73,14 @@ export default function ExplorerList<T>({
       tabIndex={0}
     >
       <div className="flex grow flex-row items-center gap-2">
-      {renderLeftSide?.(item as T)}
-      {editable ? (
-        editableItemRendering(item)
-      ) : (
-        <div className={className}>
-          <span>{renderItem?.(item as T) ?? getItemTitle?.(item as T) ?? item.name}</span>
-        </div>
-      )}
+        {renderLeftSide?.(item as T)}
+        {editable ? (
+          editableItemRendering(item)
+        ) : (
+          <div className={className}>
+            <span>{renderItem?.(item as T) ?? getItemTitle?.(item as T) ?? item.name}</span>
+          </div>
+        )}
       </div>
       {renderRightSide?.(item as T)}
     </div>
