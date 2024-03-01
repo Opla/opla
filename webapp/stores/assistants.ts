@@ -20,7 +20,16 @@ interface AssistantProps {
   assistants: Assistant[];
 }
 
+export const OplaAssistant: Assistant = {
+  id: 'opla-assistant',
+  name: 'Use you local AI models',
+  disabled: false,
+  targets: [],
+  createdAt: 0,
+  updatedAt: 0,
+};
 export interface AssistantSlice extends AssistantProps {
+  getAllAssistants: () => Assistant[];
   getAssistant: (id: string | undefined) => Assistant | undefined;
   createAssistant: (name: string, template?: Partial<Assistant>) => Assistant;
   updateAssistant: (newAssistant: Assistant) => void;
@@ -42,6 +51,7 @@ const createAssistantSlice =
   (set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
+    getAllAssistants: () => [OplaAssistant, ...get().assistants],
     getAssistant: (id: string | undefined) => get().assistants.find((a) => a.id === id),
     createAssistant: (name: string, template?: Partial<Assistant>) => {
       const newAssistant = createBaseNamedRecord<Assistant>(name, template);
