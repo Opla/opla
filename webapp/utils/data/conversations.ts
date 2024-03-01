@@ -11,14 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import {
-  Asset,
-  ContextWindowPolicy,
-  Conversation,
-  ConversationConnector,
-  ConversationConnectorType,
-  ProviderType,
-} from '@/types';
+import { Asset, ContextWindowPolicy, Conversation } from '@/types';
 import { createBaseRecord, createBaseNamedRecord, updateRecord } from '.';
 
 export const getConversationAssets = (conversation: Conversation) =>
@@ -116,82 +109,4 @@ export const mergeConversations = (
     }
   });
   return Array.from(conversationMap.values());
-};
-
-export const getConversationConnector = (
-  conversation: Conversation,
-  connectorType: ConversationConnectorType,
-) => {
-  let connector = conversation.connectors?.find((c) => c.type === connectorType);
-  if (!connector) {
-    if (conversation.model && connectorType === ConversationConnectorType.Model) {
-      connector = {
-        type: connectorType,
-        modelId: conversation.model,
-        provider: conversation.provider as ProviderType,
-      };
-    }
-  }
-  return connector;
-};
-
-export const addConnector = (
-  _connectors: ConversationConnector[] | undefined,
-  connector: ConversationConnector,
-): ConversationConnector[] => {
-  const connectors = _connectors || [];
-  const index = connectors?.findIndex((c) => c.type === connector.type) ?? -1;
-  if (index !== -1) {
-    connectors[index] = connector;
-  } else {
-    connectors.push(connector);
-  }
-  return connectors;
-};
-
-export const addConversationConnector = (
-  conversation: Conversation,
-  connector: ConversationConnector,
-): Conversation => {
-  const index = conversation.connectors?.findIndex((c) => c.type === connector.type) ?? -1;
-  const connectors = conversation.connectors || [];
-  if (index !== -1) {
-    connectors[index] = connector;
-  } else {
-    connectors.push(connector);
-  }
-  return {
-    ...conversation,
-    connectors,
-  };
-};
-
-export const getConnectorModelId = (modelConnector: ConversationConnector | undefined) => {
-  if (modelConnector && modelConnector.type === ConversationConnectorType.Model) {
-    return modelConnector.modelId;
-  }
-  return undefined;
-};
-
-export const getConnectorProvider = (modelConnector: ConversationConnector | undefined) => {
-  if (modelConnector && modelConnector.type === ConversationConnectorType.Model) {
-    return modelConnector.provider;
-  }
-  return undefined;
-};
-
-export const getConversationModelId = (conversation: Conversation | undefined) => {
-  if (!conversation) {
-    return undefined;
-  }
-  const modelConnector = getConversationConnector(conversation, ConversationConnectorType.Model);
-  return getConnectorModelId(modelConnector);
-};
-
-export const getConversationProvider = (conversation: Conversation | undefined) => {
-  if (!conversation) {
-    return undefined;
-  }
-  const modelConnector = getConversationConnector(conversation, ConversationConnectorType.Model);
-  return getConnectorProvider(modelConnector);
 };

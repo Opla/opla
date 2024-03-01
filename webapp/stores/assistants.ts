@@ -22,7 +22,7 @@ interface AssistantProps {
 
 export const OplaAssistant: Assistant = {
   id: 'opla-assistant',
-  name: 'Opla',
+  name: 'Use you local AI models',
   disabled: false,
   targets: [],
   createdAt: 0,
