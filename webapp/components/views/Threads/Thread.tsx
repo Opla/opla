@@ -21,6 +21,8 @@ import { AppContext } from '@/context';
 import {
   Asset,
   Conversation,
+  ConversationConnector,
+  ConversationConnectorType,
   LlmParameters,
   Message,
   MessageStatus,
@@ -38,6 +40,11 @@ import {
   updateOrCreateConversation,
   addAssetsToConversation,
   getConversationAssets,
+  getConnectorModelId,
+  getConversationModelId,
+  addConnector,
+  getConversationProvider,
+  addConversationConnector,
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
 import { buildContext, completion, getCompletionParametersDefinition } from '@/utils/providers';
@@ -105,10 +112,11 @@ function Thread({
   } = useContext(AppContext);
   const { backendContext, setActiveModel } = useBackend();
   const { activeModel: aModel } = backendContext.config.models;
-  const [tempModelProvider, setTempModelProvider] = useState<[string, ProviderType] | undefined>(
+  /* const [tempModelProvider, setTempModelProvider] = useState<[string, ProviderType] | undefined>(
     undefined,
-  );
-  const activeModel = tempModelProvider?.[0] || aModel;
+  ); */
+  const [connector, setConnector] = useState<ConversationConnector | undefined>(undefined);
+  const activeModel = getConnectorModelId(connector) || aModel;
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
   const conversationId = _conversationId || tempConversationId;
   const selectedConversation = conversations.find((c) => c.id === conversationId);
@@ -162,7 +170,7 @@ function Thread({
   ]);
 
   const showEmptyChat = !conversationId;
-  const selectedModel = selectedConversation?.model || activeModel;
+  const selectedModel = getConversationModelId(selectedConversation) || activeModel;
 
   const { modelItems, commandManager } = useMemo(() => {
     const items = getModelsAsItems(providers, backendContext, selectedModel);
@@ -228,9 +236,15 @@ function Thread({
       `handleSelectModel ${model} ${provider} activeModel=${typeof activeModel}`,
       selectedConversation,
     );
+    const newConnector: ConversationConnector = {
+      type: ConversationConnectorType.Model,
+      modelId: model as string,
+      provider,
+    };
     if (model && selectedConversation) {
+      const connectors = addConnector(selectedConversation.connectors, newConnector);
       const newConversations = updateConversation(
-        { ...selectedConversation, model, provider, parameters: {}, ...partial },
+        { ...selectedConversation, connectors, parameters: {}, ...partial },
         conversations,
         true,
       );
@@ -238,7 +252,8 @@ function Thread({
     } else if (model && !activeModel) {
       await setActiveModel(model);
     } else if (model) {
-      setTempModelProvider([model, provider]);
+      // setTempModelProvider([model, provider]);
+      setConnector(newConnector);
     }
   };
 
@@ -252,14 +267,16 @@ function Thread({
     let providerName: string | undefined = model?.provider;
     const returnedMessage = { ...message };
     let provider: Provider | undefined;
-    if (conversation.provider && conversation.model) {
-      provider = findProvider(conversation.provider, providers);
-      model = findModel(conversation.model, provider?.models || []);
+    const conversationProvider = getConversationProvider(conversation);
+    const conversationModel = getConversationModelId(conversation);
+    if (conversationProvider && conversationModel) {
+      provider = findProvider(conversationProvider, providers);
+      model = findModel(conversationModel, provider?.models || []);
       if (provider) {
         providerName = provider.name;
       }
     }
-    const modelName = message.author.name || model?.name || conversation.model || activeModel;
+    const modelName = message.author.name || model?.name || conversationModel || activeModel;
     if (!model || model.name !== modelName) {
       model = findModelInAll(modelName, providers, backendContext);
     }
@@ -628,16 +645,20 @@ function Thread({
         newConversation.temp = true;
         newConversation.name = conversationName;
         newConversation.currentPrompt = prompt;
-        if (tempModelProvider) {
+        /* if (tempModelProvider) {
           [newConversation.model, newConversation.provider] = tempModelProvider;
           setTempModelProvider(undefined);
+        } */
+        if (connector) {
+          addConversationConnector(newConversation, connector);
+          setConnector(undefined);
         }
         setTempConversationId(newConversation.id);
       }
       updateConversations(updatedConversations);
       setChangedPrompt(undefined);
     },
-    [tempConversationId, conversationId, conversations, updateConversations, tempModelProvider],
+    [tempConversationId, conversationId, conversations, updateConversations, connector],
   );
 
   useDebounceFunc<ParsedPrompt | undefined>(handleUpdatePrompt, changedPrompt, 500);
