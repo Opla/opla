@@ -20,6 +20,7 @@ export type ToolbarProps = {
   displaySettings: boolean;
   onChangeDisplayExplorer: (value: boolean) => void;
   onChangeDisplaySettings: (value: boolean) => void;
+  disabledSettings?: boolean;
 };
 
 export default function Header({
@@ -27,6 +28,7 @@ export default function Header({
   displaySettings,
   onChangeDisplayExplorer,
   onChangeDisplaySettings,
+  disabledSettings,
 }: ToolbarProps) {
   return (
     <div className="flex flex-1 flex-row justify-end gap-2">
@@ -39,7 +41,7 @@ export default function Header({
       >
         {displayExplorer ? <PanelLeftClose strokeWidth={1.0} /> : <PanelLeft strokeWidth={1.0} />}
       </Button>
-      <Button
+      {(disabledSettings !== false) && <Button
         aria-label="Toggle thread settings"
         variant="ghost"
         size="sm"
@@ -47,7 +49,7 @@ export default function Header({
         onClick={() => onChangeDisplaySettings(!displaySettings)}
       >
         {displaySettings ? <PanelRightClose strokeWidth={1.0} /> : <PanelRight strokeWidth={1.0} />}
-      </Button>
+      </Button>}
     </div>
   );
 }

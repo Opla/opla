@@ -16,6 +16,7 @@
 
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 import { AppContext } from '@/context';
 import {
   Asset,
@@ -68,17 +69,17 @@ import { createMessage, changeMessageContent } from '@/utils/data/messages';
 import { getCommandManager } from '@/utils/commands';
 import ContentView from '@/components/common/ContentView';
 import PromptArea from './Prompt';
-import ThreadMenu from './ThreadMenu';
 import { ConversationPanel } from './Conversation';
+import ThreadMenu from './Menu';
 
 function Thread({
   conversationId: _conversationId,
-  leftToolbar,
+  rightToolbar,
   onSelectMenu,
   onError,
 }: {
   conversationId?: string;
-  leftToolbar: React.ReactNode;
+  rightToolbar: React.ReactNode;
   onSelectMenu: (menu: MenuAction, data: string) => void;
   onError: (error: string) => void;
 }) {
@@ -98,6 +99,8 @@ function Thread({
   } = useContext(AppContext);
   const { backendContext, setActiveModel } = useBackend();
   const { activeModel: aModel } = backendContext.config.models;
+  const searchParams = useSearchParams();
+  const assistantId = searchParams?.get('assistant') || undefined;
 
   const [connector, setConnector] = useState<ConversationConnector | undefined>(undefined);
   const activeModel = getConnectorModelId(connector) || aModel;
@@ -155,13 +158,13 @@ function Thread({
 
   const tempConversationName = messages?.[0]?.content as string;
 
-  const selectedModel = getConversationModelId(selectedConversation) || activeModel;
+  const selectedModelNameOrId = getConversationModelId(selectedConversation) || activeModel;
 
   const { modelItems, commandManager } = useMemo(() => {
-    const items = getModelsAsItems(providers, backendContext, selectedModel);
+    const items = getModelsAsItems(providers, backendContext, selectedModelNameOrId);
     const manager = getCommandManager(items);
     return { modelItems: items, commandManager: manager };
-  }, [backendContext, providers, selectedModel]);
+  }, [backendContext, providers, selectedModelNameOrId]);
 
   useEffect(() => {
     if (_conversationId && tempConversationId) {
@@ -388,7 +391,7 @@ function Thread({
             currentPrompt.raw,
           );
           const message = createMessage(
-            { role: 'assistant', name: modelName || selectedModel },
+            { role: 'assistant', name: modelName || selectedModelNameOrId },
             t("Soon, I'll be able to imagine wonderfull images..."),
           );
           let updatedConversationId: string | undefined;
@@ -441,7 +444,10 @@ function Thread({
       currentPrompt.text,
       currentPrompt.raw,
     );
-    let message = createMessage({ role: 'assistant', name: modelName || selectedModel }, '...');
+    let message = createMessage(
+      { role: 'assistant', name: modelName || selectedModelNameOrId },
+      '...',
+    );
     message.status = MessageStatus.Pending;
     userMessage.sibling = message.id;
     message.sibling = userMessage.id;
@@ -642,14 +648,15 @@ function Thread({
     <ContentView
       header={
         <ThreadMenu
-          selectedModelName={selectedModel}
+          selectedAssistantId={assistantId}
+          selectedModelName={selectedModelNameOrId}
           selectedConversationId={conversationId}
           modelItems={modelItems}
           onSelectModel={handleSelectModel}
           onSelectMenu={onSelectMenu}
         />
       }
-      toolbar={leftToolbar}
+      toolbar={rightToolbar}
     >
       <ConversationPanel
         selectedConversation={selectedConversation}

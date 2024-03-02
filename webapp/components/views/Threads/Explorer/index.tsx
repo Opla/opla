@@ -64,6 +64,7 @@ import AssistantsList from './AssistantsList';
 
 type ExplorerProps = {
   view: Ui.ViewName;
+  selectedAssistantId: string | undefined;
   selectedThreadId?: string;
   threads: Conversation[];
   setThreads: (conversations: Conversation[]) => void;
@@ -73,6 +74,7 @@ type ExplorerProps = {
 
 export default function ThreadsExplorer({
   view,
+  selectedAssistantId,
   selectedThreadId,
   threads,
   setThreads,
@@ -167,10 +169,10 @@ export default function ThreadsExplorer({
   const handleSelectAssistant = (id: string) => {
     logger.info(`onSelectAssistant ${id}`);
     if (id === OplaAssistant.id) {
-      router.push(Ui.Page.Assistants);
+      router.push(Ui.Page.Threads);
       return;
     }
-    router.push(`${Ui.Page.Assistants}/?a=${id}`);
+    router.push(`${Ui.Page.Threads}/?assistant=${id}`);
   };
 
   useShortcuts(ShortcutIds.NEW_CONVERSATION, (event) => {
@@ -303,7 +305,7 @@ export default function ThreadsExplorer({
             />
           )}
 
-          <AssistantsList onSelect={handleSelectAssistant} />
+          <AssistantsList selectedId={selectedAssistantId} onSelect={handleSelectAssistant} />
           {threads.length > 0 && (
             <ExplorerGroup title={t(view)}>
               <ExplorerList<Conversation>
