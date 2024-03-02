@@ -41,15 +41,21 @@ export default function Header({
       >
         {displayExplorer ? <PanelLeftClose strokeWidth={1.0} /> : <PanelLeft strokeWidth={1.0} />}
       </Button>
-      {(disabledSettings !== false) && <Button
-        aria-label="Toggle thread settings"
-        variant="ghost"
-        size="sm"
-        className="p-1"
-        onClick={() => onChangeDisplaySettings(!displaySettings)}
-      >
-        {displaySettings ? <PanelRightClose strokeWidth={1.0} /> : <PanelRight strokeWidth={1.0} />}
-      </Button>}
+      {disabledSettings !== false && (
+        <Button
+          aria-label="Toggle thread settings"
+          variant="ghost"
+          size="sm"
+          className="p-1"
+          onClick={() => onChangeDisplaySettings(!displaySettings)}
+        >
+          {displaySettings ? (
+            <PanelRightClose strokeWidth={1.0} />
+          ) : (
+            <PanelRight strokeWidth={1.0} />
+          )}
+        </Button>
+      )}
     </div>
   );
 }

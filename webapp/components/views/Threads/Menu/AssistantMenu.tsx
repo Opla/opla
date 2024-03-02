@@ -145,7 +145,6 @@ export default function AssistantMenu({
         <div className="flex grow items-center capitalize text-foreground">
           <AssistantIcon icon={assistant?.icon} name={assistant?.name} className="mr-2 h-4 w-4" />
           <span>{assistant?.name ?? t('Assistant not found')}</span>{' '}
-          
         </div>
         <div className="flex-1" />
         <Button asChild onClick={handleEnableProvider}>
