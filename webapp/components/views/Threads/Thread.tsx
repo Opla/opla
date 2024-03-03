@@ -21,13 +21,10 @@ import { AppContext } from '@/context';
 import {
   Asset,
   Conversation,
-  ConversationConnector,
-  ConversationConnectorType,
-  LlmParameters,
+  AIService,
+  AIServiceType,
   Message,
   MessageStatus,
-  Model,
-  Provider,
   ProviderType,
 } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
@@ -37,22 +34,20 @@ import {
   getConversation,
   updateConversation,
   getConversationAssets,
-  getConnectorModelId,
+  getServiceModelId,
   getConversationModelId,
-  addConnector,
-  getConversationProvider,
-  addConversationConnector,
+  addService,
+  addConversationService,
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
-import { buildContext, completion, getCompletionParametersDefinition } from '@/utils/providers';
-import { findModel, findModelInAll, getModelsAsItems } from '@/utils/data/models';
-import { findProvider } from '@/utils/data/providers';
+import { completion } from '@/utils/providers';
+import { getModelsAsItems } from '@/utils/data/models';
+import { getActiveService } from '@/utils/services';
 import { toast } from '@/components/ui/Toast';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { ModalData, ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { MenuAction, Page } from '@/types/ui';
-import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
 import {
   ParsedPrompt,
   PromptToken,
@@ -68,6 +63,7 @@ import validator from '@/utils/parsers/validator';
 import { createMessage, changeMessageContent } from '@/utils/data/messages';
 import { getCommandManager } from '@/utils/commands';
 import ContentView from '@/components/common/ContentView';
+import { useAssistantStore } from '@/stores';
 import PromptArea from './Prompt';
 import { ConversationPanel } from './Conversation';
 import ThreadMenu from './Menu';
@@ -98,12 +94,12 @@ function Thread({
     presets,
   } = useContext(AppContext);
   const { backendContext, setActiveModel } = useBackend();
-  const { activeModel: aModel } = backendContext.config.models;
   const searchParams = useSearchParams();
   const assistantId = searchParams?.get('assistant') || undefined;
-
-  const [connector, setConnector] = useState<ConversationConnector | undefined>(undefined);
-  const activeModel = getConnectorModelId(connector) || aModel;
+  const { getAssistant } = useAssistantStore();
+  const assistant = getAssistant(assistantId);
+  const [service, setService] = useState<AIService | undefined>(undefined);
+  const activeModel = getServiceModelId(service) || backendContext.config.models.activeModel;
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
   const conversationId = _conversationId || tempConversationId;
   const selectedConversation = conversations.find((c) => c.id === conversationId);
@@ -199,24 +195,24 @@ function Thread({
   const parseAndValidatePrompt = (text: string, caretStartIndex = 0) =>
     parsePrompt({ text, caretStartIndex }, tokenValidator);
 
-  const handleSelectModel = async (
+  const handleChangeService = async (
     model?: string,
     provider = ProviderType.opla,
     partial: Partial<Conversation> = {},
   ) => {
     logger.info(
-      `handleSelectModel ${model} ${provider} activeModel=${typeof activeModel}`,
+      `handleChangeService ${model} ${provider} activeModel=${typeof activeModel}`,
       selectedConversation,
     );
-    const newConnector: ConversationConnector = {
-      type: ConversationConnectorType.Model,
+    const newService: AIService = {
+      type: AIServiceType.Model,
       modelId: model as string,
-      provider,
+      providerType: provider,
     };
     if (model && selectedConversation) {
-      const connectors = addConnector(selectedConversation.connectors, newConnector);
+      const services = addService(selectedConversation.services, newService);
       const newConversations = updateConversation(
-        { ...selectedConversation, connectors, parameters: {}, ...partial },
+        { ...selectedConversation, services, parameters: {}, ...partial },
         conversations,
         true,
       );
@@ -224,7 +220,7 @@ function Thread({
     } else if (model && !activeModel) {
       await setActiveModel(model);
     } else if (model) {
-      setConnector(newConnector);
+      setService(newService);
     }
   };
 
@@ -234,66 +230,24 @@ function Thread({
     conversation: Conversation,
     updatedConversations: Conversation[],
   ) => {
-    let model: Model | undefined;
-    let providerName: string | undefined = model?.provider;
     const returnedMessage = { ...message };
-    let provider: Provider | undefined;
-    const conversationProvider = getConversationProvider(conversation);
-    const conversationModel = getConversationModelId(conversation);
-    if (conversationProvider && conversationModel) {
-      provider = findProvider(conversationProvider, providers);
-      model = findModel(conversationModel, provider?.models || []);
-      if (provider) {
-        providerName = provider.name;
-      }
-    }
-    const modelName = message.author.name || model?.name || conversationModel || activeModel;
-    if (!model || model.name !== modelName) {
-      model = findModelInAll(modelName, providers, backendContext);
-    }
-    const name = model?.provider || model?.creator;
-    if (name && name !== providerName) {
-      provider = findProvider(name, providers);
-      providerName = provider?.name;
-    }
-    logger.info(
-      'sendMessage',
-      name,
-      model,
-      provider,
-      modelName,
-      providerName,
+    const activeService = getActiveService(
       conversation,
-      presets,
+      assistant,
+      providers,
+      activeModel,
+      backendContext,
+      message.author.name,
     );
+    logger.info('sendMessage', activeService, conversation, presets);
 
-    const llmParameters: LlmParameters[] = [];
-    const preset = findCompatiblePreset(selectedConversation?.preset, presets, modelName, provider);
-    const { parameters, system } = getCompletePresetProperties(preset, conversation, presets);
-    if (parameters) {
-      const parametersDefinition = getCompletionParametersDefinition(provider);
-      Object.keys(parameters).forEach((key) => {
-        const parameterDef = parametersDefinition[key];
-        if (parameterDef) {
-          const result = parameterDef.z.safeParse(parameters[key]);
-          if (result.success) {
-            llmParameters.push({ key, value: String(result.data) });
-          }
-        }
-      });
-    }
-    const index = conversationMessages.findIndex((m) => m.id === message.id);
-    const context = buildContext(conversation, conversationMessages, index);
-    logger.info('sendMessage context', context, llmParameters, parameters, system);
     try {
       const response = await completion(
-        model,
-        providerName,
-        { providers },
-        context,
-        system,
-        conversationId,
-        llmParameters,
+        activeService,
+        message,
+        conversationMessages,
+        conversation,
+        presets,
       );
       setUsage(response.usage);
       returnedMessage.content = response.content.trim();
@@ -304,6 +258,7 @@ function Thread({
       setErrorMessage({ ...errorMessage, [conversation.id]: error });
       returnedMessage.content = t('Oops, something went wrong.');
       returnedMessage.status = MessageStatus.Error;
+      const { provider } = activeService;
       if (provider) {
         const { errors = [] } = provider || { errors: [] };
         const len = errors.unshift(error);
@@ -416,7 +371,9 @@ function Thread({
       if (modelName) {
         // Change conversation's model if there is only a model mention in the prompt
         // TODO handle parameters and key
-        handleSelectModel(modelName, modelItem.group as ProviderType, { currentPrompt: undefined });
+        handleChangeService(modelName, modelItem.group as ProviderType, {
+          currentPrompt: undefined,
+        });
         setChangedPrompt(undefined);
         return;
       }
@@ -623,16 +580,16 @@ function Thread({
         newConversation.temp = true;
         newConversation.name = conversationName;
         newConversation.currentPrompt = prompt;
-        if (connector) {
-          addConversationConnector(newConversation, connector);
-          setConnector(undefined);
+        if (service) {
+          addConversationService(newConversation, service);
+          setService(undefined);
         }
         setTempConversationId(newConversation.id);
       }
       updateConversations(updatedConversations);
       setChangedPrompt(undefined);
     },
-    [tempConversationId, conversationId, conversations, updateConversations, connector],
+    [tempConversationId, conversationId, conversations, updateConversations, service],
   );
 
   useDebounceFunc<ParsedPrompt | undefined>(handleUpdatePrompt, changedPrompt, 500);
@@ -652,7 +609,7 @@ function Thread({
           selectedModelName={selectedModelNameOrId}
           selectedConversationId={conversationId}
           modelItems={modelItems}
-          onSelectModel={handleSelectModel}
+          onSelectModel={handleChangeService}
           onSelectMenu={onSelectMenu}
         />
       }

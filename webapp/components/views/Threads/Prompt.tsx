@@ -21,7 +21,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
 import { ParsedPrompt, TokenValidator, parsePrompt } from '@/utils/parsers';
-import { getCaretPosition } from '@/utils/caretposition';
+import { getCaretPosition } from '@/utils/ui/caretposition';
 import { CommandManager } from '@/utils/commands/types';
 import {
   getConversation,

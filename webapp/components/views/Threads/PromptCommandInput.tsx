@@ -18,7 +18,7 @@
 import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isCommand, ParsedPrompt, parsePrompt, TokenValidator } from '@/utils/parsers';
 import { CommandManager } from '@/utils/commands/types';
-import { getCaretCoordinates, getCurrentWord } from '@/utils/caretposition';
+import { getCaretCoordinates, getCurrentWord } from '@/utils/ui/caretposition';
 import { cn } from '@/lib/utils';
 import logger from '@/utils/logger';
 import useTranslation from '@/hooks/useTranslation';
@@ -245,7 +245,7 @@ function PromptCommandInput({
                   event.preventDefault();
                   handleCommandSelect(item.value as string);
                 }}
-                className="ellipsis flex flex w-full cursor-pointer select-none flex-row-reverse items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                className="ellipsis flex w-full cursor-pointer select-none flex-row-reverse items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
               >
                 <div className="w-full grow">{item.label}</div>
               </Button>

@@ -15,8 +15,8 @@ import {
   Asset,
   ContextWindowPolicy,
   Conversation,
-  ConversationConnector,
-  ConversationConnectorType,
+  AIService,
+  AIServiceType,
   ProviderType,
 } from '@/types';
 import { createBaseRecord, createBaseNamedRecord, updateRecord } from '.';
@@ -118,64 +118,68 @@ export const mergeConversations = (
   return Array.from(conversationMap.values());
 };
 
-export const getConversationConnector = (
+export const getConversationService = (
   conversation: Conversation,
-  connectorType: ConversationConnectorType,
+  serviceType: AIServiceType,
+  assistantId?: string,
 ) => {
-  let connector = conversation.connectors?.find((c) => c.type === connectorType);
-  if (!connector) {
-    if (conversation.model && connectorType === ConversationConnectorType.Model) {
-      connector = {
-        type: connectorType,
+  let service = conversation.services?.find((c) => c.type === serviceType);
+  if (!service) {
+    if (conversation.model && serviceType === AIServiceType.Model) {
+      service = {
+        type: serviceType,
         modelId: conversation.model,
-        provider: conversation.provider as ProviderType,
+        providerType: conversation.provider as ProviderType,
+      };
+    }
+    if (conversation.model && serviceType === AIServiceType.Assistant && assistantId) {
+      service = {
+        type: serviceType,
+        assistantId,
       };
     }
   }
-  return connector;
+  return service;
 };
 
-export const addConnector = (
-  _connectors: ConversationConnector[] | undefined,
-  connector: ConversationConnector,
-): ConversationConnector[] => {
-  const connectors = _connectors || [];
-  const index = connectors?.findIndex((c) => c.type === connector.type) ?? -1;
+export const addService = (_services: AIService[] | undefined, service: AIService): AIService[] => {
+  const services = _services || [];
+  const index = services?.findIndex((c) => c.type === service.type) ?? -1;
   if (index !== -1) {
-    connectors[index] = connector;
+    services[index] = service;
   } else {
-    connectors.push(connector);
+    services.push(service);
   }
-  return connectors;
+  return services;
 };
 
-export const addConversationConnector = (
+export const addConversationService = (
   conversation: Conversation,
-  connector: ConversationConnector,
+  service: AIService,
 ): Conversation => {
-  const index = conversation.connectors?.findIndex((c) => c.type === connector.type) ?? -1;
-  const connectors = conversation.connectors || [];
+  const index = conversation.services?.findIndex((c) => c.type === service.type) ?? -1;
+  const services = conversation.services || [];
   if (index !== -1) {
-    connectors[index] = connector;
+    services[index] = service;
   } else {
-    connectors.push(connector);
+    services.push(service);
   }
   return {
     ...conversation,
-    connectors,
+    services,
   };
 };
 
-export const getConnectorModelId = (modelConnector: ConversationConnector | undefined) => {
-  if (modelConnector && modelConnector.type === ConversationConnectorType.Model) {
-    return modelConnector.modelId;
+export const getServiceModelId = (modelService: AIService | undefined) => {
+  if (modelService && modelService.type === AIServiceType.Model) {
+    return modelService.modelId;
   }
   return undefined;
 };
 
-export const getConnectorProvider = (modelConnector: ConversationConnector | undefined) => {
-  if (modelConnector && modelConnector.type === ConversationConnectorType.Model) {
-    return modelConnector.provider;
+export const getServiceProvider = (modelService: AIService | undefined) => {
+  if (modelService && modelService.type === AIServiceType.Model) {
+    return modelService.providerType;
   }
   return undefined;
 };
@@ -184,14 +188,14 @@ export const getConversationModelId = (conversation: Conversation | undefined) =
   if (!conversation) {
     return undefined;
   }
-  const modelConnector = getConversationConnector(conversation, ConversationConnectorType.Model);
-  return getConnectorModelId(modelConnector);
+  const modelService = getConversationService(conversation, AIServiceType.Model);
+  return getServiceModelId(modelService);
 };
 
 export const getConversationProvider = (conversation: Conversation | undefined) => {
   if (!conversation) {
     return undefined;
   }
-  const modelConnector = getConversationConnector(conversation, ConversationConnectorType.Model);
-  return getConnectorProvider(modelConnector);
+  const modelService = getConversationService(conversation, AIServiceType.Model);
+  return getServiceProvider(modelService);
 };
