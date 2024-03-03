@@ -20,7 +20,7 @@ import { useAssistantStore } from '@/stores';
 import { openFileDialog } from '@/utils/backend/tauri';
 import { ModalData, ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
-import { AssistantTarget } from '@/types';
+import { AITarget } from '@/types';
 import ContentView from '../../common/ContentView';
 import { Button } from '../../ui/button';
 import { ScrollArea } from '../../ui/scroll-area';
@@ -72,7 +72,7 @@ export default function AssistantView({ assistantId }: AssistantProps) {
 
   const handleUpdateTarget = async (action: string, data: ModalData) => {
     if (assistant) {
-      const target = data.item as AssistantTarget;
+      const target = data.item as AITarget;
       updateTarget(assistant, target);
     }
   };
@@ -85,14 +85,14 @@ export default function AssistantView({ assistantId }: AssistantProps) {
     }
   };
 
-  const handleEditTarget = (target: AssistantTarget) => {
+  const handleEditTarget = (target: AITarget) => {
     logger.info('Edit target');
     if (assistant) {
       showModal(ModalIds.EditTarget, { item: target, onAction: handleUpdateTarget });
     }
   };
 
-  const handleDuplicateTarget = (target: AssistantTarget) => {
+  const handleDuplicateTarget = (target: AITarget) => {
     logger.info('Duplicate target');
     if (assistant) {
       const newTarget = duplicateTarget({ ...target, name: '#duplicate' });
@@ -107,7 +107,7 @@ export default function AssistantView({ assistantId }: AssistantProps) {
     }
   };
 
-  const handleToDeleteTarget = (target: AssistantTarget) => {
+  const handleToDeleteTarget = (target: AITarget) => {
     logger.info('Delete target');
     if (assistant) {
       showModal(ModalIds.DeleteItem, { item: target, onAction: handleDeleteTarget });

@@ -15,7 +15,7 @@
 'use client';
 
 import { useContext, useState } from 'react';
-import { Archive, Check, HardDriveDownload, MoreHorizontal, Plug, Plus, Trash } from 'lucide-react';
+import { Archive, Check, MoreHorizontal, Plug, Trash } from 'lucide-react';
 // import { useRouter } from 'next/router';
 import { Button } from '@/components/ui/button';
 import {
@@ -39,49 +39,55 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Ui, Provider, ProviderType } from '@/types';
+import { Provider, ProviderType, Ui } from '@/types';
 import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { AppContext } from '@/context';
-import {
-  createProvider,
-  findProvider,
-  getProviderState,
-  updateProvider,
-} from '@/utils/data/providers';
+import { createProvider, getProviderState } from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
-import { BasicState, MenuAction } from '@/types/ui';
+import { MenuAction } from '@/types/ui';
 import { getStateColor } from '@/utils/ui';
 import { cn } from '@/lib/utils';
-import { Badge } from '../../ui/badge';
-// import { toast } from '../ui/Toast';
-import { ShortcutBadge } from '../../common/ShortCut';
-import Pastille from '../../common/Pastille';
-import ModelInfos from '../../common/ModelInfos';
+import { useAssistantStore } from '@/stores';
+import AssistantIcon from '@/components/common/AssistantIcon';
+import { Badge } from '../../../ui/badge';
+import { ShortcutBadge } from '../../../common/ShortCut';
+import Pastille from '../../../common/Pastille';
+import ModelInfos from '../../../common/ModelInfos';
 
-export default function ThreadMenu({
-  selectedModelName,
-  selectedConversationId,
-  modelItems,
-  onSelectModel,
-  onSelectMenu,
-}: {
-  selectedModelName: string;
+type AssistantMenuProps = {
+  selectedAssistantId: string;
+  selectedTargetId?: string;
   selectedConversationId?: string;
-  modelItems: Ui.MenuItem[];
-  onSelectModel: (model: string, provider: ProviderType) => void;
+  onSelectTarget: (model: string, provider: ProviderType) => void;
   onSelectMenu: (menu: MenuAction, data: string) => void;
-}) {
-  const { providers, setProviders } = useContext(AppContext);
+};
+
+export default function AssistantMenu({
+  selectedAssistantId,
+  selectedTargetId,
+  selectedConversationId,
+  onSelectTarget,
+  onSelectMenu,
+}: AssistantMenuProps) {
+  const { getAssistant } = useAssistantStore();
+  const { providers } = useContext(AppContext);
   const { backendContext } = useBackend();
+  const assistant = getAssistant(selectedAssistantId);
+  const target = assistant?.targets?.find(
+    (t) => t.id === selectedTargetId || assistant?.targets?.[0].id,
+  );
+  const targetState = target && !target.disabled ? Ui.BasicState.active : Ui.BasicState.disabled;
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
-  const selectedItem = modelItems.find((item) => item.value === selectedModelName);
+  const selectedModelName = target?.models?.[0];
+  const targetItems: Ui.MenuItem[] = []; // TODO get targets fro assistant
+  /* const selectedItem = modelItems.find((item) => item.value === selectedModelName); */
   const selectedModel = backendContext.config.models.items.find(
     (model) => model.name === selectedModelName,
   );
@@ -90,7 +96,7 @@ export default function ThreadMenu({
   );
 
   const handleEnableProvider = () => {
-    if (selectedItem?.group) {
+    /* if (selectedItem?.group) {
       const provider = findProvider(selectedItem?.group, providers) as Provider;
       if (provider && provider.disabled) {
         const newProviders = updateProvider(
@@ -99,7 +105,7 @@ export default function ThreadMenu({
         );
         setProviders(newProviders);
       }
-    }
+    } */
   };
 
   const handleSetupChatGPT = () => {
@@ -135,44 +141,26 @@ export default function ThreadMenu({
 
   return (
     <div className="flex w-full flex-col items-start justify-between rounded-md border px-4 py-0 sm:flex-row sm:items-center">
-      {modelItems.length > 0 && (
-        <div className="flex grow items-center justify-between text-sm font-medium leading-none">
-          {selectedItem?.label ? (
-            <>
-              <div className="grow capitalize text-foreground">
-                {selectedModel && <ModelInfos model={selectedModel} />}
-              </div>
-              <div className="flex-1" />
-            </>
-          ) : (
-            <span>{t('Select a model')}</span>
-          )}
-          <Button asChild onClick={handleEnableProvider}>
-            <Badge
-              className={cn(
-                'mr-4 h-[24px] bg-gray-300 capitalize text-gray-600 hover:bg-gray-400',
-                selectedItem?.state === (BasicState.disabled || BasicState.error)
-                  ? 'cursor-pointer'
-                  : '',
-              )}
-            >
-              <span className={`mr-2  ${getStateColor(selectedItem?.state, 'text', true)}`}>
-                {selectedItem?.group || 'local'}
-              </span>
-              <Pastille state={selectedItem?.state} />
-            </Badge>
-          </Button>
+      <div className="flex grow items-center justify-between text-sm font-medium leading-none">
+        <div className="flex grow items-center capitalize text-foreground">
+          <AssistantIcon icon={assistant?.icon} name={assistant?.name} className="mr-2 h-4 w-4" />
+          <span>{assistant?.name ?? t('Assistant not found')}</span>{' '}
         </div>
-      )}
-      {modelItems.length === 0 && (
-        <Button
-          variant="ghost"
-          className="flex h-[20px] w-full items-center justify-between text-sm font-medium leading-none text-primary"
-          onClick={handleNewLocalModel}
-        >
-          <span>{t('You need to install a local model')}</span>
+        <div className="flex-1" />
+        <Button asChild onClick={handleEnableProvider}>
+          <Badge
+            className={cn(
+              'mr-4 h-[24px] bg-gray-300 capitalize text-gray-600 hover:bg-gray-400',
+              target?.disabled ? 'cursor-pointer' : '',
+            )}
+          >
+            <span className={`mr-2  ${getStateColor(targetState, 'text', true)}`}>
+              {target?.provider || 'local'}
+            </span>
+            <Pastille state={targetState} />
+          </Badge>
         </Button>
-      )}
+      </div>
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm">
@@ -180,27 +168,34 @@ export default function ThreadMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-full">
-          <DropdownMenuLabel>{t('Model')}</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('Target')}</DropdownMenuLabel>
           <DropdownMenuGroup>
-            {modelItems.length > 0 && (
+            {targetItems.length < 2 && (
+              <DropdownMenuItem onSelect={handleNewProviderModel}>
+                <Check className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                <span className="capitalize">{target?.name || t('Select a target')}</span>
+                {selectedModel && <ModelInfos model={selectedModel} stateAsIcon />}
+              </DropdownMenuItem>
+            )}
+            {targetItems.length > 0 && (
               <>
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
                     <Check className="mr-2 h-4 w-4" strokeWidth={1.5} />
-                    <span className="capitalize">{selectedItem?.label || t('Select a model')}</span>
+                    <span className="capitalize">{target?.name || t('Select a target')}</span>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent className="p-0">
                     <Command>
-                      <CommandInput placeholder={t('Filter model...')} autoFocus />
+                      <CommandInput placeholder={t('Filter target...')} autoFocus />
                       <CommandList>
-                        <CommandEmpty>{t('No Model found.')}</CommandEmpty>
+                        <CommandEmpty>{t('No target found.')}</CommandEmpty>
                         <CommandGroup>
-                          {modelItems.map((item) => (
+                          {targetItems.map((item) => (
                             <CommandItem
                               key={item.label}
                               value={item.value}
                               onSelect={() => {
-                                onSelectModel(item.value as string, item.group as ProviderType);
+                                onSelectTarget(item.value as string, item.group as ProviderType);
                                 setOpen(false);
                               }}
                               className="flex w-full items-center justify-between"
@@ -222,13 +217,6 @@ export default function ThreadMenu({
                 <DropdownMenuSeparator />
               </>
             )}
-            <DropdownMenuItem onSelect={handleNewLocalModel}>
-              <HardDriveDownload className="mr-2 h-4 w-4" strokeWidth={1.5} />
-              {t('Install local model')}
-              <DropdownMenuShortcut>
-                <ShortcutBadge command={ShortcutIds.INSTALL_MODEL} />
-              </DropdownMenuShortcut>
-            </DropdownMenuItem>
             <DropdownMenuItem onSelect={handleSetupChatGPT}>
               <Plug
                 className={`mr-2 h-4 w-4 ${getStateColor(getProviderState(chatGPT), 'text')}`}
@@ -237,17 +225,6 @@ export default function ThreadMenu({
               {t('Configure ChatGPT')}
               <DropdownMenuShortcut>
                 <ShortcutBadge command={ShortcutIds.CONFIG_GPT} />
-              </DropdownMenuShortcut>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() => {
-                handleNewProviderModel();
-              }}
-            >
-              <Plus className="mr-2 h-4 w-4" strokeWidth={1.5} />
-              {t('Add other AI providers')}
-              <DropdownMenuShortcut>
-                <ShortcutBadge command={ShortcutIds.NEW_PROVIDER} />
               </DropdownMenuShortcut>
             </DropdownMenuItem>
             {selectedConversationId && <DropdownMenuSeparator />}

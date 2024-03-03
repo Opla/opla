@@ -14,14 +14,22 @@
 
 'use client';
 
-import { ChangeEvent, MouseEvent } from 'react';
+import { ChangeEvent, MouseEvent, useContext } from 'react';
 import { AlertTriangle, Loader2, Paperclip, SendHorizontal } from 'lucide-react';
+import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
 import { ParsedPrompt, TokenValidator, parsePrompt } from '@/utils/parsers';
-import { getCaretPosition } from '@/utils/caretposition';
+import { getCaretPosition } from '@/utils/ui/caretposition';
 import { CommandManager } from '@/utils/commands/types';
+import {
+  getConversation,
+  updateConversation,
+  addAssetsToConversation,
+} from '@/utils/data/conversations';
+import { createMessage, mergeMessages } from '@/utils/data/messages';
+import { openFileDialog } from '@/utils/backend/tauri';
 import { Button } from '../../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
 import { ShortcutBadge } from '../../common/ShortCut';
@@ -36,7 +44,6 @@ export type PromptProps = {
   disabled: boolean;
   onUpdatePrompt: (prompt: ParsedPrompt) => void;
   onSendMessage: () => void;
-  onUploadFile: () => void;
   tokenValidate: TokenValidator;
 };
 
@@ -48,20 +55,44 @@ export default function Prompt({
   disabled,
   onUpdatePrompt,
   onSendMessage,
-  onUploadFile,
   tokenValidate,
   isLoading,
 }: PromptProps) {
   const { t } = useTranslation();
+
+  const {
+    conversations,
+    updateConversations,
+    getConversationMessages,
+    updateConversationMessages,
+  } = useContext(AppContext);
+
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
     logger.info('sending message', conversationId);
     onSendMessage();
   };
 
-  const handleUploadFile = (e: MouseEvent) => {
+  const handleUploadFile = async (e: MouseEvent) => {
     e.preventDefault();
-    onUploadFile();
+    const conversation = getConversation(conversationId, conversations);
+    if (conversation) {
+      const files = await openFileDialog(false, [
+        { name: 'conversations', extensions: ['pdf', 'txt', 'csv', 'json', 'md'] },
+      ]);
+      if (files) {
+        const { conversation: updatedConversation, assets } = addAssetsToConversation(
+          conversation,
+          files,
+        );
+        const message = createMessage({ role: 'user', name: 'you' }, undefined, undefined, assets);
+        const conversationMessages = getConversationMessages(conversationId);
+        const updatedMessages = mergeMessages(conversationMessages, [message]);
+        updateConversationMessages(conversationId, updatedMessages);
+        const updatedConversations = updateConversation(updatedConversation, conversations, true);
+        updateConversations(updatedConversations);
+      }
+    }
   };
 
   const handleKeypress = (e: KeyboardEvent) => {

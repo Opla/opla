@@ -24,8 +24,10 @@ declare global {
   }
 }
 
+export type Id = string;
+
 export type BaseIdRecord = {
-  id: string;
+  id: Id;
   createdAt: number;
   updatedAt: number;
   metadata?: Metadata;
@@ -145,25 +147,30 @@ export type ConversationUsage = {
   totalPerSecond?: number;
 };
 
-export enum ConversationConnectorType {
+export enum AIServiceType {
   Model = 'model',
   Assistant = 'assistant',
 }
 
-export type ConversationConnector = {
+export type AIService = {
   disabled?: boolean;
 } & (
   | {
-      type: ConversationConnectorType.Model;
+      type: AIServiceType.Model;
       modelId: string;
-      provider?: ProviderType;
+      providerType?: ProviderType;
     }
   | {
-      type: ConversationConnectorType.Assistant;
+      type: AIServiceType.Assistant;
       assistantId: string;
       targetId?: string;
     }
 );
+
+export type AIImplService = AIService & {
+  model: Model | undefined;
+  provider: Provider | undefined;
+};
 
 export type Conversation = BaseNamedRecord & {
   messages: Message[] | undefined;
@@ -172,11 +179,11 @@ export type Conversation = BaseNamedRecord & {
   currentPrompt?: string | ParsedPrompt;
   note?: string;
 
-  // Deprecated replaced by connectors
+  // Deprecated replaced by service
   model?: string;
   provider?: string;
 
-  connectors?: ConversationConnector[];
+  services?: AIService[];
 
   importedFrom?: string;
   temp?: boolean;
@@ -399,7 +406,7 @@ export type ModelsConfiguration = {
   items: Array<Model>;
 };
 
-export type AssistantTarget = BaseNamedRecord & {
+export type AITarget = BaseNamedRecord & {
   parent?: string;
   disabled?: boolean;
   models?: string[];
@@ -411,19 +418,25 @@ export type AssistantTarget = BaseNamedRecord & {
   keepSystem?: boolean;
 };
 
-export type AssistantIcon = {
+export type AvatarIcon = {
   color?: string;
   url: string;
 };
 
-export type Assistant = BaseNamedRecord & {
+export type Agent = BaseNamedRecord & {
   disabled?: boolean;
-  icon?: AssistantIcon;
+  icon?: AvatarIcon;
   parent?: string;
   version?: string;
   readonly?: boolean;
   system?: string;
-  targets?: AssistantTarget[];
+  targets?: AITarget[];
+};
+
+export type Assistant = Agent & {
+  title?: string;
+  subtitle?: string;
+  promptTemplates?: PromptTemplate[];
 };
 
 export type Store = {

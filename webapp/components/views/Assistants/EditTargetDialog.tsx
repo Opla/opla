@@ -15,7 +15,7 @@
 import { useContext, useMemo, useState } from 'react';
 import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
-import { AssistantTarget } from '@/types';
+import { AITarget } from '@/types';
 import { AppContext } from '@/context';
 import { getModelsAsItems } from '@/utils/data/models';
 import logger from '@/utils/logger';
@@ -40,7 +40,7 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
     [providers, backendContext],
   );
   const [newParameters, setNewParameters] = useState<Record<string, ParameterValue>>({});
-  const target = data?.item as AssistantTarget;
+  const target = data?.item as AITarget;
   const { title, isNew, targetName } = useMemo(() => {
     let newTitle = 'Edit target';
     const isNewNew = !target.name;

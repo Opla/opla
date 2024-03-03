@@ -16,6 +16,7 @@
 
 import { useContext, useState } from 'react';
 import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 import useBackend from '@/hooks/useBackendContext';
 import { Conversation, PageSettings } from '@/types';
 import { DefaultPageSettings } from '@/utils/constants';
@@ -31,6 +32,7 @@ import Explorer from './Explorer';
 import Settings from './Settings';
 import Thread from './Thread';
 import Archive from './Archive';
+import ToolbarTogglePanels from './ToolbarTogglePanels';
 
 const getSelectedPage = (selectedThreadId: string | undefined, view: ViewName) =>
   `${view === ViewName.Recent ? Page.Threads : Page.Archives}${selectedThreadId ? `/${selectedThreadId}` : ''}`;
@@ -43,7 +45,8 @@ type ThreadsProps = {
 export default function Threads({ selectedThreadId, view = ViewName.Recent }: ThreadsProps) {
   const router = useRouter();
   const { id } = router.query;
-
+  const searchParams = useSearchParams();
+  const assistantId = searchParams?.get('assistant') || undefined;
   const [errors, setError] = useState<string[]>([]);
   const handleError = (error: string) => {
     setError([...errors, error]);
@@ -210,6 +213,7 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
           setThreads={setThreads}
           onSelectMenu={handleSelectMenu}
           onShouldDelete={handleShouldDelete}
+          selectedAssistantId={assistantId}
           selectedThreadId={selectedThreadId}
         />
       </ResizablePanel>
@@ -218,10 +222,15 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
         {view !== ViewName.Archives && (
           <Thread
             conversationId={selectedThreadId}
-            displayExplorer={!pageSettings.explorerHidden}
-            displaySettings={!pageSettings.settingsHidden}
-            onChangeDisplayExplorer={handleChangeDisplayExplorer}
-            onChangeDisplaySettings={handleChangeDisplaySettings}
+            rightToolbar={
+              <ToolbarTogglePanels
+                displayExplorer={!pageSettings.explorerHidden}
+                displaySettings={!pageSettings.settingsHidden}
+                onChangeDisplayExplorer={handleChangeDisplayExplorer}
+                onChangeDisplaySettings={handleChangeDisplaySettings}
+                disabledSettings={assistantId === undefined}
+              />
+            }
             onSelectMenu={handleSelectMenu}
             onError={handleError}
           />

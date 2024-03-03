@@ -19,9 +19,10 @@ import { Conversation, LlmUsage, Message, Preset, Provider } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
 import logger from '@/utils/logger';
 import useCollectionStorage from '@/hooks/useCollectionStorage';
-import { removeConversation } from '@/utils/data/conversations';
+import { removeConversation, updateOrCreateConversation } from '@/utils/data/conversations';
 import { deepCopy } from '@/utils/data';
 import { defaultPresets, mergePresets } from '@/utils/data/presets';
+import { mergeMessages } from '@/utils/data/messages';
 
 export type Context = {
   conversations: Array<Conversation>;
@@ -37,6 +38,17 @@ export type Context = {
     filter: (m: Message) => boolean,
   ) => Message[];
   updateConversationMessages: (id: string | undefined, messages: Message[]) => Promise<void>;
+  updateMessagesAndConversation: (
+    changedMessages: Message[],
+    conversationMessages: Message[],
+    newConversationTitle: string,
+    selectedConversationId: string,
+    selectedConversations?: Conversation[],
+  ) => Promise<{
+    updatedConversationId: string;
+    updatedConversations: Conversation[];
+    updatedMessages: Message[];
+  }>;
   setArchives: (newArchives: Conversation[]) => void;
   deleteArchive: (id: string, cleanup?: (id: string) => Promise<void>) => Promise<void>;
   setProviders: (newProviders: Provider[]) => void;
@@ -53,6 +65,11 @@ const initialContext: Context = {
   readConversationMessages: async () => [],
   filterConversationMessages: () => [],
   updateConversationMessages: async () => {},
+  updateMessagesAndConversation: async () => ({
+    updatedConversationId: '',
+    updatedConversations: [],
+    updatedMessages: [],
+  }),
   archives: [],
   setArchives: () => {},
   deleteArchive: async () => {},
@@ -153,6 +170,29 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
     [conversations, setConversations, updateConversationMessages],
   );
 
+  const updateMessagesAndConversation = useCallback(
+    async (
+      changedMessages: Message[],
+      conversationMessages: Message[],
+      newConversationTitle: string,
+      selectedConversationId: string, // = conversationId,
+      selectedConversations = conversations,
+    ) => {
+      const updatedConversations = updateOrCreateConversation(
+        selectedConversationId,
+        selectedConversations,
+        newConversationTitle, // messages?.[0]?.content as string,
+      );
+      const updatedMessages = mergeMessages(conversationMessages, changedMessages);
+      await updateConversations(updatedConversations);
+      await updateConversationMessages(selectedConversationId, updatedMessages);
+
+      const updatedConversationId = selectedConversationId;
+      return { updatedConversationId, updatedConversations, updatedMessages };
+    },
+    [conversations, updateConversations, updateConversationMessages],
+  );
+
   const deleteConversation = useCallback(
     async (id: string, cleanup?: (id: string) => Promise<void>) => {
       const updatedConversations = removeConversation(id, conversations);
@@ -183,6 +223,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       readConversationMessages,
       filterConversationMessages,
       updateConversationMessages,
+      updateMessagesAndConversation,
       archives,
       setArchives,
       deleteArchive,
@@ -201,6 +242,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       readConversationMessages,
       filterConversationMessages,
       updateConversationMessages,
+      updateMessagesAndConversation,
       archives,
       setArchives,
       deleteArchive,

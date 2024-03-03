@@ -16,7 +16,7 @@ import { useContext, useState } from 'react';
 import { Copy, Edit, MoreHorizontal, Trash } from 'lucide-react';
 import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
-import { AssistantTarget } from '@/types';
+import { AITarget } from '@/types';
 import { getAllModels } from '@/utils/data/models';
 import { AppContext } from '@/context';
 import ModelInfos from '@/components/common/ModelInfos';
@@ -31,10 +31,10 @@ import {
 import { Button } from '../../ui/button';
 
 type TargetsTableProps = {
-  targets: AssistantTarget[];
-  onEdit: (target: AssistantTarget) => void;
-  onDuplicate: (target: AssistantTarget) => void;
-  onDelete: (target: AssistantTarget) => void;
+  targets: AITarget[];
+  onEdit: (target: AITarget) => void;
+  onDuplicate: (target: AITarget) => void;
+  onDelete: (target: AITarget) => void;
 };
 
 function TargetsTable({ targets, onEdit, onDuplicate, onDelete }: TargetsTableProps) {
