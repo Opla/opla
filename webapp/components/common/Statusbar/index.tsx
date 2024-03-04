@@ -23,6 +23,7 @@ import { cancelDownloadModel, getSys } from '@/utils/backend/commands';
 import { Sys } from '@/types';
 import { ModalsContext } from '@/context/modals';
 import logger from '@/utils/logger';
+import { findModel } from '@/utils/data/models';
 
 export default function Statusbar() {
   const router = useRouter();
@@ -40,11 +41,13 @@ export default function Statusbar() {
     call();
   }, [setSys]);
 
-  // logger.info('statusbar sys', sys);
-
   const running = backendContext.server.status === 'started';
   const error = backendContext.server.status === 'error';
 
+  const model = findModel(
+    backendContext.config.models.activeModel,
+    backendContext.config.models.items,
+  );
   const download = (backendContext.downloads ?? [undefined])[0];
 
   const displayServer = () => {
@@ -70,8 +73,6 @@ export default function Statusbar() {
     }
   };
 
-  const { activeModel } = backendContext.config.models;
-
   return (
     <div className="m-0 flex w-full flex-row justify-between gap-4 bg-primary px-2 py-1 text-xs text-primary-foreground">
       <div className="flex flex-row items-center">
@@ -93,7 +94,9 @@ export default function Statusbar() {
           {(backendContext.server.status === 'init' ||
             backendContext.server.status === 'wait' ||
             backendContext.server.status === 'starting') && <span>{t('Server is starting')}</span>}
-          {backendContext.server.status === 'started' && <span>{activeModel}</span>}
+          {backendContext.server.status === 'started' && (
+            <span>{model?.title || t('Model not found')}</span>
+          )}
           {(backendContext.server.status === 'stopping' ||
             backendContext.server.status === 'stopped') && <span>{t('Server is stopped')}</span>}
           {backendContext.server.status === 'error' && (
