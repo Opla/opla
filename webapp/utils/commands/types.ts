@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Ui } from '@/types';
+import { PresetParameter, Ui } from '@/types';
+import { ParsedPrompt } from '../parsers';
 
 export enum CommandType {
   Action = 'action',
@@ -31,4 +32,5 @@ export type CommandManager = {
   commands: Command[];
   getCommand: (value: string, type: string) => Command | undefined;
   filterCommands: (commandValue: string) => Command[];
+  findCommandParameters: (prompt: ParsedPrompt) => Record<string, PresetParameter>;
 };

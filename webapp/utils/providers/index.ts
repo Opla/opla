@@ -18,6 +18,8 @@ import OpenAI from './openai';
 import Opla from './opla';
 import { findCompatiblePreset, getCompletePresetProperties } from '../data/presets';
 import { getMessageContentAsString } from '../data/messages';
+import { ParsedPrompt } from '../parsers';
+import { CommandManager } from '../commands/types';
 
 // TODO: code it in Rust
 // and use ContextWindowPolicy from webapp/utils/constants.ts
@@ -55,6 +57,8 @@ export const completion = async (
   conversationMessages: Message[],
   conversation: Conversation,
   presets: Preset[],
+  prompt: ParsedPrompt,
+  commandManager: CommandManager,
 ): Promise<LlmResponse> => {
   if (!activeService.model) {
     throw new Error('Model not set');
@@ -62,15 +66,26 @@ export const completion = async (
   const { model, provider } = activeService;
   const llmParameters: LlmParameters[] = [];
   const preset = findCompatiblePreset(conversation?.preset, presets, model?.name, provider);
-  const { parameters, system } = getCompletePresetProperties(preset, conversation, presets);
+  const { parameters: presetParameters, system } = getCompletePresetProperties(
+    preset,
+    conversation,
+    presets,
+  );
+  const commandParameters = commandManager.findCommandParameters(prompt);
+  const parameters = { ...presetParameters, ...commandParameters };
+  let { key } = provider || {};
+  if (parameters.provider_key) {
+    key = parameters.provider_key as string;
+    delete parameters.provider_key;
+  }
   if (parameters) {
     const parametersDefinition = getCompletionParametersDefinition(provider);
-    Object.keys(parameters).forEach((key) => {
-      const parameterDef = parametersDefinition[key];
+    Object.keys(parameters).forEach((k) => {
+      const parameterDef = parametersDefinition[k];
       if (parameterDef) {
-        const result = parameterDef.z.safeParse(parameters[key]);
+        const result = parameterDef.z.safeParse(parameters[k]);
         if (result.success) {
-          llmParameters.push({ key, value: String(result.data) });
+          llmParameters.push({ key: k, value: String(result.data) });
         }
       }
     });
@@ -81,7 +96,7 @@ export const completion = async (
   if (provider?.type === ProviderType.openai) {
     return OpenAI.completion.invoke(
       model,
-      provider,
+      { ...provider, key },
       messages,
       system,
       conversation.id,
