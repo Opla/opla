@@ -19,7 +19,11 @@ import { Conversation, LlmUsage, Message, Preset, Provider } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
 import logger from '@/utils/logger';
 import useCollectionStorage from '@/hooks/useCollectionStorage';
-import { removeConversation, updateOrCreateConversation } from '@/utils/data/conversations';
+import {
+  getConversation,
+  removeConversation,
+  updateOrCreateConversation,
+} from '@/utils/data/conversations';
 import { deepCopy } from '@/utils/data';
 import { defaultPresets, mergePresets } from '@/utils/data/presets';
 import { mergeMessages } from '@/utils/data/messages';
@@ -45,7 +49,7 @@ export type Context = {
     selectedConversationId: string,
     selectedConversations?: Conversation[],
   ) => Promise<{
-    updatedConversationId: string;
+    updatedConversation: Conversation;
     updatedConversations: Conversation[];
     updatedMessages: Message[];
   }>;
@@ -66,7 +70,7 @@ const initialContext: Context = {
   filterConversationMessages: () => [],
   updateConversationMessages: async () => {},
   updateMessagesAndConversation: async () => ({
-    updatedConversationId: '',
+    updatedConversation: { id: '', createdAt: 0, updatedAt: 0 } as Conversation,
     updatedConversations: [],
     updatedMessages: [],
   }),
@@ -188,7 +192,11 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       await updateConversationMessages(selectedConversationId, updatedMessages);
 
       const updatedConversationId = selectedConversationId;
-      return { updatedConversationId, updatedConversations, updatedMessages };
+      const updatedConversation = getConversation(
+        updatedConversationId,
+        updatedConversations,
+      ) as Conversation;
+      return { updatedConversation, updatedConversations, updatedMessages };
     },
     [conversations, updateConversations, updateConversationMessages],
   );

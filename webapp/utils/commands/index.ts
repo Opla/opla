@@ -12,8 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getMentionName } from '../parsers';
+import { Conversation, PresetParameter, ProviderType } from '@/types';
+import {
+  ParsedPrompt,
+  PromptToken,
+  PromptTokenState,
+  PromptTokenType,
+  compareMentions,
+  getMentionName,
+} from '../parsers';
 import { Command, CommandManager, CommandType } from './types';
+import { createMessage } from '../data/messages';
 
 const actionsItems: Command[] = [
   {
@@ -75,9 +84,9 @@ export const compareCommands = (
   return (!type || (type === type1 && type === type2)) && command1 === command2;
 };
 
-export const getCommandManager = (mentionItems: Partial<Command>[]): CommandManager => {
+export const getCommandManager = (cmds: Partial<Command>[]): CommandManager => {
   const commands = [
-    ...mentionItems
+    ...cmds
       .filter((item) => !item.selected)
       .map(
         (item) =>
@@ -101,5 +110,105 @@ export const getCommandManager = (mentionItems: Partial<Command>[]): CommandMana
       commands.filter(
         (c) => !(!c.value || c.value?.toLowerCase().indexOf(commandValue.toLowerCase()) === -1),
       ),
+    findCommandParameters: (prompt: ParsedPrompt): Record<string, PresetParameter> => {
+      const presetParameters: Record<string, PresetParameter> = {};
+      let param: PromptToken | undefined;
+      prompt.tokens.forEach((token) => {
+        if (token.type === PromptTokenType.Hashtag) {
+          if (token.value === '#stream') {
+            presetParameters[token.value] = true;
+          } else {
+            param = token;
+          }
+        } else if (param && token.type === PromptTokenType.ParameterValue) {
+          presetParameters[param.value] = token.value;
+          param = undefined;
+        }
+      });
+      return presetParameters;
+    },
   };
+};
+
+export const preProcessingCommands = async (
+  cId: string,
+  prompt: ParsedPrompt,
+  commandManager: CommandManager,
+  conversation: Conversation,
+  conversations: Conversation[],
+  tempConversationName: string,
+  selectedModelNameOrId: string,
+  context: {
+    changeService: Function;
+    getConversationMessages: Function;
+    t: Function;
+    updateMessagesAndConversation: Function;
+  },
+): Promise<
+  { type: 'error' | 'ok' | 'return' } & (
+    | { type: 'return'; updatedConversation: Conversation; updatedConversations: Conversation[] }
+    | { type: 'ok'; modelName: string | undefined }
+    | { type: 'error'; error: string }
+  )
+> => {
+  const mentions = prompt.tokens.filter((to) => to.type === PromptTokenType.Mention);
+  const modelItem =
+    mentions.length === 1
+      ? commandManager.commands.find((cmd) => compareMentions(cmd.value, mentions[0].value))
+      : undefined;
+  const modelName = modelItem?.value;
+
+  const action = prompt.tokens.find((to) => to.type === PromptTokenType.Action);
+
+  let updatedConversation = conversation as Conversation;
+  let updatedConversations = conversations;
+  if (action) {
+    const command = commandManager.getCommand(action.value, action.type);
+    if (command) {
+      command.execute?.(action.value);
+      if (command.label === 'System') {
+        const message = createMessage({ role: 'system', name: 'system' }, prompt.text, prompt.raw);
+        ({ updatedConversation, updatedConversations } =
+          await context.updateMessagesAndConversation(
+            [message],
+            context.getConversationMessages(cId),
+            tempConversationName,
+            cId,
+          ));
+      } else if (command.label === 'Imagine') {
+        const userMessage = createMessage({ role: 'user', name: 'You' }, prompt.raw, prompt.raw);
+        const message = createMessage(
+          { role: 'assistant', name: modelName || selectedModelNameOrId },
+          context.t("Soon, I'll be able to imagine wonderfull images..."),
+        );
+        ({ updatedConversation, updatedConversations } =
+          await context.updateMessagesAndConversation(
+            [userMessage, message],
+            context.getConversationMessages(cId),
+            tempConversationName,
+            cId,
+          ));
+      }
+    }
+    return { type: 'return', updatedConversation, updatedConversations };
+  }
+
+  if (prompt.text.length < 1) {
+    if (modelName) {
+      // Change conversation's model if there is only a model mention in the prompt
+      context.changeService(modelName, modelItem.group as ProviderType, {
+        currentPrompt: undefined,
+      });
+      return { type: 'return', updatedConversation, updatedConversations };
+    }
+    return { type: 'error', error: context.t('Please enter a message.') };
+  }
+
+  if (mentions.length > 1) {
+    return { type: 'error', error: context.t('Only one model at a time.') };
+  }
+  if (mentions.length === 1 && (!modelName || mentions[0].state === PromptTokenState.Error)) {
+    return { type: 'error', error: context.t('This model is not available.') };
+  }
+  return { type: 'ok', modelName };
 };

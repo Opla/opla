@@ -264,7 +264,7 @@ export type Provider = BaseNamedRecord & {
   docUrl?: string;
   type: ProviderType;
   disabled: boolean;
-  key: string;
+  key: string | undefined;
   models?: Model[];
   errors?: string[];
   metadata?: {

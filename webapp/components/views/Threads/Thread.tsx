@@ -48,20 +48,15 @@ import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { ModalData, ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { MenuAction, Page } from '@/types/ui';
-import {
-  ParsedPrompt,
-  PromptToken,
-  PromptTokenState,
-  PromptTokenType,
-  compareMentions,
-  comparePrompts,
-  parsePrompt,
-  toPrompt,
-} from '@/utils/parsers';
+import { ParsedPrompt, PromptToken, comparePrompts, parsePrompt, toPrompt } from '@/utils/parsers';
 import { getConversationTitle } from '@/utils/conversations';
 import validator from '@/utils/parsers/validator';
-import { createMessage, changeMessageContent } from '@/utils/data/messages';
-import { getCommandManager } from '@/utils/commands';
+import {
+  createMessage,
+  changeMessageContent,
+  getMessageRawContentAsString,
+} from '@/utils/data/messages';
+import { getCommandManager, preProcessingCommands } from '@/utils/commands';
 import ContentView from '@/components/common/ContentView';
 import { useAssistantStore } from '@/stores';
 import PromptArea from './Prompt';
@@ -195,13 +190,13 @@ function Thread({
   const parseAndValidatePrompt = (text: string, caretStartIndex = 0) =>
     parsePrompt({ text, caretStartIndex }, tokenValidator);
 
-  const handleChangeService = async (
+  const changeService = async (
     model?: string,
     provider = ProviderType.opla,
     partial: Partial<Conversation> = {},
   ) => {
     logger.info(
-      `handleChangeService ${model} ${provider} activeModel=${typeof activeModel}`,
+      `ChangeService ${model} ${provider} activeModel=${typeof activeModel}`,
       selectedConversation,
     );
     const newService: AIService = {
@@ -229,6 +224,7 @@ function Thread({
     conversationMessages: Message[],
     conversation: Conversation,
     updatedConversations: Conversation[],
+    prompt: ParsedPrompt,
   ) => {
     const returnedMessage = { ...message };
     const activeService = getActiveService(
@@ -248,6 +244,8 @@ function Thread({
         conversationMessages,
         conversation,
         presets,
+        prompt,
+        commandManager,
       );
       setUsage(response.usage);
       returnedMessage.content = response.content.trim();
@@ -306,92 +304,25 @@ function Thread({
       return;
     }
 
-    const mentions = currentPrompt.tokens.filter((to) => to.type === PromptTokenType.Mention);
-    const modelItem =
-      mentions.length === 1
-        ? modelItems.find((mi) => compareMentions(mi.value, mentions[0].value))
-        : undefined;
-    const modelName = modelItem?.value;
-
-    const action = currentPrompt.tokens.find((to) => to.type === PromptTokenType.Action);
-
-    if (action) {
-      let updatedConversation = selectedConversation;
-      let updatedConversations = conversations;
-      const command = commandManager.getCommand(action.value, action.type);
-      if (command) {
-        command.execute?.(action.value);
-        if (command.label === 'System') {
-          const message = createMessage(
-            { role: 'system', name: 'system' },
-            currentPrompt.text,
-            currentPrompt.raw,
-          );
-          let updatedConversationId: string | undefined;
-          ({ updatedConversationId, updatedConversations } = await updateMessagesAndConversation(
-            [message],
-            getConversationMessages(conversationId),
-            tempConversationName,
-            conversationId,
-          ));
-
-          updatedConversation = getConversation(
-            updatedConversationId,
-            updatedConversations,
-          ) as Conversation;
-        } else if (command.label === 'Imagine') {
-          const userMessage = createMessage(
-            { role: 'user', name: 'You' },
-            currentPrompt.raw,
-            currentPrompt.raw,
-          );
-          const message = createMessage(
-            { role: 'assistant', name: modelName || selectedModelNameOrId },
-            t("Soon, I'll be able to imagine wonderfull images..."),
-          );
-          let updatedConversationId: string | undefined;
-          ({ updatedConversationId, updatedConversations } = await updateMessagesAndConversation(
-            [userMessage, message],
-            getConversationMessages(conversationId),
-            tempConversationName,
-            conversationId,
-          ));
-
-          updatedConversation = getConversation(
-            updatedConversationId,
-            updatedConversations,
-          ) as Conversation;
-        }
-      }
-      clearPrompt(updatedConversation, updatedConversations);
+    const result = await preProcessingCommands(
+      conversationId,
+      currentPrompt,
+      commandManager,
+      selectedConversation as Conversation,
+      conversations,
+      tempConversationName,
+      selectedModelNameOrId,
+      { changeService, getConversationMessages, updateMessagesAndConversation, t },
+    );
+    if (result.type === 'error') {
+      setErrorMessage({ ...errorMessage, [conversationId]: result.error });
       return;
     }
-
-    if (currentPrompt.text.length < 1) {
-      if (modelName) {
-        // Change conversation's model if there is only a model mention in the prompt
-        // TODO handle parameters and key
-        handleChangeService(modelName, modelItem.group as ProviderType, {
-          currentPrompt: undefined,
-        });
-        setChangedPrompt(undefined);
-        return;
-      }
-      const error = { ...errorMessage, [conversationId]: t('Please enter a message.') };
-      setErrorMessage(error);
+    if (result.type === 'return') {
+      clearPrompt(result.updatedConversation, result.updatedConversations);
       return;
     }
-
-    if (mentions.length > 1) {
-      const error = { ...errorMessage, [conversationId]: t('Only one model at a time.') };
-      setErrorMessage(error);
-      return;
-    }
-    if (mentions.length === 1 && (!modelName || mentions[0].state === PromptTokenState.Error)) {
-      const error = { ...errorMessage, [conversationId]: t('This model is not available.') };
-      setErrorMessage(error);
-      return;
-    }
+    const { modelName } = result;
 
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
     setIsProcessing({ ...isProcessing, [conversationId]: true });
@@ -410,7 +341,7 @@ function Thread({
     message.sibling = userMessage.id;
 
     const {
-      updatedConversationId,
+      updatedConversation,
       updatedConversations: uc,
       updatedMessages,
     } = await updateMessagesAndConversation(
@@ -420,19 +351,20 @@ function Thread({
       conversationId,
     );
     let updatedConversations = uc;
-
-    const conversation: Conversation = getConversation(
-      updatedConversationId,
-      updatedConversations,
-    ) as Conversation;
-    if (conversation.temp) {
-      conversation.name = getConversationTitle(conversation);
+    if (updatedConversation.temp) {
+      updatedConversation.name = getConversationTitle(updatedConversation);
     }
 
-    updatedConversations = clearPrompt(conversation, updatedConversations);
+    updatedConversations = clearPrompt(updatedConversation, updatedConversations);
 
-    logger.info('onSendMessage', updatedMessages, conversation);
-    message = await sendMessage(message, updatedMessages, conversation, updatedConversations);
+    logger.info('onSendMessage', updatedMessages, updatedConversation);
+    message = await sendMessage(
+      message,
+      updatedMessages,
+      updatedConversation,
+      updatedConversations,
+      currentPrompt,
+    );
 
     if (tempConversationId) {
       router.push(`${Page.Threads}/${tempConversationId}`);
@@ -458,7 +390,7 @@ function Thread({
       MessageStatus.Pending,
     );
 
-    const { updatedConversationId, updatedConversations, updatedMessages } =
+    const { updatedConversation, updatedConversations, updatedMessages } =
       await updateMessagesAndConversation(
         [message],
         conversationMessages,
@@ -466,12 +398,17 @@ function Thread({
         conversationId,
       );
 
-    const conversation: Conversation = getConversation(
-      updatedConversationId,
+    const index = updatedMessages.findIndex((m) => m.id === message.id);
+    const prompt = parseAndValidatePrompt(
+      getMessageRawContentAsString(updatedMessages[index - 1]) || '',
+    );
+    message = await sendMessage(
+      message,
+      updatedMessages,
+      updatedConversation,
       updatedConversations,
-    ) as Conversation;
-
-    message = await sendMessage(message, updatedMessages, conversation, updatedConversations);
+      prompt,
+    );
 
     setIsProcessing({ ...isProcessing, [conversationId]: false });
   };
@@ -529,7 +466,7 @@ function Thread({
 
     const conversation = getConversation(conversationId, conversations);
     if (conversation && message.content) {
-      const parsedContent = parseAndValidatePrompt(newContent); // parsePrompt({ text: newContent }, tokenValidator);
+      const parsedContent = parseAndValidatePrompt(newContent);
       const newMessage = changeMessageContent(message, parsedContent.text, parsedContent.raw);
       const conversationMessages = getConversationMessages(conversationId);
       const newMessages = conversationMessages.map((m) => {
@@ -609,7 +546,7 @@ function Thread({
           selectedModelName={selectedModelNameOrId}
           selectedConversationId={conversationId}
           modelItems={modelItems}
-          onSelectModel={handleChangeService}
+          onSelectModel={changeService}
           onSelectMenu={onSelectMenu}
         />
       }
