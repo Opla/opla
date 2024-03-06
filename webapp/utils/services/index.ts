@@ -58,15 +58,36 @@ export const getActiveService = (
     if (provider) {
       providerName = provider.name;
     }
+  } else if (activeService && activeService.type === AIServiceType.Assistant) {
+    const { assistantId, targetId } = activeService;
+    if (assistantId && targetId) {
+      const target = assistant?.targets?.find((t) => t.id === targetId);
+      if (target?.models && target.models.length > 0) {
+        model = findModelInAll(target.models[0], providers, backendContext);
+        provider = findProvider(target.provider, providers);
+        providerName = provider?.name;
+      }
+    }
   }
   const modelName = _modelName || model?.name || conversation.model || activeModel;
-  if (!model || model.name !== modelName) {
-    model = findModelInAll(modelName, providers, backendContext);
-  }
-  const name = model?.provider || model?.creator;
-  if (name && name !== providerName) {
-    provider = findProvider(name, providers);
+  if (!assistant && !provider) {
+    if (!model || model.name !== modelName) {
+      model = findModelInAll(modelName, providers, backendContext);
+    }
+    const modelProviderName = model?.provider || model?.creator;
+    if (modelProviderName && modelProviderName !== providerName) {
+      provider = findProvider(modelProviderName, providers);
+    }
   }
 
   return { ...activeService, model, provider } as AIImplService;
+};
+
+export const getAssistantId = (conversation: Conversation | undefined): string | undefined => {
+  let assistantId: string | undefined;
+  if (conversation?.services) {
+    const service = conversation.services.find((c) => c.type === AIServiceType.Assistant);
+    if (service?.type === AIServiceType.Assistant) assistantId = service?.assistantId;
+  }
+  return assistantId;
 };

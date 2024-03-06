@@ -18,6 +18,7 @@ import {
   AIService,
   AIServiceType,
   ProviderType,
+  Assistant,
 } from '@/types';
 import { createBaseRecord, createBaseNamedRecord, updateRecord } from '.';
 
@@ -184,12 +185,26 @@ export const getServiceProvider = (modelService: AIService | undefined) => {
   return undefined;
 };
 
-export const getConversationModelId = (conversation: Conversation | undefined) => {
+export const getConversationModelId = (
+  conversation: Conversation | undefined,
+  assistant?: Assistant,
+) => {
   if (!conversation) {
     return undefined;
   }
   const modelService = getConversationService(conversation, AIServiceType.Model);
-  return getServiceModelId(modelService);
+  let modelId = getServiceModelId(modelService);
+  if (!modelId) {
+    const assistantService = getConversationService(conversation, AIServiceType.Assistant);
+    if (assistantService?.type === AIServiceType.Assistant) {
+      const { assistantId, targetId } = assistantService;
+      if (assistantId && assistantId === assistant?.id) {
+        const target = assistant.targets?.find((t) => t.id === targetId);
+        modelId = target?.models?.[0];
+      }
+    }
+  }
+  return modelId;
 };
 
 export const getConversationProvider = (conversation: Conversation | undefined) => {

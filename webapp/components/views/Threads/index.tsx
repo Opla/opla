@@ -27,6 +27,7 @@ import { ModalIds } from '@/modals';
 import { ModalsContext } from '@/context/modals';
 import { AppContext } from '@/context';
 import { MenuAction, Page, ViewName } from '@/types/ui';
+import { getAssistantId } from '@/utils/services';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../../ui/resizable';
 import Explorer from './Explorer';
 import Settings from './Settings';
@@ -45,8 +46,6 @@ type ThreadsProps = {
 export default function Threads({ selectedThreadId, view = ViewName.Recent }: ThreadsProps) {
   const router = useRouter();
   const { id } = router.query;
-  const searchParams = useSearchParams();
-  const assistantId = searchParams?.get('assistant') || undefined;
   const [errors, setError] = useState<string[]>([]);
   const handleError = (error: string) => {
     setError([...errors, error]);
@@ -63,6 +62,10 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     deleteArchive,
   } = useContext(AppContext);
   const { backendContext, setSettings } = useBackend();
+
+  const searchParams = useSearchParams();
+  const selectedConversation = conversations.find((c) => c.id === selectedThreadId);
+  const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);
 
   useShortcuts(ShortcutIds.DELETE_MESSAGE, (event) => {
     event.preventDefault();

@@ -42,7 +42,7 @@ import {
 import useBackend from '@/hooks/useBackendContext';
 import { completion } from '@/utils/providers';
 import { getModelsAsItems } from '@/utils/data/models';
-import { getActiveService } from '@/utils/services';
+import { getActiveService, getAssistantId } from '@/utils/services';
 import { toast } from '@/components/ui/Toast';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { ModalData, ModalsContext } from '@/context/modals';
@@ -59,6 +59,7 @@ import {
 import { getCommandManager, preProcessingCommands } from '@/utils/commands';
 import ContentView from '@/components/common/ContentView';
 import { useAssistantStore } from '@/stores';
+import { getDefaultAssistantService } from '@/utils/data/assistants';
 import PromptArea from './Prompt';
 import { ConversationPanel } from './Conversation';
 import ThreadMenu from './Menu';
@@ -90,14 +91,14 @@ function Thread({
   } = useContext(AppContext);
   const { backendContext, setActiveModel } = useBackend();
   const searchParams = useSearchParams();
-  const assistantId = searchParams?.get('assistant') || undefined;
-  const { getAssistant } = useAssistantStore();
-  const assistant = getAssistant(assistantId);
   const [service, setService] = useState<AIService | undefined>(undefined);
   const activeModel = getServiceModelId(service) || backendContext.config.models.activeModel;
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
   const conversationId = _conversationId || tempConversationId;
   const selectedConversation = conversations.find((c) => c.id === conversationId);
+  const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);
+  const { getAssistant } = useAssistantStore();
+  const assistant = getAssistant(assistantId);
   const [changedPrompt, setChangedPrompt] = useState<ParsedPrompt | undefined>(undefined);
   const { showModal } = useContext(ModalsContext);
   const [messages, setMessages] = useState<Message[] | undefined>(undefined);
@@ -149,13 +150,12 @@ function Thread({
 
   const tempConversationName = messages?.[0]?.content as string;
 
-  const selectedModelNameOrId = getConversationModelId(selectedConversation) || activeModel;
-
   const { modelItems, commandManager } = useMemo(() => {
+    const selectedModelNameOrId = getConversationModelId(selectedConversation) || activeModel;
     const items = getModelsAsItems(providers, backendContext, selectedModelNameOrId);
     const manager = getCommandManager(items);
     return { modelItems: items, commandManager: manager };
-  }, [backendContext, providers, selectedModelNameOrId]);
+  }, [activeModel, backendContext, providers, selectedConversation]);
 
   useEffect(() => {
     if (_conversationId && tempConversationId) {
@@ -304,6 +304,8 @@ function Thread({
       return;
     }
 
+    const selectedModelNameOrId =
+      getConversationModelId(selectedConversation, assistant) || activeModel;
     const result = await preProcessingCommands(
       conversationId,
       currentPrompt,
@@ -357,7 +359,13 @@ function Thread({
 
     updatedConversations = clearPrompt(updatedConversation, updatedConversations);
 
-    logger.info('onSendMessage', updatedMessages, updatedConversation);
+    logger.info(
+      'onSendMessage',
+      modelName,
+      selectedModelNameOrId,
+      updatedMessages,
+      updatedConversation,
+    );
     message = await sendMessage(
       message,
       updatedMessages,
@@ -383,13 +391,18 @@ function Thread({
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
     setIsProcessing({ ...isProcessing, [conversationId]: true });
 
+    const selectedModelNameOrId =
+      getConversationModelId(selectedConversation, assistant) || activeModel;
+
     let message: Message = changeMessageContent(
       previousMessage,
       '...',
       '...',
       MessageStatus.Pending,
     );
-
+    if (selectedModelNameOrId && message.author.name !== selectedModelNameOrId) {
+      message.author.name = selectedModelNameOrId;
+    }
     const { updatedConversation, updatedConversations, updatedMessages } =
       await updateMessagesAndConversation(
         [message],
@@ -517,7 +530,11 @@ function Thread({
         newConversation.temp = true;
         newConversation.name = conversationName;
         newConversation.currentPrompt = prompt;
-        if (service) {
+        if (assistant) {
+          const newService = getDefaultAssistantService(assistant);
+          addConversationService(newConversation, newService);
+          setService(undefined);
+        } else if (service) {
           addConversationService(newConversation, service);
           setService(undefined);
         }
@@ -526,7 +543,7 @@ function Thread({
       updateConversations(updatedConversations);
       setChangedPrompt(undefined);
     },
-    [tempConversationId, conversationId, conversations, updateConversations, service],
+    [tempConversationId, conversationId, conversations, updateConversations, assistant, service],
   );
 
   useDebounceFunc<ParsedPrompt | undefined>(handleUpdatePrompt, changedPrompt, 500);
@@ -538,6 +555,7 @@ function Thread({
   };
 
   const prompt = changedPrompt === undefined ? currentPrompt : changedPrompt;
+  const selectedModelNameOrId = getConversationModelId(selectedConversation) || activeModel;
   return (
     <ContentView
       header={
