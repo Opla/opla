@@ -24,7 +24,12 @@ import {
   CommandItem,
   CommandSeparator,
 } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverContentExt, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverContentExt,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { useContext } from 'react';
 import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';

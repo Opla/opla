@@ -28,7 +28,7 @@ import { ModalData } from '@/context/modals';
 export default function AlertDialog({
   id,
   title,
-  size='sm',
+  size = 'sm',
   visible,
   children,
   actions,

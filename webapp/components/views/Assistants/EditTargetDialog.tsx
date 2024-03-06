@@ -73,7 +73,6 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
       ? findProvider(target?.provider, providers)
       : getLocalProvider(providers);
   }
-  console.log('EditTargetDialog', model, target.provider, provider, newParameters, target);
   const handleChange = (name: string, value: ParameterValue) => {
     setNewParameters({ ...newParameters, [name]: value });
   };
