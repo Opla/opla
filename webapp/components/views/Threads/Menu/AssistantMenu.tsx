@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useContext, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { Archive, Check, MoreHorizontal, Plug, Trash } from 'lucide-react';
 // import { useRouter } from 'next/router';
 import { Button } from '@/components/ui/button';
@@ -39,7 +39,15 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Provider, ProviderType, Ui } from '@/types';
+import {
+  AIService,
+  AIServiceType,
+  Assistant,
+  Conversation,
+  Provider,
+  ProviderType,
+  Ui,
+} from '@/types';
 import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
@@ -47,13 +55,14 @@ import { ModalIds } from '@/modals';
 import { AppContext } from '@/context';
 import { createProvider, getProviderState } from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';
-import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
-import logger from '@/utils/logger';
+import { ShortcutIds } from '@/hooks/useShortcuts';
 import { MenuAction } from '@/types/ui';
 import { getStateColor } from '@/utils/ui';
 import { cn } from '@/lib/utils';
 import { useAssistantStore } from '@/stores';
 import AssistantIcon from '@/components/common/AssistantIcon';
+import { getAssistantTargetsAsItems, getDefaultAssistantService } from '@/utils/data/assistants';
+import { updateConversation } from '@/utils/data/conversations';
 import { Badge } from '../../../ui/badge';
 import { ShortcutBadge } from '../../../common/ShortCut';
 import Pastille from '../../../common/Pastille';
@@ -63,21 +72,23 @@ type AssistantMenuProps = {
   selectedAssistantId: string;
   selectedTargetId?: string;
   selectedConversationId?: string;
-  onSelectTarget: (model: string, provider: ProviderType) => void;
   onSelectMenu: (menu: MenuAction, data: string) => void;
 };
 
 export default function AssistantMenu({
   selectedAssistantId,
-  selectedTargetId,
+  selectedTargetId: _selectedTargetId,
   selectedConversationId,
-  onSelectTarget,
   onSelectMenu,
 }: AssistantMenuProps) {
   const { getAssistant } = useAssistantStore();
-  const { providers } = useContext(AppContext);
+  const { conversations, updateConversations, providers } = useContext(AppContext);
   const { backendContext } = useBackend();
-  const assistant = getAssistant(selectedAssistantId);
+  const conversation = conversations.find((c) => c.id === selectedConversationId) as Conversation;
+  const assistant = getAssistant(selectedAssistantId) as Assistant;
+  const service = conversation?.services?.[0] || getDefaultAssistantService(assistant);
+  const selectedTargetId =
+    service.type === AIServiceType.Assistant ? service.targetId : _selectedTargetId;
   const target = assistant?.targets?.find(
     (t) => t.id === selectedTargetId || assistant?.targets?.[0].id,
   );
@@ -86,8 +97,10 @@ export default function AssistantMenu({
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
   const selectedModelName = target?.models?.[0];
-  const targetItems: Ui.MenuItem[] = []; // TODO get targets fro assistant
-  /* const selectedItem = modelItems.find((item) => item.value === selectedModelName); */
+  const targetItems: Ui.MenuItem[] = useMemo(
+    () => (assistant ? getAssistantTargetsAsItems(assistant, selectedTargetId) : []),
+    [assistant, selectedTargetId],
+  );
   const selectedModel = backendContext.config.models.items.find(
     (model) => model.name === selectedModelName,
   );
@@ -115,29 +128,15 @@ export default function AssistantMenu({
     showModal(ModalIds.OpenAI, { item: chatGPT });
   };
 
-  const handleNewLocalModel = () => {
-    showModal(ModalIds.NewLocalModel);
+  const handleSelectAssistantTarget = async (item: Ui.MenuItem) => {
+    const targetId = item.value as string;
+    const newConversation: Conversation = {
+      ...conversation,
+      services: [{ ...service, targetId } as AIService],
+    };
+    const newConversations = updateConversation(newConversation, conversations);
+    updateConversations(newConversations);
   };
-
-  const handleNewProviderModel = () => {
-    showModal(ModalIds.NewProvider);
-  };
-
-  useShortcuts(ShortcutIds.INSTALL_MODEL, (event) => {
-    event.preventDefault();
-    logger.info('shortcut install Model');
-    handleNewLocalModel();
-  });
-  useShortcuts(ShortcutIds.NEW_PROVIDER, (event) => {
-    event.preventDefault();
-    logger.info('shortcut new provider');
-    handleNewProviderModel();
-  });
-  useShortcuts(ShortcutIds.CONFIG_GPT, (event) => {
-    event.preventDefault();
-    logger.info('shortcut configure ChatGPT');
-    handleSetupChatGPT();
-  });
 
   return (
     <div className="flex w-full flex-col items-start justify-between rounded-md border px-4 py-0 sm:flex-row sm:items-center">
@@ -170,14 +169,14 @@ export default function AssistantMenu({
         <DropdownMenuContent align="end" className="w-full">
           <DropdownMenuLabel>{t('Target')}</DropdownMenuLabel>
           <DropdownMenuGroup>
-            {targetItems.length < 2 && (
-              <DropdownMenuItem onSelect={handleNewProviderModel}>
+            {(!selectedConversationId || targetItems.length < 2) && (
+              <DropdownMenuItem>
                 <Check className="mr-2 h-4 w-4" strokeWidth={1.5} />
                 <span className="capitalize">{target?.name || t('Select a target')}</span>
                 {selectedModel && <ModelInfos model={selectedModel} stateAsIcon />}
               </DropdownMenuItem>
             )}
-            {targetItems.length > 0 && (
+            {selectedConversationId && targetItems.length > 1 && (
               <>
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
@@ -195,7 +194,7 @@ export default function AssistantMenu({
                               key={item.label}
                               value={item.value}
                               onSelect={() => {
-                                onSelectTarget(item.value as string, item.group as ProviderType);
+                                handleSelectAssistantTarget(item);
                                 setOpen(false);
                               }}
                               className="flex w-full items-center justify-between"

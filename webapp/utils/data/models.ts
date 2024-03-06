@@ -31,14 +31,17 @@ export const getLocalModelsAsItems = (
   localProvider?: Provider,
 ): Ui.MenuItem[] => {
   const state = getProviderState(localProvider);
-  return backendContext.config.models.items.map((model) => ({
-    label: model.title || model.name,
-    value: model.name,
-    group: localProvider?.name || OplaProvider.name,
-    icon: Opla,
-    selected: model.name === selectedModelname,
-    state,
-  }));
+  return backendContext.config.models.items.map(
+    (model) =>
+      ({
+        label: model.title || model.name,
+        value: model.name,
+        group: localProvider?.name || OplaProvider.name,
+        icon: Opla,
+        selected: model.name === selectedModelname,
+        state,
+      }) as Ui.MenuItem,
+  );
 };
 
 export const getProviderModelsAsItems = (

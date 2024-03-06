@@ -37,9 +37,7 @@ export default function ThreadMenu({
   return selectedAssistantId ? (
     <AssistantMenu
       selectedAssistantId={selectedAssistantId}
-      onSelectTarget={() => {
-        throw new Error('Function not implemented.');
-      }}
+      selectedConversationId={selectedConversationId}
       onSelectMenu={() => {
         throw new Error('Function not implemented.');
       }}
