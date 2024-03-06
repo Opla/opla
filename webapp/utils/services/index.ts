@@ -59,7 +59,7 @@ export const getActiveService = (
       providerName = provider.name;
     }
   } else if (activeService && activeService.type === AIServiceType.Assistant) {
-    const { assistantId, targetId }  = activeService;
+    const { assistantId, targetId } = activeService;
     if (assistantId && targetId) {
       const target = assistant?.targets?.find((t) => t.id === targetId);
       if (target?.models && target.models.length > 0) {
@@ -80,7 +80,6 @@ export const getActiveService = (
     }
   }
 
-
   return { ...activeService, model, provider } as AIImplService;
 };
 
@@ -91,4 +90,4 @@ export const getAssistantId = (conversation: Conversation | undefined): string |
     if (service?.type === AIServiceType.Assistant) assistantId = service?.assistantId;
   }
   return assistantId;
-}
+};

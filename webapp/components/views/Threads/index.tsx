@@ -35,7 +35,6 @@ import Thread from './Thread';
 import Archive from './Archive';
 import ToolbarTogglePanels from './ToolbarTogglePanels';
 
-
 const getSelectedPage = (selectedThreadId: string | undefined, view: ViewName) =>
   `${view === ViewName.Recent ? Page.Threads : Page.Archives}${selectedThreadId ? `/${selectedThreadId}` : ''}`;
 

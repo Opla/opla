@@ -185,7 +185,10 @@ export const getServiceProvider = (modelService: AIService | undefined) => {
   return undefined;
 };
 
-export const getConversationModelId = (conversation: Conversation | undefined, assistant?: Assistant) => {
+export const getConversationModelId = (
+  conversation: Conversation | undefined,
+  assistant?: Assistant,
+) => {
   if (!conversation) {
     return undefined;
   }
@@ -194,7 +197,7 @@ export const getConversationModelId = (conversation: Conversation | undefined, a
   if (!modelId) {
     const assistantService = getConversationService(conversation, AIServiceType.Assistant);
     if (assistantService?.type === AIServiceType.Assistant) {
-      const { assistantId, targetId} = assistantService;
+      const { assistantId, targetId } = assistantService;
       if (assistantId && assistantId === assistant?.id) {
         const target = assistant.targets?.find((t) => t.id === targetId);
         modelId = target?.models?.[0];

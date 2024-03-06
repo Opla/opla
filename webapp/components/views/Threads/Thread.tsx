@@ -304,7 +304,8 @@ function Thread({
       return;
     }
 
-    const selectedModelNameOrId = getConversationModelId(selectedConversation, assistant) || activeModel;
+    const selectedModelNameOrId =
+      getConversationModelId(selectedConversation, assistant) || activeModel;
     const result = await preProcessingCommands(
       conversationId,
       currentPrompt,
@@ -358,7 +359,13 @@ function Thread({
 
     updatedConversations = clearPrompt(updatedConversation, updatedConversations);
 
-    logger.info('onSendMessage', modelName, selectedModelNameOrId, updatedMessages, updatedConversation);
+    logger.info(
+      'onSendMessage',
+      modelName,
+      selectedModelNameOrId,
+      updatedMessages,
+      updatedConversation,
+    );
     message = await sendMessage(
       message,
       updatedMessages,
@@ -384,7 +391,8 @@ function Thread({
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
     setIsProcessing({ ...isProcessing, [conversationId]: true });
 
-    const selectedModelNameOrId = getConversationModelId(selectedConversation, assistant) || activeModel;
+    const selectedModelNameOrId =
+      getConversationModelId(selectedConversation, assistant) || activeModel;
 
     let message: Message = changeMessageContent(
       previousMessage,
