@@ -131,6 +131,10 @@ export type Preset = BaseNamedRecord & {
   parameters?: Record<string, PresetParameter>;
   contextWindowPolicy?: ContextWindowPolicy;
   keepSystem?: boolean;
+
+  // For compatibility with Conversation
+  preset?: string;
+  model?: string;
 };
 
 export type ConversationUsage = {
