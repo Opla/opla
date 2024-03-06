@@ -88,11 +88,17 @@ export default function AssistantMenu({
   const assistant = getAssistant(selectedAssistantId) as Assistant;
   const service = conversation?.services?.[0] || getDefaultAssistantService(assistant);
   const selectedTargetId =
-    service.type === AIServiceType.Assistant ? service.targetId : _selectedTargetId || assistant?.targets?.[0].id;
-  console.log('assistant menu service', selectedTargetId, service, conversation?.services, assistant);
-  const target = assistant?.targets?.find(
-    (t) => t.id === selectedTargetId,
+    service.type === AIServiceType.Assistant
+      ? service.targetId
+      : _selectedTargetId || assistant?.targets?.[0].id;
+  console.log(
+    'assistant menu service',
+    selectedTargetId,
+    service,
+    conversation?.services,
+    assistant,
   );
+  const target = assistant?.targets?.find((t) => t.id === selectedTargetId);
   const targetState = target && !target.disabled ? Ui.BasicState.active : Ui.BasicState.disabled;
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
@@ -131,7 +137,10 @@ export default function AssistantMenu({
 
   const handleSelectAssistantTarget = async (item: Ui.MenuItem) => {
     const targetId = item.value as string;
-    const newConversation: Conversation = addConversationService(conversation, { ...service, targetId } as AIService);
+    const newConversation: Conversation = addConversationService(conversation, {
+      ...service,
+      targetId,
+    } as AIService);
     console.log('assistant menu', newConversation);
     const newConversations = updateConversation(newConversation, conversations);
     updateConversations(newConversations);
