@@ -59,6 +59,7 @@ import {
 import { getCommandManager, preProcessingCommands } from '@/utils/commands';
 import ContentView from '@/components/common/ContentView';
 import { useAssistantStore } from '@/stores';
+import { getDefaultAssistantService } from '@/utils/data/assistants';
 import PromptArea from './Prompt';
 import { ConversationPanel } from './Conversation';
 import ThreadMenu from './Menu';
@@ -517,7 +518,11 @@ function Thread({
         newConversation.temp = true;
         newConversation.name = conversationName;
         newConversation.currentPrompt = prompt;
-        if (service) {
+        if (assistant) {
+          const newService = getDefaultAssistantService(assistant);
+          addConversationService(newConversation, newService);
+          setService(undefined);
+        } else if (service) {
           addConversationService(newConversation, service);
           setService(undefined);
         }
