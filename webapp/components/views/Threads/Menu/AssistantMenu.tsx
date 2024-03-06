@@ -91,13 +91,6 @@ export default function AssistantMenu({
     service.type === AIServiceType.Assistant
       ? service.targetId
       : _selectedTargetId || assistant?.targets?.[0].id;
-  console.log(
-    'assistant menu service',
-    selectedTargetId,
-    service,
-    conversation?.services,
-    assistant,
-  );
   const target = assistant?.targets?.find((t) => t.id === selectedTargetId);
   const targetState = target && !target.disabled ? Ui.BasicState.active : Ui.BasicState.disabled;
   const [open, setOpen] = useState(false);
@@ -141,7 +134,6 @@ export default function AssistantMenu({
       ...service,
       targetId,
     } as AIService);
-    console.log('assistant menu', newConversation);
     const newConversations = updateConversation(newConversation, conversations);
     updateConversations(newConversations);
   };

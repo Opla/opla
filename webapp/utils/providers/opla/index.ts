@@ -25,7 +25,7 @@ import {
 } from '@/types';
 import { mapKeys } from '@/utils/data';
 import logger from '@/utils/logger';
-import { toCamelCase } from '@/utils/string';
+import { toCamelCase, toSnakeCase } from '@/utils/string';
 import { invokeTauri } from '@/utils/backend/tauri';
 import { z } from 'zod';
 
@@ -233,9 +233,10 @@ const completion = async (
     parameters,
   };
 
+  const llmProvider = mapKeys(provider, toSnakeCase);
   const response: LlmResponse = (await invokeTauri('llm_call_completion', {
     model: model.name,
-    llmProvider: provider,
+    llmProvider,
     query: { command: 'completion', options },
   })) as LlmResponse;
 
