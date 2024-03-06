@@ -28,6 +28,7 @@ import { ModalData } from '@/context/modals';
 export default function AlertDialog({
   id,
   title,
+  size='sm',
   visible,
   children,
   actions,
@@ -37,6 +38,7 @@ export default function AlertDialog({
 }: {
   id: string;
   title: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   visible: boolean;
   children: React.ReactNode;
   actions?: Ui.MenuItem[];
@@ -53,7 +55,7 @@ export default function AlertDialog({
     <Dialog
       id={id}
       open={visible}
-      size="sm"
+      size={size}
       onClose={() => {
         onClose?.(data);
       }}

@@ -49,16 +49,19 @@ export default function EditPreset<T>({
   presetProperties,
   provider,
   model,
+  portal = true,
   onChange,
 }: {
   presetProperties: Partial<Preset>;
   provider: Provider | undefined;
   model: Model | undefined;
+  portal?: boolean;
   onChange: (newpreset: T) => void;
 }) {
   const { t } = useTranslation();
   const { presets } = useContext(AppContext);
   const parametersDefinition = getCompletionParametersDefinition(provider);
+  console.log('parametersDefinition', parametersDefinition);
   const modelName = presetProperties?.model ?? model?.name;
   const preset = findCompatiblePreset(presetProperties?.preset, presets, modelName, provider);
   const {
@@ -142,6 +145,7 @@ export default function EditPreset<T>({
         presetProperties={presetProperties}
         model={modelName}
         provider={provider}
+        portal={portal}
         onChangePreset={handleChangePreset}
       />
       <Accordion type="multiple" className="w-full px-1" defaultValue={['settings-system']}>

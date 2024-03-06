@@ -24,21 +24,21 @@ import {
   CommandItem,
   CommandSeparator,
 } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverContentExt, PopoverTrigger } from '@/components/ui/popover';
 import { useContext } from 'react';
 import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
 import { Preset, Provider } from '@/types';
 import { createPreset, getCompatiblePresets } from '@/utils/data/presets';
 import { deepMerge } from '@/utils/data';
-import { ModalData, ModalsContext } from '@/context/modals';
-import { ModalIds } from '@/modals';
+import { ModalData, ModalsContext, ModalIds } from '@/context/modals';
 
 type PresetsProps = {
   preset: Preset | undefined;
   presetProperties: Partial<Preset>;
   model: string | undefined;
   provider: Provider | undefined;
+  portal?: boolean;
   onChangePreset: (preset: string) => void;
 };
 
@@ -47,6 +47,7 @@ export default function Presets({
   presetProperties,
   model,
   provider,
+  portal = true,
   onChangePreset,
 }: PresetsProps) {
   const { presets, setPresets } = useContext(AppContext);
@@ -78,6 +79,7 @@ export default function Presets({
   const deletePreset = (p: Preset) => {
     setPresets(presets.filter((ps) => ps.id !== p.id));
   };
+  const Content = portal ? PopoverContent : PopoverContentExt;
 
   return (
     <div className="w-full pb-4">
@@ -93,7 +95,7 @@ export default function Presets({
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
+        <Content className="w-full p-0">
           <Command>
             <CommandInput placeholder={t('Search preset...')} />
             <CommandEmpty>{t('No preset found.')}</CommandEmpty>
@@ -151,7 +153,7 @@ export default function Presets({
               </CommandGroup>
             )}
           </Command>
-        </PopoverContent>
+        </Content>
       </Popover>
     </div>
   );
