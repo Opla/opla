@@ -138,6 +138,7 @@ export type Preset = BaseNamedRecord &
   InlinePreset & {
     parentId?: string;
     readonly?: boolean;
+    disabled?: boolean;
   };
 
 export type ConversationUsage = {
@@ -405,12 +406,6 @@ export type ModelsConfiguration = {
   items: Array<Model>;
 };
 
-export type AITarget = BaseNamedRecord &
-  InlinePreset & {
-    parent?: string;
-    disabled?: boolean;
-  };
-
 export type AvatarIcon = {
   color?: string;
   url: string;
@@ -423,7 +418,7 @@ export type Agent = BaseNamedRecord & {
   version?: string;
   readonly?: boolean;
   system?: string;
-  targets?: AITarget[];
+  targets?: Preset[];
 };
 
 export type Assistant = Agent & {

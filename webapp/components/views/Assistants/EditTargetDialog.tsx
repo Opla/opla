@@ -16,7 +16,7 @@ import { useContext, useMemo, useState } from 'react';
 import { BrainCircuit, Settings2 } from 'lucide-react';
 import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
-import { AITarget, Model, Provider } from '@/types';
+import { Preset, Model, Provider } from '@/types';
 import { AppContext } from '@/context';
 import { findModelInAll, getModelsAsItems } from '@/utils/data/models';
 import logger from '@/utils/logger';
@@ -45,7 +45,7 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
     [providers, backendContext],
   );
   const [newParameters, setNewParameters] = useState<Record<string, ParameterValue>>({});
-  const target = data?.item as AITarget;
+  const target = data?.item as Preset;
   const { title, isNew, targetName } = useMemo(() => {
     let newTitle = 'Edit target';
     const isNewNew = !target.name;
@@ -92,7 +92,7 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
     }
   };
 
-  const handlePresetChange = (newPartialTarget: Partial<AITarget>) => {
+  const handlePresetChange = (newPartialTarget: Partial<Preset>) => {
     const keys = Object.keys(newPartialTarget);
     const params = { ...newParameters };
     keys.forEach((key) => {
@@ -148,7 +148,7 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
             </LabelParameter>
           </TabsContent>
           <TabsContent value="settings" className="h-full py-4">
-            <EditPreset<AITarget>
+            <EditPreset<Preset>
               presetProperties={{ ...target, ...newParameters }}
               provider={provider}
               model={model}

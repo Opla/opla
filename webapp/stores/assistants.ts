@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { Assistant, AITarget } from '@/types';
+import { Assistant, Preset } from '@/types';
 import { createBaseNamedRecord, createBaseRecord, updateRecord } from '@/utils/data';
 
 interface AssistantProps {
@@ -35,10 +35,10 @@ export interface AssistantSlice extends AssistantProps {
   createAssistant: (name: string, template?: Partial<Assistant>) => Assistant;
   updateAssistant: (newAssistant: Assistant) => void;
   deleteAssistant: (id: string) => void;
-  createTarget: () => AITarget;
-  updateTarget: (assistant: Assistant, newTarget: AITarget) => void;
+  createTarget: () => Preset;
+  updateTarget: (assistant: Assistant, newTarget: Preset) => void;
   deleteTarget: (assistant: Assistant, targetId: string) => void;
-  duplicateTarget: (target: AITarget) => AITarget;
+  duplicateTarget: (target: Preset) => Preset;
 }
 
 export type AssistantStore = ReturnType<typeof createAssistantSlice>;
@@ -72,11 +72,11 @@ const createAssistantSlice =
       set((state: AssistantSlice) => ({ assistants: state.assistants.filter((a) => a.id !== id) }));
     },
     createTarget: () => {
-      const newTarget: AITarget = createBaseRecord<AITarget>();
+      const newTarget: Preset = createBaseRecord<Preset>();
       return newTarget;
     },
-    updateTarget: (assistant: Assistant, newTarget: AITarget) => {
-      const updatedTarget: AITarget = updateRecord<AITarget>(newTarget);
+    updateTarget: (assistant: Assistant, newTarget: Preset) => {
+      const updatedTarget: Preset = updateRecord<Preset>(newTarget);
       let targets = assistant.targets || [];
       if (targets.find((t) => t.id === updatedTarget.id)) {
         targets = targets.map((t) => (t.id === updatedTarget.id ? updatedTarget : t));
@@ -105,8 +105,8 @@ const createAssistantSlice =
         ),
       }));
     },
-    duplicateTarget: (target: AITarget) => {
-      const newTarget: AITarget = createBaseRecord<AITarget>();
+    duplicateTarget: (target: Preset) => {
+      const newTarget: Preset = createBaseRecord<Preset>();
       return { ...target, ...newTarget };
     },
   });
