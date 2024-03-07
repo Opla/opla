@@ -141,7 +141,7 @@ export default function EditPreset<T>({
   };
 
   return (
-    <ScrollArea className={cn("h-[480px] w-full px-4", className)}>
+    <ScrollArea className={cn('h-[480px] w-full px-4', className)}>
       <Presets
         preset={preset}
         presetProperties={presetProperties}
