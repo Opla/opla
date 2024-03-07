@@ -62,11 +62,11 @@ export enum ContentType {
 export type Content =
   | string
   | {
-      type: ContentType;
-      parts: string[];
-      raw?: string[];
-      metadata?: Metadata;
-    };
+    type: ContentType;
+    parts: string[];
+    raw?: string[];
+    metadata?: Metadata;
+  };
 
 export enum MessageStatus {
   Pending = 'pending',
@@ -87,13 +87,13 @@ export type Asset = BaseIdRecord & {
   state?: AssetState;
 } & (
     | {
-        type: 'link';
-        url: string;
-      }
+      type: 'link';
+      url: string;
+    }
     | {
-        type: 'file';
-        file: string;
-      }
+      type: 'file';
+      file: string;
+    }
   );
 
 export type Message = BaseIdRecord & {
@@ -163,17 +163,17 @@ export enum AIServiceType {
 export type AIService = {
   disabled?: boolean;
 } & (
-  | {
+    | {
       type: AIServiceType.Model;
       modelId: string;
       providerType?: ProviderType;
     }
-  | {
+    | {
       type: AIServiceType.Assistant;
       assistantId: string;
       targetId?: string;
     }
-);
+  );
 
 export type AIImplService = AIService & {
   model: Model | undefined;
@@ -240,7 +240,7 @@ export type CompletionParameterDefinition = ParameterDefinition;
 
 export type CompletionParametersDefinition = Record<string, CompletionParameterDefinition>;
 
-export type ProviderDefinition = {
+export type ImplProvider = {
   name: string;
   type: ProviderType;
   description: string;
@@ -257,6 +257,7 @@ export type ProviderDefinition = {
       parameters?: LlmParameters[],
     ) => Promise<LlmResponse>;
   };
+  tokenize?: (text: string) => Promise<number[]>;
 };
 
 export type Provider = BaseNamedRecord & {

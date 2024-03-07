@@ -20,7 +20,7 @@ import {
   LlmResponse,
   Model,
   Provider,
-  ProviderDefinition,
+  ImplProvider,
   ProviderType,
 } from '@/types';
 import { mapKeys } from '@/utils/data';
@@ -248,7 +248,7 @@ const completion = async (
   throw new Error(`${NAME} completion error ${response}`);
 };
 
-const OplaProvider: ProviderDefinition = {
+const OplaProvider: ImplProvider = {
   name: NAME,
   type: TYPE,
   description: DESCRIPTION,

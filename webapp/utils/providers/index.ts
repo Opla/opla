@@ -113,3 +113,11 @@ export const models = async (provider: Provider): Promise<Model[]> => {
   }
   return [];
 };
+
+export const tokenize = async (activeService: AIImplService, text: string): Promise<string[]> => {
+  const { provider } = activeService;
+  if (provider?.type === ProviderType.openai) {
+    return OpenAI.tokenize(text);
+  }
+  return Opla.tokenize(text);
+}

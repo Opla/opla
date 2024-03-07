@@ -10,7 +10,7 @@ import {
   LlmResponse,
   Model,
   Provider,
-  ProviderDefinition,
+  ImplProvider,
   ProviderType,
 } from '@/types';
 import { mapKeys } from '@/utils/data';
@@ -165,7 +165,7 @@ const completion = async (
   throw new Error(`${NAME} completion completion error ${response}`);
 };
 
-const OpenAIProvider: ProviderDefinition = {
+const OpenAIProvider: ImplProvider = {
   name: NAME,
   type: TYPE,
   description: DESCRIPTION,
