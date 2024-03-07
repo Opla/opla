@@ -120,21 +120,23 @@ export enum ContextWindowPolicy {
   Last = 'last',
 }
 
-export type Preset = BaseNamedRecord & {
-  parentId?: string;
-  provider?: string;
+export type InlinePreset = {
   models?: string[];
-
-  readonly?: boolean;
-
+  provider?: string;
   system?: string;
   parameters?: Record<string, PresetParameter>;
   contextWindowPolicy?: ContextWindowPolicy;
   keepSystem?: boolean;
 
   // For compatibility with Conversation
+  // Should be replaced
   preset?: string;
   model?: string;
+};
+
+export type Preset = BaseNamedRecord & InlinePreset & {
+  parentId?: string;
+  readonly?: boolean;
 };
 
 export type ConversationUsage = {
@@ -176,16 +178,12 @@ export type AIImplService = AIService & {
   provider: Provider | undefined;
 };
 
-export type Conversation = BaseNamedRecord & {
+export type Conversation = BaseNamedRecord & InlinePreset & {
   messages: Message[] | undefined;
   pluginIds?: string[];
-  preset?: string;
+
   currentPrompt?: string | ParsedPrompt;
   note?: string;
-
-  // Deprecated replaced by service
-  model?: string;
-  provider?: string;
 
   services?: AIService[];
 
@@ -193,11 +191,6 @@ export type Conversation = BaseNamedRecord & {
   temp?: boolean;
 
   usage?: ConversationUsage;
-
-  system?: string;
-  parameters?: Record<string, PresetParameter>;
-  contextWindowPolicy?: ContextWindowPolicy;
-  keepSystem?: boolean;
 
   scrollPosition?: number;
 
@@ -410,17 +403,9 @@ export type ModelsConfiguration = {
   items: Array<Model>;
 };
 
-export type AITarget = BaseNamedRecord & {
+export type AITarget = BaseNamedRecord & InlinePreset & {
   parent?: string;
   disabled?: boolean;
-  
-  models?: string[];
-  provider?: string;
-
-  system?: string;
-  parameters?: Record<string, PresetParameter>;
-  contextWindowPolicy?: ContextWindowPolicy;
-  keepSystem?: boolean;
 };
 
 export type AvatarIcon = {
