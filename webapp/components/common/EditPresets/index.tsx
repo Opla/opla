@@ -36,6 +36,7 @@ import { ContextWindowPolicy, Model, Preset, PresetParameter, Provider } from '@
 import { toast } from '@/components/ui/Toast';
 import { ContextWindowPolicies, DefaultContextWindowPolicy } from '@/utils/constants';
 import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
+import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../ui/accordion';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Textarea } from '../../ui/textarea';
@@ -50,12 +51,14 @@ export default function EditPreset<T>({
   provider,
   model,
   portal = true,
+  className,
   onChange,
 }: {
   presetProperties: Partial<Preset>;
   provider: Provider | undefined;
   model: Model | undefined;
   portal?: boolean;
+  className?: string;
   onChange: (newpreset: Partial<T>) => void;
 }) {
   const { t } = useTranslation();
@@ -138,7 +141,7 @@ export default function EditPreset<T>({
   };
 
   return (
-    <ScrollArea className="h-[480px] w-full px-4">
+    <ScrollArea className={cn("h-[480px] w-full px-4", className)}>
       <Presets
         preset={preset}
         presetProperties={presetProperties}

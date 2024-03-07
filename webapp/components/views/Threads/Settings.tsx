@@ -106,6 +106,7 @@ export default function Settings({
             provider={provider}
             model={model}
             onChange={handleChangePreset}
+            className='h-full'
           />
         </TabsContent>
         <TabsContent value="appearance" className="px-4">
