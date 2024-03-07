@@ -62,11 +62,11 @@ export enum ContentType {
 export type Content =
   | string
   | {
-      type: ContentType;
-      parts: string[];
-      raw?: string[];
-      metadata?: Metadata;
-    };
+    type: ContentType;
+    parts: string[];
+    raw?: string[];
+    metadata?: Metadata;
+  };
 
 export enum MessageStatus {
   Pending = 'pending',
@@ -87,13 +87,13 @@ export type Asset = BaseIdRecord & {
   state?: AssetState;
 } & (
     | {
-        type: 'link';
-        url: string;
-      }
+      type: 'link';
+      url: string;
+    }
     | {
-        type: 'file';
-        file: string;
-      }
+      type: 'file';
+      file: string;
+    }
   );
 
 export type Message = BaseIdRecord & {
@@ -163,17 +163,17 @@ export enum AIServiceType {
 export type AIService = {
   disabled?: boolean;
 } & (
-  | {
+    | {
       type: AIServiceType.Model;
       modelId: string;
       providerType?: ProviderType;
     }
-  | {
+    | {
       type: AIServiceType.Assistant;
       assistantId: string;
       targetId?: string;
     }
-);
+  );
 
 export type AIImplService = AIService & {
   model: Model | undefined;
@@ -255,7 +255,7 @@ export type ImplProvider = {
       system?: string,
       conversationId?: string,
       parameters?: LlmParameters[],
-    ) => Promise<LlmResponse>;
+    ) => Promise<LlmCompletionResponse>;
   };
   tokenize?: (text: string) => Promise<number[]>;
 };
@@ -485,7 +485,7 @@ export type LlmUsage = {
   totalPerSecond?: number;
 };
 
-export type LlmResponse = {
+export type LlmCompletionResponse = {
   created?: number;
   status?: string;
   content: string;
@@ -503,6 +503,10 @@ export type LlmStreamResponse = {
 
 export type Cpu = {
   usage: number;
+};
+
+export type LlmTokenizeResponse = {
+  tokens: number[];
 };
 
 export type Sys = {

@@ -23,7 +23,7 @@ import {
   OplaContext,
   ServerStatus,
   Settings,
-  LlmResponse,
+  LlmCompletionResponse,
   LlmStreamResponse,
   Download,
   ServerParameters,
@@ -202,7 +202,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       logger.info('stream event', event, backendContext, context);
-      const response = (await mapKeys(event.payload, toCamelCase)) as LlmResponse;
+      const response = (await mapKeys(event.payload, toCamelCase)) as LlmCompletionResponse;
       if (!response.conversationId) {
         logger.error('stream event without conversationId', response);
         return;

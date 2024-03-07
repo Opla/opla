@@ -7,7 +7,7 @@ import {
   LlmMessage,
   LlmParameters,
   LlmQueryCompletion,
-  LlmResponse,
+  LlmCompletionResponse,
   Model,
   Provider,
   ImplProvider,
@@ -130,7 +130,7 @@ const completion = async (
   system = DEFAULT_SYSTEM,
   conversationId?: string,
   parameters: LlmParameters[] = [],
-): Promise<LlmResponse> => {
+): Promise<LlmCompletionResponse> => {
   if (!model) {
     throw new Error('Model not found');
   }
@@ -151,11 +151,11 @@ const completion = async (
     },
     toSnakeCase,
   );
-  const response: LlmResponse = (await invokeTauri('llm_call_completion', {
+  const response: LlmCompletionResponse = (await invokeTauri('llm_call_completion', {
     model: model.id,
     llmProvider: provider,
     query: { command: 'completion', options },
-  })) as LlmResponse;
+  })) as LlmCompletionResponse;
 
   const { content } = response;
   if (content) {

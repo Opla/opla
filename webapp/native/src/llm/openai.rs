@@ -21,7 +21,7 @@ use futures_util::stream::StreamExt;
 use crate::llm::{
     LlmQuery,
     LlmQueryCompletion,
-    LlmResponse,
+    LlmCompletionResponse,
     LlmResponseError,
     LlmUsage,
     LlmError,
@@ -160,8 +160,8 @@ impl OpenAIChatCompletion {
         }
     }
 
-    fn to_llm_response(&self) -> LlmResponse {
-        let mut response = LlmResponse::new(
+    fn to_llm_response(&self) -> LlmCompletionResponse {
+        let mut response = LlmCompletionResponse::new(
             self.created,
             "success",
             &self.choices[0].message.content
@@ -186,7 +186,7 @@ async fn request<R: Runtime>(
     url: String,
     secret_key: &str,
     parameters: OpenAIBodyCompletion
-) -> Result<LlmResponse, Box<dyn std::error::Error>> {
+) -> Result<LlmCompletionResponse, Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
     let result = client.post(url).bearer_auth(&secret_key).json(&parameters).send().await;
     let response = match result {
@@ -223,8 +223,8 @@ async fn stream_request<R: Runtime>(
     url: String,
     secret_key: &str,
     parameters: OpenAIBodyCompletion,
-    callback: Option<impl FnMut(Result<LlmResponse, LlmError>) + Copy>
-) -> Result<LlmResponse, Box<dyn std::error::Error>> {
+    callback: Option<impl FnMut(Result<LlmCompletionResponse, LlmError>) + Copy>
+) -> Result<LlmCompletionResponse, Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
     let result = client.post(url).bearer_auth(&secret_key).json(&parameters).send().await;
     let response = match result {
@@ -278,7 +278,7 @@ async fn stream_request<R: Runtime>(
                         Some(mut cb) => {
                             cb(
                                 Ok(
-                                    LlmResponse::new(
+                                    LlmCompletionResponse::new(
                                         chrono::Utc::now().timestamp_millis(),
                                         "finished",
                                         "done"
@@ -303,7 +303,7 @@ async fn stream_request<R: Runtime>(
                     Some(mut cb) => {
                         cb(
                             Ok(
-                                LlmResponse::new(
+                                LlmCompletionResponse::new(
                                     chunk.created,
                                     "success",
                                     chunk.choices[0].delta.content
@@ -340,8 +340,8 @@ pub async fn call_completion<R: Runtime>(
     secret_key: &str,
     model: &str,
     query: LlmQuery<LlmQueryCompletion>,
-    callback: Option<impl FnMut(Result<LlmResponse, LlmError>) + Copy>
-) -> Result<LlmResponse, Box<dyn std::error::Error>> {
+    callback: Option<impl FnMut(Result<LlmCompletionResponse, LlmError>) + Copy>
+) -> Result<LlmCompletionResponse, Box<dyn std::error::Error>> {
     let start_time = chrono::Utc::now().timestamp_millis();
     let url = format!("{}/chat/{}s", api, query.command);
     println!(

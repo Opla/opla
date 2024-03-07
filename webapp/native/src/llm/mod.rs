@@ -62,6 +62,7 @@ pub struct LlmParameter {
 pub struct LlmQueryCompletion {
     pub conversation_id: Option<String>,
     pub messages: Vec<LlmMessage>,
+    pub prompt: Option<String>,
     pub parameters: Option<Vec<LlmParameter>>,
 }
 
@@ -161,14 +162,14 @@ impl LlmUsage {
 
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LlmResponse {
+pub struct LlmCompletionResponse {
     pub created: Option<i64>,
     pub status: Option<String>,
     pub content: String,
     pub conversation_id: Option<String>,
     pub usage: Option<LlmUsage>,
 }
-impl LlmResponse {
+impl LlmCompletionResponse {
     pub fn new(created: i64, status: &str, content: &str) -> Self {
         Self {
             created: Some(created),
@@ -183,4 +184,9 @@ impl LlmResponse {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmResponseError {
     pub error: LlmError,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LlmTokenizeResponse {
+    pub tokens: Vec<u64>,
 }
