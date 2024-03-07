@@ -116,4 +116,4 @@ function ModalsProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export { ModalsContext, ModalsProvider };
+export { ModalsContext, ModalsProvider, ModalIds };

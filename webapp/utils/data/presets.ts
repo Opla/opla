@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Conversation, Preset, PresetParameter, Provider } from '@/types';
+import { Preset, PresetParameter, Provider } from '@/types';
 import { createBaseNamedRecord, deepEqual } from '.';
 
 export const defaultPresets: Preset[] = [
@@ -138,7 +138,7 @@ export const mergeParameters = (
 
 export const getCompletePresetProperties = (
   _preset: Preset | undefined,
-  conversation: Conversation | undefined,
+  conversation: Partial<Preset> | undefined,
   presets: Preset[],
   includeParent = false,
 ) => {

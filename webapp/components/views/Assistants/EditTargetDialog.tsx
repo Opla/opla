@@ -13,12 +13,17 @@
 // limitations under the License.
 
 import { useContext, useMemo, useState } from 'react';
+import { BrainCircuit, Settings2 } from 'lucide-react';
 import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
-import { AITarget } from '@/types';
+import { Preset, Model, Provider } from '@/types';
 import { AppContext } from '@/context';
-import { getModelsAsItems } from '@/utils/data/models';
+import { findModelInAll, getModelsAsItems } from '@/utils/data/models';
 import logger from '@/utils/logger';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import EditPreset from '@/components/common/EditPresets';
+import { findProvider, getLocalProvider } from '@/utils/data/providers';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import AlertDialog from '../../common/AlertDialog';
 import Parameter, { ParameterValue } from '../../common/Parameter';
 import Combobox from '../../common/Combobox';
@@ -40,7 +45,7 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
     [providers, backendContext],
   );
   const [newParameters, setNewParameters] = useState<Record<string, ParameterValue>>({});
-  const target = data?.item as AITarget;
+  const target = data?.item as Preset;
   const { title, isNew, targetName } = useMemo(() => {
     let newTitle = 'Edit target';
     const isNewNew = !target.name;
@@ -53,10 +58,21 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
     }
     return { title: newTitle, isNew: isNewNew, targetName: name };
   }, [target]);
+
   const isDisabled = !(
     (newParameters.name || targetName) &&
     (newParameters.models || target.models)
   );
+
+  let model: Model | undefined;
+  let provider: Provider | undefined;
+  const modelName = (newParameters?.models as string[] | undefined)?.[0] || target.models?.[0];
+  if (modelName) {
+    model = findModelInAll(modelName, providers, backendContext);
+    provider = target.provider
+      ? findProvider(target?.provider, providers)
+      : getLocalProvider(providers);
+  }
   const handleChange = (name: string, value: ParameterValue) => {
     setNewParameters({ ...newParameters, [name]: value });
   };
@@ -76,10 +92,20 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
     }
   };
 
+  const handlePresetChange = (newPartialTarget: Partial<Preset>) => {
+    const keys = Object.keys(newPartialTarget);
+    const params = { ...newParameters };
+    keys.forEach((key) => {
+      params[key] = newPartialTarget[key as keyof typeof newPartialTarget] as ParameterValue;
+    });
+    setNewParameters(params);
+  };
+
   return (
     <AlertDialog
       id={id}
       title={t(title)}
+      size="lg"
       actions={[
         { label: isNew ? t('Create') : t('Save'), value: 'Update', disabled: isDisabled },
         { label: t('Cancel'), value: 'Cancel', variant: 'outline' },
@@ -89,28 +115,49 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
       data={data}
       onAction={handleAction}
     >
-      <div>
-        <LabelParameter label={t('Name')} className="space-y-0">
-          <Parameter
-            placeholder={t('Insert target name...')}
-            inputCss="w-full"
-            name="name"
-            value={newParameters.name || targetName || ''}
-            onChange={handleChange}
-          />
-        </LabelParameter>
+      <TooltipProvider>
+        <Tabs>
+          <TabsList className="justify-left w-full gap-4">
+            <TabsTrigger value="config">
+              <BrainCircuit className="h-4 w-4" strokeWidth={1.5} />
+            </TabsTrigger>
+            <TabsTrigger value="settings">
+              <Settings2 className="h-4 w-4" strokeWidth={1.5} />
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="config" className="h-full py-4">
+            <LabelParameter label={t('Name')} className="space-y-0">
+              <Parameter
+                placeholder={t('Insert target name...')}
+                inputCss="w-full"
+                name="name"
+                value={newParameters.name || targetName || ''}
+                onChange={handleChange}
+              />
+            </LabelParameter>
 
-        <LabelParameter label={t('Model')}>
-          <Combobox
-            items={modelItems}
-            selected={(newParameters.models as string[])?.[0] || target.models?.[0]}
-            onSelect={handleSelectModel}
-            className="w-full bg-transparent"
-            placeholder="Select a model..."
-            portal={false}
-          />
-        </LabelParameter>
-      </div>
+            <LabelParameter label={t('Model')}>
+              <Combobox
+                items={modelItems}
+                selected={(newParameters.models as string[])?.[0] || target.models?.[0]}
+                onSelect={handleSelectModel}
+                className="w-full bg-transparent"
+                placeholder="Select a model..."
+                portal={false}
+              />
+            </LabelParameter>
+          </TabsContent>
+          <TabsContent value="settings" className="h-full py-4">
+            <EditPreset<Preset>
+              presetProperties={{ ...target, ...newParameters }}
+              provider={provider}
+              model={model}
+              portal={false}
+              onChange={handlePresetChange}
+            />
+          </TabsContent>
+        </Tabs>
+      </TooltipProvider>
     </AlertDialog>
   );
 }

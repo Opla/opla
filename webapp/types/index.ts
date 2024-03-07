@@ -120,18 +120,26 @@ export enum ContextWindowPolicy {
   Last = 'last',
 }
 
-export type Preset = BaseNamedRecord & {
-  parentId?: string;
-  provider?: string;
+export type InlinePreset = {
   models?: string[];
-
-  readonly?: boolean;
-
+  provider?: string;
   system?: string;
   parameters?: Record<string, PresetParameter>;
   contextWindowPolicy?: ContextWindowPolicy;
   keepSystem?: boolean;
+
+  // For compatibility with Conversation
+  // Should be replaced
+  preset?: string;
+  model?: string;
 };
+
+export type Preset = BaseNamedRecord &
+  InlinePreset & {
+    parentId?: string;
+    readonly?: boolean;
+    disabled?: boolean;
+  };
 
 export type ConversationUsage = {
   promptTokens?: number;
@@ -172,33 +180,25 @@ export type AIImplService = AIService & {
   provider: Provider | undefined;
 };
 
-export type Conversation = BaseNamedRecord & {
-  messages: Message[] | undefined;
-  pluginIds?: string[];
-  preset?: string;
-  currentPrompt?: string | ParsedPrompt;
-  note?: string;
+export type Conversation = BaseNamedRecord &
+  InlinePreset & {
+    messages: Message[] | undefined;
+    pluginIds?: string[];
 
-  // Deprecated replaced by service
-  model?: string;
-  provider?: string;
+    currentPrompt?: string | ParsedPrompt;
+    note?: string;
 
-  services?: AIService[];
+    services?: AIService[];
 
-  importedFrom?: string;
-  temp?: boolean;
+    importedFrom?: string;
+    temp?: boolean;
 
-  usage?: ConversationUsage;
+    usage?: ConversationUsage;
 
-  system?: string;
-  parameters?: Record<string, PresetParameter>;
-  contextWindowPolicy?: ContextWindowPolicy;
-  keepSystem?: boolean;
+    scrollPosition?: number;
 
-  scrollPosition?: number;
-
-  assets?: Asset | Asset[];
-};
+    assets?: Asset | Asset[];
+  };
 
 export type Entity = {
   name: string;
@@ -406,18 +406,6 @@ export type ModelsConfiguration = {
   items: Array<Model>;
 };
 
-export type AITarget = BaseNamedRecord & {
-  parent?: string;
-  disabled?: boolean;
-  models?: string[];
-  provider?: string;
-
-  system?: string;
-  parameters?: Record<string, PresetParameter>;
-  contextWindowPolicy?: ContextWindowPolicy;
-  keepSystem?: boolean;
-};
-
 export type AvatarIcon = {
   color?: string;
   url: string;
@@ -430,7 +418,7 @@ export type Agent = BaseNamedRecord & {
   version?: string;
   readonly?: boolean;
   system?: string;
-  targets?: AITarget[];
+  targets?: Preset[];
 };
 
 export type Assistant = Agent & {
