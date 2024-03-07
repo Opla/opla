@@ -24,11 +24,13 @@ import { ParsedPrompt } from '../parsers';
 import { CommandManager } from '../commands/types';
 import { invokeTauri } from '../backend/tauri';
 
-
-export const tokenize = async (activeService: AIImplService, text: string): Promise<LlmTokenizeResponse> => {
+export const tokenize = async (
+  activeService: AIImplService,
+  text: string,
+): Promise<LlmTokenizeResponse> => {
   const { provider, model } = activeService;
   let response: LlmTokenizeResponse;
-  if (model && provider){
+  if (model && provider) {
     response = await invokeTauri<LlmTokenizeResponse>('llm_call_tokenize', {
       model: model.name,
       provider: provider.name,
@@ -95,11 +97,12 @@ export const completion = async (
   const { model, provider } = activeService;
   const llmParameters: LlmParameters[] = [];
   const preset = findCompatiblePreset(conversation?.preset, presets, model?.name, provider);
-  const { parameters: presetParameters, system, contextWindowPolicy = ContextWindowPolicy.None, keepSystem = true } = getCompletePresetProperties(
-    preset,
-    conversation,
-    presets,
-  );
+  const {
+    parameters: presetParameters,
+    system,
+    contextWindowPolicy = ContextWindowPolicy.None,
+    keepSystem = true,
+  } = getCompletePresetProperties(preset, conversation, presets);
   const commandParameters = commandManager.findCommandParameters(prompt);
   const parameters = { ...presetParameters, ...commandParameters };
   let { key } = provider || {};
@@ -120,7 +123,13 @@ export const completion = async (
     });
   }
   const index = conversationMessages.findIndex((m) => m.id === message.id);
-  const messages = buildContext(conversation, conversationMessages, index, contextWindowPolicy, keepSystem);
+  const messages = buildContext(
+    conversation,
+    conversationMessages,
+    index,
+    contextWindowPolicy,
+    keepSystem,
+  );
 
   if (provider?.type === ProviderType.openai) {
     return OpenAI.completion.invoke(
@@ -142,4 +151,3 @@ export const models = async (provider: Provider): Promise<Model[]> => {
   }
   return [];
 };
-
