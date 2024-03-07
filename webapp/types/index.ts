@@ -134,10 +134,11 @@ export type InlinePreset = {
   model?: string;
 };
 
-export type Preset = BaseNamedRecord & InlinePreset & {
-  parentId?: string;
-  readonly?: boolean;
-};
+export type Preset = BaseNamedRecord &
+  InlinePreset & {
+    parentId?: string;
+    readonly?: boolean;
+  };
 
 export type ConversationUsage = {
   promptTokens?: number;
@@ -178,24 +179,25 @@ export type AIImplService = AIService & {
   provider: Provider | undefined;
 };
 
-export type Conversation = BaseNamedRecord & InlinePreset & {
-  messages: Message[] | undefined;
-  pluginIds?: string[];
+export type Conversation = BaseNamedRecord &
+  InlinePreset & {
+    messages: Message[] | undefined;
+    pluginIds?: string[];
 
-  currentPrompt?: string | ParsedPrompt;
-  note?: string;
+    currentPrompt?: string | ParsedPrompt;
+    note?: string;
 
-  services?: AIService[];
+    services?: AIService[];
 
-  importedFrom?: string;
-  temp?: boolean;
+    importedFrom?: string;
+    temp?: boolean;
 
-  usage?: ConversationUsage;
+    usage?: ConversationUsage;
 
-  scrollPosition?: number;
+    scrollPosition?: number;
 
-  assets?: Asset | Asset[];
-};
+    assets?: Asset | Asset[];
+  };
 
 export type Entity = {
   name: string;
@@ -403,10 +405,11 @@ export type ModelsConfiguration = {
   items: Array<Model>;
 };
 
-export type AITarget = BaseNamedRecord & InlinePreset & {
-  parent?: string;
-  disabled?: boolean;
-};
+export type AITarget = BaseNamedRecord &
+  InlinePreset & {
+    parent?: string;
+    disabled?: boolean;
+  };
 
 export type AvatarIcon = {
   color?: string;
