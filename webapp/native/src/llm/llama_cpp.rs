@@ -18,7 +18,7 @@ use tauri::Runtime;
 use serde::{ Deserialize, Serialize };
 use crate::llm::{ LlmQuery, LlmCompletionResponse, LlmUsage };
 
-use super::LlmTokenizeResponse;
+use super::{ LlmCompletionOptions, LlmTokenizeResponse };
 
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -49,8 +49,23 @@ pub struct LlamaCppQueryCompletion {
 }
 
 impl LlmQueryCompletion {
-    fn to_llama_cpp_parameters(&self) -> LlamaCppQueryCompletion {
+    fn to_llama_cpp_parameters(
+        &self,
+        options: Option<LlmCompletionOptions>
+    ) -> LlamaCppQueryCompletion {
         let mut prompt = String::new();
+        match options {
+            Some(options) => {
+                match options.system {
+                    Some(system) => {
+                        prompt.push_str(&format!("{}\n", system));
+                    }
+                    None => {}
+                }
+            }
+            None => {}
+        }
+        // TODO: handle context_window_policy and keep_system
         for message in &self.messages {
             match message.role.as_str() {
                 "user" => {
@@ -140,7 +155,6 @@ impl LlamaCppChatCompletion {
     }
 }
 
-
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlamaCppQueryTokenize {
     pub content: String,
@@ -166,16 +180,17 @@ impl LLamaCppServer {
     }
 
     fn get_api(&self, server_parameters: &ServerParameters, endpoint: String) -> String {
-                // TODO https support
+        // TODO https support
         format!("http://{:}:{:}/{}", server_parameters.host, server_parameters.port, endpoint)
     }
 
     pub async fn call_completion<R: Runtime>(
         &mut self,
         query: LlmQuery<LlmQueryCompletion>,
-        server_parameters: &ServerParameters
+        server_parameters: &ServerParameters,
+        completion_options: Option<LlmCompletionOptions>
     ) -> Result<LlmCompletionResponse, Box<dyn std::error::Error>> {
-        let parameters = query.options.to_llama_cpp_parameters();
+        let parameters = query.options.to_llama_cpp_parameters(completion_options);
 
         let api_url = self.get_api(server_parameters, query.command);
         let client = reqwest::Client::new();
@@ -202,7 +217,7 @@ impl LLamaCppServer {
         Ok(response.to_llm_response())
     }
 
-        pub async fn call_tokenize<R: Runtime>(
+    pub async fn call_tokenize<R: Runtime>(
         &mut self,
         text: String,
         server_parameters: &ServerParameters

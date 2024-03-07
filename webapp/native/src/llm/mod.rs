@@ -66,6 +66,14 @@ pub struct LlmQueryCompletion {
     pub parameters: Option<Vec<LlmParameter>>,
 }
 
+#[serde_with::skip_serializing_none]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LlmCompletionOptions {
+    pub context_window_policy: Option<String>,
+    pub keep_system: Option<bool>,
+    pub system: Option<String>,
+}
+
 impl LlmQueryCompletion {
     pub fn get_parameter_value(&self, key: &str) -> Option<String> {
         let parameters = match &self.parameters {

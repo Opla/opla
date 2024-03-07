@@ -15,6 +15,8 @@ import {
   ProviderType,
   LlmTokenizeResponse,
   ContextWindowPolicy,
+  ImplProvider,
+  LlmQueryCompletion,
 } from '@/types';
 import OpenAI from './openai';
 import Opla from './opla';
@@ -23,6 +25,9 @@ import { getMessageContentAsString } from '../data/messages';
 import { ParsedPrompt } from '../parsers';
 import { CommandManager } from '../commands/types';
 import { invokeTauri } from '../backend/tauri';
+import { mapKeys } from '../data';
+import { toCamelCase, toSnakeCase } from '../string';
+import logger from '../logger';
 
 export const tokenize = async (
   activeService: AIImplService,
@@ -42,7 +47,7 @@ export const tokenize = async (
   return response;
 };
 
-export const buildContext = (
+export const createLlmMessages = (
   conversation: Conversation,
   messages: Message[],
   index: number,
@@ -67,7 +72,7 @@ export const buildContext = (
 
   const llmMessages: LlmMessage[] = context.map((m) => ({
     content: getMessageContentAsString(m),
-    role: m.author?.role === 'user' ? 'user' : 'assistant',
+    role: m.author?.role,
     name: m.author?.name,
   }));
   return llmMessages;
@@ -97,12 +102,20 @@ export const completion = async (
   const { model, provider } = activeService;
   const llmParameters: LlmParameters[] = [];
   const preset = findCompatiblePreset(conversation?.preset, presets, model?.name, provider);
-  const {
-    parameters: presetParameters,
-    system,
-    contextWindowPolicy = ContextWindowPolicy.None,
-    keepSystem = true,
-  } = getCompletePresetProperties(preset, conversation, presets);
+  const { parameters: presetParameters, ...completionOptions } = getCompletePresetProperties(
+    preset,
+    conversation,
+    presets,
+  );
+
+  let implProvider: ImplProvider;
+  if (provider?.type === ProviderType.opla) {
+    implProvider = Opla;
+  } else {
+    implProvider = OpenAI;
+  }
+
+  const { contextWindowPolicy = ContextWindowPolicy.None, keepSystem = true } = completionOptions;
   const commandParameters = commandManager.findCommandParameters(prompt);
   const parameters = { ...presetParameters, ...commandParameters };
   let { key } = provider || {};
@@ -122,8 +135,18 @@ export const completion = async (
       }
     });
   }
+  if (
+    implProvider.completion.parameters.stream.defaultValue &&
+    !llmParameters.find((p) => p.key === 'stream')
+  ) {
+    llmParameters.push({
+      key: 'stream',
+      value: String(implProvider.completion.parameters.stream.defaultValue),
+    });
+  }
+
   const index = conversationMessages.findIndex((m) => m.id === message.id);
-  const messages = buildContext(
+  const messages = createLlmMessages(
     conversation,
     conversationMessages,
     index,
@@ -131,17 +154,29 @@ export const completion = async (
     keepSystem,
   );
 
-  if (provider?.type === ProviderType.openai) {
-    return OpenAI.completion.invoke(
-      model,
-      { ...provider, key },
-      messages,
-      system,
-      conversation.id,
-      llmParameters,
-    );
+  const options: LlmQueryCompletion = mapKeys(
+    {
+      messages, // : [systemMessage, ...messages],
+      conversationId: conversation.id,
+      parameters: llmParameters,
+    },
+    toSnakeCase,
+  );
+
+  const llmProvider = mapKeys({ ...provider, key }, toSnakeCase);
+  const response: LlmCompletionResponse = (await invokeTauri('llm_call_completion', {
+    model: model.name,
+    llmProvider,
+    query: { command: 'completion', options },
+    completionOptions: mapKeys(completionOptions, toSnakeCase),
+  })) as LlmCompletionResponse;
+
+  const { content } = response;
+  if (content) {
+    logger.info(`${implProvider.name} completion response`, response);
+    return mapKeys(response, toCamelCase);
   }
-  return Opla.completion.invoke(model, provider, messages, system, conversation.id, llmParameters);
+  throw new Error(`${implProvider.name} completion error ${response}`);
 };
 
 export const models = async (provider: Provider): Promise<Model[]> => {

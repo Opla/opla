@@ -28,6 +28,8 @@ use crate::llm::{
     LlmMessage,
 };
 
+use super::LlmCompletionOptions;
+
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct OpenAIBodyCompletion {
@@ -44,10 +46,33 @@ pub struct OpenAIBodyCompletion {
 }
 
 impl OpenAIBodyCompletion {
-    pub fn new(model: String, from: &LlmQueryCompletion) -> Self {
+    pub fn new(
+        model: String,
+        from: &LlmQueryCompletion,
+        options: Option<LlmCompletionOptions>
+    ) -> Self {
+        let mut messages: Vec<LlmMessage> = vec![];
+
+        match options {
+            Some(options) => {
+                match options.system {
+                    Some(system) => {
+                        messages.push(LlmMessage {
+                            content: system.clone(),
+                            role: "system".to_owned(),
+                            name: None,
+                        });
+                    }
+                    None => {}
+                }
+            }
+            None => {}
+        }
+        messages.extend(from.messages.clone());
+        // TODO: handle context_window_policy and keep_system
         Self {
             model,
-            messages: from.messages.clone(),
+            messages,
             stream: from.get_parameter_as_boolean("stream"),
             temperature: from.get_parameter_as_f32("temperature"),
             stop: from.get_parameter_array("stop"),
@@ -340,6 +365,7 @@ pub async fn call_completion<R: Runtime>(
     secret_key: &str,
     model: &str,
     query: LlmQuery<LlmQueryCompletion>,
+    completion_options: Option<LlmCompletionOptions>,
     callback: Option<impl FnMut(Result<LlmCompletionResponse, LlmError>) + Copy>
 ) -> Result<LlmCompletionResponse, Box<dyn std::error::Error>> {
     let start_time = chrono::Utc::now().timestamp_millis();
@@ -349,7 +375,11 @@ pub async fn call_completion<R: Runtime>(
         format!("llm call:  {:?} / {:?} / {:?} / {:?}", query.command, url, &model, query.options)
     );
 
-    let parameters = OpenAIBodyCompletion::new(model.to_owned(), &query.options);
+    let parameters = OpenAIBodyCompletion::new(
+        model.to_owned(),
+        &query.options,
+        completion_options
+    );
     println!("llm call parameters:  {:?}", parameters);
     let stream = match parameters.stream {
         Some(t) => t,

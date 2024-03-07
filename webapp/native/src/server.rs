@@ -16,7 +16,7 @@ use tokio::sync::Mutex;
 use std::sync::Arc;
 use crate::{
     error::Error,
-    llm::{llama_cpp::LLamaCppServer, LlmQueryCompletion, LlmTokenizeResponse},
+    llm::{llama_cpp::LLamaCppServer, LlmCompletionOptions, LlmQueryCompletion, LlmTokenizeResponse},
     store::{ ServerConfiguration, ServerParameters },
 };
 use sysinfo::System;
@@ -511,7 +511,8 @@ impl OplaServer {
     pub async fn call_completion<R: Runtime>(
         &mut self,
         model: &str,
-        query: LlmQuery<LlmQueryCompletion>
+        query: LlmQuery<LlmQueryCompletion>,
+        completion_options: Option<LlmCompletionOptions>
     ) -> Result<LlmCompletionResponse, Box<dyn std::error::Error>> {
         println!("{}", format!("Opla llm call: {:?} / {:?}", query.command, &model));
 
@@ -523,7 +524,7 @@ impl OplaServer {
             }
         };
 
-        self.server.call_completion::<R>(query, server_parameters).await
+        self.server.call_completion::<R>(query, server_parameters, completion_options).await
     }
 
     pub async fn call_tokenize<R: Runtime>(

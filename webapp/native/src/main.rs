@@ -30,7 +30,7 @@ use std::sync::Arc;
 use api::{ hf::search_hf_models, models };
 use data::model::Model;
 use downloader::Downloader;
-use llm::{ openai::call_completion, LlmCompletionResponse, LlmError, LlmQuery, LlmQueryCompletion, LlmTokenizeResponse };
+use llm::{ openai::call_completion, LlmCompletionOptions, LlmCompletionResponse, LlmError, LlmQuery, LlmQueryCompletion, LlmTokenizeResponse };
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
 use store::{ Store, Provider, ProviderType, ProviderMetadata, Settings, ServerConfiguration };
@@ -418,7 +418,8 @@ async fn llm_call_completion<R: Runtime>(
     context: State<'_, OplaContext>,
     model: String,
     llm_provider: Option<Provider>,
-    query: LlmQuery<LlmQueryCompletion>
+    query: LlmQuery<LlmQueryCompletion>,
+    completion_options: Option<LlmCompletionOptions>
 ) -> Result<LlmCompletionResponse, String> {
     let (llm_provider, llm_provider_type) = match llm_provider {
         Some(p) => { (p.clone(), p.r#type) }
@@ -454,7 +455,7 @@ async fn llm_call_completion<R: Runtime>(
         let mut server = context_server.lock().await;
         server.bind::<R>(app, &model_name, &model_path).await.map_err(|err| err.to_string())?;
         let response = {
-            server.call_completion::<R>(&model_name, query).await.map_err(|err| err.to_string())?
+            server.call_completion::<R>(&model_name, query, completion_options).await.map_err(|err| err.to_string())?
         };
         let parameters = server.parameters.clone();
         server.set_parameters(&model, &model_path, parameters);
@@ -484,6 +485,7 @@ async fn llm_call_completion<R: Runtime>(
                 &secret_key,
                 &model,
                 query,
+                completion_options,
                 Some(|result: Result<LlmCompletionResponse, LlmError>| {
                     match result {
                         Ok(response) => {

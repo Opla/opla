@@ -240,22 +240,20 @@ export type CompletionParameterDefinition = ParameterDefinition;
 
 export type CompletionParametersDefinition = Record<string, CompletionParameterDefinition>;
 
+export type CompletionOptions = {
+  contextWindowPolicy?: ContextWindowPolicy;
+  keepSystem?: boolean;
+  system?: string;
+};
 export type ImplProvider = {
   name: string;
   type: ProviderType;
   description: string;
   system: string;
+  defaultParameters: LlmParameters[];
   template: Partial<Provider>;
   completion: {
     parameters: CompletionParametersDefinition;
-    invoke: (
-      model: Model | undefined,
-      provider: Provider | undefined,
-      messages: LlmMessage[],
-      system?: string,
-      conversationId?: string,
-      parameters?: LlmParameters[],
-    ) => Promise<LlmCompletionResponse>;
   };
   tokenize?: (text: string) => Promise<number[]>;
 };
