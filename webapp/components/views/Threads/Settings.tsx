@@ -70,7 +70,7 @@ export default function Settings({
     }
   };
 
-  const handleChangePreset = (newPreset: Conversation) => {
+  const handleChangePreset = (newPreset: Partial<Conversation>) => {
     if (selectedConversation) {
       const newConversations = updateConversation(
         { ...selectedConversation, ...newPreset },

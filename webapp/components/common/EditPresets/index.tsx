@@ -56,12 +56,11 @@ export default function EditPreset<T>({
   provider: Provider | undefined;
   model: Model | undefined;
   portal?: boolean;
-  onChange: (newpreset: T) => void;
+  onChange: (newpreset: Partial<T>) => void;
 }) {
   const { t } = useTranslation();
   const { presets } = useContext(AppContext);
   const parametersDefinition = getCompletionParametersDefinition(provider);
-  console.log('parametersDefinition', parametersDefinition);
   const modelName = presetProperties?.model ?? model?.name;
   const preset = findCompatiblePreset(presetProperties?.preset, presets, modelName, provider);
   const {
@@ -74,7 +73,7 @@ export default function EditPreset<T>({
   const handleSystemChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
     if (presetProperties) {
-      onChange({ ...presetProperties, system: value } as T);
+      onChange({ system: value } as unknown as Partial<T>);
     }
   };
 
@@ -109,12 +108,12 @@ export default function EditPreset<T>({
 
       if (needUpdate) {
         if (presetProperties.parameters && Object.keys(parameters).length === 0) {
-          newPreset = { ...presetProperties };
-          delete newPreset.parameters;
+          // newPreset = { ...presetProperties };
+          // delete newPreset.parameters;
         } else {
-          newPreset = { ...presetProperties, parameters };
+          newPreset = { parameters };
         }
-        onChange(newPreset as T);
+        onChange(newPreset as Partial<T>);
       }
     }
     return newParams;
@@ -122,24 +121,24 @@ export default function EditPreset<T>({
 
   const handlePolicyChange = (policy: ContextWindowPolicy) => {
     if (presetProperties) {
-      onChange({ ...presetProperties, contextWindowPolicy: policy } as T);
+      onChange({ contextWindowPolicy: policy } as unknown as Partial<T>);
     }
   };
 
   const handleKeepSystemChange = (name: string, value: ParameterValue) => {
     if (presetProperties) {
-      onChange({ ...presetProperties, keepSystem: value as boolean } as T);
+      onChange({ keepSystem: value as boolean } as unknown as Partial<T>);
     }
   };
 
   const handleChangePreset = (newPreset: string) => {
     if (presetProperties) {
-      onChange({ ...presetProperties, preset: newPreset } as T);
+      onChange({ preset: newPreset } as unknown as Partial<T>);
     }
   };
 
   return (
-    <ScrollArea className="h-full w-full px-4">
+    <ScrollArea className="h-[480px] w-full px-4">
       <Presets
         preset={preset}
         presetProperties={presetProperties}

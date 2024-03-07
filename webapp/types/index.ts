@@ -413,6 +413,7 @@ export type ModelsConfiguration = {
 export type AITarget = BaseNamedRecord & {
   parent?: string;
   disabled?: boolean;
+  
   models?: string[];
   provider?: string;
 

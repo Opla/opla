@@ -92,6 +92,15 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
     }
   };
 
+  const handlePresetChange = (newPartialTarget: Partial<AITarget>) => {
+    const keys = Object.keys(newPartialTarget);
+    const params = { ...newParameters };
+    keys.forEach((key) => {
+      params[key] = newPartialTarget[key as keyof typeof newPartialTarget] as ParameterValue;
+    });
+    setNewParameters(params);
+  };
+
   return (
     <AlertDialog
       id={id}
@@ -140,13 +149,11 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
           </TabsContent>
           <TabsContent value="settings" className="h-full py-4">
             <EditPreset<AITarget>
-              presetProperties={target}
+              presetProperties={{ ...target, ...newParameters }}
               provider={provider}
               model={model}
               portal={false}
-              onChange={(newpreset: AITarget) => {
-                console.log('EditTarget onChange not implemented', newpreset);
-              }}
+              onChange={handlePresetChange}
             />
           </TabsContent>
         </Tabs>
