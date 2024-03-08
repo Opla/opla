@@ -83,5 +83,8 @@ export const getConversationTitle = (conversation: Conversation) => {
       ? (conversation.currentPrompt as ParsedPrompt).text || ''
       : conversation.currentPrompt || '';
   }
-  return conversation.name;
+  if (typeof conversation.name === 'string' && conversation.name.length > 0) {
+    return conversation.name;
+  }
+  return 'Conversation';
 };

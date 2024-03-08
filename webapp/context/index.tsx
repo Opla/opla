@@ -45,7 +45,7 @@ export type Context = {
   updateMessagesAndConversation: (
     changedMessages: Message[],
     conversationMessages: Message[],
-    newConversationTitle: string,
+    partialConversation: Partial<Conversation>,
     selectedConversationId: string,
     selectedConversations?: Conversation[],
   ) => Promise<{
@@ -178,14 +178,14 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
     async (
       changedMessages: Message[],
       conversationMessages: Message[],
-      newConversationTitle: string,
+      partialConversation: Partial<Conversation>,
       selectedConversationId: string, // = conversationId,
       selectedConversations = conversations,
     ) => {
       const updatedConversations = updateOrCreateConversation(
         selectedConversationId,
         selectedConversations,
-        newConversationTitle, // messages?.[0]?.content as string,
+        partialConversation, // messages?.[0]?.content as string,
       );
       const updatedMessages = mergeMessages(conversationMessages, changedMessages);
       await updateConversations(updatedConversations);

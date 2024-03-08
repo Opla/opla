@@ -166,7 +166,7 @@ export type AIService = {
   | {
       type: AIServiceType.Model;
       modelId: string;
-      providerType?: ProviderType;
+      providerIdOrName?: string;
     }
   | {
       type: AIServiceType.Assistant;
