@@ -17,6 +17,7 @@
 import { SafeParseReturnType, z } from 'zod';
 import { Conversation, Metadata } from '@/types';
 import { ParsedPrompt } from '../parsers';
+import { getDefaultConversationName } from '../data/conversations';
 
 export const MetadataSchema: z.ZodSchema<Metadata> = z.lazy(() =>
   z.record(z.union([z.string(), z.number(), z.boolean(), MetadataSchema])),
@@ -86,5 +87,5 @@ export const getConversationTitle = (conversation: Conversation) => {
   if (typeof conversation.name === 'string' && conversation.name.length > 0) {
     return conversation.name;
   }
-  return 'Conversation';
+  return getDefaultConversationName();
 };

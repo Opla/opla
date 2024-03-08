@@ -21,6 +21,8 @@ import {
 } from '@/types';
 import { createBaseRecord, createBaseNamedRecord, updateRecord } from '.';
 
+export const getDefaultConversationName = () => 'Conversation';
+
 export const getConversationAssets = (conversation: Conversation) =>
   !conversation.assets || Array.isArray(conversation.assets)
     ? conversation.assets || []
@@ -96,7 +98,7 @@ export const updateOrCreateConversation = (
   if (conversation) {
     updatedConversations = updateConversation({ ...conversation, ...partial }, conversations);
   } else {
-    const name = partial.name || 'Conversation';
+    const name = partial.name || getDefaultConversationName();
     conversation = createConversation(name.trim().substring(0, 200));
     updatedConversations = [...conversations, conversation];
   }

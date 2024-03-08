@@ -30,6 +30,7 @@ import {
   getConversationModelId,
   addService,
   addConversationService,
+  getDefaultConversationName,
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
 import { completion } from '@/utils/providers';
@@ -143,7 +144,7 @@ function Thread({
 
   const tempConversationName = messages?.[0]
     ? getMessageContentAsString(messages?.[0])
-    : 'Conversation';
+    : getDefaultConversationName();
 
   const { modelItems, commandManager } = useMemo(() => {
     const selectedModelNameOrId = getConversationModelId(selectedConversation) || activeModel;
@@ -500,7 +501,7 @@ function Thread({
   };
 
   const handleUpdatePrompt = useCallback(
-    (prompt: ParsedPrompt | undefined, conversationName = 'Conversation') => {
+    (prompt: ParsedPrompt | undefined, conversationName = getDefaultConversationName()) => {
       if (prompt?.raw === '' && tempConversationId) {
         setChangedPrompt(undefined);
         updateConversations(conversations.filter((c) => !c.temp));
@@ -519,10 +520,8 @@ function Thread({
         updatedConversations = updateConversation(conversation, updatedConversations, true);
       } else {
         updatedConversations = conversations.filter((c) => !c.temp);
-        let newConversation = createConversation('Conversation');
-
+        let newConversation = createConversation(conversationName);
         newConversation.temp = true;
-        newConversation.name = conversationName;
         newConversation.currentPrompt = prompt;
         if (assistant) {
           const newService = getDefaultAssistantService(assistant);
