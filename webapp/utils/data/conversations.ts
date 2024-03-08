@@ -21,7 +21,7 @@ import {
 } from '@/types';
 import { createBaseRecord, createBaseNamedRecord, updateRecord } from '.';
 
-export const getDefaultConversationName = () => 'Conversation';
+export const getDefaultConversationName = (t = (value: string) => value) => t('Conversation');
 
 export const getConversationAssets = (conversation: Conversation) =>
   !conversation.assets || Array.isArray(conversation.assets)

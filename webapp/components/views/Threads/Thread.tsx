@@ -144,7 +144,7 @@ function Thread({
 
   const tempConversationName = messages?.[0]
     ? getMessageContentAsString(messages?.[0])
-    : getDefaultConversationName();
+    : getDefaultConversationName(t);
 
   const { modelItems, commandManager } = useMemo(() => {
     const selectedModelNameOrId = getConversationModelId(selectedConversation) || activeModel;
@@ -347,7 +347,7 @@ function Thread({
     );
     let updatedConversations = uc;
     if (updatedConversation.temp) {
-      updatedConversation.name = getConversationTitle(updatedConversation);
+      updatedConversation.name = getConversationTitle(updatedConversation, t);
     }
 
     updatedConversations = clearPrompt(updatedConversation, updatedConversations);
@@ -501,7 +501,7 @@ function Thread({
   };
 
   const handleUpdatePrompt = useCallback(
-    (prompt: ParsedPrompt | undefined, conversationName = getDefaultConversationName()) => {
+    (prompt: ParsedPrompt | undefined, conversationName = getDefaultConversationName(t)) => {
       if (prompt?.raw === '' && tempConversationId) {
         setChangedPrompt(undefined);
         updateConversations(conversations.filter((c) => !c.temp));
@@ -537,7 +537,7 @@ function Thread({
       updateConversations(updatedConversations);
       setChangedPrompt(undefined);
     },
-    [tempConversationId, conversationId, conversations, updateConversations, assistant, service],
+    [t, tempConversationId, conversationId, conversations, updateConversations, assistant, service],
   );
 
   useDebounceFunc<ParsedPrompt | undefined>(handleUpdatePrompt, changedPrompt, 500);

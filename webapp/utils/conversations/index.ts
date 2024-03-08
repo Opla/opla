@@ -78,7 +78,7 @@ export type Conversations = z.infer<typeof ConversationsSchema>;
 export const validateConversations = (data: unknown): SafeParseReturnType<unknown, Conversations> =>
   ConversationsSchema.safeParse(data);
 
-export const getConversationTitle = (conversation: Conversation) => {
+export const getConversationTitle = (conversation: Conversation, t: (value: string) => string) => {
   if (conversation.temp) {
     return conversation.currentPrompt && typeof conversation.currentPrompt !== 'string'
       ? (conversation.currentPrompt as ParsedPrompt).text || ''
@@ -87,5 +87,5 @@ export const getConversationTitle = (conversation: Conversation) => {
   if (typeof conversation.name === 'string' && conversation.name.length > 0) {
     return conversation.name;
   }
-  return getDefaultConversationName();
+  return getDefaultConversationName(t);
 };
