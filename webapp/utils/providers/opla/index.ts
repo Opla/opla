@@ -12,21 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  CompletionParametersDefinition,
-  LlmMessage,
-  LlmParameters,
-  LlmQueryCompletion,
-  LlmResponse,
-  Model,
-  Provider,
-  ProviderDefinition,
-  ProviderType,
-} from '@/types';
-import { mapKeys } from '@/utils/data';
-import logger from '@/utils/logger';
-import { toCamelCase, toSnakeCase } from '@/utils/string';
-import { invokeTauri } from '@/utils/backend/tauri';
+import { CompletionParametersDefinition, LlmParameters, ImplProvider, ProviderType } from '@/types';
 import { z } from 'zod';
 
 const NAME = 'Opla';
@@ -34,7 +20,7 @@ const TYPE = ProviderType.opla;
 const DESCRIPTION = 'Opla Open source local LLM';
 const DEFAULT_SYSTEM = 'You are an expert in retrieving information.\n';
 
-const DEFAULT_PROPERTIES: LlmParameters[] = [
+const DEFAULT_PARAMETERS: LlmParameters[] = [
   { key: 'stop', value: "['Llama:', 'User:', 'Question:']" },
 ];
 
@@ -210,53 +196,15 @@ export const CompletionParameters: CompletionParametersDefinition = {
   },
 };
 
-const completion = async (
-  model: Model | undefined,
-  provider: Provider | undefined,
-  messages: LlmMessage[],
-  system = DEFAULT_SYSTEM,
-  conversationId?: string,
-  parameters: LlmParameters[] = DEFAULT_PROPERTIES,
-): Promise<LlmResponse> => {
-  if (!model) {
-    throw new Error('Model not found');
-  }
-
-  const systemMessage: LlmMessage = {
-    role: 'system',
-    content: system,
-  };
-
-  const options: LlmQueryCompletion = {
-    messages: [systemMessage, ...messages],
-    conversationId,
-    parameters,
-  };
-
-  const llmProvider = mapKeys(provider, toSnakeCase);
-  const response: LlmResponse = (await invokeTauri('llm_call_completion', {
-    model: model.name,
-    llmProvider,
-    query: { command: 'completion', options },
-  })) as LlmResponse;
-
-  const { content } = response;
-  if (content) {
-    logger.info(`${NAME} completion response`, response);
-    return mapKeys(response, toCamelCase);
-  }
-  throw new Error(`${NAME} completion error ${response}`);
-};
-
-const OplaProvider: ProviderDefinition = {
+const OplaProvider: ImplProvider = {
   name: NAME,
   type: TYPE,
   description: DESCRIPTION,
   system: DEFAULT_SYSTEM,
+  defaultParameters: DEFAULT_PARAMETERS,
   template: {}, // TODO: add template
   completion: {
     parameters: CompletionParameters,
-    invoke: completion,
   },
 };
 

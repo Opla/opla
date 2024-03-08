@@ -17,10 +17,11 @@ import {
   Conversation,
   AIService,
   AIServiceType,
-  ProviderType,
   Assistant,
 } from '@/types';
 import { createBaseRecord, createBaseNamedRecord, updateRecord } from '.';
+
+export const getDefaultConversationName = (t = (value: string) => value) => t('Conversation');
 
 export const getConversationAssets = (conversation: Conversation) =>
   !conversation.assets || Array.isArray(conversation.assets)
@@ -90,14 +91,15 @@ export const removeConversation = (conversationId: string, conversations: Conver
 export const updateOrCreateConversation = (
   conversationId: string | undefined,
   conversations: Conversation[],
-  title = 'Conversation',
+  partial: Partial<Conversation>,
 ) => {
   let conversation = conversations.find((c) => c.id === conversationId);
   let updatedConversations;
   if (conversation) {
-    updatedConversations = updateConversation(conversation, conversations);
+    updatedConversations = updateConversation({ ...conversation, ...partial }, conversations);
   } else {
-    conversation = createConversation(title.trim().substring(0, 200));
+    const name = partial.name || getDefaultConversationName();
+    conversation = createConversation(name.trim().substring(0, 200));
     updatedConversations = [...conversations, conversation];
   }
   return updatedConversations;
@@ -130,7 +132,7 @@ export const getConversationService = (
       service = {
         type: serviceType,
         modelId: conversation.model,
-        providerType: conversation.provider as ProviderType,
+        providerIdOrName: conversation.provider,
       };
     }
     if (conversation.model && serviceType === AIServiceType.Assistant && assistantId) {
@@ -180,7 +182,7 @@ export const getServiceModelId = (modelService: AIService | undefined) => {
 
 export const getServiceProvider = (modelService: AIService | undefined) => {
   if (modelService && modelService.type === AIServiceType.Model) {
-    return modelService.providerType;
+    return modelService.providerIdOrName;
   }
   return undefined;
 };

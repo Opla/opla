@@ -30,7 +30,7 @@ use std::sync::Arc;
 use api::{ hf::search_hf_models, models };
 use data::model::Model;
 use downloader::Downloader;
-use llm::{ LlmQuery, LlmResponse, LlmQueryCompletion, openai::call_completion, LlmError };
+use llm::{ openai::call_completion, LlmCompletionOptions, LlmCompletionResponse, LlmError, LlmQuery, LlmQueryCompletion, LlmTokenizeResponse };
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
 use store::{ Store, Provider, ProviderType, ProviderMetadata, Settings, ServerConfiguration };
@@ -418,8 +418,9 @@ async fn llm_call_completion<R: Runtime>(
     context: State<'_, OplaContext>,
     model: String,
     llm_provider: Option<Provider>,
-    query: LlmQuery<LlmQueryCompletion>
-) -> Result<LlmResponse, String> {
+    query: LlmQuery<LlmQueryCompletion>,
+    completion_options: Option<LlmCompletionOptions>
+) -> Result<LlmCompletionResponse, String> {
     let (llm_provider, llm_provider_type) = match llm_provider {
         Some(p) => { (p.clone(), p.r#type) }
         None => {
@@ -454,7 +455,7 @@ async fn llm_call_completion<R: Runtime>(
         let mut server = context_server.lock().await;
         server.bind::<R>(app, &model_name, &model_path).await.map_err(|err| err.to_string())?;
         let response = {
-            server.call_completion::<R>(&model_name, query).await.map_err(|err| err.to_string())?
+            server.call_completion::<R>(&model_name, query, completion_options).await.map_err(|err| err.to_string())?
         };
         let parameters = server.parameters.clone();
         server.set_parameters(&model, &model_path, parameters);
@@ -484,7 +485,8 @@ async fn llm_call_completion<R: Runtime>(
                 &secret_key,
                 &model,
                 query,
-                Some(|result: Result<LlmResponse, LlmError>| {
+                completion_options,
+                Some(|result: Result<LlmCompletionResponse, LlmError>| {
                     match result {
                         Ok(response) => {
                             let mut response = response.clone();
@@ -510,6 +512,24 @@ async fn llm_call_completion<R: Runtime>(
     return Err(format!("LLM provider not found: {:?}", llm_provider_type));
 }
 
+#[tauri::command]
+async fn llm_call_tokenize<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>,
+    model: String,
+    provider: String,
+    text: String
+) -> Result<LlmTokenizeResponse, String> {
+    if provider == "opla" {
+        let context_server = Arc::clone(&context.server);
+        let mut server = context_server.lock().await;
+        let response = server.call_tokenize::<R>(&model, text).await.map_err(|err| err.to_string())?;
+        return Ok(response);
+
+    }
+    return Err(format!("LLM provider not found: {:?}", provider));
+}
 async fn start_server<R: Runtime>(
     app: tauri::AppHandle<R>,
     context: State<'_, OplaContext>
@@ -556,7 +576,10 @@ async fn model_download<R: Runtime>(
             drop(store);
             println!("model_download {} {}", state, model_id);
             let server = context.server.lock().await;
-            if state == "ok" && (m.reference.is_some_id_or_name(&server.model) || server.model.is_none()) {
+            if
+                state == "ok" &&
+                (m.reference.is_some_id_or_name(&server.model) || server.model.is_none())
+            {
                 drop(server);
                 let res = start_server(handle, context).await;
                 match res {
@@ -634,7 +657,7 @@ fn handle_download_event<EventLoopMessage>(app: &tauri::AppHandle, payload: &str
     let vec: Vec<&str> = payload.split(':').collect();
     let (state, id) = (vec[0].to_string(), vec[1].to_string());
 
-        let handler = app.app_handle();    
+    let handler = app.app_handle();
     tauri::async_runtime::spawn(async move {
         let handler = handler.app_handle();
         match model_download(handler, id.to_string(), state.to_string()).await {
@@ -800,7 +823,8 @@ fn main() {
                 uninstall_model,
                 update_model,
                 set_active_model,
-                llm_call_completion
+                llm_call_completion,
+                llm_call_tokenize,
             ]
         )
         .run(tauri::generate_context!())

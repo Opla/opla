@@ -4,19 +4,11 @@
 import { z } from 'zod';
 import {
   CompletionParametersDefinition,
-  LlmMessage,
   LlmParameters,
-  LlmQueryCompletion,
-  LlmResponse,
-  Model,
   Provider,
-  ProviderDefinition,
+  ImplProvider,
   ProviderType,
 } from '@/types';
-import { mapKeys } from '@/utils/data';
-import logger from '@/utils/logger';
-import { toCamelCase, toSnakeCase } from '@/utils/string';
-import { invokeTauri } from '@/utils/backend/tauri';
 
 const NAME = 'OpenAI';
 const TYPE = ProviderType.openai;
@@ -24,6 +16,7 @@ const DESCRIPTION = 'OpenAI API';
 const DEFAULT_SYSTEM = `
 You are an expert in retrieving information.
 `;
+const DEFAULT_PARAMETERS: LlmParameters[] = [];
 
 const openAIProviderTemplate: Partial<Provider> = {
   name: NAME,
@@ -123,57 +116,15 @@ const CompletionParameters: CompletionParametersDefinition = {
   },
 };
 
-const completion = async (
-  model: Model | undefined,
-  provider: Provider | undefined,
-  messages: LlmMessage[],
-  system = DEFAULT_SYSTEM,
-  conversationId?: string,
-  parameters: LlmParameters[] = [],
-): Promise<LlmResponse> => {
-  if (!model) {
-    throw new Error('Model not found');
-  }
-
-  const systemMessage: LlmMessage = {
-    role: 'system',
-    content: system,
-  };
-
-  if (!parameters.find((p) => p.key === 'stream')) {
-    parameters.push({ key: 'stream', value: String(CompletionParameters.stream.defaultValue) });
-  }
-  const options: LlmQueryCompletion = mapKeys(
-    {
-      messages: [systemMessage, ...messages],
-      conversationId,
-      parameters,
-    },
-    toSnakeCase,
-  );
-  const response: LlmResponse = (await invokeTauri('llm_call_completion', {
-    model: model.id,
-    llmProvider: provider,
-    query: { command: 'completion', options },
-  })) as LlmResponse;
-
-  const { content } = response;
-  if (content) {
-    logger.info(`${NAME} completion response`, content);
-    return mapKeys(response, toCamelCase);
-  }
-  throw new Error(`${NAME} completion completion error ${response}`);
-};
-
-const OpenAIProvider: ProviderDefinition = {
+const OpenAIProvider: ImplProvider = {
   name: NAME,
   type: TYPE,
   description: DESCRIPTION,
   system: DEFAULT_SYSTEM,
+  defaultParameters: DEFAULT_PARAMETERS,
   template: openAIProviderTemplate,
   completion: {
     parameters: CompletionParameters,
-    invoke: completion,
   },
 };
 

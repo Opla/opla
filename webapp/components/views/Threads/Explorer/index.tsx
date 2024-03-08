@@ -314,11 +314,11 @@ export default function ThreadsExplorer({
                   (c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt,
                 )}
                 editable
-                getItemTitle={(c) => `${getConversationTitle(c)}${c.temp ? '...' : ''}`}
+                getItemTitle={(c) => `${getConversationTitle(c, t)}${c.temp ? '...' : ''}`}
                 isEditable={(c) => !c.temp && c.id === selectedThreadId}
                 renderItem={(c) => (
                   <>
-                    <span>{getConversationTitle(c).replaceAll(' ', '\u00a0')}</span>
+                    <span>{getConversationTitle(c, t).replaceAll(' ', '\u00a0')}</span>
                     {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
                   </>
                 )}

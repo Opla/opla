@@ -16,14 +16,13 @@ use tokio::sync::Mutex;
 use std::sync::Arc;
 use crate::{
     error::Error,
-    llm::LlmQueryCompletion,
-    llm::llama_cpp::LLamaCppServer,
-    store::{ ServerParameters, ServerConfiguration },
+    llm::{llama_cpp::LLamaCppServer, LlmCompletionOptions, LlmQueryCompletion, LlmTokenizeResponse},
+    store::{ ServerConfiguration, ServerParameters },
 };
 use sysinfo::System;
 use tauri::async_runtime::JoinHandle;
 use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
-use crate::llm::{ LlmQuery, LlmResponse };
+use crate::llm::{ LlmQuery, LlmCompletionResponse };
 use std::time::Duration;
 use std::thread;
 
@@ -323,9 +322,7 @@ impl OplaServer {
         };
         let arguments = parameters.to_args(&model_path);
         println!("Opla server arguments: {}", arguments.join(" "));
-        if
-            status == ServerStatus::Starting.as_str().to_string()
-        {
+        if status == ServerStatus::Starting.as_str().to_string() {
             println!("Opla server is starting: stop it");
             match self.stop(&app).await {
                 Ok(_) => {}
@@ -333,10 +330,7 @@ impl OplaServer {
                     return Err(e);
                 }
             }
-
-        } else if
-            status == ServerStatus::Started.as_str().to_string()
-        {
+        } else if status == ServerStatus::Started.as_str().to_string() {
             println!("Opla server already started ");
             return Ok(Payload {
                 status: status.to_string(),
@@ -406,7 +400,7 @@ impl OplaServer {
             };
             process.kill();
             println!("Kill Opla server {}", pid); */
-            match (self.handle).take() {
+            match self.handle.take() {
                 Some(handle) => {
                     handle.abort();
                 }
@@ -517,8 +511,9 @@ impl OplaServer {
     pub async fn call_completion<R: Runtime>(
         &mut self,
         model: &str,
-        query: LlmQuery<LlmQueryCompletion>
-    ) -> Result<LlmResponse, Box<dyn std::error::Error>> {
+        query: LlmQuery<LlmQueryCompletion>,
+        completion_options: Option<LlmCompletionOptions>
+    ) -> Result<LlmCompletionResponse, Box<dyn std::error::Error>> {
         println!("{}", format!("Opla llm call: {:?} / {:?}", query.command, &model));
 
         let server_parameters = match &self.parameters {
@@ -529,6 +524,24 @@ impl OplaServer {
             }
         };
 
-        self.server.call_completion::<R>(query, server_parameters).await
+        self.server.call_completion::<R>(query, server_parameters, completion_options).await
+    }
+
+    pub async fn call_tokenize<R: Runtime>(
+        &mut self,
+        model: &str,
+        text: String,
+    ) -> Result<LlmTokenizeResponse, Box<dyn std::error::Error>> {
+        println!("{}", format!("Opla llm call tokenize: {:?}", &model));
+
+        let server_parameters = match &self.parameters {
+            Some(p) => p,
+            None => {
+                println!("Opla server error try to read parameters");
+                return Err(Box::new(Error::BadParameters));
+            }
+        };
+
+        self.server.call_tokenize::<R>(text, server_parameters).await
     }
 }

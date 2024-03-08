@@ -166,7 +166,7 @@ export type AIService = {
   | {
       type: AIServiceType.Model;
       modelId: string;
-      providerType?: ProviderType;
+      providerIdOrName?: string;
     }
   | {
       type: AIServiceType.Assistant;
@@ -240,23 +240,22 @@ export type CompletionParameterDefinition = ParameterDefinition;
 
 export type CompletionParametersDefinition = Record<string, CompletionParameterDefinition>;
 
-export type ProviderDefinition = {
+export type CompletionOptions = {
+  contextWindowPolicy?: ContextWindowPolicy;
+  keepSystem?: boolean;
+  system?: string;
+};
+export type ImplProvider = {
   name: string;
   type: ProviderType;
   description: string;
   system: string;
+  defaultParameters: LlmParameters[];
   template: Partial<Provider>;
   completion: {
     parameters: CompletionParametersDefinition;
-    invoke: (
-      model: Model | undefined,
-      provider: Provider | undefined,
-      messages: LlmMessage[],
-      system?: string,
-      conversationId?: string,
-      parameters?: LlmParameters[],
-    ) => Promise<LlmResponse>;
   };
+  tokenize?: (text: string) => Promise<number[]>;
 };
 
 export type Provider = BaseNamedRecord & {
@@ -484,7 +483,7 @@ export type LlmUsage = {
   totalPerSecond?: number;
 };
 
-export type LlmResponse = {
+export type LlmCompletionResponse = {
   created?: number;
   status?: string;
   content: string;
@@ -502,6 +501,10 @@ export type LlmStreamResponse = {
 
 export type Cpu = {
   usage: number;
+};
+
+export type LlmTokenizeResponse = {
+  tokens: number[];
 };
 
 export type Sys = {

@@ -16,7 +16,9 @@ use crate::{ error::Error, llm::LlmQueryCompletion, store::ServerParameters };
 
 use tauri::Runtime;
 use serde::{ Deserialize, Serialize };
-use crate::llm::{ LlmQuery, LlmResponse, LlmUsage };
+use crate::llm::{ LlmQuery, LlmCompletionResponse, LlmUsage };
+
+use super::{ LlmCompletionOptions, LlmTokenizeResponse };
 
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -47,8 +49,23 @@ pub struct LlamaCppQueryCompletion {
 }
 
 impl LlmQueryCompletion {
-    fn to_llama_cpp_parameters(&self) -> LlamaCppQueryCompletion {
+    fn to_llama_cpp_parameters(
+        &self,
+        options: Option<LlmCompletionOptions>
+    ) -> LlamaCppQueryCompletion {
         let mut prompt = String::new();
+        match options {
+            Some(options) => {
+                match options.system {
+                    Some(system) => {
+                        prompt.push_str(&format!("{}\n", system));
+                    }
+                    None => {}
+                }
+            }
+            None => {}
+        }
+        // TODO: handle context_window_policy and keep_system
         for message in &self.messages {
             match message.role.as_str() {
                 "user" => {
@@ -127,8 +144,8 @@ pub struct LlamaCppChatCompletion {
 }
 
 impl LlamaCppChatCompletion {
-    pub fn to_llm_response(&self) -> LlmResponse {
-        LlmResponse {
+    pub fn to_llm_response(&self) -> LlmCompletionResponse {
+        LlmCompletionResponse {
             created: None,
             status: None,
             content: self.content.clone(),
@@ -139,6 +156,22 @@ impl LlamaCppChatCompletion {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LlamaCppQueryTokenize {
+    pub content: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LlamaCppTokenize {
+    pub tokens: Vec<u64>,
+}
+impl LlamaCppTokenize {
+    pub fn to_llm_response(&self) -> LlmTokenizeResponse {
+        LlmTokenizeResponse {
+            tokens: self.tokens.clone(),
+        }
+    }
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LLamaCppServer {}
 
 impl LLamaCppServer {
@@ -146,18 +179,23 @@ impl LLamaCppServer {
         LLamaCppServer {}
     }
 
+    fn get_api(&self, server_parameters: &ServerParameters, endpoint: String) -> String {
+        // TODO https support
+        format!("http://{:}:{:}/{}", server_parameters.host, server_parameters.port, endpoint)
+    }
+
     pub async fn call_completion<R: Runtime>(
         &mut self,
         query: LlmQuery<LlmQueryCompletion>,
-        server_parameters: &ServerParameters
-    ) -> Result<LlmResponse, Box<dyn std::error::Error>> {
-        let parameters = query.options.to_llama_cpp_parameters();
+        server_parameters: &ServerParameters,
+        completion_options: Option<LlmCompletionOptions>
+    ) -> Result<LlmCompletionResponse, Box<dyn std::error::Error>> {
+        let parameters = query.options.to_llama_cpp_parameters(completion_options);
 
-        // TODO https support
-        let api = format!("http://{:}:{:}", server_parameters.host, server_parameters.port);
+        let api_url = self.get_api(server_parameters, query.command);
         let client = reqwest::Client::new();
         let res = client
-            .post(format!("{}/{}", api, query.command)) // TODO remove hardcoding
+            .post(api_url) // TODO remove hardcoding
             .json(&parameters)
             .send().await;
         let response = match res {
@@ -170,6 +208,39 @@ impl LLamaCppServer {
         let status = response.status();
         println!("Response Status: {}", status);
         let response = match response.json::<LlamaCppChatCompletion>().await {
+            Ok(r) => r,
+            Err(error) => {
+                println!("Failed to parse response: {}", error);
+                return Err(Box::new(Error::BadResponse));
+            }
+        };
+        Ok(response.to_llm_response())
+    }
+
+    pub async fn call_tokenize<R: Runtime>(
+        &mut self,
+        text: String,
+        server_parameters: &ServerParameters
+    ) -> Result<LlmTokenizeResponse, Box<dyn std::error::Error>> {
+        let parameters = LlamaCppQueryTokenize {
+            content: text,
+        };
+        let api_url = self.get_api(server_parameters, "tokenize".to_owned());
+        let client = reqwest::Client::new();
+        let res = client
+            .post(api_url) // TODO remove hardcoding
+            .json(&parameters)
+            .send().await;
+        let response = match res {
+            Ok(res) => res,
+            Err(error) => {
+                println!("Failed to get Response: {}", error);
+                return Err(Box::new(Error::BadResponse));
+            }
+        };
+        let status = response.status();
+        println!("Response Status: {}", status);
+        let response = match response.json::<LlamaCppTokenize>().await {
             Ok(r) => r,
             Err(error) => {
                 println!("Failed to parse response: {}", error);

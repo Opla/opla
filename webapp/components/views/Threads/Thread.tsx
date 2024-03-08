@@ -18,15 +18,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useSearchParams } from 'next/navigation';
 import { AppContext } from '@/context';
-import {
-  Asset,
-  Conversation,
-  AIService,
-  AIServiceType,
-  Message,
-  MessageStatus,
-  ProviderType,
-} from '@/types';
+import { Asset, Conversation, AIService, AIServiceType, Message, MessageStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import {
@@ -38,6 +30,7 @@ import {
   getConversationModelId,
   addService,
   addConversationService,
+  getDefaultConversationName,
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
 import { completion } from '@/utils/providers';
@@ -55,6 +48,7 @@ import {
   createMessage,
   changeMessageContent,
   getMessageRawContentAsString,
+  getMessageContentAsString,
 } from '@/utils/data/messages';
 import { getCommandManager, preProcessingCommands } from '@/utils/commands';
 import ContentView from '@/components/common/ContentView';
@@ -148,7 +142,9 @@ function Thread({
     selectedConversation,
   ]);
 
-  const tempConversationName = messages?.[0]?.content as string;
+  const tempConversationName = messages?.[0]
+    ? getMessageContentAsString(messages?.[0])
+    : getDefaultConversationName(t);
 
   const { modelItems, commandManager } = useMemo(() => {
     const selectedModelNameOrId = getConversationModelId(selectedConversation) || activeModel;
@@ -191,18 +187,18 @@ function Thread({
     parsePrompt({ text, caretStartIndex }, tokenValidator);
 
   const changeService = async (
-    model?: string,
-    provider = ProviderType.opla,
+    model: string,
+    providerIdOrName: string,
     partial: Partial<Conversation> = {},
   ) => {
     logger.info(
-      `ChangeService ${model} ${provider} activeModel=${typeof activeModel}`,
+      `ChangeService ${model} ${providerIdOrName} activeModel=${typeof activeModel}`,
       selectedConversation,
     );
     const newService: AIService = {
       type: AIServiceType.Model,
       modelId: model as string,
-      providerType: provider,
+      providerIdOrName,
     };
     if (model && selectedConversation) {
       const services = addService(selectedConversation.services, newService);
@@ -225,15 +221,15 @@ function Thread({
     conversation: Conversation,
     updatedConversations: Conversation[],
     prompt: ParsedPrompt,
+    modelName: string,
   ) => {
     const returnedMessage = { ...message };
     const activeService = getActiveService(
       conversation,
       assistant,
       providers,
-      activeModel,
       backendContext,
-      message.author.name,
+      modelName,
     );
     logger.info('sendMessage', activeService, conversation, presets);
 
@@ -275,7 +271,7 @@ function Thread({
     await updateMessagesAndConversation(
       [returnedMessage],
       conversationMessages,
-      conversation.name,
+      { name: conversation.name },
       conversation.id,
       updatedConversations,
     );
@@ -324,7 +320,7 @@ function Thread({
       clearPrompt(result.updatedConversation, result.updatedConversations);
       return;
     }
-    const { modelName } = result;
+    const { modelName = selectedModelNameOrId } = result;
 
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
     setIsProcessing({ ...isProcessing, [conversationId]: true });
@@ -334,10 +330,7 @@ function Thread({
       currentPrompt.text,
       currentPrompt.raw,
     );
-    let message = createMessage(
-      { role: 'assistant', name: modelName || selectedModelNameOrId },
-      '...',
-    );
+    let message = createMessage({ role: 'assistant', name: modelName }, '...');
     message.status = MessageStatus.Pending;
     userMessage.sibling = message.id;
     message.sibling = userMessage.id;
@@ -349,12 +342,12 @@ function Thread({
     } = await updateMessagesAndConversation(
       [userMessage, message],
       getConversationMessages(conversationId),
-      tempConversationName,
+      { name: tempConversationName },
       conversationId,
     );
     let updatedConversations = uc;
     if (updatedConversation.temp) {
-      updatedConversation.name = getConversationTitle(updatedConversation);
+      updatedConversation.name = getConversationTitle(updatedConversation, t);
     }
 
     updatedConversations = clearPrompt(updatedConversation, updatedConversations);
@@ -372,6 +365,7 @@ function Thread({
       updatedConversation,
       updatedConversations,
       currentPrompt,
+      modelName,
     );
 
     if (tempConversationId) {
@@ -407,7 +401,7 @@ function Thread({
       await updateMessagesAndConversation(
         [message],
         conversationMessages,
-        tempConversationName,
+        { name: tempConversationName },
         conversationId,
       );
 
@@ -421,6 +415,7 @@ function Thread({
       updatedConversation,
       updatedConversations,
       prompt,
+      selectedModelNameOrId,
     );
 
     setIsProcessing({ ...isProcessing, [conversationId]: false });
@@ -491,7 +486,7 @@ function Thread({
       const { updatedMessages } = await updateMessagesAndConversation(
         newMessages,
         conversationMessages,
-        tempConversationName,
+        { name: tempConversationName },
         conversationId,
         conversations,
       );
@@ -506,7 +501,7 @@ function Thread({
   };
 
   const handleUpdatePrompt = useCallback(
-    (prompt: ParsedPrompt | undefined, conversationName = 'Conversation') => {
+    (prompt: ParsedPrompt | undefined, conversationName = getDefaultConversationName(t)) => {
       if (prompt?.raw === '' && tempConversationId) {
         setChangedPrompt(undefined);
         updateConversations(conversations.filter((c) => !c.temp));
@@ -525,25 +520,24 @@ function Thread({
         updatedConversations = updateConversation(conversation, updatedConversations, true);
       } else {
         updatedConversations = conversations.filter((c) => !c.temp);
-        const newConversation = createConversation('Conversation');
-        updatedConversations.push(newConversation);
+        let newConversation = createConversation(conversationName);
         newConversation.temp = true;
-        newConversation.name = conversationName;
         newConversation.currentPrompt = prompt;
         if (assistant) {
           const newService = getDefaultAssistantService(assistant);
-          addConversationService(newConversation, newService);
+          newConversation = addConversationService(newConversation, newService);
           setService(undefined);
         } else if (service) {
-          addConversationService(newConversation, service);
+          newConversation = addConversationService(newConversation, service);
           setService(undefined);
         }
+        updatedConversations.push(newConversation);
         setTempConversationId(newConversation.id);
       }
       updateConversations(updatedConversations);
       setChangedPrompt(undefined);
     },
-    [tempConversationId, conversationId, conversations, updateConversations, assistant, service],
+    [t, tempConversationId, conversationId, conversations, updateConversations, assistant, service],
   );
 
   useDebounceFunc<ParsedPrompt | undefined>(handleUpdatePrompt, changedPrompt, 500);
