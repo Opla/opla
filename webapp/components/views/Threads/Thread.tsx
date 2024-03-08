@@ -519,19 +519,20 @@ function Thread({
         updatedConversations = updateConversation(conversation, updatedConversations, true);
       } else {
         updatedConversations = conversations.filter((c) => !c.temp);
-        const newConversation = createConversation('Conversation');
-        updatedConversations.push(newConversation);
+        let newConversation = createConversation('Conversation');
+
         newConversation.temp = true;
         newConversation.name = conversationName;
         newConversation.currentPrompt = prompt;
         if (assistant) {
           const newService = getDefaultAssistantService(assistant);
-          addConversationService(newConversation, newService);
+          newConversation = addConversationService(newConversation, newService);
           setService(undefined);
         } else if (service) {
-          addConversationService(newConversation, service);
+          newConversation = addConversationService(newConversation, service);
           setService(undefined);
         }
+        updatedConversations.push(newConversation);
         setTempConversationId(newConversation.id);
       }
       updateConversations(updatedConversations);
