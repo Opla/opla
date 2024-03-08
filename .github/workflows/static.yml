@@ -37,9 +37,9 @@ jobs:
         with:
           node-version: 18
       - name: Install dependencies
-        run: npm install-docs
+        run: npm run install-docs
       - name: Build website
-        run: npm build-docs
+        run: npm run build-docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
