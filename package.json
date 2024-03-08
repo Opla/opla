@@ -9,7 +9,8 @@
         "test": "cd webapp && npm run test",
         "precommit-lint": "cd webapp && npm run precommit-lint",
         "prepare": "husky install",
-        "tauri": "cd webapp && npm run tauri"
+        "tauri": "cd webapp && npm run tauri",
+        "docs": "cd docs && npm start"
     },
     "workspaces": [
         "webapp"

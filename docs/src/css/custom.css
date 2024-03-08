@@ -1,0 +1,38 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+ @tailwind base;
+ @tailwind components;
+ @tailwind utilities;
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: hsl(24.6 95% 53.1%); /* #2e8555; */
+  --ifm-color-primary-dark: rgb(from var(--ifm-color-primary) h s calc(l + 5%)); /* #29784c; */
+  --ifm-color-primary-darker: rgb(from var(--ifm-color-primary) h s calc(l + 10%)); /* #277148; */
+  --ifm-color-primary-darkest: rgb(from var(--ifm-color-primary) h s calc(l + 20%)); /* #205d3b; */
+  --ifm-color-primary-light: rgb(from var(--ifm-color-primary) h s calc(l - 5%)); /* #33925d; */
+  --ifm-color-primary-lighter: rgb(from var(--ifm-color-primary) h s calc(l - 10%)); /* #359962; */
+  --ifm-color-primary-lightest: rgb(from var(--ifm-color-primary) h s calc(l - 20%)); /* #3cad6e; */
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary:  hsl(20.5 90.2% 48.2%); /* #25c2a0; */
+  --ifm-color-primary-dark: rgb(from var(--ifm-color-primary) h s calc(l + 5%)); /*  #21af90; */
+  --ifm-color-primary-darker: rgb(from var(--ifm-color-primary) h s calc(l + 10%)); /* #1fa588; */
+  --ifm-color-primary-darkest: rgb(from var(--ifm-color-primary) h s calc(l + 20%)); /*  #1a8870; */
+  --ifm-color-primary-light: rgb(from var(--ifm-color-primary) h s calc(l - 5%)); /*  #29d5b0; */
+  --ifm-color-primary-lighter: rgb(from var(--ifm-color-primary) h s calc(l - 10%)); /* #32d8b4; */
+  --ifm-color-primary-lightest: rgb(from var(--ifm-color-primary) h s calc(l - 20%)); /*  #4fddbf; */
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+svg {
+  display:inline-block;
+  vertical-align: baseline;
+}
