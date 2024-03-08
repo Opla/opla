@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-function tailwindPlugin(_context, _options) {
+import type { Plugin, PostCssOptions } from '@docusaurus/types';
+
+function tailwindPlugin(): Plugin {
     return {
       name: 'tailwind-plugin',
-      configurePostCss(postcssOptions) {
+      configurePostCss(postcssOptions: PostCssOptions): PostCssOptions {
         postcssOptions.plugins = [
           require('postcss-import'),
           require('tailwindcss'),

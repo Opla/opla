@@ -10,13 +10,12 @@ import styles from './index.module.css';
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
   return (
-    <header className={clsx('hero', styles.heroBanner)}>
-      <div className="container">
-      <img src="img/logo.svg" alt="Opla Logo" className={clsx('hero-logo', styles.heroLogo)} />
-        <Heading as="h1" className="hero__title">
+      <div className="container px-10 py-40 text-center">
+      <img src="img/logo.svg" alt="Opla Logo" className="w-12 h-12 animate-pulse" />
+        <Heading as="h2" className="mx-auto my-2 text-4xl font-medium md:text-3xl">
           {siteConfig.tagline}
         </Heading>
-        <p className="hero__subtitle">Opla works using your machine processing power.</p>
+        <h3 className="text-lg font-normal pb-4">Opla works using your machine processing power.</h3>
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
@@ -25,7 +24,6 @@ function HomepageHeader() {
           </Link>
         </div>
       </div>
-    </header>
   );
 }
 
@@ -34,7 +32,7 @@ export default function Home(): JSX.Element {
   return (
     <Layout
       title={siteConfig.title}
-      description="Description will go into a meta tag in <head />">
+      description={siteConfig.tagline}>
       <HomepageHeader />
       <main>
       </main>

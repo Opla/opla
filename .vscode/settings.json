@@ -2,6 +2,9 @@
     "eslint.workingDirectories": [
         {
             "pattern": "./webapp"
+        },
+        {
+            "pattern": "./docs"
         }
     ],
     "[typescript][typescriptreact]": {
