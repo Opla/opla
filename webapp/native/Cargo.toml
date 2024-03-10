@@ -31,7 +31,7 @@ thiserror = "1.0.56"
 eventsource-stream = "0.2.3"
 futures-util = "0.3.30"
 tokio = { version = "1.36.0", features = ["sync"] }
-
+tokenizer = { path = "../../crates/tokenizer"}
 [features]
 # by default Tauri runs in production mode
 # when `tauri dev` runs it is executed with `cargo run --no-default-features` if `devPath` is an URL

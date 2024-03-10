@@ -1,0 +1,13 @@
+[package]
+name = "tokenizer"
+version = "0.1.0"
+edition = "2021"
+
+include = ["encodings/**/*", "src/**/*"]
+
+[dependencies]
+fancy-regex = "0.12.0"
+rustc-hash = "1.1.0"
+bstr = "1.6.2"
+anyhow = "1.0.76"
+base64 = "0.21.5"

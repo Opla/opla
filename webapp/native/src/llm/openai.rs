@@ -12,11 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use core::num;
+
 use serde::{ Deserialize, Serialize };
 use crate::error::Error;
 use tauri::Runtime;
 use eventsource_stream::Eventsource;
 use futures_util::stream::StreamExt;
+
+use tokenizer::encode;
 
 use crate::llm::{
     LlmQuery,
@@ -402,4 +406,31 @@ pub async fn call_completion<R: Runtime>(
     println!("llm call duration:  {:?} usage={:?}", end_time, usage);
     result.usage = Some(usage);
     Ok(result)
+}
+
+fn encode_length(text: String) -> usize {
+    match encode(text, "gpt".to_owned(), None) {
+        Ok(ranks) => ranks.len(),
+        Err(_) => 0,
+    }
+}
+
+// See: 
+// https://platform.openai.com/docs/guides/text-generation/managing-tokens
+// https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken
+pub fn num_tokens_from_messages(messages: &Vec<LlmMessage>) -> usize {
+    let mut num_tokens = 0;
+    for message in messages {
+        num_tokens += 4;  // every message follows <im_start>{role/name}\n{content}<im_end>\n
+        num_tokens += encode_length(message.content.clone());
+        num_tokens += 1; // message.role
+        match &message.name {
+            Some(name) => {
+                num_tokens += encode_length(name.to_string()) - 1;
+            }
+            None => {}
+        }
+        num_tokens += 2;  // # every reply is primed with <im_start>assistant
+    }
+    num_tokens
 }
