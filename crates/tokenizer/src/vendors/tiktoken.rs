@@ -3,11 +3,13 @@
 // This check is new and seems buggy (possibly with PyO3 interaction)
 #![allow(clippy::borrow_deref_ref)]
 
+use anyhow::anyhow;
 use std::collections::HashSet;
 use std::num::NonZeroU64;
 use std::thread;
 
 use fancy_regex::Regex;
+use rustc_hash::FxHashMap as HashMap;
 
 #[cfg(feature = "python")]
 use pyo3::exceptions;
@@ -23,9 +25,8 @@ use pyo3::PyResult;
 
 #[cfg(feature = "python")]
 use pyo3::types::{PyBytes, PyList, PyTuple};
-use rustc_hash::FxHashMap as HashMap;
 
-type Rank = u32;
+pub type Rank = u32;
 
 fn _byte_pair_merge(ranks: &HashMap<Vec<u8>, Rank>, piece: &[u8]) -> Vec<(usize, Rank)> {
     // This is a vector of (start, rank).
@@ -176,10 +177,10 @@ struct CoreBPE {
 #[derive(Debug, Clone)]
 #[allow(dead_code)] // sorted_token_bytes is used but is read only in python version
 pub struct CoreBPE {
-    encoder: HashMap<Vec<u8>, usize>,
-    special_tokens_encoder: HashMap<String, usize>,
-    decoder: HashMap<usize, Vec<u8>>,
-    special_tokens_decoder: HashMap<usize, Vec<u8>>,
+    encoder: HashMap<Vec<u8>, Rank>,
+    special_tokens_encoder: HashMap<String, Rank>,
+    decoder: HashMap<Rank, Vec<u8>>,
+    special_tokens_decoder: HashMap<Rank, Vec<u8>>,
     regex_tls: Vec<Regex>,
     special_regex_tls: Vec<Regex>,
     sorted_token_bytes: Vec<Vec<u8>>,
@@ -207,6 +208,19 @@ impl CoreBPE {
             ret.extend(token_bytes);
         }
         ret
+    }
+
+    fn _decode_native_and_split(
+        &self,
+        tokens: Vec<Rank>,
+    ) -> impl Iterator<Item = Vec<u8>> + '_ {
+        tokens.into_iter().map(|token| {
+            let token_bytes = self
+                .decoder
+                .get(&token)
+                .unwrap_or_else(|| &self.special_tokens_decoder[&token]);
+            token_bytes.clone()
+        })
     }
 
     fn _encode_ordinary_native(&self, text: &str) -> Vec<Rank> {
@@ -446,10 +460,10 @@ impl CoreBPE {
     // Rust's results and errors
     #[cfg(not(feature = "python"))]
     pub fn new(
-        encoder: HashMap<Vec<u8>, usize>,
-        special_tokens_encoder: HashMap<String, usize>,
+        encoder: HashMap<Vec<u8>, Rank>,
+        special_tokens_encoder: HashMap<String, Rank>,
         pattern: &str,
-    ) -> Result<Self> {
+    ) -> Result<Self, anyhow::Error> {
         let regex = Regex::new(pattern).map_err(|e| anyhow!(e.to_string()))?;
 
         let special_regex = {
@@ -460,12 +474,12 @@ impl CoreBPE {
             Regex::new(&_parts.join("|")).map_err(|e| anyhow!(e.to_string()))?
         };
 
-        let decoder: HashMap<usize, Vec<u8>> =
+        let decoder: HashMap<Rank, Vec<u8>> =
             encoder.iter().map(|(k, v)| (*v, k.clone())).collect();
 
         assert!(encoder.len() == decoder.len());
 
-        let special_tokens_decoder: HashMap<usize, Vec<u8>> = special_tokens_encoder
+        let special_tokens_decoder: HashMap<Rank, Vec<u8>> = special_tokens_encoder
             .iter()
             .map(|(k, v)| (*v, k.as_bytes().to_vec()))
             .collect();
@@ -487,15 +501,15 @@ impl CoreBPE {
         })
     }
 
-    pub fn encode_ordinary(&self, text: &str) -> Vec<usize> {
+    pub fn encode_ordinary(&self, text: &str) -> Vec<Rank> {
         self._encode_ordinary_native(text)
     }
 
-    pub fn encode(&self, text: &str, allowed_special: HashSet<&str>) -> Vec<usize> {
+    pub fn encode(&self, text: &str, allowed_special: HashSet<&str>) -> Vec<Rank> {
         self._encode_native(text, &allowed_special).0
     }
 
-    pub fn encode_with_special_tokens(&self, text: &str) -> Vec<usize> {
+    pub fn encode_with_special_tokens(&self, text: &str) -> Vec<Rank> {
         let allowed_special = self
             .special_tokens_encoder
             .keys()
@@ -511,7 +525,7 @@ impl CoreBPE {
     /// Decode a vector of tokens into a valid UTF-8 String
     ///
     /// If unicode validation is not wanted, see _decode_native.
-    pub fn decode(&self, tokens: Vec<usize>) -> Result<String> {
+    pub fn decode(&self, tokens: Vec<Rank>) -> Result<String, anyhow::Error> {
         match String::from_utf8(self._decode_native(&tokens)) {
             Ok(text) => Ok(text),
             Err(e) => Err(anyhow!("Unable to decode into a valid UTF-8 string: {}", e)),
@@ -558,7 +572,7 @@ impl CoreBPE {
         &'a self,
         text: &'a str,
         use_special_tokens: bool,
-    ) -> Result<Vec<String>> {
+    ) -> Result<Vec<String>, ()> {
         self.split_by_token_iter(text, use_special_tokens).collect()
     }
 
@@ -568,7 +582,7 @@ impl CoreBPE {
         &'a self,
         text: &'a str,
         use_special_tokens: bool,
-    ) -> impl Iterator<Item = Result<String>> + 'a {
+    ) -> impl Iterator<Item = Result<String, ()>> + 'a {
         // First, encode the text using the BPE model
         let encoded = match use_special_tokens {
             true => self.encode_with_special_tokens(text),
@@ -583,7 +597,7 @@ impl CoreBPE {
 
     /// Tokenize a string and return the decoded tokens using the correct BPE model.
     /// This method is equivalent to `split_by_token(text, false)`.
-    pub fn split_by_token_ordinary<'a>(&'a self, text: &'a str) -> Result<Vec<String>> {
+    pub fn split_by_token_ordinary<'a>(&'a self, text: &'a str) -> Result<Vec<String>, ()> {
         self.split_by_token(text, false)
     }
 
@@ -592,7 +606,7 @@ impl CoreBPE {
     pub fn split_by_token_ordinary_iter<'a>(
         &'a self,
         text: &'a str,
-    ) -> impl Iterator<Item = Result<String>> + 'a {
+    ) -> impl Iterator<Item = Result<String, ()>> + 'a {
         self.split_by_token_iter(text, false)
     }
 }
@@ -764,9 +778,9 @@ fn _tiktoken(_py: Python, m: &PyModule) -> PyResult<()> {
 mod tests {
     use rustc_hash::FxHashMap as HashMap;
 
-    use crate::{byte_pair_split, Rank};
+    use super::byte_pair_split;
 
-    fn setup_ranks() -> HashMap<Vec<u8>, Rank> {
+    fn setup_ranks() -> HashMap<Vec<u8>, u32> {
         HashMap::from_iter([
             (b"ab".to_vec(), 0),
             (b"cd".to_vec(), 1),

@@ -31,6 +31,15 @@ const openAIProviderTemplate: Partial<Provider> = {
       createdAt: 1677610602,
       updatedAt: 1677610602,
       creator: 'openai',
+      contextWindow: 4096,
+    },
+    {
+      id: 'gpt-3.5-turbo-16k',
+      name: 'gpt-3.5 turbo 16k',
+      createdAt: 1683758102,
+      updatedAt: 1683758102,
+      creator: 'openai',
+      contextWindow: 16384,
     },
     {
       id: 'gpt-4',
@@ -38,6 +47,15 @@ const openAIProviderTemplate: Partial<Provider> = {
       createdAt: 1687882411,
       updatedAt: 1687882411,
       creator: 'openai',
+      contextWindow: 8192,
+    },
+    {
+      id: 'gpt-4-turbo-preview',
+      name: 'gpt-4 turbo preview',
+      createdAt: 1706037777,
+      updatedAt: 1706037777,
+      creator: 'openai',
+      contextWindow: 4096,
     },
   ],
 };
