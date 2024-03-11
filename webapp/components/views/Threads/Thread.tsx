@@ -250,7 +250,7 @@ function Thread({
       const error = String(e);
       onError(error);
       setErrorMessage({ ...errorMessage, [conversation.id]: error });
-      returnedMessage.content = t('Oops, something went wrong.');
+      returnedMessage.content = t(error);
       returnedMessage.status = MessageStatus.Error;
       const { provider } = activeService;
       if (provider) {
@@ -266,7 +266,9 @@ function Thread({
 
       toast.error(String(e));
     }
-    returnedMessage.status = MessageStatus.Delivered;
+    if (returnedMessage.status !== MessageStatus.Error) {
+      returnedMessage.status = MessageStatus.Delivered;
+    }
 
     await updateMessagesAndConversation(
       [returnedMessage],
