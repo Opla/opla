@@ -17,6 +17,7 @@
 import { useContext, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useSearchParams } from 'next/navigation';
+import { v4 as uuid } from 'uuid';
 import useBackend from '@/hooks/useBackendContext';
 import { Conversation, PageSettings } from '@/types';
 import { DefaultPageSettings } from '@/utils/constants';
@@ -26,7 +27,7 @@ import { getConversation } from '@/utils/data/conversations';
 import { ModalIds } from '@/modals';
 import { ModalsContext } from '@/context/modals';
 import { AppContext } from '@/context';
-import { MenuAction, Page, ViewName } from '@/types/ui';
+import { ConversationError, MenuAction, Page, ViewName } from '@/types/ui';
 import { getAssistantId } from '@/utils/services';
 import { deepEqual } from '@/utils/data';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../../ui/resizable';
@@ -47,9 +48,9 @@ type ThreadsProps = {
 export default function Threads({ selectedThreadId, view = ViewName.Recent }: ThreadsProps) {
   const router = useRouter();
   const { id } = router.query;
-  const [errors, setError] = useState<string[]>([]);
-  const handleError = (error: string) => {
-    setError([...errors, error]);
+  const [errors, setError] = useState<ConversationError[]>([]);
+  const handleError = (conversationId: string, error: string) => {
+    setError([...errors, { id: uuid(), conversationId, error }]);
   };
 
   const {
@@ -254,7 +255,10 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
         onResize={handleResizeSettings}
         className={!pageSettings.settingsHidden && view === ViewName.Recent ? '' : 'hidden'}
       >
-        <Settings conversationId={selectedThreadId} errors={errors} />
+        <Settings
+          conversationId={selectedThreadId}
+          errors={errors.filter((e) => e.conversationId === selectedThreadId)}
+        />
       </ResizablePanel>
     </ResizablePanelGroup>
   );

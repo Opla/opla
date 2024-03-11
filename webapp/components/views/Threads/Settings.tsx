@@ -22,6 +22,7 @@ import { findProvider, getLocalProvider } from '@/utils/data/providers';
 import { Conversation, Preset } from '@/types';
 import { getFilename } from '@/utils/misc';
 import EditPresets from '@/components/common/EditPresets';
+import { ConversationError } from '@/types/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { Textarea } from '../../ui/textarea';
 import { Button } from '../../ui/button';
@@ -31,7 +32,7 @@ export default function Settings({
   errors,
 }: {
   conversationId?: string;
-  errors: string[];
+  errors: ConversationError[];
 }) {
   const { t } = useTranslation();
   const { conversations, updateConversations, providers } = useContext(AppContext);
@@ -170,10 +171,10 @@ export default function Settings({
         </TabsContent>
         <TabsContent value="debug" className="px-4">
           {errors.map((error) => (
-            <div key={error.substring(0, 5)} className="p-2 text-xs text-red-500">
+            <div key={error.id} className="p-2 text-xs text-red-500">
               <p>
                 <AlertTriangle className="mr-2 inline-flex h-4 w-4 text-red-500" />
-                <span>{error}</span>
+                <span>{error.error}</span>
               </p>
             </div>
           ))}

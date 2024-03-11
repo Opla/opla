@@ -67,7 +67,7 @@ function Thread({
   conversationId?: string;
   rightToolbar: React.ReactNode;
   onSelectMenu: (menu: MenuAction, data: string) => void;
-  onError: (error: string) => void;
+  onError: (conversationId: string, error: string) => void;
 }) {
   const router = useRouter();
   const {
@@ -248,7 +248,7 @@ function Thread({
     } catch (e: any) {
       logger.error('sendMessage', e, typeof e);
       const error = String(e);
-      onError(error);
+      onError(conversation.id, error);
       setErrorMessage({ ...errorMessage, [conversation.id]: error });
       returnedMessage.content = t(error);
       returnedMessage.status = MessageStatus.Error;

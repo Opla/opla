@@ -81,3 +81,9 @@ export enum ModalIds {
   NewPreset = 'newpreset',
   EditTarget = 'edittarget',
 }
+
+export type ConversationError = {
+  id: string;
+  conversationId: string;
+  error: string;
+};
