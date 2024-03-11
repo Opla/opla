@@ -174,7 +174,7 @@ export default function Settings({
             <div key={error.id} className="p-2 text-xs text-red-500">
               <p>
                 <AlertTriangle className="mr-2 inline-flex h-4 w-4 text-red-500" />
-                <span>{error.error}</span>
+                <span>{error.message}</span>
               </p>
             </div>
           ))}

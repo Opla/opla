@@ -50,7 +50,7 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
   const { id } = router.query;
   const [errors, setError] = useState<ConversationError[]>([]);
   const handleError = (conversationId: string, error: string) => {
-    setError([...errors, { id: uuid(), conversationId, error }]);
+    setError([...errors, { id: uuid(), conversationId, message: error }]);
   };
 
   const {
