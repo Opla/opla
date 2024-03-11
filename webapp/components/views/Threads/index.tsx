@@ -90,10 +90,10 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
       const newSettings = { ...page, ...partialSettings };
       if (partialSettings && !deepEqual(newSettings, DefaultPageSettings)) {
         if (!deepEqual(newSettings, page)) {
-        setSettings({
-          ...settings,
-          pages: { ...pages, [currentPage]: newSettings },
-        });
+          setSettings({
+            ...settings,
+            pages: { ...pages, [currentPage]: newSettings },
+          });
         }
       } else if (pages[currentPage]) {
         delete pages[currentPage];
