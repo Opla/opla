@@ -19,23 +19,17 @@ import { Position2D, Rect, getBoundingClientRect } from '@/utils/ui';
 export type KeyedScrollPosition = { key: string | undefined; position: Position2D; rect?: Rect };
 
 const containerRectToPercentage = (elementRect: Rect, parentRect: Rect): Rect => {
-  let width = +(elementRect.width - parentRect.width - parentRect.x).toFixed(1);
-  if (width === 0) {
-    width = -1;
-  }
+  const width = +(elementRect.width - parentRect.width - parentRect.x).toFixed(1);
+  const height = +(elementRect.height - parentRect.height - parentRect.y).toFixed(1);
 
-  let height = +(elementRect.height - parentRect.height - parentRect.y).toFixed(1);
-  if (height === 0) {
-    height = -1;
-  }
   const ex = +elementRect.x.toFixed(1);
   const ey = +elementRect.y.toFixed(1);
-  const x = width < 1 ? 0 : +((-ex / width) * 100).toFixed(1);
-  const y = height < 1 ? 0 : +((-ey / height) * 100).toFixed(1);
+  const x = width <= 0 ? -1 : +((-ex / width) * 100).toFixed(1);
+  const y = height <= 0 ? -1 : +((-ey / height) * 100).toFixed(1);
   // logger.info('containerRectToPercentage', ey, elementRect, parentRect, x, y, height);
   return {
     x,
-    y,
+    y: y < 0 ? 0 : y,
     width,
     height,
   };
@@ -52,20 +46,15 @@ const percentageToContainerRect = (
   parent: HTMLDivElement,
   position: Position2D,
 ): Rect => {
+  const px = position.x > 0 ? position.x : 0;
+  const py = position.y > 0 ? position.y : 0;
   const parentRect = getBoundingClientRect(parent);
-  let width = +(elementRect.width - parentRect.width).toFixed(1);
-  if (width === 0) {
-    width = -1;
-  }
+  const width = +(elementRect.width - parentRect.width).toFixed(1);
+  const height = +(elementRect.height - parentRect.height).toFixed(1);
 
-  let height = +(elementRect.height - parentRect.height).toFixed(1);
-  if (height === 0) {
-    height = -1;
-  }
-
-  const x = width < 1 ? 0 : -((position.x / 100) * width).toFixed(1);
-  const y = height < 1 ? 0 : -((position.y / 100) * height).toFixed(1) + 50;
-  // logger.info('percentageToContainerRect', y, elementRect, parentRect, position, height);
+  const x = width <= 0 ? -1 : -((px / 100) * width).toFixed(1);
+  const y = height <= 0 ? -1 : -((py / 100) * height).toFixed(1) + 50;
+  // logger.info('percentageToContainerRect', y, elementRect, parentRect, position, px, py, height);
   return {
     x,
     y,
@@ -109,7 +98,7 @@ export default function useScroll(
 
       const currentRect = keyedRect.current.rect;
       const parent = previousNode.current as HTMLDivElement;
-      logger.info('handleResize', contentRect, currentRect, parent);
+      // logger.info('handleResize', contentRect, currentRect, parent);
       if (
         parent &&
         (!currentRect ||
@@ -119,29 +108,37 @@ export default function useScroll(
         const rect = percentageToContainerRect(contentRect, parent, position);
         const { width, height, ...xy } = rect;
         if (height < 1 && width < 1) {
+          logger.info('handleResize not scroll', rect, contentRect, currentRect, xy, position);
+          keyedRect.current = { key, position: { x: -1, y: -1 }, rect };
+          if (position.x !== -1 && position.y !== -1) {
+            onUpdatePosition(keyedRect.current);
+          }
           return;
         }
-        const compare = containerRectToPercentage(
+        const resizedRect = containerRectToPercentage(
           { width: contentRect.width, height: contentRect.height, x: rect.x, y: rect.y },
           getBoundingClientRect(parent),
         );
-        logger.info(
+        /* logger.info(
           'resize update',
-          `y=${position.y} yc=${compare.y}`,
-          `y=${position.y} yc=${compare.y}`,
+          `x=${position.x} xc=${resizedRect.x}`,
+          `y=${position.y} yc=${resizedRect.y}`,
           position,
-          compare,
+          resizedRect,
           xy,
           width,
           height,
           contentRect,
-        );
-        parent.scrollTo({ left: -xy.x, top: -xy.y, behavior: 'instant' });
-        keyedRect.current = { key, position: xy, rect };
+        ); */
+        // parent.scrollTo({ left: -xy.x, top: -xy.y, behavior: 'instant' });
+        keyedRect.current = { key, position: { x: resizedRect.x, y: resizedRect.y }, rect };
+        if (position.x !== resizedRect.x || position.y !== resizedRect.y) {
+          onUpdatePosition(keyedRect.current);
+        }
         isResizing.current = true;
       }
     },
-    [key, position],
+    [key, onUpdatePosition, position],
   );
 
   const handleScrollEnd = useCallback(
@@ -152,25 +149,12 @@ export default function useScroll(
         return;
       }
       // logger.info(`handleScrollEnd newPosition ${key}`, keyedRect.current, position, rect);
-      if (rect.width && rect.height) {
+      if (rect.width > 0 || rect.height > 0) {
         const newKeyedPosition: KeyedScrollPosition = {
           key,
           position: { x: rect.x, y: rect.y },
           rect,
         };
-        /* if (
-        (keyedRect.current.key === key &&
-          keyedRect.current.position.x !== newKeyedPosition.position.x) ||
-        keyedRect.current.position.y !== newKeyedPosition.position.y
-      ) {
-        keyedRect.current = newKeyedPosition;
-        if (
-          keyedRect.current.rect?.height === newKeyedPosition.rect?.height &&
-          keyedRect.current.rect?.width === newKeyedPosition.rect?.width
-        ) {
-          onUpdatePosition(newKeyedPosition);
-        }
-      } */
         onUpdatePosition(newKeyedPosition);
       }
 
@@ -206,7 +190,7 @@ export default function useScroll(
 
       const parent = previousNode.current as HTMLDivElement;
       if (parent) {
-        logger.info(`scrollTo isScrolling ${key} ${parent}`, isScrolling, scrollPosition, position);
+        // logger.info(`scrollTo isScrolling ${key} ${parent}`, isScrolling, scrollPosition, position);
         const element = parent.firstChild as HTMLDivElement;
         if (!element) {
           return;
@@ -216,7 +200,7 @@ export default function useScroll(
           element as HTMLDivElement,
           parent as HTMLDivElement,
         );
-        logger.info('currentRect', currentRect, scrollPosition, position);
+        // logger.info('currentRect', currentRect, scrollPosition, position);
         if (currentRect.height < 1) {
           // logger.info('not scroll', scrollPosition, currentRect);
           return;
@@ -234,13 +218,10 @@ export default function useScroll(
         parent.scrollTo(-newPosition.x, -newPosition.y + parentRect.y);
         const rect = containerToPercentage(element, parent);
         keyedRect.current = { key, position: { x: rect.x, y: rect.y }, rect };
-        /* waitAfterScroll(() => {
-                    isScrolling.current = false;
-                }); */
-        // isScrolling.current = false;
+        onUpdatePosition(keyedRect.current);
       }
     },
-    [key, position],
+    [key, onUpdatePosition, position],
   );
 
   const customRef = useCallback(
