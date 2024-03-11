@@ -295,7 +295,7 @@ function Thread({
     return updatedConversations;
   };
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (prompt = currentPrompt) => {
     if (conversationId === undefined) {
       return;
     }
@@ -304,7 +304,7 @@ function Thread({
       getConversationModelId(selectedConversation, assistant) || activeModel;
     const result = await preProcessingCommands(
       conversationId,
-      currentPrompt,
+      prompt,
       commandManager,
       selectedConversation as Conversation,
       conversations,
@@ -325,11 +325,7 @@ function Thread({
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
     setIsProcessing({ ...isProcessing, [conversationId]: true });
 
-    const userMessage = createMessage(
-      { role: 'user', name: 'you' },
-      currentPrompt.text,
-      currentPrompt.raw,
-    );
+    const userMessage = createMessage({ role: 'user', name: 'you' }, prompt.text, prompt.raw);
     let message = createMessage({ role: 'assistant', name: modelName }, '...');
     message.status = MessageStatus.Pending;
     userMessage.sibling = message.id;
@@ -364,7 +360,7 @@ function Thread({
       updatedMessages,
       updatedConversation,
       updatedConversations,
-      currentPrompt,
+      prompt,
       modelName,
     );
 
