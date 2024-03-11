@@ -206,13 +206,16 @@ function PromptCommandInput({
         ref={textareaRef}
         autoComplete="off"
         autoCorrect="off"
-        className={cn(className, 'border-0 text-transparent')}
+        className={cn(
+          className,
+          'focus-visible:ring-none border-none text-transparent shadow-none focus-visible:border-none focus-visible:shadow-none focus-visible:outline-none',
+        )}
         value={value?.raw || ''}
         placeholder={placeholder}
         onChange={handleValueChange}
         onFocus={handleFocus}
       >
-        <p className="textarea-overlay pointer-events-none absolute left-[1px] top-[1px] h-full w-full px-3 py-2 text-sm">
+        <p className="textarea-overlay pointer-events-none absolute left-[0.01px] top-[0.1px] h-full w-full px-3 py-2 text-sm">
           {value?.tokens?.map((token) =>
             token.type !== 'newline' ? (
               <span key={token.index} className={cn('', getTokenColor(token))}>
