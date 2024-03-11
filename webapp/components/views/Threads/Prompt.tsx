@@ -136,7 +136,7 @@ export default function Prompt({
             <span className="text-sm text-red-500">{errorMessage}</span>
           </div>
         ) : null}
-        <div className="flex w-full flex-row items-center rounded-md border border-black/10 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white">
+        <div className="flex w-full flex-row items-center  rounded-md border border-input p-3 focus-within:border-transparent focus-within:ring-1 focus-within:ring-ring ">
           <Button
             disabled={disabled || isLoading}
             type="button"
