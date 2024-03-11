@@ -107,9 +107,6 @@ function MessageComponent({
   const [current, setCurrent] = useState(0);
   const { author } = message;
 
-  /* const content = getContent(
-    current > 0 && message.contentHistory ? message.contentHistory[current - 1] : message.content,
-  ); */
   const content = getMessageContentHistoryAsString(message, current, edit !== undefined);
   const Content = useMarkdownProcessor(content || '');
   const isUser = author.role === 'user';
