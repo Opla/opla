@@ -165,16 +165,22 @@ function PromptCommandInput({
   const handleSelectionChange = useCallback(() => {
     const textarea = textareaRef.current;
     const dropdown = dropdownRef.current;
+
     if (textarea && dropdown) {
       const { currentWord } = getCurrentWord(textarea);
 
       const start = textarea.value.trim().length - currentWord.length;
-
-      if (!isCommand(currentWord, start) && commandValue !== '') {
+      const isaCommand = isCommand(currentWord, start);
+      // logger.info('focus handleSelectionChange', isaCommand, commandValue);
+      if (!isaCommand && commandValue !== '') {
         toggleDropdown(false);
+      } else if (isaCommand) {
+        setCommandValue(currentWord);
+        positionDropdown();
+        toggleDropdown();
       }
     }
-  }, [commandValue]);
+  }, [commandValue, positionDropdown]);
 
   useEffect(() => {
     const textarea = textareaRef.current;
