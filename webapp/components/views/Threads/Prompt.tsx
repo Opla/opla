@@ -43,7 +43,7 @@ export type PromptProps = {
   errorMessage: string;
   disabled: boolean;
   onUpdatePrompt: (prompt: ParsedPrompt) => void;
-  onSendMessage: () => void;
+  onSendMessage: (prompt?: ParsedPrompt) => void;
   tokenValidate: TokenValidator;
 };
 
@@ -96,16 +96,16 @@ export default function Prompt({
   };
 
   const handleKeypress = (e: KeyboardEvent) => {
+    const textarea = e.target as HTMLTextAreaElement;
+    const { caretStartIndex } = getCaretPosition(textarea);
+    const value = `${textarea.value} \n`;
+    const newPrompt = parsePrompt({ text: value, caretStartIndex }, tokenValidate);
     if (e.key === 'Enter' && e.shiftKey) {
       e.preventDefault();
-      const textarea = e.target as HTMLTextAreaElement;
-      const { caretStartIndex } = getCaretPosition(textarea);
-      const value = `${textarea.value} \n`;
-      const newPrompt = parsePrompt({ text: value, caretStartIndex }, tokenValidate);
       onUpdatePrompt(newPrompt);
     } else if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      onSendMessage();
+      onSendMessage(newPrompt);
     }
   };
 
