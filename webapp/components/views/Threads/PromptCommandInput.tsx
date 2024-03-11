@@ -176,7 +176,7 @@ function PromptCommandInput({
         toggleDropdown(false);
       } else if (isaCommand) {
         setCommandValue(currentWord);
-          positionDropdown();
+        positionDropdown();
         toggleDropdown();
       }
     }
