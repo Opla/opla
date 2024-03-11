@@ -48,6 +48,7 @@ function ConversationList({
   const position = { x: scrollPosition === -1 ? -1 : 0, y: scrollPosition };
   const [ref, scrollTo] = useScroll(conversationId, position, handleUpdatePosition);
 
+  // console.log('scrollPosition', scrollPosition, position, ref, scrollTo);
   return (
     <div className="flex grow flex-col overflow-hidden">
       <div ref={ref} className="overflow-y-auto">
@@ -74,7 +75,7 @@ function ConversationList({
       </div>
 
       <div className="z-100 relative w-full">
-        {scrollPosition < 99 && scrollPosition > 0 && (
+        {scrollPosition < 99 && scrollPosition > -1 && (
           <Button
             variant="ghost"
             size="icon"
