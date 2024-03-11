@@ -97,10 +97,7 @@ export const deepEqual = <T>(a: T, b: T): boolean => {
   if (typeof a !== 'object' || typeof b !== 'object') return false;
   if (a === null || b === null) return false;
   if (a === undefined || b === undefined) return false;
-  if (
-    Array.isArray(a) === Array.isArray(b) &&
-    (a as unknown[]).length === (b as unknown[]).length
-  ) {
+  if (Array.isArray(a) && Array.isArray(b) && (a as unknown[]).length === (b as unknown[]).length) {
     return (a as unknown[]).every((v: unknown, i: number) => deepEqual(v, (b as unknown[])[i]));
   }
   if (Object.keys(a).length === Object.keys(b).length) {
