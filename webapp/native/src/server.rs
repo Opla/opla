@@ -20,7 +20,7 @@ use crate::{
     store::{ ServerConfiguration, ServerParameters },
 };
 use sysinfo::System;
-use tauri::async_runtime::JoinHandle;
+use tauri::{api::process::CommandChild, async_runtime::JoinHandle};
 use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
 use crate::llm::{ LlmQuery, LlmCompletionResponse };
 use std::time::Duration;
@@ -35,6 +35,7 @@ pub struct OplaServer {
     pub parameters: Option<ServerParameters>,
     server: LLamaCppServer,
     handle: Option<JoinHandle<()>>,
+    command_child: Arc<Mutex<Option<CommandChild>>>,
 }
 
 #[derive(Clone, serde::Serialize, Copy, PartialEq, Debug)]
@@ -83,6 +84,7 @@ impl OplaServer {
             parameters: None,
             server: LLamaCppServer::new(),
             handle: None,
+            command_child: Arc::new(Mutex::new(None)),
         }
     }
 
@@ -110,12 +112,12 @@ impl OplaServer {
         model: &str,
         arguments: Vec<String>,
         wpid: Arc<Mutex<usize>>,
-        wstatus: Arc<Mutex<ServerStatus>>
+        wstatus: Arc<Mutex<ServerStatus>>,
+        command_child: Arc<Mutex<Option<CommandChild>>>,
     ) -> Result<(), String> {
         let command = Command::new_sidecar("llama.cpp.server").map_err(
             |_| "failed to init llama.cpp.server"
         )?;
-
         let model = model.to_string();
         let handle = tauri::async_runtime::spawn(async move {
             let (mut rx, child) = match command.args(arguments).spawn() {
@@ -170,7 +172,10 @@ impl OplaServer {
             let mut wp = wpid.lock().await;
             *wp = p;
             drop(wp);
-
+            let mut cchild = command_child.lock().await;
+            *cchild = Some(child);
+            drop(cchild);
+        
             while let Some(event) = rx.recv().await {
                 if let CommandEvent::Stdout(line) = event {
                     println!("{}", line);
@@ -357,7 +362,8 @@ impl OplaServer {
 
         let wpid = Arc::clone(&self.pid);
         let wstatus = Arc::clone(&self.status);
-        self.start_llama_cpp_server(app, model, arguments, wpid, wstatus).await?;
+        let command_child = Arc::clone(&self.command_child);
+        self.start_llama_cpp_server(app, model, arguments, wpid, wstatus, command_child).await?;
 
         Ok(Payload { status: status_response, message: self.name.to_string() })
     }
@@ -400,13 +406,33 @@ impl OplaServer {
             };
             process.kill();
             println!("Kill Opla server {}", pid); */
-            match self.handle.take() {
+            /* match self.handle.take() {
                 Some(handle) => {
+                    println!("Opla try to cancel task {:?}", handle);
                     handle.abort();
                 }
                 None => {
                     println!("Opla server error trying to get handler");
                     return Err("Opla server can't get handler".to_string());
+                }
+            } */
+            match self.command_child.lock().await.take() {
+                Some(child) => {
+                    // println!("Opla try to kill child {:?}", child);
+                    let result = child.kill();
+                    match result {
+                        Ok(_) => {
+                            println!("Opla server killed: {} ", "llama.cpp.server");
+                        }
+                        Err(e) => {
+                            println!("Opla server error trying to kill child {:?}", e);
+                            return Err("Opla server can't kill child".to_string());
+                        }
+                    }
+                }
+                None => {
+                    println!("Opla server error trying to get child");
+                    return Err("Opla server can't get child".to_string());
                 }
             }
             app
@@ -436,7 +462,7 @@ impl OplaServer {
         let mut pid: u32 = 0;
         let mut started = false;
         let mut name;
-        // This will not work in Apple sandbox
+        // This will not work in Apple Macos sandbox
         for process in sys.processes_by_name("llama.cpp.server") {
             if pid == 0 && !started {
                 pid = process.pid().as_u32();
