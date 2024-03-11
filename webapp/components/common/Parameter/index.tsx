@@ -111,7 +111,7 @@ export default function Parameter({
             }}
           />
         )}
-        {(type === 'text' || type === 'number' || type === 'url') && (
+        {(type === 'text' || type === 'number' || (type === 'url' && !disabled)) && (
           <Input
             value={value as string}
             placeholder={placeholder}
