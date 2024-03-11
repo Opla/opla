@@ -85,5 +85,5 @@ export enum ModalIds {
 export type ConversationError = {
   id: string;
   conversationId: string;
-  error: string;
+  message: string;
 };
