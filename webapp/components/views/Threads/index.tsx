@@ -28,6 +28,7 @@ import { ModalsContext } from '@/context/modals';
 import { AppContext } from '@/context';
 import { MenuAction, Page, ViewName } from '@/types/ui';
 import { getAssistantId } from '@/utils/services';
+import { deepEqual } from '@/utils/data';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../../ui/resizable';
 import Explorer from './Explorer';
 import Settings from './Settings';
@@ -86,11 +87,14 @@ export default function Threads({ selectedThreadId, view = ViewName.Recent }: Th
     if (settings.selectedPage) {
       const pages = settings.pages || {};
       const page = pages[currentPage] || DefaultPageSettings;
-      if (partialSettings) {
+      const newSettings = { ...page, ...partialSettings };
+      if (partialSettings && !deepEqual(newSettings, DefaultPageSettings)) {
+        if (!deepEqual(newSettings, page)) {
         setSettings({
           ...settings,
-          pages: { ...pages, [currentPage]: { ...page, ...partialSettings } },
+          pages: { ...pages, [currentPage]: newSettings },
         });
+        }
       } else if (pages[currentPage]) {
         delete pages[currentPage];
         setSettings({
