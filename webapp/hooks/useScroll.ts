@@ -28,10 +28,10 @@ const containerRectToPercentage = (elementRect: Rect, parentRect: Rect): Rect =>
   if (height === 0) {
     height = -1;
   }
-  const ex = +(elementRect.x).toFixed(1);
-  const ey = +(elementRect.y).toFixed(1);
-  const x = width < 1 ? 0 : +(((-ex) / width) * 100).toFixed(1);
-  const y = height < 1 ? 0 : +(((-ey) / height) * 100).toFixed(1);
+  const ex = +elementRect.x.toFixed(1);
+  const ey = +elementRect.y.toFixed(1);
+  const x = width < 1 ? 0 : +((-ex / width) * 100).toFixed(1);
+  const y = height < 1 ? 0 : +((-ey / height) * 100).toFixed(1);
   // logger.info('containerRectToPercentage', ey, elementRect, parentRect, x, y, height);
   return {
     x,
@@ -230,11 +230,7 @@ export default function useScroll(
         const newPosition = percentageToContainerRect(elementRect, parent, scrollPosition);
         const compare = containerRectToPercentage(elementRect, getBoundingClientRect(parent));
         const parentRect = getBoundingClientRect(parent);
-        logger.info(
-                    'scrollTo update',
-                    compare,
-                    newPosition,
-                );
+        logger.info('scrollTo update', compare, newPosition);
         parent.scrollTo(-newPosition.x, -newPosition.y + parentRect.y);
         const rect = containerToPercentage(element, parent);
         keyedRect.current = { key, position: { x: rect.x, y: rect.y }, rect };
