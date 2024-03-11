@@ -55,9 +55,13 @@ export function ConversationPanel({
 
   const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {
     const conversation = getConversation(key, conversations);
-    if (conversation && conversation.scrollPosition !== position.y && position.y !== -1) {
-      logger.info(`handleScrollPosition ${key} ${conversation.id}`, position);
-      conversation.scrollPosition = position.y;
+    logger.info(
+      `handleScrollPosition ${key} ${conversation?.id}`,
+      position,
+      conversation?.scrollPosition,
+    );
+    if (conversation && conversation.scrollPosition !== position.y) {
+      conversation.scrollPosition = position.y === -1 ? undefined : position.y;
       const updatedConversations = updateConversation(conversation, conversations, true);
       updateConversations(updatedConversations);
     }
@@ -88,7 +92,7 @@ export function ConversationPanel({
             scrollPosition={
               selectedConversation && selectedConversation.scrollPosition !== undefined
                 ? selectedConversation.scrollPosition
-                : -1
+                : undefined
             }
             messages={messages || []}
             onScrollPosition={handleScrollPosition}

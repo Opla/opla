@@ -21,7 +21,7 @@ import { Button } from '../../../ui/button';
 
 type ConversationListProps = {
   conversationId: string;
-  scrollPosition: number;
+  scrollPosition: number | undefined;
   messages: Message[];
   onScrollPosition: (props: KeyedScrollPosition) => void;
   onResendMessage: (m: Message) => void;
@@ -45,10 +45,12 @@ function ConversationList({
     onScrollPosition(props);
   };
 
-  const position = { x: scrollPosition === -1 ? -1 : 0, y: scrollPosition };
+  const position = {
+    x: scrollPosition === -1 ? -1 : 0,
+    y: scrollPosition === undefined ? -1 : scrollPosition,
+  };
   const [ref, scrollTo] = useScroll(conversationId, position, handleUpdatePosition);
 
-  // console.log('scrollPosition', scrollPosition, position, ref, scrollTo);
   return (
     <div className="flex grow flex-col overflow-hidden">
       <div ref={ref} className="overflow-y-auto">
@@ -75,7 +77,7 @@ function ConversationList({
       </div>
 
       <div className="z-100 relative w-full">
-        {scrollPosition < 99 && scrollPosition > -1 && (
+        {scrollPosition !== undefined && scrollPosition < 99 && (
           <Button
             variant="ghost"
             size="icon"
