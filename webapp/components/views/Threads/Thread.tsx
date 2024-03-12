@@ -297,6 +297,34 @@ function Thread({
     return updatedConversations;
   };
 
+  const preProcessingSendMessage = async (
+    prompt: ParsedPrompt,
+    conversation: Conversation,
+    previousMessage?: Message,
+  ) => {
+    const selectedModelNameOrId = getConversationModelId(conversation, assistant) || activeModel;
+    const result = await preProcessingCommands(
+      conversation.id,
+      prompt,
+      commandManager,
+      conversation,
+      conversations,
+      tempConversationName,
+      selectedModelNameOrId,
+      previousMessage,
+      { changeService, getConversationMessages, updateMessagesAndConversation, t },
+    );
+    if (result.type === 'error') {
+      setErrorMessage({ ...errorMessage, [conversation.id]: result.error });
+      return undefined;
+    }
+    if (result.type === 'return') {
+      clearPrompt(result.updatedConversation, result.updatedConversations);
+      return undefined;
+    }
+    return result;
+  };
+
   const handleSendMessage = async (prompt = currentPrompt) => {
     if (conversationId === undefined) {
       return;
@@ -304,22 +332,9 @@ function Thread({
 
     const selectedModelNameOrId =
       getConversationModelId(selectedConversation, assistant) || activeModel;
-    const result = await preProcessingCommands(
-      conversationId,
-      prompt,
-      commandManager,
-      selectedConversation as Conversation,
-      conversations,
-      tempConversationName,
-      selectedModelNameOrId,
-      { changeService, getConversationMessages, updateMessagesAndConversation, t },
-    );
-    if (result.type === 'error') {
-      setErrorMessage({ ...errorMessage, [conversationId]: result.error });
-      return;
-    }
-    if (result.type === 'return') {
-      clearPrompt(result.updatedConversation, result.updatedConversations);
+
+    const result = await preProcessingSendMessage(prompt, selectedConversation as Conversation);
+    if (!result) {
       return;
     }
     const { modelName = selectedModelNameOrId } = result;
@@ -380,11 +395,23 @@ function Thread({
     if (conversationId === undefined) {
       return;
     }
+
+    const index = conversationMessages.findIndex((m) => m.id === previousMessage.id);
+    const prompt = parseAndValidatePrompt(
+      getMessageRawContentAsString(conversationMessages[index - 1]) || '',
+    );
+    const result = await preProcessingSendMessage(
+      prompt,
+      selectedConversation as Conversation,
+      previousMessage,
+    );
+    if (!result) {
+      return;
+    }
+    const { modelName: selectedModelNameOrId } = result;
+
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
     setIsProcessing({ ...isProcessing, [conversationId]: true });
-
-    const selectedModelNameOrId =
-      getConversationModelId(selectedConversation, assistant) || activeModel;
 
     let message: Message = changeMessageContent(
       previousMessage,
@@ -403,17 +430,13 @@ function Thread({
         conversationId,
       );
 
-    const index = updatedMessages.findIndex((m) => m.id === message.id);
-    const prompt = parseAndValidatePrompt(
-      getMessageRawContentAsString(updatedMessages[index - 1]) || '',
-    );
     message = await sendMessage(
       message,
       updatedMessages,
       updatedConversation,
       updatedConversations,
       prompt,
-      selectedModelNameOrId,
+      selectedModelNameOrId as string,
     );
 
     setIsProcessing({ ...isProcessing, [conversationId]: false });
