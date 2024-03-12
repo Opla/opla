@@ -34,7 +34,7 @@ function AssistantsStore() {
           <InputIcon
             startIcon={Search}
             className=""
-            placeholder="Search assistants, GPTs, agents, by name, description or tags"
+            placeholder="Search assistants, GPTs, agents by name, description or keywords..."
           />
         </div>
       </ResizablePanel>

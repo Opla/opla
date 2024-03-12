@@ -142,7 +142,7 @@ export default function AssistantMenu({
     <div className="flex w-full flex-col items-start justify-between rounded-md border px-4 py-0 sm:flex-row sm:items-center">
       <div className="flex grow items-center justify-between text-sm font-medium leading-none">
         <div className="flex grow items-center capitalize text-foreground">
-          <AssistantIcon icon={assistant?.icon} name={assistant?.name} className="mr-2 h-4 w-4" />
+          <AssistantIcon icon={assistant?.avatar} name={assistant?.name} className="mr-2 h-4 w-4" />
           <span>{assistant?.name ?? t('Assistant not found')}</span>{' '}
         </div>
         <div className="flex-1" />

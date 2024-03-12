@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Preset, PresetParameter, Provider } from '@/types';
+import { ConversationPreset, Preset, PresetParameter, Provider } from '@/types';
 import { createBaseNamedRecord, deepEqual } from '.';
 
 export const defaultPresets: Preset[] = [
@@ -138,22 +138,22 @@ export const mergeParameters = (
 
 export const getCompletePresetProperties = (
   _preset: Preset | undefined,
-  conversation: Partial<Preset> | undefined,
+  partialPreset: Partial<Preset & ConversationPreset> | undefined,
   presets: Preset[],
   includeParent = false,
 ) => {
-  const preset = _preset || presets.find((p) => p.id === conversation?.preset) || ({} as Preset);
+  const preset = _preset || presets.find((p) => p.id === partialPreset?.preset) || ({} as Preset);
   let { parameters, system, contextWindowPolicy, keepSystem } = preset;
   if (includeParent && preset?.parentId) {
     const parentPreset = presets.find((p) => p.id === preset?.parentId);
     if (parentPreset) {
-      parameters = mergeParameters(preset?.parameters, conversation?.parameters);
+      parameters = mergeParameters(preset?.parameters, partialPreset?.parameters);
       system = parentPreset?.system ?? preset?.system;
       keepSystem = parentPreset ? isKeepSystem(parentPreset) : keepSystem;
     }
   }
-  parameters = mergeParameters(preset?.parameters, conversation?.parameters);
-  contextWindowPolicy = conversation?.contextWindowPolicy || contextWindowPolicy;
-  keepSystem = conversation ? isKeepSystem(conversation as Preset) : keepSystem;
+  parameters = mergeParameters(preset?.parameters, partialPreset?.parameters);
+  contextWindowPolicy = partialPreset?.contextWindowPolicy || contextWindowPolicy;
+  keepSystem = partialPreset ? isKeepSystem(partialPreset as Preset) : keepSystem;
   return { ...preset, parameters, system, contextWindowPolicy, keepSystem };
 };

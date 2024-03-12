@@ -54,7 +54,7 @@ export default function AssistantsList({ selectedId, onSelect }: AssistantsListP
           assistant.id === OplaAssistant.id ? (
             <Opla className="h-4 w-4" />
           ) : (
-            <AssistantIcon icon={assistant.icon} name={assistant.name} className="h-4 w-4" />
+            <AssistantIcon icon={assistant.avatar} name={assistant.name} className="h-4 w-4" />
           )
         }
         renderRightSide={(assistant) =>

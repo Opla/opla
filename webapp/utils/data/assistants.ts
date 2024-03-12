@@ -20,7 +20,7 @@ export const getAssistantsAsItems = (assistants: Assistant[], selected?: string)
       ({
         label: assistant.name,
         value: assistant.id,
-        icon: assistant.icon,
+        icon: assistant.avatar,
         selected: assistant.id === selected,
       }) as Ui.MenuItem,
   );
