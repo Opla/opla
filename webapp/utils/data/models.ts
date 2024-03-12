@@ -86,7 +86,7 @@ export const getLocalModels = (backendContext: OplaContext) =>
 export const getProviderModels = (providers: Provider[]) => {
   const providerModels = providers.reduce((acc, provider) => {
     if (!provider.models || provider.disabled) return acc;
-    return [...acc, ...provider.models];
+    return [...acc, ...provider.models.map((model) => ({ ...model, provider: provider.name }))];
   }, [] as Model[]);
   return providerModels;
 };
