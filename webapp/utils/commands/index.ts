@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Conversation, PresetParameter, ProviderType } from '@/types';
+import { Conversation, Message, PresetParameter, ProviderType } from '@/types';
 import {
   ParsedPrompt,
   PromptToken,
@@ -22,7 +22,7 @@ import {
   getMentionName,
 } from '../parsers';
 import { Command, CommandManager, CommandType } from './types';
-import { createMessage } from '../data/messages';
+import { changeMessageContent, createMessage } from '../data/messages';
 
 const actionsItems: Command[] = [
   {
@@ -138,6 +138,7 @@ export const preProcessingCommands = async (
   conversations: Conversation[],
   tempConversationName: string,
   selectedModelNameOrId: string,
+  previousMessage: Message | undefined,
   context: {
     changeService: Function;
     getConversationMessages: Function;
@@ -176,18 +177,34 @@ export const preProcessingCommands = async (
             cId,
           ));
       } else if (command.label === 'Imagine') {
-        const userMessage = createMessage({ role: 'user', name: 'You' }, prompt.raw, prompt.raw);
-        const message = createMessage(
-          { role: 'assistant', name: modelName || selectedModelNameOrId },
-          context.t("Soon, I'll be able to imagine wonderfull images..."),
-        );
-        ({ updatedConversation, updatedConversations } =
-          await context.updateMessagesAndConversation(
-            [userMessage, message],
-            context.getConversationMessages(cId),
-            tempConversationName,
-            cId,
-          ));
+        if (previousMessage) {
+          const message = changeMessageContent(
+            previousMessage,
+            context.t("Sure, I'll be able to imagine wonderfull images..."),
+          );
+          ({ updatedConversation, updatedConversations } =
+            await context.updateMessagesAndConversation(
+              [message],
+              context.getConversationMessages(cId),
+              tempConversationName,
+              cId,
+            ));
+        } else {
+          const userMessage = createMessage({ role: 'user', name: 'You' }, prompt.raw, prompt.raw);
+          const message = createMessage(
+            { role: 'assistant', name: modelName || selectedModelNameOrId },
+            context.t("Soon, I'll be able to imagine wonderfull images..."),
+          );
+          userMessage.sibling = message.id;
+          message.sibling = userMessage.id;
+          ({ updatedConversation, updatedConversations } =
+            await context.updateMessagesAndConversation(
+              [userMessage, message],
+              context.getConversationMessages(cId),
+              tempConversationName,
+              cId,
+            ));
+        }
       }
     }
     return { type: 'return', updatedConversation, updatedConversations };

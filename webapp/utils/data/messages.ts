@@ -63,7 +63,7 @@ export const mergeMessages = (messages: Message[], newMessages: Message[]) => {
 export const changeMessageContent = (
   previousMessage: Message,
   content: string,
-  rawContent: string,
+  rawContent = content,
   status = previousMessage.status,
 ): Message => {
   const message: Message = {
