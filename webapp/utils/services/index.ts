@@ -49,6 +49,7 @@ export const getActiveService = (
   );
   let model: Model | undefined;
   let provider: Provider | undefined;
+  let providerIdOrName = conversation.provider;
   if (!activeService) {
     if (assistant) {
       activeService = activeServiceFrom({
@@ -60,12 +61,12 @@ export const getActiveService = (
       activeService = activeServiceFrom({
         type: AIServiceType.Model,
         modelId: modelName,
-        providerIdOrName: conversation.provider,
+        providerIdOrName,
       });
     }
   }
   if (activeService.type === AIServiceType.Model) {
-    let { providerIdOrName } = activeService;
+    ({ providerIdOrName } = activeService);
     provider = findProvider(providerIdOrName, providers);
     model = findModel(modelName || activeService.modelId, provider?.models || []);
     if (!model) {
@@ -74,6 +75,7 @@ export const getActiveService = (
     if (!provider) {
       providerIdOrName = model?.provider || OplaProvider.name;
       provider = findProvider(providerIdOrName, providers);
+      activeService.providerIdOrName = providerIdOrName;
     }
   } else if (activeService.type === AIServiceType.Assistant) {
     const { assistantId, targetId } = activeService;

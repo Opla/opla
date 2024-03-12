@@ -156,7 +156,7 @@ export const preProcessingCommands = async (
     mentions.length === 1
       ? commandManager.commands.find((cmd) => compareMentions(cmd.value, mentions[0].value))
       : undefined;
-  const modelName = modelItem?.value;
+  const modelName = modelItem?.label;
 
   const action = prompt.tokens.find((to) => to.type === PromptTokenType.Action);
 
