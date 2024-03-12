@@ -13,7 +13,9 @@
 // limitations under the License.
 
 import { ResizablePanel } from '@/components/ui/resizable';
+import { Search } from 'lucide-react';
 import Threads from '../Threads/Threads';
+import { InputIcon } from '../../ui/input-icon';
 
 /* type AssistantsStoreProps = {
     selectedThreadId?: string;
@@ -24,7 +26,17 @@ function AssistantsStore() {
   return (
     <Threads>
       <ResizablePanel>
-        <h1>Assistants Store</h1>
+        <div className="container px-40 py-20 text-center">
+          <h2 className="mx-auto my-2 text-4xl font-extrabold md:text-3xl">Assistants Store</h2>
+          <h3 className="pb-4 text-lg font-normal text-muted-foreground">
+            Discover and use the perfect GPT agent for your needs.
+          </h3>
+          <InputIcon
+            startIcon={Search}
+            className=""
+            placeholder="Search assistants, GPTs, agents, by name, description or tags"
+          />
+        </div>
       </ResizablePanel>
     </Threads>
   );
