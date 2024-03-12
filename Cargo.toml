@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 default-run = "opla-cli"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[bin]]
 bench = false
@@ -13,13 +12,8 @@ name = "opla-cli"
 
 [workspace]
 members = [
-  "crates/api",
-  "crates/cli",
-  "crates/core",
-  "crates/engines",
-  "crates/workflows",
   "crates/tokenizer",
+  "crates/cli",
   "webapp/native"
 ]
 
-[dependencies]
