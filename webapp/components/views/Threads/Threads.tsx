@@ -1,3 +1,16 @@
+// Copyright 2024 mik
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 // Copyright 2023 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +27,9 @@
 
 'use client';
 
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { useRouter } from 'next/router';
 import { useSearchParams } from 'next/navigation';
-import { v4 as uuid } from 'uuid';
 import useBackend from '@/hooks/useBackendContext';
 import { Conversation, PageSettings } from '@/types';
 import { DefaultPageSettings } from '@/utils/constants';
@@ -27,15 +39,11 @@ import { getConversation } from '@/utils/data/conversations';
 import { ModalIds } from '@/modals';
 import { ModalsContext } from '@/context/modals';
 import { AppContext } from '@/context';
-import { ConversationError, MenuAction, Page, ViewName } from '@/types/ui';
+import { MenuAction, Page, ViewName } from '@/types/ui';
 import { getAssistantId } from '@/utils/services';
 import { deepEqual } from '@/utils/data';
-import { ResizableHandle, ResizablePanel } from '../../ui/resizable';
-import Settings from './Settings';
-import Threads from './Threads';
-import Thread from './Thread';
-import Archive from './Archive';
-import ToolbarTogglePanels from './ToolbarTogglePanels';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../../ui/resizable';
+import Explorer from './Explorer';
 
 const getSelectedPage = (selectedThreadId: string | undefined, view: ViewName) =>
   `${view === ViewName.Recent ? Page.Threads : Page.Archives}${selectedThreadId ? `/${selectedThreadId}` : ''}`;
@@ -43,15 +51,16 @@ const getSelectedPage = (selectedThreadId: string | undefined, view: ViewName) =
 type ThreadsProps = {
   selectedThreadId?: string;
   view?: ViewName;
+  children?: React.ReactNode;
 };
 
-export default function MainThreads({ selectedThreadId, view = ViewName.Recent }: ThreadsProps) {
+export default function Threads({
+  selectedThreadId,
+  view = ViewName.Recent,
+  children,
+}: ThreadsProps) {
   const router = useRouter();
   const { id } = router.query;
-  const [errors, setError] = useState<ConversationError[]>([]);
-  const handleError = (conversationId: string, error: string) => {
-    setError([...errors, { id: uuid(), conversationId, message: error }]);
-  };
 
   const {
     conversations,
@@ -130,16 +139,8 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
       saveSettings(getSelectedPage(cId, ViewName.Recent));
     });
 
-  const handleResizeSettings = (size: number) => {
-    saveSettings(selectedPage, { settingsWidth: size });
-  };
-
-  const handleChangeDisplayExplorer = (value: boolean) => {
-    saveSettings(selectedPage, { explorerHidden: !value });
-  };
-
-  const handleChangeDisplaySettings = (value: boolean) => {
-    saveSettings(selectedPage, { settingsHidden: !value });
+  const handleResizeExplorer = (size: number) => {
+    saveSettings(selectedPage, { explorerWidth: size });
   };
 
   const handleDelete = async (action: string, data: any) => {
@@ -187,6 +188,14 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     }
   };
 
+  const setThreads = (threads: Conversation[]) => {
+    if (view === ViewName.Recent) {
+      updateConversations(threads);
+    } else {
+      setArchives(threads);
+    }
+  };
+
   const defaultSettings = backendContext.config.settings;
   const pageSettings =
     defaultSettings.pages?.[selectedPage] ||
@@ -195,41 +204,26 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
 
   logger.info('render Threads', selectedThreadId);
   return (
-    <Threads selectedThreadId={selectedThreadId} view={view}>
-      <ResizablePanel>
-        {view !== ViewName.Archives && (
-          <Thread
-            conversationId={selectedThreadId}
-            rightToolbar={
-              <ToolbarTogglePanels
-                displayExplorer={!pageSettings.explorerHidden}
-                displaySettings={!pageSettings.settingsHidden}
-                onChangeDisplayExplorer={handleChangeDisplayExplorer}
-                onChangeDisplaySettings={handleChangeDisplaySettings}
-                disabledSettings={assistantId === undefined}
-              />
-            }
-            onSelectMenu={handleSelectMenu}
-            onError={handleError}
-          />
-        )}
-        {view === ViewName.Archives && (
-          <Archive archiveId={selectedThreadId} onSelectMenu={handleSelectMenu} />
-        )}
-      </ResizablePanel>
-      <ResizableHandle />
+    <ResizablePanelGroup direction="horizontal">
       <ResizablePanel
-        minSize={20}
-        defaultSize={20}
-        maxSize={50}
-        onResize={handleResizeSettings}
-        className={!pageSettings.settingsHidden && view === ViewName.Recent ? '' : 'hidden'}
+        minSize={14}
+        maxSize={40}
+        defaultSize={pageSettings.explorerWidth}
+        onResize={handleResizeExplorer}
+        className={pageSettings.explorerHidden === true ? 'hidden' : ''}
       >
-        <Settings
-          conversationId={selectedThreadId}
-          errors={errors.filter((e) => e.conversationId === selectedThreadId)}
+        <Explorer
+          view={view}
+          threads={view === ViewName.Recent ? conversations : archives}
+          setThreads={setThreads}
+          onSelectMenu={handleSelectMenu}
+          onShouldDelete={handleShouldDelete}
+          selectedAssistantId={assistantId}
+          selectedThreadId={selectedThreadId}
         />
       </ResizablePanel>
-    </Threads>
+      <ResizableHandle />
+      {children}
+    </ResizablePanelGroup>
   );
 }

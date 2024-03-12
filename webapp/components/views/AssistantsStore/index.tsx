@@ -12,11 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use client';
+import { ResizablePanel } from '@/components/ui/resizable';
+import Threads from '../Threads/Threads';
 
-import MainThreads from '@/components/views/Threads';
-import { ViewName } from '@/types/ui';
+/* type AssistantsStoreProps = {
+    selectedThreadId?: string;
 
-export default function DefaultArchives() {
-  return <MainThreads view={ViewName.Archives} />;
+}; */
+
+function AssistantsStore() {
+  return (
+    <Threads>
+      <ResizablePanel>
+        <h1>Assistants Store</h1>
+      </ResizablePanel>
+    </Threads>
+  );
 }
+
+export default AssistantsStore;

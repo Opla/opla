@@ -15,11 +15,11 @@
 'use client';
 
 import { useRouter } from 'next/router';
-import Threads from '@/components/views/Threads';
+import MainThreads from '@/components/views/Threads';
 import { ViewName } from '@/types/ui';
 
 export default function ArchiveSelected() {
   const router = useRouter();
   const { id } = router.query;
-  return <Threads view={ViewName.Archives} selectedThreadId={id as string} />;
+  return <MainThreads view={ViewName.Archives} selectedThreadId={id as string} />;
 }

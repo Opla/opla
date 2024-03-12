@@ -14,9 +14,8 @@
 
 'use client';
 
-import MainThreads from '@/components/views/Threads';
-import { ViewName } from '@/types/ui';
+import AssistantsStore from '@/components/views/AssistantsStore';
 
-export default function DefaultArchives() {
-  return <MainThreads view={ViewName.Archives} />;
+export default function ThreadSelected() {
+  return <AssistantsStore />;
 }

@@ -17,7 +17,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import useBackend from '@/hooks/useBackendContext';
-import Threads from '@/components/views/Threads';
+import MainThreads from '@/components/views/Threads';
 import { Page } from '@/types/ui';
 
 export default function DefaultThreads() {
@@ -29,5 +29,5 @@ export default function DefaultThreads() {
       router.replace(`${Page.Threads}/${settings.pages?.[Page.Threads].selectedId}`);
     }
   }, [router, backendContext]);
-  return <Threads />;
+  return <MainThreads />;
 }
