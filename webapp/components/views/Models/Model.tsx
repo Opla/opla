@@ -206,7 +206,7 @@ function ModelView({
                     <TableRow
                       onClick={() => {}}
                       key={download.id || download.name}
-                      className="hover:bg-secondary/10"
+                      className=""
                     >
                       <TableCell className="truncate">{download.name}</TableCell>
                       {/* <TableCell className="truncate">
