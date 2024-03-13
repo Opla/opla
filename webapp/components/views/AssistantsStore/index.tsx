@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,17 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useEffect, useState } from 'react';
 import { ResizablePanel } from '@/components/ui/resizable';
 import { Search } from 'lucide-react';
+import { Assistant } from '@/types';
+import { getAssistantsCollection } from '@/utils/backend/commands';
 import Threads from '../Threads/Threads';
 import { InputIcon } from '../../ui/input-icon';
-
-/* type AssistantsStoreProps = {
-    selectedThreadId?: string;
-
-}; */
+import AssistantCard from './AssistantCard';
 
 function AssistantsStore() {
+  const [collection, setCollection] = useState<Assistant[]>([]);
+
+  useEffect(() => {
+    const getCollection = async () => {
+      const { assistants } = (await getAssistantsCollection()) as unknown as {
+        assistants: Assistant[];
+      };
+      setCollection(assistants);
+    };
+    getCollection();
+  }, []);
+
   return (
     <Threads>
       <ResizablePanel>
@@ -36,6 +47,11 @@ function AssistantsStore() {
             className=""
             placeholder="Search assistants, GPTs, agents by name, description or keywords..."
           />
+        </div>
+        <div className="grid grid-cols-4 gap-4 px-40">
+          {collection.map((assistant) => (
+            <AssistantCard key={assistant.id} assistant={assistant} />
+          ))}
         </div>
       </ResizablePanel>
     </Threads>

@@ -410,6 +410,7 @@ export type ModelsConfiguration = {
 export type AvatarIcon = {
   color?: string;
   url: string;
+  name?: string;
 };
 
 export type Agent = BaseNamedRecord & {
@@ -425,7 +426,9 @@ export type Agent = BaseNamedRecord & {
 export type Assistant = Agent & {
   title?: string;
   subtitle?: string;
+  author?: Entity;
   promptTemplates?: PromptTemplate[];
+  featured?: boolean;
 };
 
 export type Store = {

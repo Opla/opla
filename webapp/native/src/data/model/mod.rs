@@ -14,52 +14,14 @@
 
 use std::fs::create_dir_all;
 use std::path::PathBuf;
-use std::str::FromStr;
 use chrono::{ DateTime, Utc };
 use serde::{ self, Deserialize, Serialize };
 use serde_with::{ serde_as, OneOrMany, formats::PreferOne };
 use uuid::Uuid;
-use void::Void;
 use crate::utils::{ get_home_directory, get_data_directory };
 use crate::data::{ option_date_format, option_string_or_struct };
 
-// See https://serde.rs/string-or-struct.html
-#[serde_with::skip_serializing_none]
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Entity {
-    pub name: String,
-    pub email: Option<String>,
-    pub url: Option<String>,
-}
-impl FromStr for Entity {
-    type Err = Void;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Entity {
-            name: s.to_string(),
-            email: None,
-            url: None,
-        })
-    }
-}
-
-#[serde_with::skip_serializing_none]
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Resource {
-    pub url: String,
-    pub name: Option<String>,
-    // TODO handle filename
-}
-
-impl FromStr for Resource {
-    type Err = Void;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        // TODO check if s is a valid URL or a file path
-        Ok(Resource {
-            url: s.to_string(),
-            name: None,
-        })
-    }
-}
+use super::{Entity, Resource};
 
 #[serde_as]
 #[serde_with::skip_serializing_none]

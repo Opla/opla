@@ -17,7 +17,8 @@ use std::str::FromStr;
 use chrono::{ DateTime, Utc };
 use serde::{ self, Deserialize, Serialize };
 use crate::data::option_date_format;
-use crate::data::model::{ Entity, Model, Resource };
+use crate::data::model::Model;
+use crate::data::{ Entity, Resource };
 
 use super::models::ModelsCollection;
 
