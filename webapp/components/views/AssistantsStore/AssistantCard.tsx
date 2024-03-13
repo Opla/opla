@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import AvatarView from '@/components/common/AvatarView';
 import {
   CardButton,
   CardContent,
@@ -35,12 +35,7 @@ function AssistantCard({ assistant }: AssistantCardProps) {
     <CardButton>
       <CardHeader className="h-[94px]">
         <div className="flex flex-row items-center gap-4">
-          <Avatar>
-            <AvatarImage src={assistant.avatar?.url} />
-            <AvatarFallback color={assistant.avatar?.color}>
-              {assistant.avatar?.name}
-            </AvatarFallback>
-          </Avatar>
+          {assistant.avatar && <AvatarView avatar={assistant.avatar} />}
           <CardTitle className="line-clamp-3">{assistant.name}</CardTitle>
         </div>
       </CardHeader>

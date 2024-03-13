@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { Bot } from 'lucide-react';
-import { AvatarIcon as Icon } from '@/types';
+import { Avatar as Icon } from '@/types';
 
 type AssistantIconProps = {
   icon?: Icon;

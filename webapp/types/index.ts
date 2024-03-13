@@ -407,15 +407,20 @@ export type ModelsConfiguration = {
   items: Array<Model>;
 };
 
-export type AvatarIcon = {
+export type Avatar = {
   color?: string;
-  url: string;
+  url?: string;
   name?: string;
+};
+
+export type AvatarRef = Avatar & {
+  ref: string;
+  fallback?: string;
 };
 
 export type Agent = BaseNamedRecord & {
   disabled?: boolean;
-  avatar?: AvatarIcon;
+  avatar?: Avatar;
   parentId?: string;
   version?: string;
   readonly?: boolean;

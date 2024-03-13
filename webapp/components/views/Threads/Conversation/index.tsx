@@ -17,7 +17,7 @@ import EmptyView from '@/components/common/EmptyView';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyedScrollPosition } from '@/hooks/useScroll';
 import Opla from '@/components/icons/Opla';
-import { Conversation, Message, PromptTemplate } from '@/types';
+import { AvatarRef, Conversation, Message, PromptTemplate } from '@/types';
 import logger from '@/utils/logger';
 import { AppContext } from '@/context';
 import { getConversation, updateConversation } from '@/utils/data/conversations';
@@ -28,6 +28,7 @@ import PromptsGrid from './PromptsGrid';
 export type ConversationPanelProps = {
   selectedConversation: Conversation | undefined;
   messages: Message[] | undefined;
+  avatars: AvatarRef[];
   disabled: boolean;
   isPrompt: boolean;
   onResendMessage: (m: Message) => void;
@@ -40,6 +41,7 @@ export type ConversationPanelProps = {
 
 export function ConversationPanel({
   messages,
+  avatars,
   selectedConversation,
   disabled,
   isPrompt,
@@ -95,6 +97,7 @@ export function ConversationPanel({
                 : undefined
             }
             messages={messages || []}
+            avatars={avatars}
             onScrollPosition={handleScrollPosition}
             onResendMessage={onResendMessage}
             onDeleteMessage={onDeleteMessage}

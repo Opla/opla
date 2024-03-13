@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Check,
   Clipboard,
@@ -31,11 +31,12 @@ import {
 import { getMessageContentHistoryAsString } from '@/utils/data/messages';
 import useHover from '@/hooks/useHover';
 import useMarkdownProcessor from '@/hooks/useMarkdownProcessor';
-import { Message, MessageStatus } from '@/types';
+import { Avatar, Message, MessageStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
-import { Button } from '../../ui/button';
-import { Textarea } from '../../ui/textarea';
-import OpenAI from '../../icons/OpenAI';
+import AvatarView from '@/components/common/AvatarView';
+import { Button } from '../../../ui/button';
+import { Textarea } from '../../../ui/textarea';
+import OpenAI from '../../../icons/OpenAI';
 
 function ClipboardButton({
   onCopyToClipboard,
@@ -63,16 +64,19 @@ function DeleteButton({ onDeleteMessage }: { onDeleteMessage: () => void }) {
   );
 }
 
-function Avatar({ isUser, name }: { isUser: boolean; name: string }) {
+function AvatarIcon({ isUser, avatar }: { isUser: boolean; avatar: Avatar }) {
+  let icon: React.ReactNode;
   if (isUser) {
-    return <User className="h-4 w-4 text-white" />;
+    icon = <User className="h-4 w-4 text-white" />;
+  } else if (avatar.name?.toLowerCase().startsWith('gpt-')) {
+    icon = <OpenAI className="h-4 w-4 text-white" />;
+  } else {
+    icon = <Bot className="h-4 w-4 text-white" />;
   }
 
-  if (name?.toLowerCase().startsWith('gpt-')) {
-    return <OpenAI className="h-4 w-4 text-white" />;
-  }
-  return <Bot className="h-4 w-4 text-white" />;
+  return <AvatarView avatar={avatar} icon={icon} className="h-4 w-4 text-white" />;
 }
+
 enum DisplayMessageState {
   Markdown,
   Text,
@@ -84,6 +88,7 @@ enum DisplayMessageState {
 
 type MessageComponentProps = {
   message: Message;
+  avatar: Avatar;
   disabled?: boolean;
   onResendMessage: () => void;
   onDeleteMessage: () => void;
@@ -93,6 +98,7 @@ type MessageComponentProps = {
 
 function MessageComponent({
   message,
+  avatar,
   disabled = false,
   onResendMessage,
   onDeleteMessage,
@@ -157,14 +163,14 @@ function MessageComponent({
         <div className="m-auto flex w-full flex-row gap-4 p-4 md:max-w-2xl md:gap-6 md:py-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
           <div className="flex flex-col items-end">
             <div className="text-opacity-100r flex h-7 items-center justify-center rounded-md p-1 text-white">
-              <Avatar isUser={isUser} name={author.name} />
+              <AvatarIcon isUser={isUser} avatar={avatar} />
             </div>
           </div>
           <div className="flex w-[calc(100%-50px)] flex-col gap-1 md:gap-3 lg:w-[calc(100%-115px)]">
             <div className="flex flex-grow flex-col">
               <div className="flex min-h-20 flex-col items-start whitespace-pre-wrap break-words">
                 <div className="w-full break-words">
-                  <p className="py-1 font-bold capitalize">{author.name}</p>
+                  <p className="py-1 font-bold capitalize">{avatar.name}</p>
                   {state === DisplayMessageState.Asset && (
                     <div className="flex w-full select-auto flex-row items-center px-0 py-2">
                       <File className="mr-2 h-4 w-4" strokeWidth={1.5} />

@@ -18,7 +18,15 @@ import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useSearchParams } from 'next/navigation';
 import { AppContext } from '@/context';
-import { Asset, Conversation, AIService, AIServiceType, Message, MessageStatus } from '@/types';
+import {
+  Asset,
+  Conversation,
+  AIService,
+  AIServiceType,
+  Message,
+  MessageStatus,
+  AvatarRef,
+} from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import {
@@ -152,6 +160,26 @@ function Thread({
     const manager = getCommandManager(items);
     return { modelItems: items, commandManager: manager };
   }, [activeModel, backendContext, providers, selectedConversation]);
+
+  const avatars = useMemo(
+    () =>
+      messages?.map((msg) => {
+        const avatar = { name: msg.author.name, ref: msg.author.name } as AvatarRef;
+        if (msg.author.role === 'assistant') {
+          const modelItem = modelItems.find((m) => m.value === msg.author.name);
+          if (!avatar.name || (assistant && avatar.name === assistant?.targets?.[0]?.models?.[0])) {
+            avatar.name = assistant?.name;
+            avatar.url = assistant?.avatar?.url;
+            avatar.color = assistant?.avatar?.color;
+            avatar.fallback = assistant?.avatar?.name;
+          } else if (modelItem) {
+            avatar.name = modelItem.label;
+          }
+        }
+        return avatar;
+      }) ?? [],
+    [assistant, messages, modelItems],
+  );
 
   useEffect(() => {
     if (_conversationId && tempConversationId) {
@@ -588,6 +616,7 @@ function Thread({
       <ConversationPanel
         selectedConversation={selectedConversation}
         messages={messages}
+        avatars={avatars}
         disabled={disabled}
         isPrompt={!!prompt}
         onResendMessage={handleResendMessage}

@@ -14,15 +14,17 @@
 
 import { ArrowDown } from 'lucide-react';
 import useScroll, { KeyedScrollPosition } from '@/hooks/useScroll';
-import { Message } from '@/types';
+import { Avatar, AvatarRef, Message } from '@/types';
 import logger from '@/utils/logger';
-import MessageView from '../Message';
+import MessageView from './MessageView';
 import { Button } from '../../../ui/button';
 
 type ConversationListProps = {
   conversationId: string;
   scrollPosition: number | undefined;
   messages: Message[];
+  avatars: AvatarRef[];
+  disabled?: boolean;
   onScrollPosition: (props: KeyedScrollPosition) => void;
   onResendMessage: (m: Message) => void;
   onDeleteMessage: (m: Message) => void;
@@ -34,6 +36,8 @@ function ConversationList({
   conversationId,
   scrollPosition,
   messages,
+  avatars,
+  disabled,
   onScrollPosition,
   onResendMessage,
   onDeleteMessage,
@@ -59,6 +63,10 @@ function ConversationList({
             <MessageView
               key={m.id}
               message={m}
+              avatar={
+                avatars.find((a) => a.ref === m.author.name) || ({ name: m.author.name } as Avatar)
+              }
+              disabled={disabled}
               onResendMessage={() => {
                 onResendMessage(m);
               }}
