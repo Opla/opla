@@ -16,6 +16,7 @@
 
 import NavContainer from '@/components/common/NavContainer';
 import useTranslation from '@/hooks/useTranslation';
+import { cn } from '@/lib/utils';
 
 export default function Settings({
   tab,
@@ -47,18 +48,17 @@ export default function Settings({
     <div className="flex h-full w-full">
       <div className="navSettings">
         <NavContainer>
-          <div className="text-ellipsis break-all p-3 text-sm text-neutral-600">
-            {t('Settings')}
-          </div>
+          <div className="text-ellipsis break-all p-3 text-sm">{t('Settings')}</div>
           <ul className="flex flex-1 flex-col gap-1 p-1">
             {menu.map((item) => (
               <li
                 key={item.id}
-                className={`${
+                className={cn(
                   item.href === tab || item.hrefAlias === tab
-                    ? 'text-black dark:text-white'
-                    : 'text-neutral-400 dark:text-neutral-400'
-                } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
+                    ? 'text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+                    : 'text-muted-foreground',
+                  'rounded-md px-2 py-2 transition-colors duration-200 hover:text-accent-foreground',
+                )}
               >
                 <div
                   role="button"

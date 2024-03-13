@@ -83,7 +83,7 @@ export default function Settings({
   };
 
   return (
-    <div className="scrollbar-trigger flex h-full w-full bg-neutral-100 dark:bg-neutral-900">
+    <div className="scrollbar-trigger flex h-full w-full">
       <Tabs defaultValue="settings" className="w-full py-3">
         <div className="px-4">
           <TabsList className="justify-left w-full gap-4">
@@ -115,7 +115,7 @@ export default function Settings({
         </TabsContent>
         <TabsContent value="documents" className="px-4">
           {selectedConversation?.updatedAt && (
-            <div className="w-full p-2 text-sm text-neutral-400">
+            <div className="w-full p-2 text-sm text-muted-foreground">
               <div className="ellipsis flex w-full flex-row justify-between tabular-nums">
                 <div className="line-clamp-1 text-xs">{t('ID')}:</div>
                 <div className="ellipsis mb-4 line-clamp-1 break-all text-xs">
@@ -143,7 +143,7 @@ export default function Settings({
           </div>
 
           {selectedConversation && (
-            <div className="w-full p-2 text-sm text-neutral-400">
+            <div className="w-full p-2 text-sm text-muted-foreground">
               <div className="py-4">{t('Files')}</div>
               {getConversationAssets(selectedConversation).map((asset, index) => (
                 <div className="flex w-full flex-row items-center p-1 text-xs" key={asset.id}>

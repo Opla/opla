@@ -32,11 +32,9 @@ export type ToolbarProps = {
 
 export default function Header({ header, toolbar }: ToolbarProps) {
   return (
-    <div className="flex w-full flex-row items-center justify-between gap-1 bg-neutral-50 p-2 text-sm text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
+    <div className="flex w-full flex-row items-center justify-between gap-1 bg-secondary/40 p-2 text-sm">
       <div className="grow flex-row items-center px-2">
-        {typeof header === 'string' && (
-          <span className="truncate px-2 dark:text-neutral-300">{header}</span>
-        )}
+        {typeof header === 'string' && <span className="truncate px-2">{header}</span>}
         {typeof header !== 'string' && header}
       </div>
       <div className="flex-1" />

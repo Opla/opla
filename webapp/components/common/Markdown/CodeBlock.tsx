@@ -61,8 +61,8 @@ function CodeBlock({ children, className }: JSX.IntrinsicElements['code']) {
     }
     return (
       <div className="m-0 flex w-full flex-col p-0">
-        <div className="flex w-full flex-row items-center justify-end gap-1 bg-neutral-900">
-          <p className="flex-grow pl-4 text-xs text-neutral-400">{language}</p>
+        <div className="flex w-full flex-row items-center justify-end gap-1 bg-card">
+          <p className="flex-grow pl-4 text-xs text-card-foreground">{language}</p>
           <Button
             variant="ghost"
             className=""
@@ -77,17 +77,14 @@ function CodeBlock({ children, className }: JSX.IntrinsicElements['code']) {
             }}
           >
             {copied ? (
-              <Check className="h-4 w-4 text-neutral-400" strokeWidth={1.5} />
+              <Check className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
             ) : (
-              <Clipboard className="h-4 w-4 text-neutral-400" strokeWidth={1.5} />
+              <Clipboard className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
             )}
           </Button>
           {language === 'mermaid' ? (
             <Button
               variant="ghost"
-              className={
-                showMermaidPreview ? 'text-neutral-700 dark:text-neutral-200' : 'text-neutral-400'
-              }
               aria-label="Toggle Mermaid preview"
               title="Toggle Mermaid preview"
               size="sm"
@@ -95,15 +92,12 @@ function CodeBlock({ children, className }: JSX.IntrinsicElements['code']) {
                 setShowMermaidPreview(!showMermaidPreview);
               }}
             >
-              <PieChart className="h-4 w-4 text-neutral-400" strokeWidth={1.5} />
+              <PieChart className="h-4 w-4" strokeWidth={1.5} />
             </Button>
           ) : null}
           {language === 'math' ? (
             <Button
               variant="ghost"
-              className={
-                showLatexPreview ? 'text-neutral-700 dark:text-neutral-200' : 'text-neutral-400'
-              }
               size="sm"
               aria-label="Toggle Latex preview"
               title="Toggle Latex preview"
@@ -124,11 +118,7 @@ function CodeBlock({ children, className }: JSX.IntrinsicElements['code']) {
     );
   }
 
-  return (
-    <code className="font-code inline-block rounded bg-neutral-100 text-neutral-950 dark:bg-neutral-700 dark:text-neutral-100">
-      {children}
-    </code>
-  );
+  return <code className="font-code inline-block rounded">{children}</code>;
 }
 
 export default CodeBlock;

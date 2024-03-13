@@ -25,12 +25,12 @@ export default function Card({
   disabled?: boolean;
   onClick?: () => void;
 }) {
-  const cssTitle = title ? '' : 'bg-neutral-300/50 dark:bg-neutral-600/50 ';
-  const cssDesc = description ? '' : 'bg-neutral-300/50 dark:bg-neutral-600/50 ';
+  const cssTitle = title ? '' : 'bg-secondary/50 ';
+  const cssDesc = description ? '' : 'bg-secondary/50 ';
   const container = (
     <div className="flex h-full w-full flex-col gap-2 p-4">
       <div className={`${cssTitle}min-h-[24px] w-full text-xl font-bold`}>{title}</div>
-      <div className={`${cssDesc}aspect-[4/3]  text-base text-neutral-700 dark:text-neutral-400`}>
+      <div className={`${cssDesc}aspect-[4/3]  text-base text-secondary-foreground`}>
         <p className="line-clamp-4">{description}</p>
       </div>
     </div>
@@ -39,7 +39,7 @@ export default function Card({
   if (disabled) {
     cname += ' opacity-50 ';
   } else {
-    cname += ' hover:bg-neutral-200 hover:dark:bg-neutral-800 ';
+    cname += ' hover:bg-muted ';
   }
   return (
     <div
@@ -49,8 +49,8 @@ export default function Card({
       tabIndex={0}
       onClick={disabled ? undefined : onClick}
       className={`${
-        selected ? `${cname} border-2 border-neutral-800 dark:border-neutral-300` : `${cname}`
-      } m-2 h-full w-full overflow-hidden rounded bg-neutral-100  dark:bg-neutral-700`}
+        selected ? `${cname} border-2 ` : `${cname}`
+      } m-2 h-full w-full overflow-hidden rounded bg-muted`}
     >
       {container}
     </div>

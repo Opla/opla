@@ -20,10 +20,10 @@ export default function Searchbar() {
       <div className="flex">
         <div className="w-full p-1">
           <div className="relative">
-            <Search strokeWidth={1.5} className="absolute left-4 top-3 text-neutral-400" />
+            <Search strokeWidth={1.5} className="absolute left-4 top-3 text-muted-foreground" />
             <input
               type="text"
-              className="w-full rounded-lg bg-neutral-100 p-2 px-12 hover:cursor-pointer focus:outline-none dark:bg-neutral-800"
+              className="w-full rounded-lg p-2 px-12 hover:cursor-pointer focus:outline-none "
               name=""
             />
           </div>

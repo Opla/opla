@@ -25,7 +25,7 @@ export type ContentViewProps = {
 export default function ContentView({ header, selectedId, children, toolbar }: ContentViewProps) {
   // const { t } = useTranslation();
   return (
-    <div className="flex h-full flex-col dark:bg-neutral-800/30">
+    <div className="flex h-full flex-col bg-secondary/20">
       <Header header={header || selectedId || ''} toolbar={toolbar} />
       {children}
     </div>

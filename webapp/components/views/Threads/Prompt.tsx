@@ -128,7 +128,7 @@ export default function Prompt({
   ) as KeyBinding;
 
   return (
-    <div className="w-full grow-0 !bg-transparent dark:bg-neutral-800">
+    <div className="w-full grow-0 !bg-transparent ">
       <form className="mx-2 flex flex-col gap-2 last:mb-2">
         {errorMessage ? (
           <div className="m-1 flex w-full items-center justify-center gap-2">

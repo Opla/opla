@@ -36,7 +36,7 @@ function Menu({
         return (
           <li
             key={item.label}
-            className="w-full cursor-pointer rounded-md px-2 py-2 text-neutral-400 transition-colors duration-200 hover:bg-neutral-500/10 hover:text-white dark:text-neutral-400 hover:dark:text-white"
+            className="w-full cursor-pointer rounded-md px-2 py-2 text-muted-foreground transition-colors duration-200 hover:text-secondary/10 "
           >
             <button
               onClick={(e) => {
