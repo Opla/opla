@@ -29,7 +29,7 @@
 
 export default function NavContainer({ children }: { children: React.ReactNode }) {
   return (
-    <div className="h-full w-full bg-neutral-100 dark:bg-neutral-800">
+    <div className="h-full w-full ">
       <nav className="flex flex-col space-y-1 p-2 pt-4">{children}</nav>
     </div>
   );

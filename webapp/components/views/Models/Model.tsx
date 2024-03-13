@@ -73,13 +73,13 @@ function ModelView({
       <div className="transition-width relative flex h-full w-full flex-1 flex-col items-stretch overflow-hidden">
         <div className="flex-1 overflow-hidden">
           <div className="flex flex-col items-center text-xs">
-            <div className="justify-left flex w-full w-full flex-row items-center justify-between gap-1 bg-neutral-50 p-3 text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
-              <div className="mx-3 flex flex h-7 grow flex-row items-center px-2">
+            <div className="justify-left flex w-full flex-row items-center justify-between gap-1 bg-neutral-50 p-3 text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
+              <div className="mx-3 flex h-7 grow flex-row items-center px-2">
                 <span className="gap-1 py-1 capitalize text-neutral-700 dark:text-neutral-500">
                   {`${model.creator || getEntityName(model.author)}`}
                 </span>
                 <span className="pl-2">/</span>
-                <div className="flex grow items-center gap-2 truncate truncate px-2 dark:text-neutral-300">
+                <div className="flex grow items-center gap-2 truncate px-2 ">
                   <span>{model.name}</span>
                   <ModelInfos model={model} displayName={false} />
                 </div>
@@ -111,7 +111,7 @@ function ModelView({
               </div>
             </div>
           </div>
-          <div className="flex h-full w-full flex-col text-sm dark:bg-neutral-900">
+          <div className="flex h-full w-full flex-col text-sm ">
             <div className="flex h-[90%] w-full flex-col overflow-y-auto overflow-x-hidden">
               <div className="flex w-full flex-col px-8 py-4 text-sm">
                 <h1 className="items-right bold w-full text-xl">{model.title || model.name}</h1>
@@ -212,7 +212,7 @@ function ModelView({
                           <TableRow
                             onClick={() => {}}
                             key={download.id || download.name}
-                            className="hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                            className="hover:bg-secondary/10"
                           >
                             <TableCell className="truncate">{download.name}</TableCell>
                             {/* <TableCell className="truncate">

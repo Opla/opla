@@ -27,7 +27,7 @@ function ProviderCreate({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="flex w-full flex-col items-center gap-1 p-2 text-sm dark:bg-neutral-900">
+    <div className="flex w-full flex-col items-center gap-1 p-2 text-sm">
       {!advanced && (
         <>
           <Parameter

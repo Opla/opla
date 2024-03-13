@@ -157,7 +157,7 @@ function MessageComponent({
   return (
     <div
       ref={disabled ? undefined : ref}
-      className={`group relative w-full text-neutral-800 dark:text-neutral-100 hover:dark:bg-neutral-900 ${isUser ? '' : ''}`}
+      className={`group relative w-full hover:dark:bg-secondary/20 ${isUser ? '' : ''}`}
     >
       <div className="m-auto flex w-full gap-4 font-sans text-sm md:max-w-2xl md:gap-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
         <div className="m-auto flex w-full flex-row gap-4 p-4 md:max-w-2xl md:gap-6 md:py-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">

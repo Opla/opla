@@ -290,7 +290,7 @@ export default function ThreadsExplorer({
       }
     >
       <div className="flex-1 flex-col space-y-1 overflow-y-auto overflow-x-hidden p-1 dark:border-white/20">
-        <div className="flex h-full grow flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
+        <div className="flex h-full grow flex-col gap-2 pb-2 text-sm">
           {threads.length === 0 && (
             <EmptyView
               title={t('No threads')}

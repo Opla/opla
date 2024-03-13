@@ -13,7 +13,7 @@
 // limitations under the License.
 
 export const ANCHOR_CLASS_NAME =
-  'font-semibold underline text-neutral-700 dark:text-neutral-400 underline-offset-[2px] decoration-1 hover:text-neutral-800 dark:hover:text-neutral-600 transition-colors';
+  'font-semibold underline  underline-offset-[2px] decoration-1 transition-colors';
 
 export const MARKDOWN_TEST_MESSAGE = `
     # Heading level 1

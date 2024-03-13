@@ -28,7 +28,7 @@ export default function Explorer({ icon, title = '', children, toolbar }: Explor
   const { t } = useTranslation();
 
   return (
-    <div className="scrollbar-trigger flex h-full w-full flex-1 items-start border-r-[1px] border-neutral-300/30 bg-neutral-100 dark:border-neutral-900 dark:bg-neutral-800/70">
+    <div className="scrollbar-trigger flex h-full w-full flex-1 items-start border-r-[1px] bg-secondary/70">
       <nav className="flex h-full flex-1 flex-col space-y-1">
         <div className="flex w-full items-center">
           <div className="flex grow items-center p-2">

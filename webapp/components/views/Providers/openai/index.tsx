@@ -89,7 +89,7 @@ export default function OpenAI({
               href="https://beta.openai.com/account/api-keys"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center pt-8 underline hover:text-neutral-500"
+              className="flex items-center pt-8 underline hover:text-muted-foreground"
             >
               <span>{t('Go to OpenAI Platform')}</span>
               <ExternalLink className="ml-2 h-4 w-4" strokeWidth={1.5} />

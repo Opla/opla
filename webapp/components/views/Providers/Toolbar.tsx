@@ -36,16 +36,12 @@ export default function Toolbar({
 
   return (
     <div className="flex flex-col items-center text-xs">
-      <div className="flex w-full flex-row items-center justify-between gap-1 bg-neutral-50 p-3 text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
+      <div className="flex w-full flex-row items-center justify-between gap-1 ">
         <div className="mx-3 flex h-7 flex-row items-center  px-2">
           {provider?.type.toLowerCase() !== provider?.name.toLowerCase() && (
-            <span className="gap-1 py-1 capitalize text-neutral-700 dark:text-neutral-500">
-              {provider?.type}
-            </span>
+            <span className="gap-1 py-1 capitalize text-muted-foreground">{provider?.type}</span>
           )}
-          <span className="items-center truncate truncate px-3 dark:text-neutral-300">
-            {provider?.name}
-          </span>
+          <span className="items-center truncate px-3">{provider?.name}</span>
         </div>
         <div className="flex flex-grow flex-row-reverse items-center gap-4">
           {actions || (

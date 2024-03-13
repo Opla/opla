@@ -15,7 +15,7 @@
 import Opla from '@/components/icons/Opla';
 
 function Loading() {
-  const circleCommonClasses = 'h-2.5 w-2.5 bg-neutral-400 dark:bg-neutral-700 rounded-full';
+  const circleCommonClasses = 'h-2.5 w-2.5 bg-muted rounded-full';
 
   return (
     <div className="flex h-screen w-full flex-col items-center justify-center">

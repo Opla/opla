@@ -89,17 +89,15 @@ export default function ExplorerList<T>({
     <div
       className={cn('flex-col overflow-y-auto overflow-x-hidden dark:border-white/20', className)}
     >
-      <div className="flex flex-col gap-1 pb-2 text-sm dark:text-neutral-100">
+      <div className="flex flex-col gap-1 pb-2 text-sm">
         <div className="group relative flex flex-col break-all rounded-md px-1 py-3">
           <ul className="flex flex-col">
             {(items as BaseNamedRecord[]).map((item: BaseNamedRecord) => (
               <li
                 key={item.id}
                 className={`${
-                  selectedId === item.id
-                    ? 'text-black dark:text-white'
-                    : 'text-neutral-400 dark:text-neutral-400'
-                } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
+                  selectedId === item.id ? 'text-foreground' : 'text-muted-foreground'
+                } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-foreground/10`}
               >
                 {menu ? (
                   <ContextMenu>

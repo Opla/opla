@@ -106,7 +106,7 @@ export function ConversationPanel({
           />
         )
       )}
-      <div className="flex flex-col items-center text-sm dark:bg-neutral-800/30" />
+      <div className="flex flex-col items-center text-sm" />
     </>
   );
 }

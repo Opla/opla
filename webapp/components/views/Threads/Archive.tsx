@@ -61,9 +61,9 @@ function Archive({
   );
 
   return (
-    <div className="flex h-full flex-col dark:bg-neutral-800/30">
+    <div className="flex h-full flex-col bg-secondary/20">
       <div className="grow-0">
-        <div className="flex w-full flex-row items-center justify-end gap-4 bg-neutral-50 p-3 text-xs text-neutral-500 dark:bg-neutral-900 dark:text-neutral-300">
+        <div className="flex w-full flex-row items-center justify-end gap-4 p-3 text-xs ">
           <Button
             variant="ghost"
             size="sm"
