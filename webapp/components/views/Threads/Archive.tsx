@@ -28,13 +28,13 @@
 
 'use client';
 
-import { useContext, useMemo, useRef } from 'react';
+import { useContext, useMemo } from 'react';
 import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
 import { MenuAction } from '@/types/ui';
-import MessageView from './Message';
-import { ScrollArea } from '../../ui/scroll-area';
+import { AvatarRef } from '@/types';
 import { Button } from '../../ui/button';
+import { ConversationList } from './Conversation';
 
 function Archive({
   archiveId,
@@ -48,11 +48,16 @@ function Archive({
 
   const { t } = useTranslation();
 
-  const bottomOfChatRef = useRef<HTMLDivElement>(null);
-
   const messages = useMemo(
     () => selectedArchive?.messages?.filter((m) => !(m.author.role === 'system')) || [],
     [selectedArchive?.messages],
+  );
+  const avatars = useMemo(
+    () =>
+      messages?.map(
+        (msg) => ({ name: msg.author.name, ref: msg.author.name, url: 'none' }) as AvatarRef,
+      ) ?? [],
+    [messages],
   );
 
   return (
@@ -69,22 +74,18 @@ function Archive({
           </Button>
         </div>
       </div>
-
-      <ScrollArea className="flex h-full flex-col">
-        {messages.map((msg) => (
-          <MessageView
-            key={msg.id}
-            message={msg}
-            disabled
-            onResendMessage={() => {}}
-            onDeleteMessage={() => {}}
-            onDeleteAssets={() => {}}
-            onChangeContent={() => {}}
-          />
-        ))}
-        <div className="h-4 w-full" />
-        <div ref={bottomOfChatRef} />
-      </ScrollArea>
+      <ConversationList
+        conversationId={archiveId as string}
+        scrollPosition={undefined}
+        messages={messages}
+        avatars={avatars}
+        disabled
+        onScrollPosition={() => {}}
+        onResendMessage={() => {}}
+        onDeleteMessage={() => {}}
+        onDeleteAssets={() => {}}
+        onChangeMessageContent={() => {}}
+      />
     </div>
   );
 }
