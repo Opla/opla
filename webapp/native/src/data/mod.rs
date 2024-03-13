@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use serde::{ self, Deserialize, Deserializer };
+use chrono::{DateTime, Utc};
+use serde::{ self, Deserialize, Deserializer, Serialize };
 use std::fmt;
 use std::marker::PhantomData;
 use std::str::FromStr;
@@ -20,6 +21,103 @@ use serde::de::{ self, Visitor, MapAccess };
 use void::Void;
 
 pub mod model;
+pub mod assistant;
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Record {
+    pub key: String,
+    pub value: String,
+    pub r#type: Option<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct RecordSet {
+    pub records: Vec<Record>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Preset {
+    pub id: Option<String>,
+    pub name: String,
+    pub parent_id: Option<String>,
+    #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
+    pub created_at: Option<DateTime<Utc>>,
+    #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
+    pub updated_at: Option<DateTime<Utc>>,
+
+    pub readonly: Option<bool>,
+    pub disabled: Option<bool>,
+
+    pub models: Option<Vec<String>>,
+    pub provider: Option<String>,
+    pub parameters: Option<RecordSet>,
+}
+
+#[serde_with::skip_serializing_none]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Avatar {
+    pub url: String,
+    pub name: Option<String>,
+    pub color: Option<String>,
+}
+
+impl FromStr for Avatar {
+    type Err = Void;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // TODO check if s is a valid URL or a file path
+        if s.starts_with("http") {
+            Ok(Avatar {
+                url: s.to_string(),
+                name: None,
+                color: None,
+            })
+        } else {
+            Ok(Avatar {
+                url: "".to_string(),
+                name: Some(s.to_string()),
+                color: None,
+            })
+        }
+    }
+}
+
+// See https://serde.rs/string-or-struct.html
+#[serde_with::skip_serializing_none]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Entity {
+    pub name: String,
+    pub email: Option<String>,
+    pub url: Option<String>,
+}
+impl FromStr for Entity {
+    type Err = Void;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Entity {
+            name: s.to_string(),
+            email: None,
+            url: None,
+        })
+    }
+}
+
+#[serde_with::skip_serializing_none]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Resource {
+    pub url: String,
+    pub name: Option<String>,
+    // TODO handle filename
+}
+
+impl FromStr for Resource {
+    type Err = Void;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // TODO check if s is a valid URL or a file path
+        Ok(Resource {
+            url: s.to_string(),
+            name: None,
+        })
+    }
+}
 
 pub mod date_format {
     use chrono::{ DateTime, Utc };

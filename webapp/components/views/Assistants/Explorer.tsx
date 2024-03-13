@@ -120,7 +120,7 @@ export default function AssistantsExplorer({
     >
       <ExplorerList<Assistant>
         selectedId={selectedAssistantId}
-        renderLeftSide={(a) => <AssistantIcon icon={a.icon} name={a.name} className="h-6 w-6" />}
+        renderLeftSide={(a) => <AssistantIcon icon={a.avatar} name={a.name} className="h-6 w-6" />}
         items={assistants}
         renderRightSide={(a) => (
           <Pastille state={a.disabled ? BasicState.disabled : BasicState.active} />

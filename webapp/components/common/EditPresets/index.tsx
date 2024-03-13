@@ -32,7 +32,14 @@ import logger from '@/utils/logger';
 import { AppContext } from '@/context';
 import Opla from '@/utils/providers/opla';
 import { getCompletionParametersDefinition } from '@/utils/providers';
-import { ContextWindowPolicy, Model, Preset, PresetParameter, Provider } from '@/types';
+import {
+  ContextWindowPolicy,
+  ConversationPreset,
+  Model,
+  Preset,
+  PresetParameter,
+  Provider,
+} from '@/types';
 import { toast } from '@/components/ui/Toast';
 import { ContextWindowPolicies, DefaultContextWindowPolicy } from '@/utils/constants';
 import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
@@ -54,7 +61,7 @@ export default function EditPreset<T>({
   className,
   onChange,
 }: {
-  presetProperties: Partial<Preset>;
+  presetProperties: Partial<Preset & ConversationPreset>;
   provider: Provider | undefined;
   model: Model | undefined;
   portal?: boolean;

@@ -3,6 +3,20 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
+const CardButton = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        'flex cursor-pointer flex-col rounded-xl border bg-card text-card-foreground shadow hover:bg-accent hover:text-accent-foreground',
+        className,
+      )}
+      {...props}
+    />
+  ),
+);
+CardButton.displayName = 'CardButton';
+
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
@@ -52,4 +66,4 @@ const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 );
 CardFooter.displayName = 'CardFooter';
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };
+export { Card, CardButton, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };

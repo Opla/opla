@@ -27,7 +27,7 @@ pub mod error;
 use tokio::sync::Mutex;
 use std::sync::Arc;
 
-use api::{ hf::search_hf_models, models };
+use api::{ assistants::{fetch_assistants_collection, AssistantsCollection}, hf::search_hf_models, models };
 use data::model::Model;
 use downloader::Downloader;
 use llm::{ openai::call_completion, LlmCompletionOptions, LlmCompletionResponse, LlmError, LlmQuery, LlmQueryCompletion, LlmTokenizeResponse };
@@ -222,6 +222,18 @@ async fn stop_opla_server<R: Runtime>(
 ) -> Result<Payload, String> {
     let mut server = context.server.lock().await;
     server.stop(&app).await
+}
+#[tauri::command]
+async fn get_assistants_collection<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    _context: State<'_, OplaContext>
+) -> Result<AssistantsCollection, String>
+    where Result<AssistantsCollection, String>: Serialize
+{
+    fetch_assistants_collection("https://opla.github.io/assistants/all.json").await.map_err(|err|
+        err.to_string()
+    )
 }
 
 #[tauri::command]
@@ -823,6 +835,7 @@ fn main() {
                 uninstall_model,
                 update_model,
                 set_active_model,
+                get_assistants_collection,
                 llm_call_completion,
                 llm_call_tokenize,
             ]

@@ -127,11 +127,6 @@ export type InlinePreset = {
   parameters?: Record<string, PresetParameter>;
   contextWindowPolicy?: ContextWindowPolicy;
   keepSystem?: boolean;
-
-  // For compatibility with Conversation
-  // Should be replaced
-  preset?: string;
-  model?: string;
 };
 
 export type Preset = BaseNamedRecord &
@@ -140,6 +135,13 @@ export type Preset = BaseNamedRecord &
     readonly?: boolean;
     disabled?: boolean;
   };
+
+export type ConversationPreset = InlinePreset & {
+  // For compatibility with Conversation
+  // Should be replaced
+  preset?: string;
+  model?: string;
+};
 
 export type ConversationUsage = {
   promptTokens?: number;
@@ -181,7 +183,7 @@ export type AIImplService = AIService & {
 };
 
 export type Conversation = BaseNamedRecord &
-  InlinePreset & {
+  ConversationPreset & {
     messages: Message[] | undefined;
     pluginIds?: string[];
 
@@ -408,12 +410,13 @@ export type ModelsConfiguration = {
 export type AvatarIcon = {
   color?: string;
   url: string;
+  name?: string;
 };
 
 export type Agent = BaseNamedRecord & {
   disabled?: boolean;
-  icon?: AvatarIcon;
-  parent?: string;
+  avatar?: AvatarIcon;
+  parentId?: string;
   version?: string;
   readonly?: boolean;
   system?: string;
@@ -423,7 +426,9 @@ export type Agent = BaseNamedRecord & {
 export type Assistant = Agent & {
   title?: string;
   subtitle?: string;
+  author?: Entity;
   promptTemplates?: PromptTemplate[];
+  featured?: boolean;
 };
 
 export type Store = {

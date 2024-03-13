@@ -59,7 +59,7 @@ export default function AssistantView({ assistantId }: AssistantProps) {
     if (typeof file === 'string') {
       logger.info('File', file);
       if (assistant) {
-        updateAssistant({ ...assistant, icon: { url: file } });
+        updateAssistant({ ...assistant, avatar: { url: file } });
       }
     }
   };
@@ -170,7 +170,7 @@ export default function AssistantView({ assistantId }: AssistantProps) {
                           onClick={handleChangeIcon}
                         >
                           <AssistantIcon
-                            icon={assistant.icon}
+                            icon={assistant.avatar}
                             name={assistant.name}
                             className="h-full w-full"
                           />

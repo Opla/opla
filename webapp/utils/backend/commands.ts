@@ -67,7 +67,7 @@ export const getProviderTemplate = async (): Promise<Provider> => {
 export const getModelsCollection = async (): Promise<{ models: [] }> => {
   try {
     const collection = await invokeTauri<ModelsCollection>('get_models_collection');
-    logger.info('getCollection', collection);
+    logger.info('getModelsCollection', collection);
     return await mapKeys(collection, toCamelCase);
   } catch (error) {
     logger.error(error);
@@ -107,4 +107,16 @@ export const updateModel = async (model: Model) => {
     logger.error(error);
     toast.error(`Error installing model ${error}`);
   }
+};
+
+export const getAssistantsCollection = async (): Promise<{ assistants: []; tags: [] }> => {
+  try {
+    const collection = await invokeTauri<ModelsCollection>('get_assistants_collection');
+    logger.info('getAssistantsCollection', collection);
+    return await mapKeys(collection, toCamelCase);
+  } catch (error) {
+    logger.error(error);
+    toast.error(`Error fetching assistants ${error}`);
+  }
+  return { assistants: [], tags: [] };
 };

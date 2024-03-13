@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import Link from 'next/link';
 import { SquarePen, Store } from 'lucide-react';
 import AssistantIcon from '@/components/common/AssistantIcon';
 import { ExplorerGroup, ExplorerList } from '@/components/common/Explorer';
@@ -35,9 +36,11 @@ export default function AssistantsList({ selectedId, onSelect }: AssistantsListP
     <ExplorerGroup
       title="Assistants"
       toolbar={
-        <Button variant="outline" size="sm" className="text-primary">
-          <Store className="mr-2 h-4 w-4" strokeWidth={1.5} />
-          {t('Explore the store')}
+        <Button variant="outline" size="sm" className="text-primary" asChild>
+          <Link href="/threads/store">
+            <Store className="mr-2 h-4 w-4" strokeWidth={1.5} />
+            {t('Explore the store')}
+          </Link>
         </Button>
       }
     >
@@ -51,7 +54,7 @@ export default function AssistantsList({ selectedId, onSelect }: AssistantsListP
           assistant.id === OplaAssistant.id ? (
             <Opla className="h-4 w-4" />
           ) : (
-            <AssistantIcon icon={assistant.icon} name={assistant.name} className="h-4 w-4" />
+            <AssistantIcon icon={assistant.avatar} name={assistant.name} className="h-4 w-4" />
           )
         }
         renderRightSide={(assistant) =>

@@ -29,12 +29,12 @@
 'use client';
 
 import { useRouter } from 'next/router';
-import Threads from '@/components/views/Threads';
+import MainThreads from '@/components/views/Threads';
 import logger from '@/utils/logger';
 
 export default function ThreadSelected() {
   const router = useRouter();
   const { id } = router.query;
   logger.info('render page', id);
-  return <Threads selectedThreadId={id as string} />;
+  return <MainThreads selectedThreadId={id as string} />;
 }

@@ -14,9 +14,9 @@
 
 'use client';
 
-import Threads from '@/components/views/Threads';
+import MainThreads from '@/components/views/Threads';
 import { ViewName } from '@/types/ui';
 
 export default function DefaultArchives() {
-  return <Threads view={ViewName.Archives} />;
+  return <MainThreads view={ViewName.Archives} />;
 }
