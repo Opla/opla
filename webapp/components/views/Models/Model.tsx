@@ -195,7 +195,6 @@ function ModelView({
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t('File')}</TableHead>
-                    {/* <TableHead>{t('Size')}</TableHead> */}
                     <TableHead>{t('Description')}</TableHead>
                     <TableHead>{t('Parameters')}</TableHead>
                     <TableHead>{t('Action')}</TableHead>
@@ -203,15 +202,8 @@ function ModelView({
                 </TableHeader>
                 <TableBody>
                   {downloadables.map((download) => (
-                    <TableRow
-                      onClick={() => {}}
-                      key={download.id || download.name}
-                      className=""
-                    >
+                    <TableRow onClick={() => {}} key={download.id || download.name}>
                       <TableCell className="truncate">{download.name}</TableCell>
-                      {/* <TableCell className="truncate">
-                              <span>{`${(download.size || 0).toFixed(1)}Gb`}</span>
-                        </TableCell> */}
                       <TableCell className="truncate">
                         <span>{download.recommendations || ''}</span>
                       </TableCell>
