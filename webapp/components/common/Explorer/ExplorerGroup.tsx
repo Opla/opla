@@ -29,13 +29,13 @@ function ExplorerGroup({ title, children, toolbar, className }: ExplorerGroupPro
 
   return (
     <div className={cn('group flex w-full flex-col', className)}>
-      <div className="flex w-full items-center">
+      <div className="flex w-full items-center pl-2">
         <Button variant="ghost" size="iconSm">
           <ChevronDown className="h-4 w-4" strokeWidth={1.5} />
         </Button>
         <div className="flex w-full flex-grow items-center justify-between gap-1 overflow-hidden p-0 pl-2">
           {title && (
-            <div className="text-ellipsis break-all capitalize text-muted-foreground">
+            <div className="text-ellipsis break-all text-sm capitalize text-muted-foreground">
               {t(title)}
             </div>
           )}
