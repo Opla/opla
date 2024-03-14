@@ -12,22 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use client';
-
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../../ui/resizable';
+import MainView from '@/components/common/MainView';
 import Explorer from './Explorer';
-import Provider from './Provider';
+import ProviderView from './Provider';
 
 export default function Providers({ selectedProviderId }: { selectedProviderId?: string }) {
   return (
-    <ResizablePanelGroup direction="horizontal">
-      <ResizablePanel defaultSize={20}>
-        <Explorer selectedProviderId={selectedProviderId} />
-      </ResizablePanel>
-      <ResizableHandle />
-      <ResizablePanel>
-        <Provider providerId={selectedProviderId} />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+    <MainView selectedId={selectedProviderId} explorer={Explorer} contentView={ProviderView} />
   );
 }

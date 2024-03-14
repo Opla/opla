@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../../ui/resizable';
+import MainView from '@/components/common/MainView';
 import Explorer from './Explorer';
 import Assistant from './Assistant';
 
@@ -21,15 +21,5 @@ export type AssistantProps = {
 };
 
 export default function Assistants({ selectedAssistantId }: AssistantProps) {
-  return (
-    <ResizablePanelGroup direction="horizontal">
-      <ResizablePanel defaultSize={20}>
-        <Explorer selectedAssistantId={selectedAssistantId} />
-      </ResizablePanel>
-      <ResizableHandle />
-      <ResizablePanel>
-        <Assistant assistantId={selectedAssistantId} />
-      </ResizablePanel>
-    </ResizablePanelGroup>
-  );
+  return <MainView selectedId={selectedAssistantId} explorer={Explorer} contentView={Assistant} />;
 }

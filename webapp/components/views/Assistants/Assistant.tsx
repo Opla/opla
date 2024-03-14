@@ -32,10 +32,10 @@ import EmptyView from '../../common/EmptyView';
 import TargetsTable from './TargetsTable';
 
 export type AssistantProps = {
-  assistantId?: string;
+  selectedId?: string;
 };
 
-export default function AssistantView({ assistantId }: AssistantProps) {
+export default function AssistantView({ selectedId: assistantId }: AssistantProps) {
   const { t } = useTranslation();
   const {
     getAssistant,

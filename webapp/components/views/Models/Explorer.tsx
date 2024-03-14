@@ -14,38 +14,46 @@
 
 'use client';
 
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { HardDriveDownload } from 'lucide-react';
 import { Ui, Model } from '@/types';
+import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/types/ui';
 import logger from '@/utils/logger';
-import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
 import { shortcutAsText } from '@/utils/shortcuts';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
-import ContextMenuList from '../../ui/ContextMenu/ContextMenuList';
+import Explorer, { ExplorerGroup, ExplorerList } from '@/components/common/Explorer';
+import { getModelsCollection, updateModel } from '@/utils/backend/commands';
 import { Button } from '../../ui/button';
 import EditableItem from '../../common/EditableItem';
 import ModelInfos from '../../common/ModelInfos';
 
 export type ModelsExplorerProps = {
-  models: Model[];
-  selectedModelId?: string;
-  collection: Model[];
-  onModelRename: (id: string, name: string) => void;
+  selectedId?: string;
 };
 
-function ModelsExplorer({
-  models,
-  selectedModelId,
-  collection,
-  onModelRename,
-}: ModelsExplorerProps) {
+function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
+  const { backendContext, updateBackendStore } = useBackend();
   const router = useRouter();
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
+  const [collection, setCollection] = useState<Model[]>([]);
+
+  useEffect(() => {
+    const getCollection = async () => {
+      const coll = (await getModelsCollection()) as unknown as { models: Model[] };
+      const collectionModels = coll.models
+        .filter((m) => m.featured === true)
+        .map((m) => ({ ...m, id: m.name }));
+      setCollection(collectionModels);
+    };
+    getCollection();
+  }, []);
+
+  const models = backendContext.config.models.items;
 
   const handleSelectModel = (id: string) => {
     logger.info(`onSelectModel ${id}`);
@@ -57,9 +65,18 @@ function ModelsExplorer({
     showModal(ModalIds.NewLocalModel);
   };
 
+  const handleModelRename = async (name: string, id: string) => {
+    const updatedModel = models.find((m) => m.id === id);
+    logger.info(`change model name ${id} ${name}`, updatedModel, models);
+    if (updatedModel && updatedModel.name !== name) {
+      await updateModel({ ...updatedModel, name });
+      await updateBackendStore();
+    }
+  };
+
   const handleChangeModelName = (id: string, name: string) => {
     logger.info(`change model name ${id} ${name}`);
-    onModelRename(id, name);
+    handleModelRename(id, name);
   };
 
   useShortcuts(ShortcutIds.INSTALL_MODEL, (event) => {
@@ -84,127 +101,58 @@ function ModelsExplorer({
   ];
 
   return (
-    <div className="scrollbar-trigger flex h-full w-full flex-1 items-start border-r-[1px] border-neutral-300/30 bg-neutral-100 dark:border-neutral-900 dark:bg-neutral-800/70">
-      <nav className="flex h-full w-full flex-col">
-        <div className="flex w-full items-center dark:bg-neutral-800">
-          <div className="flex grow items-center p-2">
-            <p className="flex-1 text-sm font-semibold text-neutral-500 dark:text-neutral-400">
-              {t('Models')}
-            </p>
-            <Button
-              aria-label={t('Install local model')}
-              title={`${t('Install local model')} ${shortcutAsText(ShortcutIds.INSTALL_MODEL)}`}
-              variant="ghost"
-              size="icon"
-              onClick={handleNewLocalModel}
-            >
-              <HardDriveDownload className="h-4 w-4" strokeWidth={1.5} />
-            </Button>
-          </div>
-        </div>
-        <div className="flex-1 flex-col overflow-y-auto overflow-x-hidden dark:border-white/20">
-          <div className="flex flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
-            <div className="group relative flex flex-col gap-3 break-all rounded-md px-1 py-3">
-              <div className="p1 text-ellipsis break-all text-neutral-600">{t('Local models')}</div>
-              <ul className="p1 flex flex-1 flex-col">
-                {models.map((model) => (
-                  <li
-                    key={model.id}
-                    className={`${
-                      selectedModelId === model.id
-                        ? 'text-black dark:text-white'
-                        : 'text-neutral-400 dark:text-neutral-400'
-                    } rounded-md p-2 transition-colors duration-200 hover:bg-neutral-500/10`}
-                  >
-                    <ContextMenu>
-                      <ContextMenuTrigger>
-                        <div
-                          aria-label="Select a model"
-                          role="button"
-                          onKeyDown={() => {}}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleSelectModel(model.id);
-                          }}
-                          className="flex w-full cursor-pointer flex-row items-center"
-                          tabIndex={0}
-                        >
-                          {!model.editable && (
-                            <div className="flex w-full grow flex-row items-center justify-between overflow-hidden  px-3 py-1">
-                              <div className="flex-1 text-ellipsis break-all">
-                                {model.title || model.name}
-                              </div>
-                              <ModelInfos model={model} displayName={false} stateAsIcon />
-                            </div>
-                          )}
-                          {model.editable && (
-                            <div>
-                              <EditableItem
-                                id={model.id}
-                                title={model.title || model.name}
-                                editable
-                                className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1"
-                                onChange={handleChangeModelName}
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </ContextMenuTrigger>
-                      <ContextMenuList data={model.id} menu={menu} />
-                    </ContextMenu>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
+    <Explorer
+      title={t('Models')}
+      toolbar={
+        <Button
+          aria-label={t('Install local model')}
+          title={`${t('Install local model')} ${shortcutAsText(ShortcutIds.INSTALL_MODEL)}`}
+          variant="ghost"
+          size="icon"
+          onClick={handleNewLocalModel}
+        >
+          <HardDriveDownload className="h-4 w-4" strokeWidth={1.5} />
+        </Button>
+      }
+    >
+      <ExplorerGroup title={t('Local models')}>
+        <ExplorerList<Model>
+          selectedId={selectedModelId}
+          items={models}
+          renderItem={(model) => (
+            <>
+              {!model.editable && (
+                <div className="flex w-full grow flex-row items-center justify-between overflow-hidden  px-3 py-1">
+                  <div className="flex-1 text-ellipsis break-all">{model.title || model.name}</div>
+                  <ModelInfos model={model} displayName={false} stateAsIcon />
+                </div>
+              )}
+              {model.editable && (
+                <div className="flex w-full grow">
+                  <EditableItem
+                    id={model.id}
+                    title={model.title || model.name}
+                    editable
+                    className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1"
+                    onChange={handleChangeModelName}
+                  />
+                </div>
+              )}
+            </>
+          )}
+          onSelectItem={handleSelectModel}
+          menu={() => menu}
+        />
+      </ExplorerGroup>
 
-        <div className="flex-1 flex-col overflow-y-auto overflow-x-hidden dark:border-white/20">
-          <div className="flex flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
-            <div className="group relative flex flex-col gap-3 break-all rounded-md px-1 py-3">
-              <div className="p1 text-ellipsis break-all text-neutral-600">
-                {t('Featured models')}
-              </div>
-              <ul className="p1 flex flex-1 flex-col">
-                {collection.map((model) => (
-                  <li
-                    key={model.id}
-                    className={`${
-                      selectedModelId === model.id
-                        ? 'text-black dark:text-white'
-                        : 'text-neutral-400 dark:text-neutral-400'
-                    } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
-                  >
-                    <ContextMenu>
-                      <ContextMenuTrigger>
-                        <div
-                          aria-label="Select a model"
-                          role="button"
-                          onKeyDown={() => {}}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleSelectModel(model.id);
-                          }}
-                          className="flex cursor-pointer flex-row items-center"
-                          tabIndex={0}
-                        >
-                          <div>
-                            <div className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1">
-                              <span>{model.title || model.name}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </ContextMenuTrigger>
-                      <ContextMenuList data={model.id} menu={menu} />
-                    </ContextMenu>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </nav>
-    </div>
+      <ExplorerGroup title={t('Featured models')}>
+        <ExplorerList<Model>
+          selectedId={selectedModelId}
+          items={collection}
+          onSelectItem={handleSelectModel}
+        />
+      </ExplorerGroup>
+    </Explorer>
   );
 }
 
