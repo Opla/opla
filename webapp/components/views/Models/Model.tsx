@@ -25,39 +25,171 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use client';
-
+import { useContext, useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import { DownloadIcon } from '@radix-ui/react-icons';
 import useTranslation from '@/hooks/useTranslation';
 import { Model } from '@/types';
-import { getEntityName, getResourceUrl } from '@/utils/data';
-import useParameters, { ParametersCallback } from '@/hooks/useParameters';
+import { deepCopy, deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
+import useParameters from '@/hooks/useParameters';
 import ContentView from '@/components/common/ContentView';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import Parameter from '../../common/Parameter';
+import logger from '@/utils/logger';
+import {
+  cancelDownloadModel,
+  getModelsCollection,
+  installModel,
+  uninstallModel,
+  updateModel,
+} from '@/utils/backend/commands';
+import useBackend from '@/hooks/useBackendContext';
+import { getDownloadables, isValidFormat } from '@/utils/data/models';
+import { ModalIds, Page } from '@/types/ui';
+import { ModalsContext } from '@/context/modals';
+import Parameter, { ParametersRecord } from '../../common/Parameter';
 import { Button } from '../../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../../ui/table';
 import ModelInfos from '../../common/ModelInfos';
 
 export type ModelViewProps = {
-  model: Model;
-  isDownloading: boolean;
-  local: boolean;
-  downloadables: Model[];
-  onChange: (item?: Model) => void;
-  onParametersChange: ParametersCallback;
+  selectedId?: string;
 };
 
-function ModelView({
-  model,
-  isDownloading,
-  local,
-  downloadables,
-  onChange,
-  onParametersChange,
-}: ModelViewProps) {
+function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
   const { t } = useTranslation();
-  const [updatedParameters, setUpdatedParameters] = useParameters(model?.id, onParametersChange);
+
+  const { backendContext, updateBackendStore } = useBackend();
+  const models = backendContext.config.models.items;
+
+  const handleParametersChange = async (id: string | undefined, parameters: ParametersRecord) => {
+    logger.info(`change model parameters ${id} ${parameters}`);
+    // onParametersChange(id, parameters);
+    let updatedModel = models.find((m) => m.id === id) as Model;
+    if (updatedModel) {
+      let needUpdate = false;
+      updatedModel = deepCopy<Model>(updatedModel);
+      Object.keys(parameters).forEach((key) => {
+        switch (key) {
+          case 'name':
+            if (parameters[key] !== updatedModel.name) {
+              updatedModel.name = parameters[key] as string;
+              needUpdate = true;
+            }
+            break;
+          case 'description':
+            if (parameters[key] !== updatedModel.description) {
+              updatedModel.description = parameters[key] as string;
+              needUpdate = true;
+            }
+            break;
+          case 'author':
+            if (parameters[key] !== updatedModel.author) {
+              updatedModel.author = parameters[key] as string;
+              needUpdate = true;
+            }
+            break;
+          default:
+            logger.warn(`unknown parameter ${key}`);
+        }
+      });
+      if (needUpdate) {
+        await updateModel(updatedModel);
+        await updateBackendStore();
+      }
+    }
+    return undefined;
+  };
+
+  const [updatedParameters, setUpdatedParameters] = useParameters(
+    selectedModelId,
+    handleParametersChange,
+  );
+
+  const [collection, setCollection] = useState<Model[]>([]);
+  const { showModal } = useContext(ModalsContext);
+  const router = useRouter();
+
+  useEffect(() => {
+    const getCollection = async () => {
+      const coll = (await getModelsCollection()) as unknown as { models: Model[] };
+      const collectionModels = coll.models
+        .filter((m) => m.featured === true)
+        .map((m) => ({ ...m, id: m.name }));
+      setCollection(collectionModels);
+    };
+    getCollection();
+  }, []);
+
+  let local = true;
+  let model = models.find((m) => m.id === selectedModelId) as Model;
+  if (!model && selectedModelId) {
+    model = collection.find((m) => m.id === selectedModelId) as Model;
+    local = false;
+  }
+  const downloadables = local
+    ? []
+    : getDownloadables(model).filter((d) => d.private !== true && isValidFormat(d));
+
+  const { downloads = [] } = backendContext;
+
+  const isDownloading = downloads.findIndex((d) => d.id === model?.id) !== -1;
+
+  const handleInstall = async (item?: Model) => {
+    const selectedModel: Model = deepMerge<Model>(model, item || {}, true);
+    logger.info(`install ${model.name}`, selectedModel, item);
+    if (selectedModel.private === true) {
+      delete selectedModel.private;
+    }
+    if (selectedModel.include) {
+      delete selectedModel.include;
+    }
+    const path = getEntityName(selectedModel.creator || selectedModel.author);
+    const id = await installModel(
+      selectedModel,
+      getResourceUrl(selectedModel.download),
+      path,
+      selectedModel.name,
+    );
+    await updateBackendStore();
+    logger.info(`installed ${id}`);
+    router.push(`${Page.Models}/${id}`);
+  };
+
+  const handleUninstall = async () => {
+    logger.info(`Uninstall ${model.name} model.id=${model.id}`);
+
+    const nextModelId = models.findLast((m) => m.id !== model.id)?.id;
+    await uninstallModel(model.id);
+    await updateBackendStore();
+    router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
+  };
+
+  const handleCancelDownload = async (action: string, data: any) => {
+    logger.info(`Cancel download ${action} model.id=${data}`);
+    await cancelDownloadModel(model.id);
+  };
+
+  const handleLocalInstall = (selectedModel?: Model) => {
+    if (isDownloading) {
+      showModal(ModalIds.Downloads, { item: model, onAction: handleCancelDownload });
+    }
+    if (local && !selectedModel) {
+      handleUninstall();
+      return;
+    }
+    let item: Model = selectedModel || model;
+    // If the model is not a GGUF model, we need to find the recommended or first download
+    if (!isValidFormat(item) && downloadables.length > 0) {
+      item = downloadables.find((d) => d.recommended) || downloadables[0];
+    }
+
+    if (isValidFormat(item)) {
+      handleInstall(item);
+    } else {
+      logger.info(`No valid format ${item?.name} ${item?.library}`);
+      // TODO: display toaster
+    }
+  };
 
   if (!model) {
     return null;
@@ -80,7 +212,7 @@ function ModelView({
       selectedId={model.id}
       toolbar={
         <div className="flex flex-row gap-2">
-          <Button variant="secondary" className="" onClick={() => onChange()}>
+          <Button variant="secondary" className="" onClick={() => handleLocalInstall()}>
             {isDownloading && t('Downloading...')}
             {!isDownloading && (local ? t('Uninstall') : t('Install'))}
           </Button>
@@ -211,7 +343,11 @@ function ModelView({
                         <ModelInfos model={download} displayName={false} />
                       </TableCell>
                       <TableCell aria-label={t('Download')}>
-                        <Button variant="ghost" size="icon" onClick={() => onChange(download)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleLocalInstall(download)}
+                        >
                           <DownloadIcon />
                         </Button>
                       </TableCell>

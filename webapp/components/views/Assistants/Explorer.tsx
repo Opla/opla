@@ -28,9 +28,9 @@ import AssistantIcon from '../../common/AssistantIcon';
 import Pastille from '../../common/Pastille';
 
 export default function AssistantsExplorer({
-  selectedAssistantId,
+  selectedId: selectedAssistantId,
 }: {
-  selectedAssistantId?: string;
+  selectedId?: string;
 }) {
   const router = useRouter();
   const { t } = useTranslation();

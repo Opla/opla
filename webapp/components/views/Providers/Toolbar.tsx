@@ -35,41 +35,31 @@ export default function Toolbar({
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col items-center text-xs">
-      <div className="flex w-full flex-row items-center justify-between gap-1 ">
-        <div className="mx-3 flex h-7 flex-row items-center  px-2">
-          {provider?.type.toLowerCase() !== provider?.name.toLowerCase() && (
-            <span className="gap-1 py-1 capitalize text-muted-foreground">{provider?.type}</span>
-          )}
-          <span className="items-center truncate px-3">{provider?.name}</span>
-        </div>
-        <div className="flex flex-grow flex-row-reverse items-center gap-4">
-          {actions || (
-            <Button
-              variant="outline"
-              onClick={(e) => {
-                e.preventDefault();
-                onProviderToggle();
-              }}
-            >
-              <span className={getStateColor(getProviderState(provider), 'text')}>
-                <Plug className="mr-2 h-4 w-4 rotate-90" />
-              </span>
-              <span>{provider?.disabled ? t('Enable') : t('Disable')}</span>
-            </Button>
-          )}
-          <Button
-            disabled={!hasParametersChanged}
-            variant="outline"
-            onClick={(e) => {
-              e.preventDefault();
-              onParametersSave();
-            }}
-          >
-            {t('Save')}
-          </Button>
-        </div>
-      </div>
+    <div className="flex flex-grow flex-row-reverse items-center gap-4">
+      {actions || (
+        <Button
+          variant="outline"
+          onClick={(e) => {
+            e.preventDefault();
+            onProviderToggle();
+          }}
+        >
+          <span className={getStateColor(getProviderState(provider), 'text')}>
+            <Plug className="mr-2 h-4 w-4 rotate-90" />
+          </span>
+          <span>{provider?.disabled ? t('Enable') : t('Disable')}</span>
+        </Button>
+      )}
+      <Button
+        disabled={!hasParametersChanged}
+        variant="outline"
+        onClick={(e) => {
+          e.preventDefault();
+          onParametersSave();
+        }}
+      >
+        {t('Save')}
+      </Button>
     </div>
   );
 }

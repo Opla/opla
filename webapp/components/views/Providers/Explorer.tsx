@@ -32,17 +32,19 @@ import {
 import OpenAI from '@/utils/providers/openai';
 import useBackend from '@/hooks/useBackendContext';
 import { ModalIds } from '@/modals';
-import { ContextMenuTrigger } from '@radix-ui/react-context-menu';
 import { BasicState, Page } from '@/types/ui';
 import { shortcutAsText } from '@/utils/shortcuts';
 import { ShortcutIds } from '@/hooks/useShortcuts';
 import { getStateColor } from '@/utils/ui';
+import Explorer, { ExplorerGroup, ExplorerList } from '@/components/common/Explorer';
 import { Button } from '../../ui/button';
-import { ContextMenu } from '../../ui/context-menu';
-import ContextMenuList from '../../ui/ContextMenu/ContextMenuList';
 import OpenAIIcon from '../../icons/OpenAI';
 
-function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string }) {
+type ProvidersExplorerProps = {
+  selectedId?: string;
+};
+
+function ProvidersExplorer({ selectedId: selectedProviderId }: ProvidersExplorerProps) {
   const { providers, setProviders } = useContext(AppContext);
   const { backendContext } = useBackend();
 
@@ -132,102 +134,62 @@ function ProvidersExplorer({ selectedProviderId }: { selectedProviderId?: string
   ];
 
   return (
-    <div className="scrollbar-trigger flex h-full w-full flex-1 items-start border-r-[1px] border-neutral-300/30 bg-neutral-100 dark:border-neutral-900 dark:bg-neutral-800/70">
-      <nav className="flex h-full flex-1 flex-col space-y-1">
-        <div className="flex w-full items-center dark:bg-neutral-800">
-          <div className="flex grow items-center p-2">
-            <p className="flex-1 text-sm font-semibold text-neutral-500 dark:text-neutral-400">
-              {t('Providers')}
-            </p>
-            {!chatGPT && (
-              <Button
-                aria-label={t('Configure ChatGPT')}
-                title={`${t('Configure ChatGPT')} ${shortcutAsText(ShortcutIds.NEW_PROVIDER)}`}
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleSetupChatGPT();
-                }}
-              >
-                <OpenAIIcon className="mr-2 h-4 w-4" strokeWidth={1.5} />
-              </Button>
-            )}
+    <Explorer
+      title={t('Providers')}
+      toolbar={
+        <>
+          {!chatGPT && (
             <Button
-              aria-label={t('New AI Provider')}
-              title={`${t('New AI Provider')} ${shortcutAsText(ShortcutIds.NEW_PROVIDER)}`}
+              aria-label={t('Configure ChatGPT')}
+              title={`${t('Configure ChatGPT')} ${shortcutAsText(ShortcutIds.NEW_PROVIDER)}`}
               variant="ghost"
               size="icon"
               onClick={(e) => {
                 e.preventDefault();
-                createNewProvider();
+                handleSetupChatGPT();
               }}
             >
-              <Plus className="mr-2 h-4 w-4" strokeWidth={1.5} />
+              <OpenAIIcon className="mr-2 h-4 w-4" strokeWidth={1.5} />
             </Button>
-          </div>
-        </div>
-        <div className="flex-1 flex-col overflow-y-auto overflow-x-hidden dark:border-white/20">
-          <div className="flex flex-col gap-2 pb-2 text-sm dark:text-neutral-100">
-            <div className="group relative flex flex-col gap-3 break-all rounded-md px-1 py-3">
-              <ul className="p1 flex flex-1 flex-col">
-                {providers.map((provider) => (
-                  <li
-                    key={provider.id}
-                    className={`${
-                      selectedProviderId === provider.id
-                        ? 'text-black dark:text-white'
-                        : 'text-neutral-400 dark:text-neutral-400'
-                    } rounded-md px-2 py-2 transition-colors duration-200 hover:bg-neutral-500/10`}
-                  >
-                    <ContextMenu>
-                      <ContextMenuTrigger>
-                        <div
-                          aria-label="Select a provider"
-                          role="button"
-                          onKeyDown={() => {}}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleSelectProvider(provider.id);
-                          }}
-                          className="w-full"
-                          tabIndex={0}
-                        >
-                          <div>
-                            <div className="flex cursor-pointer flex-row items-center">
-                              <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
-                                {provider.name}
-                              </div>
-                              <div
-                                className={getStateColor(
-                                  getProviderState(provider, backendContext.server?.status),
-                                  'text',
-                                )}
-                              >
-                                <Server className="h-4 w-4" strokeWidth={1.5} />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </ContextMenuTrigger>
-                      <ContextMenuList
-                        data={provider.id}
-                        menu={
-                          getProviderState(provider, backendContext.server?.status) !==
-                          BasicState.active
-                            ? menuDisabled
-                            : menu
-                        }
-                      />
-                    </ContextMenu>
-                  </li>
-                ))}
-              </ul>
+          )}
+          <Button
+            aria-label={t('New AI Provider')}
+            title={`${t('New AI Provider')} ${shortcutAsText(ShortcutIds.NEW_PROVIDER)}`}
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.preventDefault();
+              createNewProvider();
+            }}
+          >
+            <Plus className="mr-2 h-4 w-4" strokeWidth={1.5} />
+          </Button>
+        </>
+      }
+    >
+      <ExplorerGroup>
+        <ExplorerList<Provider>
+          selectedId={selectedProviderId}
+          items={providers}
+          onSelectItem={handleSelectProvider}
+          renderRightSide={(provider) => (
+            <div
+              className={getStateColor(
+                getProviderState(provider, backendContext.server?.status),
+                'text',
+              )}
+            >
+              <Server className="h-4 w-4" strokeWidth={1.5} />
             </div>
-          </div>
-        </div>
-      </nav>
-    </div>
+          )}
+          menu={(provider) =>
+            getProviderState(provider, backendContext.server?.status) !== BasicState.active
+              ? menuDisabled
+              : menu
+          }
+        />
+      </ExplorerGroup>
+    </Explorer>
   );
 }
 

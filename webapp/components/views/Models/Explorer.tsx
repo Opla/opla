@@ -14,10 +14,11 @@
 
 'use client';
 
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { HardDriveDownload } from 'lucide-react';
 import { Ui, Model } from '@/types';
+import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/types/ui';
@@ -25,26 +26,34 @@ import logger from '@/utils/logger';
 import { shortcutAsText } from '@/utils/shortcuts';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import Explorer, { ExplorerGroup, ExplorerList } from '@/components/common/Explorer';
+import { getModelsCollection, updateModel } from '@/utils/backend/commands';
 import { Button } from '../../ui/button';
 import EditableItem from '../../common/EditableItem';
 import ModelInfos from '../../common/ModelInfos';
 
 export type ModelsExplorerProps = {
-  models: Model[];
-  selectedModelId?: string;
-  collection: Model[];
-  onModelRename: (id: string, name: string) => void;
+  selectedId?: string;
 };
 
-function ModelsExplorer({
-  models,
-  selectedModelId,
-  collection,
-  onModelRename,
-}: ModelsExplorerProps) {
+function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
+  const { backendContext, updateBackendStore } = useBackend();
   const router = useRouter();
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
+  const [collection, setCollection] = useState<Model[]>([]);
+
+  useEffect(() => {
+    const getCollection = async () => {
+      const coll = (await getModelsCollection()) as unknown as { models: Model[] };
+      const collectionModels = coll.models
+        .filter((m) => m.featured === true)
+        .map((m) => ({ ...m, id: m.name }));
+      setCollection(collectionModels);
+    };
+    getCollection();
+  }, []);
+
+  const models = backendContext.config.models.items;
 
   const handleSelectModel = (id: string) => {
     logger.info(`onSelectModel ${id}`);
@@ -56,9 +65,18 @@ function ModelsExplorer({
     showModal(ModalIds.NewLocalModel);
   };
 
+  const handleModelRename = async (name: string, id: string) => {
+    const updatedModel = models.find((m) => m.id === id);
+    logger.info(`change model name ${id} ${name}`, updatedModel, models);
+    if (updatedModel && updatedModel.name !== name) {
+      await updateModel({ ...updatedModel, name });
+      await updateBackendStore();
+    }
+  };
+
   const handleChangeModelName = (id: string, name: string) => {
     logger.info(`change model name ${id} ${name}`);
-    onModelRename(id, name);
+    handleModelRename(id, name);
   };
 
   useShortcuts(ShortcutIds.INSTALL_MODEL, (event) => {
