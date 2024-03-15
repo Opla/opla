@@ -14,7 +14,7 @@
 
 import Link from 'next/link';
 import { SquarePen, Store } from 'lucide-react';
-import AssistantIcon from '@/components/common/AssistantIcon';
+import AvatarView from '@/components/common/AvatarView';
 import { ExplorerGroup, ExplorerList } from '@/components/common/Explorer';
 import Opla from '@/components/icons/Opla';
 import { Button } from '@/components/ui/button';
@@ -54,7 +54,7 @@ export default function AssistantsList({ selectedId, onSelect }: AssistantsListP
           assistant.id === OplaAssistant.id ? (
             <Opla className="h-4 w-4" />
           ) : (
-            <AssistantIcon icon={assistant.avatar} name={assistant.name} className="h-4 w-4" />
+            <AvatarView avatar={assistant.avatar} className="h-4 w-4" />
           )
         }
         renderRightSide={(assistant) =>

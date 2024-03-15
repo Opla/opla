@@ -35,16 +35,12 @@ type AssistantCardProps = {
 function AssistantCard({ assistant }: AssistantCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
-  const { getAssistant, createAssistant, createTarget } = useAssistantStore();
+  const { getAssistant, createAssistant } = useAssistantStore();
 
   const handleStartChat = () => {
-    console.log('Start chat with assistant');
     let newAssistant = getAssistant(assistant.id);
     if (!newAssistant) {
       newAssistant = createAssistant(assistant.name, { ...assistant, readonly: true });
-    }
-    if (!newAssistant.targets || newAssistant.targets.length === 0) {
-      newAssistant.targets = [createTarget()];
     }
     router.push(`${Ui.Page.Threads}/?assistant=${assistant.id}`);
   };

@@ -1,8 +1,8 @@
 import { Avatar as AvatarContainer, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Avatar } from '@/types';
+import { Avatar, AvatarRef } from '@/types';
 
 type AvatarViewProps = {
-  avatar?: Avatar;
+  avatar?: Partial<Avatar & AvatarRef>;
   icon?: React.ReactNode;
   className?: string;
 };
@@ -11,7 +11,9 @@ function AvatarView({ avatar, icon, className }: AvatarViewProps) {
   return (
     <AvatarContainer className={className}>
       {avatar?.url && <AvatarImage src={avatar?.url} />}
-      <AvatarFallback color={avatar?.color}>{icon || avatar?.name}</AvatarFallback>
+      <AvatarFallback color={avatar?.color}>
+        {avatar?.fallback || icon || avatar?.name}
+      </AvatarFallback>
     </AvatarContainer>
   );
 }

@@ -64,7 +64,7 @@ import { useAssistantStore } from '@/stores';
 import { getDefaultAssistantService } from '@/utils/data/assistants';
 import PromptArea from './Prompt';
 import { ConversationPanel } from './Conversation';
-import ThreadMenu from './Menu';
+import ThreadHeader from './Header';
 
 function Thread({
   conversationId: _conversationId,
@@ -167,7 +167,11 @@ function Thread({
         const avatar = { name: msg.author.name, ref: msg.author.name } as AvatarRef;
         if (msg.author.role === 'assistant') {
           const modelItem = modelItems.find((m) => m.value === msg.author.name);
-          if (!avatar.name || (assistant && avatar.name === assistant?.targets?.[0]?.models?.[0])) {
+          if (
+            !avatar.name ||
+            (assistant &&
+              (!assistant?.targets || avatar.name === assistant?.targets?.[0]?.models?.[0]))
+          ) {
             avatar.name = assistant?.name;
             avatar.url = assistant?.avatar?.url;
             avatar.color = assistant?.avatar?.color;
@@ -602,7 +606,7 @@ function Thread({
   return (
     <ContentView
       header={
-        <ThreadMenu
+        <ThreadHeader
           selectedAssistantId={assistantId}
           selectedModelName={selectedModelNameOrId}
           selectedConversationId={conversationId}
