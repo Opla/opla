@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { Plus } from 'lucide-react';
 import logger from '@/utils/logger';
@@ -38,6 +38,8 @@ export default function AssistantsExplorer({
   logger.info('AssistantsExplorer', selectedAssistantId);
   const { assistants, getAssistant, createAssistant, updateAssistant, deleteAssistant } =
     useAssistantStore();
+
+  const filteredAssistants = useMemo(() => assistants.filter((a) => !a.readonly), [assistants]);
 
   const handleSelectItem = (id: string) => {
     logger.info(`onSelectItem ${id}`);
@@ -110,7 +112,7 @@ export default function AssistantsExplorer({
           size="icon"
           onClick={(e) => {
             e.preventDefault();
-            const assistant = createAssistant(`Assistant ${assistants.length + 1}`);
+            const assistant = createAssistant(`Assistant ${filteredAssistants.length + 1}`);
             handleSelectItem(assistant.id);
           }}
         >
@@ -121,7 +123,7 @@ export default function AssistantsExplorer({
       <ExplorerList<Assistant>
         selectedId={selectedAssistantId}
         renderLeftSide={(a) => <AssistantIcon icon={a.avatar} name={a.name} className="h-6 w-6" />}
-        items={assistants}
+        items={filteredAssistants}
         renderRightSide={(a) => (
           <Pastille state={a.disabled ? BasicState.disabled : BasicState.active} />
         )}
