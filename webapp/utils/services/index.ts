@@ -88,7 +88,15 @@ export const getActiveService = (
         modelName = target.models?.[0];
         providerIdOrName = target.provider;
       }
+    } else if (assistant && conversation.services?.length === 2) {
+      const modelService = conversation.services.find(
+        (s) => s.type === AIServiceType.Model && s.providerIdOrName,
+      );
+      if (modelService?.type === AIServiceType.Model) {
+        providerIdOrName = modelService.providerIdOrName;
+      }
     }
+
     model = findModelInAll(modelName, providers, backendContext);
     provider = findProvider(providerIdOrName, providers);
   }

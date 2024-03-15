@@ -18,12 +18,12 @@ import useBackend from '@/hooks/useBackendContext';
 import { AIServiceType, Assistant, Conversation, Provider, ProviderType, Ui } from '@/types';
 import { MenuAction } from '@/types/ui';
 import { findProvider, updateProvider } from '@/utils/data/providers';
-import { getDefaultAssistantService } from '@/utils/data/assistants';
 import { useAssistantStore } from '@/stores';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
 import { Button } from '@/components/ui/button';
 import useTranslation from '@/hooks/useTranslation';
+import { getActiveService } from '@/utils/services';
 import ModelMenu from './ModelMenu';
 import AssistantMenu from './AssistantMenu';
 import AssistantTitle from './AssistantTitle';
@@ -52,15 +52,21 @@ export default function ThreadHeader({
   const { conversations, providers, setProviders } = useContext(AppContext);
   const { backendContext } = useBackend();
   const selectedItem = modelItems.find((item) => item.value === selectedModelName);
-  const selectedModel = backendContext.config.models.items.find(
-    (model) => model.name === selectedModelName,
-  );
 
   const conversation = conversations.find((c) => c.id === selectedConversationId) as Conversation;
 
   const assistant = getAssistant(selectedAssistantId) as Assistant;
-  const service =
-    conversation?.services?.[0] || assistant ? getDefaultAssistantService(assistant) : undefined;
+  const service = getActiveService(
+    conversation,
+    assistant,
+    providers,
+    backendContext,
+    selectedModelName,
+  );
+  const selectedModel = service.model;
+  // const service =
+  //   conversation?.services?.[0] || assistant ? getDefaultAssistantService(assistant) : undefined;
+
   const selectedTargetId =
     service?.type === AIServiceType.Assistant ? service.targetId : assistant?.targets?.[0].id;
   const target = assistant?.targets?.find((t) => t.id === selectedTargetId);
@@ -102,13 +108,15 @@ export default function ThreadHeader({
   }
 
   let targetState = Ui.BasicState.disabled;
+
   if (target && !target.disabled) {
     targetState = Ui.BasicState.active;
   } else if (selectedItem && selectedItem.state) {
     targetState = selectedItem.state;
   }
   let badge;
-  if (targetState) {
+
+  if (target && targetState) {
     badge = (
       <ServiceBadge
         state={targetState}
