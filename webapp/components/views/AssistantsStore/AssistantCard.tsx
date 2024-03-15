@@ -28,7 +28,6 @@ import useTranslation from '@/hooks/useTranslation';
 import { Assistant, Ui } from '@/types';
 import { useAssistantStore } from '@/stores';
 
-
 type AssistantCardProps = {
   assistant: Assistant;
 };
@@ -36,11 +35,7 @@ type AssistantCardProps = {
 function AssistantCard({ assistant }: AssistantCardProps) {
   const router = useRouter();
   const { t } = useTranslation();
-  const {
-    getAssistant,
-    createAssistant,
-    createTarget,
-  } = useAssistantStore();
+  const { getAssistant, createAssistant, createTarget } = useAssistantStore();
 
   const handleStartChat = () => {
     console.log('Start chat with assistant');
@@ -65,11 +60,13 @@ function AssistantCard({ assistant }: AssistantCardProps) {
       <CardContent className="flex grow">
         <CardDescription className="line-clamp-5">{assistant.description}</CardDescription>
       </CardContent>
-      <CardFooter className="pb-auto w-full flex justify-between">
+      <CardFooter className="pb-auto flex w-full justify-between">
         <p className="className='line-clamp-1' text-sm font-thin text-muted-foreground">
           {t('by')} {assistant.author?.name}
         </p>
-        <Button variant="outline" size="iconSm"><SquarePen className="h-4 w-4" strokeWidth={1.5} /></Button>
+        <Button variant="outline" size="iconSm">
+          <SquarePen className="h-4 w-4" strokeWidth={1.5} />
+        </Button>
       </CardFooter>
     </CardButton>
   );
