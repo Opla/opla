@@ -249,7 +249,7 @@ function PromptCommandInput({
             filteredCommands.map((item) => (
               <Button
                 variant="ghost"
-                key={item.label}
+                key={item.key || item.label}
                 onClick={(event) => {
                   event.preventDefault();
                   handleCommandSelect(item.value as string);

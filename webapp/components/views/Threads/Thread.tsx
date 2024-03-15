@@ -358,7 +358,7 @@ function Thread({
   };
 
   const handleSendMessage = async (prompt = currentPrompt) => {
-    if (conversationId === undefined) {
+    if (conversationId === undefined || !selectedConversation) {
       return;
     }
 
