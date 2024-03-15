@@ -37,6 +37,7 @@ export type Item = {
 export type MenuItemState = BasicState;
 
 export type MenuItem = {
+  key?: string;
   variant?: 'link' | 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
   label: string;
   value?: string;

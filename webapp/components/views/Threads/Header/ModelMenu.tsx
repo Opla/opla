@@ -131,7 +131,7 @@ export default function ModelMenu({
                       <CommandGroup>
                         {modelItems.map((item) => (
                           <CommandItem
-                            key={item.label}
+                            key={item.key || item.label}
                             value={item.value}
                             onSelect={() => {
                               onSelectModel(item.value as string, item.group as ProviderType);
