@@ -25,7 +25,7 @@ import {
 
 import { getConversationService } from '../data/conversations';
 import { findModel, findModelInAll } from '../data/models';
-import { findProvider } from '../data/providers';
+import { findProvider, getLocalProvider } from '../data/providers';
 import OplaProvider from '../providers/opla';
 
 export const activeServiceFrom = (service: AIService): AIImplService => ({
@@ -39,7 +39,7 @@ export const getActiveService = (
   assistant: Assistant | undefined,
   providers: Provider[],
   backendContext: OplaContext,
-  modelName: string,
+  _modelName: string,
 ): AIImplService => {
   const type = assistant ? AIServiceType.Assistant : AIServiceType.Model;
   let activeService: AIService | undefined = getConversationService(
@@ -47,6 +47,7 @@ export const getActiveService = (
     type,
     assistant?.id,
   );
+  let modelName = _modelName || backendContext.config.models.activeModel;
   let model: Model | undefined;
   let provider: Provider | undefined;
   let providerIdOrName = conversation.provider;
@@ -67,10 +68,11 @@ export const getActiveService = (
   }
   if (activeService.type === AIServiceType.Model) {
     ({ providerIdOrName } = activeService);
+    modelName = _modelName || activeService.modelId;
     provider = findProvider(providerIdOrName, providers);
-    model = findModel(modelName || activeService.modelId, provider?.models || []);
+    model = findModel(modelName, provider?.models || []);
     if (!model) {
-      model = findModelInAll(activeService.modelId, providers, backendContext);
+      model = findModelInAll(modelName, providers, backendContext);
     }
     if (!provider) {
       providerIdOrName = model?.provider || OplaProvider.name;
@@ -81,13 +83,18 @@ export const getActiveService = (
     const { assistantId, targetId } = activeService;
     if (assistantId && targetId) {
       const target = assistant?.targets?.find((t) => t.id === targetId);
+
       if (target?.models && target.models.length > 0) {
-        model = findModelInAll(target.models[0], providers, backendContext);
-        provider = findProvider(target.provider, providers);
+        modelName = target.models?.[0];
+        providerIdOrName = target.provider;
       }
     }
+    model = findModelInAll(modelName, providers, backendContext);
+    provider = findProvider(providerIdOrName, providers);
   }
-
+  if (!provider) {
+    provider = getLocalProvider(providers);
+  }
   return { ...activeService, model, provider } as AIImplService;
 };
 
