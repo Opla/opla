@@ -14,13 +14,14 @@
 import { v4 as uuid } from 'uuid';
 import { BaseIdRecord, BaseNamedRecord, Entity, Resource } from '@/types';
 
-const createBaseRecord = <T>() => {
-  const item: BaseIdRecord = {
+const createBaseRecord = <T>(template?: Partial<T>) => {
+  const item = {
     id: uuid(),
     createdAt: Date.now(),
     updatedAt: Date.now(),
-  };
-  return item as T;
+    ...template,
+  } as T;
+  return item;
 };
 
 const updateRecord = <T>(item: BaseIdRecord) =>
@@ -29,13 +30,12 @@ const updateRecord = <T>(item: BaseIdRecord) =>
     updatedAt: Date.now(),
   }) as T;
 
-const createBaseNamedRecord = <T>(name: string, template?: Partial<BaseNamedRecord>): T => {
-  const item: BaseNamedRecord = {
-    ...template,
-    ...createBaseRecord<BaseNamedRecord>(),
+const createBaseNamedRecord = <T>(name: string, template?: Partial<T>): T => {
+  const item = {
+    ...createBaseRecord<BaseNamedRecord>(template),
     name,
-  };
-  return item as T;
+  } as T;
+  return item;
 };
 
 const deepCopy = <T>(obj: T): T =>

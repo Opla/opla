@@ -71,8 +71,8 @@ const createAssistantSlice =
     deleteAssistant: (id: string) => {
       set((state: AssistantSlice) => ({ assistants: state.assistants.filter((a) => a.id !== id) }));
     },
-    createTarget: () => {
-      const newTarget: Preset = createBaseRecord<Preset>();
+    createTarget: (template?: Partial<Assistant>) => {
+      const newTarget: Preset = createBaseRecord<Preset>(template);
       return newTarget;
     },
     updateTarget: (assistant: Assistant, newTarget: Preset) => {

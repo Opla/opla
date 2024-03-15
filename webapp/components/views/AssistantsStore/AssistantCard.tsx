@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useRouter } from 'next/router';
+import { SquarePen } from 'lucide-react';
 import AvatarView from '@/components/common/AvatarView';
+import { Button } from '@/components/ui/button';
 import {
   CardButton,
   CardContent,
@@ -22,17 +25,28 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import useTranslation from '@/hooks/useTranslation';
-import { Assistant } from '@/types';
+import { Assistant, Ui } from '@/types';
+import { useAssistantStore } from '@/stores';
 
 type AssistantCardProps = {
   assistant: Assistant;
 };
 
 function AssistantCard({ assistant }: AssistantCardProps) {
+  const router = useRouter();
   const { t } = useTranslation();
+  const { getAssistant, createAssistant } = useAssistantStore();
+
+  const handleStartChat = () => {
+    let newAssistant = getAssistant(assistant.id);
+    if (!newAssistant) {
+      newAssistant = createAssistant(assistant.name, { ...assistant, readonly: true });
+    }
+    router.push(`${Ui.Page.Threads}/?assistant=${assistant.id}`);
+  };
 
   return (
-    <CardButton>
+    <CardButton onClick={handleStartChat}>
       <CardHeader className="h-[94px]">
         <div className="flex flex-row items-center gap-4">
           {assistant.avatar && <AvatarView avatar={assistant.avatar} />}
@@ -42,10 +56,13 @@ function AssistantCard({ assistant }: AssistantCardProps) {
       <CardContent className="flex grow">
         <CardDescription className="line-clamp-5">{assistant.description}</CardDescription>
       </CardContent>
-      <CardFooter className="pb-auto">
+      <CardFooter className="pb-auto flex w-full justify-between">
         <p className="className='line-clamp-1' text-sm font-thin text-muted-foreground">
           {t('by')} {assistant.author?.name}
         </p>
+        <Button variant="outline" size="iconSm">
+          <SquarePen className="h-4 w-4" strokeWidth={1.5} />
+        </Button>
       </CardFooter>
     </CardButton>
   );
