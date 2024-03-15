@@ -34,6 +34,7 @@ export const getLocalModelsAsItems = (
   return backendContext.config.models.items.map(
     (model) =>
       ({
+        key: model.id,
         label: model.title || model.name,
         value: model.name,
         group: localProvider?.name || OplaProvider.name,
@@ -56,6 +57,7 @@ export const getProviderModelsAsItems = (
       provider.models.map(
         (model) =>
           ({
+            key: model.id,
             label: model.title || model.name,
             value: model.name,
             group: provider.name,
