@@ -13,9 +13,10 @@
 // limitations under the License.
 
 import { ContextWindowPolicy, ExplorerGroup, PageSettings } from '@/types';
+import { ViewName } from '@/types/ui';
 
 export const DefaultPageSettings: PageSettings = {
-  explorerHidden: true,
+  explorerHidden: false,
   settingsHidden: true,
   explorerWidth: 20,
   settingsWidth: 20,
@@ -23,13 +24,13 @@ export const DefaultPageSettings: PageSettings = {
 
 export const DefaultThreadsExplorerGroups: ExplorerGroup[] = [
   {
-    title: 'Recent',
+    title: ViewName.Recent,
     hidden: false,
     height: 0,
     closed: false,
   },
   {
-    title: 'Archives',
+    title: ViewName.Archives,
     hidden: true,
     height: 0,
     closed: false,

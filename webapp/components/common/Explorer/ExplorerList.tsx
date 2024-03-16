@@ -77,7 +77,7 @@ export default function ExplorerList<T>({
         {editable ? (
           editableItemRendering(item)
         ) : (
-          <div className={cn('w-full', className)}>
+          <div className={cn(itemClassName, className)}>
             {renderItem?.(item as T) ?? getItemTitle?.(item as T) ?? (
               <span className="px-3 capitalize">{item.name}</span>
             )}

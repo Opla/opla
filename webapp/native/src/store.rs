@@ -123,7 +123,7 @@ pub struct PageSettings {
     pub settings_hidden: bool,
     pub explorer_width: f32,
     pub settings_width: f32,
-    pub explorer_groups: Option<Vec<String>>,
+    pub explorer_groups: Option<Vec<ExplorerGroup>>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

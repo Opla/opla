@@ -28,6 +28,7 @@ import {
   SquarePen,
 } from 'lucide-react';
 import { Conversation, Ui } from '@/types';
+import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import {
@@ -42,10 +43,11 @@ import {
   validateChaGPTConversations,
 } from '@/utils/conversations/openai';
 import { getConversationTitle, validateConversations } from '@/utils/conversations';
-import { MenuAction, ViewName } from '@/types/ui';
+import { MenuAction, Page, ViewName } from '@/types/ui';
 import { AppContext } from '@/context';
 import Explorer, { ExplorerList, ExplorerGroup } from '@/components/common/Explorer';
 import { OplaAssistant } from '@/stores/assistants';
+import { DefaultPageSettings, DefaultThreadsExplorerGroups } from '@/utils/constants';
 import { toast } from '../../../ui/Toast';
 import {
   DropdownMenu,
@@ -63,26 +65,32 @@ import EmptyView from '../../../common/EmptyView';
 import AssistantsList from './AssistantsList';
 
 type ExplorerProps = {
-  view: Ui.ViewName;
   selectedAssistantId: string | undefined;
   selectedThreadId?: string;
   threads: Conversation[];
+  archives: Conversation[];
   setThreads: (conversations: Conversation[]) => void;
   onShouldDelete: (id: string) => void;
   onSelectMenu: (menu: MenuAction, data: string) => void;
 };
 
 export default function ThreadsExplorer({
-  view,
   selectedAssistantId,
   selectedThreadId,
   threads,
+  archives,
   setThreads,
   onShouldDelete,
   onSelectMenu,
 }: ExplorerProps) {
   const router = useRouter();
   const { getConversationMessages } = useContext(AppContext);
+  const { backendContext } = useBackend();
+  const { settings } = backendContext.config;
+  const threadsSettings = settings.pages?.[Page.Threads] || {
+    ...DefaultPageSettings,
+    explorerGroups: DefaultThreadsExplorerGroups,
+  };
 
   const [editableConversation, setEditableConversation] = useState<string | undefined>(undefined);
   const { t } = useTranslation();
@@ -160,7 +168,7 @@ export default function ThreadsExplorer({
     }
   };
 
-  const handleSelectThread = (id: string) => {
+  const handleSelectThread = (id: string, view: ViewName) => {
     logger.info(`onSelectThread ${id}`);
     const route = view === ViewName.Archives ? Ui.Page.Archives : Ui.Page.Threads;
     router.push(`${route}/${id}`); // , undefined, { shallow: true });
@@ -208,6 +216,9 @@ export default function ThreadsExplorer({
       onSelect: onShouldDelete,
     },
   ];
+  const explorerGroups = threadsSettings.explorerGroups || DefaultThreadsExplorerGroups;
+  const showRecent = explorerGroups.find((g) => g.title === ViewName.Recent)?.hidden === false;
+  const showArchives = explorerGroups.find((g) => g.title === ViewName.Archives)?.hidden === false;
 
   return (
     <Explorer
@@ -257,7 +268,7 @@ export default function ThreadsExplorer({
                     <FolderClock className="mr-2 h-4 w-4" strokeWidth={1.5} />
                     {t(ViewName.Recent)}
                   </div>
-                  {view === ViewName.Recent && <Check className="h-4 w-4" strokeWidth={1.5} />}
+                  {showRecent && <Check className="h-4 w-4" strokeWidth={1.5} />}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="flex w-full items-center justify-between"
@@ -269,7 +280,7 @@ export default function ThreadsExplorer({
                     <Archive className="mr-2 h-4 w-4" strokeWidth={1.5} />
                     {t(ViewName.Archives)}
                   </div>
-                  {view === ViewName.Archives && <Check className="h-4 w-4" strokeWidth={1.5} />}
+                  {showArchives && <Check className="h-4 w-4" strokeWidth={1.5} />}
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
@@ -306,8 +317,8 @@ export default function ThreadsExplorer({
           )}
 
           <AssistantsList selectedId={selectedAssistantId} onSelect={handleSelectAssistant} />
-          {threads.length > 0 && (
-            <ExplorerGroup title={t(view)}>
+          {showRecent && threads.length > 0 && (
+            <ExplorerGroup title={t(ViewName.Recent)}>
               <ExplorerList<Conversation>
                 selectedId={selectedThreadId}
                 items={threads.sort(
@@ -322,7 +333,27 @@ export default function ThreadsExplorer({
                     {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
                   </>
                 )}
-                onSelectItem={handleSelectThread}
+                onSelectItem={(item) => handleSelectThread(item, ViewName.Recent)}
+                onChange={handleChangeConversationName}
+                menu={() => menu}
+              />
+            </ExplorerGroup>
+          )}
+          {showArchives && archives.length > 0 && (
+            <ExplorerGroup title={t(ViewName.Archives)}>
+              <ExplorerList<Conversation>
+                selectedId={selectedThreadId}
+                items={archives.sort(
+                  (c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt,
+                )}
+                getItemTitle={(c) => `${getConversationTitle(c, t)}${c.temp ? '...' : ''}`}
+                renderItem={(c) => (
+                  <>
+                    <span>{getConversationTitle(c, t).replaceAll(' ', '\u00a0')}</span>
+                    {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
+                  </>
+                )}
+                onSelectItem={(item) => handleSelectThread(item, ViewName.Archives)}
                 onChange={handleChangeConversationName}
                 menu={() => menu}
               />

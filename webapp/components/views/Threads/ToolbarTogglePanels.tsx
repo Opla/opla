@@ -41,7 +41,7 @@ export default function Header({
       >
         {displayExplorer ? <PanelLeftClose strokeWidth={1.0} /> : <PanelLeft strokeWidth={1.0} />}
       </Button>
-      {disabledSettings !== false && (
+      {disabledSettings !== true && (
         <Button
           aria-label="Toggle thread settings"
           variant="ghost"
