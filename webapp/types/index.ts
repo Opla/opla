@@ -371,12 +371,20 @@ export type OplaServer = {
   stderr?: string[];
 };
 
+export type ExplorerGroup = {
+  title: string;
+  hidden: boolean;
+  height: number;
+  closed: boolean;
+};
+
 export type PageSettings = {
   selectedId?: string;
   explorerHidden: boolean;
   settingsHidden: boolean;
   explorerWidth: number;
   settingsWidth: number;
+  explorerGroups?: ExplorerGroup[];
 };
 
 export type Settings = {

@@ -109,11 +109,21 @@ pub struct WindowSettings {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ExplorerGroup {
+    pub title: String,
+    pub hidden: bool,
+    pub height: f32,
+    pub closed: bool,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PageSettings {
+    pub selected_id: Option<String>,
     pub explorer_hidden: bool,
     pub settings_hidden: bool,
     pub explorer_width: f32,
     pub settings_width: f32,
+    pub explorer_groups: Option<Vec<String>>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -210,5 +220,4 @@ impl Store {
                 })
         )
     }
-
 }
