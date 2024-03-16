@@ -20,7 +20,7 @@ import { useSearchParams } from 'next/navigation';
 import { v4 as uuid } from 'uuid';
 import useBackend from '@/hooks/useBackendContext';
 import { Conversation, PageSettings } from '@/types';
-import { DefaultPageSettings } from '@/utils/constants';
+import { DefaultPageSettings, DefaultThreadsExplorerGroups } from '@/utils/constants';
 import logger from '@/utils/logger';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import { getConversation } from '@/utils/data/conversations';
@@ -80,10 +80,14 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
 
   const { showModal } = useContext(ModalsContext);
 
+  const { settings } = backendContext.config;
   const selectedPage = getSelectedPage(selectedThreadId, view);
+  const threadsSettings = settings.pages?.[Page.Threads] || {
+    ...DefaultPageSettings,
+    explorerGroups: DefaultThreadsExplorerGroups,
+  };
 
   const saveSettings = (currentPage = selectedPage, partialSettings?: Partial<PageSettings>) => {
-    const { settings } = backendContext.config;
     logger.info('saveSettings', currentPage, partialSettings, backendContext.config);
     if (settings.selectedPage) {
       const pages = settings.pages || {};
@@ -109,7 +113,6 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
   useShortcuts(ShortcutIds.TOGGLE_FULLSCREEN, (event) => {
     event.preventDefault();
     logger.info('toggle fullscreen');
-    const { settings } = backendContext.config;
     const pages = settings.pages || {};
     const page = pages[selectedPage] || DefaultPageSettings;
     if (page.explorerHidden && page.settingsHidden) {
@@ -162,7 +165,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
   };
 
   const handleSelectMenu = async (menu: MenuAction, data: string) => {
-    logger.info('onSelectMenu', menu);
+    logger.info('onSelectMenu', menu, data);
     if (menu === MenuAction.DeleteConversation) {
       handleShouldDelete(data);
     } else if (menu === MenuAction.ArchiveConversation) {
@@ -179,11 +182,20 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
       updateConversations([...conversations, archive as Conversation]);
       updateConversationMessages(archive.id, messages || []);
     } else if (menu === MenuAction.ChangeView) {
-      if (data === ViewName.Recent) {
+      /* if (data === ViewName.Recent) {
         router.replace(Page.Threads);
+
       } else {
         router.replace(Page.Archives);
-      }
+      } */
+      let explorerGroups = threadsSettings.explorerGroups || DefaultThreadsExplorerGroups;
+      explorerGroups =
+        explorerGroups.map((g) => (g.title === data ? { ...g, hidden: !g.hidden } : g)) || [];
+      const newThreadsSettings = { ...threadsSettings, explorerGroups };
+      setSettings({
+        ...settings,
+        pages: { ...settings.pages, [Page.Threads]: newThreadsSettings },
+      });
     }
   };
 
@@ -193,28 +205,39 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     defaultSettings.pages?.[Page.Threads] ||
     DefaultPageSettings;
 
-  logger.info('render Threads', selectedThreadId);
+  logger.info(
+    'render Archives',
+    selectedThreadId,
+    view,
+    assistantId === undefined || view === ViewName.Archives,
+  );
+
+  const rightToolbar = (
+    <ToolbarTogglePanels
+      displayExplorer={!pageSettings.explorerHidden}
+      displaySettings={!pageSettings.settingsHidden}
+      onChangeDisplayExplorer={handleChangeDisplayExplorer}
+      onChangeDisplaySettings={handleChangeDisplaySettings}
+      disabledSettings={assistantId !== undefined || view === ViewName.Archives}
+    />
+  );
   return (
-    <Threads selectedThreadId={selectedThreadId} view={view}>
+    <Threads selectedThreadId={selectedThreadId} view={view} onSelectMenu={handleSelectMenu}>
       <ResizablePanel>
         {view !== ViewName.Archives && (
           <Thread
             conversationId={selectedThreadId}
-            rightToolbar={
-              <ToolbarTogglePanels
-                displayExplorer={!pageSettings.explorerHidden}
-                displaySettings={!pageSettings.settingsHidden}
-                onChangeDisplayExplorer={handleChangeDisplayExplorer}
-                onChangeDisplaySettings={handleChangeDisplaySettings}
-                disabledSettings={assistantId === undefined}
-              />
-            }
+            rightToolbar={rightToolbar}
             onSelectMenu={handleSelectMenu}
             onError={handleError}
           />
         )}
         {view === ViewName.Archives && (
-          <Archive archiveId={selectedThreadId} onSelectMenu={handleSelectMenu} />
+          <Archive
+            archiveId={selectedThreadId}
+            onSelectMenu={handleSelectMenu}
+            rightToolbar={rightToolbar}
+          />
         )}
       </ResizablePanel>
       <ResizableHandle />

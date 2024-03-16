@@ -33,24 +33,27 @@ import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
 import { MenuAction } from '@/types/ui';
 import { AvatarRef } from '@/types';
+import ContentView from '@/components/common/ContentView';
 import { Button } from '../../ui/button';
 import { ConversationList } from './Conversation';
 
 function Archive({
   archiveId,
+  rightToolbar,
   onSelectMenu,
 }: {
   archiveId?: string;
+  rightToolbar: React.ReactNode;
   onSelectMenu: (menu: MenuAction, data: string) => void;
 }) {
   const { archives } = useContext(AppContext);
-  const selectedArchive = archives.find((c) => c.id === archiveId);
+  const archive = archives.find((c) => c.id === archiveId);
 
   const { t } = useTranslation();
 
   const messages = useMemo(
-    () => selectedArchive?.messages?.filter((m) => !(m.author.role === 'system')) || [],
-    [selectedArchive?.messages],
+    () => archive?.messages?.filter((m) => !(m.author.role === 'system')) || [],
+    [archive?.messages],
   );
   const avatars = useMemo(
     () =>
@@ -61,9 +64,14 @@ function Archive({
   );
 
   return (
-    <div className="flex h-full flex-col bg-secondary/20">
-      <div className="grow-0">
-        <div className="flex w-full flex-row items-center justify-end gap-4 p-3 text-xs ">
+    <ContentView
+      header={
+        <span>
+          {t('Archives')} / {archive?.name}
+        </span>
+      }
+      toolbar={
+        <div className="flex w-full flex-row items-center justify-end gap-4 text-xs ">
           <Button
             variant="ghost"
             size="sm"
@@ -72,8 +80,10 @@ function Archive({
           >
             {t('Unarchive')}
           </Button>
+          {rightToolbar}
         </div>
-      </div>
+      }
+    >
       <ConversationList
         conversationId={archiveId as string}
         scrollPosition={undefined}
@@ -86,7 +96,7 @@ function Archive({
         onDeleteAssets={() => {}}
         onChangeMessageContent={() => {}}
       />
-    </div>
+    </ContentView>
   );
 }
 

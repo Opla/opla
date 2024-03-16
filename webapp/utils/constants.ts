@@ -12,14 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ContextWindowPolicy, PageSettings } from '@/types';
+import { ContextWindowPolicy, ExplorerGroup, PageSettings } from '@/types';
+import { ViewName } from '@/types/ui';
 
 export const DefaultPageSettings: PageSettings = {
-  explorerHidden: true,
+  explorerHidden: false,
   settingsHidden: true,
   explorerWidth: 20,
   settingsWidth: 20,
 };
+
+export const DefaultThreadsExplorerGroups: ExplorerGroup[] = [
+  {
+    title: ViewName.Recent,
+    hidden: false,
+    height: 0,
+    closed: false,
+  },
+  {
+    title: ViewName.Archives,
+    hidden: true,
+    height: 0,
+    closed: false,
+  },
+];
 
 export const AppName = 'Opla';
 export const AppVersion = '0.1.0';
