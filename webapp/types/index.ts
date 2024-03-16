@@ -434,6 +434,7 @@ export type Assistant = Agent & {
   author?: Entity;
   promptTemplates?: PromptTemplate[];
   featured?: boolean;
+  hidden?: boolean;
 };
 
 export type Store = {

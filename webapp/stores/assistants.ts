@@ -52,7 +52,7 @@ const createAssistantSlice =
   (set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
-    getAllAssistants: () => [OplaAssistant, ...get().assistants],
+    getAllAssistants: () => [OplaAssistant, ...get().assistants.filter((a) => !a.hidden)],
     getAssistant: (id: string | undefined) =>
       OplaAssistant.id === id ? OplaAssistant : get().assistants.find((a) => a.id === id),
     createAssistant: (name: string, template?: Partial<Assistant>) => {

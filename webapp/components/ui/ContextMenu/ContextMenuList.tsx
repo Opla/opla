@@ -25,7 +25,7 @@ function ContextMenuList({ menu, data }: { menu: Ui.MenuItem[]; data: string }) 
           key={item.label}
           className="cursor-pointer"
           onSelect={() => {
-            if (item.onSelect) item.onSelect(data);
+            item.onSelect?.(data);
           }}
           inset
         >

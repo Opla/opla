@@ -53,7 +53,9 @@ export default function ThreadHeader({
   const { backendContext } = useBackend();
   const selectedItem = modelItems.find((item) => item.value === selectedModelName);
 
-  const conversation = conversations.find((c) => c.id === selectedConversationId) as Conversation;
+  const conversation = conversations.find((c) => c.id === selectedConversationId) as
+    | Conversation
+    | undefined;
 
   const assistant = getAssistant(selectedAssistantId) as Assistant;
   const service = getActiveService(

@@ -35,22 +35,20 @@ export const activeServiceFrom = (service: AIService): AIImplService => ({
 });
 
 export const getActiveService = (
-  conversation: Conversation,
+  conversation: Conversation | undefined,
   assistant: Assistant | undefined,
   providers: Provider[],
   backendContext: OplaContext,
   _modelName: string,
 ): AIImplService => {
   const type = assistant ? AIServiceType.Assistant : AIServiceType.Model;
-  let activeService: AIService | undefined = getConversationService(
-    conversation,
-    type,
-    assistant?.id,
-  );
+  let activeService: AIService | undefined = conversation
+    ? getConversationService(conversation, type, assistant?.id)
+    : undefined;
   let modelName = _modelName || backendContext.config.models.activeModel;
   let model: Model | undefined;
   let provider: Provider | undefined;
-  let providerIdOrName = conversation.provider;
+  let providerIdOrName = conversation?.provider;
   if (!activeService) {
     if (assistant) {
       activeService = activeServiceFrom({
@@ -88,7 +86,7 @@ export const getActiveService = (
         modelName = target.models?.[0];
         providerIdOrName = target.provider;
       }
-    } else if (assistant && conversation.services?.length === 2) {
+    } else if (assistant && conversation?.services?.length === 2) {
       const modelService = conversation.services.find(
         (s) => s.type === AIServiceType.Model && s.providerIdOrName,
       );
