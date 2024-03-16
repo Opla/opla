@@ -17,7 +17,7 @@ import useTranslation from '@/hooks/useTranslation';
 import AvatarView from '@/components/common/AvatarView';
 
 type AssistantTitleProps = {
-  assistant: Assistant;
+  assistant: Assistant | undefined;
 };
 
 export default function AssistantTitle({ assistant }: AssistantTitleProps) {
@@ -25,7 +25,7 @@ export default function AssistantTitle({ assistant }: AssistantTitleProps) {
 
   return (
     <div className="flex grow items-center capitalize text-foreground">
-      <AvatarView avatar={assistant.avatar} className="mr-2 h-4 w-4" />
+      {assistant && <AvatarView avatar={assistant.avatar} className="mr-2 h-4 w-4" />}
       <span>{assistant?.name ?? t('Assistant not found')}</span>{' '}
     </div>
   );

@@ -57,7 +57,7 @@ import ModelInfos from '../../../common/ModelInfos';
 type AssistantMenuProps = {
   assistant: Assistant;
   target: Preset;
-  conversation: Conversation;
+  conversation: Conversation | undefined;
   onSelectMenu: (menu: MenuAction, data: string) => void;
 };
 
@@ -96,6 +96,9 @@ export default function AssistantMenu({
   };
 
   const handleSelectAssistantTarget = async (item: Ui.MenuItem) => {
+    if (!conversation) {
+      return;
+    }
     const targetId = item.value as string;
     const newConversation: Conversation = addConversationService(conversation, {
       ...service,

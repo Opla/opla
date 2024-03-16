@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useState } from 'react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { SquarePen, Store } from 'lucide-react';
 import AvatarView from '@/components/common/AvatarView';
@@ -20,7 +22,7 @@ import Opla from '@/components/icons/Opla';
 import { Button } from '@/components/ui/button';
 import useTranslation from '@/hooks/useTranslation';
 import { useAssistantStore } from '@/stores';
-import { Assistant } from '@/types';
+import { Assistant, Ui } from '@/types';
 import { OplaAssistant } from '@/stores/assistants';
 
 type AssistantsListProps = {
@@ -29,9 +31,51 @@ type AssistantsListProps = {
 };
 
 export default function AssistantsList({ selectedId, onSelect }: AssistantsListProps) {
+  const router = useRouter();
   const { t } = useTranslation();
-  const { getAllAssistants } = useAssistantStore();
-  const assistants = getAllAssistants();
+  const { getAllAssistants, updateAssistant } = useAssistantStore();
+  const [assistants, setAssistants] = useState<Assistant[]>(getAllAssistants());
+
+  const handleEditAssistant = (assistantId: string) => {
+    const route = Ui.Page.Assistants;
+    router.push(`${route}/${assistantId}`);
+  };
+
+  const handleHideAssistant = (assistantId: string) => {
+    const assistant = assistants.find((a) => a.id === assistantId) as Assistant;
+    updateAssistant({ ...assistant, hidden: true });
+    const newAssistants = getAllAssistants();
+    setAssistants(newAssistants);
+  };
+
+  const menuMyAssistants: Ui.MenuItem[] = [
+    {
+      label: t('Edit'),
+      onSelect: handleEditAssistant,
+    },
+    {
+      label: t('Hide'),
+      onSelect: handleHideAssistant,
+    },
+  ];
+
+  const menu: Ui.MenuItem[] = [
+    {
+      label: t('Hide'),
+      onSelect: handleHideAssistant,
+    },
+  ];
+
+  const getMenu = (assistant: Assistant) => {
+    if (assistant.id === OplaAssistant.id) {
+      return [];
+    }
+    if (!assistant.readonly) {
+      return menuMyAssistants;
+    }
+    return menu;
+  };
+
   return (
     <ExplorerGroup
       title="Assistants"
@@ -65,6 +109,7 @@ export default function AssistantsList({ selectedId, onSelect }: AssistantsListP
           )
         }
         onSelectItem={onSelect}
+        menu={(assistant) => getMenu(assistant)}
       />
     </ExplorerGroup>
   );
