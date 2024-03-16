@@ -65,7 +65,11 @@ function Archive({
 
   return (
     <ContentView
-      header={<span>{t('Archives')} / {archive?.name}</span>}
+      header={
+        <span>
+          {t('Archives')} / {archive?.name}
+        </span>
+      }
       toolbar={
         <div className="flex w-full flex-row items-center justify-end gap-4 text-xs ">
           <Button
