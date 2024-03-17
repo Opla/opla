@@ -22,17 +22,32 @@ type ExplorerGroupProps = {
   children: React.ReactNode;
   className?: string;
   toolbar?: React.ReactNode;
+  closed?: boolean;
+  onToggle?: () => void;
 };
 
-function ExplorerGroup({ title, children, toolbar, className }: ExplorerGroupProps) {
+function ExplorerGroup({
+  title,
+  children,
+  toolbar,
+  className,
+  closed = false,
+  onToggle,
+}: ExplorerGroupProps) {
   const { t } = useTranslation();
 
   return (
     <div className={cn('group flex w-full flex-col', className)}>
       {(title || toolbar) && (
         <div className="flex w-full items-center pl-2">
-          <Button variant="ghost" size="iconSm">
-            <ChevronDown className="h-4 w-4" strokeWidth={1.5} />
+          <Button variant="ghost" size="iconSm" onClick={onToggle}>
+            <ChevronDown
+              className={cn(
+                'h-4 w-4 transform transition-all ease-in-out',
+                closed ? 'rotate-180' : '',
+              )}
+              strokeWidth={1.5}
+            />
           </Button>
           <div className="flex w-full flex-grow items-center justify-between gap-1 overflow-hidden p-0 pl-2">
             {title && (
@@ -44,7 +59,14 @@ function ExplorerGroup({ title, children, toolbar, className }: ExplorerGroupPro
           </div>
         </div>
       )}
-      {children}
+      <div
+        className={cn(
+          'transform overflow-hidden transition-all ease-in-out',
+          closed ? 'max-h-0' : 'max-h-screen',
+        )}
+      >
+        {children}
+      </div>
     </div>
   );
 }

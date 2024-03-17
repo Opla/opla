@@ -217,8 +217,12 @@ export default function ThreadsExplorer({
     },
   ];
   const explorerGroups = threadsSettings.explorerGroups || DefaultThreadsExplorerGroups;
-  const showRecent = explorerGroups.find((g) => g.title === ViewName.Recent)?.hidden === false;
-  const showArchives = explorerGroups.find((g) => g.title === ViewName.Archives)?.hidden === false;
+  const recentGroup = explorerGroups.find((g) => g.title === ViewName.Recent);
+  const archivesGroup = explorerGroups.find((g) => g.title === ViewName.Archives);
+  const showRecent = recentGroup?.hidden === false;
+  const showArchives = archivesGroup?.hidden === false;
+  const closedRecent = recentGroup?.closed === true;
+  const closedArchives = archivesGroup?.closed === true;
 
   return (
     <Explorer
@@ -318,7 +322,13 @@ export default function ThreadsExplorer({
 
           <AssistantsList selectedId={selectedAssistantId} onSelect={handleSelectAssistant} />
           {showRecent && threads.length > 0 && (
-            <ExplorerGroup title={t(ViewName.Recent)}>
+            <ExplorerGroup
+              title={t(ViewName.Recent)}
+              closed={closedRecent}
+              onToggle={() => {
+                onSelectMenu(MenuAction.ToggleGroup, ViewName.Recent);
+              }}
+            >
               <ExplorerList<Conversation>
                 selectedId={selectedThreadId}
                 items={threads.sort(
@@ -340,7 +350,13 @@ export default function ThreadsExplorer({
             </ExplorerGroup>
           )}
           {showArchives && archives.length > 0 && (
-            <ExplorerGroup title={t(ViewName.Archives)}>
+            <ExplorerGroup
+              title={t(ViewName.Archives)}
+              closed={closedArchives}
+              onToggle={() => {
+                onSelectMenu(MenuAction.ToggleGroup, ViewName.Archives);
+              }}
+            >
               <ExplorerList<Conversation>
                 selectedId={selectedThreadId}
                 items={archives.sort(
