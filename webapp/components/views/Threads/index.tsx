@@ -182,15 +182,18 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
       updateConversations([...conversations, archive as Conversation]);
       updateConversationMessages(archive.id, messages || []);
     } else if (menu === MenuAction.ChangeView) {
-      /* if (data === ViewName.Recent) {
-        router.replace(Page.Threads);
-
-      } else {
-        router.replace(Page.Archives);
-      } */
       let explorerGroups = threadsSettings.explorerGroups || DefaultThreadsExplorerGroups;
       explorerGroups =
         explorerGroups.map((g) => (g.title === data ? { ...g, hidden: !g.hidden } : g)) || [];
+      const newThreadsSettings = { ...threadsSettings, explorerGroups };
+      setSettings({
+        ...settings,
+        pages: { ...settings.pages, [Page.Threads]: newThreadsSettings },
+      });
+    } else if (menu === MenuAction.ToggleGroup) {
+      let explorerGroups = threadsSettings.explorerGroups || DefaultThreadsExplorerGroups;
+      explorerGroups =
+        explorerGroups.map((g) => (g.title === data ? { ...g, closed: !g.closed } : g)) || [];
       const newThreadsSettings = { ...threadsSettings, explorerGroups };
       setSettings({
         ...settings,

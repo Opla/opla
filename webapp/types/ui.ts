@@ -54,6 +54,7 @@ export enum MenuAction {
   UnarchiveConversation = 'unarchive-conversation',
   DeleteConversation = 'delete-conversation',
   ChangeView = 'change-view',
+  ToggleGroup = 'toggle-group',
 }
 
 export enum ViewName {
