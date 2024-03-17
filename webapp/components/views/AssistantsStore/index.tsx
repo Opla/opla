@@ -12,18 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ResizablePanel } from '@/components/ui/resizable';
 import { Search } from 'lucide-react';
 import { Assistant } from '@/types';
 import { getAssistantsCollection } from '@/utils/backend/commands';
 import useTranslation from '@/hooks/useTranslation';
+import { getEntityName } from '@/utils/data';
 import Threads from '../Threads/Threads';
 import { InputIcon } from '../../ui/input-icon';
 import AssistantCard from './AssistantCard';
 
+const search = (query: string, assistant: Assistant) => {
+  const q = query.toLowerCase();
+  return (
+    assistant.name.toLowerCase().indexOf(q) > -1 ||
+    (assistant.author && getEntityName(assistant.author).toLowerCase().indexOf(q) > -1) ||
+    (assistant.description && assistant.description.toLowerCase().indexOf(q) > -1) ||
+    (assistant.tags && assistant.tags.some((keyword) => keyword.toLowerCase().indexOf(q) > -1))
+  );
+};
+
 function AssistantsStore() {
   const [collection, setCollection] = useState<Assistant[]>([]);
+  const [query, setQuery] = useState<string>('');
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -36,6 +48,10 @@ function AssistantsStore() {
     getCollection();
   }, []);
 
+  const filteredCollection = useMemo(
+    () => collection.filter((assistant) => search(query, assistant)),
+    [collection, query],
+  );
   return (
     <Threads onSelectMenu={() => {}}>
       <ResizablePanel>
@@ -50,10 +66,12 @@ function AssistantsStore() {
             startIcon={Search}
             className=""
             placeholder="Search assistants, GPTs, agents by name, description or keywords..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
           />
         </div>
         <div className="grid grid-cols-4 gap-4 px-40">
-          {collection.map((assistant) => (
+          {filteredCollection.map((assistant) => (
             <AssistantCard key={assistant.id} assistant={assistant} />
           ))}
         </div>
