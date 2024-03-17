@@ -322,9 +322,13 @@ export default function ThreadsExplorer({
 
           <AssistantsList selectedId={selectedAssistantId} onSelect={handleSelectAssistant} />
           {showRecent && threads.length > 0 && (
-            <ExplorerGroup title={t(ViewName.Recent)} closed={closedRecent} onToggle={() => {
-              onSelectMenu(MenuAction.ToggleGroup, ViewName.Recent);
-            }}>
+            <ExplorerGroup
+              title={t(ViewName.Recent)}
+              closed={closedRecent}
+              onToggle={() => {
+                onSelectMenu(MenuAction.ToggleGroup, ViewName.Recent);
+              }}
+            >
               <ExplorerList<Conversation>
                 selectedId={selectedThreadId}
                 items={threads.sort(
@@ -346,9 +350,13 @@ export default function ThreadsExplorer({
             </ExplorerGroup>
           )}
           {showArchives && archives.length > 0 && (
-            <ExplorerGroup title={t(ViewName.Archives)} closed={closedArchives} onToggle={() => {
-              onSelectMenu(MenuAction.ToggleGroup, ViewName.Archives);
-            }}>
+            <ExplorerGroup
+              title={t(ViewName.Archives)}
+              closed={closedArchives}
+              onToggle={() => {
+                onSelectMenu(MenuAction.ToggleGroup, ViewName.Archives);
+              }}
+            >
               <ExplorerList<Conversation>
                 selectedId={selectedThreadId}
                 items={archives.sort(
