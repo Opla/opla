@@ -443,6 +443,7 @@ export type Assistant = Agent & {
   promptTemplates?: PromptTemplate[];
   featured?: boolean;
   hidden?: boolean;
+  tags?: string[];
 };
 
 export type Store = {
