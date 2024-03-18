@@ -96,7 +96,10 @@ export const getActiveService = (
     }
 
     model = findModelInAll(modelName, providers, backendContext);
-    provider = findProvider(providerIdOrName, providers);
+    provider = findProvider(model?.provider || providerIdOrName, providers);
+    if (provider?.models?.find((m) => m.id === model?.id) === undefined) {
+      provider = undefined;
+    }
   }
   if (!provider) {
     provider = getLocalProvider(providers);

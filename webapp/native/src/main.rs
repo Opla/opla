@@ -24,6 +24,7 @@ pub mod data;
 pub mod llm;
 pub mod error;
 
+use tokenizer::encode;
 use tokio::sync::Mutex;
 use std::sync::Arc;
 
@@ -56,7 +57,7 @@ pub fn get_opla_provider(server: ServerConfiguration) -> Provider {
         key: None,
         doc_url: Some("https://opla.ai/docs".to_string()),
         metadata: Option::Some(ProviderMetadata {
-            server: server.clone(),
+            server: Some(server.clone()),
         }),
     }
 }
@@ -530,17 +531,31 @@ async fn llm_call_tokenize<R: Runtime>(
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
     model: String,
-    provider: String,
+    provider: Provider,
     text: String
 ) -> Result<LlmTokenizeResponse, String> {
-    if provider == "opla" {
+    let llm_provider_type = provider.r#type;
+    if llm_provider_type == "opla" {
         let context_server = Arc::clone(&context.server);
         let mut server = context_server.lock().await;
         let response = server.call_tokenize::<R>(&model, text).await.map_err(|err| err.to_string())?;
         return Ok(response);
 
+    } else if llm_provider_type == "openai" {
+        let encoded = match  encode(text, model, None) {
+            Ok(e) => { e }
+            Err(err) => {
+                return Err(format!("LLM encode error: {:?}", err));
+            }
+        };
+        let tokens: Vec<u64> = encoded.iter().map(|&x| x as u64).collect();
+        println!("Tokens: {:?}", tokens);
+        let response = LlmTokenizeResponse {
+            tokens,
+        };
+        return Ok(response);
     }
-    return Err(format!("LLM provider not found: {:?}", provider));
+    return Err(format!("LLM provider not found: {:?}", llm_provider_type));
 }
 async fn start_server<R: Runtime>(
     app: tauri::AppHandle<R>,

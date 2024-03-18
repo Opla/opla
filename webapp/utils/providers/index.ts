@@ -38,7 +38,7 @@ export const tokenize = async (
   if (model && provider) {
     response = await invokeTauri<LlmTokenizeResponse>('llm_call_tokenize', {
       model: model.name,
-      provider: provider.name,
+      provider: mapKeys(provider, toSnakeCase),
       text,
     });
   } else {

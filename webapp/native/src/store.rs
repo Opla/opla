@@ -86,7 +86,7 @@ impl fmt::Display for ProviderType {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ProviderMetadata {
-    pub server: ServerConfiguration,
+    pub server: Option<ServerConfiguration>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

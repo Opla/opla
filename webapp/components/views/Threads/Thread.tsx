@@ -24,6 +24,7 @@ import {
   Message,
   MessageStatus,
   AvatarRef,
+  AIImplService,
 } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
@@ -39,7 +40,7 @@ import {
   getDefaultConversationName,
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
-import { completion } from '@/utils/providers';
+import { completion, tokenize } from '@/utils/providers';
 import { getModelsAsItems } from '@/utils/data/models';
 import { getActiveService, getAssistantId } from '@/utils/services';
 import { toast } from '@/components/ui/Toast';
@@ -56,13 +57,18 @@ import {
   getMessageRawContentAsString,
   getMessageContentAsString,
 } from '@/utils/data/messages';
-import { getCommandManager, preProcessingCommands } from '@/utils/commands';
+import { getCommandManager, getMentionCommands, preProcessingCommands } from '@/utils/commands';
 import ContentView from '@/components/common/ContentView';
 import { useAssistantStore } from '@/stores';
 import { getDefaultAssistantService } from '@/utils/data/assistants';
 import PromptArea from './Prompt';
 import { ConversationPanel } from './Conversation';
 import ThreadHeader from './Header';
+
+type Usage = {
+  tokenCount: number;
+  activeService?: AIImplService;
+};
 
 function Thread({
   conversationId: _conversationId,
@@ -92,6 +98,7 @@ function Thread({
   const { backendContext, setActiveModel } = useBackend();
   const searchParams = useSearchParams();
   const [service, setService] = useState<AIService | undefined>(undefined);
+  const [usage, updateUsage] = useState<Usage | undefined>({ tokenCount: 0 });
   const activeModel = getServiceModelId(service) || backendContext.config.models.activeModel;
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
   const conversationId = _conversationId || tempConversationId;
@@ -212,6 +219,21 @@ function Thread({
     () => toPrompt(selectedConversation?.currentPrompt || '', tokenValidator),
     [selectedConversation?.currentPrompt, tokenValidator],
   );
+
+  useEffect(() => {
+    const afunc = async () => {
+    if (selectedConversation?.currentPrompt || changedPrompt) {
+      const modelsCommands = getMentionCommands(changedPrompt || currentPrompt, commandManager);
+      const selectedModelNameOrId = modelsCommands[0]?.key || getConversationModelId(selectedConversation, assistant) || activeModel;
+      const activeService = getActiveService(selectedConversation, assistant, providers, backendContext, selectedModelNameOrId);
+      console.log("tokenize activeService", modelsCommands[0], activeService, selectedModelNameOrId)
+      const response = await tokenize(activeService, changedPrompt?.text || currentPrompt.text);
+      console.log("tokenize", response, response.tokens, activeService)
+      updateUsage({ tokenCount: response.tokens.length, activeService });
+    }
+  };
+    afunc();
+  }, [changedPrompt, currentPrompt, selectedConversation, commandManager, assistant, providers, backendContext, activeModel]);
 
   const parseAndValidatePrompt = (text: string, caretStartIndex = 0) =>
     parsePrompt({ text, caretStartIndex }, tokenValidator);
@@ -639,6 +661,7 @@ function Thread({
           onSendMessage={handleSendMessage}
           onUpdatePrompt={handleChangePrompt}
           tokenValidate={tokenValidator}
+          usage={usage}
         />
       )}
     </ContentView>

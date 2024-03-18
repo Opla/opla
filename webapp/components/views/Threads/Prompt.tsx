@@ -30,6 +30,7 @@ import {
 } from '@/utils/data/conversations';
 import { createMessage, mergeMessages } from '@/utils/data/messages';
 import { openFileDialog } from '@/utils/backend/tauri';
+import { AIImplService } from '@/types';
 import { Button } from '../../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
 import { ShortcutBadge } from '../../common/ShortCut';
@@ -45,6 +46,7 @@ export type PromptProps = {
   onUpdatePrompt: (prompt: ParsedPrompt) => void;
   onSendMessage: (prompt?: ParsedPrompt) => void;
   tokenValidate: TokenValidator;
+  usage: { tokenCount: number, activeService?: AIImplService } | undefined;
 };
 
 export default function Prompt({
@@ -57,6 +59,7 @@ export default function Prompt({
   onSendMessage,
   tokenValidate,
   isLoading,
+  usage,
 }: PromptProps) {
   const { t } = useTranslation();
 
@@ -136,10 +139,10 @@ export default function Prompt({
             <span className="text-sm text-red-500">{errorMessage}</span>
           </div>
         )}
-        {prompt && (
+        {(usage && usage.activeService && usage.activeService.model) && (
           <div className="m-1 flex w-full flex-row-reverse items-center gap-2 pr-4">
             <span className="text-xs text-muted-foreground">
-              {0} {t('tokens')}
+              {usage.activeService.model.title || usage.activeService.model.name} / {usage.tokenCount} {t('tokens')}
             </span>
           </div>
         )}
