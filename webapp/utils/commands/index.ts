@@ -164,7 +164,7 @@ export const preProcessingCommands = async (
   let updatedConversation = conversation as Conversation;
   let updatedConversations = conversations;
   if (action) {
-    const command = commandManager.getCommand(action.value, action.type);
+    const command = commandManager.getCommand(action.value, action.type as unknown as CommandType);
     if (command) {
       command.execute?.(action.value);
       if (command.label === 'System') {
@@ -228,4 +228,16 @@ export const preProcessingCommands = async (
     return { type: 'error', error: context.t('This model is not available.') };
   }
   return { type: 'ok', modelName };
+};
+
+export const getMentionCommands = (
+  prompt: ParsedPrompt,
+  commandManager: CommandManager,
+): Command[] => {
+  const mentions = prompt.tokens.filter((to) => to.type === PromptTokenType.Mention);
+  const modelCommands = mentions
+    .map((m) => commandManager.getCommand(m.value, CommandType.Mention))
+    .filter((m) => m !== undefined) as Command[];
+
+  return modelCommands;
 };

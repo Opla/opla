@@ -30,7 +30,7 @@ export type Command = Ui.MenuItem & {
 
 export type CommandManager = {
   commands: Command[];
-  getCommand: (value: string, type: string) => Command | undefined;
+  getCommand: (value: string, type: CommandType) => Command | undefined;
   filterCommands: (commandValue: string) => Command[];
   findCommandParameters: (prompt: ParsedPrompt) => Record<string, PresetParameter>;
 };

@@ -14,7 +14,7 @@
 
 import logger from '../logger';
 import { ParsedPrompt, PromptToken, PromptTokenState, PromptTokenType } from '.';
-import { CommandManager } from '../commands/types';
+import { CommandManager, CommandType } from '../commands/types';
 
 const validator = (
   commandManager: CommandManager,
@@ -35,7 +35,7 @@ const validator = (
   const isAtCaret = token.value.length + token.index === parsedPrompt.caretPosition;
   const isEditing = type !== PromptTokenType.Text && isAtCaret;
   let blockOtherCommands: boolean | undefined;
-  const command = commandManager.getCommand(token.value, type);
+  const command = commandManager.getCommand(token.value, type as unknown as CommandType);
   if (type === PromptTokenType.Mention) {
     if (isEditing) {
       state = PromptTokenState.Editing;
@@ -78,7 +78,10 @@ const validator = (
       blockOtherCommands = command?.validate?.();
     }
   } else if (type === PromptTokenType.Text && _previousToken?.type === PromptTokenType.Hashtag) {
-    const previousCommand = commandManager.getCommand(_previousToken.value, _previousToken.type);
+    const previousCommand = commandManager.getCommand(
+      _previousToken.value,
+      _previousToken.type as unknown as CommandType,
+    );
     if (previousCommand && previousCommand.group !== 'parameters-boolean') {
       type = PromptTokenType.ParameterValue;
       previousToken = { ..._previousToken, state: PromptTokenState.Ok };

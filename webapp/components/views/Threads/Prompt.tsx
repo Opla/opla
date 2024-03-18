@@ -30,6 +30,7 @@ import {
 } from '@/utils/data/conversations';
 import { createMessage, mergeMessages } from '@/utils/data/messages';
 import { openFileDialog } from '@/utils/backend/tauri';
+import { AIImplService } from '@/types';
 import { Button } from '../../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
 import { ShortcutBadge } from '../../common/ShortCut';
@@ -45,6 +46,7 @@ export type PromptProps = {
   onUpdatePrompt: (prompt: ParsedPrompt) => void;
   onSendMessage: (prompt?: ParsedPrompt) => void;
   tokenValidate: TokenValidator;
+  usage: { tokenCount: number; activeService?: AIImplService } | undefined;
 };
 
 export default function Prompt({
@@ -57,6 +59,7 @@ export default function Prompt({
   onSendMessage,
   tokenValidate,
   isLoading,
+  usage,
 }: PromptProps) {
   const { t } = useTranslation();
 
@@ -130,12 +133,24 @@ export default function Prompt({
   return (
     <div className="w-full grow-0 !bg-transparent ">
       <form className="mx-2 flex flex-col gap-2 last:mb-2">
-        {errorMessage ? (
-          <div className="m-1 flex w-full items-center justify-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-red-500" />
-            <span className="text-sm text-red-500">{errorMessage}</span>
+        {(errorMessage || usage) && (
+          <div className="m-1 flex w-full items-center justify-between gap-2">
+            {errorMessage && (
+              <div className="flex w-full items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-red-500" />
+                <span className="text-xs text-red-500">{errorMessage}</span>
+              </div>
+            )}
+            {usage && usage.tokenCount > 0 && usage.activeService && usage.activeService.model && (
+              <div className="flex w-full flex-row-reverse items-center gap-2 pr-4">
+                <span className="text-xs text-muted-foreground">
+                  {usage.activeService.model.title || usage.activeService.model.name} /{' '}
+                  {usage.tokenCount} {t('tokens')}
+                </span>
+              </div>
+            )}
           </div>
-        ) : null}
+        )}
         <div className="flex w-full flex-row items-center  rounded-md border border-input p-3 focus-within:border-transparent focus-within:ring-1 focus-within:ring-ring ">
           <Button
             disabled={disabled || isLoading}
