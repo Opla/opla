@@ -130,12 +130,17 @@ export default function Prompt({
   return (
     <div className="w-full grow-0 !bg-transparent ">
       <form className="mx-2 flex flex-col gap-2 last:mb-2">
-        {errorMessage ? (
+        {errorMessage && (
           <div className="m-1 flex w-full items-center justify-center gap-2">
             <AlertTriangle className="h-4 w-4 text-red-500" />
             <span className="text-sm text-red-500">{errorMessage}</span>
           </div>
-        ) : null}
+        )}
+        {prompt && (
+          <div className="m-1 flex w-full flex-row-reverse items-center gap-2 pr-4">
+            <span className="text-xs text-muted-foreground">{0} {t('tokens')}</span>
+          </div>
+        )}
         <div className="flex w-full flex-row items-center  rounded-md border border-input p-3 focus-within:border-transparent focus-within:ring-1 focus-within:ring-ring ">
           <Button
             disabled={disabled || isLoading}

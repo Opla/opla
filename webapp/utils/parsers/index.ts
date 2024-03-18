@@ -47,6 +47,7 @@ export type ParsedPrompt = {
   currentTokenIndex: number;
   tokens: PromptToken[];
   locked?: boolean;
+  tokenCount?: number;
 };
 
 type ParsePromptOptions =
