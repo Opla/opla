@@ -138,7 +138,9 @@ export default function Prompt({
         )}
         {prompt && (
           <div className="m-1 flex w-full flex-row-reverse items-center gap-2 pr-4">
-            <span className="text-xs text-muted-foreground">{0} {t('tokens')}</span>
+            <span className="text-xs text-muted-foreground">
+              {0} {t('tokens')}
+            </span>
           </div>
         )}
         <div className="flex w-full flex-row items-center  rounded-md border border-input p-3 focus-within:border-transparent focus-within:ring-1 focus-within:ring-ring ">
