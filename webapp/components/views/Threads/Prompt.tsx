@@ -46,7 +46,7 @@ export type PromptProps = {
   onUpdatePrompt: (prompt: ParsedPrompt) => void;
   onSendMessage: (prompt?: ParsedPrompt) => void;
   tokenValidate: TokenValidator;
-  usage: { tokenCount: number, activeService?: AIImplService } | undefined;
+  usage: { tokenCount: number; activeService?: AIImplService } | undefined;
 };
 
 export default function Prompt({
@@ -139,10 +139,11 @@ export default function Prompt({
             <span className="text-sm text-red-500">{errorMessage}</span>
           </div>
         )}
-        {(usage && usage.activeService && usage.activeService.model) && (
+        {usage && usage.activeService && usage.activeService.model && (
           <div className="m-1 flex w-full flex-row-reverse items-center gap-2 pr-4">
             <span className="text-xs text-muted-foreground">
-              {usage.activeService.model.title || usage.activeService.model.name} / {usage.tokenCount} {t('tokens')}
+              {usage.activeService.model.title || usage.activeService.model.name} /{' '}
+              {usage.tokenCount} {t('tokens')}
             </span>
           </div>
         )}

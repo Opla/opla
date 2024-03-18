@@ -222,18 +222,41 @@ function Thread({
 
   useEffect(() => {
     const afunc = async () => {
-    if (selectedConversation?.currentPrompt || changedPrompt) {
-      const modelsCommands = getMentionCommands(changedPrompt || currentPrompt, commandManager);
-      const selectedModelNameOrId = modelsCommands[0]?.key || getConversationModelId(selectedConversation, assistant) || activeModel;
-      const activeService = getActiveService(selectedConversation, assistant, providers, backendContext, selectedModelNameOrId);
-      console.log("tokenize activeService", modelsCommands[0], activeService, selectedModelNameOrId)
-      const response = await tokenize(activeService, changedPrompt?.text || currentPrompt.text);
-      console.log("tokenize", response, response.tokens, activeService)
-      updateUsage({ tokenCount: response.tokens.length, activeService });
-    }
-  };
+      if (selectedConversation?.currentPrompt || changedPrompt) {
+        const modelsCommands = getMentionCommands(changedPrompt || currentPrompt, commandManager);
+        const selectedModelNameOrId =
+          modelsCommands[0]?.key ||
+          getConversationModelId(selectedConversation, assistant) ||
+          activeModel;
+        const activeService = getActiveService(
+          selectedConversation,
+          assistant,
+          providers,
+          backendContext,
+          selectedModelNameOrId,
+        );
+        console.log(
+          'tokenize activeService',
+          modelsCommands[0],
+          activeService,
+          selectedModelNameOrId,
+        );
+        const response = await tokenize(activeService, changedPrompt?.text || currentPrompt.text);
+        console.log('tokenize', response, response.tokens, activeService);
+        updateUsage({ tokenCount: response.tokens.length, activeService });
+      }
+    };
     afunc();
-  }, [changedPrompt, currentPrompt, selectedConversation, commandManager, assistant, providers, backendContext, activeModel]);
+  }, [
+    changedPrompt,
+    currentPrompt,
+    selectedConversation,
+    commandManager,
+    assistant,
+    providers,
+    backendContext,
+    activeModel,
+  ]);
 
   const parseAndValidatePrompt = (text: string, caretStartIndex = 0) =>
     parsePrompt({ text, caretStartIndex }, tokenValidator);

@@ -235,7 +235,9 @@ export const getMentionCommands = (
   commandManager: CommandManager,
 ): Command[] => {
   const mentions = prompt.tokens.filter((to) => to.type === PromptTokenType.Mention);
-  const modelCommands = mentions.map((m) => commandManager.getCommand(m.value, CommandType.Mention)).filter((m) => m !== undefined) as Command[];
+  const modelCommands = mentions
+    .map((m) => commandManager.getCommand(m.value, CommandType.Mention))
+    .filter((m) => m !== undefined) as Command[];
 
   return modelCommands;
 };
