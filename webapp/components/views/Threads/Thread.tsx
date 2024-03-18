@@ -66,6 +66,8 @@ import { ConversationPanel } from './Conversation';
 import ThreadHeader from './Header';
 
 type Usage = {
+  conversationId?: string;
+  text?: string;
   tokenCount: number;
   activeService?: AIImplService;
 };
@@ -222,7 +224,11 @@ function Thread({
 
   useEffect(() => {
     const afunc = async () => {
-      if (selectedConversation?.currentPrompt || changedPrompt) {
+      const text = changedPrompt?.text || currentPrompt.text;
+      if (
+        usage?.conversationId !== selectedConversation?.id ||
+        (text !== usage?.text && (selectedConversation?.currentPrompt || changedPrompt))
+      ) {
         const modelsCommands = getMentionCommands(changedPrompt || currentPrompt, commandManager);
         const selectedModelNameOrId =
           modelsCommands[0]?.key ||
@@ -235,15 +241,14 @@ function Thread({
           backendContext,
           selectedModelNameOrId,
         );
-        console.log(
-          'tokenize activeService',
-          modelsCommands[0],
+        const response = await tokenize(activeService, text);
+        // logger.info('tokenize', response, response.tokens, activeService);
+        updateUsage({
+          conversationId: selectedConversation?.id,
+          text,
+          tokenCount: response.tokens.length,
           activeService,
-          selectedModelNameOrId,
-        );
-        const response = await tokenize(activeService, changedPrompt?.text || currentPrompt.text);
-        console.log('tokenize', response, response.tokens, activeService);
-        updateUsage({ tokenCount: response.tokens.length, activeService });
+        });
       }
     };
     afunc();
@@ -256,6 +261,7 @@ function Thread({
     providers,
     backendContext,
     activeModel,
+    usage,
   ]);
 
   const parseAndValidatePrompt = (text: string, caretStartIndex = 0) =>
