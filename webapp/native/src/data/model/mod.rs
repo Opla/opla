@@ -343,4 +343,11 @@ impl ModelStorage {
             self.items.insert(index, model_entity.clone());
         }
     }
+
+    pub fn update_model_entity(&mut self, model_entity: &ModelEntity) {
+        if let Some(index) = self.items.iter().position(|m| m.reference.is_same_model(&model_entity.reference)) {
+            self.items.remove(index);
+            self.items.insert(index, model_entity.clone());
+        }
+    }
 }
