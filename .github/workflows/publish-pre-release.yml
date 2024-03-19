@@ -66,12 +66,15 @@ jobs:
 
       - name: get-npm-version
         id: package-version
-        uses: martinbeentjes/npm-get-version-action@v1.3.1
+        uses: beaconbrigade/package-json-version@v0.3
+        with:
+          path: .
 
-      - run: echo ${{ steps.package-version.outputs.current-version }}
+      - run: echo ${{ steps.package-version.outputs.version }}
       - run: |
           cd webapp/native
-          cargo set-version ${{ steps.package-version.outputs.current-version }}
+          cargo install cargo-edit
+          cargo set-version ${{ steps.package-version.outputs.version }}
 
       - uses: Swatinem/rust-cache@v2
         with:
