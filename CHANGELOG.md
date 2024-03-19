@@ -1,3 +1,11 @@
+# [1.0.0-alpha.2](https://github.com/Opla/opla/compare/v1.0.0-alpha.1...v1.0.0-alpha.2) (2024-03-19)
+
+
+### Bug Fixes
+
+* multiline assistants title in Threads Explorer ([2c80f7f](https://github.com/Opla/opla/commit/2c80f7f02181245d70d0f15da8ab9023d62cabe7))
+* multiline assistants title in Threads Explorer ([568a508](https://github.com/Opla/opla/commit/568a50811643981903107584793f71b65eee9162))
+
 # 1.0.0-alpha.1 (2024-03-19)
 
 
