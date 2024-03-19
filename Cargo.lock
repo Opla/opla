@@ -373,7 +373,7 @@ dependencies = [
 
 [[package]]
 name = "cli"
-version = "0.1.0"
+version = "0.0.1"
 
 [[package]]
 name = "cocoa"
@@ -2071,7 +2071,7 @@ dependencies = [
 
 [[package]]
 name = "opla"
-version = "0.1.0"
+version = "0.0.1"
 
 [[package]]
 name = "option-ext"
@@ -3555,7 +3555,7 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokenizer"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anyhow",
  "base64 0.21.5",

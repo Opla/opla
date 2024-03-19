@@ -22,12 +22,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "lts/*"
+
+      - run: cargo install cargo-edit
+    
       - name: Install dependencies
         run: npm clean-install
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx -p @semantic-release/commit-analyzer -p @semantic-release/npm -p @semantic-release/github -p @semantic-release/release-notes-generator -p @semantic-release/changelog -p @semantic-release/git -p semantic-release semantic-release
+        run: npx -p @semantic-release/exec -p @semantic-release/commit-analyzer -p @semantic-release/npm -p @semantic-release/github -p @semantic-release/release-notes-generator -p @semantic-release/changelog -p @semantic-release/git -p semantic-release semantic-release
                   
   publish-pre-release:
     needs: pre-release
@@ -64,17 +67,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: get-npm-version
-        id: package-version
-        uses: beaconbrigade/package-json-version@v0.3
-        with:
-          path: .
+      #- name: get-npm-version
+      #  id: package-version
+      # uses: beaconbrigade/package-json-version@v0.3
+      #  with:
+      #    path: .
 
-      - run: echo ${{ steps.package-version.outputs.version }}
-      - run: |
-          cd webapp/native
-          cargo install cargo-edit
-          cargo set-version ${{ steps.package-version.outputs.version }}
+      #- run: echo ${{ steps.package-version.outputs.version }}
+      #- run: |
+      #    cd webapp/native
+      #    cargo install cargo-edit
+      #    cargo set-version ${{ steps.package-version.outputs.version }}
 
       - uses: Swatinem/rust-cache@v2
         with:
