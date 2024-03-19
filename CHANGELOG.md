@@ -1,3 +1,11 @@
+# [1.0.0-alpha.2](https://github.com/Opla/opla/compare/v1.0.0-alpha.1...v1.0.0-alpha.2) (2024-03-19)
+
+
+### Features
+
+* resize ExplorerGroup height ([daecdf2](https://github.com/Opla/opla/commit/daecdf2fde4dd6f700b5287f752600af06c2c845))
+* resize ExplorerGroup height ([34ff550](https://github.com/Opla/opla/commit/34ff550d32e944013d88ed73fa222af30d4254e4))
+
 # 0.1.0-alpha.1 (2024-03-19)
 
 
