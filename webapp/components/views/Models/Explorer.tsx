@@ -123,7 +123,9 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
             <>
               {!model.editable && (
                 <div className="flex w-full grow flex-row items-center justify-between overflow-hidden pl-3">
-                  <div className="flex-1 text-ellipsis break-all pr-1">{model.title || model.name}</div>
+                  <div className="flex-1 text-ellipsis break-all pr-1">
+                    {model.title || model.name}
+                  </div>
                   <ModelInfos model={model} displayName={false} stateAsIcon />
                 </div>
               )}
