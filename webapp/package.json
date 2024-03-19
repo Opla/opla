@@ -32,7 +32,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cmdk": "^1.0.0",
-    "framer-motion": "^11.0.5",
+    "framer-motion": "^11.0.14",
     "hast": "^1.0.0",
     "i18next": "^23.8.1",
     "i18next-browser-languagedetector": "^7.2.0",
