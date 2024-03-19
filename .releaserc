@@ -35,6 +35,11 @@
       {
         "assets": [
           "package.json",
+          "package-lock.json",
+          "Cargo.toml",
+          "Cargo.lock",
+          "crates/**/Cargo.toml",
+          "crates/**/Cargo.lock",
           "CHANGELOG.md"
         ],
         "message": "chore(release): create v${nextRelease.version}"
