@@ -48,6 +48,7 @@ import { AppContext } from '@/context';
 import Explorer, { ExplorerList, ExplorerGroup } from '@/components/common/Explorer';
 import { OplaAssistant } from '@/stores/assistants';
 import { DefaultPageSettings, DefaultThreadsExplorerGroups } from '@/utils/constants';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { toast } from '../../../ui/Toast';
 import {
   DropdownMenu,
@@ -320,61 +321,76 @@ export default function ThreadsExplorer({
             />
           )}
 
-          <AssistantsList selectedId={selectedAssistantId} onSelect={handleSelectAssistant} />
-          {showRecent && threads.length > 0 && (
-            <ExplorerGroup
-              title={t(ViewName.Recent)}
-              closed={closedRecent}
-              onToggle={() => {
-                onSelectMenu(MenuAction.ToggleGroup, ViewName.Recent);
-              }}
-            >
-              <ExplorerList<Conversation>
-                selectedId={selectedThreadId}
-                items={threads.sort(
-                  (c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt,
-                )}
-                editable
-                getItemTitle={(c) => `${getConversationTitle(c, t)}${c.temp ? '...' : ''}`}
-                isEditable={(c) => !c.temp && c.id === selectedThreadId}
-                renderItem={(c) => (
-                  <>
-                    <span>{getConversationTitle(c, t).replaceAll(' ', '\u00a0')}</span>
-                    {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
-                  </>
-                )}
-                onSelectItem={(item) => handleSelectThread(item, ViewName.Recent)}
-                onChange={handleChangeConversationName}
-                menu={() => menu}
-              />
-            </ExplorerGroup>
-          )}
-          {showArchives && archives.length > 0 && (
-            <ExplorerGroup
-              title={t(ViewName.Archives)}
-              closed={closedArchives}
-              onToggle={() => {
-                onSelectMenu(MenuAction.ToggleGroup, ViewName.Archives);
-              }}
-            >
-              <ExplorerList<Conversation>
-                selectedId={selectedThreadId}
-                items={archives.sort(
-                  (c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt,
-                )}
-                getItemTitle={(c) => `${getConversationTitle(c, t)}${c.temp ? '...' : ''}`}
-                renderItem={(c) => (
-                  <>
-                    <span>{getConversationTitle(c, t).replaceAll(' ', '\u00a0')}</span>
-                    {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
-                  </>
-                )}
-                onSelectItem={(item) => handleSelectThread(item, ViewName.Archives)}
-                onChange={handleChangeConversationName}
-                menu={() => menu}
-              />
-            </ExplorerGroup>
-          )}
+          <ResizablePanelGroup direction="vertical">
+            <ResizablePanel className="!overflow-y-auto">
+              <AssistantsList selectedId={selectedAssistantId} onSelect={handleSelectAssistant} />
+            </ResizablePanel>
+            <ResizableHandle />
+            {showRecent && threads.length > 0 && (
+              <>
+                <ResizablePanel className="!overflow-y-auto pt-2">
+                  <ExplorerGroup
+                    title={t(ViewName.Recent)}
+                    closed={closedRecent}
+                    onToggle={() => {
+                      onSelectMenu(MenuAction.ToggleGroup, ViewName.Recent);
+                    }}
+                  >
+                    <ExplorerList<Conversation>
+                      selectedId={selectedThreadId}
+                      items={threads.sort(
+                        (c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt,
+                      )}
+                      editable
+                      getItemTitle={(c) => `${getConversationTitle(c, t)}${c.temp ? '...' : ''}`}
+                      isEditable={(c) => !c.temp && c.id === selectedThreadId}
+                      renderItem={(c) => (
+                        <>
+                          <span>{getConversationTitle(c, t).replaceAll(' ', '\u00a0')}</span>
+                          {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
+                        </>
+                      )}
+                      onSelectItem={(item) => handleSelectThread(item, ViewName.Recent)}
+                      onChange={handleChangeConversationName}
+                      menu={() => menu}
+                    />
+                  </ExplorerGroup>
+                </ResizablePanel>
+                <ResizableHandle />
+              </>
+            )}
+            {showArchives && archives.length > 0 && (
+              <>
+                <ResizablePanel className="!overflow-y-auto pt-2">
+                  <ExplorerGroup
+                    title={t(ViewName.Archives)}
+                    closed={closedArchives}
+                    onToggle={() => {
+                      onSelectMenu(MenuAction.ToggleGroup, ViewName.Archives);
+                    }}
+                  >
+                    <ExplorerList<Conversation>
+                      selectedId={selectedThreadId}
+                      items={archives.sort(
+                        (c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt,
+                      )}
+                      getItemTitle={(c) => `${getConversationTitle(c, t)}${c.temp ? '...' : ''}`}
+                      renderItem={(c) => (
+                        <>
+                          <span>{getConversationTitle(c, t).replaceAll(' ', '\u00a0')}</span>
+                          {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
+                        </>
+                      )}
+                      onSelectItem={(item) => handleSelectThread(item, ViewName.Archives)}
+                      onChange={handleChangeConversationName}
+                      menu={() => menu}
+                    />
+                  </ExplorerGroup>
+                </ResizablePanel>
+                <ResizableHandle />
+              </>
+            )}
+          </ResizablePanelGroup>
         </div>
       </div>
     </Explorer>
