@@ -88,36 +88,33 @@ export default function ExplorerList<T>({
     </div>
   );
   return (
-    <div
-      className={cn('flex-col overflow-y-auto overflow-x-hidden dark:border-white/20', className)}
+    <ul
+      className={cn(
+        'flex h-full flex-col break-all rounded-md px-1 py-3 text-sm dark:border-white/20',
+        className,
+      )}
     >
-      <div className="flex flex-col gap-1 pb-2 text-sm">
-        <div className="group relative flex flex-col break-all rounded-md px-1 py-3">
-          <ul className="flex flex-col">
-            {(items as BaseNamedRecord[]).map((item: BaseNamedRecord) => {
-              const menuItems = menu?.(item as T);
-              return (
-                <li
-                  key={item.id}
-                  className={cn(
-                    selectedId === item.id ? 'text-foreground' : 'text-muted-foreground',
-                    'rounded-md px-2 py-2 transition-colors duration-200 hover:bg-foreground/10',
-                  )}
-                >
-                  {menuItems && menuItems.length > 0 ? (
-                    <ContextMenu>
-                      <ContextMenuTrigger>{itemRendering(item)}</ContextMenuTrigger>
-                      <ContextMenuList data={item.id} menu={menuItems} />
-                    </ContextMenu>
-                  ) : (
-                    itemRendering(item)
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </div>
-    </div>
+      {(items as BaseNamedRecord[]).map((item: BaseNamedRecord) => {
+        const menuItems = menu?.(item as T);
+        return (
+          <li
+            key={item.id}
+            className={cn(
+              selectedId === item.id ? 'text-foreground' : 'text-muted-foreground',
+              'rounded-md px-2 py-2 transition-colors duration-200 hover:bg-foreground/10',
+            )}
+          >
+            {menuItems && menuItems.length > 0 ? (
+              <ContextMenu>
+                <ContextMenuTrigger>{itemRendering(item)}</ContextMenuTrigger>
+                <ContextMenuList data={item.id} menu={menuItems} />
+              </ContextMenu>
+            ) : (
+              itemRendering(item)
+            )}
+          </li>
+        );
+      })}
+    </ul>
   );
 }
