@@ -30,8 +30,10 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GIT_AUTHOR_NAME: devOpsBot
-          GIT_COMMITTER_NAME: devOpsBot
+          GIT_AUTHOR_NAME: oplabot
+          GIT_AUTHOR_EMAIL: oplabot@users.noreply.github.com
+          GIT_COMMITTER_NAME: oplabot
+          GIT_COMMITTER_EMAIL: oplabot@users.noreply.github.com
         run: npx -p @semantic-release/exec -p @semantic-release/commit-analyzer -p @semantic-release/npm -p @semantic-release/github -p @semantic-release/release-notes-generator -p @semantic-release/changelog -p @semantic-release/git -p semantic-release semantic-release
                   
   publish-pre-release:
