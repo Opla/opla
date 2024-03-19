@@ -15,11 +15,11 @@ jobs:
       id-token: write # to enable use of OIDC for npm provenance
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
 
@@ -30,6 +30,8 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_AUTHOR_NAME: devOpsBot
+          GIT_COMMITTER_NAME: devOpsBot
         run: npx -p @semantic-release/exec -p @semantic-release/commit-analyzer -p @semantic-release/npm -p @semantic-release/github -p @semantic-release/release-notes-generator -p @semantic-release/changelog -p @semantic-release/git -p semantic-release semantic-release
                   
   publish-pre-release:
@@ -50,7 +52,9 @@ jobs:
     runs-on: ${{ matrix.settings.platform }}
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          fetch-depth: 0
+    
       - name: setup node
         uses: actions/setup-node@v4
         with:
