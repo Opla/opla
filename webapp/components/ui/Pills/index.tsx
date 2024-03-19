@@ -22,7 +22,7 @@ type PillsProps = {
 export function Pill({ label, className }: PillsProps) {
   return (
     <span
-      className={cn('rounded border-0 px-2.5 py-0.5 text-2xs font-extrabold leading-3', className)}
+      className={cn('rounded border-0 px-2.5 py-0.5 text-2xs font-extrabold leading-3 line-clamp-1', className)}
     >
       {label}
     </span>
