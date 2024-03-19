@@ -51,7 +51,7 @@ function ExplorerGroup({
           </Button>
           <div className="flex w-full flex-grow items-center justify-between gap-1 overflow-hidden p-0 pl-2">
             {title && (
-              <div className="text-ellipsis line-clamp-1 cap break-all text-sm capitalize text-muted-foreground">
+              <div className="line-clamp-1 text-ellipsis break-all text-sm capitalize text-muted-foreground">
                 {t(title)}
               </div>
             )}
