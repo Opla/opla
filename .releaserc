@@ -18,7 +18,6 @@
         "npmPublish": false
       }
     ],
-    "@semantic-release/github",
     [
       "@semantic-release/changelog",
       {
