@@ -1,0 +1,39 @@
+{
+  "branches": [
+    {
+      "name": "production"
+    },
+    {
+      "name": "main",
+      "prerelease": "alpha"
+    }
+  ],
+  "debug": "true",
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    [
+      "@semantic-release/npm",
+      {
+        "npmPublish": false
+      }
+    ],
+    "@semantic-release/github",
+    [
+      "@semantic-release/changelog",
+      {
+        "changelogFile": "CHANGELOG.md"
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": [
+          "package.json",
+          "CHANGELOG.md"
+        ],
+        "message": "chore(release): create v${nextRelease.version}"
+      }
+    ]
+  ]
+}

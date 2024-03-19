@@ -1,11 +1,11 @@
-name: "publish-release"
+name: "publish-pre-release"
 on:
   push:
     branches:
       - main
 
 jobs:
-  publish-release:
+  publish-pre-release:
     strategy:
       fail-fast: false
       matrix:
@@ -28,6 +28,11 @@ jobs:
         with:
           node-version: 20
 
+      - name: release version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
+
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -38,6 +43,16 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - uses: codfish/semantic-release-action@v3
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: echo ${{ steps.semantic.outputs.release-version }}
+      - run: |
+          cd webapp/native
+          cargo set-version ${{ steps.semantic.outputs.release-version }}
 
       - uses: Swatinem/rust-cache@v2
         with:
