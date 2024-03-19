@@ -1,3 +1,10 @@
+# [1.0.0-alpha.3](https://github.com/Opla/opla/compare/v1.0.0-alpha.2...v1.0.0-alpha.3) (2024-03-19)
+
+
+### Bug Fixes
+
+* localmodel item display in models explorer ([b8ab905](https://github.com/Opla/opla/commit/b8ab905df63b51764d543356635b571bff0871be))
+
 # [1.0.0-alpha.2](https://github.com/Opla/opla/compare/v1.0.0-alpha.1...v1.0.0-alpha.2) (2024-03-19)
 
 
