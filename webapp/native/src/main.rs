@@ -594,11 +594,12 @@ async fn model_download<R: Runtime>(
 ) -> Result<(), String> {
     let handle = app.app_handle();
     let context = app.state::<OplaContext>();
-    let store = context.store.lock().await;
+    let mut store = context.store.lock().await;
     let model = store.models.get_model_entity(model_id.as_str());
     match model {
         Some(mut m) => {
             m.state = Some(state.clone());
+            store.models.update_model_entity(&m);
             store.save().map_err(|err| err.to_string())?;
             drop(store);
             println!("model_download {} {}", state, model_id);
