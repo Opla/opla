@@ -1,3 +1,10 @@
+# [1.0.0-alpha.4](https://github.com/Opla/opla/compare/v1.0.0-alpha.3...v1.0.0-alpha.4) (2024-03-20)
+
+
+### Features
+
+* set caret color as primary ([a5b070c](https://github.com/Opla/opla/commit/a5b070cf8312a05692e6c57d42bf7a5eeef43342))
+
 # [1.0.0-alpha.3](https://github.com/Opla/opla/compare/v1.0.0-alpha.2...v1.0.0-alpha.3) (2024-03-19)
 
 
