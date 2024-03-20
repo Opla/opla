@@ -8,6 +8,8 @@ jobs:
 
   create-pre-release:
     runs-on: ubuntu-latest
+    outputs:
+      latest_release_id: ${{ steps.latest_release_id.outputs.result }}
     permissions:
       contents: write # to be able to publish a GitHub release
       issues: write # to be able to comment on released issues
@@ -40,7 +42,7 @@ jobs:
    
       # Get generated release id
       - name: Get Latest Release id
-        id: get_latest_release_id
+        id: latest_release_id
         uses: actions/github-script@v6
         with:
           script: |
@@ -54,7 +56,7 @@ jobs:
       - name: Set latest release to draft
         uses: actions/github-script@v6
         env:
-          release_id: ${{ steps.get_latest_release_id.outputs.result }}
+          release_id: ${{ steps.latest_release_id.outputs.result }}
         with:
           script: |
             github.rest.repos.updateRelease({
