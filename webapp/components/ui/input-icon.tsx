@@ -38,7 +38,7 @@ const InputIcon = React.forwardRef<HTMLInputElement, InputProps>(
         <input
           type={type}
           className={cn(
-            'focus-visible:ring-none flex h-9 w-full bg-transparent file:border-0 file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed',
+            'focus-visible:ring-none flex h-9 w-full bg-transparent file:border-0 file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:caret-primary focus-visible:outline-none disabled:cursor-not-allowed',
             startIcon ? 'pl-4' : '',
             endIcon ? 'pr-4' : '',
             classNameInput,

@@ -22,6 +22,7 @@ const config: Config = {
         '2xs': ['0.625rem', { lineHeight: '1rem' }],
         '3xs': ['0.5rem', { lineHeight: '0.75rem' }],
       },
+      caretColor: { primary: 'hsl(var(--primary))' },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -79,6 +80,9 @@ const config: Config = {
         bounce400: 'bounce 1s infinite 400ms',
       },
     },
+  },
+  variants: {
+    caretColor: ['focus'],
   },
   safelist: [
     {
