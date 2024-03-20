@@ -1,0 +1,67 @@
+name: Modify updater.json with latest release data
+
+on: 
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  modify-updater-gist:
+    name: Modify updater.json gist
+    runs-on: ubuntu-latest
+    steps:
+      - name: update download urls and signatures for updater gist
+        uses: actions/github-script@v6
+        env:
+          updater_gist_id: ${{ secrets.UPDATER_GIST_ID }}
+        with:
+          github-token: ${{ secrets.DEV_OPS_BOT_TOKEN }}
+          script: |
+
+            const { data } = await github.rest.repos.getLatestRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+            const { name, body, published_at, assets } = data;
+
+            const linuxAssetUrl = assets[1].browser_download_url;
+            const linuxSigObj = await github.request(assets[2].browser_download_url);
+            const linuxSignature = new TextDecoder().decode(linuxSigObj.data);
+
+            const macAssetUrl = assets[4].browser_download_url;
+            const macSigObj = await github.request(assets[5].browser_download_url);
+            const macSignature = new TextDecoder().decode(macSigObj.data);
+
+            const winAssetUrl = assets[8].browser_download_url;
+            const winSigObj = await github.request(assets[9].browser_download_url);
+            const winSignature = new TextDecoder().decode(winSigObj.data);
+            
+            const notes = body.replace(/ *\([^)]*\)|#|\) */g, '');
+
+            const newGistContent = JSON.stringify({
+              version: name,
+              notes,
+              pub_date: published_at,
+              platforms: { 
+                "darwin-x86_64": {
+                  signature: macSignature,
+                  url: macAssetUrl,
+                },
+                "linux-x86_64": {
+                  signature: linuxSignature,
+                  url: linuxAssetUrl,
+                },
+                "windows-x86_64": {
+                  signature: winSignature,
+                  url: winAssetUrl,
+                }
+              }
+            }, null, 2);
+
+            await github.rest.gists.update({
+              gist_id: process.env.updater_gist_id,
+              files: {
+                "updater.json": {
+                  content: newGistContent
+                }
+              }
+            });

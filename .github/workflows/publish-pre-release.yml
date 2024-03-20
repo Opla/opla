@@ -6,7 +6,7 @@ on:
 
 jobs:
 
-  pre-release:
+  create-pre-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write # to be able to publish a GitHub release
@@ -37,9 +37,36 @@ jobs:
           GIT_COMMITTER_NAME: oplabot
           GIT_COMMITTER_EMAIL: oplabot@users.noreply.github.com
         run: npx -p @semantic-release/exec -p @semantic-release/commit-analyzer -p @semantic-release/npm -p @semantic-release/github -p @semantic-release/release-notes-generator -p @semantic-release/changelog -p @semantic-release/git -p semantic-release semantic-release
-                  
-  publish-pre-release:
-    needs: pre-release
+   
+      # Get generated release id
+      - name: Get Latest Release id
+        id: get_latest_release_id
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { data } = await github.rest.repos.getLatestRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            })
+
+            return data.id
+
+      - name: Set latest release to draft
+        uses: actions/github-script@v6
+        env:
+          release_id: ${{ steps.get_latest_release_id.outputs.result }}
+        with:
+          script: |
+            github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: process.env.release_id,
+              draft: true,
+              prerelease: false
+            })
+        
+  build-pre-release:
+    needs: create-pre-release
     strategy:
       fail-fast: false
       matrix:
@@ -123,9 +150,29 @@ jobs:
           APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
           APPLE_API_KEY_PATH: ${{ secrets.APPLE_API_KEY_PATH }}
         with:
-          tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
-          releaseName: "App v__VERSION__"
-          releaseBody: "See the assets to download this version and install."
-          releaseDraft: true
-          prerelease: false
+          #tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
+          #releaseName: "App v__VERSION__"
+          #releaseBody: "See the assets to download this version and install."
+          #releaseDraft: true
+          #prerelease: false
+          releaseId: ${{ needs.create-pre-release.outputs.latest_release_id }}
           args: ${{ matrix.settings.args}}
+      
+      - name: Publish latest release
+        uses: actions/github-script@v6
+        env:
+          release_id: ${{ needs.create-pre-release.outputs.latest_release_id }}
+        with:
+          script: |
+            github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: process.env.release_id,
+              draft: false,
+              prerelease: false
+            })
+
+  # modify-updater-gist:
+  #  needs: build-pre-release
+  #  uses: Opla/opla/.github/workflows/modify-updater-with-latest-release.yml@main
+  #  secrets: inherit
