@@ -5,11 +5,11 @@ on:
       - main
 
 jobs:
-
   create-pre-release:
     runs-on: ubuntu-latest
     outputs:
       latest_release_id: ${{ steps.latest_release_id.outputs.result }}
+      latest_release_version: ${{ steps.release.outputs.version }}
     permissions:
       contents: write # to be able to publish a GitHub release
       issues: write # to be able to comment on released issues
@@ -32,6 +32,7 @@ jobs:
       - name: Install dependencies
         run: npm clean-install
       - name: Release
+        id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GIT_AUTHOR_NAME: oplabot
@@ -40,15 +41,20 @@ jobs:
           GIT_COMMITTER_EMAIL: oplabot@users.noreply.github.com
         run: npx -p @semantic-release/exec -p @semantic-release/commit-analyzer -p @semantic-release/npm -p @semantic-release/github -p @semantic-release/release-notes-generator -p @semantic-release/changelog -p @semantic-release/git -p semantic-release semantic-release
    
+      - run: |
+          echo "ref_name= ${{ github.ref_name }}"
+          echo "version= ${{ steps.release.outputs.version }}"
+
       # Get generated release id
       - name: Get Latest Release id
         id: latest_release_id
         uses: actions/github-script@v6
         with:
           script: |
-            const { data } = await github.rest.repos.getLatestRelease({
+            const { data } = await github.rest.repos.getReleaseByTag({
               owner: context.repo.owner,
-              repo: context.repo.repo
+              repo: context.repo.repo,
+              tag: "v${{ steps.release.outputs.version }}"
             })
 
             return data.id
@@ -160,6 +166,10 @@ jobs:
           releaseId: ${{ needs.create-pre-release.outputs.latest_release_id }}
           args: ${{ matrix.settings.args}}
       
+  undraft-pre-release:
+    needs: [create-pre-release,build-pre-release]
+    runs-on: ubuntu-latest
+    steps:
       - name: Publish latest release
         uses: actions/github-script@v6
         env:

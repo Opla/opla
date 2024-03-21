@@ -21,7 +21,8 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "cargo set-version ${nextRelease.version}"
+        "prepareCmd": "cargo set-version ${nextRelease.version}",
+        "publishCmd": "echo ::set-output name=nextVersion::${nextRelease.version}"
       }
     ],
     [
