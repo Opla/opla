@@ -1,3 +1,10 @@
+# [1.0.0-alpha.8](https://github.com/Opla/opla/compare/v1.0.0-alpha.7...v1.0.0-alpha.8) (2024-03-21)
+
+
+### Bug Fixes
+
+* model description text is cut ([2689070](https://github.com/Opla/opla/commit/268907092cf43f79fc972984a1bd8ea49ecf4671))
+
 # [1.0.0-alpha.7](https://github.com/Opla/opla/compare/v1.0.0-alpha.6...v1.0.0-alpha.7) (2024-03-21)
 
 
