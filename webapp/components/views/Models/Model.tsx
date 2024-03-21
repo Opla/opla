@@ -242,14 +242,19 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
         <div className="flex w-full flex-col px-8 py-4 text-sm">
           <h1 className="items-right bold w-full text-xl">{model.title || model.name}</h1>
           <div className="flex w-full flex-col items-center gap-2 text-sm">
-            <Parameter
-              label=""
-              name="description"
-              value={updatedParameters?.description || t(model.description || '')}
-              disabled={!model.editable}
-              type="large-text"
-              onChange={setUpdatedParameters}
-            />
+            {model?.editable && (
+              <Parameter
+                label=""
+                name="description"
+                value={updatedParameters?.description || t(model.description || '')}
+                disabled={!model.editable}
+                type="large-text"
+                onChange={setUpdatedParameters}
+              />
+            )}
+            {!model?.editable && (
+              <p>{(updatedParameters?.description as string) || t(model.description || '')}</p>
+            )}
             {model.fileName && (
               <Parameter
                 label={t('File')}
