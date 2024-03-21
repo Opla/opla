@@ -16,7 +16,7 @@
 import Header from './Header';
 
 export type ContentViewProps = {
-  header: string | React.ReactNode;
+  header?: string | React.ReactNode;
   selectedId?: string;
   children: React.ReactNode;
   toolbar?: React.ReactNode;
@@ -26,7 +26,7 @@ export default function ContentView({ header, selectedId, children, toolbar }: C
   // const { t } = useTranslation();
   return (
     <div className="flex h-full flex-col bg-secondary/20">
-      <Header header={header || selectedId || ''} toolbar={toolbar} />
+      {(header || toolbar) && <Header header={header || selectedId || ''} toolbar={toolbar} />}
       {children}
     </div>
   );
