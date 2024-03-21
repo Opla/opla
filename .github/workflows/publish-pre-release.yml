@@ -47,6 +47,7 @@ jobs:
 
       # Get generated release id
       - name: Get Latest Release id
+        if: steps.release.outputs.version != ''
         id: latest_release_id
         uses: actions/github-script@v6
         with:
@@ -56,10 +57,10 @@ jobs:
               repo: context.repo.repo,
               tag: "v${{ steps.release.outputs.version }}"
             })
-
             return data.id
 
       - name: Set latest release to draft
+        if: steps.release.outputs.version != ''
         uses: actions/github-script@v6
         env:
           release_id: ${{ steps.latest_release_id.outputs.result }}
@@ -75,6 +76,7 @@ jobs:
         
   build-pre-release:
     needs: create-pre-release
+    if: needs.create-pre-release.outputs.latest_release_id
     strategy:
       fail-fast: false
       matrix:
