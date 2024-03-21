@@ -1,3 +1,10 @@
+# [1.0.0-alpha.7](https://github.com/Opla/opla/compare/v1.0.0-alpha.6...v1.0.0-alpha.7) (2024-03-21)
+
+
+### Bug Fixes
+
+* contentview hide header if nothing ([9926bc3](https://github.com/Opla/opla/commit/9926bc30c3d7e16444f6ff07ee1b56f64b727021))
+
 # [1.0.0-alpha.6](https://github.com/Opla/opla/compare/v1.0.0-alpha.5...v1.0.0-alpha.6) (2024-03-21)
 
 
