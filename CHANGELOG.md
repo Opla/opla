@@ -1,3 +1,10 @@
+# [1.0.0-alpha.5](https://github.com/Opla/opla/compare/v1.0.0-alpha.4...v1.0.0-alpha.5) (2024-03-21)
+
+
+### Bug Fixes
+
+* settings properties are not ok ([f63e804](https://github.com/Opla/opla/commit/f63e804b2ac61fb50fae3ff3244c2a37d5e6325e))
+
 # [1.0.0-alpha.4](https://github.com/Opla/opla/compare/v1.0.0-alpha.3...v1.0.0-alpha.4) (2024-03-20)
 
 
