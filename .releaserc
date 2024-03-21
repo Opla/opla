@@ -46,6 +46,7 @@
         ],
         "message": "chore(release): create v${nextRelease.version}"
       }
-    ]
+    ],
+    "@semantic-release/github"
   ]
 }
