@@ -1,3 +1,10 @@
+# [1.0.0-alpha.6](https://github.com/Opla/opla/compare/v1.0.0-alpha.5...v1.0.0-alpha.6) (2024-03-21)
+
+
+### Bug Fixes
+
+* tokenizer (lib) generated 2 warnings ([5b602a1](https://github.com/Opla/opla/commit/5b602a15c1e7b43ee7e34f8ad5180f5cebc58972))
+
 # [1.0.0-alpha.5](https://github.com/Opla/opla/compare/v1.0.0-alpha.4...v1.0.0-alpha.5) (2024-03-21)
 
 
