@@ -47,7 +47,7 @@ jobs:
 
       # Get generated release id
       - name: Get Latest Release id
-        if: steps.release.outputs.version != ''
+        if: steps.release.outputs.version && steps.release.outputs.version != ''
         id: latest_release_id
         uses: actions/github-script@v6
         with:
