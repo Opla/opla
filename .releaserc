@@ -22,7 +22,7 @@
       "@semantic-release/exec",
       {
         "prepareCmd": "cargo set-version ${nextRelease.version}",
-        "publishCmd": "echo ::set-output name=nextVersion::${nextRelease.version}"
+        "publishCmd": "echo \"version=${nextRelease.version}\" >> $GITHUB_OUTPUT"
       }
     ],
     [
