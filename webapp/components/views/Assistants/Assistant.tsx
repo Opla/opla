@@ -132,9 +132,7 @@ export default function AssistantView({ selectedId: assistantId }: AssistantProp
               </TabsList>
               <div>{assistant.name}</div>
             </div>
-          ) : (
-            'Assistant'
-          )
+          ) : undefined
         }
         selectedId={assistantId}
         toolbar={
