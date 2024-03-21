@@ -34,12 +34,12 @@ export default function Settings({
       href: 'appearance',
       hrefAlias: '/settings',
     },
-    {
+    /* {
       name: 'Storage',
       id: 'storage',
       href: 'storage',
       hrefAlias: '/settings/storage',
-    },
+    }, */
   ];
 
   const { t } = useTranslation();
@@ -48,22 +48,19 @@ export default function Settings({
     <div className="flex h-full w-full">
       <div className="navSettings">
         <NavContainer>
-          <div className="text-ellipsis break-all p-3 text-sm">{t('Settings')}</div>
+          <div className="text-l text-ellipsis break-all p-3 font-semibold">{t('Settings')}</div>
           <ul className="flex flex-1 flex-col gap-1 p-1">
             {menu.map((item) => (
-              <li
-                key={item.id}
-                className={cn(
-                  item.href === tab || item.hrefAlias === tab
-                    ? 'text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
-                    : 'text-muted-foreground',
-                  'rounded-md px-2 py-2 transition-colors duration-200 hover:text-accent-foreground',
-                )}
-              >
+              <li key={item.id}>
                 <div
+                  className={cn(
+                    item.href === tab || item.hrefAlias === tab
+                      ? 'text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+                      : 'text-muted-foreground',
+                    'flex cursor-pointer flex-row items-center break-all rounded-md px-2 py-2 transition-colors duration-200 hover:text-accent-foreground',
+                  )}
                   role="button"
                   tabIndex={0}
-                  className="flex cursor-pointer flex-row items-center break-all"
                   onKeyUp={(e) => {
                     e.stopPropagation();
                   }}
@@ -81,8 +78,8 @@ export default function Settings({
           </ul>
         </NavContainer>
       </div>
-      <div className="contentSettings h-full flex-grow p-6">
-        <div className="flex h-full flex-col pt-4">{children}</div>
+      <div className="contentSettings h-full flex-grow p-6  pt-16">
+        <div className="flex h-full flex-col pt-8">{children}</div>
       </div>
     </div>
   );
