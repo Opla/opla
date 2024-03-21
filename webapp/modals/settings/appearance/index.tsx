@@ -20,6 +20,7 @@ import SettingItem from '@/components/common/SettingItem';
 import Dropdown from '@/components/common/Dropdown';
 import logger from '@/utils/logger';
 import { Laptop, Moon, Sun } from 'lucide-react';
+import { Pill } from '@/components/ui/Pills';
 
 export default function Appearance() {
   const { t } = useTranslation();
@@ -42,10 +43,10 @@ export default function Appearance() {
         <Dropdown items={colorSchemes} onSelect={handleSelectColorScheme} />
       </SettingItem>
       <SettingItem title={t('Accent color')} subtitle={t('Choose the accent color used in app')}>
-        Action
+        <Pill label="--" className='bg-primary leading-10 text-primary border-2'/>
       </SettingItem>
       <SettingItem title={t('Theme')} subtitle={t('Change the theme')}>
-        Action
+        Default
       </SettingItem>
     </>
   );

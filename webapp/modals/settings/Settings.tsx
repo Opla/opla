@@ -34,12 +34,12 @@ export default function Settings({
       href: 'appearance',
       hrefAlias: '/settings',
     },
-    {
+    /* {
       name: 'Storage',
       id: 'storage',
       href: 'storage',
       hrefAlias: '/settings/storage',
-    },
+    }, */
   ];
 
   const { t } = useTranslation();
@@ -48,7 +48,7 @@ export default function Settings({
     <div className="flex h-full w-full">
       <div className="navSettings">
         <NavContainer>
-          <div className="text-ellipsis break-all p-3 text-sm">{t('Settings')}</div>
+          <div className="text-ellipsis break-all p-3 text-l font-semibold">{t('Settings')}</div>
           <ul className="flex flex-1 flex-col gap-1 p-1">
             {menu.map((item) => (
               <li
@@ -57,32 +57,28 @@ export default function Settings({
                   item.href === tab || item.hrefAlias === tab
                     ? 'text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
                     : 'text-muted-foreground',
-                  'rounded-md px-2 py-2 transition-colors duration-200 hover:text-accent-foreground',
+                  'rounded-md px-2 py-2 transition-colors duration-200 hover:text-accent-foreground flex cursor-pointer flex-row items-center break-all',
                 )}
+                role="button"
+                tabIndex={0}
+                onKeyUp={(e) => {
+                  e.stopPropagation();
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onTabChanged(item.href as string);
+                }}
               >
-                <div
-                  role="button"
-                  tabIndex={0}
-                  className="flex cursor-pointer flex-row items-center break-all"
-                  onKeyUp={(e) => {
-                    e.stopPropagation();
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onTabChanged(item.href as string);
-                  }}
-                >
                   <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
                     {t(item.name)}
                   </div>
-                </div>
               </li>
             ))}
           </ul>
         </NavContainer>
       </div>
-      <div className="contentSettings h-full flex-grow p-6">
-        <div className="flex h-full flex-col pt-4">{children}</div>
+      <div className="contentSettings h-full flex-grow p-6  pt-16">
+        <div className="flex h-full flex-col pt-8">{children}</div>
       </div>
     </div>
   );
