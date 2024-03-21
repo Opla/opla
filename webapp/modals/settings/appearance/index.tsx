@@ -43,7 +43,7 @@ export default function Appearance() {
         <Dropdown items={colorSchemes} onSelect={handleSelectColorScheme} />
       </SettingItem>
       <SettingItem title={t('Accent color')} subtitle={t('Choose the accent color used in app')}>
-        <Pill label="--" className='bg-primary leading-10 text-primary border-2'/>
+        <Pill label="--" className="border-2 bg-primary leading-10 text-primary" />
       </SettingItem>
       <SettingItem title={t('Theme')} subtitle={t('Change the theme')}>
         Default
