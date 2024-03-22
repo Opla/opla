@@ -48,9 +48,8 @@ export const tokenize = async (
 };
 
 export const createLlmMessages = (
-  conversation: Conversation,
+  modelName: string,
   messages: Message[],
-  index: number,
   policy: ContextWindowPolicy,
   keepSystemMessages: boolean,
 ): LlmMessage[] => {
@@ -73,7 +72,7 @@ export const createLlmMessages = (
   const llmMessages: LlmMessage[] = context.map((m) => ({
     content: getMessageContentAsString(m),
     role: m.author?.role,
-    name: m.author?.name,
+    name: m.author?.role !== 'assistant' ? m.author?.name : modelName,
   }));
   return llmMessages;
 };
@@ -145,11 +144,10 @@ export const completion = async (
     });
   }
 
-  const index = conversationMessages.findIndex((m) => m.id === message.id);
+  // const index = conversationMessages.findIndex((m) => m.id === message.id);
   const messages = createLlmMessages(
-    conversation,
+    model.name,
     conversationMessages,
-    index,
     contextWindowPolicy,
     keepSystem,
   );
@@ -170,6 +168,10 @@ export const completion = async (
     query: { command: 'completion', options },
     completionOptions: mapKeys(completionOptions, toSnakeCase),
   })) as LlmCompletionResponse;
+
+  if (response.status === 'error') {
+    throw new Error(response.message);
+  }
 
   const { content } = response;
   if (content) {

@@ -503,13 +503,29 @@ export type LlmUsage = {
   totalPerSecond?: number;
 };
 
-export type LlmCompletionResponse = {
-  created?: number;
-  status?: string;
-  content: string;
-  conversationId?: string;
-  usage?: LlmUsage;
+export type LlmError = {
+  type: 'error';
+  message: string;
 };
+
+export type LlmCompletionResponse =
+  | {
+      status: 'success';
+      created?: number;
+      content: string;
+      conversationId?: string;
+      usage?: LlmUsage;
+    }
+  | {
+      status: 'finished';
+      content: 'done';
+      conversationId?: string;
+      created: number;
+    }
+  | {
+      status: 'error';
+      message: string;
+    };
 
 export type LlmStreamResponse = {
   created: number;

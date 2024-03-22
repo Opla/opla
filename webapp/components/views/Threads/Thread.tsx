@@ -324,8 +324,13 @@ function Thread({
         prompt,
         commandManager,
       );
-      setUsage(response.usage);
-      returnedMessage.content = response.content.trim();
+      if (response.status === 'error') {
+        throw new Error(response.message);
+      }
+      if (response.status === 'success') {
+        setUsage(response.usage);
+        returnedMessage.content = response.content.trim();
+      }
     } catch (e: any) {
       logger.error('sendMessage', e, typeof e);
       const error = String(e);

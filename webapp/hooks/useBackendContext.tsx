@@ -203,6 +203,10 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       }
       logger.info('stream event', event, backendContext, context);
       const response = (await mapKeys(event.payload, toCamelCase)) as LlmCompletionResponse;
+      if (response.status === 'error') {
+        logger.error('stream error', response);
+        return;
+      }
       if (!response.conversationId) {
         logger.error('stream event without conversationId', response);
         return;
@@ -225,10 +229,10 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
             streams,
           } as OplaContext);
         }
-      } else {
-        if (streams?.[conversationId]) {
-          delete streams[conversationId];
-        }
+        return;
+      }
+      if (streams?.[conversationId]) {
+        delete streams[conversationId];
         setBackendContext({
           ...backendContext,
           streams,

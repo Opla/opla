@@ -176,6 +176,7 @@ pub struct LlmCompletionResponse {
     pub content: String,
     pub conversation_id: Option<String>,
     pub usage: Option<LlmUsage>,
+    pub message: Option<String>,
 }
 impl LlmCompletionResponse {
     pub fn new(created: i64, status: &str, content: &str) -> Self {
@@ -185,6 +186,7 @@ impl LlmCompletionResponse {
             content: content.to_owned(),
             conversation_id: None,
             usage: None,
+            message: None,
         }
     }
 }

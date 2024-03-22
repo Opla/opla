@@ -151,6 +151,7 @@ impl LlamaCppChatCompletion {
             content: self.content.clone(),
             conversation_id: None,
             usage: Some(self.timings.to_llm_usage()),
+            message: None,
         }
     }
 }
