@@ -1,3 +1,10 @@
+# [1.0.0-alpha.9](https://github.com/Opla/opla/compare/v1.0.0-alpha.8...v1.0.0-alpha.9) (2024-03-22)
+
+
+### Bug Fixes
+
+* error stream event without conversationId [#456](https://github.com/Opla/opla/issues/456) ([3f143d5](https://github.com/Opla/opla/commit/3f143d5ca470722d11d7c3517f8e3226c4600a43))
+
 # [1.0.0-alpha.8](https://github.com/Opla/opla/compare/v1.0.0-alpha.7...v1.0.0-alpha.8) (2024-03-21)
 
 

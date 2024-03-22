@@ -1,6 +1,6 @@
 {
     "name": "opla",
-    "version": "1.0.0-alpha.8",
+    "version": "1.0.0-alpha.9",
     "private": true,
     "scripts": {
         "dev": "cd webapp && npm run dev",
