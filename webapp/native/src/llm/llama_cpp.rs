@@ -185,6 +185,32 @@ impl LLamaCppServer {
         format!("http://{:}:{:}/{}", server_parameters.host, server_parameters.port, endpoint)
     }
 
+    async fn post_request<R: Runtime>(
+        &self,
+        api_url: String,
+        parameters: LlamaCppQueryCompletion
+    ) -> Result<reqwest::Response, reqwest::Error> {
+        let client = reqwest::Client::new();
+        let res = client
+            .post(api_url) // TODO remove hardcoding
+            .json(&parameters)
+            .send().await;
+        res
+    }
+
+    async fn post_stream_request<R: Runtime>(
+        &self,
+        api_url: String,
+        parameters: LlamaCppQueryCompletion
+    ) -> Result<reqwest::Response, reqwest::Error> {
+        let client = reqwest::Client::new();
+        let res = client
+            .post(api_url) // TODO remove hardcoding
+            .json(&parameters)
+            .send().await;
+        res
+    }
+
     pub async fn call_completion<R: Runtime>(
         &mut self,
         query: LlmQuery<LlmQueryCompletion>,
@@ -193,12 +219,17 @@ impl LLamaCppServer {
     ) -> Result<LlmCompletionResponse, Box<dyn std::error::Error>> {
         let parameters = query.options.to_llama_cpp_parameters(completion_options);
 
+        let stream = parameters.stream.unwrap_or(false);
+
         let api_url = self.get_api(server_parameters, query.command);
-        let client = reqwest::Client::new();
-        let res = client
-            .post(api_url) // TODO remove hardcoding
-            .json(&parameters)
-            .send().await;
+
+        let res;
+        if stream {
+            res = self.post_stream_request::<R>(api_url, parameters).await;
+        } else {
+            res = self.post_request::<R>(api_url, parameters).await;
+        }
+
         let response = match res {
             Ok(res) => res,
             Err(error) => {
