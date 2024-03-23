@@ -1,3 +1,15 @@
+# [1.0.0-alpha.10](https://github.com/Opla/opla/compare/v1.0.0-alpha.9...v1.0.0-alpha.10) (2024-03-23)
+
+
+### Bug Fixes
+
+* stream completion display ([0247599](https://github.com/Opla/opla/commit/0247599e2563beb804d051a677d18bf7c716e22b))
+
+
+### Features
+
+* implement llama.cpp stream completion ([ec37165](https://github.com/Opla/opla/commit/ec371658fd20dea7858d368c806c953f2032234b))
+
 # [1.0.0-alpha.9](https://github.com/Opla/opla/compare/v1.0.0-alpha.8...v1.0.0-alpha.9) (2024-03-22)
 
 
