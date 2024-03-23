@@ -217,7 +217,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       if (response.status === 'success') {
         const stream = streams[conversationId] || ({} as LlmStreamResponse);
         if (stream.prevContent !== response.content) {
-          const content = (stream.content || []);
+          const content = stream.content || [];
           content.push(response.content);
           streams[conversationId] = {
             ...response,
