@@ -18,7 +18,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { KeyedScrollPosition } from '@/hooks/useScroll';
 import Opla from '@/components/icons/Opla';
 import { AvatarRef, Conversation, Message, PromptTemplate } from '@/types';
-import logger from '@/utils/logger';
+// import logger from '@/utils/logger';
 import { AppContext } from '@/context';
 import { getConversation, updateConversation } from '@/utils/data/conversations';
 import { ParsedPrompt } from '@/utils/parsers';
@@ -57,11 +57,11 @@ export function ConversationPanel({
 
   const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {
     const conversation = getConversation(key, conversations);
-    logger.info(
+    /* logger.info(
       `handleScrollPosition ${key} ${conversation?.id}`,
       position,
       conversation?.scrollPosition,
-    );
+    ); */
     if (conversation && conversation.scrollPosition !== position.y) {
       conversation.scrollPosition = position.y === -1 ? undefined : position.y;
       const updatedConversations = updateConversation(conversation, conversations, true);

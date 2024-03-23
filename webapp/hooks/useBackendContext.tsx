@@ -213,16 +213,16 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       }
       const { conversationId } = response;
 
-      const { streams = {} } = backendContext || {};
+      const { streams = {} } = context || {};
       if (response.status === 'success') {
-        const stream = context.streams?.[conversationId] || ({} as LlmStreamResponse);
+        const stream = streams[conversationId] || ({} as LlmStreamResponse);
         if (stream.prevContent !== response.content) {
-          const content = (stream.content || []) as string[];
-          content.push(response.content as string);
+          const content = stream.content || [];
+          content.push(response.content);
           streams[conversationId] = {
             ...response,
             content,
-            prevContent: response.content as string,
+            prevContent: response.content,
           } as LlmStreamResponse;
           setBackendContext({
             ...context,
@@ -231,10 +231,10 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
         }
         return;
       }
-      if (streams?.[conversationId]) {
+      if (response.status === 'finished' && streams[conversationId]) {
         delete streams[conversationId];
         setBackendContext({
-          ...backendContext,
+          ...context,
           streams,
         } as OplaContext);
       }

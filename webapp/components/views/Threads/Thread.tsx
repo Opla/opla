@@ -149,7 +149,7 @@ function Thread({
     setIsMessageUpdating(true);
     getNewMessages();
   }, [
-    backendContext.streams,
+    backendContext,
     conversationId,
     filterConversationMessages,
     readConversationMessages,
@@ -324,6 +324,7 @@ function Thread({
         prompt,
         commandManager,
       );
+
       if (response.status === 'error') {
         throw new Error(response.message);
       }

@@ -12,13 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{ error::Error, llm::LlmQueryCompletion, store::ServerParameters };
+use crate::{ error::Error, llm::{ LlmQueryCompletion, LlmResponseError }, store::ServerParameters };
 
 use tauri::Runtime;
+use eventsource_stream::Eventsource;
+use futures_util::stream::StreamExt;
+
 use serde::{ Deserialize, Serialize };
 use crate::llm::{ LlmQuery, LlmCompletionResponse, LlmUsage };
 
-use super::{ LlmCompletionOptions, LlmTokenizeResponse };
+use super::{ LlmCompletionOptions, LlmError, LlmTokenizeResponse };
 
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -157,6 +160,12 @@ impl LlamaCppChatCompletion {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LlamaCppChatCompletionChunk {
+    pub content: String,
+    pub stop: Option<bool>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlamaCppQueryTokenize {
     pub content: String,
 }
@@ -185,21 +194,17 @@ impl LLamaCppServer {
         format!("http://{:}:{:}/{}", server_parameters.host, server_parameters.port, endpoint)
     }
 
-    pub async fn call_completion<R: Runtime>(
-        &mut self,
-        query: LlmQuery<LlmQueryCompletion>,
-        server_parameters: &ServerParameters,
-        completion_options: Option<LlmCompletionOptions>
+    async fn post_request<R: Runtime>(
+        &self,
+        api_url: String,
+        parameters: LlamaCppQueryCompletion
     ) -> Result<LlmCompletionResponse, Box<dyn std::error::Error>> {
-        let parameters = query.options.to_llama_cpp_parameters(completion_options);
-
-        let api_url = self.get_api(server_parameters, query.command);
         let client = reqwest::Client::new();
-        let res = client
+        let result = client
             .post(api_url) // TODO remove hardcoding
             .json(&parameters)
             .send().await;
-        let response = match res {
+        let response = match result {
             Ok(res) => res,
             Err(error) => {
                 println!("Failed to get Response: {}", error);
@@ -216,6 +221,169 @@ impl LLamaCppServer {
             }
         };
         Ok(response.to_llm_response())
+    }
+
+    async fn post_stream_request<R: Runtime>(
+        &self,
+        api_url: String,
+        parameters: LlamaCppQueryCompletion,
+        callback: Option<impl FnMut(Result<LlmCompletionResponse, LlmError>) + Copy>
+    ) -> Result<LlmCompletionResponse, Box<dyn std::error::Error>> {
+        let start_time = chrono::Utc::now().timestamp_millis();
+
+        let client = reqwest::Client::new();
+        let result = client
+            .post(api_url) // TODO remove hardcoding
+            .json(&parameters)
+            .send().await;
+        let response = match result {
+            Ok(res) => res,
+            Err(error) => {
+                let message = format!("Failed to send: {}", error);
+                println!("{}", message);
+                match callback {
+                    Some(mut cb) => {
+                        cb(Err(LlmError::new(&message, "BadJson")));
+                    }
+                    None => (),
+                }
+                return Err(Box::new(Error::BadJson));
+            }
+        };
+        let status = response.status();
+        if !status.is_success() {
+            let error = match response.json::<LlmResponseError>().await {
+                Ok(t) => t,
+                Err(error) => {
+                    let message = format!("Failed to dezerialize error response: {}", error);
+                    println!("{}", message);
+                    match callback {
+                        Some(mut cb) => {
+                            cb(Err(LlmError::new(&message, "BadJson")));
+                        }
+                        None => (),
+                    }
+                    return Err(Box::new(Error::BadJson));
+                }
+            };
+            let message = format!("Failed to get response: {} {:?}", status, error);
+            println!("{}", message);
+            match callback {
+                Some(mut cb) => {
+                    cb(Err(LlmError::new(&message, "BadJson")));
+                }
+                None => (),
+            }
+            return Err(Box::new(error.error));
+        }
+        let mut stream = response.bytes_stream().eventsource();
+        let mut content = String::new();
+        let created = chrono::Utc::now().timestamp_millis();
+        while let Some(event) = stream.next().await {
+            match event {
+                Ok(event) => {
+                    let data = event.data;
+                    let chunk = match serde_json::from_str::<LlamaCppChatCompletionChunk>(&data) {
+                        Ok(r) => r,
+                        Err(error) => {
+                            let message = format!("Failed to parse response: {}", error);
+                            println!("{}", message);
+                            match callback {
+                                Some(mut cb) => {
+                                    cb(Err(LlmError::new(&message, "BadJson")));
+                                }
+                                None => (),
+                            }
+                            return Err(Box::new(Error::BadJson));
+                        }
+                    };
+                    println!("chunk: {:?}", chunk);
+                    if chunk.stop.unwrap_or(false) {
+                        println!("chunk: stop");
+                        match callback {
+                            Some(mut cb) => {
+                                cb(
+                                    Ok(
+                                        LlmCompletionResponse::new(
+                                            chrono::Utc::now().timestamp_millis(),
+                                            "finished",
+                                            "done"
+                                        )
+                                    )
+                                );
+                            }
+                            None => (),
+                        }
+                        break;
+                    } else {
+                        content.push_str(chunk.content.as_str());
+                        match callback {
+                            Some(mut cb) => {
+                                cb(
+                                    Ok(
+                                        LlmCompletionResponse::new(
+                                            created,
+                                            "success",
+                                            chunk.content.as_str()
+                                        )
+                                    )
+                                );
+                            }
+                            None => (),
+                        }
+                    }
+                }
+                Err(error) => {
+                    let message = format!("Failed to get event: {}", error);
+                    println!("{}", message);
+                    match callback {
+                        Some(mut cb) => {
+                            cb(Err(LlmError::new(&message, "BadJson")));
+                        }
+                        None => (),
+                    }
+                    return Err(Box::new(Error::BadJson));
+                }
+            }
+        }
+        let end_time = chrono::Utc::now().timestamp_millis() - start_time;
+        let mut usage = LlmUsage::new();
+        usage.total_ms = Some(end_time);
+        let total_tokens = usage.total_tokens.unwrap_or(0);
+        if total_tokens > 0 && end_time > 0 {
+            usage.total_per_second = Some(((total_tokens as f32) / (end_time as f32)) * 1000.0);
+        }
+        println!("Response Status: {} {}", status, content);
+        Ok(LlmCompletionResponse {
+            created: Some(created),
+            status: Some("success".to_owned()),
+            content,
+            conversation_id: None,
+            usage: Some(usage),
+            message: None,
+        })
+    }
+
+    pub async fn call_completion<R: Runtime>(
+        &mut self,
+        query: LlmQuery<LlmQueryCompletion>,
+        server_parameters: &ServerParameters,
+        completion_options: Option<LlmCompletionOptions>,
+        callback: Option<impl FnMut(Result<LlmCompletionResponse, LlmError>) + Copy>
+    ) -> Result<LlmCompletionResponse, Box<dyn std::error::Error>> {
+        let parameters = query.options.to_llama_cpp_parameters(completion_options);
+
+        let stream = parameters.stream.unwrap_or(false);
+
+        let api_url = self.get_api(server_parameters, query.command);
+
+        let result;
+        if stream {
+            result = self.post_stream_request::<R>(api_url, parameters, callback).await?;
+        } else {
+            result = self.post_request::<R>(api_url, parameters).await?;
+        }
+        Ok(result)
     }
 
     pub async fn call_tokenize<R: Runtime>(
