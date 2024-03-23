@@ -8,7 +8,7 @@ Experience the power of Opla, harnessing your device's capabilities to run cutti
 
 ![Opla App Interface](https://github.com/Opla/.github/assets/395718/bebc028a-b89c-47b7-a636-8ff289e3a80f)
 
-> **Warning**
+>  [!IMPORTANT]
 > Welcome to the cutting edge! Opla is currently under active development, evolving daily with new features and improvements. While we're working hard to polish every bit, please note that you might encounter some magic dust and unfinished spells. Your patience and feedback are what make this journey exciting. Dive in, explore, and help shape the future of Opla with us!
 
 
