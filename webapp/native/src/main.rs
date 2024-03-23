@@ -28,10 +28,22 @@ use tokenizer::encode;
 use tokio::sync::Mutex;
 use std::sync::Arc;
 
-use api::{ assistants::{fetch_assistants_collection, AssistantsCollection}, hf::search_hf_models, models };
+use api::{
+    assistants::{ fetch_assistants_collection, AssistantsCollection },
+    hf::search_hf_models,
+    models,
+};
 use data::model::Model;
 use downloader::Downloader;
-use llm::{ openai::call_completion, LlmCompletionOptions, LlmCompletionResponse, LlmError, LlmQuery, LlmQueryCompletion, LlmTokenizeResponse };
+use llm::{
+    openai::call_completion,
+    LlmCompletionOptions,
+    LlmCompletionResponse,
+    LlmError,
+    LlmQuery,
+    LlmQueryCompletion,
+    LlmTokenizeResponse,
+};
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
 use store::{ Store, Provider, ProviderType, ProviderMetadata, Settings, ServerConfiguration };
@@ -466,9 +478,37 @@ async fn llm_call_completion<R: Runtime>(
             (model.name, model_path)
         };
         let mut server = context_server.lock().await;
-        server.bind::<R>(app, &model_name, &model_path).await.map_err(|err| err.to_string())?;
+        let query = query.clone();
+        let conversation_id = query.options.conversation_id.clone();
+        server.bind::<R>(app.app_handle(), &model_name, &model_path).await.map_err(|err| err.to_string())?;
+        let handle = app.app_handle();
         let response = {
-            server.call_completion::<R>(&model_name, query, completion_options).await.map_err(|err| err.to_string())?
+            server
+                .call_completion::<R>(
+                    &model_name,
+                    query,
+                    completion_options,
+                    Some(|result: Result<LlmCompletionResponse, LlmError>| {
+                        match result {
+                            Ok(response) => {
+                                let mut response = response.clone();
+                                response.conversation_id = conversation_id.clone();
+                                let _ = handle
+                                    .emit_all("opla-sse", response)
+                                    .map_err(|err| err.to_string());
+                            }
+                            Err(err) => {
+                                let _ = handle
+                                    .emit_all("opla-sse", Payload {
+                                        message: err.to_string(),
+                                        status: ServerStatus::Error.as_str().to_string(),
+                                    })
+                                    .map_err(|err| err.to_string());
+                            }
+                        }
+                    })
+                ).await
+                .map_err(|err| err.to_string())?
         };
         let parameters = server.parameters.clone();
         server.set_parameters(&model, &model_path, parameters);
@@ -538,17 +578,21 @@ async fn llm_call_tokenize<R: Runtime>(
     if llm_provider_type == "opla" {
         let context_server = Arc::clone(&context.server);
         let mut server = context_server.lock().await;
-        let response = server.call_tokenize::<R>(&model, text).await.map_err(|err| err.to_string())?;
+        let response = server
+            .call_tokenize::<R>(&model, text).await
+            .map_err(|err| err.to_string())?;
         return Ok(response);
-
     } else if llm_provider_type == "openai" {
-        let encoded = match  encode(text, model, None) {
+        let encoded = match encode(text, model, None) {
             Ok(e) => { e }
             Err(err) => {
                 return Err(format!("LLM encode error: {:?}", err));
             }
         };
-        let tokens: Vec<u64> = encoded.iter().map(|&x| x as u64).collect();
+        let tokens: Vec<u64> = encoded
+            .iter()
+            .map(|&x| x as u64)
+            .collect();
         println!("Tokens: {:?}", tokens);
         let response = LlmTokenizeResponse {
             tokens,
@@ -853,7 +897,7 @@ fn main() {
                 set_active_model,
                 get_assistants_collection,
                 llm_call_completion,
-                llm_call_tokenize,
+                llm_call_tokenize
             ]
         )
         .run(tauri::generate_context!())

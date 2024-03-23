@@ -170,7 +170,7 @@ export default function Threads({
     defaultSettings.pages?.[Page.Threads] ||
     DefaultPageSettings;
 
-  logger.info('render Threads', selectedThreadId, view);
+  // logger.info('render Threads', selectedThreadId, view);
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel
