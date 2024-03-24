@@ -116,13 +116,13 @@ export const isValidFormat = (m: Model) =>
   m?.name.endsWith('.gguf') ||
   getResourceUrl(m?.download).endsWith('.gguf');
 
-export const findModel = (modelIdOrName: string, models: Model[]): Model | undefined =>
+export const findModel = (modelIdOrName: string | undefined, models: Model[]): Model | undefined =>
   models.find(
-    (m) => m.name.toLowerCase() === modelIdOrName.toLowerCase() || m.id === modelIdOrName,
+    (m) => m.name.toLowerCase() === modelIdOrName?.toLowerCase() || m.id === modelIdOrName,
   );
 
 export const findModelInAll = (
-  modelIdOrName: string,
+  modelIdOrName: string | undefined,
   providers: Provider[],
   backendContext: OplaContext,
 ) => {
