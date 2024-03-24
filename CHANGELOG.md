@@ -1,3 +1,10 @@
+# [1.0.0-alpha.16](https://github.com/Opla/opla/compare/v1.0.0-alpha.15...v1.0.0-alpha.16) (2024-03-24)
+
+
+### Bug Fixes
+
+* set ChatGPT key add a warning [#529](https://github.com/Opla/opla/issues/529) ([66cf2a9](https://github.com/Opla/opla/commit/66cf2a961f1d6b278d57b008f489275b75599aa3))
+
 # [1.0.0-alpha.15](https://github.com/Opla/opla/compare/v1.0.0-alpha.14...v1.0.0-alpha.15) (2024-03-24)
 
 
