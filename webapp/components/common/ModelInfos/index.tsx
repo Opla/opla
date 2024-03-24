@@ -14,18 +14,25 @@
 
 import { BluePill, GreenPill, PurplePill, RedPill, YellowPill } from '@/components/ui/Pills';
 import useTranslation from '@/hooks/useTranslation';
+import { cn } from '@/lib/utils';
 import { Model, ModelState } from '@/types';
 
 type ModelInfosProps = {
   model: Model;
   displayName?: boolean;
   stateAsIcon?: boolean;
+  className?: string;
 };
 
-function ModelInfos({ model, displayName = true, stateAsIcon = false }: ModelInfosProps) {
+function ModelInfos({
+  model,
+  displayName = true,
+  stateAsIcon = false,
+  className,
+}: ModelInfosProps) {
   const { t } = useTranslation();
   return (
-    <div className="flex items-center space-x-2">
+    <div className={cn('flex items-center space-x-2', className)}>
       {displayName && (
         <span className="grow rounded px-2.5 py-0.5 font-extrabold">
           {model.title || model.name}
