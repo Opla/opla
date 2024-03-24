@@ -71,7 +71,7 @@ export default function OpenAI({
             <Input
               id="name"
               placeholder={t('Your secret API key')}
-              value={provider?.key}
+              value={provider?.key || ''}
               onChange={(e) => {
                 // e.preventDefault();
                 onParameterChange('key', e.target.value);
