@@ -246,9 +246,11 @@ function MessageComponent({
                         </Button>
                       )}
                       <ClipboardButton copied={copied} onCopyToClipboard={handleCopyToClipboard} />
-                      <Button variant="ghost" size="sm" onClick={handleEdit}>
-                        <Pencil className="h-4 w-4" strokeWidth={1.5} />
-                      </Button>
+                      {message.status !== MessageStatus.Error && (
+                        <Button variant="ghost" size="sm" onClick={handleEdit}>
+                          <Pencil className="h-4 w-4" strokeWidth={1.5} />
+                        </Button>
+                      )}
                       <DeleteButton onDeleteMessage={onDeleteMessage} />
                     </div>
                   )}
