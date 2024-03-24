@@ -1,3 +1,10 @@
+# [1.0.0-alpha.12](https://github.com/Opla/opla/compare/v1.0.0-alpha.11...v1.0.0-alpha.12) (2024-03-24)
+
+
+### Bug Fixes
+
+* empty Recents after assistants [#525](https://github.com/Opla/opla/issues/525) ([009956c](https://github.com/Opla/opla/commit/009956ca6c4b6b483ca71366bf8add920f4d491e))
+
 # [1.0.0-alpha.11](https://github.com/Opla/opla/compare/v1.0.0-alpha.10...v1.0.0-alpha.11) (2024-03-24)
 
 
