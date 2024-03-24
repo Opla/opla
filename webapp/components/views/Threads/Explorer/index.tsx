@@ -322,37 +322,39 @@ export default function ThreadsExplorer({
                       onSelectMenu(MenuAction.ToggleGroup, ViewName.Recent);
                     }}
                   >
-                    {threads.length > 0 &&<ExplorerList<Conversation>
-                      selectedId={selectedThreadId}
-                      items={threads.sort(
-                        (c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt,
-                      )}
-                      editable
-                      getItemTitle={(c) => `${getConversationTitle(c, t)}${c.temp ? '...' : ''}`}
-                      isEditable={(c) => !c.temp && c.id === selectedThreadId}
-                      renderItem={(c) => (
-                        <>
-                          <span>{getConversationTitle(c, t).replaceAll(' ', '\u00a0')}</span>
-                          {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
-                        </>
-                      )}
-                      onSelectItem={(item) => handleSelectThread(item, ViewName.Recent)}
-                      onChange={handleChangeConversationName}
-                      menu={() => menu}
-                    />}
-                              {threads.length === 0 && (
-            <EmptyView
-              title={t('No threads')}
-              description={t("Don't be shy, say hi!")}
-              icon={
-                <MessageSquareWarning
-                  className="h-12 w-12 text-muted-foreground"
-                  strokeWidth={1.5}
-                />
-              }
-              className="h-full flex-1 grow"
-            />
-          )}
+                    {threads.length > 0 && (
+                      <ExplorerList<Conversation>
+                        selectedId={selectedThreadId}
+                        items={threads.sort(
+                          (c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt,
+                        )}
+                        editable
+                        getItemTitle={(c) => `${getConversationTitle(c, t)}${c.temp ? '...' : ''}`}
+                        isEditable={(c) => !c.temp && c.id === selectedThreadId}
+                        renderItem={(c) => (
+                          <>
+                            <span>{getConversationTitle(c, t).replaceAll(' ', '\u00a0')}</span>
+                            {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
+                          </>
+                        )}
+                        onSelectItem={(item) => handleSelectThread(item, ViewName.Recent)}
+                        onChange={handleChangeConversationName}
+                        menu={() => menu}
+                      />
+                    )}
+                    {threads.length === 0 && (
+                      <EmptyView
+                        title={t('No threads')}
+                        description={t("Don't be shy, say hi!")}
+                        icon={
+                          <MessageSquareWarning
+                            className="h-12 w-12 text-muted-foreground"
+                            strokeWidth={1.5}
+                          />
+                        }
+                        className="h-full flex-1 grow"
+                      />
+                    )}
                   </ExplorerGroup>
                 </ResizablePanel>
                 <ResizableHandle />
