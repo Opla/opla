@@ -1,3 +1,10 @@
+# [1.0.0-alpha.13](https://github.com/Opla/opla/compare/v1.0.0-alpha.12...v1.0.0-alpha.13) (2024-03-24)
+
+
+### Bug Fixes
+
+* crash when no model or provider found in Thread ([1240bd8](https://github.com/Opla/opla/commit/1240bd889b938f28dc54bcefd4443c17e91f3ece))
+
 # [1.0.0-alpha.12](https://github.com/Opla/opla/compare/v1.0.0-alpha.11...v1.0.0-alpha.12) (2024-03-24)
 
 
