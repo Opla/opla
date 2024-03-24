@@ -106,9 +106,9 @@ export default function useScroll(
           contentRect.height !== currentRect.height)
       ) {
         const rect = percentageToContainerRect(contentRect, parent, position);
-        const { width, height, ...xy } = rect;
+        const { width, height } = rect;
         if (height < 1 && width < 1) {
-          logger.info('handleResize not scroll', rect, contentRect, currentRect, xy, position);
+          // logger.info('handleResize not scroll', rect, contentRect, currentRect, xy, position);
           keyedRect.current = { key, position: { x: -1, y: -1 }, rect };
           if (position.x !== -1 && position.y !== -1) {
             onUpdatePosition(keyedRect.current);

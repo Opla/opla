@@ -32,7 +32,7 @@ import logger from '../logger';
 export const tokenize = async (
   activeService: AIImplService,
   text: string,
-): Promise<LlmTokenizeResponse> => {
+): Promise<LlmTokenizeResponse | undefined> => {
   const { provider, model } = activeService;
   let response: LlmTokenizeResponse;
   if (model && provider) {
@@ -42,7 +42,7 @@ export const tokenize = async (
       text,
     });
   } else {
-    throw new Error('Model or provider not found');
+    return undefined;
   }
   return response;
 };

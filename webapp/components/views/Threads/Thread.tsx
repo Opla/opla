@@ -61,6 +61,7 @@ import { getCommandManager, getMentionCommands, preProcessingCommands } from '@/
 import ContentView from '@/components/common/ContentView';
 import { useAssistantStore } from '@/stores';
 import { getDefaultAssistantService } from '@/utils/data/assistants';
+import { getLocalProvider } from '@/utils/data/providers';
 import PromptArea from './Prompt';
 import { ConversationPanel } from './Conversation';
 import ThreadHeader from './Header';
@@ -246,7 +247,7 @@ function Thread({
         updateUsage({
           conversationId: selectedConversation?.id,
           text,
-          tokenCount: response.tokens.length,
+          tokenCount: response?.tokens.length || 0,
           activeService,
         });
       }
@@ -289,7 +290,7 @@ function Thread({
         true,
       );
       updateConversations(newConversations);
-    } else if (model && !activeModel) {
+    } else if (model && !activeModel && providerIdOrName === getLocalProvider(providers)?.id) {
       await setActiveModel(model);
     } else if (model) {
       setService(newService);
