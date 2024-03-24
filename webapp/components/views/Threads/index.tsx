@@ -208,12 +208,12 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     defaultSettings.pages?.[Page.Threads] ||
     DefaultPageSettings;
 
-  logger.info(
+  /* logger.info(
     'render Archives',
     selectedThreadId,
     view,
     assistantId === undefined || view === ViewName.Archives,
-  );
+  ); */
 
   const rightToolbar = (
     <ToolbarTogglePanels
