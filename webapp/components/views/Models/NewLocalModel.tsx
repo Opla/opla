@@ -38,6 +38,7 @@ import { ShortcutIds } from '@/hooks/useShortcuts';
 import { Page } from '@/types/ui';
 import { fileExists, openFileDialog } from '@/utils/backend/tauri';
 import { importModel, validateModelsFile } from '@/utils/models';
+import ModelInfos from '@/components/common/ModelInfos';
 import { ShortcutBadge } from '../../common/ShortCut';
 import { toast } from '../../ui/Toast';
 import SearchHuggingFaceHub from './SearchHuggingFaceHub';
@@ -72,6 +73,17 @@ function NewLocalModel({
     };
     getCollection();
   }, []);
+
+  const getFirstValidModel = (m: Model) => {
+    if (!isValidFormat(m)) {
+      const downloadables: Model[] = getDownloadables(m).filter(
+        (d) => d.private !== true && isValidFormat(d),
+      );
+      const selectedModel = downloadables.find((d) => d.recommended) || downloadables[0];
+      return deepMerge(m, selectedModel || {}, true);
+    }
+    return m;
+  };
 
   const handleValueChange = (s: string) => {
     setValue(s);
@@ -195,7 +207,7 @@ function NewLocalModel({
                     handleSelect(m);
                   }}
                 >
-                  <span>{m.name}</span>
+                  <ModelInfos model={getFirstValidModel(m)} className="w-full" />
                 </CommandItem>
               ))}
           </CommandGroup>
