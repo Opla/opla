@@ -1,3 +1,10 @@
+# [1.0.0-alpha.11](https://github.com/Opla/opla/compare/v1.0.0-alpha.10...v1.0.0-alpha.11) (2024-03-24)
+
+
+### Bug Fixes
+
+* null is not an object finModel bug: TypeError: null is not an object (evaluating 'modelIdOrName.toLowerCase') [#523](https://github.com/Opla/opla/issues/523) ([c9cb6b3](https://github.com/Opla/opla/commit/c9cb6b3b169d92cf3d6af7ce6f6dc91ce51ca4b3))
+
 # [1.0.0-alpha.10](https://github.com/Opla/opla/compare/v1.0.0-alpha.9...v1.0.0-alpha.10) (2024-03-23)
 
 
