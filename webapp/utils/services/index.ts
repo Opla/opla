@@ -69,7 +69,7 @@ export const getActiveService = (
     modelName = _modelName || activeService.modelId;
     provider = findProvider(providerIdOrName, providers);
     model = findModel(modelName, provider?.models || []);
-    if (!model) {
+    if (!model && modelName) {
       model = findModelInAll(modelName, providers, backendContext);
     }
     if (!provider) {
