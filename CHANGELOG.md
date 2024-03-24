@@ -1,3 +1,10 @@
+# [1.0.0-alpha.15](https://github.com/Opla/opla/compare/v1.0.0-alpha.14...v1.0.0-alpha.15) (2024-03-24)
+
+
+### Bug Fixes
+
+* don't edit an error message [#534](https://github.com/Opla/opla/issues/534) ([8d80043](https://github.com/Opla/opla/commit/8d800434b573d8f515a1b46c58d72d8bd63975ff))
+
 # [1.0.0-alpha.14](https://github.com/Opla/opla/compare/v1.0.0-alpha.13...v1.0.0-alpha.14) (2024-03-24)
 
 
