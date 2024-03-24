@@ -1,3 +1,10 @@
+# [1.0.0-alpha.14](https://github.com/Opla/opla/compare/v1.0.0-alpha.13...v1.0.0-alpha.14) (2024-03-24)
+
+
+### Features
+
+* display model infos in Install Model [#532](https://github.com/Opla/opla/issues/532) ([6c57956](https://github.com/Opla/opla/commit/6c57956f74d7b601dede117640d14571dbb20dcb))
+
 # [1.0.0-alpha.13](https://github.com/Opla/opla/compare/v1.0.0-alpha.12...v1.0.0-alpha.13) (2024-03-24)
 
 
