@@ -1,3 +1,10 @@
+# [1.0.0-alpha.19](https://github.com/Opla/opla/compare/v1.0.0-alpha.18...v1.0.0-alpha.19) (2024-03-25)
+
+
+### Features
+
+* replace start a conversation by install a model assistant [#540](https://github.com/Opla/opla/issues/540) ([#553](https://github.com/Opla/opla/issues/553)) ([de7bc62](https://github.com/Opla/opla/commit/de7bc62d69d3d7049a992ae98e8f80bbb872b90a))
+
 # [1.0.0-alpha.18](https://github.com/Opla/opla/compare/v1.0.0-alpha.17...v1.0.0-alpha.18) (2024-03-25)
 
 
