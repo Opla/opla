@@ -1,3 +1,10 @@
+# [1.0.0-alpha.21](https://github.com/Opla/opla/compare/v1.0.0-alpha.20...v1.0.0-alpha.21) (2024-03-25)
+
+
+### Bug Fixes
+
+* Panel id and order props recommended [#551](https://github.com/Opla/opla/issues/551) ([#559](https://github.com/Opla/opla/issues/559)) ([8e6ca96](https://github.com/Opla/opla/commit/8e6ca9687a8c4922774dd2bc30b9612a7d9a8a3d))
+
 # [1.0.0-alpha.20](https://github.com/Opla/opla/compare/v1.0.0-alpha.19...v1.0.0-alpha.20) (2024-03-25)
 
 
