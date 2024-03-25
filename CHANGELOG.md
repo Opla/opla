@@ -1,3 +1,10 @@
+# [1.0.0-alpha.22](https://github.com/Opla/opla/compare/v1.0.0-alpha.21...v1.0.0-alpha.22) (2024-03-25)
+
+
+### Bug Fixes
+
+* better error display completion [#544](https://github.com/Opla/opla/issues/544) ([#560](https://github.com/Opla/opla/issues/560)) ([a1faa70](https://github.com/Opla/opla/commit/a1faa703144131cc2a904f82ae2f7a6fc4b81209))
+
 # [1.0.0-alpha.21](https://github.com/Opla/opla/compare/v1.0.0-alpha.20...v1.0.0-alpha.21) (2024-03-25)
 
 
