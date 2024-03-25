@@ -220,7 +220,7 @@ async fn request<R: Runtime>(
         Ok(res) => res,
         Err(error) => {
             println!("Failed to send: {}", error);
-            return Err(Box::new(Error::BadJson));
+            return Err(Box::new(error));
         }
     };
     let status = response.status();
@@ -229,7 +229,7 @@ async fn request<R: Runtime>(
             Ok(t) => t,
             Err(error) => {
                 println!("Failed to dezerialize error response: {}", error);
-                return Err(Box::new(Error::BadJson));
+                return Err(Box::new(error));
             }
         };
         println!("Failed to get response: {} {:?}", status, error);
@@ -239,7 +239,7 @@ async fn request<R: Runtime>(
         Ok(r) => r,
         Err(error) => {
             println!("Failed to dezerialize response: {}", error);
-            return Err(Box::new(Error::BadJson));
+            return Err(Box::new(error));
         }
     };
 
@@ -261,11 +261,11 @@ async fn stream_request<R: Runtime>(
             println!("{}", message);
             match callback {
                 Some(mut cb) => {
-                    cb(Err(LlmError::new(&message, "BadJson")));
+                    cb(Err(LlmError::new(&message, "FailedSend")));
                 }
                 None => (),
             }
-            return Err(Box::new(Error::BadJson));
+            return Err(Box::new(error));
         }
     };
     let status = response.status();
@@ -273,22 +273,22 @@ async fn stream_request<R: Runtime>(
         let error = match response.json::<LlmResponseError>().await {
             Ok(t) => t,
             Err(error) => {
-                let message = format!("Failed to dezerialize error response: {}", error);
+                let message = format!("Failed to deserialize error response: {}", error);
                 println!("{}", message);
                 match callback {
                     Some(mut cb) => {
-                        cb(Err(LlmError::new(&message, "BadJson")));
+                        cb(Err(LlmError::new(&message, "FailedDeserialize")));
                     }
                     None => (),
                 }
-                return Err(Box::new(Error::BadJson));
+                return Err(Box::new(error));
             }
         };
         let message = format!("Failed to get response: {} {:?}", status, error);
         println!("{}", message);
         match callback {
             Some(mut cb) => {
-                cb(Err(LlmError::new(&message, "BadJson")));
+                cb(Err(LlmError::new(&message, "FailedResponse")));
             }
             None => (),
         }
@@ -323,7 +323,7 @@ async fn stream_request<R: Runtime>(
                     Ok(t) => t,
                     Err(error) => {
                         println!("Failed to dezerialize event data: {}", error);
-                        return Err(Box::new(Error::BadJson));
+                        return Err(Box::new(error));
                     }
                 };
                 match callback {
@@ -349,11 +349,11 @@ async fn stream_request<R: Runtime>(
                 println!("{}", message);
                 match callback {
                     Some(mut cb) => {
-                        cb(Err(LlmError::new(&message, "BadJson")));
+                        cb(Err(LlmError::new(&message, "StreamError")));
                     }
                     None => (),
                 }
-                return Err(Box::new(Error::BadJson));
+                return Err(Box::new(error));
             }
         }
     }
@@ -413,13 +413,13 @@ fn encode_length(text: String) -> usize {
     }
 }
 
-// See: 
+// See:
 // https://platform.openai.com/docs/guides/text-generation/managing-tokens
 // https://cookbook.openai.com/examples/how_to_count_tokens_with_tiktoken
 pub fn num_tokens_from_messages(messages: &Vec<LlmMessage>) -> usize {
     let mut num_tokens = 0;
     for message in messages {
-        num_tokens += 4;  // every message follows <im_start>{role/name}\n{content}<im_end>\n
+        num_tokens += 4; // every message follows <im_start>{role/name}\n{content}<im_end>\n
         num_tokens += encode_length(message.content.clone());
         num_tokens += 1; // message.role
         match &message.name {
@@ -428,7 +428,7 @@ pub fn num_tokens_from_messages(messages: &Vec<LlmMessage>) -> usize {
             }
             None => {}
         }
-        num_tokens += 2;  // # every reply is primed with <im_start>assistant
+        num_tokens += 2; // # every reply is primed with <im_start>assistant
     }
     num_tokens
 }
