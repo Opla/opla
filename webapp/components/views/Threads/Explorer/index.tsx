@@ -308,13 +308,13 @@ export default function ThreadsExplorer({
       <div className="flex-1 flex-col space-y-1 overflow-y-auto overflow-x-hidden p-1 dark:border-white/20">
         <div className="flex h-full grow flex-col gap-2 pb-2 text-sm">
           <ResizablePanelGroup direction="vertical">
-            <ResizablePanel className="!overflow-y-auto">
+            <ResizablePanel id="assistant" className="!overflow-y-auto">
               <AssistantsList selectedId={selectedAssistantId} onSelect={handleSelectAssistant} />
             </ResizablePanel>
             <ResizableHandle />
             {showRecent && (
               <>
-                <ResizablePanel className="!overflow-y-auto pt-2" minSize={3}>
+                <ResizablePanel id="recent" className="!overflow-y-auto pt-2" minSize={3}>
                   <ExplorerGroup
                     title={t(ViewName.Recent)}
                     closed={closedRecent}
@@ -365,7 +365,7 @@ export default function ThreadsExplorer({
             )}
             {showArchives && (
               <>
-                <ResizablePanel className="!overflow-y-auto pt-2" minSize={3}>
+                <ResizablePanel id="archives" className="!overflow-y-auto pt-2" minSize={3}>
                   <ExplorerGroup
                     title={t(ViewName.Archives)}
                     closed={closedArchives}

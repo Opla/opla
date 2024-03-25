@@ -54,7 +54,7 @@ function AssistantsStore() {
   );
   return (
     <Threads onSelectMenu={() => {}}>
-      <ResizablePanel>
+      <ResizablePanel id="assistant-store">
         <div className="container px-40 py-20 text-center">
           <h2 className="mx-auto my-2 text-4xl font-extrabold md:text-3xl">
             {t('Assistants Store')}

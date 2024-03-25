@@ -242,7 +242,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
   );
   return (
     <Threads selectedThreadId={selectedThreadId} view={view} onSelectMenu={handleSelectMenu}>
-      <ResizablePanel>
+      <ResizablePanel id="thread">
         {view !== ViewName.Archives && (
           <Thread
             conversationId={selectedThreadId}
@@ -261,6 +261,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
       </ResizablePanel>
       <ResizableHandle />
       <ResizablePanel
+        id="settings"
         minSize={20}
         defaultSize={20}
         maxSize={50}
