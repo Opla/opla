@@ -19,9 +19,6 @@ import { AIServiceType, Assistant, Conversation, Provider, ProviderType, Ui } fr
 import { MenuAction } from '@/types/ui';
 import { findProvider, updateProvider } from '@/utils/data/providers';
 import { useAssistantStore } from '@/stores';
-// import { ModalsContext } from '@/context/modals';
-// import { ModalIds } from '@/modals';
-// import { Button } from '@/components/ui/button';
 import useTranslation from '@/hooks/useTranslation';
 import { getActiveService } from '@/utils/services';
 import ModelMenu from './ModelMenu';
@@ -47,7 +44,6 @@ export default function ThreadHeader({
   onSelectModel,
   onSelectMenu,
 }: ThreadMenuProps) {
-  // const { showModal } = useContext(ModalsContext);
   const { getAssistant } = useAssistantStore();
   const { conversations, providers, setProviders } = useContext(AppContext);
   const { backendContext } = useBackend();
@@ -66,8 +62,6 @@ export default function ThreadHeader({
     selectedModelName,
   );
   const selectedModel = service.model;
-  // const service =
-  //   conversation?.services?.[0] || assistant ? getDefaultAssistantService(assistant) : undefined;
 
   const selectedTargetId =
     service?.type === AIServiceType.Assistant ? service.targetId : assistant?.targets?.[0].id;
@@ -88,25 +82,12 @@ export default function ThreadHeader({
     }
   };
 
-  /* const handleNewLocalModel = () => {
-    showModal(ModalIds.NewLocalModel);
-  }; */
-
   let title;
   if (selectedAssistantId) {
     title = <AssistantTitle assistant={assistant} />;
   } else if (selectedItem) {
     title = <ModelTitle selectedItem={selectedItem} selectedModel={selectedModel} />;
   } else {
-    /* title = (
-      <Button
-        variant="ghost"
-        className="flex h-[20px] w-full items-center justify-between text-sm font-medium leading-none text-primary"
-        onClick={handleNewLocalModel}
-      >
-        <span>{t('You need to install a local model')}</span>
-      </Button>
-    ); */
     return (
       <div className="flex w-full flex-col items-start justify-between px-4 py-0 sm:flex-row sm:items-center">
         <div className="flex grow items-center justify-between p-2 text-sm font-medium leading-none">

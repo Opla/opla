@@ -144,7 +144,7 @@ export default function ModelMenu({
                               variant="secondary"
                               className={`ml-4 bg-gray-300 capitalize text-gray-600 ${getStateColor(item.state, 'text', true)}`}
                             >
-                              {item.group || 'local'}
+                              {item.group && item.group !== 'Opla' ? item.group : 'local'}
                             </Badge>
                           </CommandItem>
                         ))}
