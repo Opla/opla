@@ -47,6 +47,8 @@ export type MenuItem = {
   onSelect?: (data: string) => void;
   state?: MenuItemState;
   disabled?: boolean;
+  className?: string;
+  description?: string;
 };
 
 export enum MenuAction {
@@ -55,6 +57,9 @@ export enum MenuAction {
   DeleteConversation = 'delete-conversation',
   ChangeView = 'change-view',
   ToggleGroup = 'toggle-group',
+  ChooseAssistant = 'choose-assistant',
+  InstallModel = 'install-model',
+  ConfigureOpenAI = 'configure-openai',
 }
 
 export enum ViewName {

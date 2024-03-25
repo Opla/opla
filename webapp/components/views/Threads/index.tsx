@@ -19,7 +19,7 @@ import { useRouter } from 'next/router';
 import { useSearchParams } from 'next/navigation';
 import { v4 as uuid } from 'uuid';
 import useBackend from '@/hooks/useBackendContext';
-import { Conversation, PageSettings } from '@/types';
+import { Conversation, PageSettings, Provider, ProviderType, Ui } from '@/types';
 import { DefaultPageSettings, DefaultThreadsExplorerGroups } from '@/utils/constants';
 import logger from '@/utils/logger';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
@@ -30,6 +30,8 @@ import { AppContext } from '@/context';
 import { ConversationError, MenuAction, Page, ViewName } from '@/types/ui';
 import { getAssistantId } from '@/utils/services';
 import { deepEqual } from '@/utils/data';
+import { createProvider } from '@/utils/data/providers';
+import OpenAI from '@/utils/providers/openai';
 import { ResizableHandle, ResizablePanel } from '../../ui/resizable';
 import Settings from './Settings';
 import Threads from './Threads';
@@ -62,6 +64,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     archives,
     setArchives,
     deleteArchive,
+    providers,
   } = useContext(AppContext);
   const { backendContext, setSettings } = useBackend();
 
@@ -199,6 +202,19 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
         ...settings,
         pages: { ...settings.pages, [Page.Threads]: newThreadsSettings },
       });
+    } else if (menu === MenuAction.ChooseAssistant) {
+      const route = Ui.Page.Threads;
+      router.push(`${route}/store`);
+    } else if (menu === MenuAction.InstallModel) {
+      showModal(ModalIds.NewLocalModel);
+    } else if (menu === MenuAction.ConfigureOpenAI) {
+      let chatGPT = providers.find(
+        (p: Provider) => p.type === ProviderType.openai && p.name === OpenAI.template.name,
+      );
+      if (!chatGPT) {
+        chatGPT = createProvider(OpenAI.template.name as string, OpenAI.template);
+      }
+      showModal(ModalIds.OpenAI, { item: chatGPT });
     }
   };
 

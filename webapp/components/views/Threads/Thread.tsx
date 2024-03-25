@@ -675,6 +675,8 @@ function Thread({
     >
       <ConversationPanel
         selectedConversation={selectedConversation}
+        selectedAssistantId={assistantId}
+        selectedModelName={selectedModelNameOrId}
         messages={messages}
         avatars={avatars}
         disabled={disabled}
@@ -684,6 +686,7 @@ function Thread({
         onDeleteAssets={handleShouldDeleteAssets}
         onChangeMessageContent={handleChangeMessageContent}
         onSelectPrompt={handleUpdatePrompt}
+        onSelectMenu={onSelectMenu}
         parseAndValidatePrompt={parseAndValidatePrompt}
       />
       {(prompt || (messages && messages[0]?.conversationId === conversationId)) && (
