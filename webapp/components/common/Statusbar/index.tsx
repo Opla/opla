@@ -97,8 +97,8 @@ export default function Statusbar() {
           {backendContext.server.status === 'started' && (
             <span>{model?.title || t('Model not found')}</span>
           )}
-          {(backendContext.server.status === 'stopping' ||
-            backendContext.server.status === 'stopped') && <span>{t('Server is stopped')}</span>}
+          {/* (backendContext.server.status === 'stopping' ||
+            backendContext.server.status === 'stopped') && <span>{t('Server is stopped')}</span> */}
           {backendContext.server.status === 'error' && (
             <span className="text-destructive-foreground">{t('Server error')}</span>
           )}
