@@ -1,3 +1,10 @@
+# [1.0.0-alpha.23](https://github.com/Opla/opla/compare/v1.0.0-alpha.22...v1.0.0-alpha.23) (2024-03-25)
+
+
+### Features
+
+* add sentry to monitor bugs [#542](https://github.com/Opla/opla/issues/542) ([#561](https://github.com/Opla/opla/issues/561)) ([0b5ebff](https://github.com/Opla/opla/commit/0b5ebff080e8170892536c84fda3f9aaefc3116b))
+
 # [1.0.0-alpha.22](https://github.com/Opla/opla/compare/v1.0.0-alpha.21...v1.0.0-alpha.22) (2024-03-25)
 
 
