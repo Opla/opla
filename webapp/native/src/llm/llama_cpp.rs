@@ -243,11 +243,11 @@ impl LLamaCppServer {
                 println!("{}", message);
                 match callback {
                     Some(mut cb) => {
-                        cb(Err(LlmError::new(&message, "BadJson")));
+                        cb(Err(LlmError::new(&message, "FailedSend")));
                     }
                     None => (),
                 }
-                return Err(Box::new(Error::BadJson));
+                return Err(Box::new(error));
             }
         };
         let status = response.status();
@@ -259,18 +259,18 @@ impl LLamaCppServer {
                     println!("{}", message);
                     match callback {
                         Some(mut cb) => {
-                            cb(Err(LlmError::new(&message, "BadJson")));
+                            cb(Err(LlmError::new(&message, "FailedDeserialize")));
                         }
                         None => (),
                     }
-                    return Err(Box::new(Error::BadJson));
+                    return Err(Box::new(error));
                 }
             };
             let message = format!("Failed to get response: {} {:?}", status, error);
             println!("{}", message);
             match callback {
                 Some(mut cb) => {
-                    cb(Err(LlmError::new(&message, "BadJson")));
+                    cb(Err(LlmError::new(&message, "FailedResponse")));
                 }
                 None => (),
             }
@@ -290,11 +290,11 @@ impl LLamaCppServer {
                             println!("{}", message);
                             match callback {
                                 Some(mut cb) => {
-                                    cb(Err(LlmError::new(&message, "BadJson")));
+                                    cb(Err(LlmError::new(&message, "FailedParsingResponse")));
                                 }
                                 None => (),
                             }
-                            return Err(Box::new(Error::BadJson));
+                            return Err(Box::new(error));
                         }
                     };
                     println!("chunk: {:?}", chunk);
@@ -338,11 +338,11 @@ impl LLamaCppServer {
                     println!("{}", message);
                     match callback {
                         Some(mut cb) => {
-                            cb(Err(LlmError::new(&message, "BadJson")));
+                            cb(Err(LlmError::new(&message, "FailedEvent")));
                         }
                         None => (),
                     }
-                    return Err(Box::new(Error::BadJson));
+                    return Err(Box::new(error));
                 }
             }
         }
