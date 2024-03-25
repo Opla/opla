@@ -1,3 +1,10 @@
+# [1.0.0-alpha.17](https://github.com/Opla/opla/compare/v1.0.0-alpha.16...v1.0.0-alpha.17) (2024-03-25)
+
+
+### Features
+
+* remove "server is stopped" [#541](https://github.com/Opla/opla/issues/541) ([5753403](https://github.com/Opla/opla/commit/575340395e7b1b97bb22e603a57d5ba5f10db251))
+
 # [1.0.0-alpha.16](https://github.com/Opla/opla/compare/v1.0.0-alpha.15...v1.0.0-alpha.16) (2024-03-24)
 
 
