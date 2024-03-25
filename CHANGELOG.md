@@ -1,3 +1,10 @@
+# [1.0.0-alpha.20](https://github.com/Opla/opla/compare/v1.0.0-alpha.19...v1.0.0-alpha.20) (2024-03-25)
+
+
+### Bug Fixes
+
+* hover should have a unique key ([#555](https://github.com/Opla/opla/issues/555)) ([e409637](https://github.com/Opla/opla/commit/e40963711989b0629757f028de57ceba47b4df31)), closes [#554](https://github.com/Opla/opla/issues/554)
+
 # [1.0.0-alpha.19](https://github.com/Opla/opla/compare/v1.0.0-alpha.18...v1.0.0-alpha.19) (2024-03-25)
 
 
