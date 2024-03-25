@@ -53,7 +53,7 @@ function EmptyView({
     );
     if (action.description) {
       return (
-        <HoverCard>
+        <HoverCard key={action.label}>
           <HoverCardTrigger>{Actionbutton}</HoverCardTrigger>
           <HoverCardContent>{action.description}</HoverCardContent>
         </HoverCard>
