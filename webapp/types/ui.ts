@@ -63,6 +63,7 @@ export enum MenuAction {
 }
 
 export enum ViewName {
+  Assistants = 'assistants',
   Recent = 'recent',
   Archives = 'archives',
 }

@@ -220,10 +220,12 @@ export default function ThreadsExplorer({
   const explorerGroups = threadsSettings.explorerGroups || DefaultThreadsExplorerGroups;
   const recentGroup = explorerGroups.find((g) => g.title === ViewName.Recent);
   const archivesGroup = explorerGroups.find((g) => g.title === ViewName.Archives);
+  const assistantsGroup = explorerGroups.find((g) => g.title === ViewName.Assistants);
   const showRecent = recentGroup?.hidden === false;
   const showArchives = archivesGroup?.hidden === false;
   const closedRecent = recentGroup?.closed === true;
   const closedArchives = archivesGroup?.closed === true;
+  const closedAssistants = assistantsGroup?.closed === true;
 
   return (
     <Explorer
@@ -309,7 +311,14 @@ export default function ThreadsExplorer({
         <div className="flex h-full grow flex-col gap-2 pb-2 text-sm">
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel id="assistant" className="!overflow-y-auto">
-              <AssistantsList selectedId={selectedAssistantId} onSelect={handleSelectAssistant} />
+              <AssistantsList
+                closed={closedAssistants}
+                onToggle={() => {
+                  onSelectMenu(MenuAction.ToggleGroup, ViewName.Assistants);
+                }}
+                selectedId={selectedAssistantId}
+                onSelect={handleSelectAssistant}
+              />
             </ResizablePanel>
             <ResizableHandle />
             {showRecent && (
