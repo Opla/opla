@@ -1,3 +1,10 @@
+# [1.0.0-alpha.18](https://github.com/Opla/opla/compare/v1.0.0-alpha.17...v1.0.0-alpha.18) (2024-03-25)
+
+
+### Bug Fixes
+
+* empty threads use all height [#549](https://github.com/Opla/opla/issues/549) ([#552](https://github.com/Opla/opla/issues/552)) ([d121ff1](https://github.com/Opla/opla/commit/d121ff1e32f536d86b45275b866c83ca9df2d01e))
+
 # [1.0.0-alpha.17](https://github.com/Opla/opla/compare/v1.0.0-alpha.16...v1.0.0-alpha.17) (2024-03-25)
 
 
