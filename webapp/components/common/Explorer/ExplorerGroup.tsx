@@ -62,7 +62,7 @@ function ExplorerGroup({
       <div
         className={cn(
           'transform overflow-hidden transition-all ease-in-out',
-          closed ? 'max-h-0' : 'max-h-screen',
+          closed ? 'max-h-0' : 'h-full max-h-screen',
         )}
       >
         {children}

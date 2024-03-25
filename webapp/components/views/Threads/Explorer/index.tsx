@@ -314,13 +314,14 @@ export default function ThreadsExplorer({
             <ResizableHandle />
             {showRecent && (
               <>
-                <ResizablePanel className="!overflow-y-auto pt-2">
+                <ResizablePanel className="!overflow-y-auto pt-2" minSize={3}>
                   <ExplorerGroup
                     title={t(ViewName.Recent)}
                     closed={closedRecent}
                     onToggle={() => {
                       onSelectMenu(MenuAction.ToggleGroup, ViewName.Recent);
                     }}
+                    className="h-full"
                   >
                     {threads.length > 0 && (
                       <ExplorerList<Conversation>
@@ -343,49 +344,69 @@ export default function ThreadsExplorer({
                       />
                     )}
                     {threads.length === 0 && (
-                      <EmptyView
-                        title={t('No threads')}
-                        description={t("Don't be shy, say hi!")}
-                        icon={
-                          <MessageSquareWarning
-                            className="h-12 w-12 text-muted-foreground"
-                            strokeWidth={1.5}
-                          />
-                        }
-                        className="h-full flex-1 grow"
-                      />
+                      <div className="h-full">
+                        <EmptyView
+                          title={t('No threads')}
+                          description={t("Don't be shy, say hi!")}
+                          icon={
+                            <MessageSquareWarning
+                              className="h-12 w-12 text-muted-foreground"
+                              strokeWidth={1.5}
+                            />
+                          }
+                          className="h-full"
+                        />
+                      </div>
                     )}
                   </ExplorerGroup>
                 </ResizablePanel>
                 <ResizableHandle />
               </>
             )}
-            {showArchives && archives.length > 0 && (
+            {showArchives && (
               <>
-                <ResizablePanel className="!overflow-y-auto pt-2">
+                <ResizablePanel className="!overflow-y-auto pt-2" minSize={3}>
                   <ExplorerGroup
                     title={t(ViewName.Archives)}
                     closed={closedArchives}
                     onToggle={() => {
                       onSelectMenu(MenuAction.ToggleGroup, ViewName.Archives);
                     }}
+                    className="h-full"
                   >
-                    <ExplorerList<Conversation>
-                      selectedId={selectedThreadId}
-                      items={archives.sort(
-                        (c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt,
-                      )}
-                      getItemTitle={(c) => `${getConversationTitle(c, t)}${c.temp ? '...' : ''}`}
-                      renderItem={(c) => (
-                        <>
-                          <span>{getConversationTitle(c, t).replaceAll(' ', '\u00a0')}</span>
-                          {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
-                        </>
-                      )}
-                      onSelectItem={(item) => handleSelectThread(item, ViewName.Archives)}
-                      onChange={handleChangeConversationName}
-                      menu={() => menu}
-                    />
+                    {archives.length > 0 && (
+                      <ExplorerList<Conversation>
+                        selectedId={selectedThreadId}
+                        items={archives.sort(
+                          (c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt,
+                        )}
+                        getItemTitle={(c) => `${getConversationTitle(c, t)}${c.temp ? '...' : ''}`}
+                        renderItem={(c) => (
+                          <>
+                            <span>{getConversationTitle(c, t).replaceAll(' ', '\u00a0')}</span>
+                            {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
+                          </>
+                        )}
+                        onSelectItem={(item) => handleSelectThread(item, ViewName.Archives)}
+                        onChange={handleChangeConversationName}
+                        menu={() => menu}
+                      />
+                    )}
+                    {archives.length === 0 && (
+                      <div className="h-full">
+                        <EmptyView
+                          title={t('No archives')}
+                          description={t('No conversation in archives')}
+                          icon={
+                            <Archive
+                              className="h-12 w-12 text-muted-foreground"
+                              strokeWidth={1.5}
+                            />
+                          }
+                          className="h-full"
+                        />
+                      </div>
+                    )}
                   </ExplorerGroup>
                 </ResizablePanel>
                 <ResizableHandle />
