@@ -19,9 +19,9 @@ import { AIServiceType, Assistant, Conversation, Provider, ProviderType, Ui } fr
 import { MenuAction } from '@/types/ui';
 import { findProvider, updateProvider } from '@/utils/data/providers';
 import { useAssistantStore } from '@/stores';
-import { ModalsContext } from '@/context/modals';
-import { ModalIds } from '@/modals';
-import { Button } from '@/components/ui/button';
+// import { ModalsContext } from '@/context/modals';
+// import { ModalIds } from '@/modals';
+// import { Button } from '@/components/ui/button';
 import useTranslation from '@/hooks/useTranslation';
 import { getActiveService } from '@/utils/services';
 import ModelMenu from './ModelMenu';
@@ -47,7 +47,7 @@ export default function ThreadHeader({
   onSelectModel,
   onSelectMenu,
 }: ThreadMenuProps) {
-  const { showModal } = useContext(ModalsContext);
+  // const { showModal } = useContext(ModalsContext);
   const { getAssistant } = useAssistantStore();
   const { conversations, providers, setProviders } = useContext(AppContext);
   const { backendContext } = useBackend();
@@ -88,9 +88,9 @@ export default function ThreadHeader({
     }
   };
 
-  const handleNewLocalModel = () => {
+  /* const handleNewLocalModel = () => {
     showModal(ModalIds.NewLocalModel);
-  };
+  }; */
 
   let title;
   if (selectedAssistantId) {
@@ -98,7 +98,7 @@ export default function ThreadHeader({
   } else if (selectedItem) {
     title = <ModelTitle selectedItem={selectedItem} selectedModel={selectedModel} />;
   } else {
-    title = (
+    /* title = (
       <Button
         variant="ghost"
         className="flex h-[20px] w-full items-center justify-between text-sm font-medium leading-none text-primary"
@@ -106,6 +106,13 @@ export default function ThreadHeader({
       >
         <span>{t('You need to install a local model')}</span>
       </Button>
+    ); */
+    return (
+      <div className="flex w-full flex-col items-start justify-between px-4 py-0 sm:flex-row sm:items-center">
+        <div className="flex grow items-center justify-between p-2 text-sm font-medium leading-none">
+          {t('Welcome to Opla')}
+        </div>
+      </div>
     );
   }
 
