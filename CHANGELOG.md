@@ -1,3 +1,10 @@
+# [1.0.0-alpha.27](https://github.com/Opla/opla/compare/v1.0.0-alpha.26...v1.0.0-alpha.27) (2024-03-25)
+
+
+### Features
+
+* toggle assistant group in Thread [#550](https://github.com/Opla/opla/issues/550) ([#568](https://github.com/Opla/opla/issues/568)) ([f5deec0](https://github.com/Opla/opla/commit/f5deec089039f82490b6d060a7f8e7d5ba421c7b))
+
 # [1.0.0-alpha.26](https://github.com/Opla/opla/compare/v1.0.0-alpha.25...v1.0.0-alpha.26) (2024-03-25)
 
 
