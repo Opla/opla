@@ -1,3 +1,10 @@
+# [1.0.0-alpha.24](https://github.com/Opla/opla/compare/v1.0.0-alpha.23...v1.0.0-alpha.24) (2024-03-25)
+
+
+### Bug Fixes
+
+* build with Sentry don't work due to some jsx [#562](https://github.com/Opla/opla/issues/562) ([#563](https://github.com/Opla/opla/issues/563)) ([3780ef8](https://github.com/Opla/opla/commit/3780ef81b082d8d648123351f41316eeb43c28e7))
+
 # [1.0.0-alpha.23](https://github.com/Opla/opla/compare/v1.0.0-alpha.22...v1.0.0-alpha.23) (2024-03-25)
 
 
