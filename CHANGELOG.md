@@ -1,3 +1,10 @@
+# [1.0.0-alpha.25](https://github.com/Opla/opla/compare/v1.0.0-alpha.24...v1.0.0-alpha.25) (2024-03-25)
+
+
+### Features
+
+* replace header  pill/badge Opla by local [#564](https://github.com/Opla/opla/issues/564) ([#565](https://github.com/Opla/opla/issues/565)) ([285a299](https://github.com/Opla/opla/commit/285a29962613d1557700618a78397ebea55bc1e3))
+
 # [1.0.0-alpha.24](https://github.com/Opla/opla/compare/v1.0.0-alpha.23...v1.0.0-alpha.24) (2024-03-25)
 
 
