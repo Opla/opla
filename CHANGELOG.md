@@ -1,3 +1,10 @@
+# [1.0.0-alpha.26](https://github.com/Opla/opla/compare/v1.0.0-alpha.25...v1.0.0-alpha.26) (2024-03-25)
+
+
+### Bug Fixes
+
+* use gpt-3.5 turbo gives invalid modelid [#528](https://github.com/Opla/opla/issues/528) ([#567](https://github.com/Opla/opla/issues/567)) ([88a29f4](https://github.com/Opla/opla/commit/88a29f47a71d86138b9a39be381f0dc9ffc65fec))
+
 # [1.0.0-alpha.25](https://github.com/Opla/opla/compare/v1.0.0-alpha.24...v1.0.0-alpha.25) (2024-03-25)
 
 
