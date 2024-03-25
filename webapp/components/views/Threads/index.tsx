@@ -195,8 +195,15 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
       });
     } else if (menu === MenuAction.ToggleGroup) {
       let explorerGroups = threadsSettings.explorerGroups || DefaultThreadsExplorerGroups;
-      explorerGroups =
-        explorerGroups.map((g) => (g.title === data ? { ...g, closed: !g.closed } : g)) || [];
+      if (explorerGroups.find((g) => g.title === data)) {
+        explorerGroups =
+          explorerGroups.map((g) => (g.title === data ? { ...g, closed: !g.closed } : g)) || [];
+      } else {
+        explorerGroups = [
+          ...explorerGroups,
+          { title: data, closed: true, hidden: false, height: 0 },
+        ];
+      }
       const newThreadsSettings = { ...threadsSettings, explorerGroups };
       setSettings({
         ...settings,

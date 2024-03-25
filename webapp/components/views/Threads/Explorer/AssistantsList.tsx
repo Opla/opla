@@ -27,10 +27,17 @@ import { OplaAssistant } from '@/stores/assistants';
 
 type AssistantsListProps = {
   selectedId?: string;
+  closed?: boolean;
+  onToggle?: () => void;
   onSelect?: (id: string) => void;
 };
 
-export default function AssistantsList({ selectedId, onSelect }: AssistantsListProps) {
+export default function AssistantsList({
+  selectedId,
+  closed,
+  onToggle,
+  onSelect,
+}: AssistantsListProps) {
   const router = useRouter();
   const { t } = useTranslation();
   const { getAllAssistants, updateAssistant } = useAssistantStore();
@@ -79,6 +86,8 @@ export default function AssistantsList({ selectedId, onSelect }: AssistantsListP
   return (
     <ExplorerGroup
       title="Assistants"
+      closed={closed}
+      onToggle={onToggle}
       toolbar={
         <Button variant="outline" size="sm" className="text-primary" asChild>
           <Link href="/threads/store">
