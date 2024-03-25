@@ -174,6 +174,7 @@ export default function Threads({
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel
+        id="explorer"
         minSize={14}
         maxSize={40}
         defaultSize={pageSettings.explorerWidth}

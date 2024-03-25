@@ -31,11 +31,11 @@ export default function MainView({
 }: MainViewProps) {
   return (
     <ResizablePanelGroup direction="horizontal">
-      <ResizablePanel defaultSize={20}>
+      <ResizablePanel id="explorer" defaultSize={20}>
         <Explorer selectedId={selectedId} />
       </ResizablePanel>
       <ResizableHandle />
-      <ResizablePanel>
+      <ResizablePanel id="content">
         <ContentView selectedId={selectedId} />
       </ResizablePanel>
     </ResizablePanelGroup>
