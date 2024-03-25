@@ -49,6 +49,7 @@ export const tokenize = async (
 
 export const createLlmMessages = (
   modelName: string,
+  providerName: string | undefined,
   messages: Message[],
   policy: ContextWindowPolicy,
   keepSystemMessages: boolean,
@@ -69,10 +70,12 @@ export const createLlmMessages = (
     });
   }
 
+  const sanitizedName = providerName === 'OpenAI' ? undefined : modelName;
+
   const llmMessages: LlmMessage[] = context.map((m) => ({
     content: getMessageContentAsString(m),
     role: m.author?.role,
-    name: m.author?.role !== 'assistant' ? m.author?.name : modelName,
+    name: m.author?.role !== 'assistant' ? m.author?.name : sanitizedName,
   }));
   return llmMessages;
 };
@@ -147,6 +150,7 @@ export const completion = async (
   // const index = conversationMessages.findIndex((m) => m.id === message.id);
   const messages = createLlmMessages(
     model.name,
+    provider?.name,
     conversationMessages,
     contextWindowPolicy,
     keepSystem,
@@ -163,7 +167,7 @@ export const completion = async (
 
   const llmProvider = mapKeys({ ...provider, key }, toSnakeCase);
   const response: LlmCompletionResponse = (await invokeTauri('llm_call_completion', {
-    model: model.name,
+    model: model.id,
     llmProvider,
     query: { command: 'completion', options },
     completionOptions: mapKeys(completionOptions, toSnakeCase),
