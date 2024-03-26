@@ -59,7 +59,13 @@ export default function Statusbar() {
 
   const displayDownloads = () => {
     const id = download?.id;
-    if (id) {
+    const downloadModel = findModel(id, backendContext.config.models.items);
+    if (downloadModel) {
+      showModal(ModalIds.DownloadModel, {
+        item: downloadModel,
+        onAction: handleCancelDownload,
+      });
+    } else if (id) {
       showModal(ModalIds.Downloads, {
         item: {
           id,

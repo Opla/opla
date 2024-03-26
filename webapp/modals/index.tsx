@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useTranslation } from 'react-i18next';
+import useTranslation from '@/hooks/useTranslation';
 import Dialog from '@/components/common/Modal';
 import AlertDialog from '@/components/common/AlertDialog';
 import { BaseNamedRecord } from '@/types';
@@ -25,6 +25,7 @@ import NewProviderDialog from './templates/NewProvider';
 import OpenAIDialog from './openai';
 import NewLocalModelDialog from './models';
 import NewPresetDialog from './presets';
+import DownloadModelDialog from './models/download';
 
 const Modals: ModalRef[] = [
   {
@@ -208,6 +209,20 @@ const Modals: ModalRef[] = [
           key={ModalIds.EditTarget}
           id={ModalIds.EditTarget}
           visible={visible}
+          onClose={onClose}
+          data={data}
+        />
+      );
+    },
+  },
+  {
+    id: ModalIds.DownloadModel,
+    Component: function DMDialog({ visible, onClose, data }) {
+      return (
+        <DownloadModelDialog
+          key={ModalIds.Downloads}
+          id={ModalIds.Downloads}
+          open={visible}
           onClose={onClose}
           data={data}
         />

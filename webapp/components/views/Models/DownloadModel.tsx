@@ -13,18 +13,35 @@
 // limitations under the License.
 
 import { cn } from '@/lib/utils';
-import { Model } from '@/types';
+import { Download, Model } from '@/types';
+import { Progress } from '@/components/ui/progress';
+import { formatFileSize } from '@/utils/download';
+import { Separator } from '@/components/ui/separator';
+import useTranslation from '@/hooks/useTranslation';
 
 type DownloadModelProps = {
   className?: string;
   model: Model;
-  onClose: () => void;
+  download: Download | undefined;
 };
-function DownloadModel({ className, model, onClose }: DownloadModelProps) {
-  console.log('DownloadModel', onClose);
+function DownloadModel({ className, model, download }: DownloadModelProps) {
+  const { t } = useTranslation();
   return (
     <div className={cn('', className)}>
-      <h1>Download Model {model.title}</h1>
+      <h1 className="pb-4">{model.name}</h1>
+
+      <Progress value={download?.percentage || 100} className="m-8 w-[80%]" />
+      {download && (
+        <p className="ali flex h-5 w-full items-center justify-end space-x-2 px-14 text-sm text-muted-foreground">
+          <div>{formatFileSize(download.transfered)}</div> <Separator orientation="vertical" />{' '}
+          <div>{formatFileSize(download.fileSize)}</div>
+        </p>
+      )}
+      {!download && (
+        <p className="ali flex h-5 w-full items-center justify-end space-x-2 px-14 text-sm text-muted-foreground">
+          {t('Done')}
+        </p>
+      )}
     </div>
   );
 }

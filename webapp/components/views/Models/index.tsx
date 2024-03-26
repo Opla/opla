@@ -14,6 +14,7 @@
 
 import MainView from '@/components/common/MainView';
 import NewLocalModel from './NewLocalModel';
+import DownloadModel from './DownloadModel';
 import Explorer from './Explorer';
 import ModelView from './Model';
 
@@ -21,4 +22,4 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
   return <MainView selectedId={selectedModelId} explorer={Explorer} contentView={ModelView} />;
 }
 
-export { NewLocalModel };
+export { NewLocalModel, DownloadModel };

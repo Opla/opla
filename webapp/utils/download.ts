@@ -11,3 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+const formatFileSize = (bytes: number, fractionDigits = 2) => {
+  if (bytes === 0) return '0 b';
+  const k = 1000;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / k ** i).toFixed(fractionDigits))} ${sizes[i]}`;
+};
+
+// eslint-disable-next-line import/prefer-default-export
+export { formatFileSize };
