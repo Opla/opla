@@ -487,14 +487,7 @@ impl OplaServer {
         model: &str,
         model_path: &str
     ) -> Result<(), Box<dyn std::error::Error>> {
-        let current_model = match &self.model {
-            Some(m) => m,
-            None => {
-                println!("Opla server error try to read model");
-                return Err(Box::new(Error::ModelNotLoaded));
-            }
-        };
-        if self.model.is_none() || current_model != &model {
+        if self.model != Some(model.to_string()) {
             self.stop(&app).await?;
             let self_status = Arc::clone(&self.status);
             let mut wouldblock = true;
@@ -505,7 +498,6 @@ impl OplaServer {
                     let status = match self_status.try_lock() {
                         Ok(status) => status,
                         Err(e) => {
-                            //if e.into_inner().kind() == std::io::ErrorKind::WouldBlock {
                             println!("Opla server error try to read status {:?}", e);
                             if wouldblock {
                                 // Retry after a short delay

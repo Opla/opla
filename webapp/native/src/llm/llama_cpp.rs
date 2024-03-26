@@ -150,7 +150,7 @@ impl LlamaCppChatCompletion {
     pub fn to_llm_response(&self) -> LlmCompletionResponse {
         LlmCompletionResponse {
             created: None,
-            status: None,
+            status: Some("success".to_owned()),
             content: self.content.clone(),
             conversation_id: None,
             usage: Some(self.timings.to_llm_usage()),
@@ -212,7 +212,7 @@ impl LLamaCppServer {
             }
         };
         let status = response.status();
-        println!("Response Status: {}", status);
+        
         let response = match response.json::<LlamaCppChatCompletion>().await {
             Ok(r) => r,
             Err(error) => {
@@ -220,6 +220,7 @@ impl LLamaCppServer {
                 return Err(Box::new(Error::BadResponse));
             }
         };
+        println!("Response Status: {} {:?}", status, response);
         Ok(response.to_llm_response())
     }
 

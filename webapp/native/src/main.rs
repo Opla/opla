@@ -518,6 +518,7 @@ async fn llm_call_completion<R: Runtime>(
         let mut store = context.store.lock().await;
         store.set_local_active_model_id(&model);
         store.save().map_err(|err| err.to_string())?;
+        println!("Opla call completion: {:?}", response);
         return Ok(response);
     }
     if llm_provider_type == "openai" || llm_provider_type == "server" {

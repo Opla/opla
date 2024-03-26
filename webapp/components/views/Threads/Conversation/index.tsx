@@ -32,6 +32,7 @@ export type ConversationPanelProps = {
   selectedModelName: string;
   messages: Message[] | undefined;
   avatars: AvatarRef[];
+  modelItems: Ui.MenuItem[];
   disabled: boolean;
   isPrompt: boolean;
   onResendMessage: (m: Message) => void;
@@ -49,6 +50,7 @@ export function ConversationPanel({
   selectedConversation,
   selectedAssistantId,
   selectedModelName,
+  modelItems,
   disabled,
   isPrompt,
   onResendMessage,
@@ -94,6 +96,8 @@ export function ConversationPanel({
       description = t('Opla works using your machine processing power.');
     } else if (selectedModelName) {
       buttonLabel = t('Start a conversation with {{model}}', { model: selectedModelName });
+      description = t('Opla works using your machine processing power.');
+    } else if (modelItems.length > 0) {
       description = t('Opla works using your machine processing power.');
     } else {
       actions = [

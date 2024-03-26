@@ -232,13 +232,19 @@ impl Store {
             service.model_id = Some(model_id.to_owned());
             service.provider_id_or_name = Some("Opla".to_owned());
             self.services.active_service = Some(service);
+        } else {
+            println!("Local model not found: {}", model_id);
         }
     }
 
     pub fn get_local_active_model_id(&self) -> Option<String> {
         let model_id = self.services.get_active_model_id();
         let provider = self.services.get_active_provider_id();
-        if provider == Some("Opla".to_owned()) && model_id.is_some() && self.has_model(model_id.as_ref().unwrap()) {
+        if
+            provider == Some("Opla".to_owned()) &&
+            model_id.is_some() &&
+            self.has_model(model_id.as_ref().unwrap())
+        {
             return model_id;
         }
         return None;

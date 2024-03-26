@@ -681,6 +681,7 @@ function Thread({
         selectedModelName={selectedModelNameOrId}
         messages={messages}
         avatars={avatars}
+        modelItems={modelItems}
         disabled={disabled}
         isPrompt={!!prompt}
         onResendMessage={handleResendMessage}

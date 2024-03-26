@@ -87,7 +87,7 @@ export default function ThreadHeader({
     title = <AssistantTitle assistant={assistant} />;
   } else if (selectedItem) {
     title = <ModelTitle selectedItem={selectedItem} selectedModel={selectedModel} />;
-  } else {
+  } else if (modelItems.length === 0) {
     return (
       <div className="flex w-full flex-col items-start justify-between px-4 py-0 sm:flex-row sm:items-center">
         <div className="flex grow items-center justify-between p-2 text-sm font-medium leading-none">
@@ -95,6 +95,8 @@ export default function ThreadHeader({
         </div>
       </div>
     );
+  } else {
+    title = <span>{t('Select a model')}</span>;
   }
 
   let targetState = Ui.BasicState.disabled;
