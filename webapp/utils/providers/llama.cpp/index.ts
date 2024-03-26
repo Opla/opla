@@ -23,7 +23,7 @@ const stopLLamaCppServer = async () => {
 };
 
 const startLLamaCppServer = async (
-  model: string,
+  model: string | undefined,
   metadata: LlamaCppArguments,
   command = 'start_opla_server',
 ): Promise<unknown> => {
@@ -37,7 +37,7 @@ const startLLamaCppServer = async (
 };
 
 const restartLLamaCppServer = async (
-  model: string,
+  model: string | undefined,
   metadata: LlamaCppArguments,
 ): Promise<unknown> => {
   await stopLLamaCppServer();

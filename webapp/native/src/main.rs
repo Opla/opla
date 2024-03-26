@@ -197,7 +197,7 @@ async fn start_opla_server<R: Runtime>(
     let model_name = match model {
         Some(m) => { m }
         None => {
-            match &store.models.active_model {
+            match &store.get_local_active_model_id() {
                 Some(m) => { m.clone() }
                 None => {
                     return Err(format!("Opla server not started model not found"));
@@ -213,7 +213,7 @@ async fn start_opla_server<R: Runtime>(
             return Err(format!("Opla server not started model not found: {:?}", err));
         }
     };
-    store.models.active_model = Some(model_name.clone());
+    // store.models.active_model = Some(model_name.clone());
     store.server.parameters.port = port;
     store.server.parameters.host = host.clone();
     store.server.parameters.context_size = context_size;
@@ -305,7 +305,7 @@ async fn install_model<R: Runtime>(
         }
     };
     if was_empty {
-        store.models.active_model = Some(model_name);
+        store.set_local_active_model_id(&model_name);
     }
 
     match url {
@@ -354,9 +354,10 @@ async fn cancel_download_model<R: Runtime>(
         Some(m) => {
             store.models.remove_model(model_name_or_id.as_str());
 
-            if store.models.active_model == Some(model_name_or_id.clone()) {
-                store.models.active_model = None;
-            }
+            /* if store.get_local_active_model_id() == Some(model_name_or_id.clone()) {
+                store.services.active_service = None;
+            } */
+            store.clear_active_service_if_model_equal(model_name_or_id.as_str());
             store.save().map_err(|err| err.to_string())?;
             drop(store);
 
@@ -400,9 +401,10 @@ async fn uninstall_model<R: Runtime>(
 
     match store.models.remove_model(model_id.as_str()) {
         Some(model) => {
-            if store.models.active_model == Some(model.name.clone()) {
+            /* if store.models.active_model == Some(model.name.clone()) {
                 store.models.active_model = None;
-            }
+            } */
+            store.clear_active_service_if_model_equal(model.name.as_str());
             let mut server = context.server.lock().await;
             if model.is_some_id_or_name(&server.model) {
                 let _res = server.stop(&app).await;
@@ -431,7 +433,7 @@ async fn set_active_model<R: Runtime>(
     if result.is_none() {
         return Err(format!("Model not found: {:?}", model_id));
     }
-    store.models.active_model = Some(model_id);
+    store.set_local_active_model_id(&model_id);
     store.save().map_err(|err| err.to_string())?;
     Ok(())
 }
@@ -514,7 +516,7 @@ async fn llm_call_completion<R: Runtime>(
         server.set_parameters(&model, &model_path, parameters);
 
         let mut store = context.store.lock().await;
-        store.models.active_model = Some(model);
+        store.set_local_active_model_id(&model);
         store.save().map_err(|err| err.to_string())?;
         return Ok(response);
     }
@@ -608,7 +610,8 @@ async fn start_server<R: Runtime>(
     println!("Opla try to start server");
     let store = context.store.lock().await;
 
-    let active_model = match &store.models.active_model {
+    let local_active_model_id = store.get_local_active_model_id();
+    let active_model = match local_active_model_id {
         Some(m) => { m }
         None => {
             return Err(format!("Opla server not started default model not set"));
@@ -763,8 +766,9 @@ async fn opla_setup(app: &mut App) -> Result<(), String> {
     let mut server = context.server.lock().await;
     server.init(store.server.clone());
     let launch_at_startup = store.server.launch_at_startup;
-    let active_model = &String::from("");
-    let (has_model, active_model) = match &store.models.active_model {
+    let active_model = String::from("");
+    let local_model_id = store.get_local_active_model_id();
+    let (has_model, active_model) = match local_model_id {
         Some(m) => { (store.has_model(m.as_str()), m) }
         None => { (false, active_model) }
     };
@@ -772,7 +776,8 @@ async fn opla_setup(app: &mut App) -> Result<(), String> {
         println!("Opla server model not found: {:?}", active_model);
         // Remove default model from server
         server.remove_model();
-        store.models.active_model = None;
+        //store.models.active_model = None;
+        store.services.active_service = None;
         store.save().map_err(|err| err.to_string())?;
     }
     drop(store);

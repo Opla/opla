@@ -20,10 +20,10 @@ import { getResourceUrl } from '.';
 import { getLocalProvider, getProviderState } from './providers';
 import OplaProvider from '../providers/opla';
 
-export const getSelectedModel = (backendContext: OplaContext) => {
+/* export const getSelectedModel = (backendContext: OplaContext) => {
   const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.activeModel}`;
   return selectedPreset;
-};
+}; */
 
 export const getLocalModelsAsItems = (
   backendContext: OplaContext,

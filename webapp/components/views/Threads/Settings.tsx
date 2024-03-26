@@ -36,10 +36,10 @@ export default function Settings({
 }) {
   const { t } = useTranslation();
   const { conversations, updateConversations, providers } = useContext(AppContext);
-  const { backendContext } = useBackend();
+  const { backendContext, getActiveModel } = useBackend();
 
   const selectedConversation = conversations.find((c) => c.id === conversationId);
-  const { activeModel } = backendContext.config.models;
+  const activeModel = getActiveModel();
   const model = findModel(activeModel, backendContext.config.models.items);
   const provider = selectedConversation?.provider
     ? findProvider(selectedConversation?.provider, providers)

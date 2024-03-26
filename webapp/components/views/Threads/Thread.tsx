@@ -102,7 +102,9 @@ function Thread({
   const searchParams = useSearchParams();
   const [service, setService] = useState<AIService | undefined>(undefined);
   const [usage, updateUsage] = useState<Usage | undefined>({ tokenCount: 0 });
-  const activeModel = getServiceModelId(service) || backendContext.config.models.activeModel;
+  const activeModel =
+    getServiceModelId(service) ||
+    (getServiceModelId(backendContext.config.services.activeService) as string); // backendContext.config.models.activeModel;
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
   const conversationId = _conversationId || tempConversationId;
   const selectedConversation = conversations.find((c) => c.id === conversationId);

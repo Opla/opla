@@ -14,7 +14,14 @@
 // import { appWindow } from '@tauri-apps/api/window';
 // import { confirm } from '@tauri-apps/api/dialog';
 // import { listen } from '@tauri-apps/api/event';
-import { LlmStreamResponse, OplaServer, ServerStatus } from '@/types';
+import {
+  AIService,
+  AIServiceType,
+  LlmStreamResponse,
+  OplaContext,
+  OplaServer,
+  ServerStatus,
+} from '@/types';
 import logger from '../logger';
 import {
   restartLLamaCppServer,
@@ -36,11 +43,10 @@ export type BackendResult =
 class Backend {
   private static instance: Backend;
 
-  private activeModel?: string;
+  // private activeModel?: string;
+  private activeService?: AIService;
 
   private static streams: Record<string, LlmStreamResponse> = {};
-
-  // public context?: OplaContext;
 
   public static getInstance = () => {
     if (!Backend.instance) {
@@ -49,7 +55,9 @@ class Backend {
     return Backend.instance;
   };
 
-  public connect = async (listeners: Record<string, (event: unknown) => Promise<void>>) => {
+  public connect = async (
+    listeners: Record<string, (event: unknown) => Promise<void>>,
+  ): Promise<OplaContext> => {
     const { appWindow } = await import('@tauri-apps/api/window');
     const { listen } = await import('@tauri-apps/api/event');
 
@@ -76,8 +84,13 @@ class Backend {
     const config = await getOplaConfig();
 
     logger.info('connected backend oplaConfig=', config);
-    const { activeModel } = config.models;
-    this.activeModel = activeModel;
+    // const { activeModel } = config.models;
+    const { services } = config;
+    let activeModel: string | undefined;
+    if (services.activeService?.type === AIServiceType.Model) {
+      activeModel = services.activeService.modelId;
+    }
+    this.activeService = services.activeService;
     let server: OplaServer = {
       status: ServerStatus.IDLE,
       stdout: [],
@@ -125,7 +138,7 @@ class Backend {
       return { status: 'ok' };
     };
 
-    return { config, server };
+    return { config, server } as OplaContext;
   };
 
   onCloseListener?: () => void;

@@ -27,19 +27,34 @@ pub enum ServiceType {
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Service {
-    r#type: String,
+    pub r#type: ServiceType,
 
-    model_id: Option<String>,
-    provider_id_or_name: Option<String>,
+    pub model_id: Option<String>,
+    pub provider_id_or_name: Option<String>,
 
-    assistant_id: Option<String>,
-    target_id: Option<String>,
+    pub assistant_id: Option<String>,
+    pub target_id: Option<String>,
 }
 
 impl Service {
-    pub fn get_active_model_id(&self) -> Option<String> {
-        match self.r#type.as_str() {
-            "model" => self.model_id.clone(),
+    pub fn new(r#type: ServiceType) -> Self {
+        Self {
+            r#type,
+            model_id: None,
+            provider_id_or_name: None,
+            assistant_id: None,
+            target_id: None,
+        }
+    }
+    pub fn get_model_id(&self) -> Option<String> {
+        match self.r#type {
+            ServiceType::Model => self.model_id.clone(),
+            _ => None,
+        }
+    }
+    pub fn get_provider_id(&self) -> Option<String> {
+        match self.r#type {
+            ServiceType::Model => self.provider_id_or_name.clone(),
             _ => None,
         }
     }
@@ -63,7 +78,14 @@ impl ServiceStorage {
 
     pub fn get_active_model_id(&self) -> Option<String> {
         match &self.active_service {
-            Some(service) => service.get_active_model_id(),
+            Some(service) => service.get_model_id(),
+            None => None,
+        }
+    }
+
+    pub fn get_active_provider_id(&self) -> Option<String> {
+        match &self.active_service {
+            Some(service) => service.get_provider_id(),
             None => None,
         }
     }

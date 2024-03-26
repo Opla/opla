@@ -191,7 +191,7 @@ pub struct ModelEntity {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ModelStorage {
     pub path: Option<String>,
-    pub active_model: Option<String>,
+    // pub active_model: Option<String>,
     pub items: Vec<ModelEntity>,
 }
 
@@ -199,7 +199,7 @@ impl ModelStorage {
     pub fn new() -> Self {
         ModelStorage {
             path: None,
-            active_model: None,
+            // active_model: None,
             items: vec![],
         }
     }
