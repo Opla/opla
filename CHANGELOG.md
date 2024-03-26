@@ -1,3 +1,10 @@
+# [1.0.0-alpha.33](https://github.com/Opla/opla/compare/v1.0.0-alpha.32...v1.0.0-alpha.33) (2024-03-26)
+
+
+### Features
+
+* rename Assistants to My Assistants [#597](https://github.com/Opla/opla/issues/597) ([#599](https://github.com/Opla/opla/issues/599)) ([7f7c7f5](https://github.com/Opla/opla/commit/7f7c7f5c0af0724d872941e6d134d49773483d4e))
+
 # [1.0.0-alpha.32](https://github.com/Opla/opla/compare/v1.0.0-alpha.31...v1.0.0-alpha.32) (2024-03-26)
 
 
