@@ -197,7 +197,13 @@ function NewLocalModel({
               </div>
             }
           >
-            <CommandEmpty>{t('No model found')}</CommandEmpty>
+            {!enabled && (
+              <CommandEmpty>
+                {t('No model found.')}
+                <br />
+                {t('Activate HugginFace Hub Search to get more results')}
+              </CommandEmpty>
+            )}
             {loading && <CommandLoading>{t('Loading please wait...')}</CommandLoading>}
             {!loading &&
               filteredCollection.map((m) => (

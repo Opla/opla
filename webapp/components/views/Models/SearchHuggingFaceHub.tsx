@@ -76,7 +76,7 @@ function SearchHuggingFaceHub({
     >
       {searching && <CommandLoading>{t('Searching please wait...')}</CommandLoading>}
       {result.length === 0 && !searching && enabled && (
-        <CommandEmpty>{t('No model found')}</CommandEmpty>
+        <CommandEmpty>{t('No model found.')}</CommandEmpty>
       )}
       {result.length > 0 &&
         !searching &&
