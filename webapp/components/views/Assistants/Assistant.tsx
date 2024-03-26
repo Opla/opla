@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { useContext } from 'react';
-import { Bug, Plus, Settings2, Target } from 'lucide-react';
+import { Bot, Bug, Plus, Settings2, Target } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { useAssistantStore } from '@/stores';
@@ -38,6 +38,7 @@ export type AssistantProps = {
 export default function AssistantView({ selectedId: assistantId }: AssistantProps) {
   const { t } = useTranslation();
   const {
+    assistants,
     getAssistant,
     updateAssistant,
     createTarget,
@@ -114,6 +115,20 @@ export default function AssistantView({ selectedId: assistantId }: AssistantProp
     }
   };
 
+  if (!assistant) {
+    return (
+      <ContentView>
+        <EmptyView
+          icon={<Bot className="h-16 w-16 text-muted" />}
+          title={
+            assistants.length === 0 ? t("You don't have any assistant") : t('Select an assistant')
+          }
+          description={t('Here you could create your own assistant.')}
+          className="h-full"
+        />
+      </ContentView>
+    );
+  }
   return (
     <Tabs defaultValue="settings" className="h-full">
       <ContentView
