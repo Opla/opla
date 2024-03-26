@@ -14,7 +14,7 @@
 
 import { useContext, useMemo } from 'react';
 import { useRouter } from 'next/router';
-import { Plus } from 'lucide-react';
+import { Bot, Plus } from 'lucide-react';
 import logger from '@/utils/logger';
 import { useAssistantStore } from '@/stores';
 import { Assistant, Ui } from '@/types';
@@ -22,6 +22,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { ModalIds } from '@/modals';
 import { ModalData, ModalsContext } from '@/context/modals';
 import { BasicState, Page } from '@/types/ui';
+import EmptyView from '@/components/common/EmptyView';
 import Explorer, { ExplorerList } from '../../common/Explorer';
 import { Button } from '../../ui/button';
 import AssistantIcon from '../../common/AssistantIcon';
@@ -120,16 +121,30 @@ export default function AssistantsExplorer({
         </Button>
       }
     >
-      <ExplorerList<Assistant>
-        selectedId={selectedAssistantId}
-        renderLeftSide={(a) => <AssistantIcon icon={a.avatar} name={a.name} className="h-6 w-6" />}
-        items={filteredAssistants}
-        renderRightSide={(a) => (
-          <Pastille state={a.disabled ? BasicState.disabled : BasicState.active} />
-        )}
-        onSelectItem={handleSelectItem}
-        menu={(assistant) => (assistant.disabled ? menuDisabled : menu)}
-      />
+      {assistants.length > 0 && (
+        <ExplorerList<Assistant>
+          selectedId={selectedAssistantId}
+          renderLeftSide={(a) => (
+            <AssistantIcon icon={a.avatar} name={a.name} className="h-6 w-6" />
+          )}
+          items={filteredAssistants}
+          renderRightSide={(a) => (
+            <Pastille state={a.disabled ? BasicState.disabled : BasicState.active} />
+          )}
+          onSelectItem={handleSelectItem}
+          menu={(assistant) => (assistant.disabled ? menuDisabled : menu)}
+        />
+      )}
+      {assistants.length === 0 && (
+        <div className="h-full">
+          <EmptyView
+            title={t('No assistant')}
+            description={t("Let's create one!")}
+            icon={<Bot className="h-12 w-12 text-muted-foreground" strokeWidth={1.5} />}
+            className="h-full"
+          />
+        </div>
+      )}
     </Explorer>
   );
 }
