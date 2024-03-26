@@ -1,3 +1,10 @@
+# [1.0.0-alpha.30](https://github.com/Opla/opla/compare/v1.0.0-alpha.29...v1.0.0-alpha.30) (2024-03-26)
+
+
+### Features
+
+* use OpenAI gpt3.5 as default if no other options [#527](https://github.com/Opla/opla/issues/527) ([#587](https://github.com/Opla/opla/issues/587)) ([bf8ea09](https://github.com/Opla/opla/commit/bf8ea0925ddd39b9fcea545452dc101944b96200))
+
 # [1.0.0-alpha.29](https://github.com/Opla/opla/compare/v1.0.0-alpha.28...v1.0.0-alpha.29) (2024-03-26)
 
 
