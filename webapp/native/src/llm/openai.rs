@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use serde::{ Deserialize, Serialize };
-use crate::error::Error;
 use tauri::Runtime;
 use eventsource_stream::Eventsource;
 use futures_util::stream::StreamExt;
