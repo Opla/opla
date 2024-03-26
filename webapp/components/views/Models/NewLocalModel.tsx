@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { BrainCircuit, Computer, Sparkles } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
@@ -35,10 +35,11 @@ import logger from '@/utils/logger';
 import { deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
 import { getDownloadables, isValidFormat } from '@/utils/data/models';
 import { ShortcutIds } from '@/hooks/useShortcuts';
-import { Page } from '@/types/ui';
+import { ModalIds, Page } from '@/types/ui';
 import { fileExists, openFileDialog } from '@/utils/backend/tauri';
 import { importModel, validateModelsFile } from '@/utils/models';
 import ModelInfos from '@/components/common/ModelInfos';
+import { ModalsContext } from '@/context/modals';
 import { ShortcutBadge } from '../../common/ShortCut';
 import { toast } from '../../ui/Toast';
 import SearchHuggingFaceHub from './SearchHuggingFaceHub';
@@ -55,6 +56,7 @@ function NewLocalModel({
   const router = useRouter();
   const { pathname } = router;
   const gotoModels = !pathname.startsWith(Page.Models);
+  const { showModal } = useContext(ModalsContext);
 
   const { updateBackendStore } = useBackend();
   const { t } = useTranslation();
@@ -156,6 +158,7 @@ function NewLocalModel({
     if (!gotoModels) {
       router.push(`${Page.Models}/${id}`);
     }
+    showModal(ModalIds.DownloadModel, { item: selectedModel });
   };
 
   let filteredCollection = collection;
