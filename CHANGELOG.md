@@ -1,3 +1,10 @@
+# [1.0.0-alpha.29](https://github.com/Opla/opla/compare/v1.0.0-alpha.28...v1.0.0-alpha.29) (2024-03-26)
+
+
+### Features
+
+* replace activeModel by activeService [#545](https://github.com/Opla/opla/issues/545) ([#586](https://github.com/Opla/opla/issues/586)) ([e3c65e0](https://github.com/Opla/opla/commit/e3c65e04a1222233e5505695dfb58db96e744c3d))
+
 # [1.0.0-alpha.28](https://github.com/Opla/opla/compare/v1.0.0-alpha.27...v1.0.0-alpha.28) (2024-03-26)
 
 
