@@ -49,7 +49,7 @@ jobs:
       - name: Get Latest Release id
         if: steps.release.outputs.version && steps.release.outputs.version != ''
         id: latest_release_id
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const { data } = await github.rest.repos.getReleaseByTag({
@@ -61,7 +61,7 @@ jobs:
 
       - name: Set latest release to draft
         if: steps.release.outputs.version != ''
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         env:
           release_id: ${{ steps.latest_release_id.outputs.result }}
         with:
@@ -173,7 +173,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Publish latest release
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         env:
           release_id: ${{ needs.create-pre-release.outputs.latest_release_id }}
         with:

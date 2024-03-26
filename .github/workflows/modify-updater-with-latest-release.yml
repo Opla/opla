@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: update download urls and signatures for updater gist
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         env:
           updater_gist_id: ${{ secrets.UPDATER_GIST_ID }}
         with:
