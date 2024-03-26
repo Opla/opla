@@ -1,3 +1,10 @@
+# [1.0.0-alpha.35](https://github.com/Opla/opla/compare/v1.0.0-alpha.34...v1.0.0-alpha.35) (2024-03-26)
+
+
+### Features
+
+* add Models Empty view [#598](https://github.com/Opla/opla/issues/598) ([#601](https://github.com/Opla/opla/issues/601)) ([4a0f309](https://github.com/Opla/opla/commit/4a0f3093669866f234cce505ee3871c6d019b776))
+
 # [1.0.0-alpha.34](https://github.com/Opla/opla/compare/v1.0.0-alpha.33...v1.0.0-alpha.34) (2024-03-26)
 
 
