@@ -16,7 +16,7 @@
 
 import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { HardDriveDownload } from 'lucide-react';
+import { BrainCircuit, HardDriveDownload } from 'lucide-react';
 import { Ui, Model } from '@/types';
 import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
@@ -27,6 +27,7 @@ import { shortcutAsText } from '@/utils/shortcuts';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import Explorer, { ExplorerGroup, ExplorerList } from '@/components/common/Explorer';
 import { getModelsCollection, updateModel } from '@/utils/backend/commands';
+import EmptyView from '@/components/common/EmptyView';
 import { Button } from '../../ui/button';
 import EditableItem from '../../common/EditableItem';
 import ModelInfos from '../../common/ModelInfos';
@@ -116,35 +117,47 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
       }
     >
       <ExplorerGroup title={t('Local models')}>
-        <ExplorerList<Model>
-          selectedId={selectedModelId}
-          items={models}
-          renderItem={(model) => (
-            <>
-              {!model.editable && (
-                <div className="flex w-full grow flex-row items-center justify-between overflow-hidden pl-3">
-                  <div className="flex-1 text-ellipsis break-all pr-1">
-                    {model.title || model.name}
+        {models.length > 0 && (
+          <ExplorerList<Model>
+            selectedId={selectedModelId}
+            items={models}
+            renderItem={(model) => (
+              <>
+                {!model.editable && (
+                  <div className="flex w-full grow flex-row items-center justify-between overflow-hidden pl-3">
+                    <div className="flex-1 text-ellipsis break-all pr-1">
+                      {model.title || model.name}
+                    </div>
+                    <ModelInfos model={model} displayName={false} stateAsIcon />
                   </div>
-                  <ModelInfos model={model} displayName={false} stateAsIcon />
-                </div>
-              )}
-              {model.editable && (
-                <div className="flex w-full grow">
-                  <EditableItem
-                    id={model.id}
-                    title={model.title || model.name}
-                    editable
-                    className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1"
-                    onChange={handleChangeModelName}
-                  />
-                </div>
-              )}
-            </>
-          )}
-          onSelectItem={handleSelectModel}
-          menu={() => menu}
-        />
+                )}
+                {model.editable && (
+                  <div className="flex w-full grow">
+                    <EditableItem
+                      id={model.id}
+                      title={model.title || model.name}
+                      editable
+                      className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1"
+                      onChange={handleChangeModelName}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+            onSelectItem={handleSelectModel}
+            menu={() => menu}
+          />
+        )}
+        {models.length === 0 && (
+          <div className="h-full p-4">
+            <EmptyView
+              title={t('No models')}
+              description={t("Let's add one!")}
+              icon={<BrainCircuit className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} />}
+              className="h-full"
+            />
+          </div>
+        )}
       </ExplorerGroup>
 
       <ExplorerGroup title={t('Featured models')}>

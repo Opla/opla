@@ -38,6 +38,7 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
   const { provider, hasParametersChanged, onParametersSave, onParameterChange, onProviderToggle } =
     useProviderState(selectedProviderId);
   const { backendContext } = useBackend();
+
   return (
     <Tabs defaultValue="settings" className="h-full">
       <ContentView

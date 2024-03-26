@@ -46,6 +46,8 @@ import useBackend from '@/hooks/useBackendContext';
 import { getDownloadables, isValidFormat } from '@/utils/data/models';
 import { ModalIds, Page } from '@/types/ui';
 import { ModalsContext } from '@/context/modals';
+import EmptyView from '@/components/common/EmptyView';
+import { BrainCircuit } from 'lucide-react';
 import Parameter, { ParametersRecord } from '../../common/Parameter';
 import { Button } from '../../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../../ui/table';
@@ -192,7 +194,16 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
   };
 
   if (!model) {
-    return null;
+    return (
+      <ContentView>
+        <EmptyView
+          icon={<BrainCircuit className="h-16 w-16 text-muted" />}
+          title={t("You don't have any models")}
+          description={t('You could add some local models by installing a featured model.')}
+          className="h-full"
+        />
+      </ContentView>
+    );
   }
 
   return (
