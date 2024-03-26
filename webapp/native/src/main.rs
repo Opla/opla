@@ -200,6 +200,7 @@ async fn start_opla_server<R: Runtime>(
             match &store.get_local_active_model_id() {
                 Some(m) => { m.clone() }
                 None => {
+                    println!("Opla server not started default model not set");
                     return Err(format!("Opla server not started model not found"));
                 }
             }
@@ -426,14 +427,18 @@ async fn set_active_model<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
-    model_id: String
+    model_id: String,
+    provider: Option<String>,
 ) -> Result<(), String> {
     let mut store = context.store.lock().await;
     let result = store.models.get_model(model_id.as_str());
-    if result.is_none() {
+    if result.is_none() && (provider.is_none() || provider.as_deref() == Some("Opla")){
         return Err(format!("Model not found: {:?}", model_id));
+    } else if provider.is_some() {
+        store.set_active_service(&model_id, &provider.unwrap_or("Opla".to_string()));
+    } else {
+        store.set_local_active_model_id(&model_id);
     }
-    store.set_local_active_model_id(&model_id);
     store.save().map_err(|err| err.to_string())?;
     Ok(())
 }

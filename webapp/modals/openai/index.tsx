@@ -11,12 +11,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 import React from 'react';
 import Dialog from '@/components/common/Modal';
 import OpenAI from '@/components/views/Providers/openai';
+import useBackend from '@/hooks/useBackendContext';
 import useProviderState from '@/hooks/useProviderState';
 import { Provider } from '@/types';
 import { ModalData } from '@/context/modals';
+import OpenAIProvider from '@/utils/providers/openai';
 
 function OpenAIDialog({
   id,
@@ -30,6 +33,7 @@ function OpenAIDialog({
   onClose: () => void | undefined;
 }) {
   const newProvider = data.item as Provider;
+  const { getActiveModel, setActiveModel } = useBackend();
   const { provider, onParametersSave, onParameterChange } = useProviderState(
     newProvider?.id,
     newProvider,
@@ -41,6 +45,10 @@ function OpenAIDialog({
 
   const handleSave = () => {
     onParametersSave({ disabled: false });
+    if (!getActiveModel() && provider?.id) {
+      const model = OpenAIProvider.template.models?.[0].id as string;
+      setActiveModel(model, provider?.id);
+    }
     handleClose();
   };
 

@@ -108,6 +108,7 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
   };
 
   return {
+    providers,
     provider,
     hasParametersChanged,
     onParameterChange: handleParameterChange,

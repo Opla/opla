@@ -226,12 +226,16 @@ impl Store {
         )
     }
 
+    pub fn set_active_service(&mut self, model_id: &str, provider: &str) {
+        let mut service = Service::new(ServiceType::Model);
+        service.model_id = Some(model_id.to_owned());
+        service.provider_id_or_name = Some(provider.to_owned());
+        self.services.active_service = Some(service);
+    }
+
     pub fn set_local_active_model_id(&mut self, model_id: &str) {
         if self.has_model(model_id) {
-            let mut service = Service::new(ServiceType::Model);
-            service.model_id = Some(model_id.to_owned());
-            service.provider_id_or_name = Some("Opla".to_owned());
-            self.services.active_service = Some(service);
+            self.set_active_service(model_id, "Opla");
         } else {
             println!("Local model not found: {}", model_id);
         }

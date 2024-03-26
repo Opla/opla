@@ -76,7 +76,7 @@ type Context = {
   start: (params: ServerParameters | undefined) => Promise<BackendResult>;
   stop: () => Promise<BackendResult>;
   restart: (params: ServerParameters | undefined) => Promise<BackendResult>;
-  setActiveModel: (modelName: string) => Promise<void>;
+  setActiveModel: (modelName: string, provider?: string) => Promise<void>;
   getActiveModel: () => string | undefined;
 };
 
@@ -376,15 +376,26 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   }, [backendContext]);
 
   const setActiveModel = useCallback(
-    async (model: string) => {
+    async (model: string, provider?: string) => {
       logger.info('setActiveModel', model);
-      await setBackendActiveModel(model);
+      await setBackendActiveModel(model, provider);
       await updateBackendStore();
+      const { services = {} } = backendContext?.config || {};
+      const { activeService } = services;
+      if (activeService?.type === AIServiceType.Model && activeService.modelId === model) {
+        return;
+      }
+      services.activeService = {
+        type: AIServiceType.Model,
+        modelId: model,
+        providerIdOrName: provider,
+      };
       setBackendContext({
         ...backendContext,
         config: {
           ...backendContext?.config,
-          models: { ...backendContext?.config.models, activeModel: model },
+          models: { ...backendContext?.config.models },
+          services,
         },
       } as OplaContext);
     },
