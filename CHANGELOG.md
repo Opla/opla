@@ -1,3 +1,10 @@
+# [1.0.0-alpha.32](https://github.com/Opla/opla/compare/v1.0.0-alpha.31...v1.0.0-alpha.32) (2024-03-26)
+
+
+### Features
+
+* add a download dialog [#543](https://github.com/Opla/opla/issues/543) ([#593](https://github.com/Opla/opla/issues/593)) ([855f07d](https://github.com/Opla/opla/commit/855f07d8efad934e6be48aec153e531e4417efb7))
+
 # [1.0.0-alpha.31](https://github.com/Opla/opla/compare/v1.0.0-alpha.30...v1.0.0-alpha.31) (2024-03-26)
 
 
