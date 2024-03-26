@@ -1,3 +1,10 @@
+# [1.0.0-alpha.31](https://github.com/Opla/opla/compare/v1.0.0-alpha.30...v1.0.0-alpha.31) (2024-03-26)
+
+
+### Features
+
+* enhance local model search display [#589](https://github.com/Opla/opla/issues/589) ([#590](https://github.com/Opla/opla/issues/590)) ([5569402](https://github.com/Opla/opla/commit/55694025cd39adac35ac9d3691c4013888db0b21))
+
 # [1.0.0-alpha.30](https://github.com/Opla/opla/compare/v1.0.0-alpha.29...v1.0.0-alpha.30) (2024-03-26)
 
 
