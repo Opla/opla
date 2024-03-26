@@ -1,3 +1,10 @@
+# [1.0.0-alpha.28](https://github.com/Opla/opla/compare/v1.0.0-alpha.27...v1.0.0-alpha.28) (2024-03-26)
+
+
+### Bug Fixes
+
+* rust reqwest new version is not building ([#585](https://github.com/Opla/opla/issues/585)) ([d1bd30e](https://github.com/Opla/opla/commit/d1bd30e4dfa77907255025bba515712576210031)), closes [#584](https://github.com/Opla/opla/issues/584)
+
 # [1.0.0-alpha.27](https://github.com/Opla/opla/compare/v1.0.0-alpha.26...v1.0.0-alpha.27) (2024-03-25)
 
 
