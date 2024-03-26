@@ -244,7 +244,9 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
       displaySettings={!pageSettings.settingsHidden}
       onChangeDisplayExplorer={handleChangeDisplayExplorer}
       onChangeDisplaySettings={handleChangeDisplaySettings}
-      disabledSettings={assistantId !== undefined || view === ViewName.Archives}
+      disabledSettings={
+        assistantId !== undefined || view === ViewName.Archives || !selectedConversation
+      }
     />
   );
   return (

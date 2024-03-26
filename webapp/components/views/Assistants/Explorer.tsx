@@ -103,7 +103,7 @@ export default function AssistantsExplorer({
 
   return (
     <Explorer
-      title="Assistants"
+      title="My Assistants"
       toolbar={
         <Button
           aria-label={t('New Assistant')}
