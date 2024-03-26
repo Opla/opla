@@ -28,7 +28,7 @@ import { findModel } from '@/utils/data/models';
 export default function Statusbar() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { backendContext } = useBackend();
+  const { backendContext, getActiveModel } = useBackend();
   const { usage } = useContext(AppContext);
   const [sys, setSys] = useState<Sys>();
   const { showModal } = useContext(ModalsContext);
@@ -44,10 +44,8 @@ export default function Statusbar() {
   const running = backendContext.server.status === 'started';
   const error = backendContext.server.status === 'error';
 
-  const model = findModel(
-    backendContext.config.models.activeModel,
-    backendContext.config.models.items,
-  );
+  const activeModel = getActiveModel();
+  const model = findModel(activeModel, backendContext.config.models.items);
   const download = (backendContext.downloads ?? [undefined])[0];
 
   const displayServer = () => {

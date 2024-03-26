@@ -27,6 +27,7 @@ import {
   LlmStreamResponse,
   Download,
   ServerParameters,
+  AIServiceType,
 } from '@/types';
 import {
   getOplaConfig,
@@ -39,6 +40,7 @@ import Backend, { BackendResult } from '@/utils/backend/Backend';
 import { mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
 import { LlamaCppArgumentsSchema } from '@/utils/providers/llama.cpp/schema';
+import OplaProvider from '@/utils/providers/opla';
 // import { toast } from '@/components/ui/Toast';
 
 const initialBackendContext: OplaContext = {
@@ -58,10 +60,10 @@ const initialBackendContext: OplaContext = {
       parameters: {},
     },
     models: {
-      activeModel: 'None',
       items: [],
       path: '',
     },
+    services: {},
   },
 };
 
@@ -74,7 +76,8 @@ type Context = {
   start: (params: ServerParameters | undefined) => Promise<BackendResult>;
   stop: () => Promise<BackendResult>;
   restart: (params: ServerParameters | undefined) => Promise<BackendResult>;
-  setActiveModel: (preset: string) => Promise<void>;
+  setActiveModel: (modelName: string) => Promise<void>;
+  getActiveModel: () => string | undefined;
 };
 
 const defaultContext: Context = {
@@ -87,6 +90,7 @@ const defaultContext: Context = {
   stop: async () => ({ status: 'error', error: 'not implemented' }),
   restart: async () => ({ status: 'error', error: 'not implemented' }),
   setActiveModel: async () => {},
+  getActiveModel: () => undefined,
 };
 
 const BackendContext = createContext<Context>(defaultContext);
@@ -135,9 +139,15 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
           },
         });
       } else {
-        let { activeModel } = context.config.models;
-        if (event.payload.status === ServerStatus.STARTING) {
-          activeModel = event.payload.message;
+        const { services } = context.config;
+        if (
+          event.payload.status === ServerStatus.STARTING &&
+          services.activeService?.type !== AIServiceType.Assistant
+        ) {
+          services.activeService = {
+            type: AIServiceType.Model,
+            modelId: event.payload.message,
+          };
         }
         setBackendContext({
           ...context,
@@ -145,8 +155,9 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
             ...context?.config,
             models: {
               ...context?.config.models,
-              activeModel,
+              // activeModel,
             },
+            services,
           },
           server: {
             ...context?.server,
@@ -247,7 +258,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     if (!opla) {
       const oplaProviderConfig = await getProviderTemplate();
       const provider = { ...oplaProviderConfig, type: oplaProviderConfig.type as ProviderType };
-      opla = createProvider('Opla', provider);
+      opla = createProvider(OplaProvider.name, provider);
       providers.splice(0, 0, opla);
     }
     const backendImpl = await getBackend();
@@ -258,7 +269,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       'opla-downloader': downloadListener,
       'opla-sse': streamListener,
     };
-    const backendImplContext = await backendImpl.connect(listeners);
+    const backendImplContext: OplaContext = await backendImpl.connect(listeners);
     logger.info('connected backend impl', backendImpl);
     setBackendContext({
       ...initialBackendContext,
@@ -358,6 +369,12 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     } as OplaContext);
   }, [backendContext]);
 
+  const getActiveModel = useCallback(() => {
+    const { services = {} } = backendContext?.config || {};
+    const { activeService } = services;
+    return activeService?.type === AIServiceType.Model ? activeService.modelId : undefined;
+  }, [backendContext]);
+
   const setActiveModel = useCallback(
     async (model: string) => {
       logger.info('setActiveModel', model);
@@ -389,12 +406,14 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       stop,
       restart,
       setActiveModel,
+      getActiveModel,
     }),
     [
       backendContext,
       disconnectBackend,
       restart,
       setActiveModel,
+      getActiveModel,
       setSettings,
       start,
       startBackend,

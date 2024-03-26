@@ -410,9 +410,12 @@ export type ServerConfiguration = {
 };
 
 export type ModelsConfiguration = {
-  activeModel: string;
   path?: string;
   items: Array<Model>;
+};
+
+export type ServicesConfiguration = {
+  activeService?: AIService;
 };
 
 export type Avatar = {
@@ -450,6 +453,7 @@ export type Store = {
   settings: Settings;
   server: ServerConfiguration;
   models: ModelsConfiguration;
+  services: ServicesConfiguration;
 };
 
 export type Download = {

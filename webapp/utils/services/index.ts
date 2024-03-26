@@ -44,8 +44,9 @@ export const getActiveService = (
   const type = assistant ? AIServiceType.Assistant : AIServiceType.Model;
   let activeService: AIService | undefined = conversation
     ? getConversationService(conversation, type, assistant?.id)
-    : undefined;
-  let modelName = _modelName || backendContext.config.models.activeModel;
+    : backendContext.config.services.activeService;
+  let modelName = _modelName; // || backendContext.config.models.activeModel;
+
   let model: Model | undefined;
   let provider: Provider | undefined;
   let providerIdOrName = conversation?.provider;

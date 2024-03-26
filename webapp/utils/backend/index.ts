@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ServerStatus } from '@/types';
+import { OplaContext, ServerStatus } from '@/types';
 import logger from '../logger';
 
-const context = {
+const context: OplaContext = {
   config: {
     settings: {
       startApp: false,
@@ -26,9 +26,9 @@ const context = {
       parameters: {},
     },
     models: {
-      activeModel: 'None',
       items: [],
     },
+    services: {},
   },
   server: {
     status: ServerStatus.ERROR,

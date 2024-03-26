@@ -14,7 +14,11 @@
 
 use std::{ fs, path::PathBuf, fmt, collections::HashMap };
 use serde::{ Deserialize, Serialize };
-use crate::{ utils::get_config_directory, downloader::Download, data::model::ModelStorage };
+use crate::{
+    data::{ model::ModelStorage, service::{ Service, ServiceStorage, ServiceType } },
+    downloader::Download,
+    utils::get_config_directory,
+};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ServerParameters {
@@ -62,16 +66,6 @@ pub enum ProviderType {
     #[serde(rename = "proxy")]
     Proxy,
 }
-/* impl ProviderType {
-    pub fn as_str(&self) -> &'static str {
-        match self {
-            ProviderType::Opla => "opla",
-            ProviderType::Server => "server",
-            ProviderType::Api => "api",
-            ProviderType::Proxy => "proxy",
-        }
-    }
-} */
 
 impl fmt::Display for ProviderType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -141,6 +135,14 @@ pub struct Store {
     pub server: ServerConfiguration,
     pub models: ModelStorage,
     pub downloads: Vec<Download>,
+    #[serde(default = "service_default")]
+    pub services: ServiceStorage,
+}
+
+fn service_default() -> ServiceStorage {
+    ServiceStorage {
+        active_service: None,
+    }
 }
 
 impl Store {
@@ -167,10 +169,13 @@ impl Store {
             },
             models: ModelStorage {
                 path: None,
-                active_model: None,
+                // active_model: None,
                 items: vec![],
             },
             downloads: vec![],
+            services: ServiceStorage {
+                active_service: None,
+            },
         }
     }
 
@@ -210,14 +215,44 @@ impl Store {
         Ok(())
     }
 
-    pub fn has_model(&self, model_name: &str) -> bool {
+    pub fn has_model(&self, model_id_or_name: &str) -> bool {
         self.models.items.iter().any(
             |m|
-                m.reference.name == model_name ||
+                m.reference.name == model_id_or_name ||
                 (match &m.reference.id {
-                    Some(id) => id == model_name,
+                    Some(id) => id == model_id_or_name,
                     None => false,
                 })
         )
+    }
+
+    pub fn set_local_active_model_id(&mut self, model_id: &str) {
+        if self.has_model(model_id) {
+            let mut service = Service::new(ServiceType::Model);
+            service.model_id = Some(model_id.to_owned());
+            service.provider_id_or_name = Some("Opla".to_owned());
+            self.services.active_service = Some(service);
+        } else {
+            println!("Local model not found: {}", model_id);
+        }
+    }
+
+    pub fn get_local_active_model_id(&self) -> Option<String> {
+        let model_id = self.services.get_active_model_id();
+        let provider = self.services.get_active_provider_id();
+        if
+            provider == Some("Opla".to_owned()) &&
+            model_id.is_some() &&
+            self.has_model(model_id.as_ref().unwrap())
+        {
+            return model_id;
+        }
+        return None;
+    }
+
+    pub fn clear_active_service_if_model_equal(&mut self, model_id: &str) {
+        if Some(model_id) == self.get_local_active_model_id().as_deref() {
+            self.services.active_service = None;
+        }
     }
 }

@@ -22,6 +22,7 @@ use void::Void;
 
 pub mod model;
 pub mod assistant;
+pub mod service;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Record {
