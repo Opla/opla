@@ -57,7 +57,7 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
               <div>{provider.name}</div>
             </div>
           ) : (
-            'Assistant'
+            t('Provider')
           )
         }
         selectedId={selectedProviderId}

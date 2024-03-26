@@ -54,7 +54,7 @@ const sidebarItems: Array<Ui.Item> = [
         shortcut: ShortcutIds.DISPLAY_THREADS,
       },
       {
-        name: 'Assistants',
+        name: 'My Assistants',
         href: Ui.Page.Assistants,
         page: Ui.Page.Assistants,
         icon: Bot,
