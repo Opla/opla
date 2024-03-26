@@ -62,6 +62,10 @@ impl Service {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ServiceStorage {
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        default,
+    )]
     pub active_service: Option<Service>,
 }
 

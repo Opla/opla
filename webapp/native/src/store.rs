@@ -15,7 +15,7 @@
 use std::{ fs, path::PathBuf, fmt, collections::HashMap };
 use serde::{ Deserialize, Serialize };
 use crate::{
-    data::{ model::{ self, ModelStorage }, service::{ Service, ServiceStorage, ServiceType } },
+    data::{ model::ModelStorage, service::{ Service, ServiceStorage, ServiceType } },
     downloader::Download,
     utils::get_config_directory,
 };
@@ -135,7 +135,14 @@ pub struct Store {
     pub server: ServerConfiguration,
     pub models: ModelStorage,
     pub downloads: Vec<Download>,
+    #[serde(default = "service_default")]
     pub services: ServiceStorage,
+}
+
+fn service_default() -> ServiceStorage {
+    ServiceStorage {
+        active_service: None,
+    }
 }
 
 impl Store {
@@ -238,7 +245,7 @@ impl Store {
     }
 
     pub fn clear_active_service_if_model_equal(&mut self, model_id: &str) {
-        if let Some(model_id) = self.get_local_active_model_id() {
+        if Some(model_id) == self.get_local_active_model_id().as_deref() {
             self.services.active_service = None;
         }
     }
