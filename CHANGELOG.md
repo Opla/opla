@@ -1,3 +1,10 @@
+# [1.0.0-alpha.41](https://github.com/Opla/opla/compare/v1.0.0-alpha.40...v1.0.0-alpha.41) (2024-03-27)
+
+
+### Features
+
+* Parameters display file [#614](https://github.com/Opla/opla/issues/614) ([#619](https://github.com/Opla/opla/issues/619)) ([4b2cf22](https://github.com/Opla/opla/commit/4b2cf222623dfca4754ad6226e2bc0f2dac007d0))
+
 # [1.0.0-alpha.40](https://github.com/Opla/opla/compare/v1.0.0-alpha.39...v1.0.0-alpha.40) (2024-03-27)
 
 
