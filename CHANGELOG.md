@@ -1,3 +1,10 @@
+# [1.0.0-alpha.36](https://github.com/Opla/opla/compare/v1.0.0-alpha.35...v1.0.0-alpha.36) (2024-03-27)
+
+
+### Bug Fixes
+
+* Llama.cpp completion right error messages [#602](https://github.com/Opla/opla/issues/602) ([#604](https://github.com/Opla/opla/issues/604)) ([366b7a4](https://github.com/Opla/opla/commit/366b7a4271295788d78dbb8a3266ce8f3d15b0f7))
+
 # [1.0.0-alpha.35](https://github.com/Opla/opla/compare/v1.0.0-alpha.34...v1.0.0-alpha.35) (2024-03-26)
 
 
