@@ -1,3 +1,10 @@
+# [1.0.0-alpha.38](https://github.com/Opla/opla/compare/v1.0.0-alpha.37...v1.0.0-alpha.38) (2024-03-27)
+
+
+### Bug Fixes
+
+* remove default hardcoded models.path [#609](https://github.com/Opla/opla/issues/609) ([#611](https://github.com/Opla/opla/issues/611)) ([5608f19](https://github.com/Opla/opla/commit/5608f1976a3827dc922562fc04ff9778342d6d32))
+
 # [1.0.0-alpha.37](https://github.com/Opla/opla/compare/v1.0.0-alpha.36...v1.0.0-alpha.37) (2024-03-27)
 
 
