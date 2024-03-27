@@ -41,7 +41,7 @@ import {
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
 import { completion, tokenize } from '@/utils/providers';
-import { getModelsAsItems } from '@/utils/data/models';
+import { findModelInAll, getModelsAsItems } from '@/utils/data/models';
 import { getActiveService, getAssistantId } from '@/utils/services';
 import { toast } from '@/components/ui/Toast';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
@@ -131,15 +131,22 @@ function Thread({
         const stream = backendContext.streams?.[conversationId as string];
         newMessages = newMessages.filter((m) => !(m.author.role === 'system'));
         newMessages = newMessages.map((msg, index) => {
+          const { author } = msg;
+          if (author.role === 'assistant') {
+            const model = findModelInAll(author.name, providers, backendContext);
+            author.name = model?.title || model?.name || author.name;
+          }
           if (stream && index === newMessages.length - 1) {
             return {
               ...msg,
+              author,
               status: 'stream',
               content: stream.content.join(''),
               contentHistory: undefined,
+              conversationId,
             } as Message;
           }
-          return { ...msg, conversationId };
+          return { ...msg, author, conversationId };
         });
       }
       setMessages(newMessages);
@@ -158,6 +165,7 @@ function Thread({
     readConversationMessages,
     isMessageUpdating,
     selectedConversation,
+    providers,
   ]);
 
   const tempConversationName = messages?.[0]
