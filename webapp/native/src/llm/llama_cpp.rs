@@ -208,7 +208,7 @@ impl LLamaCppServer {
             Ok(res) => res,
             Err(error) => {
                 println!("Failed to get Response: {}", error);
-                return Err(Box::new(Error::BadResponse));
+                return Err(Box::new(error));
             }
         };
         let status = response.status();
@@ -217,7 +217,7 @@ impl LLamaCppServer {
             Ok(r) => r,
             Err(error) => {
                 println!("Failed to parse response: {}", error);
-                return Err(Box::new(Error::BadResponse));
+                return Err(Box::new(error));
             }
         };
         println!("Response Status: {} {:?}", status, response);
@@ -398,14 +398,14 @@ impl LLamaCppServer {
         let api_url = self.get_api(server_parameters, "tokenize".to_owned());
         let client = reqwest::Client::new();
         let res = client
-            .post(api_url) // TODO remove hardcoding
+            .post(api_url)
             .json(&parameters)
             .send().await;
         let response = match res {
             Ok(res) => res,
             Err(error) => {
                 println!("Failed to get Response: {}", error);
-                return Err(Box::new(Error::BadResponse));
+                return Err(Box::new(error));
             }
         };
         let status = response.status();
@@ -414,7 +414,7 @@ impl LLamaCppServer {
             Ok(r) => r,
             Err(error) => {
                 println!("Failed to parse response: {}", error);
-                return Err(Box::new(Error::BadResponse));
+                return Err(Box::new(error));
             }
         };
         Ok(response.to_llm_response())
