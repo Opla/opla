@@ -1,3 +1,10 @@
+# [1.0.0-alpha.43](https://github.com/Opla/opla/compare/v1.0.0-alpha.42...v1.0.0-alpha.43) (2024-03-27)
+
+
+### Bug Fixes
+
+* build sentry release name [#622](https://github.com/Opla/opla/issues/622) ([#623](https://github.com/Opla/opla/issues/623)) ([4a32d3c](https://github.com/Opla/opla/commit/4a32d3c6202f53b6108082a24d8cd902067e924e))
+
 # [1.0.0-alpha.42](https://github.com/Opla/opla/compare/v1.0.0-alpha.41...v1.0.0-alpha.42) (2024-03-27)
 
 
