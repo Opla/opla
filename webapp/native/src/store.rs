@@ -24,6 +24,7 @@ use crate::{
 pub struct ServerParameters {
     pub port: i32,
     pub host: String,
+    pub model: Option<String>,
     pub context_size: i32,
     pub threads: i32,
     pub n_gpu_layers: i32,
@@ -162,6 +163,7 @@ impl Store {
                 parameters: ServerParameters {
                     port: 8081,
                     host: String::from("127.0.0.1"),
+                    model: None,
                     context_size: 512,
                     threads: 6,
                     n_gpu_layers: 0,
@@ -241,9 +243,26 @@ impl Store {
         }
     }
 
-    pub fn get_local_active_model_id(&self) -> Option<String> {
+    pub fn get_local_active_model_id(&mut self) -> Option<String> {
         let model_id = self.services.get_active_model_id();
         let provider = self.services.get_active_provider_id();
+        println!(
+            "get_local_active_model_id model_id: {:?}, provider: {:?} services: {:?}",
+            model_id,
+            provider,
+            self.services
+        );
+        if model_id.is_none() && provider.is_none() {
+            if self.models.items.len() > 0 {
+                let id = match self.models.items[0].reference.id {
+                    Some(ref id) => id.clone(),
+                    None => return None,
+                };
+                self.set_local_active_model_id(&id);
+                return Some(id);
+            }
+            return None;
+        }
         if
             provider == Some("Opla".to_owned()) &&
             model_id.is_some() &&

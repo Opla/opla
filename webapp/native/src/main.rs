@@ -201,7 +201,7 @@ async fn start_opla_server<R: Runtime>(
                 Some(m) => { m.clone() }
                 None => {
                     println!("Opla server not started default model not set");
-                    return Err(format!("Opla server not started model not found"));
+                    return Err(format!("Opla server not started model not set"));
                 }
             }
         }
@@ -217,6 +217,7 @@ async fn start_opla_server<R: Runtime>(
     // store.models.active_model = Some(model_name.clone());
     store.server.parameters.port = port;
     store.server.parameters.host = host.clone();
+    store.server.parameters.model = Some(model_path.clone());
     store.server.parameters.context_size = context_size;
     store.server.parameters.threads = threads;
     store.server.parameters.n_gpu_layers = n_gpu_layers;
@@ -614,7 +615,7 @@ async fn start_server<R: Runtime>(
     context: State<'_, OplaContext>
 ) -> Result<(), String> {
     println!("Opla try to start server");
-    let store = context.store.lock().await;
+    let mut store = context.store.lock().await;
 
     let local_active_model_id = store.get_local_active_model_id();
     let active_model = match local_active_model_id {
@@ -630,12 +631,15 @@ async fn start_server<R: Runtime>(
         }
     };
     // let args = store.server.parameters.to_args(model_path.as_str());
-    let parameters = store.server.parameters.clone();
+    let mut parameters = store.server.parameters.clone();
     let mut server = context.server.lock().await;
     let response = server.start(app, &active_model, &model_path, Some(&parameters)).await;
     if response.is_err() {
         return Err(format!("Opla server not started: {:?}", response));
     }
+    parameters.model = Some(model_path.clone());
+    store.server.parameters = parameters;
+    store.save().map_err(|err| err.to_string())?;
     println!("Opla server started: {:?}", response);
     Ok(())
 }

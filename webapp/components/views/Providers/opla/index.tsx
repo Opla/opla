@@ -58,6 +58,14 @@ export default function Opla({
         onChange={onParameterChange}
       />
       <Parameter
+        label={t('Model')}
+        name="metadata.server.parameters.model"
+        value={deepGet(provider, 'metadata.server.parameters.model', 'None')}
+        disabled
+        type="text"
+        onChange={onParameterChange}
+      />
+      <Parameter
         label={t('Host')}
         name="metadata.server.parameters.host"
         value={deepGet(provider, 'metadata.server.parameters.host', '')}
