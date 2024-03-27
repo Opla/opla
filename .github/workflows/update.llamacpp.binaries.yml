@@ -23,6 +23,11 @@ jobs:
           curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L -o ${{ env.BINARIES_DIR }}${{ env.MACOS_x86_64 }} ${{ env.ASSETS_URL }}${{ env.MACOS_x86_64 }}
           curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L -o ${{ env.BINARIES_DIR }}${{ env.LINUX_x86_64 }} ${{ env.ASSETS_URL }}${{ env.LINUX_x86_64 }}
           curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L -o ${{ env.BINARIES_DIR }}${{ env.WINDOWS_x86_64 }} ${{ env.ASSETS_URL }}${{ env.WINDOWS_x86_64 }}
+          git add .
+          git update-index --chmod=+x ${{ env.BINARIES_DIR }}${{ env.MACOS_ARM64 }}
+          git update-index --chmod=+x ${{ env.BINARIES_DIR }}${{ env.MACOS_x86_64 }}
+          git update-index --chmod=+x ${{ env.BINARIES_DIR }}${{ env.LINUX_x86_64 }}
+          git update-index --chmod=+x ${{ env.BINARIES_DIR }}${{ env.WINDOWS_x86_64 }}
 
       - name: add and commit Llama.cpp.server changes
         uses: EndBug/add-and-commit@v9
