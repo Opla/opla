@@ -172,7 +172,7 @@ jobs:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-          SENTRY_RELEASE: ${{ needs.create-pre-release.outputs.latest_release_version }}
+          SENTRY_RELEASE: "v${{ needs.create-pre-release.outputs.latest_release_version }}"
         with:
           #tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
           #releaseName: "App v__VERSION__"
