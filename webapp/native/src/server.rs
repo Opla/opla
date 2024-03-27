@@ -492,7 +492,9 @@ impl OplaServer {
             let self_status = Arc::clone(&self.status);
             let mut wouldblock = true;
             let _ = self.start(app, model, model_path, None).await?;
-            let handle = tauri::async_runtime::spawn(async move {
+                        
+            // Wait for server to start
+            let result = tauri::async_runtime::spawn(async move {
                 let mut retries = 0;
                 while retries < 20 {
                     let status = match self_status.try_lock() {
@@ -518,10 +520,16 @@ impl OplaServer {
                     retries += 1;
                 }
                 Ok(())
-            });
-            // Wait for server to start
-            let _ = handle.await;
-            println!("Opla server started: available for completion");
+            }).await;
+            match result {
+                Ok(_) => {
+                    println!("Opla server started: available for completion");
+                }
+                Err(e) => {
+                    println!("Opla server error: {:?}", e);
+                    return Err(Box::new(e));
+                }
+            }
         }
         Ok(())
     }
