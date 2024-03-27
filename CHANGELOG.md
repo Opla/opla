@@ -1,3 +1,10 @@
+# [1.0.0-alpha.42](https://github.com/Opla/opla/compare/v1.0.0-alpha.41...v1.0.0-alpha.42) (2024-03-27)
+
+
+### Bug Fixes
+
+* models empty wrong title [#620](https://github.com/Opla/opla/issues/620) ([#621](https://github.com/Opla/opla/issues/621)) ([689ca81](https://github.com/Opla/opla/commit/689ca818b3a74bba45c5f70a9dade5deb611125d))
+
 # [1.0.0-alpha.41](https://github.com/Opla/opla/compare/v1.0.0-alpha.40...v1.0.0-alpha.41) (2024-03-27)
 
 
