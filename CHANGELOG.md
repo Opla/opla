@@ -1,3 +1,10 @@
+# [1.0.0-alpha.39](https://github.com/Opla/opla/compare/v1.0.0-alpha.38...v1.0.0-alpha.39) (2024-03-27)
+
+
+### Bug Fixes
+
+* server start use available model if no model [#609](https://github.com/Opla/opla/issues/609) ([#615](https://github.com/Opla/opla/issues/615)) ([2e0654b](https://github.com/Opla/opla/commit/2e0654b01f1ff0c61f9b00ae30d98153e56eb6b6))
+
 # [1.0.0-alpha.38](https://github.com/Opla/opla/compare/v1.0.0-alpha.37...v1.0.0-alpha.38) (2024-03-27)
 
 
