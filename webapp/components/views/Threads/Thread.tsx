@@ -131,13 +131,12 @@ function Thread({
         const stream = backendContext.streams?.[conversationId as string];
         newMessages = newMessages.filter((m) => !(m.author.role === 'system'));
         newMessages = newMessages.map((msg, index) => {
-          const {author} = msg;
+          const { author } = msg;
           if (author.role === 'assistant') {
             const model = findModelInAll(author.name, providers, backendContext);
-            author.name = model?.title || model?.name  || author.name;
+            author.name = model?.title || model?.name || author.name;
           }
           if (stream && index === newMessages.length - 1) {
-
             return {
               ...msg,
               author,
@@ -159,7 +158,15 @@ function Thread({
     logger.info('getNewMessages', conversationId, selectedConversation, isMessageUpdating);
     setIsMessageUpdating(true);
     getNewMessages();
-  }, [backendContext, conversationId, filterConversationMessages, readConversationMessages, isMessageUpdating, selectedConversation, providers]);
+  }, [
+    backendContext,
+    conversationId,
+    filterConversationMessages,
+    readConversationMessages,
+    isMessageUpdating,
+    selectedConversation,
+    providers,
+  ]);
 
   const tempConversationName = messages?.[0]
     ? getMessageContentAsString(messages?.[0])
