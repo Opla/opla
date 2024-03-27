@@ -25,7 +25,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { DownloadIcon } from '@radix-ui/react-icons';
 import useTranslation from '@/hooks/useTranslation';
@@ -37,6 +37,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import logger from '@/utils/logger';
 import {
   cancelDownloadModel,
+  getModelFullPath,
   getModelsCollection,
   installModel,
   uninstallModel,
@@ -60,6 +61,7 @@ export type ModelViewProps = {
 function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
   const { t } = useTranslation();
 
+  const [fullPathModel, setFullPathModel] = useState<string | undefined>();
   const { backendContext, updateBackendStore } = useBackend();
   const models = backendContext.config.models.items;
 
@@ -106,7 +108,6 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     selectedModelId,
     handleParametersChange,
   );
-
   const [collection, setCollection] = useState<Model[]>([]);
   const { showModal } = useContext(ModalsContext);
   const router = useRouter();
@@ -122,19 +123,33 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     getCollection();
   }, []);
 
-  let local = true;
-  let model = models.find((m) => m.id === selectedModelId) as Model;
-  if (!model && selectedModelId) {
-    model = collection.find((m) => m.id === selectedModelId) as Model;
-    local = false;
-  }
-  const downloadables = local
-    ? []
-    : getDownloadables(model).filter((d) => d.private !== true && isValidFormat(d));
+  const [model, downloadables, local] = useMemo(() => {
+    let l = true;
+    let mdl = models.find((m) => m.id === selectedModelId) as Model;
+    if (!mdl && selectedModelId) {
+      mdl = collection.find((m) => m.id === selectedModelId) as Model;
+      l = false;
+    }
+    const dls: Model[] = l
+      ? []
+      : getDownloadables(model).filter((d) => d.private !== true && isValidFormat(d));
+    return [mdl, dls, l];
+  }, [selectedModelId, models, collection]);
 
   const { downloads = [] } = backendContext;
 
   const isDownloading = downloads.findIndex((d) => d.id === model?.id) !== -1;
+
+  useEffect(() => {
+    const getFullPath = async () => {
+      if (model?.fileName) {
+        const path = `${model.path || ''}/${model.fileName || ''}`;
+        const full = await getModelFullPath(path);
+        setFullPathModel(full);
+      }
+    };
+    getFullPath();
+  }, [model]);
 
   const handleInstall = async (item?: Model) => {
     const selectedModel: Model = deepMerge<Model>(model, item || {}, true);
@@ -267,13 +282,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
               <p>{(updatedParameters?.description as string) || t(model.description || '')}</p>
             )}
             {model.fileName && (
-              <Parameter
-                label={t('File')}
-                name="file"
-                value={`${model.path || ''}/${model.fileName || ''}`}
-                disabled
-                type="text"
-              />
+              <Parameter label={t('File')} name="file" value={fullPathModel} disabled type="file" />
             )}
             {model.author && (
               <Parameter

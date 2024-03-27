@@ -204,7 +204,7 @@ impl ModelStorage {
         }
     }
 
-    fn get_path(&self, path: String) -> Result<PathBuf, String> {
+    pub fn get_path(&self, path: String) -> Result<PathBuf, String> {
         let models_path = match self.path {
             Some(ref path) => {
                 let p = PathBuf::from(path);

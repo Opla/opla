@@ -50,7 +50,16 @@ export default function Parameter({
   min?: number;
   max?: number;
   value?: ParameterValue;
-  type?: 'text' | 'password' | 'large-text' | 'number' | 'url' | 'select' | 'boolean' | 'array';
+  type?:
+    | 'text'
+    | 'password'
+    | 'large-text'
+    | 'number'
+    | 'file'
+    | 'url'
+    | 'select'
+    | 'boolean'
+    | 'array';
   disabled?: boolean;
   children?: React.ReactNode;
   onChange?: (name: string, value: ParameterValue) => void;
@@ -87,7 +96,7 @@ export default function Parameter({
       <Textarea
         disabled={disabled}
         className="mt-2 w-full resize-none overflow-y-hidden"
-        value={value as string}
+        value={(value as string) || ''}
         placeholder={placeholder}
         onChange={(e) => {
           e.preventDefault();
@@ -103,6 +112,7 @@ export default function Parameter({
             {value as string}
           </a>
         )}
+        {disabled && type === 'file' && <div className={textCss}>{value as string}</div>}
         {type === 'boolean' && (
           <Switch
             checked={value as boolean}
@@ -111,9 +121,12 @@ export default function Parameter({
             }}
           />
         )}
-        {(type === 'text' || type === 'number' || (type === 'url' && !disabled)) && (
+        {(type === 'text' ||
+          type === 'number' ||
+          (type === 'url' && !disabled) ||
+          (type === 'file' && !disabled)) && (
           <Input
-            value={value as string}
+            value={(value as string) || ''}
             placeholder={placeholder}
             className="w-full min-w-[60px]"
             type={type}

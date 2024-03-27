@@ -78,12 +78,12 @@ export const getModelsCollection = async (): Promise<{ models: [] }> => {
 
 export const installModel = async (
   model: Model,
-  url: String | undefined,
-  path: String,
-  fileName: String,
-): Promise<String> => {
+  url: string | undefined,
+  path: string,
+  fileName: string,
+): Promise<string> => {
   try {
-    const id = await invokeTauri<String>('install_model', { model, url, path, fileName });
+    const id = await invokeTauri<string>('install_model', { model, url, path, fileName });
     return id;
   } catch (error) {
     logger.error(error);
@@ -92,12 +92,15 @@ export const installModel = async (
   return '';
 };
 
-export const cancelDownloadModel = async (modelId: String) => {
-  await invokeTauri<String>('cancel_download_model', { modelId });
+export const getModelFullPath = async (filename: string) =>
+  invokeTauri<string>('get_model_full_path', { filename });
+
+export const cancelDownloadModel = async (modelId: string) => {
+  await invokeTauri<string>('cancel_download_model', { modelId });
 };
 
-export const uninstallModel = async (modelId: String) => {
-  await invokeTauri<String>('uninstall_model', { modelId });
+export const uninstallModel = async (modelId: string) => {
+  await invokeTauri<string>('uninstall_model', { modelId });
 };
 
 export const updateModel = async (model: Model) => {
