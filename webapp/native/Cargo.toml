@@ -15,7 +15,7 @@ tauri-build = { version = "1.5.1", features = [] }
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.6.1", features = [ "protocol-asset", "fs-remove-file", "fs-create-dir", "fs-remove-dir", "updater", "fs-read-file", "fs-write-file", "fs-exists", "http-all", "dialog-all", "path-all", "shell-execute", "shell-open", "shell-sidecar", "window-all"] }
+tauri = { version = "1.6.1", features = [ "protocol-asset", "fs-remove-file", "fs-create-dir", "fs-remove-dir", "fs-read-file", "fs-write-file", "fs-exists", "http-all", "dialog-all", "path-all", "shell-execute", "shell-open", "shell-sidecar", "window-all"] }
 tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 sysinfo = { version = "0.30.5", features = ["apple-app-store"] }
 dirs = "5.0.1"
