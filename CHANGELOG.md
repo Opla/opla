@@ -1,3 +1,10 @@
+# [1.0.0-alpha.44](https://github.com/Opla/opla/compare/v1.0.0-alpha.43...v1.0.0-alpha.44) (2024-03-27)
+
+
+### Bug Fixes
+
+* display message assistant name instead of id ([#625](https://github.com/Opla/opla/issues/625)) ([4c363b3](https://github.com/Opla/opla/commit/4c363b31888c8058dd8bccce56c4ec6210de738e))
+
 # [1.0.0-alpha.43](https://github.com/Opla/opla/compare/v1.0.0-alpha.42...v1.0.0-alpha.43) (2024-03-27)
 
 
