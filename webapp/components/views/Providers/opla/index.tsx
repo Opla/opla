@@ -62,7 +62,7 @@ export default function Opla({
         name="metadata.server.parameters.model"
         value={deepGet(provider, 'metadata.server.parameters.model', 'None')}
         disabled
-        type="text"
+        type="file"
         onChange={onParameterChange}
       />
       <Parameter

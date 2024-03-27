@@ -280,6 +280,34 @@ async fn search_hfhub_models<R: Runtime>(
 }
 
 #[tauri::command]
+async fn get_model_full_path<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>,
+    filename: String
+) -> Result<String, String>
+    where Result<ModelsCollection, String>: Serialize
+{
+    let store = context.store.lock().await;
+    let error = format!("Model path not valid: {:?}", filename.clone());
+    let result = store.models.get_path(filename);
+    let path = match result {
+        Ok(m) => { m }
+        Err(err) => {
+            return Err(format!("Model path not found: {:?}", err));
+        }
+    };
+    match path.to_str() {
+        Some(str) => {
+            return Ok(str.to_string());
+        }
+        None => {
+            return Err(error);
+        }
+    }
+}
+
+#[tauri::command]
 async fn install_model<R: Runtime>(
     app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
@@ -429,11 +457,11 @@ async fn set_active_model<R: Runtime>(
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
     model_id: String,
-    provider: Option<String>,
+    provider: Option<String>
 ) -> Result<(), String> {
     let mut store = context.store.lock().await;
     let result = store.models.get_model(model_id.as_str());
-    if result.is_none() && (provider.is_none() || provider.as_deref() == Some("Opla")){
+    if result.is_none() && (provider.is_none() || provider.as_deref() == Some("Opla")) {
         return Err(format!("Model not found: {:?}", model_id));
     } else if provider.is_some() {
         store.set_active_service(&model_id, &provider.unwrap_or("Opla".to_string()));
@@ -488,7 +516,9 @@ async fn llm_call_completion<R: Runtime>(
         let mut server = context_server.lock().await;
         let query = query.clone();
         let conversation_id = query.options.conversation_id.clone();
-        server.bind::<R>(app.app_handle(), &model_name, &model_path).await.map_err(|err| err.to_string())?;
+        server
+            .bind::<R>(app.app_handle(), &model_name, &model_path).await
+            .map_err(|err| err.to_string())?;
         let handle = app.app_handle();
         let response = {
             server
@@ -905,6 +935,7 @@ fn main() {
                 stop_opla_server,
                 get_models_collection,
                 search_hfhub_models,
+                get_model_full_path,
                 install_model,
                 cancel_download_model,
                 uninstall_model,
