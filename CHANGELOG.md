@@ -1,3 +1,10 @@
+# [1.0.0-alpha.37](https://github.com/Opla/opla/compare/v1.0.0-alpha.36...v1.0.0-alpha.37) (2024-03-27)
+
+
+### Bug Fixes
+
+* server bind error handling ([#608](https://github.com/Opla/opla/issues/608)) ([5e9922c](https://github.com/Opla/opla/commit/5e9922c8ea280df67e3acb124525d56c7b0192b3))
+
 # [1.0.0-alpha.36](https://github.com/Opla/opla/compare/v1.0.0-alpha.35...v1.0.0-alpha.36) (2024-03-27)
 
 
