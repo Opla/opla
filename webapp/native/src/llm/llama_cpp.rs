@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{ error::Error, llm::{ LlmQueryCompletion, LlmResponseError }, store::ServerParameters };
+use crate::{ llm::{ LlmQueryCompletion, LlmResponseError }, store::ServerParameters };
 
 use tauri::Runtime;
 use eventsource_stream::Eventsource;
