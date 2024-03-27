@@ -1,3 +1,10 @@
+# [1.0.0-alpha.40](https://github.com/Opla/opla/compare/v1.0.0-alpha.39...v1.0.0-alpha.40) (2024-03-27)
+
+
+### Bug Fixes
+
+* chmod for llama.cpp [#617](https://github.com/Opla/opla/issues/617) ([#618](https://github.com/Opla/opla/issues/618)) ([7e3ce06](https://github.com/Opla/opla/commit/7e3ce06263e2d2bb20b9ba6a452c8520274359b5))
+
 # [1.0.0-alpha.39](https://github.com/Opla/opla/compare/v1.0.0-alpha.38...v1.0.0-alpha.39) (2024-03-27)
 
 
