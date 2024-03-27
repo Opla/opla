@@ -5,8 +5,6 @@
     "selected_page": "/threads"
   },
   "models": {
-    "path": "dev/ai/models",
-    "active_model": null,
     "items": []
   },
   "server": {
