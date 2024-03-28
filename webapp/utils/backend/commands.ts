@@ -105,10 +105,21 @@ export const uninstallModel = async (modelId: string) => {
 
 export const updateModel = async (model: Model) => {
   try {
-    await invokeTauri<void>('update_model', { model });
+    const args = mapKeys({ model }, toSnakeCase);
+    await invokeTauri<void>('update_model', args);
   } catch (error) {
     logger.error(error);
-    toast.error(`Error installing model ${error}`);
+    toast.error(`Error updating model ${error}`);
+  }
+};
+
+export const updateModelEntity = async (model: Model) => {
+  try {
+    const args = mapKeys({ model, entity: model }, toSnakeCase);
+    await invokeTauri<void>('update_model_entity', args);
+  } catch (error) {
+    logger.error(error);
+    toast.error(`Error updating model ${error}`);
   }
 };
 

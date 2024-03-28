@@ -278,6 +278,7 @@ export enum ModelState {
   Downloading = 'downloading',
   Ok = 'Ok',
   Error = 'error',
+  NotFound = 'not_found',
 }
 
 export type Model = BaseNamedRecord & {

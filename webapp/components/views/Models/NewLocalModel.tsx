@@ -113,6 +113,7 @@ function NewLocalModel({
       }
       if (model?.download && getResourceUrl(model.download).endsWith('.gguf')) {
         const download = getResourceUrl(model.download);
+        console.log('download', download, path);
         const isExist = await fileExists(download, path);
         if (!isExist) {
           logger.error('onLocalInstall file not found', download, path);
