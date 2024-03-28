@@ -231,7 +231,6 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     );
   }
 
-  console.log('model=', model);
   return (
     <ContentView
       header={
