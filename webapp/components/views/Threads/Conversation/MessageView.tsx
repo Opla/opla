@@ -66,15 +66,16 @@ function DeleteButton({ onDeleteMessage }: { onDeleteMessage: () => void }) {
 
 function AvatarIcon({ isUser, avatar }: { isUser: boolean; avatar: Avatar }) {
   let icon: React.ReactNode;
+  const className = 'h-4 w-4 text-muted-foreground';
   if (isUser) {
-    icon = <User className="h-4 w-4 text-white" />;
+    icon = <User className={className} />;
   } else if (avatar.name?.toLowerCase().startsWith('gpt-')) {
-    icon = <OpenAI className="h-4 w-4 text-white" />;
+    icon = <OpenAI className={className} />;
   } else {
-    icon = <Bot className="h-4 w-4 text-white" />;
+    icon = <Bot className={className} />;
   }
 
-  return <AvatarView avatar={avatar} icon={icon} className="h-4 w-4 text-white" />;
+  return <AvatarView avatar={avatar} icon={icon} className={className} />;
 }
 
 enum DisplayMessageState {
