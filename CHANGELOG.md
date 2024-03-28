@@ -1,3 +1,10 @@
+# [1.0.0-alpha.55](https://github.com/Opla/opla/compare/v1.0.0-alpha.54...v1.0.0-alpha.55) (2024-03-28)
+
+
+### Features
+
+* assistant install, load a default model if no [#455](https://github.com/Opla/opla/issues/455) ([#649](https://github.com/Opla/opla/issues/649)) ([1261403](https://github.com/Opla/opla/commit/12614032e2cf6c7ebac057f85ccbe78563553341))
+
 # [1.0.0-alpha.54](https://github.com/Opla/opla/compare/v1.0.0-alpha.53...v1.0.0-alpha.54) (2024-03-28)
 
 
