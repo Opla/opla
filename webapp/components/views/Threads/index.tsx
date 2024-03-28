@@ -140,6 +140,10 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     saveSettings(selectedPage, { settingsWidth: size });
   };
 
+  const handleResizeExplorer = (size: number) => {
+    saveSettings(selectedPage, { explorerWidth: size });
+  };
+
   const handleChangeDisplayExplorer = (value: boolean) => {
     saveSettings(selectedPage, { explorerHidden: !value });
   };
@@ -231,13 +235,6 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     defaultSettings.pages?.[Page.Threads] ||
     DefaultPageSettings;
 
-  /* logger.info(
-    'render Archives',
-    selectedThreadId,
-    view,
-    assistantId === undefined || view === ViewName.Archives,
-  ); */
-
   const rightToolbar = (
     <ToolbarTogglePanels
       displayExplorer={!pageSettings.explorerHidden}
@@ -250,7 +247,13 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     />
   );
   return (
-    <Threads selectedThreadId={selectedThreadId} view={view} onSelectMenu={handleSelectMenu}>
+    <Threads
+      selectedThreadId={selectedThreadId}
+      view={view}
+      onSelectMenu={handleSelectMenu}
+      onShouldDelete={handleShouldDelete}
+      onResizeExplorer={handleResizeExplorer}
+    >
       <ResizablePanel id="thread">
         {view !== ViewName.Archives && (
           <Thread

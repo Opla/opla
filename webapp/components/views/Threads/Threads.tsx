@@ -31,17 +31,12 @@ import { useContext } from 'react';
 import { useRouter } from 'next/router';
 import { useSearchParams } from 'next/navigation';
 import useBackend from '@/hooks/useBackendContext';
-import { Conversation, PageSettings } from '@/types';
+import { Conversation } from '@/types';
 import { DefaultPageSettings } from '@/utils/constants';
 import logger from '@/utils/logger';
-import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
-import { getConversation } from '@/utils/data/conversations';
-import { ModalIds } from '@/modals';
-import { ModalsContext } from '@/context/modals';
 import { AppContext } from '@/context';
 import { MenuAction, Page, ViewName } from '@/types/ui';
 import { getAssistantId } from '@/utils/services';
-import { deepEqual } from '@/utils/data';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../../ui/resizable';
 import Explorer from './Explorer';
 
@@ -53,6 +48,8 @@ type ThreadsProps = {
   view?: ViewName;
   children?: React.ReactNode;
   onSelectMenu: (menu: MenuAction, data: string) => void;
+  onShouldDelete: (id: string) => void;
+  onResizeExplorer: (width: number) => void;
 };
 
 export default function Threads({
@@ -60,101 +57,25 @@ export default function Threads({
   view = ViewName.Recent,
   children,
   onSelectMenu,
+  onShouldDelete,
+  onResizeExplorer,
 }: ThreadsProps) {
   const router = useRouter();
   const { id } = router.query;
 
-  const { conversations, updateConversations, deleteConversation, archives, setArchives } =
-    useContext(AppContext);
-  const { backendContext, setSettings } = useBackend();
+  const { conversations, updateConversations, archives, setArchives } = useContext(AppContext);
+  const { backendContext } = useBackend();
 
   const searchParams = useSearchParams();
   const selectedConversation = conversations.find((c) => c.id === selectedThreadId);
   const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);
 
-  useShortcuts(ShortcutIds.DELETE_MESSAGE, (event) => {
-    event.preventDefault();
-    logger.info('TODO delete Message');
-  });
-  useShortcuts(ShortcutIds.EDIT_MESSAGE, (event) => {
-    event.preventDefault();
-    logger.info('TODO edit Message');
-  });
-
-  const { showModal } = useContext(ModalsContext);
-
   const selectedPage = getSelectedPage(selectedThreadId, view);
-
-  const saveSettings = (currentPage = selectedPage, partialSettings?: Partial<PageSettings>) => {
-    const { settings } = backendContext.config;
-    logger.info('saveSettings', currentPage, partialSettings, backendContext.config);
-    if (settings.selectedPage) {
-      const pages = settings.pages || {};
-      const page = pages[currentPage] || DefaultPageSettings;
-      const newSettings = { ...page, ...partialSettings };
-      if (partialSettings && !deepEqual(newSettings, DefaultPageSettings)) {
-        if (!deepEqual(newSettings, page)) {
-          setSettings({
-            ...settings,
-            pages: { ...pages, [currentPage]: newSettings },
-          });
-        }
-      } else if (pages[currentPage]) {
-        delete pages[currentPage];
-        setSettings({
-          ...settings,
-          pages,
-        });
-      }
-    }
-  };
-
-  useShortcuts(ShortcutIds.TOGGLE_FULLSCREEN, (event) => {
-    event.preventDefault();
-    logger.info('toggle fullscreen');
-    const { settings } = backendContext.config;
-    const pages = settings.pages || {};
-    const page = pages[selectedPage] || DefaultPageSettings;
-    if (page.explorerHidden && page.settingsHidden) {
-      saveSettings(selectedPage, { explorerHidden: false, settingsHidden: false });
-    } else {
-      saveSettings(selectedPage, { explorerHidden: true, settingsHidden: true });
-    }
-  });
 
   if (id !== selectedThreadId) {
     logger.info('conflict in Threads', id, selectedThreadId);
     return null;
   }
-
-  const deleteAndCleanupConversation = async (conversationId: string) =>
-    deleteConversation(conversationId, async (cId) => {
-      // Delete associated settings
-      saveSettings(getSelectedPage(cId, ViewName.Recent));
-    });
-
-  const handleResizeExplorer = (size: number) => {
-    saveSettings(selectedPage, { explorerWidth: size });
-  };
-
-  const handleDelete = async (action: string, data: any) => {
-    const conversation = data?.item as Conversation;
-    logger.info(`delete ${action} ${data}`);
-    if (conversation) {
-      if (action === 'Delete') {
-        deleteAndCleanupConversation(conversation.id);
-        if (selectedThreadId && selectedThreadId === conversation.id) {
-          router.replace(Page.Threads);
-        }
-      }
-    }
-  };
-
-  const handleShouldDelete = (data: string) => {
-    logger.info(`to delete ${data}`);
-    const conversation = getConversation(data, conversations) as Conversation;
-    showModal(ModalIds.DeleteItem, { item: conversation, onAction: handleDelete });
-  };
 
   const setThreads = (threads: Conversation[]) => {
     if (view === ViewName.Recent) {
@@ -178,7 +99,7 @@ export default function Threads({
         minSize={14}
         maxSize={40}
         defaultSize={pageSettings.explorerWidth}
-        onResize={handleResizeExplorer}
+        onResize={onResizeExplorer}
         className={pageSettings.explorerHidden === true ? 'hidden' : ''}
       >
         <Explorer
@@ -186,7 +107,7 @@ export default function Threads({
           archives={archives}
           setThreads={setThreads}
           onSelectMenu={onSelectMenu}
-          onShouldDelete={handleShouldDelete}
+          onShouldDelete={onShouldDelete}
           selectedAssistantId={assistantId}
           selectedThreadId={selectedThreadId}
         />
