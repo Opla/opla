@@ -1,3 +1,10 @@
+# [1.0.0-alpha.47](https://github.com/Opla/opla/compare/v1.0.0-alpha.46...v1.0.0-alpha.47) (2024-03-28)
+
+
+### Bug Fixes
+
+* messages path creation [#633](https://github.com/Opla/opla/issues/633) ([#634](https://github.com/Opla/opla/issues/634)) ([47cddd0](https://github.com/Opla/opla/commit/47cddd0a26513c07fe5340fdb92094e6b7944ce4))
+
 # [1.0.0-alpha.46](https://github.com/Opla/opla/compare/v1.0.0-alpha.45...v1.0.0-alpha.46) (2024-03-28)
 
 
