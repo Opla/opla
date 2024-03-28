@@ -14,6 +14,11 @@ const { withSentryConfig } = require('@sentry/nextjs');
 module.exports = withSentryConfig(
   module.exports,
   {
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+
+    // An auth token is required for uploading source maps.
+    authToken: process.env.SENTRY_AUTH_TOKEN,
     // For all available options, see:
     // https://github.com/getsentry/sentry-webpack-plugin#options
 
