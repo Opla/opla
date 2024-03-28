@@ -15,13 +15,14 @@
 // import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { SquarePen, Store } from 'lucide-react';
+import { Bot, SquarePen, Store } from 'lucide-react';
 import AvatarView from '@/components/common/AvatarView';
 import { ExplorerGroup, ExplorerList } from '@/components/common/Explorer';
 import { Button } from '@/components/ui/button';
 import useTranslation from '@/hooks/useTranslation';
 import { useAssistantStore } from '@/stores';
 import { Assistant, Ui } from '@/types';
+import EmptyView from '@/components/common/EmptyView';
 
 type AssistantsListProps = {
   selectedId?: string;
@@ -75,35 +76,55 @@ export default function AssistantsList({
     return menu;
   };
 
+  const StoreButton = (
+    <Button variant="outline" size="sm" className="text-primary" asChild>
+      <Link href="/threads/store">
+        <Store className="mr-2 h-4 w-4" strokeWidth={1.5} />
+        {t('Explore the store')}
+      </Link>
+    </Button>
+  );
   return (
     <ExplorerGroup
       title="Assistants"
       closed={closed}
       onToggle={onToggle}
-      toolbar={
-        <Button variant="outline" size="sm" className="text-primary" asChild>
-          <Link href="/threads/store">
-            <Store className="mr-2 h-4 w-4" strokeWidth={1.5} />
-            {t('Explore the store')}
-          </Link>
-        </Button>
-      }
+      toolbar={(assistants.length > 0 || closed) && StoreButton}
+      className="h-full"
     >
-      <ExplorerList<Assistant>
-        selectedId={selectedId}
-        items={assistants}
-        getItemTitle={(assistant) => assistant.name}
-        renderLeftSide={(assistant) => <AvatarView avatar={assistant.avatar} className="h-4 w-4" />}
-        renderRightSide={(assistant) =>
-          assistant.disabled !== true && (
-            <Button variant="ghost" size="iconSm" asChild>
-              <SquarePen className="h-4 w-4" strokeWidth={1.5} />
-            </Button>
-          )
-        }
-        onSelectItem={onSelect}
-        menu={(assistant) => getMenu(assistant)}
-      />
+      {assistants.length > 0 && (
+        <ExplorerList<Assistant>
+          selectedId={selectedId}
+          items={assistants}
+          getItemTitle={(assistant) => assistant.name}
+          renderLeftSide={(assistant) => (
+            <AvatarView avatar={assistant.avatar} className="h-4 w-4" />
+          )}
+          renderRightSide={(assistant) =>
+            assistant.disabled !== true && (
+              <Button variant="ghost" size="iconSm" asChild>
+                <SquarePen className="h-4 w-4" strokeWidth={1.5} />
+              </Button>
+            )
+          }
+          onSelectItem={onSelect}
+          menu={(assistant) => getMenu(assistant)}
+        />
+      )}
+      {assistants.length === 0 && (
+        <div className="h-full">
+          <EmptyView
+            title={t('No Assistants')}
+            description={t(
+              'Opt for a specialized AI agent or GPT to navigate and enhance your daily activities. These assistants can utilize both local models and external services like OpenAI, offering versatile support.',
+            )}
+            icon={<Bot className="h-12 w-12 text-muted-foreground" strokeWidth={1.5} />}
+            className="h-full p-4"
+          >
+            {StoreButton}
+          </EmptyView>
+        </div>
+      )}
     </ExplorerGroup>
   );
 }

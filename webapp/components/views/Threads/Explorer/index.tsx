@@ -19,6 +19,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import {
   Archive,
+  Bot,
   Check,
   FolderClock,
   FolderInput,
@@ -223,6 +224,7 @@ export default function ThreadsExplorer({
   const assistantsGroup = explorerGroups.find((g) => g.title === ViewName.Assistants);
   const showRecent = recentGroup?.hidden === false;
   const showArchives = archivesGroup?.hidden === false;
+  const showAssistants = assistantsGroup?.hidden === false;
   const closedRecent = recentGroup?.closed === true;
   const closedArchives = archivesGroup?.closed === true;
   const closedAssistants = assistantsGroup?.closed === true;
@@ -269,6 +271,18 @@ export default function ThreadsExplorer({
                 <DropdownMenuItem
                   className="flex w-full items-center justify-between"
                   onSelect={() => {
+                    onSelectMenu(MenuAction.ChangeView, ViewName.Assistants);
+                  }}
+                >
+                  <div className="flex flex-1 items-center capitalize">
+                    <Bot className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                    {t(ViewName.Assistants)}
+                  </div>
+                  {showAssistants && <Check className="h-4 w-4" strokeWidth={1.5} />}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="flex w-full items-center justify-between"
+                  onSelect={() => {
                     onSelectMenu(MenuAction.ChangeView, ViewName.Recent);
                   }}
                 >
@@ -311,17 +325,21 @@ export default function ThreadsExplorer({
       <div className="flex-1 flex-col space-y-1 overflow-y-auto overflow-x-hidden p-1 dark:border-white/20">
         <div className="flex h-full grow flex-col gap-2 pb-2 text-sm">
           <ResizablePanelGroup direction="vertical">
-            <ResizablePanel id="assistant" className="!overflow-y-auto">
-              <AssistantsList
-                closed={closedAssistants}
-                onToggle={() => {
-                  onSelectMenu(MenuAction.ToggleGroup, ViewName.Assistants);
-                }}
-                selectedId={selectedAssistantId}
-                onSelect={handleSelectAssistant}
-              />
-            </ResizablePanel>
-            <ResizableHandle />
+            {showAssistants && (
+              <>
+                <ResizablePanel id="assistant" className="!overflow-y-auto pt-2" minSize={4}>
+                  <AssistantsList
+                    closed={closedAssistants}
+                    onToggle={() => {
+                      onSelectMenu(MenuAction.ToggleGroup, ViewName.Assistants);
+                    }}
+                    selectedId={selectedAssistantId}
+                    onSelect={handleSelectAssistant}
+                  />
+                </ResizablePanel>
+                <ResizableHandle />{' '}
+              </>
+            )}
             {showRecent && (
               <>
                 <ResizablePanel id="recent" className="!overflow-y-auto pt-2" minSize={3}>
