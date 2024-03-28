@@ -132,7 +132,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     }
     const dls: Model[] = l
       ? []
-      : getDownloadables(model).filter((d) => d.private !== true && isValidFormat(d));
+      : getDownloadables(mdl).filter((d) => d.private !== true && isValidFormat(d));
     return [mdl, dls, l];
   }, [selectedModelId, models, collection]);
 
@@ -228,7 +228,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       header={
         <div className="mx-3 flex h-7 grow flex-row items-center px-2">
           <span className="gap-1 py-1 capitalize text-neutral-700 dark:text-neutral-500">
-            {`${model.creator || getEntityName(model.author)}`}
+            {`${model.creator || getEntityName(model.author) || t('Local')}`}
           </span>
           <span className="pl-2">/</span>
           <div className="flex grow items-center gap-2 truncate px-2 ">

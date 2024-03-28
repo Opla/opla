@@ -80,12 +80,12 @@ export const saveFileDialog = async (filters?: DialogFilter[]) => {
 
 export const writeTextFile = async (filename: string, contents: string, createDir: boolean) => {
   const { writeFile: fsWriteFile } = await import('@tauri-apps/api/fs');
-  const { join } = await import('@tauri-apps/api/path');
+  const { join, sep } = await import('@tauri-apps/api/path');
   let path = filename;
   if (createDir) {
     const dataDir = (await invokeTauri('get_data_dir')) as string;
     path = await join(dataDir, filename);
-    const filepath = filename.split('/').slice(0, -1).join('/');
+    const filepath = filename.split(sep).slice(0, -1).join(sep);
     if (filepath.length > 0) {
       await invokeTauri('create_dir', { path: filepath, dataDir });
     }
@@ -134,4 +134,13 @@ export const fileExists = async (filename: string, path?: string) => {
     dir = (await invokeTauri('get_data_dir')) as string;
   }
   return exists(await join(dir, filename));
+};
+
+export const getPathComponents = async (resourcePath: string) => {
+  const { basename, dirname, extname } = await import('@tauri-apps/api/path');
+  const filename = await basename(resourcePath);
+  const path = await dirname(resourcePath);
+  const ext = await extname(resourcePath);
+  const name = filename.replace(ext, '');
+  return { filename, path, ext, name };
 };
