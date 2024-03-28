@@ -1,3 +1,10 @@
+# [1.0.0-alpha.49](https://github.com/Opla/opla/compare/v1.0.0-alpha.48...v1.0.0-alpha.49) (2024-03-28)
+
+
+### Bug Fixes
+
+* model not found in status bar ([#636](https://github.com/Opla/opla/issues/636)) ([1727c59](https://github.com/Opla/opla/commit/1727c59f43ecc9164c7b13fcef62826125ffd459))
+
 # [1.0.0-alpha.48](https://github.com/Opla/opla/compare/v1.0.0-alpha.47...v1.0.0-alpha.48) (2024-03-28)
 
 
