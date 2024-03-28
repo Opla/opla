@@ -1,3 +1,10 @@
+# [1.0.0-alpha.56](https://github.com/Opla/opla/compare/v1.0.0-alpha.55...v1.0.0-alpha.56) (2024-03-28)
+
+
+### Bug Fixes
+
+* remove model id in empty conversation button  [#650](https://github.com/Opla/opla/issues/650) ([#651](https://github.com/Opla/opla/issues/651)) ([145641b](https://github.com/Opla/opla/commit/145641b7a85810f826856dda73f482cc17a8cd0e))
+
 # [1.0.0-alpha.55](https://github.com/Opla/opla/compare/v1.0.0-alpha.54...v1.0.0-alpha.55) (2024-03-28)
 
 
