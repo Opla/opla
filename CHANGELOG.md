@@ -1,3 +1,10 @@
+# [1.0.0-alpha.52](https://github.com/Opla/opla/compare/v1.0.0-alpha.51...v1.0.0-alpha.52) (2024-03-28)
+
+
+### Bug Fixes
+
+* in light theme avatar are invisible [#639](https://github.com/Opla/opla/issues/639) ([#641](https://github.com/Opla/opla/issues/641)) ([a286b79](https://github.com/Opla/opla/commit/a286b798a57d8ce987609323285a11eb771d4df6))
+
 # [1.0.0-alpha.51](https://github.com/Opla/opla/compare/v1.0.0-alpha.50...v1.0.0-alpha.51) (2024-03-28)
 
 
