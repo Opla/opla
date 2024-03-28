@@ -1,3 +1,10 @@
+# [1.0.0-alpha.50](https://github.com/Opla/opla/compare/v1.0.0-alpha.49...v1.0.0-alpha.50) (2024-03-28)
+
+
+### Features
+
+* remove 'use your local AI models' from Assistants [#630](https://github.com/Opla/opla/issues/630) ([#637](https://github.com/Opla/opla/issues/637)) ([f5c79bb](https://github.com/Opla/opla/commit/f5c79bbe20bc22a6c1ee9435bcd144d0d1fdccda))
+
 # [1.0.0-alpha.49](https://github.com/Opla/opla/compare/v1.0.0-alpha.48...v1.0.0-alpha.49) (2024-03-28)
 
 
