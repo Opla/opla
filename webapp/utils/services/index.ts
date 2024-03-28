@@ -55,7 +55,7 @@ export const getActiveService = (
       activeService = activeServiceFrom({
         type: AIServiceType.Assistant,
         assistantId: assistant.id,
-        targetId: assistant.targets?.[0].id,
+        targetId: assistant.targets?.[0]?.id,
       });
     } else {
       activeService = activeServiceFrom({

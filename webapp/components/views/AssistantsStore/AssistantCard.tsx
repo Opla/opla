@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useRouter } from 'next/router';
 import { SquarePen } from 'lucide-react';
 import AvatarView from '@/components/common/AvatarView';
 import { Button } from '@/components/ui/button';
@@ -25,28 +24,18 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import useTranslation from '@/hooks/useTranslation';
-import { Assistant, Ui } from '@/types';
-import { useAssistantStore } from '@/stores';
+import { Assistant } from '@/types';
 
 type AssistantCardProps = {
   assistant: Assistant;
+  onInstall: (assistant: Assistant) => void;
 };
 
-function AssistantCard({ assistant }: AssistantCardProps) {
-  const router = useRouter();
+function AssistantCard({ assistant, onInstall }: AssistantCardProps) {
   const { t } = useTranslation();
-  const { getAssistant, createAssistant } = useAssistantStore();
-
-  const handleStartChat = () => {
-    let newAssistant = getAssistant(assistant.id);
-    if (!newAssistant) {
-      newAssistant = createAssistant(assistant.name, { ...assistant, readonly: true });
-    }
-    router.push(`${Ui.Page.Threads}/?assistant=${assistant.id}`);
-  };
 
   return (
-    <CardButton onClick={handleStartChat}>
+    <CardButton onClick={() => onInstall(assistant)}>
       <CardHeader className="h-[94px]">
         <div className="flex flex-row items-center gap-4">
           {assistant.avatar && <AvatarView avatar={assistant.avatar} />}

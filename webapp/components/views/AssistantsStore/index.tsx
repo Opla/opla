@@ -12,13 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 import { ResizablePanel } from '@/components/ui/resizable';
 import { Search } from 'lucide-react';
-import { Assistant } from '@/types';
-import { getAssistantsCollection } from '@/utils/backend/commands';
+import useBackend from '@/hooks/useBackendContext';
+import { Assistant, Model, Ui } from '@/types';
+import { getAssistantsCollection, getModelsCollection } from '@/utils/backend/commands';
 import useTranslation from '@/hooks/useTranslation';
 import { getEntityName } from '@/utils/data';
+import { useAssistantStore } from '@/stores';
+import { installModelFromApi } from '@/utils/data/models';
+import { toast } from '@/components/ui/Toast';
+import logger from '@/utils/logger';
+import { DefaultModelId } from '@/utils/constants';
 import Threads from '../Threads/Threads';
 import { InputIcon } from '../../ui/input-icon';
 import AssistantCard from './AssistantCard';
@@ -34,9 +41,41 @@ const search = (query: string, assistant: Assistant) => {
 };
 
 function AssistantsStore() {
+  const router = useRouter();
+  const { backendContext, updateBackendStore } = useBackend();
   const [collection, setCollection] = useState<Assistant[]>([]);
   const [query, setQuery] = useState<string>('');
   const { t } = useTranslation();
+
+  const { getAssistant, createAssistant } = useAssistantStore();
+
+  const installAssistant = async (assistant: Assistant) => {
+    let newAssistant = getAssistant(assistant.id);
+    if (!newAssistant) {
+      const { targets = [] } = assistant;
+      const allModels = backendContext.config.models.items;
+      if (targets.length) {
+        // TODO install first target model if not present
+      }
+
+      if (allModels.length === 0) {
+        const collections = (await getModelsCollection()) as unknown as { models: Model[] };
+        const model = collections.models.find((m) => m.id === DefaultModelId);
+        if (model) {
+          try {
+            await installModelFromApi(model);
+            await updateBackendStore();
+          } catch (e) {
+            const error = `Can't install ${model?.name} model`;
+            logger.info(error);
+            toast.error(error);
+          }
+        }
+      }
+      newAssistant = createAssistant(assistant.name, { ...assistant, targets, readonly: true });
+    }
+    router.push(`${Ui.Page.Threads}/?assistant=${assistant.id}`);
+  };
 
   useEffect(() => {
     const getCollection = async () => {
@@ -72,7 +111,7 @@ function AssistantsStore() {
         </div>
         <div className="grid grid-cols-4 gap-4 px-40">
           {filteredCollection.map((assistant) => (
-            <AssistantCard key={assistant.id} assistant={assistant} />
+            <AssistantCard key={assistant.id} assistant={assistant} onInstall={installAssistant} />
           ))}
         </div>
       </ResizablePanel>

@@ -134,6 +134,7 @@ export type Preset = BaseNamedRecord &
     parentId?: string;
     readonly?: boolean;
     disabled?: boolean;
+    selected?: boolean;
   };
 
 export type ConversationPreset = InlinePreset & {
@@ -295,6 +296,7 @@ export type Model = BaseNamedRecord & {
   tags?: string[];
   recommendations?: string;
   recommended?: boolean;
+
   featured?: boolean;
   deprecated?: boolean;
   private?: boolean;

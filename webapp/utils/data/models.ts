@@ -16,9 +16,11 @@ import { BrainCircuit } from 'lucide-react';
 import { Ui, Model, OplaContext, Provider, ProviderType } from '@/types';
 import Opla from '@/components/icons/Opla';
 import OpenAI from '@/components/icons/OpenAI';
-import { getResourceUrl } from '.';
+import { deepMerge, getEntityName, getResourceUrl } from '.';
 import { getLocalProvider, getProviderState } from './providers';
 import OplaProvider from '../providers/opla';
+import logger from '../logger';
+import { installModel } from '../backend/commands';
 
 /* export const getSelectedModel = (backendContext: OplaContext) => {
   const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.activeModel}`;
@@ -128,4 +130,35 @@ export const findModelInAll = (
 ) => {
   const allModels = getAllModels(providers, backendContext);
   return findModel(modelIdOrName, allModels);
+};
+
+export const installModelFromApi = async (modelSource: Model) => {
+  const downloadables = getDownloadables(modelSource).filter(
+    (d) => d.private !== true && isValidFormat(d),
+  );
+  let model: Model = modelSource;
+  if (!isValidFormat(model) && downloadables.length > 0) {
+    model = downloadables.find((d) => d.recommended) || downloadables[0];
+  }
+
+  if (!isValidFormat(model)) {
+    throw new Error(`Not valid Model to install ${model?.name}`);
+  }
+
+  const selectedModel: Model = deepMerge(modelSource, model || {}, true);
+  logger.info(`install ${model?.name}`, selectedModel);
+  if (selectedModel.private === true) {
+    delete selectedModel.private;
+  }
+  if (selectedModel.include) {
+    delete selectedModel.include;
+  }
+  const path = getEntityName(selectedModel.creator || selectedModel.author);
+  const id = await installModel(
+    selectedModel,
+    getResourceUrl(selectedModel.download),
+    path,
+    selectedModel.name,
+  );
+  return id;
 };
