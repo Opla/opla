@@ -1,3 +1,10 @@
+# [1.0.0-alpha.45](https://github.com/Opla/opla/compare/v1.0.0-alpha.44...v1.0.0-alpha.45) (2024-03-28)
+
+
+### Bug Fixes
+
+* path separator for Windows [#603](https://github.com/Opla/opla/issues/603) ([#626](https://github.com/Opla/opla/issues/626)) ([27fa877](https://github.com/Opla/opla/commit/27fa877ac86b3cbe3f51f78b28ec4ba9d685024a))
+
 # [1.0.0-alpha.44](https://github.com/Opla/opla/compare/v1.0.0-alpha.43...v1.0.0-alpha.44) (2024-03-27)
 
 
