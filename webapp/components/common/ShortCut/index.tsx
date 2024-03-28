@@ -19,7 +19,7 @@ import { shortcutAsText } from '@/utils/shortcuts';
 function ShortcutBadge({ command }: { command: string }) {
   const keys = shortcutAsText(command);
 
-  return <div className="ml-2 text-muted-foreground">{keys.toUpperCase()}</div>;
+  return <div className="ml-2 whitespace-break-spaces text-muted-foreground">{keys}</div>;
 }
 
 function ShortcutSettings() {

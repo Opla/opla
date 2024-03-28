@@ -24,16 +24,18 @@ function shortcutAsText(command: string) {
   if (!shortcut) {
     return '';
   }
-  let keys = Array.isArray(shortcut.keys) ? shortcut.keys.join(' ') : (shortcut.keys as string);
-  keys = keys.replace('mod', isMac() ? '⌘' : 'Ctrl');
+  const mac = isMac();
+  const sep = mac ? ' ' : ' ';
+  let keys = Array.isArray(shortcut.keys) ? shortcut.keys.join(sep) : (shortcut.keys as string);
+  keys = keys.replace('mod', mac ? '⌘' : 'Ctrl');
   keys = keys.replace('shift', '⇧');
-  keys = keys.replace('alt', isMac() ? '⌥' : 'Alt');
-  keys = keys.replaceAll('+', '');
+  keys = keys.replace('alt', mac ? '⌥' : 'Alt');
+  keys = keys.replaceAll('+', sep);
   keys = keys.replace('backspace', '⌫');
   keys = keys.replace('enter', '⏎');
   keys = keys.replace('delete', '⌦');
 
-  return keys.toUpperCase();
+  return mac ? keys.toUpperCase() : keys;
 }
 
 export { shortcutAsText, findShortcut };
