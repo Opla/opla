@@ -18,6 +18,6 @@ export const isWindows =
   typeof window !== 'undefined' && window.navigator.platform.toLowerCase().indexOf('win') > -1;
 
 export const getFilename = (path: string) => {
-  const sep = path.indexOf('\\') !== -1 ? '\\' : '/';
-  return path.split(sep).pop();
+  const p = path.replace(/\\/g, '/');
+  return p.split('/').pop();
 };
