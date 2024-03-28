@@ -95,7 +95,7 @@ export function ConversationPanel({
       });
       description = t('Opla works using your machine processing power.');
     } else if (selectedModelName) {
-      buttonLabel = t('Start a conversation with {{model}}', { model: selectedModelName });
+      buttonLabel = t('Start a conversation');
       description = t('Opla works using your machine processing power.');
     } else if (modelItems.length > 0) {
       description = t('Opla works using your machine processing power.');
