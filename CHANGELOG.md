@@ -1,3 +1,10 @@
+# [1.0.0-alpha.53](https://github.com/Opla/opla/compare/v1.0.0-alpha.52...v1.0.0-alpha.53) (2024-03-28)
+
+
+### Features
+
+* use popover theme for tooltip [#638](https://github.com/Opla/opla/issues/638) ([#642](https://github.com/Opla/opla/issues/642)) ([0b2126e](https://github.com/Opla/opla/commit/0b2126ef1018d7bd623376822a72cbba6c359f48))
+
 # [1.0.0-alpha.52](https://github.com/Opla/opla/compare/v1.0.0-alpha.51...v1.0.0-alpha.52) (2024-03-28)
 
 
