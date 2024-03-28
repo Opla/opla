@@ -1,3 +1,10 @@
+# [1.0.0-alpha.51](https://github.com/Opla/opla/compare/v1.0.0-alpha.50...v1.0.0-alpha.51) (2024-03-28)
+
+
+### Features
+
+* display empty for assistants [#631](https://github.com/Opla/opla/issues/631) ([#640](https://github.com/Opla/opla/issues/640)) ([626a3fa](https://github.com/Opla/opla/commit/626a3fa766ccf8cb323868bf6f636609a3155714))
+
 # [1.0.0-alpha.50](https://github.com/Opla/opla/compare/v1.0.0-alpha.49...v1.0.0-alpha.50) (2024-03-28)
 
 
