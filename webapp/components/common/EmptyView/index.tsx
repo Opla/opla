@@ -25,6 +25,7 @@ type EmptyViewProps = {
   actions?: Ui.MenuItem[];
   onCreateItem?: () => void;
   className?: string;
+  children?: React.ReactNode;
 };
 function EmptyView({
   title,
@@ -34,6 +35,7 @@ function EmptyView({
   className,
   onCreateItem,
   actions,
+  children,
 }: EmptyViewProps) {
   const renderAction = (action: Ui.MenuItem) => {
     const Actionbutton = (
@@ -76,6 +78,7 @@ function EmptyView({
         {actions && (
           <div className="flex gap-2">{actions.map((action) => renderAction(action))}</div>
         )}
+        {children}
       </div>
     </div>
   );
