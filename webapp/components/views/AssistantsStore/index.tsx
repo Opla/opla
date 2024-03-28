@@ -53,7 +53,7 @@ function AssistantsStore() {
     [collection, query],
   );
   return (
-    <Threads onSelectMenu={() => {}}>
+    <Threads onSelectMenu={() => {}} onShouldDelete={() => {}} onResizeExplorer={() => {}}>
       <ResizablePanel id="assistant-store">
         <div className="container px-40 py-20 text-center">
           <h2 className="mx-auto my-2 text-4xl font-extrabold md:text-3xl">
