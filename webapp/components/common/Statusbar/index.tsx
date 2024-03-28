@@ -99,7 +99,7 @@ export default function Statusbar() {
             backendContext.server.status === 'wait' ||
             backendContext.server.status === 'starting') && <span>{t('Server is starting')}</span>}
           {backendContext.server.status === 'started' && (
-            <span>{model?.title || t('Model not found')}</span>
+            <span>{model?.title || model?.name || t('Model unknown')}</span>
           )}
           {/* (backendContext.server.status === 'stopping' ||
             backendContext.server.status === 'stopped') && <span>{t('Server is stopped')}</span> */}
