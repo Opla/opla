@@ -66,7 +66,7 @@ export default function ThreadHeader({
   const selectedModel = service.model;
 
   const selectedTargetId =
-    service?.type === AIServiceType.Assistant ? service.targetId : assistant?.targets?.[0].id;
+    service?.type === AIServiceType.Assistant ? service.targetId : assistant?.targets?.[0]?.id;
   const target = assistant?.targets?.find((t) => t.id === selectedTargetId);
 
   const { t } = useTranslation();

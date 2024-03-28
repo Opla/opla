@@ -42,5 +42,5 @@ export const getAssistantTargetsAsItems = (
 export const getDefaultAssistantService = (assistant: Assistant): AIService => ({
   type: AIServiceType.Assistant,
   assistantId: assistant.id,
-  targetId: assistant.targets?.[0].id,
+  targetId: assistant.targets?.[0]?.id,
 });
