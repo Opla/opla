@@ -149,7 +149,7 @@ export default function Settings({
                 <div className="flex w-full flex-row items-center p-1 text-xs" key={asset.id}>
                   <File className="mr-2 h-4 w-4" strokeWidth={1.5} />
                   <span className="ellipsis mr-2 line-clamp-1 grow break-all">
-                    {asset.type === 'file' ? getFilename(asset.file) : ''}
+                    {asset.type === 'file' ? getFilename(asset.file) || '' : ''}
                   </span>
                   <Button
                     variant="ghost"

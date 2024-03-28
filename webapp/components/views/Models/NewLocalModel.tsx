@@ -36,7 +36,7 @@ import { deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
 import { getDownloadables, isValidFormat } from '@/utils/data/models';
 import { ShortcutIds } from '@/hooks/useShortcuts';
 import { ModalIds, Page } from '@/types/ui';
-import { fileExists, openFileDialog } from '@/utils/backend/tauri';
+import { fileExists, getPathComponents, openFileDialog } from '@/utils/backend/tauri';
 import { importModel, validateModelsFile } from '@/utils/models';
 import ModelInfos from '@/components/common/ModelInfos';
 import { ModalsContext } from '@/context/modals';
@@ -96,9 +96,9 @@ function NewLocalModel({
       { name: t('Choose a model file'), extensions: ['gguf', 'json'] },
     ]);
     if (typeof file === 'string') {
-      const filepath = file.substring(0, file.lastIndexOf('/'));
+      const { path, name, filename, ext } = await getPathComponents(file);
       let model: Model | undefined;
-      if (file.endsWith('.json')) {
+      if (ext === 'json') {
         const validate = await validateModelsFile(file);
         logger.info('onLocalInstall', validate);
         if (!validate.success) {
@@ -107,24 +107,22 @@ function NewLocalModel({
           return;
         }
         model = importModel(validate.data);
-      } else if (file.endsWith('.gguf')) {
-        const name = file.substring(file.lastIndexOf('/') + 1, file.lastIndexOf('.'));
-        const filename = file.substring(file.lastIndexOf('/') + 1);
+      } else if (ext === 'gguf') {
         logger.info('onLocalInstall gguf', file);
         model = importModel({ id: name, name, download: filename });
       }
       if (model?.download && getResourceUrl(model.download).endsWith('.gguf')) {
         const download = getResourceUrl(model.download);
-        const isExist = await fileExists(download, filepath);
+        const isExist = await fileExists(download, path);
         if (!isExist) {
-          logger.error('onLocalInstall file not found', download, filepath);
+          logger.error('onLocalInstall file not found', download, path);
           toast.error(`File not found ${file}`);
           return;
         }
         model.editable = true;
-        const id = await installModel(model, undefined, filepath, download);
+        const id = await installModel(model, undefined, path, download);
         await updateBackendStore();
-        logger.info('onLocalInstall', id, model, filepath, download);
+        logger.info('onLocalInstall', id, model, path, download);
         if (!gotoModels) {
           router.push(`${Page.Models}/${id}`);
         }
