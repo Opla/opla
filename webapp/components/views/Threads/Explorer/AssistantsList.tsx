@@ -12,18 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+// import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { SquarePen, Store } from 'lucide-react';
 import AvatarView from '@/components/common/AvatarView';
 import { ExplorerGroup, ExplorerList } from '@/components/common/Explorer';
-import Opla from '@/components/icons/Opla';
 import { Button } from '@/components/ui/button';
 import useTranslation from '@/hooks/useTranslation';
 import { useAssistantStore } from '@/stores';
 import { Assistant, Ui } from '@/types';
-import { OplaAssistant } from '@/stores/assistants';
 
 type AssistantsListProps = {
   selectedId?: string;
@@ -40,8 +38,7 @@ export default function AssistantsList({
 }: AssistantsListProps) {
   const router = useRouter();
   const { t } = useTranslation();
-  const { getAllAssistants, updateAssistant } = useAssistantStore();
-  const [assistants, setAssistants] = useState<Assistant[]>(getAllAssistants());
+  const { assistants, updateAssistant } = useAssistantStore();
 
   const handleEditAssistant = (assistantId: string) => {
     const route = Ui.Page.Assistants;
@@ -51,8 +48,6 @@ export default function AssistantsList({
   const handleHideAssistant = (assistantId: string) => {
     const assistant = assistants.find((a) => a.id === assistantId) as Assistant;
     updateAssistant({ ...assistant, hidden: true });
-    const newAssistants = getAllAssistants();
-    setAssistants(newAssistants);
   };
 
   const menuMyAssistants: Ui.MenuItem[] = [
@@ -74,9 +69,6 @@ export default function AssistantsList({
   ];
 
   const getMenu = (assistant: Assistant) => {
-    if (assistant.id === OplaAssistant.id) {
-      return [];
-    }
     if (!assistant.readonly) {
       return menuMyAssistants;
     }
@@ -98,18 +90,10 @@ export default function AssistantsList({
       }
     >
       <ExplorerList<Assistant>
-        selectedId={selectedId || OplaAssistant.id}
+        selectedId={selectedId}
         items={assistants}
-        getItemTitle={(assistant) =>
-          assistant.id === OplaAssistant.id ? t('Use your local AI Models') : assistant.name
-        }
-        renderLeftSide={(assistant) =>
-          assistant.id === OplaAssistant.id ? (
-            <Opla className="h-4 w-4" />
-          ) : (
-            <AvatarView avatar={assistant.avatar} className="h-4 w-4" />
-          )
-        }
+        getItemTitle={(assistant) => assistant.name}
+        renderLeftSide={(assistant) => <AvatarView avatar={assistant.avatar} className="h-4 w-4" />}
         renderRightSide={(assistant) =>
           assistant.disabled !== true && (
             <Button variant="ghost" size="iconSm" asChild>

@@ -232,24 +232,25 @@ export default function ThreadsExplorer({
       title="Threads"
       toolbar={
         <>
-          {selectedThreadId && (
+          {(selectedThreadId || selectedAssistantId) && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   asChild
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   disabled={!selectedThreadId}
                   className="cursor-pointer items-center p-1"
                 >
                   <Link href={Ui.Page.Threads}>
-                    <SquarePen className="h-4 w-4" strokeWidth={1.5} />
+                    <SquarePen className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                    {t('Chat with Local AI')}
                   </Link>
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom" sideOffset={12} className="mt-1">
                 <div className="flex w-full flex-row gap-2">
-                  <p>{t('New conversation')}</p>
+                  <p>{t('Playground for your local AI Models')}</p>
                   <ShortcutBadge command={ShortcutIds.NEW_CONVERSATION} />
                 </div>
               </TooltipContent>
