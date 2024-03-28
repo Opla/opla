@@ -24,6 +24,12 @@ export const DefaultPageSettings: PageSettings = {
 
 export const DefaultThreadsExplorerGroups: ExplorerGroup[] = [
   {
+    title: ViewName.Assistants,
+    hidden: false,
+    height: 0,
+    closed: false,
+  },
+  {
     title: ViewName.Recent,
     hidden: false,
     height: 0,
