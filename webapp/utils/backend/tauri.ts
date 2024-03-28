@@ -80,14 +80,16 @@ export const saveFileDialog = async (filters?: DialogFilter[]) => {
 
 export const writeTextFile = async (filename: string, contents: string, createDir: boolean) => {
   const { writeFile: fsWriteFile } = await import('@tauri-apps/api/fs');
-  const { join, sep } = await import('@tauri-apps/api/path');
+  const { join, dirname } = await import('@tauri-apps/api/path');
   let path = filename;
   if (createDir) {
     const dataDir = (await invokeTauri('get_data_dir')) as string;
     path = await join(dataDir, filename);
-    const filepath = filename.split(sep).slice(0, -1).join(sep);
+    // const filepath = filename.split(sep).slice(0, -1).join(sep);
+    const filepath = await dirname(filename);
     if (filepath.length > 0) {
       await invokeTauri('create_dir', { path: filepath, dataDir });
+      // await createPaths(await join(dataDir, filepath));
     }
   }
   return fsWriteFile({
