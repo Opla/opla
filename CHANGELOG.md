@@ -1,3 +1,10 @@
+# [1.0.0-alpha.48](https://github.com/Opla/opla/compare/v1.0.0-alpha.47...v1.0.0-alpha.48) (2024-03-28)
+
+
+### Bug Fixes
+
+* check if Sentry is working in Prod [#629](https://github.com/Opla/opla/issues/629) ([#635](https://github.com/Opla/opla/issues/635)) ([fd8196e](https://github.com/Opla/opla/commit/fd8196eb0e3deec20c60a59d5f23468f6a02b425))
+
 # [1.0.0-alpha.47](https://github.com/Opla/opla/compare/v1.0.0-alpha.46...v1.0.0-alpha.47) (2024-03-28)
 
 
