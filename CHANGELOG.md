@@ -1,3 +1,10 @@
+# [1.0.0-alpha.46](https://github.com/Opla/opla/compare/v1.0.0-alpha.45...v1.0.0-alpha.46) (2024-03-28)
+
+
+### Features
+
+* check if model file is available [#612](https://github.com/Opla/opla/issues/612) ([#627](https://github.com/Opla/opla/issues/627)) ([f0f8c01](https://github.com/Opla/opla/commit/f0f8c01ab85ccaf4c9ef967d3c0e62eca67cbc20))
+
 # [1.0.0-alpha.45](https://github.com/Opla/opla/compare/v1.0.0-alpha.44...v1.0.0-alpha.45) (2024-03-28)
 
 
