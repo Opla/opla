@@ -221,7 +221,8 @@ export default function ThreadsExplorer({
   const explorerGroups = threadsSettings.explorerGroups || DefaultThreadsExplorerGroups;
   const recentGroup = explorerGroups.find((g) => g.title === ViewName.Recent);
   const archivesGroup = explorerGroups.find((g) => g.title === ViewName.Archives);
-  const assistantsGroup = explorerGroups.find((g) => g.title === ViewName.Assistants);
+  const assistantsGroup =
+    explorerGroups.find((g) => g.title === ViewName.Assistants) || DefaultThreadsExplorerGroups[0];
   const showRecent = recentGroup?.hidden === false;
   const showArchives = archivesGroup?.hidden === false;
   const showAssistants = assistantsGroup?.hidden === false;
