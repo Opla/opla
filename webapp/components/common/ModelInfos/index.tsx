@@ -46,6 +46,7 @@ function ModelInfos({
           <GreenPill label={t('Downloading')} />
         )}
         {!stateAsIcon && model.state === ModelState.Error && <RedPill label={t('Error')} />}
+        {!stateAsIcon && model.state === ModelState.NotFound && <RedPill label={t('NotFound')} />}
       </div>
     </div>
   );

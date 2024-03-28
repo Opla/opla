@@ -128,10 +128,12 @@ export const deleteDir = async (dirname: string, isDatadir = true, recursive = f
 
 export const fileExists = async (filename: string, path?: string) => {
   const { exists } = await import('@tauri-apps/api/fs');
-  const { join } = await import('@tauri-apps/api/path');
-  let dir = path as string;
-  if (!dir) {
+  const { join, isAbsolute } = await import('@tauri-apps/api/path');
+  let dir = '';
+  if (!path && !isAbsolute(filename)) {
     dir = (await invokeTauri('get_data_dir')) as string;
+  } else if (path) {
+    dir = path;
   }
   return exists(await join(dir, filename));
 };
@@ -141,6 +143,6 @@ export const getPathComponents = async (resourcePath: string) => {
   const filename = await basename(resourcePath);
   const path = await dirname(resourcePath);
   const ext = await extname(resourcePath);
-  const name = filename.replace(ext, '');
+  const name = filename.replace(`.${ext}`, '');
   return { filename, path, ext, name };
 };

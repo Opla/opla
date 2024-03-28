@@ -263,6 +263,15 @@ impl ModelStorage {
         Ok(model_path.to_string())
     }
 
+    pub fn validate_model(&self, model: &Model) -> Result<(), String> {
+        if model.id.is_none() {
+            return Err("Model ID is required".to_string());
+        }
+        if model.name.is_empty() {
+            return Err("Model name is required".to_string());
+        }
+        Ok(())
+    }
     pub fn get_model_entity(&self, id_or_name: &str) -> Option<ModelEntity> {
         self.items
             .iter()

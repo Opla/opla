@@ -29,7 +29,7 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { DownloadIcon } from '@radix-ui/react-icons';
 import useTranslation from '@/hooks/useTranslation';
-import { Model } from '@/types';
+import { Model, ModelState } from '@/types';
 import { deepCopy, deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
 import useParameters from '@/hooks/useParameters';
 import ContentView from '@/components/common/ContentView';
@@ -42,6 +42,7 @@ import {
   installModel,
   uninstallModel,
   updateModel,
+  updateModelEntity,
 } from '@/utils/backend/commands';
 import useBackend from '@/hooks/useBackendContext';
 import { getDownloadables, isValidFormat } from '@/utils/data/models';
@@ -49,6 +50,7 @@ import { ModalIds, Page } from '@/types/ui';
 import { ModalsContext } from '@/context/modals';
 import EmptyView from '@/components/common/EmptyView';
 import { BrainCircuit } from 'lucide-react';
+import { fileExists } from '@/utils/backend/tauri';
 import Parameter, { ParametersRecord } from '../../common/Parameter';
 import { Button } from '../../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../../ui/table';
@@ -145,11 +147,17 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       if (model?.fileName) {
         const path = `${model.path || ''}/${model.fileName || ''}`;
         const full = await getModelFullPath(path);
+        const exist = await fileExists(full);
+        if (!exist && model.state !== ModelState.NotFound) {
+          logger.error(`File not found ${full}`);
+          await updateModelEntity({ ...model, state: ModelState.NotFound });
+          await updateBackendStore();
+        }
         setFullPathModel(full);
       }
     };
     getFullPath();
-  }, [model]);
+  }, [fullPathModel, model, updateBackendStore]);
 
   const handleInstall = async (item?: Model) => {
     const selectedModel: Model = deepMerge<Model>(model, item || {}, true);
@@ -284,7 +292,14 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
               <p>{(updatedParameters?.description as string) || t(model.description || '')}</p>
             )}
             {model.fileName && (
-              <Parameter label={t('File')} name="file" value={fullPathModel} disabled type="file" />
+              <Parameter
+                label={t('File')}
+                name="file"
+                value={fullPathModel}
+                disabled
+                type="file"
+                inputCss={model.state === ModelState.NotFound ? 'text-red-500' : ''}
+              />
             )}
             {model.author && (
               <Parameter

@@ -17,7 +17,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { BrainCircuit, HardDriveDownload } from 'lucide-react';
-import { Ui, Model } from '@/types';
+import { Ui, Model, ModelState } from '@/types';
 import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
@@ -28,6 +28,7 @@ import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import Explorer, { ExplorerGroup, ExplorerList } from '@/components/common/Explorer';
 import { getModelsCollection, updateModel } from '@/utils/backend/commands';
 import EmptyView from '@/components/common/EmptyView';
+import { cn } from '@/lib/utils';
 import { Button } from '../../ui/button';
 import EditableItem from '../../common/EditableItem';
 import ModelInfos from '../../common/ModelInfos';
@@ -125,7 +126,14 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
               <>
                 {!model.editable && (
                   <div className="flex w-full grow flex-row items-center justify-between overflow-hidden pl-3">
-                    <div className="flex-1 text-ellipsis break-all pr-1">
+                    <div
+                      className={cn(
+                        'flex-1 text-ellipsis break-all pr-1',
+                        model.state === ModelState.Error || model.state === ModelState.NotFound
+                          ? 'text-red-500'
+                          : '',
+                      )}
+                    >
                       {model.title || model.name}
                     </div>
                     <ModelInfos model={model} displayName={false} stateAsIcon />
@@ -137,7 +145,12 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
                       id={model.id}
                       title={model.title || model.name}
                       editable
-                      className="line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1"
+                      className={cn(
+                        'line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1',
+                        model.state === ModelState.Error || model.state === ModelState.NotFound
+                          ? 'text-red-500'
+                          : '',
+                      )}
                       onChange={handleChangeModelName}
                     />
                   </div>

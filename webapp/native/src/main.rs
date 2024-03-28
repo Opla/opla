@@ -33,7 +33,7 @@ use api::{
     hf::search_hf_models,
     models,
 };
-use data::model::Model;
+use data::model::{Model, ModelEntity};
 use downloader::Downloader;
 use llm::{
     openai::call_completion,
@@ -238,6 +238,7 @@ async fn stop_opla_server<R: Runtime>(
     let mut server = context.server.lock().await;
     server.stop(&app).await
 }
+
 #[tauri::command]
 async fn get_assistants_collection<R: Runtime>(
     _app: tauri::AppHandle<R>,
@@ -415,6 +416,23 @@ async fn update_model<R: Runtime>(
 
     store.models.update_model(model);
 
+    store.save().map_err(|err| err.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn update_model_entity<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>,
+    model: Model,
+    entity: ModelEntity
+) -> Result<(), String> {
+    let mut store = context.store.lock().await;
+
+    store.models.update_model_entity(&entity);
+    store.models.update_model(model);
     store.save().map_err(|err| err.to_string())?;
 
     Ok(())
@@ -940,6 +958,7 @@ fn main() {
                 cancel_download_model,
                 uninstall_model,
                 update_model,
+                update_model_entity,
                 set_active_model,
                 get_assistants_collection,
                 llm_call_completion,
