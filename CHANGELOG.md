@@ -1,3 +1,10 @@
+# [1.0.0-alpha.54](https://github.com/Opla/opla/compare/v1.0.0-alpha.53...v1.0.0-alpha.54) (2024-03-28)
+
+
+### Bug Fixes
+
+* shortcut display is not great on Windows [#645](https://github.com/Opla/opla/issues/645) ([#648](https://github.com/Opla/opla/issues/648)) ([260857d](https://github.com/Opla/opla/commit/260857d3652904d2c50fdf5706dd514c07da96c8))
+
 # [1.0.0-alpha.53](https://github.com/Opla/opla/compare/v1.0.0-alpha.52...v1.0.0-alpha.53) (2024-03-28)
 
 
