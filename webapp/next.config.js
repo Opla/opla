@@ -16,7 +16,7 @@ module.exports = withSentryConfig(
   {
     org: process.env.SENTRY_ORG,
     project: process.env.SENTRY_PROJECT,
-  
+
     // An auth token is required for uploading source maps.
     authToken: process.env.SENTRY_AUTH_TOKEN,
     // For all available options, see:
