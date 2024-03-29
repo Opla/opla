@@ -1,3 +1,10 @@
+# [1.0.0-alpha.65](https://github.com/Opla/opla/compare/v1.0.0-alpha.64...v1.0.0-alpha.65) (2024-03-29)
+
+
+### Bug Fixes
+
+* show 'no model installed' conversation [#670](https://github.com/Opla/opla/issues/670) ([#673](https://github.com/Opla/opla/issues/673)) ([6f6f6bf](https://github.com/Opla/opla/commit/6f6f6bfd17c8fafe765d80322a6b1de55aab4137))
+
 # [1.0.0-alpha.64](https://github.com/Opla/opla/compare/v1.0.0-alpha.63...v1.0.0-alpha.64) (2024-03-29)
 
 
