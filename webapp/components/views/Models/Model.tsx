@@ -223,7 +223,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
 
   if (!model) {
     return (
-      <ContentView>
+      <ContentView className="pb-8">
         <EmptyView
           icon={<BrainCircuit className="h-16 w-16 text-muted" />}
           title={models.length > 0 ? t('Local models') : t("You don't have any models")}

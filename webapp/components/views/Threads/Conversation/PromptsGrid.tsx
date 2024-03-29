@@ -29,7 +29,9 @@ function PromptsGrid({
   const [prompts] = useFetch<PromptTemplate[]>('https://opla.github.io/prompts/default.json');
 
   return (
-    <div className={cn('mr-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3', className)}>
+    <div
+      className={cn('mr-4 grid grid-cols-1 gap-4 px-2 sm:grid-cols-2 md:grid-cols-3', className)}
+    >
       {prompts?.map((prompt) => (
         <PromptCard
           key={prompt.id}

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 // import useTranslation from '@/hooks/useTranslation';
+import { cn } from '@/lib/utils';
 import Header from './Header';
 
 export type ContentViewProps = {
@@ -20,12 +21,19 @@ export type ContentViewProps = {
   selectedId?: string;
   children: React.ReactNode;
   toolbar?: React.ReactNode;
+  className?: string;
 };
 
-export default function ContentView({ header, selectedId, children, toolbar }: ContentViewProps) {
+export default function ContentView({
+  header,
+  selectedId,
+  children,
+  toolbar,
+  className,
+}: ContentViewProps) {
   // const { t } = useTranslation();
   return (
-    <div className="flex h-full flex-col bg-secondary/20">
+    <div className={cn('flex h-full flex-col bg-secondary/20', className)}>
       {(header || toolbar) && <Header header={header || selectedId || ''} toolbar={toolbar} />}
       {children}
     </div>

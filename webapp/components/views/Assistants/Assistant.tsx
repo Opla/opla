@@ -117,7 +117,7 @@ export default function AssistantView({ selectedId: assistantId }: AssistantProp
 
   if (!assistant) {
     return (
-      <ContentView>
+      <ContentView className="pb-8">
         <EmptyView
           icon={<Bot className="h-16 w-16 text-muted" />}
           title={
