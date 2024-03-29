@@ -1,3 +1,10 @@
+# [1.0.0-alpha.58](https://github.com/Opla/opla/compare/v1.0.0-alpha.57...v1.0.0-alpha.58) (2024-03-29)
+
+
+### Bug Fixes
+
+* cancel downloading a model [#592](https://github.com/Opla/opla/issues/592) ([#664](https://github.com/Opla/opla/issues/664)) ([ba14232](https://github.com/Opla/opla/commit/ba142325d082d3feabccb96470d1b1623df7687a))
+
 # [1.0.0-alpha.57](https://github.com/Opla/opla/compare/v1.0.0-alpha.56...v1.0.0-alpha.57) (2024-03-29)
 
 
