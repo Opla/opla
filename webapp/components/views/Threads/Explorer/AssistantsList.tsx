@@ -95,7 +95,7 @@ export default function AssistantsList({
       {assistants.length > 0 && (
         <ExplorerList<Assistant>
           selectedId={selectedId}
-          items={assistants}
+          items={assistants.filter((assistant) => !assistant.hidden)}
           getItemTitle={(assistant) => assistant.name}
           renderLeftSide={(assistant) => (
             <AvatarView avatar={assistant.avatar} className="h-4 w-4" />
