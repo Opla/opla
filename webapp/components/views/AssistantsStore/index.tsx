@@ -59,7 +59,7 @@ function AssistantsStore() {
     setSettings({ ...settings, pages });
   };
 
-  const { getAssistant, createAssistant } = useAssistantStore();
+  const { getAssistant, createAssistant, updateAssistant } = useAssistantStore();
 
   const installAssistant = async (assistant: Assistant) => {
     let newAssistant = getAssistant(assistant.id);
@@ -85,6 +85,10 @@ function AssistantsStore() {
         }
       }
       newAssistant = createAssistant(assistant.name, { ...assistant, targets, readonly: true });
+    }
+    if (newAssistant.hidden) {
+      newAssistant.hidden = false;
+      updateAssistant(newAssistant);
     }
     router.push(`${Ui.Page.Threads}/?assistant=${assistant.id}`);
   };

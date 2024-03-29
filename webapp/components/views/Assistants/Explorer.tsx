@@ -121,7 +121,7 @@ export default function AssistantsExplorer({
         </Button>
       }
     >
-      {assistants.length > 0 && (
+      {filteredAssistants.length > 0 && (
         <ExplorerList<Assistant>
           selectedId={selectedAssistantId}
           renderLeftSide={(a) => (
@@ -135,7 +135,7 @@ export default function AssistantsExplorer({
           menu={(assistant) => (assistant.disabled ? menuDisabled : menu)}
         />
       )}
-      {assistants.length === 0 && (
+      {filteredAssistants.length === 0 && (
         <div className="h-full">
           <EmptyView
             title={t('No assistant')}
