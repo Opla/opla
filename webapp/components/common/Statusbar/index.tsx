@@ -27,8 +27,9 @@ import { findModel } from '@/utils/data/models';
 
 export default function Statusbar() {
   const router = useRouter();
+  const { pathname } = router;
   const { t } = useTranslation();
-  const { backendContext, getActiveModel } = useBackend();
+  const { backendContext, getActiveModel, updateBackendStore } = useBackend();
   const { usage } = useContext(AppContext);
   const [sys, setSys] = useState<Sys>();
   const { showModal } = useContext(ModalsContext);
@@ -53,8 +54,12 @@ export default function Statusbar() {
   };
 
   const handleCancelDownload = async (action: string, data: any) => {
-    logger.info(`Cancel download ${action} model.id=${data}`);
+    logger.info(`Cancel download ${action} model.id=${data} ${pathname}`);
     await cancelDownloadModel(data.item.id);
+    await updateBackendStore();
+    if (pathname.startsWith(Page.Models)) {
+      router.push(Page.Models);
+    }
   };
 
   const displayDownloads = () => {

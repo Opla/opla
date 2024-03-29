@@ -376,11 +376,12 @@ async fn cancel_download_model<R: Runtime>(
     model_name_or_id: String
 ) -> Result<(), String> {
     let mut store = context.store.lock().await;
-
+    println!("Cancel download model: {:?}", model_name_or_id);
     let mut downloader = context.downloader.lock().await;
     downloader.cancel_download(&model_name_or_id, &app);
 
     let model = store.models.get_model(model_name_or_id.as_str());
+    println!("Cancel download model: {:?}", model);
     match model {
         Some(m) => {
             store.models.remove_model(model_name_or_id.as_str());
@@ -446,6 +447,8 @@ async fn uninstall_model<R: Runtime>(
     model_id: String
 ) -> Result<(), String> {
     let mut store = context.store.lock().await;
+
+    println!("Uninstall model: {:?}", model_id);
 
     match store.models.remove_model(model_id.as_str()) {
         Some(model) => {
@@ -692,7 +695,7 @@ async fn start_server<R: Runtime>(
     Ok(())
 }
 
-async fn model_download<R: Runtime>(
+async fn model_download_event<R: Runtime>(
     app: tauri::AppHandle<R>,
     model_id: String,
     state: String
@@ -707,7 +710,7 @@ async fn model_download<R: Runtime>(
             store.models.update_model_entity(&m);
             store.save().map_err(|err| err.to_string())?;
             drop(store);
-            println!("model_download {} {}", state, model_id);
+            // println!("model_download {} {}", state, model_id);
             let server = context.server.lock().await;
             if
                 state == "ok" &&
@@ -793,7 +796,7 @@ fn handle_download_event<EventLoopMessage>(app: &tauri::AppHandle, payload: &str
     let handler = app.app_handle();
     tauri::async_runtime::spawn(async move {
         let handler = handler.app_handle();
-        match model_download(handler, id.to_string(), state.to_string()).await {
+        match model_download_event(handler, id.to_string(), state.to_string()).await {
             Ok(_) => {}
             Err(err) => {
                 println!("Model downloaded error: {:?}", err);
