@@ -17,17 +17,17 @@ import { Button } from '@/components/ui/button';
 
 export type ToolbarProps = {
   displayExplorer: boolean;
-  displaySettings: boolean;
+  displaySettings?: boolean;
   onChangeDisplayExplorer: (value: boolean) => void;
-  onChangeDisplaySettings: (value: boolean) => void;
+  onChangeDisplaySettings?: (value: boolean) => void;
   disabledSettings?: boolean;
 };
 
 export default function Header({
   displayExplorer,
-  displaySettings,
+  displaySettings = false,
   onChangeDisplayExplorer,
-  onChangeDisplaySettings,
+  onChangeDisplaySettings = () => {},
   disabledSettings,
 }: ToolbarProps) {
   return (

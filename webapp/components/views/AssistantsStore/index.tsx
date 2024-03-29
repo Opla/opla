@@ -15,7 +15,7 @@
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 import { ResizablePanel } from '@/components/ui/resizable';
-import { Search } from 'lucide-react';
+import { ArrowLeftCircle, Search } from 'lucide-react';
 import useBackend from '@/hooks/useBackendContext';
 import { Assistant, Model, Ui } from '@/types';
 import { getAssistantsCollection, getModelsCollection } from '@/utils/backend/commands';
@@ -25,10 +25,12 @@ import { useAssistantStore } from '@/stores';
 import { installModelFromApi } from '@/utils/data/models';
 import { toast } from '@/components/ui/Toast';
 import logger from '@/utils/logger';
-import { DefaultModelId } from '@/utils/constants';
+import { DefaultModelId, DefaultPageSettings } from '@/utils/constants';
+import { Button } from '@/components/ui/button';
 import Threads from '../Threads/Threads';
 import { InputIcon } from '../../ui/input-icon';
 import AssistantCard from './AssistantCard';
+import ToolbarTogglePanels from '../Threads/ToolbarTogglePanels';
 
 const search = (query: string, assistant: Assistant) => {
   const q = query.toLowerCase();
@@ -42,10 +44,20 @@ const search = (query: string, assistant: Assistant) => {
 
 function AssistantsStore() {
   const router = useRouter();
-  const { backendContext, updateBackendStore } = useBackend();
+  const { backendContext, updateBackendStore, setSettings } = useBackend();
   const [collection, setCollection] = useState<Assistant[]>([]);
   const [query, setQuery] = useState<string>('');
   const { t } = useTranslation();
+
+  const defaultSettings = backendContext.config.settings;
+  const pageSettings = defaultSettings.pages?.[`${Ui.Page.Threads}/store`] || DefaultPageSettings;
+
+  const handleExplorerHidden = (hidden: boolean) => {
+    const { settings } = backendContext.config;
+    const { pages = {} } = settings;
+    pages[`${Ui.Page.Threads}/store`] = { ...pageSettings, explorerHidden: !hidden };
+    setSettings({ ...settings, pages });
+  };
 
   const { getAssistant, createAssistant } = useAssistantStore();
 
@@ -94,6 +106,16 @@ function AssistantsStore() {
   return (
     <Threads onSelectMenu={() => {}} onShouldDelete={() => {}} onResizeExplorer={() => {}}>
       <ResizablePanel id="assistant-store">
+        <div className="flex w-full p-4">
+          <Button variant="ghost" onClick={() => router.push(Ui.Page.Threads)} size="icon">
+            <ArrowLeftCircle className="" strokeWidth={1.5} />
+          </Button>
+          <ToolbarTogglePanels
+            displayExplorer={!pageSettings.explorerHidden}
+            onChangeDisplayExplorer={handleExplorerHidden}
+            disabledSettings
+          />
+        </div>
         <div className="container px-40 py-20 text-center">
           <h2 className="mx-auto my-2 text-4xl font-extrabold md:text-3xl">
             {t('Assistants Store')}
@@ -109,6 +131,7 @@ function AssistantsStore() {
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
+
         <div className="grid grid-cols-4 gap-4 px-40">
           {filteredCollection.map((assistant) => (
             <AssistantCard key={assistant.id} assistant={assistant} onInstall={installAssistant} />
