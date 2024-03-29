@@ -39,7 +39,7 @@ export const getActiveService = (
   assistant: Assistant | undefined,
   providers: Provider[],
   backendContext: OplaContext,
-  _modelName: string,
+  _modelName: string | undefined,
 ): AIImplService => {
   const type = assistant ? AIServiceType.Assistant : AIServiceType.Model;
   let activeService: AIService | undefined = conversation
@@ -60,7 +60,7 @@ export const getActiveService = (
     } else {
       activeService = activeServiceFrom({
         type: AIServiceType.Model,
-        modelId: modelName,
+        modelId: modelName as string,
         providerIdOrName,
       });
     }
