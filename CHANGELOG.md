@@ -1,3 +1,10 @@
+# [1.0.0-alpha.64](https://github.com/Opla/opla/compare/v1.0.0-alpha.63...v1.0.0-alpha.64) (2024-03-29)
+
+
+### Bug Fixes
+
+* set shadow-none for EditableItem [#661](https://github.com/Opla/opla/issues/661) ([690efbd](https://github.com/Opla/opla/commit/690efbd036412a9bc526c89bdd8e3c55a7fe4c53))
+
 # [1.0.0-alpha.63](https://github.com/Opla/opla/compare/v1.0.0-alpha.62...v1.0.0-alpha.63) (2024-03-29)
 
 
