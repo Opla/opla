@@ -1,3 +1,10 @@
+# [1.0.0-alpha.57](https://github.com/Opla/opla/compare/v1.0.0-alpha.56...v1.0.0-alpha.57) (2024-03-29)
+
+
+### Bug Fixes
+
+* sentry config using NEXT_PUBLIC [#656](https://github.com/Opla/opla/issues/656) ([#657](https://github.com/Opla/opla/issues/657)) ([a1eb3c1](https://github.com/Opla/opla/commit/a1eb3c1ccb216bd34bdf111be14fe2b2d9dec26b))
+
 # [1.0.0-alpha.56](https://github.com/Opla/opla/compare/v1.0.0-alpha.55...v1.0.0-alpha.56) (2024-03-28)
 
 
