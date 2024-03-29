@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { useContext } from 'react';
+import { AlertTriangle, ArrowRight } from 'lucide-react';
 import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackendContext';
 import { AIServiceType, Assistant, Conversation, Provider, ProviderType, Ui } from '@/types';
@@ -29,7 +30,7 @@ import ServiceBadge from './ServiceBadge';
 
 export type ThreadMenuProps = {
   selectedAssistantId: string | undefined;
-  selectedModelName: string;
+  selectedModelName: string | undefined;
   selectedConversationId?: string;
   modelItems: Ui.MenuItem[];
   onSelectModel: (model: string, provider: ProviderType) => void;
@@ -89,16 +90,25 @@ export default function ThreadHeader({
     title = <AssistantTitle assistant={assistant} />;
   } else if (selectedItem) {
     title = <ModelTitle selectedItem={selectedItem} selectedModel={selectedModel} />;
-  } else if (modelItems.length === 0) {
+  } else if (modelItems.length === 0 && !selectedConversationId) {
     return (
       <div className="flex w-full flex-col items-start justify-between px-4 py-0 sm:flex-row sm:items-center">
-        <div className="flex grow items-center justify-between p-2 text-sm font-medium leading-none">
+        <div className="flex grow items-center justify-between p-2 text-sm font-extrabold leading-none">
           {t('Welcome to Opla')}
         </div>
       </div>
     );
   } else {
-    title = <span>{t('Select a model')}</span>;
+    title = (
+      <div className="flex items-center justify-center text-red-500">
+        <AlertTriangle className="mr-4 h-4 w-4" strokeWidth={1.5} />
+        <span>
+          {t('No local model found.')}{' '}
+          {modelItems.length === 0 ? t('Install one') : t('Select one')}
+        </span>
+        <ArrowRight className="ml-4 h-4 w-4" strokeWidth={1.5} />
+      </div>
+    );
   }
 
   let targetState = Ui.BasicState.disabled;

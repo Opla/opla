@@ -29,7 +29,7 @@ import PromptsGrid from './PromptsGrid';
 export type ConversationPanelProps = {
   selectedConversation: Conversation | undefined;
   selectedAssistantId: string | undefined;
-  selectedModelName: string;
+  selectedModelName: string | undefined;
   messages: Message[] | undefined;
   avatars: AvatarRef[];
   modelItems: Ui.MenuItem[];

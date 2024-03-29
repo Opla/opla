@@ -51,7 +51,7 @@ import { Badge } from '../../../ui/badge';
 import { ShortcutBadge } from '../../../common/ShortCut';
 
 type ModelMenuProps = {
-  selectedModelName: string;
+  selectedModelName?: string;
   selectedConversationId?: string;
   modelItems: Ui.MenuItem[];
   onSelectModel: (model: string, provider: ProviderType) => void;

@@ -668,7 +668,12 @@ function Thread({
   };
 
   const prompt = changedPrompt === undefined ? currentPrompt : changedPrompt;
-  const selectedModelNameOrId = getConversationModelId(selectedConversation) || activeModel;
+  let selectedModelNameOrId: string | undefined =
+    getConversationModelId(selectedConversation) || activeModel;
+  const model = modelItems.find((m) => m.value === selectedModelNameOrId);
+  if (!model) {
+    selectedModelNameOrId = undefined;
+  }
   return (
     <ContentView
       header={
