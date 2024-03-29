@@ -350,7 +350,7 @@ export default function ThreadsExplorer({
                     onToggle={() => {
                       onSelectMenu(MenuAction.ToggleGroup, ViewName.Recent);
                     }}
-                    className="h-full"
+                    className="h-full pb-8"
                   >
                     {threads.length > 0 && (
                       <ExplorerList<Conversation>
@@ -373,7 +373,7 @@ export default function ThreadsExplorer({
                       />
                     )}
                     {threads.length === 0 && (
-                      <div className="h-full">
+                      <div className="h-full pb-8">
                         <EmptyView
                           title={t('No threads')}
                           description={t("Don't be shy, say hi!")}
@@ -401,7 +401,7 @@ export default function ThreadsExplorer({
                     onToggle={() => {
                       onSelectMenu(MenuAction.ToggleGroup, ViewName.Archives);
                     }}
-                    className="h-full"
+                    className="h-full pb-8"
                   >
                     {archives.length > 0 && (
                       <ExplorerList<Conversation>

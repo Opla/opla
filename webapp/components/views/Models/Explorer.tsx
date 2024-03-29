@@ -162,7 +162,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
           />
         )}
         {models.length === 0 && (
-          <div className="h-full p-4">
+          <div className="h-full pb-8">
             <EmptyView
               title={t('No models')}
               description={t("Let's add one!")}

@@ -66,8 +66,9 @@ function EmptyView({
   return (
     <div
       className={cn(
-        'flex h-[350px] shrink-0 items-center justify-center rounded-md border border-dashed',
+        'flex h-auto shrink-0 items-center justify-center rounded-md border border-dashed',
         className,
+        'm-4',
       )}
     >
       <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
