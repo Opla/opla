@@ -85,7 +85,8 @@ function AssistantsStore() {
         }
       }
       newAssistant = createAssistant(assistant.name, { ...assistant, targets, readonly: true });
-    } if (newAssistant.hidden) {
+    }
+    if (newAssistant.hidden) {
       newAssistant.hidden = false;
       updateAssistant(newAssistant);
     }
