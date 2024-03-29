@@ -1,3 +1,10 @@
+# [1.0.0-alpha.63](https://github.com/Opla/opla/compare/v1.0.0-alpha.62...v1.0.0-alpha.63) (2024-03-29)
+
+
+### Bug Fixes
+
+* empty view only for my assistants [#658](https://github.com/Opla/opla/issues/658) ([#672](https://github.com/Opla/opla/issues/672)) ([27a0809](https://github.com/Opla/opla/commit/27a08095875448f50c0c269e89544e88fefe4e7a))
+
 # [1.0.0-alpha.62](https://github.com/Opla/opla/compare/v1.0.0-alpha.61...v1.0.0-alpha.62) (2024-03-29)
 
 
