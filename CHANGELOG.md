@@ -1,3 +1,10 @@
+# [1.0.0-alpha.62](https://github.com/Opla/opla/compare/v1.0.0-alpha.61...v1.0.0-alpha.62) (2024-03-29)
+
+
+### Features
+
+* display app version in settings [#662](https://github.com/Opla/opla/issues/662) ([#671](https://github.com/Opla/opla/issues/671)) ([89e19d0](https://github.com/Opla/opla/commit/89e19d0f65b64ac048354f8248c28beb2278d6d9))
+
 # [1.0.0-alpha.61](https://github.com/Opla/opla/compare/v1.0.0-alpha.60...v1.0.0-alpha.61) (2024-03-29)
 
 
