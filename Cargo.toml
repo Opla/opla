@@ -1,6 +1,6 @@
 [package]
 name = "opla"
-version = "1.0.0-alpha.60"
+version = "1.0.0-alpha.61"
 edition = "2021"
 default-run = "opla-cli"
 

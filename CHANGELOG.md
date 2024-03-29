@@ -1,3 +1,10 @@
+# [1.0.0-alpha.61](https://github.com/Opla/opla/compare/v1.0.0-alpha.60...v1.0.0-alpha.61) (2024-03-29)
+
+
+### Bug Fixes
+
+* returning back from assistants store [#667](https://github.com/Opla/opla/issues/667) ([#669](https://github.com/Opla/opla/issues/669)) ([4f17018](https://github.com/Opla/opla/commit/4f17018afbde3a0df1bc09200d218ebd4c5ca975))
+
 # [1.0.0-alpha.60](https://github.com/Opla/opla/compare/v1.0.0-alpha.59...v1.0.0-alpha.60) (2024-03-29)
 
 
