@@ -85,7 +85,10 @@ export default function AssistantsList({
     </Button>
   );
 
-  const filteredAssistants = useMemo(() => assistants.filter((assistant) => !assistant.hidden), [assistants]);
+  const filteredAssistants = useMemo(
+    () => assistants.filter((assistant) => !assistant.hidden),
+    [assistants],
+  );
 
   return (
     <ExplorerGroup
