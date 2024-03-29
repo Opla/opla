@@ -31,7 +31,7 @@ import { useContext } from 'react';
 import { useRouter } from 'next/router';
 import { useSearchParams } from 'next/navigation';
 import useBackend from '@/hooks/useBackendContext';
-import { Conversation } from '@/types';
+import { Conversation, PageSettings } from '@/types';
 import { DefaultPageSettings } from '@/utils/constants';
 import logger from '@/utils/logger';
 import { AppContext } from '@/context';
@@ -62,6 +62,7 @@ export default function Threads({
 }: ThreadsProps) {
   const router = useRouter();
   const { id } = router.query;
+  const { pathname } = router;
 
   const { conversations, updateConversations, archives, setArchives } = useContext(AppContext);
   const { backendContext } = useBackend();
@@ -86,11 +87,18 @@ export default function Threads({
   };
 
   const defaultSettings = backendContext.config.settings;
-  const pageSettings =
-    defaultSettings.pages?.[selectedPage] ||
-    defaultSettings.pages?.[Page.Threads] ||
-    DefaultPageSettings;
+  let pageSettings: PageSettings;
 
+  if (pathname.startsWith(Page.Archives)) {
+    pageSettings = defaultSettings.pages?.[pathname] || DefaultPageSettings;
+  } else if (pathname === `${Page.Threads}/store`) {
+    pageSettings = defaultSettings.pages?.[pathname] || DefaultPageSettings;
+  } else {
+    pageSettings =
+      defaultSettings.pages?.[selectedPage] ||
+      defaultSettings.pages?.[Page.Threads] ||
+      DefaultPageSettings;
+  }
   // logger.info('render Threads', selectedThreadId, view);
   return (
     <ResizablePanelGroup direction="horizontal">
