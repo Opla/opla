@@ -1,3 +1,10 @@
+# [1.0.0-alpha.60](https://github.com/Opla/opla/compare/v1.0.0-alpha.59...v1.0.0-alpha.60) (2024-03-29)
+
+
+### Bug Fixes
+
+* can't hide an assistant in Threads [#665](https://github.com/Opla/opla/issues/665) ([#668](https://github.com/Opla/opla/issues/668)) ([77c2a5b](https://github.com/Opla/opla/commit/77c2a5b807ca68757e076926fb917319d7dc7d37))
+
 # [1.0.0-alpha.59](https://github.com/Opla/opla/compare/v1.0.0-alpha.58...v1.0.0-alpha.59) (2024-03-29)
 
 
