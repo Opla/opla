@@ -1,3 +1,10 @@
+# [1.0.0-alpha.59](https://github.com/Opla/opla/compare/v1.0.0-alpha.58...v1.0.0-alpha.59) (2024-03-29)
+
+
+### Bug Fixes
+
+* padding dashed border for emptyView [#660](https://github.com/Opla/opla/issues/660) ([#666](https://github.com/Opla/opla/issues/666)) ([23d7528](https://github.com/Opla/opla/commit/23d75288ab75ca3804f7d49812a5277143b24d43))
+
 # [1.0.0-alpha.58](https://github.com/Opla/opla/compare/v1.0.0-alpha.57...v1.0.0-alpha.58) (2024-03-29)
 
 
