@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// import { useState } from 'react';
+import { useMemo } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Bot, SquarePen, Store } from 'lucide-react';
@@ -84,18 +84,21 @@ export default function AssistantsList({
       </Link>
     </Button>
   );
+
+  const filteredAssistants = useMemo(() => assistants.filter((assistant) => !assistant.hidden), [assistants]);
+
   return (
     <ExplorerGroup
       title="Assistants"
       closed={closed}
       onToggle={onToggle}
-      toolbar={(assistants.length > 0 || closed) && StoreButton}
+      toolbar={(filteredAssistants.length > 0 || closed) && StoreButton}
       className="h-full"
     >
-      {assistants.length > 0 && (
+      {filteredAssistants.length > 0 && (
         <ExplorerList<Assistant>
           selectedId={selectedId}
-          items={assistants.filter((assistant) => !assistant.hidden)}
+          items={filteredAssistants}
           getItemTitle={(assistant) => assistant.name}
           renderLeftSide={(assistant) => (
             <AvatarView avatar={assistant.avatar} className="h-4 w-4" />
@@ -111,8 +114,8 @@ export default function AssistantsList({
           menu={(assistant) => getMenu(assistant)}
         />
       )}
-      {assistants.length === 0 && (
-        <div className="h-full">
+      {filteredAssistants.length === 0 && (
+        <div className="h-full pb-8">
           <EmptyView
             title={t('No Assistants')}
             description={t(

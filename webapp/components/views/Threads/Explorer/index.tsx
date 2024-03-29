@@ -373,7 +373,7 @@ export default function ThreadsExplorer({
                       />
                     )}
                     {threads.length === 0 && (
-                      <div className="h-full pb-8">
+                      <div className="h-full">
                         <EmptyView
                           title={t('No threads')}
                           description={t("Don't be shy, say hi!")}
