@@ -333,6 +333,7 @@ impl ModelStorage {
     }
 
     pub fn remove_model(&mut self, id: &str) -> Option<Model> {
+        println!("remove_model: {:?}", id);
         self.items
             .iter()
             .position(|m| m.reference.is_same_id_or_name(id))

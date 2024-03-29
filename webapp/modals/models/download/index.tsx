@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import React, { useEffect } from 'react';
+import { useRouter } from 'next/router';
 import useTranslation from '@/hooks/useTranslation';
 import useBackend from '@/hooks/useBackendContext';
 import { DownloadModel } from '@/components/views/Models';
@@ -20,6 +21,7 @@ import AlertDialog from '@/components/common/AlertDialog';
 import { Model } from '@/types';
 import logger from '@/utils/logger';
 import { cancelDownloadModel } from '@/utils/backend/commands';
+import { Page } from '@/types/ui';
 
 function DownloadModelDialog({
   id,
@@ -32,8 +34,10 @@ function DownloadModelDialog({
   data: any;
   onClose: () => void | undefined;
 }) {
+  const router = useRouter();
+  const { pathname } = router;
   const { t } = useTranslation();
-  const { backendContext } = useBackend();
+  const { backendContext, updateBackendStore } = useBackend();
   const model: Model = data?.item as Model;
   const download = (backendContext.downloads ?? [undefined])[0];
 
@@ -43,7 +47,10 @@ function DownloadModelDialog({
     if (action === 'Cancel') {
       logger.info(`Cancel download model.id=${model.id}`);
       await cancelDownloadModel(data.item.id);
-      // onClose();
+      await updateBackendStore();
+      if (pathname.startsWith(Page.Models)) {
+        router.push(Page.Models);
+      }
     }
   };
 

@@ -65,7 +65,37 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
 
   const [fullPathModel, setFullPathModel] = useState<string | undefined>();
   const { backendContext, updateBackendStore } = useBackend();
-  const models = backendContext.config.models.items;
+
+  const [collection, setCollection] = useState<Model[]>([]);
+  const { showModal } = useContext(ModalsContext);
+  const router = useRouter();
+
+  useEffect(() => {
+    const getCollection = async () => {
+      const coll = (await getModelsCollection()) as unknown as { models: Model[] };
+      const collectionModels = coll.models
+        .filter((m) => m.featured === true)
+        .map((m) => ({ ...m, id: m.name }));
+      setCollection(collectionModels);
+    };
+    getCollection();
+  }, []);
+
+  const [downloads, models, model, downloadables, local] = useMemo(() => {
+    let l = true;
+    const mdls = backendContext.config.models.items;
+    let mdl = mdls.find((m) => m.id === selectedModelId) as Model;
+    if (!mdl && selectedModelId) {
+      mdl = collection.find((m) => m.id === selectedModelId) as Model;
+      l = false;
+    }
+    const dls: Model[] = l
+      ? []
+      : getDownloadables(mdl).filter((d) => d.private !== true && isValidFormat(d));
+    return [backendContext.downloads || [], mdls, mdl, dls, l];
+  }, [selectedModelId, backendContext, collection]);
+
+  const isDownloading = downloads.findIndex((d) => d.id === model?.id) !== -1;
 
   const handleParametersChange = async (id: string | undefined, parameters: ParametersRecord) => {
     logger.info(`change model parameters ${id} ${parameters}`);
@@ -110,37 +140,6 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     selectedModelId,
     handleParametersChange,
   );
-  const [collection, setCollection] = useState<Model[]>([]);
-  const { showModal } = useContext(ModalsContext);
-  const router = useRouter();
-
-  useEffect(() => {
-    const getCollection = async () => {
-      const coll = (await getModelsCollection()) as unknown as { models: Model[] };
-      const collectionModels = coll.models
-        .filter((m) => m.featured === true)
-        .map((m) => ({ ...m, id: m.name }));
-      setCollection(collectionModels);
-    };
-    getCollection();
-  }, []);
-
-  const [model, downloadables, local] = useMemo(() => {
-    let l = true;
-    let mdl = models.find((m) => m.id === selectedModelId) as Model;
-    if (!mdl && selectedModelId) {
-      mdl = collection.find((m) => m.id === selectedModelId) as Model;
-      l = false;
-    }
-    const dls: Model[] = l
-      ? []
-      : getDownloadables(mdl).filter((d) => d.private !== true && isValidFormat(d));
-    return [mdl, dls, l];
-  }, [selectedModelId, models, collection]);
-
-  const { downloads = [] } = backendContext;
-
-  const isDownloading = downloads.findIndex((d) => d.id === model?.id) !== -1;
 
   useEffect(() => {
     const getFullPath = async () => {
@@ -183,21 +182,27 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
   const handleUninstall = async () => {
     logger.info(`Uninstall ${model.name} model.id=${model.id}`);
 
-    const nextModelId = models.findLast((m) => m.id !== model.id)?.id;
+    const nextModelId = models.findLast((m) => m.id !== model.id)?.id || '';
     await uninstallModel(model.id);
     await updateBackendStore();
     router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
   };
 
   const handleCancelDownload = async (action: string, data: any) => {
-    logger.info(`Cancel download ${action} model.id=${data}`);
-    await cancelDownloadModel(model.id);
+    const modelId = data.item.id;
+    logger.info(`Cancel download ${action} model.id=${modelId}`);
+    const nextModelId = models.findLast((m) => m.id !== modelId)?.id || '';
+    await cancelDownloadModel(modelId);
+    await updateBackendStore();
+    router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
   };
 
   const handleLocalInstall = (selectedModel?: Model) => {
     if (isDownloading) {
       showModal(ModalIds.Downloads, { item: model, onAction: handleCancelDownload });
+      return;
     }
+
     if (local && !selectedModel) {
       handleUninstall();
       return;
