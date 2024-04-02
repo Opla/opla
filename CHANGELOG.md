@@ -1,3 +1,10 @@
+# [1.0.0-alpha.68](https://github.com/Opla/opla/compare/v1.0.0-alpha.67...v1.0.0-alpha.68) (2024-04-02)
+
+
+### Bug Fixes
+
+* remove message assistant:... in context generation [#659](https://github.com/Opla/opla/issues/659) ([#689](https://github.com/Opla/opla/issues/689)) ([79c2722](https://github.com/Opla/opla/commit/79c272255e904b2a96727ead081ce548c799c12d))
+
 # [1.0.0-alpha.67](https://github.com/Opla/opla/compare/v1.0.0-alpha.66...v1.0.0-alpha.67) (2024-04-02)
 
 
