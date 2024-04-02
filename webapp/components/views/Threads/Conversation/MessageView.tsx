@@ -14,7 +14,7 @@
 
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   Check,
   Clipboard,
@@ -115,7 +115,7 @@ function MessageComponent({
   const { author } = message;
 
   const content = getMessageContentHistoryAsString(message, current, edit !== undefined);
-  const Content = useMarkdownProcessor(content || '');
+  const { Content, MarkDownContext } = useMarkdownProcessor(content || '');
   const isUser = author.role === 'user';
 
   const handleCopyToClipboard = () => {
@@ -155,132 +155,138 @@ function MessageComponent({
     state = DisplayMessageState.Streaming;
   }
 
+  const memoizedContent = useMemo(() => ({ content }), [content]);
   return (
-    <div
-      ref={disabled ? undefined : ref}
-      className={`group relative w-full hover:dark:bg-secondary/20 ${isUser ? '' : ''}`}
-    >
-      <div className="m-auto flex w-full gap-4 font-sans text-sm md:max-w-2xl md:gap-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
-        <div className="m-auto flex w-full flex-row gap-4 p-4 md:max-w-2xl md:gap-6 md:py-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
-          <div className="flex flex-col items-end">
-            <div className="text-opacity-100r flex h-7 items-center justify-center rounded-md p-1 text-white">
-              <AvatarIcon isUser={isUser} avatar={avatar} />
+    <MarkDownContext.Provider value={memoizedContent}>
+      <div
+        ref={disabled ? undefined : ref}
+        className={`group relative w-full hover:dark:bg-secondary/20 ${isUser ? '' : ''}`}
+      >
+        <div className="m-auto flex w-full gap-4 font-sans text-sm md:max-w-2xl md:gap-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
+          <div className="m-auto flex w-full flex-row gap-4 p-4 md:max-w-2xl md:gap-6 md:py-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
+            <div className="flex flex-col items-end">
+              <div className="text-opacity-100r flex h-7 items-center justify-center rounded-md p-1 text-white">
+                <AvatarIcon isUser={isUser} avatar={avatar} />
+              </div>
             </div>
-          </div>
-          <div className="flex w-[calc(100%-50px)] flex-col gap-1 md:gap-3 lg:w-[calc(100%-115px)]">
-            <div className="flex flex-grow flex-col">
-              <div className="flex min-h-20 flex-col items-start whitespace-pre-wrap break-words">
-                <div className="w-full break-words">
-                  <p className="py-1 font-bold capitalize">{avatar.name}</p>
-                  {state === DisplayMessageState.Asset && (
-                    <div className="flex w-full select-auto flex-row items-center px-0 py-2">
-                      <File className="mr-2 h-4 w-4" strokeWidth={1.5} />
-                      <span>{t('Document added')}</span>
+            <div className="flex w-[calc(100%-50px)] flex-col gap-1 md:gap-3 lg:w-[calc(100%-115px)]">
+              <div className="flex flex-grow flex-col">
+                <div className="flex min-h-20 flex-col items-start whitespace-pre-wrap break-words">
+                  <div className="w-full break-words">
+                    <p className="py-1 font-bold capitalize">{avatar.name}</p>
+                    {state === DisplayMessageState.Asset && (
+                      <div className="flex w-full select-auto flex-row items-center px-0 py-2">
+                        <File className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                        <span>{t('Document added')}</span>
+                      </div>
+                    )}
+                    {state === DisplayMessageState.Pending && (
+                      <div className="px-4 py-2">
+                        <MoreHorizontal className="h-4 w-4 animate-pulse" />
+                      </div>
+                    )}
+                    {(state === DisplayMessageState.Markdown ||
+                      state === DisplayMessageState.Streaming) && (
+                      <div className="w-full select-auto px-0 py-2">{Content}</div>
+                    )}
+                    {state === DisplayMessageState.Text && (
+                      <div className="w-full select-auto px-0 py-2">{content}</div>
+                    )}
+                    {state === DisplayMessageState.Edit && (
+                      <Textarea
+                        autoFocus
+                        ref={inputRef}
+                        className="-mx-3 mb-4 mt-0 min-h-[40px] w-full resize-none text-sm"
+                        value={edit !== undefined ? edit : content}
+                        onChange={(e) => {
+                          setEdit(e.target.value);
+                        }}
+                      />
+                    )}
+                  </div>
+                  {state === DisplayMessageState.Asset && isHover && (
+                    <div className="left-34 absolute bottom-0 flex flex-row items-center">
+                      <DeleteButton onDeleteMessage={onDeleteAssets} />
                     </div>
                   )}
-                  {state === DisplayMessageState.Pending && (
-                    <div className="px-4 py-2">
-                      <MoreHorizontal className="h-4 w-4 animate-pulse" />
-                    </div>
-                  )}
-                  {(state === DisplayMessageState.Markdown ||
-                    state === DisplayMessageState.Streaming) && (
-                    <div className="w-full select-auto px-0 py-2">{Content}</div>
-                  )}
-                  {state === DisplayMessageState.Text && (
-                    <div className="w-full select-auto px-0 py-2">{content}</div>
-                  )}
+                  {(state === DisplayMessageState.Markdown || state === DisplayMessageState.Text) &&
+                    isHover && (
+                      <div className="left-34 absolute bottom-0 flex flex-row items-center">
+                        {message.contentHistory && message.contentHistory.length > 0 && (
+                          <div className="flex flex-row items-center pt-0 text-xs">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled={current === message.contentHistory?.length}
+                              onClick={() => {
+                                setCurrent(current + 1);
+                              }}
+                              className="h-5 w-5 p-1"
+                            >
+                              <ChevronLeft className="h-4 w-4" strokeWidth={1.5} />
+                            </Button>
+                            <span className="tabular-nums">
+                              {' '}
+                              {message.contentHistory.length - current + 1} /{' '}
+                              {message.contentHistory.length + 1}{' '}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled={current === 0}
+                              onClick={() => {
+                                setCurrent(current - 1);
+                              }}
+                              className="h-5 w-5 p-1"
+                            >
+                              <ChevronRight className="h-4 w-4" strokeWidth={1.5} />
+                            </Button>
+                          </div>
+                        )}
+                        {!isUser && (
+                          <Button variant="ghost" size="sm" onClick={onResendMessage}>
+                            <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
+                          </Button>
+                        )}
+                        <ClipboardButton
+                          copied={copied}
+                          onCopyToClipboard={handleCopyToClipboard}
+                        />
+                        {message.status !== MessageStatus.Error && (
+                          <Button variant="ghost" size="sm" onClick={handleEdit}>
+                            <Pencil className="h-4 w-4" strokeWidth={1.5} />
+                          </Button>
+                        )}
+                        <DeleteButton onDeleteMessage={onDeleteMessage} />
+                      </div>
+                    )}
                   {state === DisplayMessageState.Edit && (
-                    <Textarea
-                      autoFocus
-                      ref={inputRef}
-                      className="-mx-3 mb-4 mt-0 min-h-[40px] w-full resize-none text-sm"
-                      value={edit !== undefined ? edit : content}
-                      onChange={(e) => {
-                        setEdit(e.target.value);
-                      }}
-                    />
+                    <div className="left-30 absolute -bottom-2 flex flex-row gap-2">
+                      <Button
+                        size="sm"
+                        onClick={handleSave}
+                        disabled={!edit}
+                        className="my-2 h-[28px] py-2"
+                      >
+                        {isUser ? t('Save & submit') : t('Save')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleCancelEdit}
+                        className="my-2 h-[28px] py-2"
+                      >
+                        {t('Cancel')}
+                      </Button>
+                    </div>
                   )}
                 </div>
-                {state === DisplayMessageState.Asset && isHover && (
-                  <div className="left-34 absolute bottom-0 flex flex-row items-center">
-                    <DeleteButton onDeleteMessage={onDeleteAssets} />
-                  </div>
-                )}
-                {(state === DisplayMessageState.Markdown || state === DisplayMessageState.Text) &&
-                  isHover && (
-                    <div className="left-34 absolute bottom-0 flex flex-row items-center">
-                      {message.contentHistory && message.contentHistory.length > 0 && (
-                        <div className="flex flex-row items-center pt-0 text-xs">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={current === message.contentHistory?.length}
-                            onClick={() => {
-                              setCurrent(current + 1);
-                            }}
-                            className="h-5 w-5 p-1"
-                          >
-                            <ChevronLeft className="h-4 w-4" strokeWidth={1.5} />
-                          </Button>
-                          <span className="tabular-nums">
-                            {' '}
-                            {message.contentHistory.length - current + 1} /{' '}
-                            {message.contentHistory.length + 1}{' '}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={current === 0}
-                            onClick={() => {
-                              setCurrent(current - 1);
-                            }}
-                            className="h-5 w-5 p-1"
-                          >
-                            <ChevronRight className="h-4 w-4" strokeWidth={1.5} />
-                          </Button>
-                        </div>
-                      )}
-                      {!isUser && (
-                        <Button variant="ghost" size="sm" onClick={onResendMessage}>
-                          <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
-                        </Button>
-                      )}
-                      <ClipboardButton copied={copied} onCopyToClipboard={handleCopyToClipboard} />
-                      {message.status !== MessageStatus.Error && (
-                        <Button variant="ghost" size="sm" onClick={handleEdit}>
-                          <Pencil className="h-4 w-4" strokeWidth={1.5} />
-                        </Button>
-                      )}
-                      <DeleteButton onDeleteMessage={onDeleteMessage} />
-                    </div>
-                  )}
-                {state === DisplayMessageState.Edit && (
-                  <div className="left-30 absolute -bottom-2 flex flex-row gap-2">
-                    <Button
-                      size="sm"
-                      onClick={handleSave}
-                      disabled={!edit}
-                      className="my-2 h-[28px] py-2"
-                    >
-                      {isUser ? t('Save & submit') : t('Save')}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleCancelEdit}
-                      className="my-2 h-[28px] py-2"
-                    >
-                      {t('Cancel')}
-                    </Button>
-                  </div>
-                )}
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </MarkDownContext.Provider>
   );
 }
 
