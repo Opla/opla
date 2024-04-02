@@ -82,7 +82,7 @@ checksum = "080e9890a082662b09c1ad45f567faeeb47f22b5fb23895fbe1e651e718e25ca"
 
 [[package]]
 name = "app"
-version = "1.0.0-alpha.65"
+version = "1.0.0-alpha.66"
 dependencies = [
  "chrono",
  "dirs",
@@ -358,9 +358,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "chrono"
-version = "0.4.31"
+version = "0.4.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f2c685bad3eb3d45a01354cedb7d5faa66194d1d58ba6e267a8de788f79db38"
+checksum = "8a0d04d43504c61aa6c7531f1871dd0d418d91130162063b789da00fd7057a5e"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
@@ -368,12 +368,15 @@ dependencies = [
  "num-traits",
  "serde",
  "wasm-bindgen",
- "windows-targets 0.48.5",
+ "windows-targets 0.52.0",
 ]
 
 [[package]]
 name = "cli"
-version = "1.0.0-alpha.65"
+version = "1.0.0-alpha.66"
+dependencies = [
+ "opla_core",
+]
 
 [[package]]
 name = "cocoa"
@@ -2174,7 +2177,18 @@ dependencies = [
 
 [[package]]
 name = "opla"
-version = "1.0.0-alpha.65"
+version = "1.0.0-alpha.66"
+dependencies = [
+ "opla_core",
+ "tokenizer",
+]
+
+[[package]]
+name = "opla_core"
+version = "1.0.0-alpha.66"
+dependencies = [
+ "anyhow",
+]
 
 [[package]]
 name = "option-ext"
@@ -3733,7 +3747,7 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokenizer"
-version = "1.0.0-alpha.65"
+version = "1.0.0-alpha.66"
 dependencies = [
  "anyhow",
  "base64 0.21.5",
@@ -3744,9 +3758,9 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.36.0"
+version = "1.37.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61285f6515fa018fb2d1e46eb21223fff441ee8db5d0f1435e8ab4f5cdb80931"
+checksum = "1adbebffeca75fcfd058afa480fb6c0b81e165a0323f9c9d39c9697e37c46787"
 dependencies = [
  "backtrace",
  "bytes",

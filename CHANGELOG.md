@@ -1,3 +1,10 @@
+# [1.0.0-alpha.66](https://github.com/Opla/opla/compare/v1.0.0-alpha.65...v1.0.0-alpha.66) (2024-04-02)
+
+
+### Features
+
+* gguf parser [#481](https://github.com/Opla/opla/issues/481) ([#686](https://github.com/Opla/opla/issues/686)) ([acbcff7](https://github.com/Opla/opla/commit/acbcff71adeefaa3dd708c8545733fd6ea0065fc))
+
 # [1.0.0-alpha.65](https://github.com/Opla/opla/compare/v1.0.0-alpha.64...v1.0.0-alpha.65) (2024-03-29)
 
 
