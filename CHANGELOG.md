@@ -1,3 +1,10 @@
+# [1.0.0-alpha.67](https://github.com/Opla/opla/compare/v1.0.0-alpha.66...v1.0.0-alpha.67) (2024-04-02)
+
+
+### Bug Fixes
+
+* update llama.cpp to latest version ([#687](https://github.com/Opla/opla/issues/687)) ([22c5904](https://github.com/Opla/opla/commit/22c5904d0adda12bab17f85d9e17b2eab34fb874))
+
 # [1.0.0-alpha.66](https://github.com/Opla/opla/compare/v1.0.0-alpha.65...v1.0.0-alpha.66) (2024-04-02)
 
 
