@@ -16,11 +16,17 @@ use tokio::sync::Mutex;
 use std::sync::Arc;
 use crate::{
     error::Error,
-    llm::{llama_cpp::LLamaCppServer, LlmCompletionOptions, LlmError, LlmQueryCompletion, LlmTokenizeResponse},
+    llm::{
+        llama_cpp::LLamaCppServer,
+        LlmCompletionOptions,
+        LlmError,
+        LlmQueryCompletion,
+        LlmTokenizeResponse,
+    },
     store::{ ServerConfiguration, ServerParameters },
 };
 use sysinfo::System;
-use tauri::{api::process::CommandChild, async_runtime::JoinHandle};
+use tauri::{ api::process::CommandChild, async_runtime::JoinHandle };
 use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
 use crate::llm::{ LlmQuery, LlmCompletionResponse };
 use std::time::Duration;
@@ -113,7 +119,7 @@ impl OplaServer {
         arguments: Vec<String>,
         wpid: Arc<Mutex<usize>>,
         wstatus: Arc<Mutex<ServerStatus>>,
-        command_child: Arc<Mutex<Option<CommandChild>>>,
+        command_child: Arc<Mutex<Option<CommandChild>>>
     ) -> Result<(), String> {
         let command = Command::new_sidecar("llama.cpp.server").map_err(
             |_| "failed to init llama.cpp.server"
@@ -175,11 +181,26 @@ impl OplaServer {
             let mut cchild = command_child.lock().await;
             *cchild = Some(child);
             drop(cchild);
-        
+
             while let Some(event) = rx.recv().await {
                 if let CommandEvent::Stdout(line) = event {
-                    println!("{}", line);
-                    if
+                    println!("json={}", line);
+                    if line.contains("HTTP server listening") {
+                        println!("{}", model);
+                        if
+                            app
+                                .emit_all("opla-server", Payload {
+                                    message: format!("{}", model),
+                                    status: ServerStatus::Started.as_str().to_string(),
+                                })
+                                .is_err()
+                        {
+                            println!("Opla server error: {}", "failed to emit started");
+                        }
+
+                        let mut st = wstatus.lock().await;
+                        *st = ServerStatus::Started;
+                    } else if
                         app
                             .emit_all("opla-server", Payload {
                                 message: line.clone(),
@@ -492,7 +513,7 @@ impl OplaServer {
             let self_status = Arc::clone(&self.status);
             let mut wouldblock = true;
             let _ = self.start(app, model, model_path, None).await?;
-                        
+
             // Wait for server to start
             let result = tauri::async_runtime::spawn(async move {
                 let mut retries = 0;
@@ -551,13 +572,18 @@ impl OplaServer {
             }
         };
 
-        self.server.call_completion::<R>(query, server_parameters, completion_options, callback).await
+        self.server.call_completion::<R>(
+            query,
+            server_parameters,
+            completion_options,
+            callback
+        ).await
     }
 
     pub async fn call_tokenize<R: Runtime>(
         &mut self,
         model: &str,
-        text: String,
+        text: String
     ) -> Result<LlmTokenizeResponse, Box<dyn std::error::Error>> {
         println!("{}", format!("Opla llm call tokenize: {:?}", &model));
 
