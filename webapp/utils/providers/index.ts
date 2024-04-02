@@ -64,7 +64,8 @@ export const createLlmMessages = (
   } else {
     // For other policies, we include all messages, and handle system messages accordingly
     messages.forEach((message) => {
-      if (message.author?.role !== 'system' || keepSystemMessages) {
+      const content = getMessageContentAsString(message);
+      if ((message.author?.role !== 'system' || keepSystemMessages) && content !== '...') {
         context.push(message);
       }
     });
