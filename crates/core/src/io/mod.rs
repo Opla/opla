@@ -12,16 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::env;
-
-use opla_core::gguf::GGUF;
-
-fn main() {
-        println!("Opla CLI WIP");
-    let args: Vec<_> = env::args().collect();
-    if args.len() > 1 {
-        println!("The first argument is {}", args[1]);
-    }
-    let mut gguf = GGUF::new();
-    gguf.read(&args[1]).unwrap();
-}
+pub mod gguf;

@@ -4,16 +4,20 @@ version = "1.0.0-alpha.65"
 edition = "2021"
 default-run = "opla-cli"
 
-
 [[bin]]
 bench = false
 path = "crates/cli/src/main.rs"
 name = "opla-cli"
 
+[dependencies]
+tokenizer = { path = "./crates/tokenizer" }
+opla_core = { path = "./crates/core" }
+
 [workspace]
 members = [
   "crates/tokenizer",
   "crates/cli",
+  "crates/core",
   "webapp/native"
 ]
 
