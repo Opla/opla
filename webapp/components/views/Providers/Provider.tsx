@@ -20,6 +20,7 @@ import useBackend from '@/hooks/useBackendContext';
 import useProviderState from '@/hooks/useProviderState';
 import { ProviderType, ServerStatus } from '@/types';
 import ContentView from '@/components/common/ContentView';
+import CopyToClipBoard from '@/components/common/CopyToClipBoard';
 import Toolbar from './Toolbar';
 import Server from './server';
 import OpenAI from './openai';
@@ -38,6 +39,17 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
   const { provider, hasParametersChanged, onParametersSave, onParameterChange, onProviderToggle } =
     useProviderState(selectedProviderId);
   const { backendContext } = useBackend();
+
+  const buildLogs = () => {
+    let logs = '';
+    if (!provider || provider.type === ProviderType.opla) {
+      logs = backendContext?.server.stderr?.join('\n') || '';
+      logs += backendContext?.server.stdout?.join('\n') || '';
+    } else {
+      logs = provider?.errors?.join('\n') || '';
+    }
+    return logs;
+  };
 
   return (
     <Tabs defaultValue="settings" className="h-full">
@@ -103,6 +115,9 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
             )}
           </TabsContent>
           <TabsContent value="debug" className="h-full w-full p-4">
+            <div className="flex w-full flex-row-reverse">
+              <CopyToClipBoard title={t('Copy logs to clipboard')} text={buildLogs()} />
+            </div>
             {provider && (
               <ScrollArea>
                 {provider.type === ProviderType.opla && (
