@@ -23,6 +23,7 @@ import { Conversation, Preset } from '@/types';
 import { getFilename } from '@/utils/misc';
 import EditPresets from '@/components/common/EditPresets';
 import { ConversationError } from '@/types/ui';
+import CopyToClipBoard from '@/components/common/CopyToClipBoard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { Textarea } from '../../ui/textarea';
 import { Button } from '../../ui/button';
@@ -80,6 +81,17 @@ export default function Settings({
       );
       updateConversations(newConversations);
     }
+  };
+
+  const buildLogs = () => {
+    let logs = '';
+    if (provider && provider.type === 'opla') {
+      logs = backendContext?.server.stderr?.join('\n') || '';
+      logs += backendContext?.server.stdout?.join('\n') || '';
+    } else {
+      logs = provider?.errors?.join('\n') || '';
+    }
+    return logs;
   };
 
   return (
@@ -166,8 +178,9 @@ export default function Settings({
             </div>
           )}
         </TabsContent>
-        <TabsContent value="debug" className="px-4">
-          {t('Debug')}
+        <TabsContent value="debug" className="flex w-full items-center justify-between px-4">
+          <span className="text-muted-foreground">{t('Debug')}</span>
+          <CopyToClipBoard title={t('Copy logs to clipboard')} text={buildLogs()} />
         </TabsContent>
         <TabsContent value="debug" className="px-4">
           {errors.map((error) => (
