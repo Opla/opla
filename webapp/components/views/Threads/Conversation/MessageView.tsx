@@ -113,10 +113,10 @@ function MessageComponent({
   const [edit, setEdit] = useState<string | undefined>(undefined);
   const [current, setCurrent] = useState(0);
   const { author } = message;
-
-  const content = getMessageContentHistoryAsString(message, current, edit !== undefined);
-  const { Content, MarkDownContext } = useMarkdownProcessor(content || '');
   const isUser = author.role === 'user';
+
+  const content = getMessageContentHistoryAsString(message, current, !isUser || edit !== undefined);
+  const { Content, MarkDownContext } = useMarkdownProcessor(content || '');
 
   const handleCopyToClipboard = () => {
     if (typeof content === 'string') {
@@ -196,7 +196,7 @@ function MessageComponent({
                       <Textarea
                         autoFocus
                         ref={inputRef}
-                        className="-mx-3 mb-4 mt-0 min-h-[40px] w-full resize-none text-sm"
+                        className="-mx-3 mb-4 mt-0 min-h-[40px] w-full resize-y overflow-auto text-sm"
                         value={edit !== undefined ? edit : content}
                         onChange={(e) => {
                           setEdit(e.target.value);
