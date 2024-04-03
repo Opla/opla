@@ -22,6 +22,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
   CommandSeparator,
 } from '@/components/ui/command';
 import {
@@ -102,61 +103,63 @@ export default function Presets({
         </PopoverTrigger>
         <Content className="w-full p-0">
           <Command>
-            <CommandInput placeholder={t('Search preset...')} />
-            <CommandEmpty>{t('No preset found.')}</CommandEmpty>
-            <CommandGroup>
-              {presets.map((p) => (
-                <CommandItem
-                  key={p.id}
-                  value={p.id}
-                  onSelect={(currentValue) => {
-                    // setValue(currentValue === value ? '' : currentValue);
-                    onChangePreset(currentValue);
-                    setOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      'mr-2 h-4 w-4',
-                      preset && preset?.id === p?.id ? 'opacity-100' : 'opacity-0',
-                    )}
-                  />
-                  {p?.name}
-                  <AlertTriangle
-                    className={cn(
-                      'ml-auto h-4 w-4 text-red-600',
-                      compatibles[p.id] ? 'opacity-0' : 'opacity-100',
-                    )}
-                  />
-                </CommandItem>
-              ))}
-            </CommandGroup>
-            <CommandSeparator />
-            {preset && (
+            <CommandList>
+              <CommandInput placeholder={t('Search preset...')} />
+              <CommandEmpty>{t('No preset found.')}</CommandEmpty>
               <CommandGroup>
-                <CommandItem
-                  onSelect={() => {
-                    setOpen(false);
-                    handleDuplicatePreset(preset);
-                  }}
-                >
-                  <Copy className="mr-2 h-4 w-4" strokeWidth={1.5} />
-                  {t('Duplicate selected preset')}
-                </CommandItem>
-                {!preset?.readonly && (
+                {presets.map((p) => (
                   <CommandItem
-                    className="text-red-600 hover:text-red-700"
-                    onSelect={() => {
+                    key={p.id}
+                    value={p.id}
+                    onSelect={(currentValue) => {
+                      // setValue(currentValue === value ? '' : currentValue);
+                      onChangePreset(currentValue);
                       setOpen(false);
-                      deletePreset(preset);
                     }}
                   >
-                    <Trash className="mr-2 h-4 w-4" strokeWidth={1.5} />
-                    {t('Delete selected preset')}
+                    <Check
+                      className={cn(
+                        'mr-2 h-4 w-4',
+                        preset && preset?.id === p?.id ? 'opacity-100' : 'opacity-0',
+                      )}
+                    />
+                    {p?.name}
+                    <AlertTriangle
+                      className={cn(
+                        'ml-auto h-4 w-4 text-red-600',
+                        compatibles[p.id] ? 'opacity-0' : 'opacity-100',
+                      )}
+                    />
                   </CommandItem>
-                )}
+                ))}
               </CommandGroup>
-            )}
+              <CommandSeparator />
+              {preset && (
+                <CommandGroup>
+                  <CommandItem
+                    onSelect={() => {
+                      setOpen(false);
+                      handleDuplicatePreset(preset);
+                    }}
+                  >
+                    <Copy className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                    {t('Duplicate selected preset')}
+                  </CommandItem>
+                  {!preset?.readonly && (
+                    <CommandItem
+                      className="text-red-600 hover:text-red-700"
+                      onSelect={() => {
+                        setOpen(false);
+                        deletePreset(preset);
+                      }}
+                    >
+                      <Trash className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                      {t('Delete selected preset')}
+                    </CommandItem>
+                  )}
+                </CommandGroup>
+              )}
+            </CommandList>
           </Command>
         </Content>
       </Popover>

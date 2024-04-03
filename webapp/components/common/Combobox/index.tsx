@@ -23,6 +23,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from '@/components/ui/command';
 import {
   Popover,
@@ -103,20 +104,22 @@ export default function Combobox({
       <Content className="min-w-[200px] p-0">
         <Command className="">
           <CommandInput placeholder={searchPlaceholder ? t(searchPlaceholder) : undefined} />
-          <CommandEmpty>{t(notFound)}</CommandEmpty>
-          <CommandGroup>
-            {items.map((item, index) => (
-              <ComboItem
-                key={item.label}
-                selected={selected}
-                item={item}
-                onSelect={() => {
-                  onSelect(item.value, index);
-                  setOpen(false);
-                }}
-              />
-            ))}
-          </CommandGroup>
+          <CommandList>
+            <CommandEmpty>{t(notFound)}</CommandEmpty>
+            <CommandGroup>
+              {items.map((item, index) => (
+                <ComboItem
+                  key={item.label}
+                  selected={selected}
+                  item={item}
+                  onSelect={() => {
+                    onSelect(item.value, index);
+                    setOpen(false);
+                  }}
+                />
+              ))}
+            </CommandGroup>
+          </CommandList>
         </Command>
       </Content>
     </Popover>
