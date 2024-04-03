@@ -15,9 +15,11 @@
 'use client';
 
 import NavContainer from '@/components/common/NavContainer';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import useTranslation from '@/hooks/useTranslation';
 import { cn } from '@/lib/utils';
+import { Bug } from 'lucide-react';
 
 export default function Settings({
   tab,
@@ -84,9 +86,19 @@ export default function Settings({
           <div className="flex h-full flex-col pt-8">{children}</div>
         </div>
       </div>
-      <div className="flex w-full gap-2 p-2 text-xs text-muted-foreground">
-        Opla version: {process.env.NEXT_PUBLIC_SENTRY_RELEASE} <Separator orientation="vertical" />
-        {process.env.NODE_ENV}
+      <div className="flex w-full items-center gap-2 p-2 text-xs text-muted-foreground">
+        <span>Opla version: {process.env.NEXT_PUBLIC_SENTRY_RELEASE}</span>{' '}
+        <Separator orientation="vertical" />
+        <span>{process.env.NODE_ENV}</span>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            throw new Error('Test error');
+          }}
+        >
+          <Bug className="h-4 w-4" strokeWidth={1.5} />
+        </Button>
       </div>
     </div>
   );
