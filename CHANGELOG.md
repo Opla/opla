@@ -1,3 +1,10 @@
+# [1.0.0-alpha.70](https://github.com/Opla/opla/compare/v1.0.0-alpha.69...v1.0.0-alpha.70) (2024-04-03)
+
+
+### Features
+
+* settings bug button [#691](https://github.com/Opla/opla/issues/691) ([#692](https://github.com/Opla/opla/issues/692)) ([03996a6](https://github.com/Opla/opla/commit/03996a6a15487a69d8eb1febde011dfe6c4409b6))
+
 # [1.0.0-alpha.69](https://github.com/Opla/opla/compare/v1.0.0-alpha.68...v1.0.0-alpha.69) (2024-04-03)
 
 
