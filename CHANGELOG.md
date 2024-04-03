@@ -1,3 +1,10 @@
+# [1.0.0-alpha.69](https://github.com/Opla/opla/compare/v1.0.0-alpha.68...v1.0.0-alpha.69) (2024-04-03)
+
+
+### Features
+
+* copy to clipboard logs [#652](https://github.com/Opla/opla/issues/652) ([#690](https://github.com/Opla/opla/issues/690)) ([4a3bb20](https://github.com/Opla/opla/commit/4a3bb20f3939d334090b05ecdbc08709c387062b))
+
 # [1.0.0-alpha.68](https://github.com/Opla/opla/compare/v1.0.0-alpha.67...v1.0.0-alpha.68) (2024-04-02)
 
 
