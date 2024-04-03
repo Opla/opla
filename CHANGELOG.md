@@ -1,3 +1,10 @@
+# [1.0.0-alpha.71](https://github.com/Opla/opla/compare/v1.0.0-alpha.70...v1.0.0-alpha.71) (2024-04-03)
+
+
+### Bug Fixes
+
+* add CommandList [#693](https://github.com/Opla/opla/issues/693) ([#694](https://github.com/Opla/opla/issues/694)) ([e3a43a0](https://github.com/Opla/opla/commit/e3a43a03912205045c76f9f0848edb63e0197857))
+
 # [1.0.0-alpha.70](https://github.com/Opla/opla/compare/v1.0.0-alpha.69...v1.0.0-alpha.70) (2024-04-03)
 
 
