@@ -17,7 +17,7 @@ import { Sigma, Check, Clipboard, PieChart } from 'lucide-react';
 import { BlockMath } from 'react-katex';
 import { Element } from 'hast';
 import { Button } from '@/components/ui/button';
-// import logger from '@/utils/logger';
+import logger from '@/utils/logger';
 import MarkDownContext from '@/hooks/useMarkdownProcessor/context';
 import Mermaid from './Mermaid';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -49,10 +49,10 @@ function CodeBlock({
     const start = node.position?.start.offset || 0;
     const end = node.position?.end.offset;
     const code = context.content.substring(start, end);
-    const match = code.match(/`{3}(?<type>[\w]*)\n(?<content>[\S\s]+?)\n`{3}/);
+    const match = code.match(/^`{3}(?<type>[\S]*)\n(?<content>[\s\S]*)`{3}$/);
     let newLanguage = match?.groups?.type || '';
-    let newContent = match?.groups?.content || '';
-    // logger.info('CodeBlock', className, start, end, code, newLanguage, newContent);
+    let newContent = match?.groups?.content.trimEnd() || '';
+    logger.info('CodeBlock', className, start, end, code, match, newLanguage, newContent);
 
     let newNoHighlight = '';
     if (newLanguage.length === 0 && className && className.indexOf('language-') >= 0) {
