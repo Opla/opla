@@ -1,7 +1,6 @@
 # Opla
 
-![GitHub commit activity](https://img.shields.io/github/commit-activity/w/Opla/opla)
-
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/opla/opla)
 
 ## Empower Your Productivity with Local AI Assistants
 Experience the power of Opla, harnessing your device's capabilities to run cutting-edge, open-source generative AI. Say hello to seamless task management powered by LLMs like Llama2 and Gemma.
