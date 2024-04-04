@@ -21,11 +21,19 @@ type UseThemeProps = {
   theme?: string;
   setTheme: (theme: string) => void;
   isSystem: boolean;
+  toggleTheme: () => void;
 };
 
 export default function useTheme(): UseThemeProps {
-  const { theme, setTheme } = _useTheme();
+  const { theme, setTheme, systemTheme } = _useTheme();
   const storedTheme = localStorage.getItem('theme');
   const isSystem = (storedTheme as string) === 'system' || !storedTheme;
-  return { theme, setTheme, isSystem };
+  const toggleTheme = () => {
+    if (theme === 'system') {
+      setTheme(systemTheme === 'dark' ? 'light' : 'dark');
+    } else {
+      setTheme(theme === 'dark' ? 'light' : 'dark');
+    }
+  };
+  return { theme, setTheme, isSystem, toggleTheme };
 }
