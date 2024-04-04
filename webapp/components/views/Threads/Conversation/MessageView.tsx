@@ -28,10 +28,13 @@ import {
   ChevronRight,
   File,
 } from 'lucide-react';
-import { getMessageContentHistoryAsString } from '@/utils/data/messages';
+import {
+  getMessageContentAuthorAsString,
+  getMessageContentHistoryAsString,
+} from '@/utils/data/messages';
 import useHover from '@/hooks/useHover';
 import useMarkdownProcessor from '@/hooks/useMarkdownProcessor';
-import { Avatar, Message, MessageStatus } from '@/types';
+import { Avatar, AvatarRef, Message, MessageStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import AvatarView from '@/components/common/AvatarView';
 import { Button } from '../../../ui/button';
@@ -89,7 +92,7 @@ enum DisplayMessageState {
 
 type MessageComponentProps = {
   message: Message;
-  avatar: Avatar;
+  avatars: AvatarRef[];
   disabled?: boolean;
   onResendMessage: () => void;
   onDeleteMessage: () => void;
@@ -99,7 +102,7 @@ type MessageComponentProps = {
 
 function MessageComponent({
   message,
-  avatar,
+  avatars,
   disabled = false,
   onResendMessage,
   onDeleteMessage,
@@ -112,8 +115,9 @@ function MessageComponent({
   const [copied, setCopied] = useState(false);
   const [edit, setEdit] = useState<string | undefined>(undefined);
   const [current, setCurrent] = useState(0);
-  const { author } = message;
 
+  const author = getMessageContentAuthorAsString(message, current);
+  const avatar = avatars.find((a) => a.ref === author.name) || ({ name: author.name } as Avatar);
   const content = getMessageContentHistoryAsString(message, current, edit !== undefined);
   const Content = useMarkdownProcessor(content || '');
   const isUser = author.role === 'user';

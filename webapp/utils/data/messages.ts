@@ -12,11 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Asset, Author, Content, ContentType, Message, MessageStatus, Metadata } from '@/types';
+import {
+  Asset,
+  Author,
+  Content,
+  ContentFull,
+  ContentType,
+  Message,
+  MessageStatus,
+  Metadata,
+} from '@/types';
 import { createBaseRecord } from '.';
 
 export const createStringArray = (content: string | string[]): string[] =>
   Array.isArray(content) ? content : [content];
+
+const createContentFull = (
+  content: string | string[],
+  rawContent?: string | string[],
+  metadata?: Metadata,
+  type = ContentType.Text,
+): ContentFull => {
+  const parts = createStringArray(content);
+  const raw = rawContent ? createStringArray(rawContent) : undefined;
+  const textContent: ContentFull = { type, raw, parts, metadata };
+  return textContent;
+};
 
 export const createTextContent = (
   content: string | string[] | undefined,
@@ -26,10 +47,18 @@ export const createTextContent = (
   if (!content || (typeof content === 'string' && !rawContent)) {
     return content;
   }
-  const parts = createStringArray(content);
-  const raw = rawContent ? createStringArray(rawContent) : undefined;
-  const textContent: Content = { type: ContentType.Text, raw, parts, metadata };
-  return textContent;
+  return createContentFull(content, rawContent, metadata);
+};
+
+export const createContent = (
+  content: string | string[] | Content,
+  rawContent?: string | string[],
+  metadata?: Metadata,
+): ContentFull => {
+  if (typeof content === 'string' || Array.isArray(content)) {
+    return createContentFull(content, rawContent, metadata);
+  }
+  return content as ContentFull;
 };
 
 export const createMessage = (
@@ -77,7 +106,9 @@ export const changeMessageContent = (
     previousMessage.status !== MessageStatus.Error
   ) {
     const { contentHistory = [] } = previousMessage;
-    contentHistory.push(previousMessage.content);
+    const previousContent = createContent(previousMessage.content);
+    previousContent.author = { ...previousMessage.author };
+    contentHistory.unshift(previousContent);
     message.contentHistory = contentHistory;
   }
   return message;
@@ -117,4 +148,13 @@ export const getMessageContentHistoryAsString = (
   const contentHistory = message.contentHistory || [];
   const content = index ? contentHistory[index - 1] : message.content;
   return raw ? getRawContentAsString(content) : getContentAsString(content);
+};
+
+export const getMessageContentAuthorAsString = (message: Message, index = 0): Author => {
+  const contentHistory = message.contentHistory || [];
+  let { author } = message;
+  if (index !== 0 && typeof contentHistory[index - 1] !== 'string') {
+    author = (contentHistory[index - 1] as ContentFull)?.author || author;
+  }
+  return author;
 };
