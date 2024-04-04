@@ -1,3 +1,10 @@
+# [1.0.0-alpha.77](https://github.com/Opla/opla/compare/v1.0.0-alpha.76...v1.0.0-alpha.77) (2024-04-04)
+
+
+### Features
+
+* delete last message shortcut [#465](https://github.com/Opla/opla/issues/465) ([#704](https://github.com/Opla/opla/issues/704)) ([9cb4c4e](https://github.com/Opla/opla/commit/9cb4c4e6d696d23585e6a251daf45138de57280e))
+
 # [1.0.0-alpha.76](https://github.com/Opla/opla/compare/v1.0.0-alpha.75...v1.0.0-alpha.76) (2024-04-04)
 
 
