@@ -1,3 +1,10 @@
+# [1.0.0-alpha.75](https://github.com/Opla/opla/compare/v1.0.0-alpha.74...v1.0.0-alpha.75) (2024-04-04)
+
+
+### Features
+
+* link to author url if set AssistantCard [#445](https://github.com/Opla/opla/issues/445) ([#701](https://github.com/Opla/opla/issues/701)) ([f226b85](https://github.com/Opla/opla/commit/f226b85339b7796674beb690e5ae21a7694e90d5))
+
 # [1.0.0-alpha.74](https://github.com/Opla/opla/compare/v1.0.0-alpha.73...v1.0.0-alpha.74) (2024-04-04)
 
 
