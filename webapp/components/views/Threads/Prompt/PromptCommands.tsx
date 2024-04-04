@@ -12,54 +12,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Inspiration
-// https://github.com/mxkaske/mxkaske.dev/blob/main/components/craft/fancy-area/write.tsx
-
-import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { isCommand, ParsedPrompt, parsePrompt, TokenValidator } from '@/utils/parsers';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ParsedPrompt, isCommand } from '@/utils/parsers';
 import { CommandManager } from '@/utils/commands/types';
 import { getCaretCoordinates, getCurrentWord } from '@/utils/ui/caretposition';
+import { getCommandType } from '@/utils/commands';
 import { cn } from '@/lib/utils';
 import logger from '@/utils/logger';
 import useTranslation from '@/hooks/useTranslation';
-import { getTokenColor } from '@/utils/ui';
-import { getCommandType } from '@/utils/commands';
-import { Textarea } from '../../ui/textarea';
-import { Button } from '../../ui/button';
+import { Button } from '../../../ui/button';
 
 type PromptCommandProps = {
-  value?: ParsedPrompt;
-  placeholder?: string;
   commandManager: CommandManager;
-  onChange?: (parsedPrompt: ParsedPrompt) => void;
+  prompt: ParsedPrompt | undefined;
+  textareaRef: React.RefObject<HTMLTextAreaElement>;
+  children: React.ReactNode;
+  onValueChange: (text: string, caretStartIndex: number) => void;
   onKeyDown: (event: KeyboardEvent) => void;
-  className?: string;
-  onFocus?: (event: ChangeEvent<HTMLTextAreaElement>) => void;
-  onCommandSelect?: (value: string) => void;
-  tokenValidate: TokenValidator;
 };
 
 function PromptCommandInput({
-  value,
-  placeholder,
   commandManager,
-  className,
-  onChange,
-  onFocus,
+  prompt,
+  textareaRef,
+  children,
+  onValueChange,
   onKeyDown,
-  onCommandSelect,
-  tokenValidate,
 }: PromptCommandProps) {
   const { t } = useTranslation();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [commandValue, setCommandValue] = useState('');
+  const [focusIndex, setFocusIndex] = useState(-1);
+
+  const filteredCommands = useMemo(
+    () => commandManager.filterCommands(commandValue),
+    [commandManager, commandValue],
+  );
 
   const toggleDropdown = (visible = true) => {
     if (visible) {
       dropdownRef.current?.classList.remove('hidden');
     } else {
       setCommandValue('');
+      setFocusIndex(-1);
       dropdownRef.current?.classList.add('hidden');
     }
   };
@@ -81,64 +76,69 @@ function PromptCommandInput({
       dropdown.style.left = `0px`;
       dropdown.style.bottom = `56px`;
     }
-  }, []);
+  }, [textareaRef]);
+
+  const updateDisplay = useCallback(() => {
+    const textarea = textareaRef.current;
+    const dropdown = dropdownRef.current;
+    const { activeElement } = document;
+    const focused = activeElement === textarea;
+    if (textarea && focused && dropdown) {
+      const txt = textarea.value;
+      const { currentWord } = getCurrentWord(textarea);
+      const start = txt.trim().length - currentWord.length;
+      if (prompt && !prompt.locked && isCommand(currentWord, start)) {
+        setCommandValue(currentWord);
+        positionDropdown();
+        toggleDropdown();
+      } else if (commandValue !== '') {
+        toggleDropdown(false);
+      }
+    } else {
+      toggleDropdown(false);
+    }
+  }, [commandValue, positionDropdown, prompt, textareaRef]);
 
   useEffect(() => {
-    positionDropdown();
-  }, [commandValue, positionDropdown]);
-
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      onKeyDown(event);
-    },
-    [onKeyDown],
-  );
-
-  const valueChange = useCallback(
-    (text: string, caretStartIndex: number) => {
-      const parsedPrompt = parsePrompt({ text, caretStartIndex }, tokenValidate);
-      if (value?.raw !== text) {
-        onChange?.(parsedPrompt);
-      }
-    },
-    [tokenValidate, value?.raw, onChange],
-  );
-
-  const handleValueChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const text = e.target.value;
-      const textarea = textareaRef.current;
-      const dropdown = dropdownRef.current;
-
-      if (textarea && dropdown) {
-        const { currentWord, caretStartIndex } = getCurrentWord(textarea);
-        valueChange(text, caretStartIndex);
-        const start = text.trim().length - currentWord.length;
-        if (value && !value.locked && isCommand(currentWord, start)) {
-          setCommandValue(currentWord);
-          positionDropdown();
-          toggleDropdown();
-        } else if (commandValue !== '') {
-          toggleDropdown(false);
-        }
-      }
-    },
-    [commandValue, positionDropdown, value, valueChange],
-  );
+    updateDisplay();
+  }, [commandValue, positionDropdown, prompt, textareaRef, updateDisplay]);
 
   const handleCommandSelect = useCallback(
-    (newValue: string) => {
+    (newValue: string, close = false) => {
       const textarea = textareaRef.current;
       const dropdown = dropdownRef.current;
+
       if (textarea && dropdown) {
         const { currentWord, start, text, caretStartIndex } = getCurrentWord(textarea);
         const newText = `${text.substring(0, start)}${newValue} ${text.substring(start + currentWord.length)}`;
-        valueChange(newText, caretStartIndex + 1);
-        toggleDropdown(false);
-        onCommandSelect?.(newValue);
+        onValueChange(newText, caretStartIndex + 1);
+        toggleDropdown(close);
       }
     },
-    [onCommandSelect, valueChange],
+    [onValueChange, textareaRef],
+  );
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setFocusIndex(-1);
+      } else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        const index = focusIndex + 1 > filteredCommands.length - 1 ? 0 : focusIndex + 1;
+        setFocusIndex(index);
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        const index = focusIndex - 1 < 0 ? filteredCommands.length - 1 : focusIndex - 1;
+        setFocusIndex(index);
+      } else if (event.key === 'Enter') {
+        event.preventDefault();
+        if (focusIndex >= 0) {
+          handleCommandSelect(filteredCommands[focusIndex].value as string);
+        }
+      }
+      onKeyDown(event);
+    },
+    [filteredCommands, focusIndex, handleCommandSelect, onKeyDown],
   );
 
   const handleBlur = useCallback(() => {
@@ -148,18 +148,20 @@ function PromptCommandInput({
     }
   }, []);
 
-  const handleFocus = useCallback(
-    (event: ChangeEvent<HTMLTextAreaElement>) => {
-      logger.info('focus');
-      handleValueChange(event);
-      onFocus?.(event);
-    },
-    [handleValueChange, onFocus],
-  );
+  const handleFocus = useCallback(() => {
+    const dropdown = dropdownRef.current;
+    if (dropdown) {
+      updateDisplay();
+    }
+  }, [updateDisplay]);
 
   const handleMouseDown = useCallback((e: Event) => {
     e.preventDefault();
     e.stopPropagation();
+  }, []);
+
+  const handleMouseMove = useCallback(() => {
+    setFocusIndex(-1);
   }, []);
 
   const handleSelectionChange = useCallback(() => {
@@ -180,59 +182,32 @@ function PromptCommandInput({
         toggleDropdown();
       }
     }
-  }, [commandValue, positionDropdown]);
+  }, [commandValue, positionDropdown, textareaRef]);
 
   useEffect(() => {
     const textarea = textareaRef.current;
     const dropdown = dropdownRef.current;
     textarea?.addEventListener('keydown', handleKeyDown);
     textarea?.addEventListener('blur', handleBlur);
+    textarea?.addEventListener('focus', handleFocus);
     document?.addEventListener('selectionchange', handleSelectionChange);
+    document?.addEventListener('mousemove', handleMouseMove);
     dropdown?.addEventListener('mousedown', handleMouseDown);
     return () => {
       textarea?.removeEventListener('keydown', handleKeyDown);
       textarea?.removeEventListener('blur', handleBlur);
+      textarea?.removeEventListener('focus', handleFocus);
       document?.removeEventListener('selectionchange', handleSelectionChange);
+      document?.removeEventListener('mousemove', handleMouseMove);
       dropdown?.removeEventListener('mousedown', handleMouseDown);
     };
-  }, [handleBlur, handleKeyDown, handleMouseDown, handleSelectionChange]);
+  });
 
-  const filteredCommands = useMemo(
-    () => commandManager.filterCommands(commandValue),
-    [commandManager, commandValue],
-  );
   const commandType = getCommandType(commandValue);
   const notFound = commandType ? `No ${commandType}s found.` : '';
   return (
     <div className="h-full w-full overflow-visible">
-      <Textarea
-        autoresize
-        autoFocus
-        tabIndex={0}
-        ref={textareaRef}
-        autoComplete="off"
-        autoCorrect="off"
-        className={cn(
-          className,
-          'focus-visible:ring-none border-none text-transparent shadow-none focus-visible:border-none focus-visible:shadow-none focus-visible:outline-none',
-        )}
-        value={value?.raw || ''}
-        placeholder={placeholder}
-        onChange={handleValueChange}
-        onFocus={handleFocus}
-      >
-        <p className="textarea-overlay pointer-events-none absolute left-[0.01px] top-[0.1px] h-full w-full px-3 py-2 text-sm">
-          {value?.tokens?.map((token) =>
-            token.type !== 'newline' ? (
-              <span key={token.index} className={cn('', getTokenColor(token))}>
-                {token.value.replaceAll(' ', '\u00a0')}
-              </span>
-            ) : (
-              <br key={token.index} />
-            ),
-          )}
-        </p>
-      </Textarea>
+      {children}
       <div
         ref={dropdownRef}
         className={cn(
@@ -246,15 +221,19 @@ function PromptCommandInput({
             </div>
           )}
           {filteredCommands.length > 0 &&
-            filteredCommands.map((item) => (
+            filteredCommands.map((item, index) => (
               <Button
                 variant="ghost"
+                aria-selected={focusIndex === index}
                 key={item.key || item.label}
                 onClick={(event) => {
                   event.preventDefault();
                   handleCommandSelect(item.value as string);
                 }}
-                className="ellipsis flex w-full cursor-pointer select-none flex-row-reverse items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                className={cn(
+                  'ellipsis flex w-full cursor-pointer select-none flex-row-reverse items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+                  focusIndex !== -1 ? 'hover:bg-transparent' : '',
+                )}
               >
                 <div className="w-full grow">{item.label}</div>
               </Button>

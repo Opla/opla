@@ -14,7 +14,7 @@
 
 'use client';
 
-import { ChangeEvent, MouseEvent, useContext } from 'react';
+import { ChangeEvent, MouseEvent, useCallback, useContext, useRef } from 'react';
 import { AlertTriangle, Loader2, Paperclip, SendHorizontal } from 'lucide-react';
 import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
@@ -31,10 +31,11 @@ import {
 import { createMessage, mergeMessages } from '@/utils/data/messages';
 import { openFileDialog } from '@/utils/backend/tauri';
 import { AIImplService } from '@/types';
-import { Button } from '../../ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip';
-import { ShortcutBadge } from '../../common/ShortCut';
-import PromptCommandInput from './PromptCommandInput';
+import { Button } from '../../../ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../../ui/tooltip';
+import { ShortcutBadge } from '../../../common/ShortCut';
+import PromptInput from './PromptInput';
+import PromptCommands from './PromptCommands';
 
 export type PromptProps = {
   conversationId: string;
@@ -62,6 +63,7 @@ export default function Prompt({
   usage,
 }: PromptProps) {
   const { t } = useTranslation();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const {
     conversations,
@@ -112,9 +114,15 @@ export default function Prompt({
     }
   };
 
-  const handleUpdateMessage = (newValue: ParsedPrompt) => {
-    onUpdatePrompt(newValue);
-  };
+  const handleValueChange = useCallback(
+    (text: string, caretStartIndex: number) => {
+      const parsedPrompt = parsePrompt({ text, caretStartIndex }, tokenValidate);
+      if (prompt?.raw !== text) {
+        onUpdatePrompt(parsedPrompt);
+      }
+    },
+    [tokenValidate, prompt?.raw, onUpdatePrompt],
+  );
 
   const handleFocus = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const lengthOfInput = event.target.value.length;
@@ -163,16 +171,22 @@ export default function Prompt({
           >
             <Paperclip className="strokeWidth={1.5} h-4 w-4" />
           </Button>
-          <PromptCommandInput
-            value={prompt}
+          <PromptCommands
             commandManager={commandManager}
-            placeholder={t('Send a message...')}
-            className="m-0 max-h-[240px] min-h-[36px] "
-            onChange={handleUpdateMessage}
-            onFocus={handleFocus}
+            prompt={prompt}
+            textareaRef={textareaRef}
+            onValueChange={handleValueChange}
             onKeyDown={handleKeypress}
-            tokenValidate={tokenValidate}
-          />
+          >
+            <PromptInput
+              value={prompt}
+              textareaRef={textareaRef}
+              placeholder={t('Send a message...')}
+              className="m-0 max-h-[240px] min-h-[36px] "
+              onValueChange={handleValueChange}
+              onFocus={handleFocus}
+            />
+          </PromptCommands>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
