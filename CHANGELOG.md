@@ -1,3 +1,10 @@
+# [1.0.0-alpha.72](https://github.com/Opla/opla/compare/v1.0.0-alpha.71...v1.0.0-alpha.72) (2024-04-04)
+
+
+### Features
+
+* keyboard support prompt commands [#323](https://github.com/Opla/opla/issues/323) ([#697](https://github.com/Opla/opla/issues/697)) ([5c49916](https://github.com/Opla/opla/commit/5c4991646c4041f8ee388e002bb94c8f23d4466c))
+
 # [1.0.0-alpha.71](https://github.com/Opla/opla/compare/v1.0.0-alpha.70...v1.0.0-alpha.71) (2024-04-03)
 
 
