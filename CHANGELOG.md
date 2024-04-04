@@ -1,3 +1,10 @@
+# [1.0.0-alpha.74](https://github.com/Opla/opla/compare/v1.0.0-alpha.73...v1.0.0-alpha.74) (2024-04-04)
+
+
+### Bug Fixes
+
+* toggle theme shortcut [#546](https://github.com/Opla/opla/issues/546) ([#700](https://github.com/Opla/opla/issues/700)) ([600a341](https://github.com/Opla/opla/commit/600a34143cd11a51f6188084a301cbae6ff7e731))
+
 # [1.0.0-alpha.73](https://github.com/Opla/opla/compare/v1.0.0-alpha.72...v1.0.0-alpha.73) (2024-04-04)
 
 
