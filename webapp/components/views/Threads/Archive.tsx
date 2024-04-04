@@ -87,6 +87,7 @@ function Archive({
       <ConversationList
         conversationId={archiveId as string}
         scrollPosition={undefined}
+        selectedMessageId={undefined}
         messages={messages}
         avatars={avatars}
         disabled
@@ -95,6 +96,7 @@ function Archive({
         onDeleteMessage={() => {}}
         onDeleteAssets={() => {}}
         onChangeMessageContent={() => {}}
+        onStartMessageEdit={() => {}}
       />
     </ContentView>
   );
