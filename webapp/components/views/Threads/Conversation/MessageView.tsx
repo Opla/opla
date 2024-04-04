@@ -118,9 +118,6 @@ function MessageComponent({
 
   const author = getMessageContentAuthorAsString(message, current);
   const avatar = avatars.find((a) => a.ref === author.name) || ({ name: author.name } as Avatar);
-  const content = getMessageContentHistoryAsString(message, current, edit !== undefined);
-  const Content = useMarkdownProcessor(content || '');
-
   const isUser = author.role === 'user';
 
   const content = getMessageContentHistoryAsString(message, current, !isUser || edit !== undefined);
