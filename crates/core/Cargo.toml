@@ -1,0 +1,9 @@
+[package]
+name = "opla_core"
+version = "1.0.0-alpha.73"
+edition = "2021"
+
+include = ["src/**/*"]
+
+[dependencies]
+anyhow = "1.0.76"

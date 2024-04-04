@@ -102,15 +102,12 @@ function Thread({
   const searchParams = useSearchParams();
   const [service, setService] = useState<AIService | undefined>(undefined);
   const [usage, updateUsage] = useState<Usage | undefined>({ tokenCount: 0 });
-  const activeModel =
-    getServiceModelId(service) ||
-    (getServiceModelId(backendContext.config.services.activeService) as string); // backendContext.config.models.activeModel;
+  const { getAssistant } = useAssistantStore();
+
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
   const conversationId = _conversationId || tempConversationId;
   const selectedConversation = conversations.find((c) => c.id === conversationId);
-  const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);
-  const { getAssistant } = useAssistantStore();
-  const assistant = getAssistant(assistantId);
+
   const [changedPrompt, setChangedPrompt] = useState<ParsedPrompt | undefined>(undefined);
   const { showModal } = useContext(ModalsContext);
   const [messages, setMessages] = useState<Message[] | undefined>(undefined);
@@ -120,8 +117,6 @@ function Thread({
   const [errorMessage, setErrorMessage] = useState<{ [key: string]: string }>({});
 
   const { t } = useTranslation();
-
-  const disabled = !activeModel;
 
   useEffect(() => {
     const getNewMessages = async () => {
@@ -172,12 +167,23 @@ function Thread({
     ? getMessageContentAsString(messages?.[0])
     : getDefaultConversationName(t);
 
-  const { modelItems, commandManager } = useMemo(() => {
-    const selectedModelNameOrId = getConversationModelId(selectedConversation) || activeModel;
-    const items = getModelsAsItems(providers, backendContext, selectedModelNameOrId);
+  const { modelItems, commandManager, assistant, activeModel, disabled } = useMemo(() => {
+    const model =
+      getServiceModelId(service) ||
+      (getServiceModelId(backendContext.config.services.activeService) as string);
+    const modelNameOrId = getConversationModelId(selectedConversation) || model;
+    const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);
+    const newAssistant = getAssistant(assistantId);
+    const items = getModelsAsItems(providers, backendContext, modelNameOrId);
     const manager = getCommandManager(items);
-    return { modelItems: items, commandManager: manager };
-  }, [activeModel, backendContext, providers, selectedConversation]);
+    return {
+      modelItems: items,
+      commandManager: manager,
+      assistant: newAssistant,
+      activeModel: model,
+      disabled: !model,
+    };
+  }, [backendContext, getAssistant, providers, searchParams, selectedConversation, service]);
 
   const avatars = useMemo(
     () =>
@@ -506,7 +512,8 @@ function Thread({
     if (!result) {
       return;
     }
-    const { modelName: selectedModelNameOrId } = result;
+    const selectedModelNameOrId =
+      result.modelName || getConversationModelId(selectedConversation) || activeModel;
 
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
     setIsProcessing({ ...isProcessing, [conversationId]: true });
@@ -678,7 +685,7 @@ function Thread({
     <ContentView
       header={
         <ThreadHeader
-          selectedAssistantId={assistantId}
+          selectedAssistantId={assistant?.id}
           selectedModelName={selectedModelNameOrId}
           selectedConversationId={conversationId}
           modelItems={modelItems}
@@ -690,7 +697,7 @@ function Thread({
     >
       <ConversationPanel
         selectedConversation={selectedConversation}
-        selectedAssistantId={assistantId}
+        selectedAssistantId={assistant?.id}
         selectedModelName={selectedModelNameOrId}
         messages={messages}
         avatars={avatars}

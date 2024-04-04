@@ -14,7 +14,7 @@
 
 import { ArrowDown } from 'lucide-react';
 import useScroll, { KeyedScrollPosition } from '@/hooks/useScroll';
-import { Avatar, AvatarRef, Message } from '@/types';
+import { AvatarRef, Message } from '@/types';
 import logger from '@/utils/logger';
 import MessageView from './MessageView';
 import { Button } from '../../../ui/button';
@@ -63,9 +63,7 @@ function ConversationList({
             <MessageView
               key={m.id}
               message={m}
-              avatar={
-                avatars.find((a) => a.ref === m.author.name) || ({ name: m.author.name } as Avatar)
-              }
+              avatars={avatars}
               disabled={disabled}
               onResendMessage={() => {
                 onResendMessage(m);

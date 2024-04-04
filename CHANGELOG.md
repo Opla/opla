@@ -1,3 +1,59 @@
+# [1.0.0-alpha.73](https://github.com/Opla/opla/compare/v1.0.0-alpha.72...v1.0.0-alpha.73) (2024-04-04)
+
+
+### Features
+
+* save author in message contextHistory [#364](https://github.com/Opla/opla/issues/364) ([#699](https://github.com/Opla/opla/issues/699)) ([d3d1fbc](https://github.com/Opla/opla/commit/d3d1fbc21241b474d12bbcaf2a791fc807306a03))
+
+# [1.0.0-alpha.72](https://github.com/Opla/opla/compare/v1.0.0-alpha.71...v1.0.0-alpha.72) (2024-04-04)
+
+
+### Features
+
+* keyboard support prompt commands [#323](https://github.com/Opla/opla/issues/323) ([#697](https://github.com/Opla/opla/issues/697)) ([5c49916](https://github.com/Opla/opla/commit/5c4991646c4041f8ee388e002bb94c8f23d4466c))
+
+# [1.0.0-alpha.71](https://github.com/Opla/opla/compare/v1.0.0-alpha.70...v1.0.0-alpha.71) (2024-04-03)
+
+
+### Bug Fixes
+
+* add CommandList [#693](https://github.com/Opla/opla/issues/693) ([#694](https://github.com/Opla/opla/issues/694)) ([e3a43a0](https://github.com/Opla/opla/commit/e3a43a03912205045c76f9f0848edb63e0197857))
+
+# [1.0.0-alpha.70](https://github.com/Opla/opla/compare/v1.0.0-alpha.69...v1.0.0-alpha.70) (2024-04-03)
+
+
+### Features
+
+* settings bug button [#691](https://github.com/Opla/opla/issues/691) ([#692](https://github.com/Opla/opla/issues/692)) ([03996a6](https://github.com/Opla/opla/commit/03996a6a15487a69d8eb1febde011dfe6c4409b6))
+
+# [1.0.0-alpha.69](https://github.com/Opla/opla/compare/v1.0.0-alpha.68...v1.0.0-alpha.69) (2024-04-03)
+
+
+### Features
+
+* copy to clipboard logs [#652](https://github.com/Opla/opla/issues/652) ([#690](https://github.com/Opla/opla/issues/690)) ([4a3bb20](https://github.com/Opla/opla/commit/4a3bb20f3939d334090b05ecdbc08709c387062b))
+
+# [1.0.0-alpha.68](https://github.com/Opla/opla/compare/v1.0.0-alpha.67...v1.0.0-alpha.68) (2024-04-02)
+
+
+### Bug Fixes
+
+* remove message assistant:... in context generation [#659](https://github.com/Opla/opla/issues/659) ([#689](https://github.com/Opla/opla/issues/689)) ([79c2722](https://github.com/Opla/opla/commit/79c272255e904b2a96727ead081ce548c799c12d))
+
+# [1.0.0-alpha.67](https://github.com/Opla/opla/compare/v1.0.0-alpha.66...v1.0.0-alpha.67) (2024-04-02)
+
+
+### Bug Fixes
+
+* update llama.cpp to latest version ([#687](https://github.com/Opla/opla/issues/687)) ([22c5904](https://github.com/Opla/opla/commit/22c5904d0adda12bab17f85d9e17b2eab34fb874))
+
+# [1.0.0-alpha.66](https://github.com/Opla/opla/compare/v1.0.0-alpha.65...v1.0.0-alpha.66) (2024-04-02)
+
+
+### Features
+
+* gguf parser [#481](https://github.com/Opla/opla/issues/481) ([#686](https://github.com/Opla/opla/issues/686)) ([acbcff7](https://github.com/Opla/opla/commit/acbcff71adeefaa3dd708c8545733fd6ea0065fc))
+
 # [1.0.0-alpha.65](https://github.com/Opla/opla/compare/v1.0.0-alpha.64...v1.0.0-alpha.65) (2024-03-29)
 
 

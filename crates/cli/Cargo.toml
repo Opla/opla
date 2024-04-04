@@ -1,6 +1,7 @@
 [package]
 name = "cli"
-version = "1.0.0-alpha.65"
+version = "1.0.0-alpha.73"
 edition = "2021"
 
 [dependencies]
+opla_core = { path = "../core"}
