@@ -14,7 +14,7 @@
 
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Check,
   Clipboard,
@@ -92,8 +92,11 @@ enum DisplayMessageState {
 
 type MessageComponentProps = {
   message: Message;
+  index: number;
   avatars: AvatarRef[];
   disabled?: boolean;
+  edit: boolean;
+  onStartEdit: (messageId: string, index: number) => void;
   onResendMessage: () => void;
   onDeleteMessage: () => void;
   onDeleteAssets: () => void;
@@ -102,8 +105,11 @@ type MessageComponentProps = {
 
 function MessageComponent({
   message,
+  index,
   avatars,
   disabled = false,
+  edit,
+  onStartEdit,
   onResendMessage,
   onDeleteMessage,
   onChangeContent,
@@ -113,12 +119,12 @@ function MessageComponent({
   const [ref, isHover] = useHover();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [copied, setCopied] = useState(false);
-  const [edit, setEdit] = useState<string | undefined>(undefined);
+  const [editValue, setEditValue] = useState<string | undefined>(undefined);
   const [current, setCurrent] = useState(0);
 
   const author = getMessageContentAuthorAsString(message, current);
   const avatar = avatars.find((a) => a.ref === author.name) || ({ name: author.name } as Avatar);
-  const content = getMessageContentHistoryAsString(message, current, edit !== undefined);
+  const content = getMessageContentHistoryAsString(message, current, editValue !== undefined);
   const Content = useMarkdownProcessor(content || '');
   const isUser = author.role === 'user';
 
@@ -129,27 +135,34 @@ function MessageComponent({
     }
   };
 
-  const handleEdit = () => {
+  const handleEdit = useCallback(() => {
     const raw = getMessageContentHistoryAsString(message, current, true);
-    setEdit(raw);
-  };
+    setEditValue(raw);
+    onStartEdit(message.id, index);
+  }, [message, current, onStartEdit, index]);
+
+  useEffect(() => {
+    if (edit && editValue === undefined) {
+      handleEdit();
+    }
+  }, [edit, handleEdit, editValue]);
 
   const handleSave = () => {
     const newContent = inputRef.current?.value;
     if (newContent && content !== newContent) {
       onChangeContent(newContent, isUser);
     }
-    setEdit(undefined);
+    setEditValue(undefined);
   };
 
   const handleCancelEdit = () => {
-    setEdit(undefined);
+    setEditValue(undefined);
   };
 
   let state = DisplayMessageState.Markdown;
   if (message.assets) {
     state = DisplayMessageState.Asset;
-  } else if (edit !== undefined) {
+  } else if (editValue !== undefined) {
     state = DisplayMessageState.Edit;
   } else if (isUser) {
     state = DisplayMessageState.Text;
@@ -199,9 +212,9 @@ function MessageComponent({
                       autoFocus
                       ref={inputRef}
                       className="-mx-3 mb-4 mt-0 min-h-[40px] w-full resize-none text-sm"
-                      value={edit !== undefined ? edit : content}
+                      value={editValue !== undefined ? editValue : content}
                       onChange={(e) => {
-                        setEdit(e.target.value);
+                        setEditValue(e.target.value);
                       }}
                     />
                   )}
@@ -264,7 +277,7 @@ function MessageComponent({
                     <Button
                       size="sm"
                       onClick={handleSave}
-                      disabled={!edit}
+                      disabled={!editValue}
                       className="my-2 h-[28px] py-2"
                     >
                       {isUser ? t('Save & submit') : t('Save')}

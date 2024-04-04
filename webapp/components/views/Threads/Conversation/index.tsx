@@ -30,6 +30,7 @@ export type ConversationPanelProps = {
   selectedConversation: Conversation | undefined;
   selectedAssistantId: string | undefined;
   selectedModelName: string | undefined;
+  selectedMessageId: string | undefined;
   messages: Message[] | undefined;
   avatars: AvatarRef[];
   modelItems: Ui.MenuItem[];
@@ -41,6 +42,7 @@ export type ConversationPanelProps = {
   onChangeMessageContent: (m: Message, newContent: string, submit: boolean) => void;
   onSelectPrompt: (prompt: ParsedPrompt, name: string) => void;
   onSelectMenu: (menu: MenuAction, data: string) => void;
+  onStartMessageEdit: (messageId: string, index: number) => void;
   parseAndValidatePrompt: (prompt: string) => ParsedPrompt;
 };
 
@@ -50,6 +52,7 @@ export function ConversationPanel({
   selectedConversation,
   selectedAssistantId,
   selectedModelName,
+  selectedMessageId,
   modelItems,
   disabled,
   isPrompt,
@@ -59,6 +62,7 @@ export function ConversationPanel({
   onChangeMessageContent,
   onSelectPrompt,
   onSelectMenu,
+  onStartMessageEdit,
   parseAndValidatePrompt,
 }: ConversationPanelProps) {
   const { t } = useTranslation();
@@ -151,6 +155,7 @@ export function ConversationPanel({
       {(isPrompt || (messages && messages[0]?.conversationId === selectedConversation.id)) && (
         <ConversationList
           conversationId={selectedConversation?.id as string}
+          selectedMessageId={selectedMessageId}
           scrollPosition={
             selectedConversation && selectedConversation.scrollPosition !== undefined
               ? selectedConversation.scrollPosition
@@ -163,6 +168,7 @@ export function ConversationPanel({
           onDeleteMessage={onDeleteMessage}
           onDeleteAssets={onDeleteAssets}
           onChangeMessageContent={onChangeMessageContent}
+          onStartMessageEdit={onStartMessageEdit}
         />
       )}
       <div className="flex flex-col items-center text-sm" />

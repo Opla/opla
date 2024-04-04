@@ -15,7 +15,7 @@
 import { ArrowDown } from 'lucide-react';
 import useScroll, { KeyedScrollPosition } from '@/hooks/useScroll';
 import { AvatarRef, Message } from '@/types';
-import logger from '@/utils/logger';
+// import logger from '@/utils/logger';
 import MessageView from './MessageView';
 import { Button } from '../../../ui/button';
 
@@ -23,6 +23,7 @@ type ConversationListProps = {
   conversationId: string;
   scrollPosition: number | undefined;
   messages: Message[];
+  selectedMessageId: string | undefined;
   avatars: AvatarRef[];
   disabled?: boolean;
   onScrollPosition: (props: KeyedScrollPosition) => void;
@@ -30,12 +31,14 @@ type ConversationListProps = {
   onDeleteMessage: (m: Message) => void;
   onDeleteAssets: (m: Message) => void;
   onChangeMessageContent: (m: Message, newContent: string, submit: boolean) => void;
+  onStartMessageEdit: (messageId: string, index: number) => void;
 };
 
 function ConversationList({
   conversationId,
   scrollPosition,
   messages,
+  selectedMessageId,
   avatars,
   disabled,
   onScrollPosition,
@@ -43,9 +46,10 @@ function ConversationList({
   onDeleteMessage,
   onDeleteAssets,
   onChangeMessageContent,
+  onStartMessageEdit,
 }: ConversationListProps) {
   const handleUpdatePosition = (props: KeyedScrollPosition) => {
-    logger.info('updated newPosition', props);
+    // logger.info('updated newPosition', props);
     onScrollPosition(props);
   };
 
@@ -59,12 +63,15 @@ function ConversationList({
     <div className="flex grow flex-col overflow-hidden">
       <div ref={ref} className="overflow-y-auto">
         <div>
-          {messages.map((m) => (
+          {messages.map((m, index) => (
             <MessageView
               key={m.id}
+              index={index}
+              edit={selectedMessageId === m.id}
               message={m}
               avatars={avatars}
               disabled={disabled}
+              onStartEdit={onStartMessageEdit}
               onResendMessage={() => {
                 onResendMessage(m);
               }}
