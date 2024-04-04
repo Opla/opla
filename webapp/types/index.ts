@@ -59,14 +59,15 @@ export enum ContentType {
   Custom = 'custom', */
 }
 
-export type Content =
-  | string
-  | {
-      type: ContentType;
-      parts: string[];
-      raw?: string[];
-      metadata?: Metadata;
-    };
+export type ContentFull = {
+  type: ContentType;
+  parts: string[];
+  raw?: string[];
+  metadata?: Metadata;
+  author?: Author;
+};
+
+export type Content = string | ContentFull;
 
 export enum MessageStatus {
   Pending = 'pending',
