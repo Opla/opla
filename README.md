@@ -19,6 +19,8 @@ Opla isn't just another AI tool. It's your personal productivity booster, design
 - Enjoy lightning-fast responses without internet delays.
 - Keep your data securely on your device, away from prying eyes.
 
+[![Opla App video](https://img.youtube.com/vi/ivGzeAp5pWA/0.jpg)](https://www.youtube.com/watch?v=ivGzeAp5pWA)
+
 ## Getting Started
 
 ### Download
