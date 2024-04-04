@@ -1,3 +1,10 @@
+# [1.0.0-alpha.76](https://github.com/Opla/opla/compare/v1.0.0-alpha.75...v1.0.0-alpha.76) (2024-04-04)
+
+
+### Features
+
+* shortcut edit message [#464](https://github.com/Opla/opla/issues/464) ([#702](https://github.com/Opla/opla/issues/702)) ([aa9303e](https://github.com/Opla/opla/commit/aa9303ee8a9a1c7ad53512b246d918dec85d15fc))
+
 # [1.0.0-alpha.75](https://github.com/Opla/opla/compare/v1.0.0-alpha.74...v1.0.0-alpha.75) (2024-04-04)
 
 
