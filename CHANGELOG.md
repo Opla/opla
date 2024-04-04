@@ -1,3 +1,10 @@
+# [1.0.0-alpha.73](https://github.com/Opla/opla/compare/v1.0.0-alpha.72...v1.0.0-alpha.73) (2024-04-04)
+
+
+### Features
+
+* save author in message contextHistory [#364](https://github.com/Opla/opla/issues/364) ([#699](https://github.com/Opla/opla/issues/699)) ([d3d1fbc](https://github.com/Opla/opla/commit/d3d1fbc21241b474d12bbcaf2a791fc807306a03))
+
 # [1.0.0-alpha.72](https://github.com/Opla/opla/compare/v1.0.0-alpha.71...v1.0.0-alpha.72) (2024-04-04)
 
 
