@@ -120,15 +120,6 @@ function Thread({
 
   const { t } = useTranslation();
 
-  useShortcuts(ShortcutIds.EDIT_MESSAGE, (e) => {
-    e.preventDefault();
-    logger.info('shortcut #edit-message', e);
-    const lastMessage = messages?.findLast((m) => m.author.role === 'user');
-    if (lastMessage && lastMessage.id !== selectedMessageId) {
-      setSelectedMessageId(lastMessage.id);
-    }
-  });
-
   useEffect(() => {
     const getNewMessages = async () => {
       let newMessages: Message[] = [];
@@ -691,6 +682,24 @@ function Thread({
       setSelectedMessageId(undefined);
     }
   };
+
+  useShortcuts(ShortcutIds.EDIT_MESSAGE, (e) => {
+    e.preventDefault();
+    const lastMessage = messages?.findLast((m) => m.author.role === 'user');
+    logger.info('shortcut #edit-message', lastMessage);
+    if (lastMessage && lastMessage.id !== selectedMessageId) {
+      setSelectedMessageId(lastMessage.id);
+    }
+  });
+
+  useShortcuts(ShortcutIds.DELETE_MESSAGE, (e) => {
+    e.preventDefault();
+    const lastMessage = messages?.findLast((m) => m.author.role === 'user');
+    logger.info('shortcut #delete-message', lastMessage);
+    if (lastMessage) {
+      handleShouldDeleteMessage(lastMessage);
+    }
+  });
 
   const prompt = changedPrompt === undefined ? currentPrompt : changedPrompt;
   let selectedModelNameOrId: string | undefined =
