@@ -1,3 +1,10 @@
+# [1.0.0-alpha.78](https://github.com/Opla/opla/compare/v1.0.0-alpha.77...v1.0.0-alpha.78) (2024-04-05)
+
+
+### Bug Fixes
+
+* handling of language code copied [#674](https://github.com/Opla/opla/issues/674) ([#685](https://github.com/Opla/opla/issues/685)) ([7bbae40](https://github.com/Opla/opla/commit/7bbae406322c89c6d275a6c62d4a5bd460fc7c1a))
+
 # [1.0.0-alpha.77](https://github.com/Opla/opla/compare/v1.0.0-alpha.76...v1.0.0-alpha.77) (2024-04-04)
 
 
