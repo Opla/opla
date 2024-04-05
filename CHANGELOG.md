@@ -1,3 +1,10 @@
+# [1.0.0-alpha.80](https://github.com/Opla/opla/compare/v1.0.0-alpha.79...v1.0.0-alpha.80) (2024-04-05)
+
+
+### Features
+
+* resend last prompt shortcut [#703](https://github.com/Opla/opla/issues/703) ([#711](https://github.com/Opla/opla/issues/711)) ([29c64cd](https://github.com/Opla/opla/commit/29c64cdb880773700455df790229a6e7ea65c8da))
+
 # [1.0.0-alpha.79](https://github.com/Opla/opla/compare/v1.0.0-alpha.78...v1.0.0-alpha.79) (2024-04-05)
 
 
