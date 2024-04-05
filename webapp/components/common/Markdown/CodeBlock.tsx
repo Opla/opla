@@ -17,7 +17,7 @@ import { Sigma, Check, Clipboard, PieChart } from 'lucide-react';
 import { BlockMath } from 'react-katex';
 import { Element } from 'hast';
 import { Button } from '@/components/ui/button';
-import logger from '@/utils/logger';
+// import logger from '@/utils/logger';
 import MarkDownContext from '@/hooks/useMarkdownProcessor/context';
 import Mermaid from './Mermaid';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -52,7 +52,16 @@ function CodeBlock({
     const match = code.match(/^`{3}(?<type>[\S]*)\n(?<content>[\s\S]*)`{3}$/);
     let newLanguage = match?.groups?.type || '';
     let newContent = match?.groups?.content.trimEnd() || '';
-    logger.info('CodeBlock', className, start, end, code, match, newLanguage, newContent);
+    if (match) {
+      const column = node.position?.start.column || 1;
+      if (column > 1) {
+        newContent = newContent
+          .split('\n')
+          .map((line) => line.substring(column - 1))
+          .join('\n');
+      }
+      // logger.info('CodeBlock', node, className, start, end, code, match, newLanguage, newContent);
+    }
 
     let newNoHighlight = '';
     if (newLanguage.length === 0 && className && className.indexOf('language-') >= 0) {
@@ -67,7 +76,7 @@ function CodeBlock({
       }
     }
     return { noHighlight: newNoHighlight, content: newContent, language: newLanguage };
-  }, [children, className, context, node.position]);
+  }, [children, className, context, node]);
 
   if (className) {
     let display = '';
