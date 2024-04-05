@@ -1,3 +1,10 @@
+# [1.0.0-alpha.79](https://github.com/Opla/opla/compare/v1.0.0-alpha.78...v1.0.0-alpha.79) (2024-04-05)
+
+
+### Bug Fixes
+
+* long text in promptInput is invisible [#698](https://github.com/Opla/opla/issues/698) ([#709](https://github.com/Opla/opla/issues/709)) ([0787623](https://github.com/Opla/opla/commit/07876232e841af5bac44137f2f622d407db4d396))
+
 # [1.0.0-alpha.78](https://github.com/Opla/opla/compare/v1.0.0-alpha.77...v1.0.0-alpha.78) (2024-04-05)
 
 
