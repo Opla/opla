@@ -18,7 +18,7 @@ import * as prod from 'react/jsx-runtime';
 // import mermaid from 'mermaid';
 import flattenChildren from 'react-keyed-flatten-children';
 import rehypeHighlight from 'rehype-highlight';
-import rehypeReact from 'rehype-react';
+import rehypeReact, { Options } from 'rehype-react';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import remarkParse from 'remark-parse';
@@ -28,6 +28,7 @@ import { Plugin, unified } from 'unified';
 import { visit } from 'unist-util-visit';
 import CodeBlock from '@/components/common/Markdown/CodeBlock';
 import { ANCHOR_CLASS_NAME } from '@/components/common/Markdown';
+import MarkDownContext from './context';
 
 // Inspiration:
 // https://www.skovy.dev/blog/vercel-ai-rendering-markdown?seed=imyoqy
@@ -49,7 +50,7 @@ const rehypeListItemParagraphToDiv: Plugin<[], Root> = () => (tree) => {
 const p = prod as any; // Fix ts errors
 const production = {
   createElement,
-
+  passNode: true,
   Fragment: p.Fragment,
   jsx: p.jsx,
   jsxs: p.jsxs,
@@ -188,10 +189,11 @@ const processor = unified()
   .use(rehypeKatex)
   .use(rehypeHighlight, { detect: true })
   .use(rehypeListItemParagraphToDiv)
-  .use(rehypeReact, production);
+  .use(rehypeReact, production as Options);
 
 const useMarkdownProcessor = (content: string) => {
   const [Content, setContent] = useState(createElement(Fragment));
+
   useEffect(() => {
     (async function proceed() {
       const file = await processor.process(content);
@@ -199,7 +201,9 @@ const useMarkdownProcessor = (content: string) => {
     })();
   }, [content]);
 
-  return Content;
+  return { Content, MarkDownContext };
 };
 
 export default useMarkdownProcessor;
+
+export { MarkDownContext };

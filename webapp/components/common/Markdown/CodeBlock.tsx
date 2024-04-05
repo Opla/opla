@@ -12,21 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Sigma, Check, Clipboard, PieChart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { BlockMath } from 'react-katex';
+import { Element } from 'hast';
+import { Button } from '@/components/ui/button';
+import logger from '@/utils/logger';
+import MarkDownContext from '@/hooks/useMarkdownProcessor/context';
 import Mermaid from './Mermaid';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'highlight.js/styles/obsidian.min.css';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'katex/dist/katex.min.css';
 
-function CodeBlock({ children, className }: JSX.IntrinsicElements['code']) {
+function CodeBlock({
+  children,
+  className,
+  node,
+}: JSX.IntrinsicElements['code'] & { node: Element }) {
   const [copied, setCopied] = useState(false);
   const [showMermaidPreview, setShowMermaidPreview] = useState(true);
   const [showLatexPreview, setShowLatexPreview] = useState(true);
   const ref = useRef<HTMLElement>(null);
+
+  const context = useContext(MarkDownContext);
 
   useEffect(() => {
     if (copied) {
@@ -37,20 +46,28 @@ function CodeBlock({ children, className }: JSX.IntrinsicElements['code']) {
   }, [copied]);
 
   const { noHighlight, content, language } = useMemo(() => {
+    const start = node.position?.start.offset || 0;
+    const end = node.position?.end.offset;
+    const code = context.content.substring(start, end);
+    const match = code.match(/^`{3}(?<type>[\S]*)\n(?<content>[\s\S]*)`{3}$/);
+    let newLanguage = match?.groups?.type || '';
+    let newContent = match?.groups?.content.trimEnd() || '';
+    logger.info('CodeBlock', className, start, end, code, match, newLanguage, newContent);
+
     let newNoHighlight = '';
-    let newContent = '';
-    let newLanguage = '';
-    if (className && className.indexOf('language-') >= 0) {
+    if (newLanguage.length === 0 && className && className.indexOf('language-') >= 0) {
       newLanguage = className?.substring(className.indexOf('language-') + 9);
     }
     if (newLanguage.startsWith('math') || newLanguage === 'latex') {
       newLanguage = 'math';
       newNoHighlight = 'no-highlight';
       const regex = /\\\[(.+)\\\]/g;
-      newContent = children?.toString().replace(regex, (_, latex: string) => `${latex}`) || '';
+      if (newContent.length === 0 && children) {
+        newContent = children?.toString().replace(regex, (_, latex: string) => `${latex}`) || '';
+      }
     }
     return { noHighlight: newNoHighlight, content: newContent, language: newLanguage };
-  }, [children, className]);
+  }, [children, className, context, node.position]);
 
   if (className) {
     let display = '';
@@ -71,7 +88,7 @@ function CodeBlock({ children, className }: JSX.IntrinsicElements['code']) {
             title="Copy code to clipboard"
             onClick={() => {
               if (ref.current) {
-                navigator.clipboard.writeText(children?.toString() ?? '');
+                navigator.clipboard.writeText(content || (children?.toString() ?? ''));
                 setCopied(true);
               }
             }}
