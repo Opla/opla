@@ -1,3 +1,10 @@
+# [1.0.0-alpha.81](https://github.com/Opla/opla/compare/v1.0.0-alpha.80...v1.0.0-alpha.81) (2024-04-05)
+
+
+### Features
+
+* copy last message to clipboard shortcut [#710](https://github.com/Opla/opla/issues/710) ([#712](https://github.com/Opla/opla/issues/712)) ([9f49a2b](https://github.com/Opla/opla/commit/9f49a2b556a77a5bce58d67c9e9daa295298cbf7))
+
 # [1.0.0-alpha.80](https://github.com/Opla/opla/compare/v1.0.0-alpha.79...v1.0.0-alpha.80) (2024-04-05)
 
 
