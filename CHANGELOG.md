@@ -1,3 +1,10 @@
+# [1.0.0-alpha.82](https://github.com/Opla/opla/compare/v1.0.0-alpha.81...v1.0.0-alpha.82) (2024-04-05)
+
+
+### Features
+
+* add discord & github buttons Sidepanel [#663](https://github.com/Opla/opla/issues/663) ([#715](https://github.com/Opla/opla/issues/715)) ([3dff0c2](https://github.com/Opla/opla/commit/3dff0c2c71b655432ed0ba72a30d3a46064a684f))
+
 # [1.0.0-alpha.81](https://github.com/Opla/opla/compare/v1.0.0-alpha.80...v1.0.0-alpha.81) (2024-04-05)
 
 
