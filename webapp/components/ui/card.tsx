@@ -4,12 +4,15 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 const CardButton = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
+  ({ className, onClick, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        'flex cursor-pointer flex-col rounded-xl border bg-card text-card-foreground shadow hover:bg-accent hover:text-accent-foreground',
+        'flex flex-col rounded-xl border bg-card text-card-foreground shadow ',
         className,
+        onClick
+          ? 'cursor-pointer hover:bg-accent hover:text-accent-foreground'
+          : 'hover:border-primary',
       )}
       {...props}
     />

@@ -35,7 +35,7 @@ function AssistantCard({ assistant, onInstall }: AssistantCardProps) {
   const { t } = useTranslation();
 
   return (
-    <CardButton onClick={() => onInstall(assistant)}>
+    <CardButton>
       <CardHeader className="h-[94px]">
         <div className="flex flex-row items-center gap-4">
           {assistant.avatar && <AvatarView avatar={assistant.avatar} />}
@@ -47,10 +47,18 @@ function AssistantCard({ assistant, onInstall }: AssistantCardProps) {
       </CardContent>
       <CardFooter className="pb-auto flex w-full justify-between">
         <p className="className='line-clamp-1' text-sm font-thin text-muted-foreground">
-          {t('by')} {assistant.author?.name}
+          {assistant.author?.url ? (
+            <a href={assistant.author.url} target="_blank">
+              {t('by')} {assistant.author?.name}
+            </a>
+          ) : (
+            <span>
+              {t('by')} {assistant.author?.name}
+            </span>
+          )}
         </p>
-        <Button variant="outline" size="iconSm">
-          <SquarePen className="h-4 w-4" strokeWidth={1.5} />
+        <Button variant="ghost" size="icon">
+          <SquarePen className="h-5 w-5" strokeWidth={1.5} onClick={() => onInstall(assistant)} />
         </Button>
       </CardFooter>
     </CardButton>

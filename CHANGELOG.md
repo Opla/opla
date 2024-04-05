@@ -1,3 +1,31 @@
+# [1.0.0-alpha.77](https://github.com/Opla/opla/compare/v1.0.0-alpha.76...v1.0.0-alpha.77) (2024-04-04)
+
+
+### Features
+
+* delete last message shortcut [#465](https://github.com/Opla/opla/issues/465) ([#704](https://github.com/Opla/opla/issues/704)) ([9cb4c4e](https://github.com/Opla/opla/commit/9cb4c4e6d696d23585e6a251daf45138de57280e))
+
+# [1.0.0-alpha.76](https://github.com/Opla/opla/compare/v1.0.0-alpha.75...v1.0.0-alpha.76) (2024-04-04)
+
+
+### Features
+
+* shortcut edit message [#464](https://github.com/Opla/opla/issues/464) ([#702](https://github.com/Opla/opla/issues/702)) ([aa9303e](https://github.com/Opla/opla/commit/aa9303ee8a9a1c7ad53512b246d918dec85d15fc))
+
+# [1.0.0-alpha.75](https://github.com/Opla/opla/compare/v1.0.0-alpha.74...v1.0.0-alpha.75) (2024-04-04)
+
+
+### Features
+
+* link to author url if set AssistantCard [#445](https://github.com/Opla/opla/issues/445) ([#701](https://github.com/Opla/opla/issues/701)) ([f226b85](https://github.com/Opla/opla/commit/f226b85339b7796674beb690e5ae21a7694e90d5))
+
+# [1.0.0-alpha.74](https://github.com/Opla/opla/compare/v1.0.0-alpha.73...v1.0.0-alpha.74) (2024-04-04)
+
+
+### Bug Fixes
+
+* toggle theme shortcut [#546](https://github.com/Opla/opla/issues/546) ([#700](https://github.com/Opla/opla/issues/700)) ([600a341](https://github.com/Opla/opla/commit/600a34143cd11a51f6188084a301cbae6ff7e731))
+
 # [1.0.0-alpha.73](https://github.com/Opla/opla/compare/v1.0.0-alpha.72...v1.0.0-alpha.73) (2024-04-04)
 
 

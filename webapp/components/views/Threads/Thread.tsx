@@ -62,6 +62,7 @@ import ContentView from '@/components/common/ContentView';
 import { useAssistantStore } from '@/stores';
 import { getDefaultAssistantService } from '@/utils/data/assistants';
 import { getLocalProvider } from '@/utils/data/providers';
+import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import PromptArea from './Prompt';
 import { ConversationPanel } from './Conversation';
 import ThreadHeader from './Header';
@@ -100,6 +101,7 @@ function Thread({
   } = useContext(AppContext);
   const { backendContext, setActiveModel } = useBackend();
   const searchParams = useSearchParams();
+  const [selectedMessageId, setSelectedMessageId] = useState<string | undefined>(undefined);
   const [service, setService] = useState<AIService | undefined>(undefined);
   const [usage, updateUsage] = useState<Usage | undefined>({ tokenCount: 0 });
   const { getAssistant } = useAssistantStore();
@@ -674,6 +676,31 @@ function Thread({
     }
   };
 
+  const handleStartMessageEdit = (messageId: string, index: number) => {
+    const messageIndex = messages?.findIndex((m) => m.id === messageId);
+    if (messageIndex === index) {
+      setSelectedMessageId(undefined);
+    }
+  };
+
+  useShortcuts(ShortcutIds.EDIT_MESSAGE, (e) => {
+    e.preventDefault();
+    const lastMessage = messages?.findLast((m) => m.author.role === 'user');
+    logger.info('shortcut #edit-message', lastMessage);
+    if (lastMessage && lastMessage.id !== selectedMessageId) {
+      setSelectedMessageId(lastMessage.id);
+    }
+  });
+
+  useShortcuts(ShortcutIds.DELETE_MESSAGE, (e) => {
+    e.preventDefault();
+    const lastMessage = messages?.findLast((m) => m.author.role === 'user');
+    logger.info('shortcut #delete-message', lastMessage);
+    if (lastMessage) {
+      handleShouldDeleteMessage(lastMessage);
+    }
+  });
+
   const prompt = changedPrompt === undefined ? currentPrompt : changedPrompt;
   let selectedModelNameOrId: string | undefined =
     getConversationModelId(selectedConversation) || activeModel;
@@ -699,6 +726,7 @@ function Thread({
         selectedConversation={selectedConversation}
         selectedAssistantId={assistant?.id}
         selectedModelName={selectedModelNameOrId}
+        selectedMessageId={selectedMessageId}
         messages={messages}
         avatars={avatars}
         modelItems={modelItems}
@@ -710,6 +738,7 @@ function Thread({
         onChangeMessageContent={handleChangeMessageContent}
         onSelectPrompt={handleUpdatePrompt}
         onSelectMenu={onSelectMenu}
+        onStartMessageEdit={handleStartMessageEdit}
         parseAndValidatePrompt={parseAndValidatePrompt}
       />
       {(prompt || (messages && messages[0]?.conversationId === conversationId)) && (

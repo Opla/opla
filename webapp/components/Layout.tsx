@@ -26,6 +26,7 @@ import Modals, { ModalIds } from '@/modals';
 import { Toaster } from '@/components/ui/Toast';
 import logger from '@/utils/logger';
 import { Page } from '@/types/ui';
+import useTheme from '@/hooks/useTheme';
 import Statusbar from './common/Statusbar';
 import { TooltipProvider } from './ui/tooltip';
 import Loading from './common/Loading';
@@ -39,6 +40,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { startBackend, disconnectBackend, backendContext, setSettings } = useBackendContext();
 
   const { showModal } = useRegisterModals(Modals);
+  const { toggleTheme } = useTheme();
 
   useEffect(() => {
     if (firstRender.current && providers) {
@@ -65,10 +67,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       router.events.off('routeChangeStart', handleRouteChange);
     };
   }, [backendContext, router, setSettings]);
-
-  /* useShortcuts('info', (e) => {
-    logger.info('shortcut', e);
-  }); */
 
   useShortcuts(ShortcutIds.DISPLAY_THREADS, (e) => {
     e.preventDefault();
@@ -98,6 +96,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     e.preventDefault();
     logger.info('shortcut #display-shortcuts', e);
     showModal(ModalIds.Shortcuts);
+  });
+
+  useShortcuts(ShortcutIds.TOGGLE_DARKMODE, (e) => {
+    e.preventDefault();
+    logger.info('shortcut #toggle-darkmode', e);
+    toggleTheme();
   });
 
   if (!backendContext || !providers) {
