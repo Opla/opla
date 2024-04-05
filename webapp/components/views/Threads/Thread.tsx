@@ -56,6 +56,7 @@ import {
   changeMessageContent,
   getMessageRawContentAsString,
   getMessageContentAsString,
+  getMessageContentHistoryAsString,
 } from '@/utils/data/messages';
 import { getCommandManager, getMentionCommands, preProcessingCommands } from '@/utils/commands';
 import ContentView from '@/components/common/ContentView';
@@ -708,6 +709,20 @@ function Thread({
     logger.info('shortcut #resend-message', lastMessage);
     if (lastMessage) {
       handleResendMessage(lastMessage);
+    }
+  });
+
+  useShortcuts(ShortcutIds.COPY_MESSAGE, (e) => {
+    e.preventDefault();
+    const lastMessage = messages?.findLast((m) => m.author.role === 'assistant');
+
+    logger.info('shortcut #copy-message', lastMessage);
+    if (lastMessage) {
+      const content = getMessageContentHistoryAsString(lastMessage, 0, true);
+      if (typeof content === 'string') {
+        navigator.clipboard.writeText(content);
+        toast.success('Message copied to clipboard');
+      }
     }
   });
 
