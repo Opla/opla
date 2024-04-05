@@ -701,6 +701,16 @@ function Thread({
     }
   });
 
+  useShortcuts(ShortcutIds.RESEND_MESSAGE, (e) => {
+    e.preventDefault();
+    const lastMessage = messages?.findLast((m) => m.author.role === 'assistant');
+
+    logger.info('shortcut #resend-message', lastMessage);
+    if (lastMessage) {
+      handleResendMessage(lastMessage);
+    }
+  });
+
   const prompt = changedPrompt === undefined ? currentPrompt : changedPrompt;
   let selectedModelNameOrId: string | undefined =
     getConversationModelId(selectedConversation) || activeModel;
