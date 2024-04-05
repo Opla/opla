@@ -17,28 +17,38 @@ import { LucideIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ShortcutBadge } from '../ShortCut';
 
-function Content({ icon }: { icon: LucideIcon }) {
+function Content({
+  icon,
+  renderIcon,
+}: {
+  icon: LucideIcon;
+  renderIcon?: () => React.ReactElement;
+}) {
   const Icon = icon as LucideIcon;
   return (
     <div className="hover:primary-foreground h-5 w-5">
-      <Icon size="28px" strokeWidth={1.5} />
+      {renderIcon ? renderIcon() : <Icon size="28px" strokeWidth={1.5} />}
     </div>
   );
 }
 
 export default function SidebarItem({
   href,
+  target,
   selected,
   name,
   icon,
+  renderIcon,
   shortcut,
   modal,
   onModalClick,
 }: {
   href?: string;
+  target?: boolean;
   selected: boolean;
   name: string;
   icon?: LucideIcon;
+  renderIcon?: () => React.ReactElement;
   shortcut?: string;
   modal?: boolean;
   onModalClick: (href: string) => void;
@@ -46,9 +56,9 @@ export default function SidebarItem({
   const className = `flex h-6 w-6 rounded-md ${
     selected ? 'text-primary' : 'text-muted-foreground hover:text-primary'
   } dark:transparent`;
-  const content = <Content icon={icon as LucideIcon} />;
+  const content = <Content icon={icon as LucideIcon} renderIcon={renderIcon} />;
   return (
-    <li className="p-2 py-4">
+    <li className="p-2">
       <Tooltip>
         <TooltipTrigger asChild>
           {modal ? (
@@ -67,7 +77,12 @@ export default function SidebarItem({
               {content}
             </div>
           ) : (
-            <Link className={className} href={href as string}>
+            <Link
+              className={className}
+              href={href as string}
+              target={target ? '_blank' : undefined}
+              rel={target ? 'noopener noreferrer' : undefined}
+            >
               {content}
             </Link>
           )}

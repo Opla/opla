@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 import Image from 'next/image';
 import {
   Bot,
@@ -26,11 +26,10 @@ import {
   Server,
   Settings,
   Settings2,
-  UserCircle2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { UpdateIcon } from '@radix-ui/react-icons';
+import { DiscordLogoIcon, GitHubLogoIcon, UpdateIcon } from '@radix-ui/react-icons';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 // import logger from '@/utils/logger';
@@ -86,10 +85,16 @@ const sidebarItems: Array<Ui.Item> = [
     name: 'Config',
     items: [
       {
-        name: 'Profile',
-        href: '/profile',
-        icon: UserCircle2,
-        hidden: true,
+        name: 'Github',
+        href: 'https://github.com/Opla/opla',
+        renderIcon: () => <GitHubLogoIcon className="h-7 w-7" />,
+        target: true,
+      },
+      {
+        name: 'Discord',
+        href: 'https://discord.gg/szayZWCeXn',
+        renderIcon: () => <DiscordLogoIcon className="h-7 w-7" />,
+        target: true,
       },
       {
         name: 'Settings',
@@ -169,7 +174,7 @@ function Sidebar() {
           </TooltipContent>
         </Tooltip>
       </div>
-      <ul className="p1 flex h-full flex-1 flex-col">
+      <ul className="p1 flex h-full flex-1 flex-col pb-4">
         <SidebarItems items={sidebarItems} pathname={pathname} t={t} onModal={handleModal} />
       </ul>
     </aside>

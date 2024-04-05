@@ -78,7 +78,7 @@ const config: Config = {
           label: 'GitHub',
         },
         {
-          href: 'https://discord.gg/RJD4Xa2Y',
+          href: 'https://discord.gg/szayZWCeXn',
           label: 'Discord',
         },
       ],
