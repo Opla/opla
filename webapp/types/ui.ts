@@ -27,11 +27,13 @@ export type Item = {
   href?: string;
   page?: string;
   icon?: LucideIcon;
+  renderIcon?: () => React.ReactElement;
   items?: Array<Item>;
   flex?: number;
   hidden?: boolean;
   modal?: boolean;
   shortcut?: string;
+  target?: boolean;
 };
 
 export type MenuItemState = BasicState;

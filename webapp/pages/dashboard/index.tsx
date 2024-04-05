@@ -37,7 +37,7 @@ export default function Dashboard() {
           <div className="truncate">{t('AI Providers')}</div>
         </div>
         <div className="mr-8 flex w-full flex-row-reverse items-center gap-4">
-          <a href="https://discord.gg/RJD4Xa2Y" target="_blank" className="" aria-label="Discord">
+          <a href="https://discord.gg/szayZWCeXn" target="_blank" className="" aria-label="Discord">
             <DiscordLogoIcon />
           </a>
           <a href="https://github.com/Opla/opla" target="_blank" className="" aria-label="Github">
@@ -99,7 +99,11 @@ export default function Dashboard() {
             <GitHubLogoIcon />
             <span className="ml-2">{t('Contribute')}</span>
           </a>
-          <a href="https://discord.gg/RJD4Xa2Y" target="_blank" className="ml-4 flex items-center">
+          <a
+            href="https://discord.gg/szayZWCeXn"
+            target="_blank"
+            className="ml-4 flex items-center"
+          >
             <DiscordLogoIcon />
             <span className="ml-2">{t('Community')}</span>
           </a>
