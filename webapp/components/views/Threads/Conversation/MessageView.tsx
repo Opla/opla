@@ -32,7 +32,7 @@ import {
   getMessageContentHistoryAsString,
 } from '@/utils/data/messages';
 import useHover from '@/hooks/useHover';
-import useMarkdownProcessor from '@/hooks/useMarkdownProcessor';
+import useMarkdownProcessor from '@/hooks/useMarkdownProcessor/index';
 import { Avatar, AvatarRef, Message, MessageStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import AvatarView from '@/components/common/AvatarView';

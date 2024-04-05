@@ -182,7 +182,7 @@ export default function Prompt({
               value={prompt}
               textareaRef={textareaRef}
               placeholder={t('Send a message...')}
-              className="m-0 max-h-[240px] min-h-[36px] "
+              className="max-h-[240px] min-h-[36px]"
               onValueChange={handleValueChange}
               onFocus={handleFocus}
             />

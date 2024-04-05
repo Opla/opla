@@ -59,6 +59,8 @@ function PromptCommandInput({
     }
   };
 
+  const isDropdownVisible = () => !dropdownRef.current?.classList.contains('hidden');
+
   const positionDropdown = useCallback(() => {
     const textarea = textareaRef.current;
     const dropdown = dropdownRef.current;
@@ -120,6 +122,9 @@ function PromptCommandInput({
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
+      if (!isDropdownVisible()) {
+        return;
+      }
       if (event.key === 'Escape') {
         setFocusIndex(-1);
       } else if (event.key === 'ArrowDown') {
@@ -142,27 +147,29 @@ function PromptCommandInput({
   );
 
   const handleBlur = useCallback(() => {
-    const dropdown = dropdownRef.current;
-    if (dropdown) {
+    if (isDropdownVisible()) {
       toggleDropdown(false);
     }
   }, []);
 
   const handleFocus = useCallback(() => {
-    const dropdown = dropdownRef.current;
-    if (dropdown) {
+    if (isDropdownVisible()) {
       updateDisplay();
     }
   }, [updateDisplay]);
 
   const handleMouseDown = useCallback((e: Event) => {
-    e.preventDefault();
-    e.stopPropagation();
+    if (isDropdownVisible()) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
   }, []);
 
   const handleMouseMove = useCallback(() => {
-    setFocusIndex(-1);
-  }, []);
+    if (focusIndex !== -1) {
+      setFocusIndex(-1);
+    }
+  }, [focusIndex]);
 
   const handleSelectionChange = useCallback(() => {
     const textarea = textareaRef.current;
