@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-'use client';
-
-import React, { useState, useRef, useMemo } from 'react';
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 
 import {
   Check,
@@ -127,11 +124,15 @@ function MessageComponent({
   const author = getMessageContentAuthorAsString(message, current);
   const avatar = avatars.find((a) => a.ref === author.name) || ({ name: author.name } as Avatar);
 
-  const content = getMessageContentHistoryAsString(message, current, editValue !== undefined);
-  const Content = useMarkdownProcessor(content || '');
+  // const content = getMessageContentHistoryAsString(message, current, editValue !== undefined);
+  // const Content = useMarkdownProcessor(content || '');
   const isUser = author.role === 'user';
 
-  const content = getMessageContentHistoryAsString(message, current, !isUser || edit !== undefined);
+  const content = getMessageContentHistoryAsString(
+    message,
+    current,
+    !isUser || editValue !== undefined,
+  );
   const { Content, MarkDownContext } = useMarkdownProcessor(content || '');
 
   const handleCopyToClipboard = () => {
@@ -192,45 +193,40 @@ function MessageComponent({
                 <AvatarIcon isUser={isUser} avatar={avatar} />
               </div>
             </div>
-          </div>
-          <div className="flex w-[calc(100%-50px)] flex-col gap-1 md:gap-3 lg:w-[calc(100%-115px)]">
-            <div className="flex flex-grow flex-col">
-              <div className="flex min-h-20 flex-col items-start whitespace-pre-wrap break-words">
-                <div className="w-full break-words">
-                  <p className="py-1 font-bold capitalize">{avatar.name}</p>
-                  {state === DisplayMessageState.Asset && (
-                    <div className="flex w-full select-auto flex-row items-center px-0 py-2">
-                      <File className="mr-2 h-4 w-4" strokeWidth={1.5} />
-                      <span>{t('Document added')}</span>
-                    </div>
-                  )}
-                  {state === DisplayMessageState.Pending && (
-                    <div className="px-4 py-2">
-                      <MoreHorizontal className="h-4 w-4 animate-pulse" />
-                    </div>
-                  )}
-                  {(state === DisplayMessageState.Markdown ||
-                    state === DisplayMessageState.Streaming) && (
-                    <div className="w-full select-auto px-0 py-2">{Content}</div>
-                  )}
-                  {state === DisplayMessageState.Text && (
-                    <div className="w-full select-auto px-0 py-2">{content}</div>
-                  )}
-                  {state === DisplayMessageState.Edit && (
-                    <Textarea
-                      autoFocus
-                      ref={inputRef}
-                      className="-mx-3 mb-4 mt-0 min-h-[40px] w-full resize-none text-sm"
-                      value={editValue !== undefined ? editValue : content}
-                      onChange={(e) => {
-                        setEditValue(e.target.value);
-                      }}
-                    />
-                  )}
-                </div>
-                {state === DisplayMessageState.Asset && isHover && (
-                  <div className="left-34 absolute bottom-0 flex flex-row items-center">
-                    <DeleteButton onDeleteMessage={onDeleteAssets} />
+            <div className="flex w-[calc(100%-50px)] flex-col gap-1 md:gap-3 lg:w-[calc(100%-115px)]">
+              <div className="flex flex-grow flex-col">
+                <div className="flex min-h-20 flex-col items-start whitespace-pre-wrap break-words">
+                  <div className="w-full break-words">
+                    <p className="py-1 font-bold capitalize">{avatar.name}</p>
+                    {state === DisplayMessageState.Asset && (
+                      <div className="flex w-full select-auto flex-row items-center px-0 py-2">
+                        <File className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                        <span>{t('Document added')}</span>
+                      </div>
+                    )}
+                    {state === DisplayMessageState.Pending && (
+                      <div className="px-4 py-2">
+                        <MoreHorizontal className="h-4 w-4 animate-pulse" />
+                      </div>
+                    )}
+                    {(state === DisplayMessageState.Markdown ||
+                      state === DisplayMessageState.Streaming) && (
+                      <div className="w-full select-auto px-0 py-2">{Content}</div>
+                    )}
+                    {state === DisplayMessageState.Text && (
+                      <div className="w-full select-auto px-0 py-2">{content}</div>
+                    )}
+                    {state === DisplayMessageState.Edit && (
+                      <Textarea
+                        autoFocus
+                        ref={inputRef}
+                        className="-mx-3 mb-4 mt-0 min-h-[40px] w-full resize-none text-sm"
+                        value={editValue !== undefined ? editValue : content}
+                        onChange={(e) => {
+                          setEditValue(e.target.value);
+                        }}
+                      />
+                    )}
                   </div>
                   {state === DisplayMessageState.Asset && isHover && (
                     <div className="left-34 absolute bottom-0 flex flex-row items-center">
@@ -288,26 +284,27 @@ function MessageComponent({
                         <DeleteButton onDeleteMessage={onDeleteMessage} />
                       </div>
                     )}
-                {state === DisplayMessageState.Edit && (
-                  <div className="left-30 absolute -bottom-2 flex flex-row gap-2">
-                    <Button
-                      size="sm"
-                      onClick={handleSave}
-                      disabled={!editValue}
-                      className="my-2 h-[28px] py-2"
-                    >
-                      {isUser ? t('Save & submit') : t('Save')}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleCancelEdit}
-                      className="my-2 h-[28px] py-2"
-                    >
-                      {t('Cancel')}
-                    </Button>
-                  </div>
-                )}
+                  {state === DisplayMessageState.Edit && (
+                    <div className="left-30 absolute -bottom-2 flex flex-row gap-2">
+                      <Button
+                        size="sm"
+                        onClick={handleSave}
+                        disabled={!editValue}
+                        className="my-2 h-[28px] py-2"
+                      >
+                        {isUser ? t('Save & submit') : t('Save')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleCancelEdit}
+                        className="my-2 h-[28px] py-2"
+                      >
+                        {t('Cancel')}
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
