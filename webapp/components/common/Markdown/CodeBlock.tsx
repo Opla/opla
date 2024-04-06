@@ -12,38 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Sigma, Check, Clipboard, PieChart } from 'lucide-react';
+import { useContext, useMemo, useRef, useState } from 'react';
+import { Sigma, PieChart } from 'lucide-react';
 import { BlockMath } from 'react-katex';
 import { Element } from 'hast';
 import { Button } from '@/components/ui/button';
 // import logger from '@/utils/logger';
 import MarkDownContext from '@/hooks/useMarkdownProcessor/context';
+import useTranslation from '@/hooks/useTranslation';
 import Mermaid from './Mermaid';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'highlight.js/styles/obsidian.min.css';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'katex/dist/katex.min.css';
+import CopyToClipBoard from '../CopyToClipBoard';
 
 function CodeBlock({
   children,
   className,
   node,
 }: JSX.IntrinsicElements['code'] & { node: Element }) {
-  const [copied, setCopied] = useState(false);
+  const { t } = useTranslation();
   const [showMermaidPreview, setShowMermaidPreview] = useState(true);
   const [showLatexPreview, setShowLatexPreview] = useState(true);
   const ref = useRef<HTMLElement>(null);
 
   const context = useContext(MarkDownContext);
-
-  useEffect(() => {
-    if (copied) {
-      const interval = setTimeout(() => setCopied(false), 1000);
-      return () => clearTimeout(interval);
-    }
-    return () => {};
-  }, [copied]);
 
   const { noHighlight, content, language } = useMemo(() => {
     const start = node.position?.start.offset || 0;
@@ -89,25 +83,7 @@ function CodeBlock({
       <div className="m-0 flex w-full flex-col p-0">
         <div className="flex w-full flex-row items-center justify-end gap-1 bg-card">
           <p className="flex-grow pl-4 text-xs text-card-foreground">{language}</p>
-          <Button
-            variant="ghost"
-            className=""
-            size="sm"
-            aria-label="Copy code to clipboard"
-            title="Copy code to clipboard"
-            onClick={() => {
-              if (ref.current) {
-                navigator.clipboard.writeText(content || (children?.toString() ?? ''));
-                setCopied(true);
-              }
-            }}
-          >
-            {copied ? (
-              <Check className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
-            ) : (
-              <Clipboard className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
-            )}
-          </Button>
+          <CopyToClipBoard title={t('Copy to clipboard')} text={content} />
           {language === 'mermaid' ? (
             <Button
               variant="ghost"
@@ -118,7 +94,7 @@ function CodeBlock({
                 setShowMermaidPreview(!showMermaidPreview);
               }}
             >
-              <PieChart className="h-4 w-4" strokeWidth={1.5} />
+              <PieChart className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
             </Button>
           ) : null}
           {language === 'math' ? (
@@ -131,7 +107,7 @@ function CodeBlock({
                 setShowLatexPreview(!showLatexPreview);
               }}
             >
-              <Sigma className="h-4 w-4 " strokeWidth={1.5} />
+              <Sigma className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
             </Button>
           ) : null}
         </div>

@@ -15,8 +15,6 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 
 import {
-  Check,
-  Clipboard,
   Bot,
   MoreHorizontal,
   User,
@@ -36,32 +34,15 @@ import useMarkdownProcessor from '@/hooks/useMarkdownProcessor/index';
 import { Avatar, AvatarRef, Message, MessageStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import AvatarView from '@/components/common/AvatarView';
+import CopyToClipBoard from '@/components/common/CopyToClipBoard';
 import { Button } from '../../../ui/button';
 import { Textarea } from '../../../ui/textarea';
 import OpenAI from '../../../icons/OpenAI';
 
-function ClipboardButton({
-  onCopyToClipboard,
-  copied,
-}: {
-  onCopyToClipboard: () => void;
-  copied: boolean;
-}) {
-  return (
-    <Button disabled={copied} variant="ghost" size="sm" onClick={onCopyToClipboard}>
-      {copied ? (
-        <Check className="h-4 w-4" strokeWidth={1.5} />
-      ) : (
-        <Clipboard className="h-4 w-4" strokeWidth={1.5} />
-      )}
-    </Button>
-  );
-}
-
 function DeleteButton({ onDeleteMessage }: { onDeleteMessage: () => void }) {
   return (
     <Button variant="ghost" size="sm" onClick={onDeleteMessage}>
-      <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+      <Trash2 className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
     </Button>
   );
 }
@@ -117,15 +98,12 @@ function MessageComponent({
   const { t } = useTranslation();
   const [ref, isHover] = useHover();
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [copied, setCopied] = useState(false);
   const [editValue, setEditValue] = useState<string | undefined>(undefined);
   const [current, setCurrent] = useState(0);
 
   const author = getMessageContentAuthorAsString(message, current);
   const avatar = avatars.find((a) => a.ref === author.name) || ({ name: author.name } as Avatar);
 
-  // const content = getMessageContentHistoryAsString(message, current, editValue !== undefined);
-  // const Content = useMarkdownProcessor(content || '');
   const isUser = author.role === 'user';
 
   const content = getMessageContentHistoryAsString(
@@ -134,13 +112,6 @@ function MessageComponent({
     !isUser || editValue !== undefined,
   );
   const { Content, MarkDownContext } = useMarkdownProcessor(content || '');
-
-  const handleCopyToClipboard = () => {
-    if (typeof content === 'string') {
-      navigator.clipboard.writeText(content);
-      setCopied(true);
-    }
-  };
 
   const handleEdit = useCallback(() => {
     const raw = getMessageContentHistoryAsString(message, current, true);
@@ -247,7 +218,10 @@ function MessageComponent({
                               }}
                               className="h-5 w-5 p-1"
                             >
-                              <ChevronLeft className="h-4 w-4" strokeWidth={1.5} />
+                              <ChevronLeft
+                                className="h-4 w-4 text-muted-foreground"
+                                strokeWidth={1.5}
+                              />
                             </Button>
                             <span className="tabular-nums">
                               {' '}
@@ -263,22 +237,29 @@ function MessageComponent({
                               }}
                               className="h-5 w-5 p-1"
                             >
-                              <ChevronRight className="h-4 w-4" strokeWidth={1.5} />
+                              <ChevronRight
+                                className="h-4 w-4 text-muted-foreground"
+                                strokeWidth={1.5}
+                              />
                             </Button>
                           </div>
                         )}
                         {!isUser && (
                           <Button variant="ghost" size="sm" onClick={onResendMessage}>
-                            <RotateCcw className="h-4 w-4" strokeWidth={1.5} />
+                            <RotateCcw
+                              className="h-4 w-4 text-muted-foreground"
+                              strokeWidth={1.5}
+                            />
                           </Button>
                         )}
-                        <ClipboardButton
+                        {/* <ClipboardButton
                           copied={copied}
                           onCopyToClipboard={handleCopyToClipboard}
-                        />
+                        /> */}
+                        <CopyToClipBoard title={t('Copy message to clipboard')} text={content} />
                         {message.status !== MessageStatus.Error && (
                           <Button variant="ghost" size="sm" onClick={handleEdit}>
-                            <Pencil className="h-4 w-4" strokeWidth={1.5} />
+                            <Pencil className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
                           </Button>
                         )}
                         <DeleteButton onDeleteMessage={onDeleteMessage} />
