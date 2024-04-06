@@ -48,9 +48,6 @@ export default function ThreadHeader({
   const { getAssistant } = useAssistantStore();
   const { conversations, providers, setProviders } = useContext(AppContext);
   const { backendContext } = useBackend();
-  const selectedItem = modelItems.find(
-    (item) => item.value === selectedModelName || item.key === selectedModelName,
-  );
 
   const conversation = conversations.find((c) => c.id === selectedConversationId) as
     | Conversation
@@ -65,6 +62,11 @@ export default function ThreadHeader({
     selectedModelName,
   );
   const selectedModel = service.model;
+  const modelName = selectedModel?.name || selectedModelName;
+
+  const selectedItem = modelItems.find(
+    (item) => item.value === modelName || item.key === modelName,
+  );
 
   const selectedTargetId =
     service?.type === AIServiceType.Assistant ? service.targetId : assistant?.targets?.[0]?.id;
@@ -149,7 +151,7 @@ export default function ThreadHeader({
       />
     ) : (
       <ModelMenu
-        selectedModelName={selectedModelName}
+        selectedModelName={modelName}
         selectedConversationId={selectedConversationId}
         modelItems={modelItems}
         onSelectModel={onSelectModel}
