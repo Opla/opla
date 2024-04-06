@@ -1,3 +1,10 @@
+# [1.0.0-alpha.83](https://github.com/Opla/opla/compare/v1.0.0-alpha.82...v1.0.0-alpha.83) (2024-04-06)
+
+
+### Bug Fixes
+
+* remove codeblock extra indentation ([#708](https://github.com/Opla/opla/issues/708)) ([b118ddd](https://github.com/Opla/opla/commit/b118ddda646e79dd5dbc7bdc78cfa094b94a97a6))
+
 # [1.0.0-alpha.82](https://github.com/Opla/opla/compare/v1.0.0-alpha.81...v1.0.0-alpha.82) (2024-04-05)
 
 
