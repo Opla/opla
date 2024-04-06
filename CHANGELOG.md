@@ -1,3 +1,10 @@
+# [1.0.0-alpha.84](https://github.com/Opla/opla/compare/v1.0.0-alpha.83...v1.0.0-alpha.84) (2024-04-06)
+
+
+### Features
+
+* use CopyToClipBoard everywhere [#696](https://github.com/Opla/opla/issues/696) ([#719](https://github.com/Opla/opla/issues/719)) ([616fd81](https://github.com/Opla/opla/commit/616fd81e5ec8f9528f84c05edb0fe899fd1cdfa6))
+
 # [1.0.0-alpha.83](https://github.com/Opla/opla/compare/v1.0.0-alpha.82...v1.0.0-alpha.83) (2024-04-06)
 
 
