@@ -95,7 +95,8 @@ export function parsePrompt(options: ParsePromptOptions, validator: TokenValidat
     'textarea' in options ? getCurrentWord(options.textarea) : options;
 
   const tokens: PromptToken[] = [];
-  const spans = value.split(/(?<=^| )([@|#|/][\p{L}0-9._-]+)|(\n)/gu);
+  // fix Lookbehind Regex in Safari #717
+  const spans = value.split(/(^|\s)([@|#|/][\p{L}0-9._-]+)|(\n)/gu); // /(?<=^| )([@|#|/][\p{L}0-9._-]+)|(\n)/gu);
   let index = 0;
   const parsedPrompt: ParsedPrompt = {
     tokens,
