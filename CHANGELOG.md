@@ -1,3 +1,10 @@
+# [1.0.0-alpha.85](https://github.com/Opla/opla/compare/v1.0.0-alpha.84...v1.0.0-alpha.85) (2024-04-06)
+
+
+### Bug Fixes
+
+* lookbehind Regex in Safari [#717](https://github.com/Opla/opla/issues/717) ([#723](https://github.com/Opla/opla/issues/723)) ([5f712ce](https://github.com/Opla/opla/commit/5f712ce487679981068e42347e50fe56dde4cc87))
+
 # [1.0.0-alpha.84](https://github.com/Opla/opla/compare/v1.0.0-alpha.83...v1.0.0-alpha.84) (2024-04-06)
 
 
