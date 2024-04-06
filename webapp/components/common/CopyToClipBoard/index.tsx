@@ -21,7 +21,7 @@ function CopyToClipBoard({ title, text }: CopyToClipBoardProps) {
       toast.success('Copied to clipboard');
       setTimeout(() => {
         setCopySuccess('idle');
-      }, 8000);
+      }, 1000);
     } catch (err) {
       setCopySuccess('error');
       toast.error(`Failed to copy to clipboard: ${err}`);
@@ -40,7 +40,6 @@ function CopyToClipBoard({ title, text }: CopyToClipBoardProps) {
   return (
     <Button
       variant="ghost"
-      className=""
       size="sm"
       aria-label={title}
       title={title}
