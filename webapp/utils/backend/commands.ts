@@ -92,8 +92,8 @@ export const installModel = async (
   return '';
 };
 
-export const getModelFullPath = async (filename: string) =>
-  invokeTauri<string>('get_model_full_path', { filename });
+export const getModelFullPath = async (path: string, filename: string) =>
+  invokeTauri<string>('get_model_full_path', { path, filename });
 
 export const cancelDownloadModel = async (modelNameOrId: string) => {
   await invokeTauri<string>('cancel_download_model', { modelNameOrId });

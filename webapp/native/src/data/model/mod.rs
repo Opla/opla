@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::fs::create_dir_all;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use chrono::{ DateTime, Utc };
 use serde::{ self, Deserialize, Serialize };
 use serde_with::{ serde_as, OneOrMany, formats::PreferOne };
@@ -204,7 +204,11 @@ impl ModelStorage {
         }
     }
 
-    pub fn get_path(&self, path: String) -> Result<PathBuf, String> {
+    pub fn get_path(&self, filepath: String, filename: Option<String>) -> Result<PathBuf, String> {
+        let path_filename = Path::new(&filepath).join(&filename.unwrap_or("".to_string()));
+        if path_filename.is_absolute() {
+            return Ok(path_filename.to_path_buf());
+        }
         let models_path = match self.path {
             Some(ref path) => {
                 let p = PathBuf::from(path);
@@ -216,7 +220,7 @@ impl ModelStorage {
             }
             None => get_data_directory()?.join("models"),
         };
-        let model_path = models_path.join(path);
+        let model_path = models_path.join(path_filename);
         Ok(model_path)
     }
 
@@ -225,7 +229,7 @@ impl ModelStorage {
         path: String,
         file_name: String
     ) -> Result<String, String> {
-        let models_path = self.get_path(path)?;
+        let models_path = self.get_path(path, None)?;
         let result = create_dir_all(models_path.clone());
         if result.is_err() {
             return Err(format!("Failed to create model directory: {:?}", result));
@@ -249,7 +253,7 @@ impl ModelStorage {
         path: String,
         file_name: String
     ) -> Result<String, String> {
-        let models_path = self.get_path(path)?;
+        let models_path = self.get_path(path, None)?;
         let file_name = file_name.as_str();
         let binding = models_path.join(file_name);
         let model_path = match binding.to_str() {

@@ -51,6 +51,7 @@ import { ModalsContext } from '@/context/modals';
 import EmptyView from '@/components/common/EmptyView';
 import { BrainCircuit } from 'lucide-react';
 import { fileExists } from '@/utils/backend/tauri';
+import { toast } from 'sonner';
 import Parameter, { ParametersRecord } from '../../common/Parameter';
 import { Button } from '../../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../../ui/table';
@@ -144,12 +145,26 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
   useEffect(() => {
     const getFullPath = async () => {
       if (model?.fileName) {
-        const path = `${model.path || ''}/${model.fileName || ''}`;
-        const full = await getModelFullPath(path);
-        const exist = await fileExists(full);
+        let exist = false;
+        let full = '';
+        const modelPath = getResourceUrl(model.path);
+        try {
+          full = await getModelFullPath(modelPath, model.fileName);
+          exist = await fileExists(full);
+        } catch (error) {
+          logger.error(error);
+        }
+
         if (!exist && model.state !== ModelState.NotFound) {
-          logger.error(`File not found ${full}`);
+          logger.error(`File not found ${modelPath} ${model.fileName} ${full}`);
+          toast.error(`File not found ${full}`);
           await updateModelEntity({ ...model, state: ModelState.NotFound });
+          await updateBackendStore();
+        } else if (exist && model.state === ModelState.NotFound) {
+          logger.info(
+            `File found path=${modelPath} model.path=${model.path} model.fileName=${model.fileName} full=${full}`,
+          );
+          await updateModelEntity({ ...model, state: ModelState.Ok });
           await updateBackendStore();
         }
         setFullPathModel(full);
