@@ -1,3 +1,10 @@
+# [1.0.0-alpha.87](https://github.com/Opla/opla/compare/v1.0.0-alpha.86...v1.0.0-alpha.87) (2024-04-07)
+
+
+### Bug Fixes
+
+* DownloadModel div inside p [#720](https://github.com/Opla/opla/issues/720) ([#725](https://github.com/Opla/opla/issues/725)) ([574ea64](https://github.com/Opla/opla/commit/574ea64c9603b2851b0b5a894074aa6aa27bb8c4))
+
 # [1.0.0-alpha.86](https://github.com/Opla/opla/compare/v1.0.0-alpha.85...v1.0.0-alpha.86) (2024-04-07)
 
 
