@@ -32,10 +32,10 @@ function DownloadModel({ className, model, download }: DownloadModelProps) {
 
       <Progress value={download?.percentage || 100} className="m-8 w-[80%]" />
       {download && (
-        <p className="ali flex h-5 w-full items-center justify-end space-x-2 px-14 text-sm text-muted-foreground">
+        <div className="ali flex h-5 w-full items-center justify-end space-x-2 px-14 text-sm text-muted-foreground">
           <div>{formatFileSize(download.transfered)}</div> <Separator orientation="vertical" />{' '}
           <div>{formatFileSize(download.fileSize)}</div>
-        </p>
+        </div>
       )}
       {!download && (
         <p className="ali flex h-5 w-full items-center justify-end space-x-2 px-14 text-sm text-muted-foreground">
