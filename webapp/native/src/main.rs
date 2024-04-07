@@ -285,13 +285,14 @@ async fn get_model_full_path<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
+    path: String,
     filename: String
 ) -> Result<String, String>
     where Result<ModelsCollection, String>: Serialize
 {
     let store = context.store.lock().await;
     let error = format!("Model path not valid: {:?}", filename.clone());
-    let result = store.models.get_path(filename);
+    let result = store.models.get_path(path, Some(filename));
     let path = match result {
         Ok(m) => { m }
         Err(err) => {
