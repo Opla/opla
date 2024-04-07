@@ -1,3 +1,10 @@
+# [1.0.0-alpha.86](https://github.com/Opla/opla/compare/v1.0.0-alpha.85...v1.0.0-alpha.86) (2024-04-07)
+
+
+### Bug Fixes
+
+* wrong full path [#716](https://github.com/Opla/opla/issues/716) ([#724](https://github.com/Opla/opla/issues/724)) ([46fa024](https://github.com/Opla/opla/commit/46fa0249312ec2cf8bd5cb3e44f6c2c0853b7c9f))
+
 # [1.0.0-alpha.85](https://github.com/Opla/opla/compare/v1.0.0-alpha.84...v1.0.0-alpha.85) (2024-04-06)
 
 
