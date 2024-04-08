@@ -1,3 +1,10 @@
+# [1.0.0-alpha.88](https://github.com/Opla/opla/compare/v1.0.0-alpha.87...v1.0.0-alpha.88) (2024-04-08)
+
+
+### Bug Fixes
+
+* delete unused conversation directories [#356](https://github.com/Opla/opla/issues/356) ([#729](https://github.com/Opla/opla/issues/729)) ([8cdd387](https://github.com/Opla/opla/commit/8cdd38715fceb1752a4126f6bea5ee1f1d76bbfe))
+
 # [1.0.0-alpha.87](https://github.com/Opla/opla/compare/v1.0.0-alpha.86...v1.0.0-alpha.87) (2024-04-07)
 
 
