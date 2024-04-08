@@ -15,7 +15,7 @@
 use std::{ fs, path::PathBuf, fmt, collections::HashMap };
 use serde::{ Deserialize, Serialize };
 use crate::{
-    data::{ model::ModelStorage, service::{ Service, ServiceStorage, ServiceType } },
+    data::{ model::{Model, ModelStorage}, service::{ Service, ServiceStorage, ServiceType } },
     downloader::Download,
     utils::get_config_directory,
 };
@@ -250,7 +250,7 @@ impl Store {
             "get_local_active_model_id model_id: {:?}, provider: {:?} services: {:?}",
             model_id,
             provider,
-            self.services
+            self.services,
         );
         if model_id.is_none() && provider.is_none() {
             if self.models.items.len() > 0 {
@@ -273,8 +273,9 @@ impl Store {
         return None;
     }
 
-    pub fn clear_active_service_if_model_equal(&mut self, model_id: &str) {
-        if Some(model_id) == self.get_local_active_model_id().as_deref() {
+    pub fn clear_active_service_if_model_equal(&mut self, model_id: Option<String>) {
+        let local_model_id = self.services.get_active_model_id();
+        if model_id == local_model_id {
             self.services.active_service = None;
         }
     }

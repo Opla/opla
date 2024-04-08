@@ -31,6 +31,6 @@ pub async fn fetch_models_collection(
     println!("Fetching models collection from {}", url);
     let response = reqwest::get(url).await?;
     let collection = response.json::<ModelsCollection>().await?;
-    println!("Fetched models collection: {:?}", collection);
+    // println!("Fetched models collection: {:?}", collection);
     Ok(collection)
 }
