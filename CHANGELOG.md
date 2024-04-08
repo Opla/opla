@@ -1,3 +1,10 @@
+# [1.0.0-alpha.90](https://github.com/Opla/opla/compare/v1.0.0-alpha.89...v1.0.0-alpha.90) (2024-04-08)
+
+
+### Bug Fixes
+
+* file not found error Model [#727](https://github.com/Opla/opla/issues/727) ([#732](https://github.com/Opla/opla/issues/732)) ([a665918](https://github.com/Opla/opla/commit/a665918ea12979f9403bdade147b4db7bb771d2f))
+
 # [1.0.0-alpha.89](https://github.com/Opla/opla/compare/v1.0.0-alpha.88...v1.0.0-alpha.89) (2024-04-08)
 
 
