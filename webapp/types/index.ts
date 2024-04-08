@@ -281,6 +281,7 @@ export enum ModelState {
   Ok = 'Ok',
   Error = 'error',
   NotFound = 'not_found',
+  Removed = 'removed',
 }
 
 export type Model = BaseNamedRecord & {

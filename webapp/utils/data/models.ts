@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { BrainCircuit } from 'lucide-react';
-import { Ui, Model, OplaContext, Provider, ProviderType } from '@/types';
+import { Ui, Model, OplaContext, Provider, ProviderType, ModelState } from '@/types';
 import Opla from '@/components/icons/Opla';
 import OpenAI from '@/components/icons/OpenAI';
 import { deepMerge, getEntityName, getResourceUrl } from '.';
@@ -22,70 +22,8 @@ import OplaProvider from '../providers/opla';
 import logger from '../logger';
 import { installModel } from '../backend/commands';
 
-/* export const getSelectedModel = (backendContext: OplaContext) => {
-  const selectedPreset = `${backendContext.config.server.name}::${backendContext.config.models.activeModel}`;
-  return selectedPreset;
-}; */
-
-export const getLocalModelsAsItems = (
-  backendContext: OplaContext,
-  selectedModelname?: string,
-  localProvider?: Provider,
-): Ui.MenuItem[] => {
-  const state = getProviderState(localProvider);
-  return backendContext.config.models.items.map(
-    (model) =>
-      ({
-        key: model.id,
-        label: model.title || model.name,
-        value: model.name,
-        group: localProvider?.name || OplaProvider.name,
-        icon: Opla,
-        selected: model.name === selectedModelname,
-        state,
-      }) as Ui.MenuItem,
-  );
-};
-
-export const getProviderModelsAsItems = (
-  providers: Provider[],
-  selectedModelname?: string,
-): Ui.MenuItem[] => {
-  const items = providers.reduce((acc, provider) => {
-    const selectedModel = provider.models?.find((model) => model.name === selectedModelname);
-    if (!provider.models || (provider.disabled && !selectedModel)) return acc;
-    const state = getProviderState(provider);
-    const providerItems =
-      provider.models.map(
-        (model) =>
-          ({
-            key: model.id,
-            label: model.title || model.name,
-            value: model.name,
-            group: provider.name,
-            selected: model.name === selectedModelname,
-            icon: provider.type === ProviderType.openai ? OpenAI : BrainCircuit,
-            state,
-          }) as Ui.MenuItem,
-      ) || [];
-    return [...acc, ...providerItems];
-  }, [] as Ui.MenuItem[]);
-  return items;
-};
-
-export const getModelsAsItems = (
-  providers: Provider[],
-  backendContext: OplaContext,
-  selectedModelname?: string,
-) => {
-  const localProvider = getLocalProvider(providers);
-  const localItems = getLocalModelsAsItems(backendContext, selectedModelname, localProvider);
-  const providerItems = getProviderModelsAsItems(providers, selectedModelname);
-  return [...localItems, ...providerItems];
-};
-
 export const getLocalModels = (backendContext: OplaContext) =>
-  backendContext.config.models.items.map((model) => model);
+  backendContext.config.models.items.filter((model) => model.state !== ModelState.Removed);
 
 export const getProviderModels = (providers: Provider[]) => {
   const providerModels = providers.reduce((acc, provider) => {
@@ -161,4 +99,61 @@ export const installModelFromApi = async (modelSource: Model) => {
     selectedModel.name,
   );
   return id;
+};
+
+export const getLocalModelsAsItems = (
+  backendContext: OplaContext,
+  selectedModelname?: string,
+  localProvider?: Provider,
+): Ui.MenuItem[] => {
+  const state = getProviderState(localProvider);
+  return getLocalModels(backendContext).map(
+    (model) =>
+      ({
+        key: model.id,
+        label: model.title || model.name,
+        value: model.name,
+        group: localProvider?.name || OplaProvider.name,
+        icon: Opla,
+        selected: model.name === selectedModelname,
+        state,
+      }) as Ui.MenuItem,
+  );
+};
+
+export const getProviderModelsAsItems = (
+  providers: Provider[],
+  selectedModelname?: string,
+): Ui.MenuItem[] => {
+  const items = providers.reduce((acc, provider) => {
+    const selectedModel = provider.models?.find((model) => model.name === selectedModelname);
+    if (!provider.models || (provider.disabled && !selectedModel)) return acc;
+    const state = getProviderState(provider);
+    const providerItems =
+      provider.models.map(
+        (model) =>
+          ({
+            key: model.id,
+            label: model.title || model.name,
+            value: model.name,
+            group: provider.name,
+            selected: model.name === selectedModelname,
+            icon: provider.type === ProviderType.openai ? OpenAI : BrainCircuit,
+            state,
+          }) as Ui.MenuItem,
+      ) || [];
+    return [...acc, ...providerItems];
+  }, [] as Ui.MenuItem[]);
+  return items;
+};
+
+export const getModelsAsItems = (
+  providers: Provider[],
+  backendContext: OplaContext,
+  selectedModelname?: string,
+) => {
+  const localProvider = getLocalProvider(providers);
+  const localItems = getLocalModelsAsItems(backendContext, selectedModelname, localProvider);
+  const providerItems = getProviderModelsAsItems(providers, selectedModelname);
+  return [...localItems, ...providerItems];
 };

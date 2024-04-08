@@ -47,6 +47,7 @@ function ModelInfos({
         )}
         {!stateAsIcon && model.state === ModelState.Error && <RedPill label={t('Error')} />}
         {!stateAsIcon && model.state === ModelState.NotFound && <RedPill label={t('NotFound')} />}
+        {!stateAsIcon && model.state === ModelState.Removed && <RedPill label={t('Removed')} />}
       </div>
     </div>
   );

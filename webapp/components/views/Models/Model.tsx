@@ -52,6 +52,10 @@ import EmptyView from '@/components/common/EmptyView';
 import { BrainCircuit } from 'lucide-react';
 import { fileExists } from '@/utils/backend/tauri';
 import { toast } from 'sonner';
+import { isModelUsedInConversations } from '@/utils/data/conversations';
+import { AppContext } from '@/context';
+import { useAssistantStore } from '@/stores';
+import { OrangePill } from '@/components/ui/Pills';
 import Parameter, { ParametersRecord } from '../../common/Parameter';
 import { Button } from '../../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../../ui/table';
@@ -66,7 +70,8 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
 
   const [fullPathModel, setFullPathModel] = useState<string | undefined>();
   const { backendContext, updateBackendStore } = useBackend();
-
+  const { conversations } = useContext(AppContext);
+  const { isModelUsedInAssistants } = useAssistantStore();
   const [collection, setCollection] = useState<Model[]>([]);
   const { showModal } = useContext(ModalsContext);
   const router = useRouter();
@@ -82,7 +87,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     getCollection();
   }, []);
 
-  const [downloads, models, model, downloadables, local] = useMemo(() => {
+  const [downloads, models, model, downloadables, local, inUse] = useMemo(() => {
     let l = true;
     const mdls = backendContext.config.models.items;
     let mdl = mdls.find((m) => m.id === selectedModelId) as Model;
@@ -93,8 +98,12 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     const dls: Model[] = l
       ? []
       : getDownloadables(mdl).filter((d) => d.private !== true && isValidFormat(d));
-    return [backendContext.downloads || [], mdls, mdl, dls, l];
-  }, [selectedModelId, backendContext, collection]);
+
+    const isUsed: boolean =
+      mdl && (isModelUsedInConversations(conversations, mdl) || isModelUsedInAssistants(mdl));
+
+    return [backendContext.downloads || [], mdls, mdl, dls, l, isUsed];
+  }, [selectedModelId, backendContext, collection, conversations, isModelUsedInAssistants]);
 
   const isDownloading = downloads.findIndex((d) => d.id === model?.id) !== -1;
 
@@ -197,8 +206,9 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
   const handleUninstall = async () => {
     logger.info(`Uninstall ${model.name} model.id=${model.id}`);
 
-    const nextModelId = models.findLast((m) => m.id !== model.id)?.id || '';
-    await uninstallModel(model.id);
+    const nextModelId =
+      models.findLast((m) => m.state !== ModelState.Removed && m.id !== model.id)?.id || '';
+    await uninstallModel(model.id, inUse);
     await updateBackendStore();
     router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
   };
@@ -261,18 +271,20 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
           <span className="pl-2">/</span>
           <div className="flex grow items-center gap-2 truncate px-2 ">
             <span>{model.name}</span>
+            {inUse ? <OrangePill label={t('In use')} /> : <OrangePill label={t('Not in use')} />}
             <ModelInfos model={model} displayName={false} />
           </div>
         </div>
       }
       selectedId={model.id}
       toolbar={
-        <div className="flex flex-row gap-2">
-          <Button variant="secondary" className="" onClick={() => handleLocalInstall()}>
-            {isDownloading && t('Downloading...')}
-            {!isDownloading && (local ? t('Uninstall') : t('Install'))}
-          </Button>
-          {/* local && (
+        model.state !== ModelState.Removed && (
+          <div className="flex flex-row gap-2">
+            <Button variant="secondary" className="" onClick={() => handleLocalInstall()}>
+              {isDownloading && t('Downloading...')}
+              {!isDownloading && (local ? t('Uninstall') : t('Install'))}
+            </Button>
+            {/* local && (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon">
@@ -291,7 +303,8 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       </DropdownMenuContent>
     </DropdownMenu>
   ) */}
-        </div>
+          </div>
+        )
       }
     >
       <ScrollArea className="h-full px-8 py-4">
