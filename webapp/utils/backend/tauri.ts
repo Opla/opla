@@ -133,25 +133,31 @@ export const deleteDir = async (dirname: string, isDatadir = true, recursive = f
 };
 
 export const deleteUnusedConversationsDir = async (excludedDirs: string[]) => {
-  const { removeDir: fsRemoveDir, removeFile: fsRemoveFile, readDir: fsReadDir } = await import('@tauri-apps/api/fs');
+  const {
+    removeDir: fsRemoveDir,
+    removeFile: fsRemoveFile,
+    readDir: fsReadDir,
+  } = await import('@tauri-apps/api/fs');
   const { join } = await import('@tauri-apps/api/path');
-  const dataDir = await invokeTauri('get_data_dir') as string;
+  const dataDir = (await invokeTauri('get_data_dir')) as string;
   const dirs = await fsReadDir(dataDir, { recursive: true });
   const promises: Promise<void>[] = [];
   dirs.forEach((dir) => {
     const { path } = dir;
     if (dir.children && !excludedDirs.includes(dir.path)) {
-      promises.push((async (children: FileEntry[]) => {
-        const isConversation = children.some((child) => child.path.endsWith('messages.json'));
-        if (isConversation) {
-          try {
-            await fsRemoveFile(await join(path, 'messages.json'));
-          } catch (error) {
-            logger.error(error);
+      promises.push(
+        (async (children: FileEntry[]) => {
+          const isConversation = children.some((child) => child.path.endsWith('messages.json'));
+          if (isConversation) {
+            try {
+              await fsRemoveFile(await join(path, 'messages.json'));
+            } catch (error) {
+              logger.error(error);
+            }
+            fsRemoveDir(path, { recursive: true });
           }
-          fsRemoveDir(path, { recursive: true })
-        }
-      })(dir.children));
+        })(dir.children),
+      );
     }
   });
   return Promise.all(promises);

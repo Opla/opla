@@ -34,7 +34,11 @@ export type Context = {
   providers: Array<Provider>;
   presets: Array<Preset>;
   updateConversations: (newConversations: Conversation[]) => Promise<void>;
-  deleteConversation: (id: string, deleteFiles: boolean, cleanup?: (id: string) => Promise<void>) => Promise<void>;
+  deleteConversation: (
+    id: string,
+    deleteFiles: boolean,
+    cleanup?: (id: string) => Promise<void>,
+  ) => Promise<void>;
   readConversationMessages: (key: string, defaultValue: Message[]) => Promise<Message[]>;
   getConversationMessages: (id: string | undefined) => Message[];
   filterConversationMessages: (
