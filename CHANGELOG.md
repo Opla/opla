@@ -1,3 +1,10 @@
+# [1.0.0-alpha.95](https://github.com/Opla/opla/compare/v1.0.0-alpha.94...v1.0.0-alpha.95) (2024-04-08)
+
+
+### Features
+
+* replace text-red-xxx by text-error | text-destructive [#741](https://github.com/Opla/opla/issues/741) ([#743](https://github.com/Opla/opla/issues/743)) ([aa11788](https://github.com/Opla/opla/commit/aa117886477e047431da59be54c6e54cc4135dfa))
+
 # [1.0.0-alpha.94](https://github.com/Opla/opla/compare/v1.0.0-alpha.93...v1.0.0-alpha.94) (2024-04-08)
 
 

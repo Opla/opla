@@ -82,7 +82,7 @@ checksum = "080e9890a082662b09c1ad45f567faeeb47f22b5fb23895fbe1e651e718e25ca"
 
 [[package]]
 name = "app"
-version = "1.0.0-alpha.94"
+version = "1.0.0-alpha.95"
 dependencies = [
  "chrono",
  "dirs",
@@ -373,7 +373,7 @@ dependencies = [
 
 [[package]]
 name = "cli"
-version = "1.0.0-alpha.94"
+version = "1.0.0-alpha.95"
 dependencies = [
  "opla_core",
 ]
@@ -2177,7 +2177,7 @@ dependencies = [
 
 [[package]]
 name = "opla"
-version = "1.0.0-alpha.94"
+version = "1.0.0-alpha.95"
 dependencies = [
  "opla_core",
  "tokenizer",
@@ -2185,7 +2185,7 @@ dependencies = [
 
 [[package]]
 name = "opla_core"
-version = "1.0.0-alpha.94"
+version = "1.0.0-alpha.95"
 dependencies = [
  "anyhow",
 ]
@@ -3747,7 +3747,7 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokenizer"
-version = "1.0.0-alpha.94"
+version = "1.0.0-alpha.95"
 dependencies = [
  "anyhow",
  "base64 0.21.5",
