@@ -15,7 +15,7 @@
 // Inspiration
 // https://github.com/mxkaske/mxkaske.dev/blob/main/components/craft/fancy-area/write.tsx
 
-import { ChangeEvent, useCallback } from 'react';
+import { ChangeEvent, KeyboardEventHandler, useCallback } from 'react';
 import { ParsedPrompt } from '@/utils/parsers';
 import { getCurrentWord } from '@/utils/ui/caretposition';
 import { cn } from '@/lib/utils';
@@ -30,6 +30,7 @@ type PromptInputProps = {
   onValueChange: (text: string, caretStartIndex: number) => void;
   className?: string;
   onFocus?: (event: ChangeEvent<HTMLTextAreaElement>) => void;
+  onKeyDown: (event: KeyboardEvent) => void;
 };
 
 function PromptInput({
@@ -39,6 +40,7 @@ function PromptInput({
   className,
   onValueChange,
   onFocus,
+  onKeyDown,
 }: PromptInputProps) {
   const handleChange = useCallback(() => {
     const textarea = textareaRef.current;
@@ -73,6 +75,7 @@ function PromptInput({
       placeholder={placeholder}
       onChange={handleChange}
       onFocus={handleFocus}
+      onKeyDown={onKeyDown as unknown as KeyboardEventHandler<HTMLTextAreaElement>}
     >
       <p className="textarea-overlay pointer-events-none absolute left-[0.0px] top-[0.0px] h-full w-full overflow-visible px-3 py-2 text-sm">
         {value?.tokens?.map((token) =>

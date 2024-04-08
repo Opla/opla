@@ -28,7 +28,6 @@ type PromptCommandProps = {
   textareaRef: React.RefObject<HTMLTextAreaElement>;
   children: React.ReactNode;
   onValueChange: (text: string, caretStartIndex: number) => void;
-  onKeyDown: (event: KeyboardEvent) => void;
 };
 
 function PromptCommandInput({
@@ -37,7 +36,6 @@ function PromptCommandInput({
   textareaRef,
   children,
   onValueChange,
-  onKeyDown,
 }: PromptCommandProps) {
   const { t } = useTranslation();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -141,9 +139,8 @@ function PromptCommandInput({
           handleCommandSelect(filteredCommands[focusIndex].value as string);
         }
       }
-      onKeyDown(event);
     },
-    [filteredCommands, focusIndex, handleCommandSelect, onKeyDown],
+    [filteredCommands, focusIndex, handleCommandSelect],
   );
 
   const handleBlur = useCallback(() => {
