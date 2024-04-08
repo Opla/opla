@@ -1,3 +1,10 @@
+# [1.0.0-alpha.93](https://github.com/Opla/opla/compare/v1.0.0-alpha.92...v1.0.0-alpha.93) (2024-04-08)
+
+
+### Bug Fixes
+
+* selected model disappear after 1st input [#738](https://github.com/Opla/opla/issues/738) ([#740](https://github.com/Opla/opla/issues/740)) ([c5c4c87](https://github.com/Opla/opla/commit/c5c4c87e8a4654bd42fb14841d826c86fae0093d))
+
 # [1.0.0-alpha.92](https://github.com/Opla/opla/compare/v1.0.0-alpha.91...v1.0.0-alpha.92) (2024-04-08)
 
 
