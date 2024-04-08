@@ -24,6 +24,7 @@
         "exists": true,
         "readFile": true,
         "writeFile": true,
+        "readDir": true,
         "removeDir": true,
         "createDir": true,
         "removeFile": true,

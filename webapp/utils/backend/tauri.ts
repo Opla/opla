@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+import { FileEntry } from '@tauri-apps/api/fs';
 import logger from '../logger';
 
 type InvokeArgs = Record<string, unknown>;
@@ -109,13 +110,16 @@ export const readTextFile = async (filename: string, isDatadir = true) => {
 };
 
 export const deleteFile = async (filename: string, isDatadir = true) => {
-  const { removeFile: fsRemoveFile } = await import('@tauri-apps/api/fs');
+  const { removeFile: fsRemoveFile, exists } = await import('@tauri-apps/api/fs');
   const { join } = await import('@tauri-apps/api/path');
   let dataDir = '';
   if (isDatadir) {
     dataDir = (await invokeTauri('get_data_dir')) as string;
   }
-  return fsRemoveFile(await join(dataDir, filename));
+  const path = await join(dataDir, filename);
+  if (await exists(path)) {
+    await fsRemoveFile(path);
+  }
 };
 
 export const deleteDir = async (dirname: string, isDatadir = true, recursive = false) => {
@@ -126,6 +130,37 @@ export const deleteDir = async (dirname: string, isDatadir = true, recursive = f
     dataDir = (await invokeTauri('get_data_dir')) as string;
   }
   return fsRemoveDir(await join(dataDir, dirname), { recursive });
+};
+
+export const deleteUnusedConversationsDir = async (excludedDirs: string[]) => {
+  const {
+    removeDir: fsRemoveDir,
+    removeFile: fsRemoveFile,
+    readDir: fsReadDir,
+  } = await import('@tauri-apps/api/fs');
+  const { join } = await import('@tauri-apps/api/path');
+  const dataDir = (await invokeTauri('get_data_dir')) as string;
+  const dirs = await fsReadDir(dataDir, { recursive: true });
+  const promises: Promise<void>[] = [];
+  dirs.forEach((dir) => {
+    const { path } = dir;
+    if (dir.children && !excludedDirs.includes(dir.path)) {
+      promises.push(
+        (async (children: FileEntry[]) => {
+          const isConversation = children.some((child) => child.path.endsWith('messages.json'));
+          if (isConversation) {
+            try {
+              await fsRemoveFile(await join(path, 'messages.json'));
+            } catch (error) {
+              logger.error(error);
+            }
+            fsRemoveDir(path, { recursive: true });
+          }
+        })(dir.children),
+      );
+    }
+  });
+  return Promise.all(promises);
 };
 
 export const fileExists = async (filename: string, path?: string) => {

@@ -17,7 +17,6 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import { Conversation, LlmUsage, Message, Preset, Provider } from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
-import logger from '@/utils/logger';
 import useCollectionStorage from '@/hooks/useCollectionStorage';
 import {
   getConversation,
@@ -27,6 +26,7 @@ import {
 import { deepCopy } from '@/utils/data';
 import { defaultPresets, mergePresets } from '@/utils/data/presets';
 import { mergeMessages } from '@/utils/data/messages';
+import { deleteUnusedConversationsDir } from '@/utils/backend/tauri';
 
 export type Context = {
   conversations: Array<Conversation>;
@@ -34,7 +34,11 @@ export type Context = {
   providers: Array<Provider>;
   presets: Array<Preset>;
   updateConversations: (newConversations: Conversation[]) => Promise<void>;
-  deleteConversation: (id: string, cleanup?: (id: string) => Promise<void>) => Promise<void>;
+  deleteConversation: (
+    id: string,
+    deleteFiles: boolean,
+    cleanup?: (id: string) => Promise<void>,
+  ) => Promise<void>;
   readConversationMessages: (key: string, defaultValue: Message[]) => Promise<Message[]>;
   getConversationMessages: (id: string | undefined) => Message[];
   filterConversationMessages: (
@@ -147,10 +151,6 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
 
   const updateConversations = useCallback(
     async (updatedConversations: Conversation[], needToUpdateMessages = true) => {
-      // Get deleted conversations and delete their messages
-      const deletedConversations = conversations.filter(
-        (c) => !updatedConversations.find((uc) => uc.id === c.id),
-      );
       if (needToUpdateMessages) {
         const promises: Promise<void>[] = [];
         const conversationsWithoutMessages: Conversation[] = updatedConversations.map((c) => {
@@ -165,13 +165,8 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       } else {
         setConversations(updatedConversations);
       }
-      // TODO delete any orphans messages
-      deletedConversations.forEach((c) => {
-        logger.info(`TODO Deleting messages for conversation ${c.id}`);
-        // deleteMessages(c.id);
-      });
     },
-    [conversations, setConversations, updateConversationMessages],
+    [setConversations, updateConversationMessages],
   );
 
   const updateMessagesAndConversation = useCallback(
@@ -202,12 +197,15 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
   );
 
   const deleteConversation = useCallback(
-    async (id: string, cleanup?: (id: string) => Promise<void>) => {
+    async (id: string, deleteFiles: boolean, cleanup?: (id: string) => Promise<void>) => {
       const updatedConversations = removeConversation(id, conversations);
       setConversations(updatedConversations);
       // Delete any orphans messages
-      deleteConversationMessages(id);
-      return cleanup?.(id);
+      await deleteConversationMessages(id);
+      await cleanup?.(id);
+      if (deleteFiles) {
+        await deleteUnusedConversationsDir(conversations.map((c) => c.id));
+      }
     },
     [conversations, deleteConversationMessages, setConversations],
   );

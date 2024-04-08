@@ -130,8 +130,8 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     return null;
   }
 
-  const deleteAndCleanupConversation = async (conversationId: string) =>
-    deleteConversation(conversationId, async (cId) => {
+  const deleteAndCleanupConversation = async (conversationId: string, deleteFiles = false) =>
+    deleteConversation(conversationId, deleteFiles, async (cId) => {
       // Delete associated settings
       saveSettings(getSelectedPage(cId, ViewName.Recent));
     });
@@ -157,7 +157,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     logger.info(`delete ${action} ${data}`);
     if (conversation) {
       if (action === 'Delete') {
-        deleteAndCleanupConversation(conversation.id);
+        deleteAndCleanupConversation(conversation.id, true);
         if (selectedThreadId && selectedThreadId === conversation.id) {
           router.replace(Page.Threads);
         }
