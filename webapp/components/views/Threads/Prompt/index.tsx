@@ -176,7 +176,6 @@ export default function Prompt({
             prompt={prompt}
             textareaRef={textareaRef}
             onValueChange={handleValueChange}
-            onKeyDown={handleKeypress}
           >
             <PromptInput
               value={prompt}
@@ -185,6 +184,7 @@ export default function Prompt({
               className="max-h-[240px] min-h-[36px]"
               onValueChange={handleValueChange}
               onFocus={handleFocus}
+              onKeyDown={handleKeypress}
             />
           </PromptCommands>
           <Tooltip>
