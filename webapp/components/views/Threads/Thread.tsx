@@ -174,10 +174,14 @@ function Thread({
     const model =
       getServiceModelId(service) ||
       (getServiceModelId(backendContext.config.services.activeService) as string);
-    const modelNameOrId = getConversationModelId(selectedConversation) || model;
+    let modelNameOrId: string | undefined = getConversationModelId(selectedConversation) || model;
     const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);
     const newAssistant = getAssistant(assistantId);
     const items = getModelsAsItems(providers, backendContext, modelNameOrId);
+    const mi = items.find((m) => m.value === modelNameOrId || m.key === modelNameOrId);
+    if (!mi) {
+      modelNameOrId = undefined;
+    }
     const manager = getCommandManager(items);
     return {
       modelItems: items,
@@ -727,18 +731,13 @@ function Thread({
   });
 
   const prompt = changedPrompt === undefined ? currentPrompt : changedPrompt;
-  let selectedModelNameOrId: string | undefined =
-    getConversationModelId(selectedConversation) || activeModel;
-  const model = modelItems.find((m) => m.value === selectedModelNameOrId);
-  if (!model) {
-    selectedModelNameOrId = undefined;
-  }
+
   return (
     <ContentView
       header={
         <ThreadHeader
           selectedAssistantId={assistant?.id}
-          selectedModelName={selectedModelNameOrId}
+          selectedModelName={activeModel}
           selectedConversationId={conversationId}
           modelItems={modelItems}
           onSelectModel={changeService}
@@ -750,7 +749,7 @@ function Thread({
       <ConversationPanel
         selectedConversation={selectedConversation}
         selectedAssistantId={assistant?.id}
-        selectedModelName={selectedModelNameOrId}
+        selectedModelName={activeModel}
         selectedMessageId={selectedMessageId}
         messages={messages}
         avatars={avatars}
