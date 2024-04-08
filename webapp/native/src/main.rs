@@ -26,14 +26,14 @@ pub mod error;
 
 use tokenizer::encode;
 use tokio::sync::Mutex;
-use std::sync::Arc;
+use std::{path::{Path, PathBuf}, sync::Arc};
 
 use api::{
     assistants::{ fetch_assistants_collection, AssistantsCollection },
     hf::search_hf_models,
     models,
 };
-use data::model::{Model, ModelEntity};
+use data::model::{ Model, ModelEntity };
 use downloader::Downloader;
 use llm::{
     openai::call_completion,
@@ -278,6 +278,25 @@ async fn search_hfhub_models<R: Runtime>(
         println!("Search HF models error: {:?}", err);
         err.to_string()
     })
+}
+
+#[tauri::command]
+async fn file_exists<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    file_name: String
+) -> Result<bool, String> {
+    let mut dir;
+    let absolute = Path::new(file_name.as_str()).is_absolute();
+    if !absolute {
+        dir = get_data_directory()?;
+    } else {
+        dir = PathBuf::new();
+    }
+    dir = dir.join(file_name);
+    let result = dir.is_file();
+
+    Ok(result)
 }
 
 #[tauri::command]
@@ -951,6 +970,7 @@ fn main() {
                 get_config_dir,
                 get_data_dir,
                 create_dir,
+                file_exists,
                 get_provider_template,
                 get_opla_server_status,
                 start_opla_server,
