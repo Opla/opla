@@ -163,16 +163,9 @@ export const deleteUnusedConversationsDir = async (excludedDirs: string[]) => {
   return Promise.all(promises);
 };
 
-export const fileExists = async (filename: string, path?: string) => {
-  const { exists } = await import('@tauri-apps/api/fs');
-  const { join, isAbsolute } = await import('@tauri-apps/api/path');
-  let dir = '';
-  if (!path && !isAbsolute(filename)) {
-    dir = (await invokeTauri('get_data_dir')) as string;
-  } else if (path) {
-    dir = path;
-  }
-  return exists(await join(dir, filename));
+export const fileExists = async (fileName: string) => {
+  const result = (await invokeTauri('file_exists', { fileName })) as boolean;
+  return result;
 };
 
 export const getPathComponents = async (resourcePath: string) => {
