@@ -34,7 +34,7 @@ function CopyToClipBoard({ title, text }: CopyToClipBoardProps) {
     Icon = Check;
   } else if (copySuccess === 'error') {
     Icon = AlertTriangle;
-    color = 'text-red-500';
+    color = 'text-error';
   }
 
   return (

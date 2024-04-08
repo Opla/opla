@@ -144,7 +144,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
                       className={cn(
                         'flex-1 text-ellipsis break-all pr-1',
                         model.state === ModelState.Error || model.state === ModelState.NotFound
-                          ? 'text-red-500'
+                          ? 'text-error'
                           : '',
                       )}
                     >
@@ -162,7 +162,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
                       className={cn(
                         'line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1',
                         model.state === ModelState.Error || model.state === ModelState.NotFound
-                          ? 'text-red-500'
+                          ? 'text-error'
                           : '',
                       )}
                       onChange={handleChangeModelName}

@@ -102,7 +102,7 @@ export default function ThreadHeader({
     );
   } else {
     title = (
-      <div className="flex items-center justify-center text-red-500">
+      <div className="flex items-center justify-center text-error">
         <AlertTriangle className="mr-4 h-4 w-4" strokeWidth={1.5} />
         <span>
           {t('No local model found.')}{' '}

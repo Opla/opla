@@ -331,7 +331,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
                 value={fullPathModel}
                 disabled
                 type="file"
-                inputCss={model.state === ModelState.NotFound ? 'text-red-500' : ''}
+                inputCss={model.state === ModelState.NotFound ? 'text-error' : ''}
               />
             )}
             {model.author && (
