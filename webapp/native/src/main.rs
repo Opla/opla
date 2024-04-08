@@ -409,7 +409,7 @@ async fn cancel_download_model<R: Runtime>(
             /* if store.get_local_active_model_id() == Some(model_name_or_id.clone()) {
                 store.services.active_service = None;
             } */
-            store.clear_active_service_if_model_equal(model_name_or_id.as_str());
+            store.clear_active_service_if_model_equal(m.id.clone());
             store.save().map_err(|err| err.to_string())?;
             drop(store);
 
@@ -472,10 +472,7 @@ async fn uninstall_model<R: Runtime>(
 
     match store.models.remove_model(model_id.as_str()) {
         Some(model) => {
-            /* if store.models.active_model == Some(model.name.clone()) {
-                store.models.active_model = None;
-            } */
-            store.clear_active_service_if_model_equal(model.name.as_str());
+            store.clear_active_service_if_model_equal(model.id.clone());
             let mut server = context.server.lock().await;
             if model.is_some_id_or_name(&server.model) {
                 let _res = server.stop(&app).await;
