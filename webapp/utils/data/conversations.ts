@@ -18,6 +18,7 @@ import {
   AIService,
   AIServiceType,
   Assistant,
+  Model,
 } from '@/types';
 import { createBaseRecord, createBaseNamedRecord, updateRecord } from '.';
 
@@ -216,3 +217,9 @@ export const getConversationProvider = (conversation: Conversation | undefined) 
   const modelService = getConversationService(conversation, AIServiceType.Model);
   return getServiceProvider(modelService);
 };
+
+export const isModelUsedInConversations = (conversations: Conversation[], model: Model) =>
+  conversations.some((c) => {
+    const modelNameId = getConversationModelId(c);
+    return modelNameId === model.id || modelNameId === model.name;
+  });

@@ -15,7 +15,7 @@
 use std::{ fs, path::PathBuf, fmt, collections::HashMap };
 use serde::{ Deserialize, Serialize };
 use crate::{
-    data::{ model::{Model, ModelStorage}, service::{ Service, ServiceStorage, ServiceType } },
+    data::{ model::ModelStorage, service::{ Service, ServiceStorage, ServiceType } },
     downloader::Download,
     utils::get_config_directory,
 };

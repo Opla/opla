@@ -404,11 +404,7 @@ async fn cancel_download_model<R: Runtime>(
     println!("Cancel download model: {:?}", model);
     match model {
         Some(m) => {
-            store.models.remove_model(model_name_or_id.as_str());
-
-            /* if store.get_local_active_model_id() == Some(model_name_or_id.clone()) {
-                store.services.active_service = None;
-            } */
+            store.models.remove_model(model_name_or_id.as_str(), false);
             store.clear_active_service_if_model_equal(m.id.clone());
             store.save().map_err(|err| err.to_string())?;
             drop(store);
@@ -464,17 +460,18 @@ async fn uninstall_model<R: Runtime>(
     app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
-    model_id: String
+    model_id: String,
+    in_use: bool,
 ) -> Result<(), String> {
     let mut store = context.store.lock().await;
 
-    println!("Uninstall model: {:?}", model_id);
+    println!("Uninstall model: {:?} {:?}", model_id, in_use);
 
-    match store.models.remove_model(model_id.as_str()) {
+    match store.models.remove_model(model_id.as_str(), in_use) {
         Some(model) => {
-            store.clear_active_service_if_model_equal(model.id.clone());
+            store.clear_active_service_if_model_equal(model.reference.id.clone());
             let mut server = context.server.lock().await;
-            if model.is_some_id_or_name(&server.model) {
+            if model.reference.is_some_id_or_name(&server.model) {
                 let _res = server.stop(&app).await;
                 server.remove_model();
             }

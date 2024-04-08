@@ -29,6 +29,7 @@ import Explorer, { ExplorerGroup, ExplorerList } from '@/components/common/Explo
 import { getModelsCollection, updateModel } from '@/utils/backend/commands';
 import EmptyView from '@/components/common/EmptyView';
 import { cn } from '@/lib/utils';
+import { getLocalModels } from '@/utils/data/models';
 import { Button } from '../../ui/button';
 import EditableItem from '../../common/EditableItem';
 import ModelInfos from '../../common/ModelInfos';
@@ -55,7 +56,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
     getCollection();
   }, []);
 
-  const models = backendContext.config.models.items;
+  const models = getLocalModels(backendContext);
 
   const handleSelectModel = (id: string) => {
     logger.info(`onSelectModel ${id}`);

@@ -336,12 +336,23 @@ impl ModelStorage {
         self.items.push(model);
     }
 
-    pub fn remove_model(&mut self, id: &str) -> Option<Model> {
+    pub fn remove_model(&mut self, id: &str, in_use: bool) -> Option<ModelEntity> {
         println!("remove_model: {:?}", id);
+        if in_use {
+            let mut model = match self.get_model_entity(id) {
+                Some(model) => model,
+                None => {
+                    return None;
+                }
+            };
+            model.state = Some("removed".to_string());
+            self.update_model_entity(&model);
+            return Some(model);
+        }
         self.items
             .iter()
             .position(|m| m.reference.is_same_id_or_name(id))
-            .map(|index| self.items.remove(index).reference)
+            .map(|index| self.items.remove(index))
     }
 
     pub fn update_model(&mut self, model: Model) {

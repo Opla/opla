@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { Assistant, Preset } from '@/types';
+import { Assistant, Model, Preset } from '@/types';
 import { createBaseNamedRecord, createBaseRecord, updateRecord } from '@/utils/data';
 
 interface AssistantProps {
@@ -39,6 +39,7 @@ export interface AssistantSlice extends AssistantProps {
   updateTarget: (assistant: Assistant, newTarget: Preset) => void;
   deleteTarget: (assistant: Assistant, targetId: string) => void;
   duplicateTarget: (target: Preset) => Preset;
+  isModelUsedInAssistants: (model: Model) => boolean;
 }
 
 export type AssistantStore = ReturnType<typeof createAssistantSlice>;
@@ -108,6 +109,14 @@ const createAssistantSlice =
     duplicateTarget: (target: Preset) => {
       const newTarget: Preset = createBaseRecord<Preset>();
       return { ...target, ...newTarget };
+    },
+    isModelUsedInAssistants: (model: Model) => {
+      const { assistants } = get();
+      return assistants.some((a) =>
+        a.targets?.some((t) =>
+          t.models?.some((modelNameId) => modelNameId === model.id || modelNameId === model.name),
+        ),
+      );
     },
   });
 
