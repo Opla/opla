@@ -1,3 +1,10 @@
+# [1.0.0-alpha.89](https://github.com/Opla/opla/compare/v1.0.0-alpha.88...v1.0.0-alpha.89) (2024-04-08)
+
+
+### Bug Fixes
+
+* regression enter to send [#730](https://github.com/Opla/opla/issues/730) ([#731](https://github.com/Opla/opla/issues/731)) ([abe9773](https://github.com/Opla/opla/commit/abe9773028d5e145f31d8dffce2c9b680e20a13f))
+
 # [1.0.0-alpha.88](https://github.com/Opla/opla/compare/v1.0.0-alpha.87...v1.0.0-alpha.88) (2024-04-08)
 
 
