@@ -203,7 +203,7 @@ export default function ModelMenu({
                 </DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="text-red-600"
+                className="text-destructive"
                 onSelect={() => onSelectMenu(MenuAction.DeleteConversation, selectedConversationId)}
               >
                 <Trash className="mr-2 h-4 w-4" strokeWidth={1.5} />

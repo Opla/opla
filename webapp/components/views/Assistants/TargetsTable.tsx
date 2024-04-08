@@ -98,7 +98,7 @@ function TargetsTable({ targets, onEdit, onDuplicate, onDelete }: TargetsTablePr
                       {t('Duplicate')}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="text-red-600"
+                      className="text-destructive"
                       onSelect={() => {
                         onDelete(target);
                       }}

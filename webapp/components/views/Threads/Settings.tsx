@@ -171,7 +171,7 @@ export default function Settings({
                       deleteConversationAsset(index);
                     }}
                   >
-                    <X className="h-4 w-4 text-red-400" strokeWidth={1.5} />
+                    <X className="h-4 w-4 text-destructive" strokeWidth={1.5} />
                   </Button>
                 </div>
               ))}
@@ -184,9 +184,9 @@ export default function Settings({
         </TabsContent>
         <TabsContent value="debug" className="px-4">
           {errors.map((error) => (
-            <div key={error.id} className="p-2 text-xs text-red-500">
+            <div key={error.id} className="p-2 text-xs text-error">
               <p>
-                <AlertTriangle className="mr-2 inline-flex h-4 w-4 text-red-500" />
+                <AlertTriangle className="mr-2 inline-flex h-4 w-4 text-error" />
                 <span>{error.message}</span>
               </p>
             </div>

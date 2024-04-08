@@ -145,8 +145,8 @@ export default function Prompt({
           <div className="m-1 flex w-full items-center justify-between gap-2">
             {errorMessage && (
               <div className="flex w-full items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-red-500" />
-                <span className="text-xs text-red-500">{errorMessage}</span>
+                <AlertTriangle className="h-4 w-4 text-error" />
+                <span className="text-xs text-error">{errorMessage}</span>
               </div>
             )}
             {usage && usage.tokenCount > 0 && usage.activeService && usage.activeService.model && (

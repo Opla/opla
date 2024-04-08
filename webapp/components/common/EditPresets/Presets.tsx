@@ -126,7 +126,7 @@ export default function Presets({
                     {p?.name}
                     <AlertTriangle
                       className={cn(
-                        'ml-auto h-4 w-4 text-red-600',
+                        'ml-auto h-4 w-4 text-destructive',
                         compatibles[p.id] ? 'opacity-0' : 'opacity-100',
                       )}
                     />
@@ -147,7 +147,7 @@ export default function Presets({
                   </CommandItem>
                   {!preset?.readonly && (
                     <CommandItem
-                      className="text-red-600 hover:text-red-700"
+                      className="text-destructive"
                       onSelect={() => {
                         setOpen(false);
                         deletePreset(preset);

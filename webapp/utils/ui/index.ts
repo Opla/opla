@@ -32,7 +32,7 @@ export const getTokenColor = (token: PromptToken) => {
   let className = '';
   switch (token.state) {
     case PromptTokenState.Error:
-      className = 'text-red-400 line-through';
+      className = 'text-error line-through';
       break;
     case PromptTokenState.Editing:
       className = 'text-gray-500 animate-pulse';

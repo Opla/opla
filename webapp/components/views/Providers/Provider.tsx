@@ -124,7 +124,7 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
                   <>
                     {backendContext?.server.status === ServerStatus.ERROR && (
                       <div className="w-full text-sm">
-                        <div className="break-all pb-2 text-red-400 dark:text-red-600">
+                        <div className="break-all pb-2 text-error dark:text-destructive">
                           {t('Server Error')} : {backendContext?.server.message}
                         </div>
                       </div>
@@ -145,7 +145,7 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
                       {backendContext?.server.stderr
                         ?.map((log, index) => ({ id: index, log }))
                         .map((log) => (
-                          <div key={log.id} className="break-all text-red-400 dark:text-red-600">
+                          <div key={log.id} className="break-all text-error dark:text-destructive">
                             {log.log}
                           </div>
                         ))}
@@ -157,7 +157,7 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
                     {provider.errors
                       ?.map((log, index) => ({ id: index, log }))
                       .map((log) => (
-                        <div key={log.id} className="break-all text-red-400 dark:text-red-600">
+                        <div key={log.id} className="break-all text-error dark:text-destructive">
                           {log.log}
                         </div>
                       ))}
