@@ -26,10 +26,13 @@ import logger from '@/utils/logger';
 import { shortcutAsText } from '@/utils/shortcuts';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import Explorer, { ExplorerGroup, ExplorerList } from '@/components/common/Explorer';
-import { getModelsCollection, updateModel } from '@/utils/backend/commands';
+import { getModelsCollection, uninstallModel, updateModel } from '@/utils/backend/commands';
 import EmptyView from '@/components/common/EmptyView';
 import { cn } from '@/lib/utils';
 import { getLocalModels } from '@/utils/data/models';
+import { AppContext } from '@/context';
+import { useAssistantStore } from '@/stores';
+import { isModelUsedInConversations } from '@/utils/data/conversations';
 import { Button } from '../../ui/button';
 import EditableItem from '../../common/EditableItem';
 import ModelInfos from '../../common/ModelInfos';
@@ -39,6 +42,8 @@ export type ModelsExplorerProps = {
 };
 
 function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
+  const { conversations } = useContext(AppContext);
+  const { isModelUsedInAssistants } = useAssistantStore();
   const { backendContext, updateBackendStore } = useBackend();
   const router = useRouter();
   const { t } = useTranslation();
@@ -82,6 +87,20 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
     handleModelRename(id, name);
   };
 
+  const handleUninstall = async (modelId: string) => {
+    logger.info(`Uninstall ${modelId}`);
+    const model = models.find((m) => m.id === modelId);
+    if (model) {
+      const isUsed: boolean =
+        isModelUsedInConversations(conversations, model) || isModelUsedInAssistants(model);
+      const nextModelId =
+        models.findLast((m) => m.state !== ModelState.Removed && m.id !== modelId)?.id || '';
+      await uninstallModel(modelId, isUsed);
+      await updateBackendStore();
+      router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
+    }
+  };
+
   useShortcuts(ShortcutIds.INSTALL_MODEL, (event) => {
     event.preventDefault();
     logger.info('shortcut install Model');
@@ -92,13 +111,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
     {
       label: t('Uninstall'),
       onSelect: (data: string) => {
-        logger.info(`rename ${data}`);
-      },
-    },
-    {
-      label: t('Install'),
-      onSelect: (data: string) => {
-        logger.info(`delete ${data}`);
+        handleUninstall(data);
       },
     },
   ];
