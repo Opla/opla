@@ -1,3 +1,10 @@
+# [1.0.0-alpha.94](https://github.com/Opla/opla/compare/v1.0.0-alpha.93...v1.0.0-alpha.94) (2024-04-08)
+
+
+### Bug Fixes
+
+* set local models explorer context menu [#736](https://github.com/Opla/opla/issues/736) ([#742](https://github.com/Opla/opla/issues/742)) ([6ae4ed4](https://github.com/Opla/opla/commit/6ae4ed461882c6a8b7b339b75ba79c54ac6dc109))
+
 # [1.0.0-alpha.93](https://github.com/Opla/opla/compare/v1.0.0-alpha.92...v1.0.0-alpha.93) (2024-04-08)
 
 
