@@ -1,3 +1,10 @@
+# [1.0.0-alpha.92](https://github.com/Opla/opla/compare/v1.0.0-alpha.91...v1.0.0-alpha.92) (2024-04-08)
+
+
+### Bug Fixes
+
+* don't delete model in use [#591](https://github.com/Opla/opla/issues/591) ([#734](https://github.com/Opla/opla/issues/734)) ([e902880](https://github.com/Opla/opla/commit/e90288029f2e6d65fee816464eaed16e543dab57))
+
 # [1.0.0-alpha.91](https://github.com/Opla/opla/compare/v1.0.0-alpha.90...v1.0.0-alpha.91) (2024-04-08)
 
 
