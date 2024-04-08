@@ -1,3 +1,10 @@
+# [1.0.0-alpha.91](https://github.com/Opla/opla/compare/v1.0.0-alpha.90...v1.0.0-alpha.91) (2024-04-08)
+
+
+### Bug Fixes
+
+* several Install/remove model  error [#726](https://github.com/Opla/opla/issues/726) ([#733](https://github.com/Opla/opla/issues/733)) ([0e5e89d](https://github.com/Opla/opla/commit/0e5e89dde4b19e739995bd8049028fe4eb097284))
+
 # [1.0.0-alpha.90](https://github.com/Opla/opla/compare/v1.0.0-alpha.89...v1.0.0-alpha.90) (2024-04-08)
 
 
