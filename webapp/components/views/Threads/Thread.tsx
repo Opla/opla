@@ -198,31 +198,27 @@ function Thread({
     };
   }, [backendContext, getAssistant, providers, searchParams, selectedConversation, service]);
 
-  const avatars = useMemo(
-    () =>
-      messages?.map((msg) => {
-        const avatar = { name: msg.author.name, ref: msg.author.name } as AvatarRef;
-        if (msg.author.role === 'assistant') {
-          const modelItem = modelItems.find((m) => m.value === msg.author.name);
-          if (
-            !avatar.name ||
-            (assistant &&
-              (!assistant?.targets ||
-                assistant?.targets.length === 0 ||
-                avatar.name === assistant?.targets?.[0]?.models?.[0]))
-          ) {
-            avatar.name = assistant?.name;
-            avatar.url = assistant?.avatar?.url;
-            avatar.color = assistant?.avatar?.color;
-            avatar.fallback = assistant?.avatar?.name;
-          } else if (modelItem) {
-            avatar.name = modelItem.label;
-          }
-        }
-        return avatar;
-      }) ?? [],
-    [assistant, messages, modelItems],
-  );
+  const avatars = useMemo(() => {
+    const newAvatars: AvatarRef[] = [];
+    if (messages) {
+      newAvatars.push({ ref: 'you', name: 'you' } as AvatarRef);
+      if (assistant) {
+        const avatar = { ref: assistant.id as string, name: assistant.name } as AvatarRef;
+        avatar.url = assistant.avatar?.url;
+        avatar.color = assistant.avatar?.color;
+        avatar.fallback = assistant.avatar?.name;
+        avatar.ref = assistant.id as string;
+        newAvatars.push(avatar);
+      }
+      if (modelItems) {
+        modelItems.forEach((item) => {
+          const avatar = { ref: item.key, name: item.label } as AvatarRef;
+          newAvatars.push(avatar);
+        });
+      }
+    }
+    return newAvatars;
+  }, [assistant, messages, modelItems]);
 
   useEffect(() => {
     if (_conversationId && tempConversationId) {
@@ -483,7 +479,10 @@ function Thread({
       return;
     }
     let message = createMessage({ role: 'assistant', name: selectedModel.name }, '...');
-    message.metadata = { ...message.metadata, modelId: selectedModel.id };
+    message.author.metadata = { ...message.author.metadata, modelId: selectedModel.id };
+    if (assistant) {
+      message.author.metadata.assistantId = assistant.id;
+    }
     message.status = MessageStatus.Pending;
     userMessage.sibling = message.id;
     message.sibling = userMessage.id;
@@ -575,7 +574,10 @@ function Thread({
     );
     if (message.author.name !== selectedModel.name) {
       message.author.name = selectedModel.name;
-      message.metadata = { ...message.metadata, modelId: selectedModel.id };
+      message.author.metadata = { ...message.author.metadata, modelId: selectedModel.id };
+      if (assistant) {
+        message.author.metadata.assistantId = assistant.id;
+      }
     }
     const { updatedConversation, updatedConversations, updatedMessages } =
       await updateMessagesAndConversation(

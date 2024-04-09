@@ -29,7 +29,7 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { DownloadIcon } from '@radix-ui/react-icons';
 import useTranslation from '@/hooks/useTranslation';
-import { Model, ModelState } from '@/types';
+import { AIServiceType, Model, ModelState } from '@/types';
 import { deepCopy, deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
 import useParameters from '@/hooks/useParameters';
 import ContentView from '@/components/common/ContentView';
@@ -99,8 +99,12 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       ? []
       : getDownloadables(mdl).filter((d) => d.private !== true && isValidFormat(d));
 
+    const { activeService } = backendContext.config.services;
     const isUsed: boolean =
-      mdl && (isModelUsedInConversations(conversations, mdl) || isModelUsedInAssistants(mdl));
+      mdl &&
+      ((activeService?.type === AIServiceType.Model && activeService.modelId === mdl.id) ||
+        isModelUsedInConversations(conversations, mdl) ||
+        isModelUsedInAssistants(mdl));
 
     return [backendContext.downloads || [], mdls, mdl, dls, l, isUsed];
   }, [selectedModelId, backendContext, collection, conversations, isModelUsedInAssistants]);

@@ -102,8 +102,13 @@ function MessageComponent({
   const [current, setCurrent] = useState(0);
 
   const author = getMessageContentAuthorAsString(message, current);
-  const avatar = avatars.find((a) => a.ref === author.name) || ({ name: author.name } as Avatar);
-
+  const avatar =
+    avatars.find(
+      (a) =>
+        author.metadata?.assistantId === a.ref ||
+        author.metadata?.modelId === a.ref ||
+        a.name === author.name,
+    ) || ({ name: author.name } as Avatar);
   const isUser = author.role === 'user';
 
   const content = getMessageContentHistoryAsString(
