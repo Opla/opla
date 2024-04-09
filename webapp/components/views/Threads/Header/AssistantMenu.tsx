@@ -56,7 +56,7 @@ import ModelInfos from '../../../common/ModelInfos';
 
 type AssistantMenuProps = {
   assistant: Assistant;
-  target: Preset;
+  target: Preset | undefined;
   conversation: Conversation | undefined;
   onSelectMenu: (menu: MenuAction, data: string) => void;
 };
@@ -78,7 +78,7 @@ export default function AssistantMenu({
   const { showModal } = useContext(ModalsContext);
   const selectedModelName = target?.models?.[0];
   const targetItems: Ui.MenuItem[] = useMemo(
-    () => (assistant ? getAssistantTargetsAsItems(assistant, target.id) : []),
+    () => (assistant ? getAssistantTargetsAsItems(assistant, target?.id) : []),
     [assistant, target],
   );
   const selectedModel = backendContext.config.models.items.find(
@@ -116,67 +116,71 @@ export default function AssistantMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-full">
-        <DropdownMenuLabel>{t('Target')}</DropdownMenuLabel>
-        <DropdownMenuGroup>
-          {(!selectedConversationId || targetItems.length < 2) && (
-            <DropdownMenuItem>
-              <Check className="mr-2 h-4 w-4" strokeWidth={1.5} />
-              <span className="capitalize">{target?.name || t('Select a target')}</span>
-              {selectedModel && <ModelInfos model={selectedModel} stateAsIcon />}
-            </DropdownMenuItem>
-          )}
-          {selectedConversationId && targetItems.length > 1 && (
-            <>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
+        {targetItems.length > 0 && (
+          <>
+            <DropdownMenuLabel>{t('Target')}</DropdownMenuLabel>
+            <DropdownMenuGroup>
+              {(!selectedConversationId || targetItems.length < 2) && (
+                <DropdownMenuItem>
                   <Check className="mr-2 h-4 w-4" strokeWidth={1.5} />
                   <span className="capitalize">{target?.name || t('Select a target')}</span>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent className="p-0">
-                  <Command>
-                    <CommandInput placeholder={t('Filter target...')} autoFocus />
-                    <CommandList>
-                      <CommandEmpty>{t('No target found.')}</CommandEmpty>
-                      <CommandGroup>
-                        {targetItems.map((item) => (
-                          <CommandItem
-                            key={item.label}
-                            value={item.value}
-                            onSelect={() => {
-                              handleSelectAssistantTarget(item);
-                              setOpen(false);
-                            }}
-                            className="flex w-full items-center justify-between"
-                          >
-                            <span className="capitalize">{item.label}</span>
-                            <Badge
-                              variant="secondary"
-                              className={`ml-4 bg-gray-300 capitalize text-gray-600 ${getStateColor(item.state, 'text', true)}`}
-                            >
-                              {item.group || 'local'}
-                            </Badge>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              <DropdownMenuSeparator />
-            </>
-          )}
-          <DropdownMenuItem onSelect={handleSetupChatGPT}>
-            <Plug
-              className={`mr-2 h-4 w-4 ${getStateColor(getProviderState(chatGPT), 'text')}`}
-              strokeWidth={1.5}
-            />
-            {t('Configure ChatGPT')}
-            <DropdownMenuShortcut>
-              <ShortcutBadge command={ShortcutIds.CONFIG_GPT} />
-            </DropdownMenuShortcut>
-          </DropdownMenuItem>
-          {selectedConversationId && <DropdownMenuSeparator />}
-        </DropdownMenuGroup>
+                  {selectedModel && <ModelInfos model={selectedModel} stateAsIcon />}
+                </DropdownMenuItem>
+              )}
+              {selectedConversationId && targetItems.length > 1 && (
+                <>
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <Check className="mr-2 h-4 w-4" strokeWidth={1.5} />
+                      <span className="capitalize">{target?.name || t('Select a target')}</span>
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="p-0">
+                      <Command>
+                        <CommandInput placeholder={t('Filter target...')} autoFocus />
+                        <CommandList>
+                          <CommandEmpty>{t('No target found.')}</CommandEmpty>
+                          <CommandGroup>
+                            {targetItems.map((item) => (
+                              <CommandItem
+                                key={item.label}
+                                value={item.value}
+                                onSelect={() => {
+                                  handleSelectAssistantTarget(item);
+                                  setOpen(false);
+                                }}
+                                className="flex w-full items-center justify-between"
+                              >
+                                <span className="capitalize">{item.label}</span>
+                                <Badge
+                                  variant="secondary"
+                                  className={`ml-4 bg-gray-300 capitalize text-gray-600 ${getStateColor(item.state, 'text', true)}`}
+                                >
+                                  {item.group || 'local'}
+                                </Badge>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              <DropdownMenuItem onSelect={handleSetupChatGPT}>
+                <Plug
+                  className={`mr-2 h-4 w-4 ${getStateColor(getProviderState(chatGPT), 'text')}`}
+                  strokeWidth={1.5}
+                />
+                {t('Configure ChatGPT')}
+                <DropdownMenuShortcut>
+                  <ShortcutBadge command={ShortcutIds.CONFIG_GPT} />
+                </DropdownMenuShortcut>
+              </DropdownMenuItem>
+              {selectedConversationId && <DropdownMenuSeparator />}
+            </DropdownMenuGroup>
+          </>
+        )}
         {selectedConversationId && (
           <>
             <DropdownMenuLabel>{t('Thread')}</DropdownMenuLabel>

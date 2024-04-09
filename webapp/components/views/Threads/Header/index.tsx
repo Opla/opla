@@ -137,25 +137,24 @@ export default function ThreadHeader({
       />
     );
   }
-  const menu =
-    selectedAssistantId && target ? (
-      <AssistantMenu
-        assistant={assistant}
-        target={target}
-        conversation={conversation}
-        onSelectMenu={() => {
-          throw new Error('Function not implemented.');
-        }}
-      />
-    ) : (
-      <ModelMenu
-        selectedModelId={selectedModelId}
-        selectedConversationId={selectedConversationId}
-        modelItems={modelItems}
-        onSelectModel={onSelectModel}
-        onSelectMenu={onSelectMenu}
-      />
-    );
+  const menu = selectedAssistantId ? (
+    <AssistantMenu
+      assistant={assistant}
+      target={target}
+      conversation={conversation}
+      onSelectMenu={() => {
+        throw new Error('Function not implemented.');
+      }}
+    />
+  ) : (
+    <ModelMenu
+      selectedModelId={selectedModelId}
+      selectedConversationId={selectedConversationId}
+      modelItems={modelItems}
+      onSelectModel={onSelectModel}
+      onSelectMenu={onSelectMenu}
+    />
+  );
 
   return (
     <div className="flex w-full flex-col items-start justify-between rounded-md border px-4 py-0 sm:flex-row sm:items-center">
