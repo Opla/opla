@@ -76,6 +76,7 @@ export enum Page {
   Assistants = '/assistants',
   Models = '/models',
   Providers = '/providers',
+  Store = '/threads/store',
 }
 
 export enum ModalIds {

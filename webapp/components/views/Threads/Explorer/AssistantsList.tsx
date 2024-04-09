@@ -78,7 +78,7 @@ export default function AssistantsList({
 
   const StoreButton = (
     <Button variant="outline" size="sm" className="text-primary" asChild>
-      <Link href="/threads/store">
+      <Link href={Ui.Page.Store}>
         <Store className="mr-2 h-4 w-4" strokeWidth={1.5} />
         {t('Explore the store')}
       </Link>
@@ -90,12 +90,14 @@ export default function AssistantsList({
     [assistants],
   );
 
+  const store = router.pathname === Ui.Page.Store;
+
   return (
     <ExplorerGroup
       title="Assistants"
       closed={closed}
       onToggle={onToggle}
-      toolbar={(filteredAssistants.length > 0 || closed) && StoreButton}
+      toolbar={!store && (filteredAssistants.length > 0 || closed) && StoreButton}
       className="h-full"
     >
       {filteredAssistants.length > 0 && (
@@ -127,7 +129,7 @@ export default function AssistantsList({
             icon={<Bot className="h-12 w-12 text-muted-foreground" strokeWidth={1.5} />}
             className="h-full p-4"
           >
-            {StoreButton}
+            {!store && StoreButton}
           </EmptyView>
         </div>
       )}
