@@ -285,7 +285,7 @@ export enum ModelState {
 }
 
 export type Model = BaseNamedRecord & {
-  base_model?: string;
+  baseModel?: string;
   title?: string;
   description?: string;
   summary?: string;

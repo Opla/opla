@@ -131,10 +131,10 @@ export default function ModelMenu({
                       <CommandGroup>
                         {modelItems.map((item) => (
                           <CommandItem
-                            key={item.key || item.label}
+                            key={item.key}
                             value={item.value}
                             onSelect={() => {
-                              onSelectModel(item.value as string, item.group as ProviderType);
+                              onSelectModel(item.key as string, item.group as ProviderType);
                               setOpen(false);
                             }}
                             className="flex w-full items-center justify-between"

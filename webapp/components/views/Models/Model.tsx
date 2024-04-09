@@ -45,7 +45,7 @@ import {
   updateModelEntity,
 } from '@/utils/backend/commands';
 import useBackend from '@/hooks/useBackendContext';
-import { getDownloadables, isValidFormat } from '@/utils/data/models';
+import { findSameModel, getDownloadables, isValidFormat } from '@/utils/data/models';
 import { ModalIds, Page } from '@/types/ui';
 import { ModalsContext } from '@/context/modals';
 import EmptyView from '@/components/common/EmptyView';
@@ -192,19 +192,39 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       delete selectedModel.include;
     }
     const path = getEntityName(selectedModel.creator || selectedModel.author);
-    const id = await installModel(
-      selectedModel,
-      getResourceUrl(selectedModel.download),
-      path,
-      selectedModel.name,
-    );
+    const sameModel = findSameModel(selectedModel, backendContext);
+    console.log('sameModel', sameModel);
+
+    if (sameModel && sameModel.state !== ModelState.Removed) {
+      toast.error(`${t('Model already exists')} ${selectedModel.name}`);
+      return;
+    }
+    let id;
+    let restored = false;
+    if (sameModel?.state === ModelState.Removed) {
+      sameModel.state = ModelState.Ok;
+      await updateModelEntity(sameModel);
+      logger.info(`restored ${sameModel.id}`);
+      ({ id } = sameModel);
+      restored = true;
+    } else {
+      id = await installModel(
+        selectedModel,
+        getResourceUrl(selectedModel.download),
+        path,
+        selectedModel.name,
+      );
+    }
     await updateBackendStore();
     logger.info(`installed ${id}`);
     router.push(`${Page.Models}/${id}`);
+    if (restored) {
+      toast.success(`${t('Model restored')} ${selectedModel.name}`);
+    }
   };
 
   const handleUninstall = async () => {
-    logger.info(`Uninstall ${model.name} model.id=${model.id}`);
+    logger.info(`Uninstall ${model.name} model.id=${model.id} inUse=${inUse}`);
 
     const nextModelId =
       models.findLast((m) => m.state !== ModelState.Removed && m.id !== model.id)?.id || '';

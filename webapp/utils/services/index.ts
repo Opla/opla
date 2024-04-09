@@ -39,13 +39,13 @@ export const getActiveService = (
   assistant: Assistant | undefined,
   providers: Provider[],
   backendContext: OplaContext,
-  _modelName: string | undefined,
+  _modelId: string | undefined,
 ): AIImplService => {
   const type = assistant ? AIServiceType.Assistant : AIServiceType.Model;
   let activeService: AIService | undefined = conversation
     ? getConversationService(conversation, type, assistant?.id)
     : backendContext.config.services.activeService;
-  let modelName = _modelName; // || backendContext.config.models.activeModel;
+  let modelId = _modelId;
 
   let model: Model | undefined;
   let provider: Provider | undefined;
@@ -60,31 +60,34 @@ export const getActiveService = (
     } else {
       activeService = activeServiceFrom({
         type: AIServiceType.Model,
-        modelId: modelName as string,
+        modelId: modelId as string,
         providerIdOrName,
       });
     }
   }
+  console.log('activeService', modelId, _modelId, activeService);
   if (activeService.type === AIServiceType.Model) {
     ({ providerIdOrName } = activeService);
-    modelName = _modelName || activeService.modelId;
+    modelId = _modelId || activeService.modelId;
     provider = findProvider(providerIdOrName, providers);
-    model = findModel(modelName, provider?.models || []);
-    if (!model && modelName) {
-      model = findModelInAll(modelName, providers, backendContext);
+    model = findModel(modelId, provider?.models || []);
+    if (!model && modelId) {
+      model = findModelInAll(modelId, providers, backendContext);
+      console.log('activeService model pre', modelId, model);
     }
     if (!provider) {
       providerIdOrName = model?.provider || OplaProvider.name;
       provider = findProvider(providerIdOrName, providers);
       activeService.providerIdOrName = providerIdOrName;
     }
+    console.log('activeService model', model, activeService);
   } else if (activeService.type === AIServiceType.Assistant) {
     const { assistantId, targetId } = activeService;
     if (assistantId && targetId) {
       const target = assistant?.targets?.find((t) => t.id === targetId);
 
       if (target?.models && target.models.length > 0) {
-        modelName = target.models?.[0];
+        modelId = target.models?.[0];
         providerIdOrName = target.provider;
       }
     } else if (assistant && conversation?.services?.length === 2) {
@@ -96,7 +99,7 @@ export const getActiveService = (
       }
     }
 
-    model = findModelInAll(modelName, providers, backendContext);
+    model = findModelInAll(modelId, providers, backendContext);
     provider = findProvider(model?.provider || providerIdOrName, providers);
     if (provider?.models?.find((m) => m.id === model?.id) === undefined) {
       provider = undefined;

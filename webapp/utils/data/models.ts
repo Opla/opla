@@ -22,8 +22,10 @@ import OplaProvider from '../providers/opla';
 import logger from '../logger';
 import { installModel } from '../backend/commands';
 
-export const getLocalModels = (backendContext: OplaContext) =>
-  backendContext.config.models.items.filter((model) => model.state !== ModelState.Removed);
+export const getLocalModels = (backendContext: OplaContext, full = false) =>
+  full
+    ? backendContext.config.models.items
+    : backendContext.config.models.items.filter((model) => model.state !== ModelState.Removed);
 
 export const getProviderModels = (providers: Provider[]) => {
   const providerModels = providers.reduce((acc, provider) => {
@@ -33,8 +35,12 @@ export const getProviderModels = (providers: Provider[]) => {
   return providerModels;
 };
 
-export const getAllModels = (providers: Provider[], backendContext: OplaContext) => {
-  const localModels = getLocalModels(backendContext);
+export const getAllModels = (
+  providers: Provider[],
+  backendContext: OplaContext,
+  full?: boolean,
+) => {
+  const localModels = getLocalModels(backendContext, full);
   const providerModels = getProviderModels(providers);
   return [...localModels, ...providerModels];
 };
@@ -67,7 +73,31 @@ export const findModelInAll = (
   backendContext: OplaContext,
 ) => {
   const allModels = getAllModels(providers, backendContext);
+  console.log('findModelInAll', modelIdOrName, allModels);
   return findModel(modelIdOrName, allModels);
+};
+
+export const isEquivalentModel = (model: Model, other: Model) => {
+  const download = getResourceUrl(model.download);
+  const otherDownload = getResourceUrl(other.download);
+
+  return (
+    model.baseModel === other.baseModel &&
+    model.name === other.name &&
+    model.version === other.version &&
+    download === otherDownload
+  );
+};
+export const findSameModel = (
+  model: Model,
+  backendContext: OplaContext,
+  providers?: Provider[],
+) => {
+  const models = providers
+    ? getAllModels(providers, backendContext, true)
+    : getLocalModels(backendContext, true);
+  console.log('findSameModel', model, models);
+  return models.find((m) => isEquivalentModel(model, m));
 };
 
 export const installModelFromApi = async (modelSource: Model) => {

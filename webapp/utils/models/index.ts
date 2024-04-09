@@ -186,7 +186,7 @@ const importModel = (model: Model): ModelType => {
     name: model.name,
     createdAt: model.created_at || now,
     updatedAt: model.updated_at || now,
-    base_model: model.base_model,
+    baseModel: model.base_model || model.id,
     title: model.title,
     description: model.description,
     summary: model.summary,
