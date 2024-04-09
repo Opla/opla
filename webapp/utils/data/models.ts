@@ -76,7 +76,11 @@ export const findModelInAll = (
   return findModel(modelIdOrName, allModels);
 };
 
-export const getFirstModel = (providerId: string, providers: Provider[], backendContext: OplaContext) => {
+export const getFirstModel = (
+  providerId: string,
+  providers: Provider[],
+  backendContext: OplaContext,
+) => {
   const provider = providers.find((p) => p.id === providerId);
   if (provider?.models && provider.models.length > 0) return provider.models[0];
   if (provider?.type === ProviderType.opla) {

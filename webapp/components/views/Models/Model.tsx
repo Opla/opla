@@ -290,7 +290,8 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
           <span className="pl-2">/</span>
           <div className="flex grow items-center gap-2 truncate px-2 ">
             <span>{model.name}</span>
-            {local && (inUse ? <OrangePill label={t('In use')} /> : <OrangePill label={t('Not in use')} />)}
+            {local &&
+              (inUse ? <OrangePill label={t('In use')} /> : <OrangePill label={t('Not in use')} />)}
             <ModelInfos model={model} displayName={false} />
           </div>
         </div>

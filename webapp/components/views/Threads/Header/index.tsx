@@ -64,9 +64,7 @@ export default function ThreadHeader({
   const selectedModel = service.model;
   const modelId = selectedModel?.id || selectedModelId;
 
-  const selectedItem = modelItems.find(
-    (item) => item.key === modelId,
-  );
+  const selectedItem = modelItems.find((item) => item.key === modelId);
 
   const selectedTargetId =
     service?.type === AIServiceType.Assistant ? service.targetId : assistant?.targets?.[0]?.id;

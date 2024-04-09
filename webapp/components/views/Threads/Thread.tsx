@@ -505,7 +505,13 @@ function Thread({
 
     updatedConversations = clearPrompt(updatedConversation, updatedConversations);
 
-    logger.info('onSendMessage', selectedModel, selectedModelId, updatedMessages, updatedConversation);
+    logger.info(
+      'onSendMessage',
+      selectedModel,
+      selectedModelId,
+      updatedMessages,
+      updatedConversation,
+    );
     message = await sendMessage(
       message,
       updatedMessages,
