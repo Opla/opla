@@ -1,3 +1,13 @@
+# [1.0.0-alpha.97](https://github.com/Opla/opla/compare/v1.0.0-alpha.96...v1.0.0-alpha.97) (2024-04-09)
+
+
+### Bug Fixes
+
+* eslint@8 at the workspace level ([c3e97c3](https://github.com/Opla/opla/commit/c3e97c3ca76b0afb5a039e86fbf07269a3fc1d09))
+* force eslint@8 ([cd8ce26](https://github.com/Opla/opla/commit/cd8ce268fccae5db93c8be38488a236101490da3))
+* **MessageView:** selected Assistant is not displayed [#759](https://github.com/Opla/opla/issues/759) ([#760](https://github.com/Opla/opla/issues/760)) ([04844fa](https://github.com/Opla/opla/commit/04844faa0ef0cc844e827d97b88d2115598c637b))
+* use local eslint v8 ([54bac80](https://github.com/Opla/opla/commit/54bac807a08420b6287793047e651f9047f430c8))
+
 # [1.0.0-alpha.96](https://github.com/Opla/opla/compare/v1.0.0-alpha.95...v1.0.0-alpha.96) (2024-04-09)
 
 
