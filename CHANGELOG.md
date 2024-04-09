@@ -1,3 +1,10 @@
+# [1.0.0-alpha.99](https://github.com/Opla/opla/compare/v1.0.0-alpha.98...v1.0.0-alpha.99) (2024-04-09)
+
+
+### Features
+
+* refactor history author using name & ref[#737](https://github.com/Opla/opla/issues/737) ([#762](https://github.com/Opla/opla/issues/762)) ([b18c169](https://github.com/Opla/opla/commit/b18c169e1aac745fce7fb292e0d01940f6aee1f7))
+
 # [1.0.0-alpha.98](https://github.com/Opla/opla/compare/v1.0.0-alpha.97...v1.0.0-alpha.98) (2024-04-09)
 
 
