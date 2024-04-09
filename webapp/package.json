@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "precommit-lint": "npx tsc --noEmit && npx eslint --fix . && npx prettier --write .",
+    "precommit-lint": "npx tsc --noEmit && npx eslint@8 --fix . && npx prettier --write .",
     "test": "",
     "tauri": "tauri"
   },
