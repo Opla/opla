@@ -94,9 +94,9 @@ export function ConversationPanel({
       "Welcome to Opla! Our platform leverages the power of your device to deliver personalized AI assistance. To kick things off, you'll need to install a model or an assistant. Think of it like choosing your conversation partner. If you've used ChatGPT before, you'll feel right at home here. Remember, this step is essential to begin your journey with Opla. Let's get started!",
     );
     if (selectedAssistantId) {
-      buttonLabel = t('Start a conversation with {{assistant}}', {
+      /* buttonLabel = t('Start a conversation with {{assistant}}', {
         assistant: selectedAssistantId,
-      });
+      }); */
       description = t('Opla works using your machine processing power.');
     } else if (selectedModelName) {
       buttonLabel = t('Start a conversation');

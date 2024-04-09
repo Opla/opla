@@ -337,8 +337,9 @@ impl ModelStorage {
     }
 
     pub fn remove_model(&mut self, id: &str, in_use: bool) -> Option<ModelEntity> {
-        println!("remove_model: {:?}", id);
+
         if in_use {
+            println!("remove_model: {:?} in_use", id);
             let mut model = match self.get_model_entity(id) {
                 Some(model) => model,
                 None => {
@@ -349,6 +350,7 @@ impl ModelStorage {
             self.update_model_entity(&model);
             return Some(model);
         }
+        println!("remove_model delete: {:?}", id);
         self.items
             .iter()
             .position(|m| m.reference.is_same_id_or_name(id))

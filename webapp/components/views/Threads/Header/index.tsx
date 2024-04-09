@@ -30,7 +30,7 @@ import ServiceBadge from './ServiceBadge';
 
 export type ThreadMenuProps = {
   selectedAssistantId: string | undefined;
-  selectedModelName: string | undefined;
+  selectedModelId: string | undefined;
   selectedConversationId?: string;
   modelItems: Ui.MenuItem[];
   onSelectModel: (model: string, provider: ProviderType) => void;
@@ -39,7 +39,7 @@ export type ThreadMenuProps = {
 
 export default function ThreadHeader({
   selectedAssistantId,
-  selectedModelName,
+  selectedModelId,
   selectedConversationId,
   modelItems,
   onSelectModel,
@@ -59,14 +59,12 @@ export default function ThreadHeader({
     assistant,
     providers,
     backendContext,
-    selectedModelName,
+    selectedModelId,
   );
   const selectedModel = service.model;
-  const modelName = selectedModel?.name || selectedModelName;
+  const modelId = selectedModel?.id || selectedModelId;
 
-  const selectedItem = modelItems.find(
-    (item) => item.value === modelName || item.key === modelName,
-  );
+  const selectedItem = modelItems.find((item) => item.key === modelId);
 
   const selectedTargetId =
     service?.type === AIServiceType.Assistant ? service.targetId : assistant?.targets?.[0]?.id;
@@ -151,7 +149,7 @@ export default function ThreadHeader({
       />
     ) : (
       <ModelMenu
-        selectedModelName={modelName}
+        selectedModelId={selectedModelId}
         selectedConversationId={selectedConversationId}
         modelItems={modelItems}
         onSelectModel={onSelectModel}

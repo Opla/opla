@@ -51,7 +51,7 @@ import { Badge } from '../../../ui/badge';
 import { ShortcutBadge } from '../../../common/ShortCut';
 
 type ModelMenuProps = {
-  selectedModelName?: string;
+  selectedModelId?: string;
   selectedConversationId?: string;
   modelItems: Ui.MenuItem[];
   onSelectModel: (model: string, provider: ProviderType) => void;
@@ -59,7 +59,7 @@ type ModelMenuProps = {
 };
 
 export default function ModelMenu({
-  selectedModelName,
+  selectedModelId,
   selectedConversationId,
   modelItems,
   onSelectModel,
@@ -69,7 +69,7 @@ export default function ModelMenu({
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
-  const selectedItem = modelItems.find((item) => item.value === selectedModelName);
+  const selectedItem = modelItems.find((item) => item.key === selectedModelId);
 
   let chatGPT = providers.find(
     (p: Provider) => p.type === ProviderType.openai && p.name === OpenAI.template.name,
@@ -131,10 +131,10 @@ export default function ModelMenu({
                       <CommandGroup>
                         {modelItems.map((item) => (
                           <CommandItem
-                            key={item.key || item.label}
+                            key={item.key}
                             value={item.value}
                             onSelect={() => {
-                              onSelectModel(item.value as string, item.group as ProviderType);
+                              onSelectModel(item.key as string, item.group as ProviderType);
                               setOpen(false);
                             }}
                             className="flex w-full items-center justify-between"

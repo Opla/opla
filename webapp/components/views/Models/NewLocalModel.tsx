@@ -29,11 +29,11 @@ import {
   CommandLoading,
 } from '@/components/ui/command';
 import useBackend from '@/hooks/useBackendContext';
-import { getModelsCollection, installModel } from '@/utils/backend/commands';
-import { Model } from '@/types';
+import { getModelsCollection, installModel, updateModelEntity } from '@/utils/backend/commands';
+import { Model, ModelState } from '@/types';
 import logger from '@/utils/logger';
 import { deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
-import { getDownloadables, isValidFormat } from '@/utils/data/models';
+import { findSameModel, getDownloadables, isValidFormat } from '@/utils/data/models';
 import { ShortcutIds } from '@/hooks/useShortcuts';
 import { ModalIds, Page } from '@/types/ui';
 import { fileExists, getPathComponents, openFileDialog } from '@/utils/backend/tauri';
@@ -58,7 +58,7 @@ function NewLocalModel({
   const gotoModels = !pathname.startsWith(Page.Models);
   const { showModal } = useContext(ModalsContext);
 
-  const { updateBackendStore } = useBackend();
+  const { backendContext, updateBackendStore } = useBackend();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [search, setValue] = useState('');
@@ -117,18 +117,39 @@ function NewLocalModel({
         if (!isExist) {
           logger.error('onLocalInstall file not found', download, path);
           toast.error(`File not found ${file}`);
+          onClose();
           return;
         }
         model.editable = true;
-        const id = await installModel(model, undefined, path, download);
+        let { id } = model;
+        let success;
+        const sameModel = findSameModel(model, backendContext);
+        if (sameModel?.state === ModelState.Removed) {
+          sameModel.state = ModelState.Ok;
+          ({ id } = sameModel);
+          await updateModelEntity(sameModel);
+          success = `${t('Model restored')} ${model.name}`;
+          logger.info('onLocalRestored', id, model, path, download);
+        } else if (!sameModel) {
+          id = await installModel(model, undefined, path, download);
+          logger.info('onLocalInstall', id, model, path, download);
+        } else {
+          toast.error(`${t('Model already exists')} ${model.name}`);
+          onClose();
+          return;
+        }
         await updateBackendStore();
-        logger.info('onLocalInstall', id, model, path, download);
+
         if (!gotoModels) {
           router.push(`${Page.Models}/${id}`);
+        }
+        if (success) {
+          toast.info(success);
         }
       } else {
         logger.error('onLocalInstall no download found', model);
         toast.error(`Not downloadable model file ${file} ${model}`);
+        onClose();
         return;
       }
     }
@@ -145,18 +166,39 @@ function NewLocalModel({
       delete selectedModel.include;
     }
     const path = getEntityName(selectedModel.creator || selectedModel.author);
-    const id = await installModel(
-      selectedModel,
-      getResourceUrl(selectedModel.download),
-      path,
-      selectedModel.name,
-    );
+    const sameModel = findSameModel(selectedModel, backendContext);
+
+    if (sameModel && sameModel.state !== ModelState.Removed) {
+      toast.error(`${t('Model already exists')} ${selectedModel.name}`);
+      return;
+    }
+    let id;
+    let restored = false;
+    if (sameModel?.state === ModelState.Removed) {
+      sameModel.state = ModelState.Ok;
+      await updateModelEntity(sameModel);
+      logger.info(`restored ${sameModel.id}`);
+      ({ id } = sameModel);
+      restored = true;
+    } else {
+      id = await installModel(
+        selectedModel,
+        getResourceUrl(selectedModel.download),
+        path,
+        selectedModel.name,
+      );
+      logger.info(`installed ${id}`);
+    }
     await updateBackendStore();
-    logger.info(`installed ${id}`);
+
     if (!gotoModels) {
       router.push(`${Page.Models}/${id}`);
     }
-    showModal(ModalIds.DownloadModel, { item: selectedModel });
+    if (!restored) {
+      showModal(ModalIds.DownloadModel, { item: selectedModel });
+    } else {
+      toast.success(`${t('Model restored')} ${selectedModel.name}`);
+    }
   };
 
   let filteredCollection = collection;

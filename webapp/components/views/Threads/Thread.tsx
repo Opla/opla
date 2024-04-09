@@ -170,25 +170,31 @@ function Thread({
     ? getMessageContentAsString(messages?.[0])
     : getDefaultConversationName(t);
 
-  const { modelItems, commandManager, assistant, activeModel, disabled } = useMemo(() => {
-    const model =
+  const {
+    modelItems,
+    commandManager,
+    assistant,
+    activeModelId: selectedModelId,
+    disabled,
+  } = useMemo(() => {
+    let modelId: string | undefined =
+      getConversationModelId(selectedConversation) ||
       getServiceModelId(service) ||
       (getServiceModelId(backendContext.config.services.activeService) as string);
-    let modelNameOrId: string | undefined = getConversationModelId(selectedConversation) || model;
     const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);
     const newAssistant = getAssistant(assistantId);
-    const items = getModelsAsItems(providers, backendContext, modelNameOrId);
-    const mi = items.find((m) => m.value === modelNameOrId || m.key === modelNameOrId);
+    const items = getModelsAsItems(providers, backendContext, modelId);
+    const mi = items.find((m) => m.key === modelId);
     if (!mi) {
-      modelNameOrId = undefined;
+      modelId = undefined;
     }
     const manager = getCommandManager(items);
     return {
       modelItems: items,
       commandManager: manager,
       assistant: newAssistant,
-      activeModel: model,
-      disabled: !model,
+      activeModelId: modelId,
+      disabled: !modelId,
     };
   }, [backendContext, getAssistant, providers, searchParams, selectedConversation, service]);
 
@@ -259,7 +265,7 @@ function Thread({
         const selectedModelNameOrId =
           modelsCommands[0]?.key ||
           getConversationModelId(selectedConversation, assistant) ||
-          activeModel;
+          selectedModelId;
         const activeService = getActiveService(
           selectedConversation,
           assistant,
@@ -286,7 +292,7 @@ function Thread({
     assistant,
     providers,
     backendContext,
-    activeModel,
+    selectedModelId,
     usage,
   ]);
 
@@ -294,20 +300,25 @@ function Thread({
     parsePrompt({ text, caretStartIndex }, tokenValidator);
 
   const changeService = async (
-    model: string,
+    modelIdOrName: string,
     providerIdOrName: string,
     partial: Partial<Conversation> = {},
   ) => {
     logger.info(
-      `ChangeService ${model} ${providerIdOrName} activeModel=${typeof activeModel}`,
+      `ChangeService ${modelIdOrName} ${providerIdOrName} activeModel=${selectedModelId}`,
       selectedConversation,
     );
+    const model = findModelInAll(modelIdOrName, providers, backendContext);
+    if (!model) {
+      logger.error('Model not found', modelIdOrName);
+      return;
+    }
     const newService: AIService = {
       type: AIServiceType.Model,
-      modelId: model as string,
+      modelId: model.id,
       providerIdOrName,
     };
-    if (model && selectedConversation) {
+    if (selectedConversation) {
       const services = addService(selectedConversation.services, newService);
       const newConversations = updateConversation(
         { ...selectedConversation, services, parameters: {}, ...partial },
@@ -315,9 +326,9 @@ function Thread({
         true,
       );
       updateConversations(newConversations);
-    } else if (model && !activeModel && providerIdOrName === getLocalProvider(providers)?.id) {
-      await setActiveModel(model);
-    } else if (model) {
+    } else if (!selectedModelId && providerIdOrName === getLocalProvider(providers)?.id) {
+      await setActiveModel(model.id);
+    } else if (model.id) {
       setService(newService);
     }
   };
@@ -415,7 +426,10 @@ function Thread({
     conversation: Conversation,
     previousMessage?: Message,
   ) => {
-    const selectedModelNameOrId = getConversationModelId(conversation, assistant) || activeModel;
+    if (!selectedModelId) {
+      setErrorMessage({ type: 'error', error: 'No model selected' });
+      return undefined;
+    }
     const result = await preProcessingCommands(
       conversation.id,
       prompt,
@@ -423,7 +437,7 @@ function Thread({
       conversation,
       conversations,
       tempConversationName,
-      selectedModelNameOrId,
+      selectedModelId,
       previousMessage,
       { changeService, getConversationMessages, updateMessagesAndConversation, t },
     );
@@ -443,20 +457,33 @@ function Thread({
       return;
     }
 
-    const selectedModelNameOrId =
-      getConversationModelId(selectedConversation, assistant) || activeModel;
-
     const result = await preProcessingSendMessage(prompt, selectedConversation as Conversation);
     if (!result) {
       return;
     }
-    const { modelName = selectedModelNameOrId } = result;
+    let selectedModel;
+    if (result.modelName) {
+      selectedModel = findModelInAll(result.modelName, providers, backendContext);
+    } else {
+      selectedModel = findModelInAll(
+        getConversationModelId(selectedConversation) || selectedModelId,
+        providers,
+        backendContext,
+      );
+    }
 
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
     setIsProcessing({ ...isProcessing, [conversationId]: true });
 
     const userMessage = createMessage({ role: 'user', name: 'you' }, prompt.text, prompt.raw);
-    let message = createMessage({ role: 'assistant', name: modelName }, '...');
+
+    if (!selectedModel) {
+      setErrorMessage({ ...errorMessage, [conversationId]: 'Model not found' });
+      setIsProcessing({ ...isProcessing, [conversationId]: false });
+      return;
+    }
+    let message = createMessage({ role: 'assistant', name: selectedModel.name }, '...');
+    message.metadata = { ...message.metadata, modelId: selectedModel.id };
     message.status = MessageStatus.Pending;
     userMessage.sibling = message.id;
     message.sibling = userMessage.id;
@@ -480,8 +507,8 @@ function Thread({
 
     logger.info(
       'onSendMessage',
-      modelName,
-      selectedModelNameOrId,
+      selectedModel,
+      selectedModelId,
       updatedMessages,
       updatedConversation,
     );
@@ -491,7 +518,7 @@ function Thread({
       updatedConversation,
       updatedConversations,
       prompt,
-      modelName,
+      selectedModel.name as string,
     );
 
     if (tempConversationId) {
@@ -521,8 +548,21 @@ function Thread({
     if (!result) {
       return;
     }
-    const selectedModelNameOrId =
-      result.modelName || getConversationModelId(selectedConversation) || activeModel;
+    let selectedModel;
+    if (result.modelName) {
+      selectedModel = findModelInAll(result.modelName, providers, backendContext);
+    } else {
+      selectedModel = findModelInAll(
+        getConversationModelId(selectedConversation) || selectedModelId,
+        providers,
+        backendContext,
+      );
+    }
+    if (!selectedModel) {
+      setErrorMessage({ ...errorMessage, [conversationId]: 'Model not found' });
+      setIsProcessing({ ...isProcessing, [conversationId]: false });
+      return;
+    }
 
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
     setIsProcessing({ ...isProcessing, [conversationId]: true });
@@ -533,8 +573,9 @@ function Thread({
       '...',
       MessageStatus.Pending,
     );
-    if (selectedModelNameOrId && message.author.name !== selectedModelNameOrId) {
-      message.author.name = selectedModelNameOrId;
+    if (message.author.name !== selectedModel.name) {
+      message.author.name = selectedModel.name;
+      message.metadata = { ...message.metadata, modelId: selectedModel.id };
     }
     const { updatedConversation, updatedConversations, updatedMessages } =
       await updateMessagesAndConversation(
@@ -550,7 +591,7 @@ function Thread({
       updatedConversation,
       updatedConversations,
       prompt,
-      selectedModelNameOrId as string,
+      selectedModel.name as string,
     );
 
     setIsProcessing({ ...isProcessing, [conversationId]: false });
@@ -739,7 +780,7 @@ function Thread({
       header={
         <ThreadHeader
           selectedAssistantId={assistant?.id}
-          selectedModelName={activeModel}
+          selectedModelId={selectedModelId}
           selectedConversationId={conversationId}
           modelItems={modelItems}
           onSelectModel={changeService}
@@ -751,7 +792,7 @@ function Thread({
       <ConversationPanel
         selectedConversation={selectedConversation}
         selectedAssistantId={assistant?.id}
-        selectedModelName={activeModel}
+        selectedModelName={selectedModelId}
         selectedMessageId={selectedMessageId}
         messages={messages}
         avatars={avatars}
