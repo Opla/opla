@@ -139,7 +139,7 @@ jobs:
           cache-on-failure: true
 
       - name: install frontend dependencies
-        run: yarn install # change this to npm or pnpm depending on which one you use
+        run: npm install # change this to npm or pnpm depending on which one you use
 
       #- name: import windows certificate
       #  if: matrix.settings.platform == 'windows-latest'
