@@ -1,3 +1,11 @@
+# [1.0.0-alpha.96](https://github.com/Opla/opla/compare/v1.0.0-alpha.95...v1.0.0-alpha.96) (2024-04-09)
+
+
+### Bug Fixes
+
+* eslint 8 ([440cd47](https://github.com/Opla/opla/commit/440cd47c92287f358782848843679c2a131dad54))
+* hide "explore the store" in empty view [#757](https://github.com/Opla/opla/issues/757) ([#758](https://github.com/Opla/opla/issues/758)) ([c744b6e](https://github.com/Opla/opla/commit/c744b6e07ec4f567aea2bf963606100370f422e3))
+
 # [1.0.0-alpha.95](https://github.com/Opla/opla/compare/v1.0.0-alpha.94...v1.0.0-alpha.95) (2024-04-08)
 
 
