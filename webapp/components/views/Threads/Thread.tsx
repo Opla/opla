@@ -201,7 +201,9 @@ function Thread({
           if (
             !avatar.name ||
             (assistant &&
-              (!assistant?.targets || avatar.name === assistant?.targets?.[0]?.models?.[0]))
+              (!assistant?.targets ||
+                assistant?.targets.length === 0 ||
+                avatar.name === assistant?.targets?.[0]?.models?.[0]))
           ) {
             avatar.name = assistant?.name;
             avatar.url = assistant?.avatar?.url;
