@@ -181,7 +181,6 @@ function Thread({
       getConversationModelId(selectedConversation) ||
       getServiceModelId(service) ||
       (getServiceModelId(backendContext.config.services.activeService) as string);
-    console.log('Thread', modelId, selectedConversation);
     const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);
     const newAssistant = getAssistant(assistantId);
     const items = getModelsAsItems(providers, backendContext, modelId);
@@ -321,7 +320,6 @@ function Thread({
     };
     if (selectedConversation) {
       const services = addService(selectedConversation.services, newService);
-      console.log('changeService services=', services, partial);
       const newConversations = updateConversation(
         { ...selectedConversation, services, parameters: {}, ...partial },
         conversations,
@@ -463,19 +461,29 @@ function Thread({
     if (!result) {
       return;
     }
-    const { modelName } = result;
+    let selectedModel;
+    if (result.modelName) {
+      selectedModel = findModelInAll(result.modelName, providers, backendContext);
+    } else {
+      selectedModel = findModelInAll(
+        getConversationModelId(selectedConversation) || selectedModelId,
+        providers,
+        backendContext,
+      );
+    }
 
     setErrorMessage({ ...errorMessage, [conversationId]: '' });
     setIsProcessing({ ...isProcessing, [conversationId]: true });
 
     const userMessage = createMessage({ role: 'user', name: 'you' }, prompt.text, prompt.raw);
-    const model = findModelInAll(modelName, providers, backendContext);
-    if (!modelName || !model) {
+
+    if (!selectedModel) {
       setErrorMessage({ ...errorMessage, [conversationId]: 'Model not found' });
       setIsProcessing({ ...isProcessing, [conversationId]: false });
       return;
     }
-    let message = createMessage({ role: 'assistant', name: modelName }, '...');
+    let message = createMessage({ role: 'assistant', name: selectedModel.name }, '...');
+    message.metadata = { ...message.metadata, modelId: selectedModel.id };
     message.status = MessageStatus.Pending;
     userMessage.sibling = message.id;
     message.sibling = userMessage.id;
@@ -497,14 +505,14 @@ function Thread({
 
     updatedConversations = clearPrompt(updatedConversation, updatedConversations);
 
-    logger.info('onSendMessage', modelName, selectedModelId, updatedMessages, updatedConversation);
+    logger.info('onSendMessage', selectedModel, selectedModelId, updatedMessages, updatedConversation);
     message = await sendMessage(
       message,
       updatedMessages,
       updatedConversation,
       updatedConversations,
       prompt,
-      modelName,
+      selectedModel.name as string,
     );
 
     if (tempConversationId) {

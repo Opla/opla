@@ -193,10 +193,9 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     }
     const path = getEntityName(selectedModel.creator || selectedModel.author);
     const sameModel = findSameModel(selectedModel, backendContext);
-    console.log('sameModel', sameModel);
 
     if (sameModel && sameModel.state !== ModelState.Removed) {
-      toast.error(`${t('Model already exists')} ${selectedModel.name}`);
+      toast.error(`${t('Model already installed ')} ${selectedModel.name}`);
       return;
     }
     let id;
@@ -291,7 +290,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
           <span className="pl-2">/</span>
           <div className="flex grow items-center gap-2 truncate px-2 ">
             <span>{model.name}</span>
-            {inUse ? <OrangePill label={t('In use')} /> : <OrangePill label={t('Not in use')} />}
+            {local && (inUse ? <OrangePill label={t('In use')} /> : <OrangePill label={t('Not in use')} />)}
             <ModelInfos model={model} displayName={false} />
           </div>
         </div>

@@ -73,8 +73,16 @@ export const findModelInAll = (
   backendContext: OplaContext,
 ) => {
   const allModels = getAllModels(providers, backendContext);
-  console.log('findModelInAll', modelIdOrName, allModels);
   return findModel(modelIdOrName, allModels);
+};
+
+export const getFirstModel = (providerId: string, providers: Provider[], backendContext: OplaContext) => {
+  const provider = providers.find((p) => p.id === providerId);
+  if (provider?.models && provider.models.length > 0) return provider.models[0];
+  if (provider?.type === ProviderType.opla) {
+    return getLocalModels(backendContext)[0];
+  }
+  return undefined;
 };
 
 export const isEquivalentModel = (model: Model, other: Model) => {
@@ -96,7 +104,6 @@ export const findSameModel = (
   const models = providers
     ? getAllModels(providers, backendContext, true)
     : getLocalModels(backendContext, true);
-  console.log('findSameModel', model, models);
   return models.find((m) => isEquivalentModel(model, m));
 };
 

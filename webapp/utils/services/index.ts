@@ -24,7 +24,7 @@ import {
 } from '../../types';
 
 import { getConversationService } from '../data/conversations';
-import { findModel, findModelInAll } from '../data/models';
+import { findModel, findModelInAll, getFirstModel } from '../data/models';
 import { findProvider, getLocalProvider } from '../data/providers';
 import OplaProvider from '../providers/opla';
 
@@ -65,7 +65,7 @@ export const getActiveService = (
       });
     }
   }
-  console.log('activeService', modelId, _modelId, activeService);
+
   if (activeService.type === AIServiceType.Model) {
     ({ providerIdOrName } = activeService);
     modelId = _modelId || activeService.modelId;
@@ -73,14 +73,16 @@ export const getActiveService = (
     model = findModel(modelId, provider?.models || []);
     if (!model && modelId) {
       model = findModelInAll(modelId, providers, backendContext);
-      console.log('activeService model pre', modelId, model);
     }
     if (!provider) {
       providerIdOrName = model?.provider || OplaProvider.name;
       provider = findProvider(providerIdOrName, providers);
       activeService.providerIdOrName = providerIdOrName;
     }
-    console.log('activeService model', model, activeService);
+    if (provider && !model) {
+      model = getFirstModel(provider.id, providers, backendContext);
+      modelId = model?.id;
+    }
   } else if (activeService.type === AIServiceType.Assistant) {
     const { assistantId, targetId } = activeService;
     if (assistantId && targetId) {

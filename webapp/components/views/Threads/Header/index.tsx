@@ -62,11 +62,10 @@ export default function ThreadHeader({
     selectedModelId,
   );
   const selectedModel = service.model;
-  console.log('ThreadHeader', selectedModel, selectedModelId, conversation);
-  const modelName = selectedModel?.name || selectedModelId;
+  const modelId = selectedModel?.id || selectedModelId;
 
   const selectedItem = modelItems.find(
-    (item) => item.value === modelName || item.key === modelName,
+    (item) => item.key === modelId,
   );
 
   const selectedTargetId =
@@ -152,7 +151,7 @@ export default function ThreadHeader({
       />
     ) : (
       <ModelMenu
-        selectedModelName={modelName}
+        selectedModelId={selectedModelId}
         selectedConversationId={selectedConversationId}
         modelItems={modelItems}
         onSelectModel={onSelectModel}
