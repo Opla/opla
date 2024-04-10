@@ -1,3 +1,10 @@
+# [1.0.0-alpha.100](https://github.com/Opla/opla/compare/v1.0.0-alpha.99...v1.0.0-alpha.100) (2024-04-10)
+
+
+### Bug Fixes
+
+* MessageView can't select text [#763](https://github.com/Opla/opla/issues/763) ([#768](https://github.com/Opla/opla/issues/768)) ([c124ea7](https://github.com/Opla/opla/commit/c124ea7685cd62d61922c278d60f8c6323f248fd))
+
 # [1.0.0-alpha.99](https://github.com/Opla/opla/compare/v1.0.0-alpha.98...v1.0.0-alpha.99) (2024-04-09)
 
 
