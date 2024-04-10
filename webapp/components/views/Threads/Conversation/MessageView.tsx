@@ -175,7 +175,7 @@ function MessageComponent({
                   <div className="w-full break-words">
                     <p className="py-1 font-bold capitalize">{avatar.name}</p>
                     {state === DisplayMessageState.Asset && (
-                      <div className="flex w-full select-auto flex-row items-center px-0 py-2">
+                      <div className="pointer-events-auto flex w-full cursor-text select-text flex-row items-center px-0 py-2">
                         <File className="mr-2 h-4 w-4" strokeWidth={1.5} />
                         <span>{t('Document added')}</span>
                       </div>
@@ -187,10 +187,14 @@ function MessageComponent({
                     )}
                     {(state === DisplayMessageState.Markdown ||
                       state === DisplayMessageState.Streaming) && (
-                      <div className="w-full select-auto px-0 py-2">{Content}</div>
+                      <div className="pointer-events-auto w-full cursor-text select-text px-0 py-2">
+                        {Content}
+                      </div>
                     )}
                     {state === DisplayMessageState.Text && (
-                      <div className="w-full select-auto px-0 py-2">{content}</div>
+                      <div className="pointer-events-auto w-full cursor-text select-text px-0 py-2">
+                        {content}
+                      </div>
                     )}
                     {state === DisplayMessageState.Edit && (
                       <Textarea
@@ -257,10 +261,6 @@ function MessageComponent({
                             />
                           </Button>
                         )}
-                        {/* <ClipboardButton
-                          copied={copied}
-                          onCopyToClipboard={handleCopyToClipboard}
-                        /> */}
                         <CopyToClipBoard title={t('Copy message to clipboard')} text={content} />
                         {message.status !== MessageStatus.Error && (
                           <Button variant="ghost" size="sm" onClick={handleEdit}>
