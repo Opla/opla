@@ -31,7 +31,7 @@ import {
 } from '@/utils/data/messages';
 import useHover from '@/hooks/useHover';
 import useMarkdownProcessor from '@/hooks/useMarkdownProcessor/index';
-import { Avatar, AvatarRef, Message, MessageStatus } from '@/types';
+import { Avatar, AvatarRef, MessageImpl, MessageStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import AvatarView from '@/components/common/AvatarView';
 import CopyToClipBoard from '@/components/common/CopyToClipBoard';
@@ -71,7 +71,7 @@ enum DisplayMessageState {
 }
 
 type MessageComponentProps = {
-  message: Message;
+  message: MessageImpl;
   index: number;
   avatars: AvatarRef[];
   disabled?: boolean;
@@ -81,6 +81,7 @@ type MessageComponentProps = {
   onDeleteMessage: () => void;
   onDeleteAssets: () => void;
   onChangeContent: (content: string, submit: boolean) => void;
+  onCopyMessage: (messageId: string, state: boolean) => void;
 };
 
 function MessageComponent({
@@ -94,6 +95,7 @@ function MessageComponent({
   onDeleteMessage,
   onChangeContent,
   onDeleteAssets,
+  onCopyMessage,
 }: MessageComponentProps) {
   const { t } = useTranslation();
   const [ref, isHover] = useHover();
@@ -261,7 +263,13 @@ function MessageComponent({
                             />
                           </Button>
                         )}
-                        <CopyToClipBoard title={t('Copy message to clipboard')} text={content} />
+                        <CopyToClipBoard
+                          copied={message.copied}
+                          title={t('Copy message to clipboard')}
+                          message={t('Message copied to clipboard')}
+                          text={content}
+                          onCopy={(copied) => onCopyMessage(message.id, copied)}
+                        />
                         {message.status !== MessageStatus.Error && (
                           <Button variant="ghost" size="sm" onClick={handleEdit}>
                             <Pencil className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />

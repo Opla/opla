@@ -118,6 +118,7 @@ function Thread({
 
   const [isProcessing, setIsProcessing] = useState<{ [key: string]: boolean }>({});
   const [errorMessage, setErrorMessage] = useState<{ [key: string]: string }>({});
+  const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
 
   const { t } = useTranslation();
 
@@ -144,7 +145,7 @@ function Thread({
               conversationId,
             } as Message;
           }
-          return { ...msg, author, conversationId };
+          return { ...msg, author, conversationId, copied: copied[msg.id] };
         });
       }
       setMessages(newMessages);
@@ -164,6 +165,7 @@ function Thread({
     isMessageUpdating,
     selectedConversation,
     providers,
+    copied,
   ]);
 
   const tempConversationName = messages?.[0]
@@ -733,6 +735,11 @@ function Thread({
     }
   };
 
+  const handleCopyMessage = (messageId: string, state: boolean) => {
+    const newCopied = { ...copied, [messageId]: state };
+    setCopied(newCopied);
+  };
+
   useShortcuts(ShortcutIds.EDIT_MESSAGE, (e) => {
     e.preventDefault();
     const lastMessage = messages?.findLast((m) => m.author.role === 'user');
@@ -771,6 +778,7 @@ function Thread({
       if (typeof content === 'string') {
         navigator.clipboard.writeText(content);
         toast.success('Message copied to clipboard');
+        handleCopyMessage(lastMessage.id, true);
       }
     }
   });
@@ -809,6 +817,7 @@ function Thread({
         onSelectMenu={onSelectMenu}
         onStartMessageEdit={handleStartMessageEdit}
         parseAndValidatePrompt={parseAndValidatePrompt}
+        onCopyMessage={handleCopyMessage}
       />
       {(prompt || (messages && messages[0]?.conversationId === conversationId)) && (
         <PromptArea
