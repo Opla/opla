@@ -15,6 +15,7 @@
 import Link from 'next/link';
 import { LucideIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ShortcutIds } from '@/hooks/useShortcuts';
 import { ShortcutBadge } from '../ShortCut';
 
 function Content({
@@ -49,7 +50,7 @@ export default function SidebarItem({
   name: string;
   icon?: LucideIcon;
   renderIcon?: () => React.ReactElement;
-  shortcut?: string;
+  shortcut?: ShortcutIds;
   modal?: boolean;
   onModalClick: (href: string) => void;
 }) {

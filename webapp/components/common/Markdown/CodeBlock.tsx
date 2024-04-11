@@ -92,8 +92,8 @@ function CodeBlock({
           {language === 'mermaid' ? (
             <Button
               variant="ghost"
-              aria-label="Toggle Mermaid preview"
-              title="Toggle Mermaid preview"
+              aria-label={t('Toggle Mermaid preview')}
+              title={t('Toggle Mermaid preview')}
               size="sm"
               onClick={() => {
                 setShowMermaidPreview(!showMermaidPreview);

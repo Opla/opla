@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ShortcutIds } from '@/hooks/useShortcuts';
 import { LucideIcon } from 'lucide-react';
 
 export enum BasicState {
@@ -32,7 +33,7 @@ export type Item = {
   flex?: number;
   hidden?: boolean;
   modal?: boolean;
-  shortcut?: string;
+  shortcut?: ShortcutIds;
   target?: boolean;
 };
 
