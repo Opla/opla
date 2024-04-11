@@ -1,3 +1,10 @@
+# [1.0.0-alpha.101](https://github.com/Opla/opla/compare/v1.0.0-alpha.100...v1.0.0-alpha.101) (2024-04-11)
+
+
+### Bug Fixes
+
+* refactor CopyToClipBoard ([#770](https://github.com/Opla/opla/issues/770)) ([d3fc7cf](https://github.com/Opla/opla/commit/d3fc7cf5cdaebd46c4cd0a9f1e3e3254219743db))
+
 # [1.0.0-alpha.100](https://github.com/Opla/opla/compare/v1.0.0-alpha.99...v1.0.0-alpha.100) (2024-04-10)
 
 
