@@ -1,3 +1,10 @@
+# [1.0.0-alpha.104](https://github.com/Opla/opla/compare/v1.0.0-alpha.103...v1.0.0-alpha.104) (2024-04-11)
+
+
+### Features
+
+* hidden assistant in temp conversation [#462](https://github.com/Opla/opla/issues/462) ([#773](https://github.com/Opla/opla/issues/773)) ([ce683ec](https://github.com/Opla/opla/commit/ce683eccc5e59e395ee983e9d7859b4701cf83fe))
+
 # [1.0.0-alpha.103](https://github.com/Opla/opla/compare/v1.0.0-alpha.102...v1.0.0-alpha.103) (2024-04-11)
 
 
