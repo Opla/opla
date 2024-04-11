@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use chrono::{DateTime, Utc};
+use chrono::{ DateTime, Utc };
 use serde::{ self, Deserialize, Deserializer, Serialize };
-use std::fmt;
+use std::{collections::HashMap, fmt};
 use std::marker::PhantomData;
 use std::str::FromStr;
 use serde::de::{ self, Visitor, MapAccess };
@@ -25,15 +25,11 @@ pub mod assistant;
 pub mod service;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Record {
-    pub key: String,
-    pub value: String,
-    pub r#type: Option<String>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct RecordSet {
-    pub records: Vec<Record>,
+#[serde(untagged)]
+pub enum PresetParameter {
+    String(String),
+    Number(f32),
+    Boolean(bool),
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -51,7 +47,7 @@ pub struct Preset {
 
     pub models: Option<Vec<String>>,
     pub provider: Option<String>,
-    pub parameters: Option<RecordSet>,
+    pub parameters: Option<HashMap<String, Option<PresetParameter>>>,
 }
 
 #[serde_with::skip_serializing_none]
