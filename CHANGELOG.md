@@ -1,3 +1,10 @@
+# [1.0.0-alpha.102](https://github.com/Opla/opla/compare/v1.0.0-alpha.101...v1.0.0-alpha.102) (2024-04-11)
+
+
+### Bug Fixes
+
+* **Settings:** edit note [#765](https://github.com/Opla/opla/issues/765) ([#771](https://github.com/Opla/opla/issues/771)) ([ece1279](https://github.com/Opla/opla/commit/ece12797606e92f44fee5ae6bfef8f5181d39f04))
+
 # [1.0.0-alpha.101](https://github.com/Opla/opla/compare/v1.0.0-alpha.100...v1.0.0-alpha.101) (2024-04-11)
 
 
