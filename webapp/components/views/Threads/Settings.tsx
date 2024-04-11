@@ -24,6 +24,7 @@ import { getFilename } from '@/utils/misc';
 import EditPresets from '@/components/common/EditPresets';
 import { ConversationError } from '@/types/ui';
 import CopyToClipBoard from '@/components/common/CopyToClipBoard';
+import { getActiveService } from '@/utils/services';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { Textarea } from '../../ui/textarea';
 import { Button } from '../../ui/button';
@@ -41,6 +42,13 @@ export default function Settings({
 
   const selectedConversation = conversations.find((c) => c.id === conversationId);
   const activeModel = getActiveModel();
+  const service = getActiveService(
+    selectedConversation,
+    undefined,
+    providers,
+    backendContext,
+    activeModel,
+  );
   const model = findModel(activeModel, backendContext.config.models.items);
   const provider = selectedConversation?.provider
     ? findProvider(selectedConversation?.provider, providers)
@@ -118,6 +126,7 @@ export default function Settings({
             presetProperties={selectedConversation as Partial<Preset>}
             provider={provider}
             model={model}
+            service={service}
             onChange={handleChangePreset}
             className="h-full"
           />

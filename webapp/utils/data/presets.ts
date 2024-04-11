@@ -88,6 +88,7 @@ export const findCompatiblePreset = (
   provider?: Provider,
 ) => {
   let compatiblePreset = presets.find((p) => p.id === presetId);
+  console.log('findCompatiblePreset', compatiblePreset, model, provider);
   if (!compatiblePreset) {
     if (model && !compatiblePreset) {
       compatiblePreset = presets.find((p) => matchModel(p, model));
