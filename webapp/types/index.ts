@@ -116,7 +116,7 @@ export type Messages = {
   messages: Message[];
 };
 
-export type PresetParameter = string | number | boolean;
+export type PresetParameter = string | number | boolean | undefined;
 
 export enum ContextWindowPolicy {
   None = 'none',
