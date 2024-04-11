@@ -71,9 +71,9 @@ export type Content = string | ContentFull;
 
 export enum MessageStatus {
   Pending = 'pending',
-  Stream = 'stream',
   Delivered = 'delivered',
   Error = 'error',
+  Stream = 'stream',
 }
 
 export enum AssetState {
@@ -103,12 +103,14 @@ export type Message = BaseIdRecord & {
   contentHistory?: Content[];
   status?: MessageStatus;
   sibling?: string;
-  conversationId?: string;
   assets?: string[];
 };
 
 export type MessageImpl = Message & {
+  conversationId?: string;
+  status?: MessageStatus;
   copied?: boolean;
+  last?: boolean;
 };
 
 export type Messages = {

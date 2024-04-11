@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import useTranslation from '@/hooks/useTranslation';
-import { defaultShortcuts } from '@/hooks/useShortcuts';
+import { ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts';
 import { shortcutAsText } from '@/utils/shortcuts';
 
-function ShortcutBadge({ command }: { command: string }) {
+function ShortcutBadge({ command }: { command: ShortcutIds }) {
   const keys = shortcutAsText(command);
 
   return <div className="ml-2 whitespace-break-spaces text-muted-foreground">{keys}</div>;

@@ -35,6 +35,8 @@ import { Avatar, AvatarRef, MessageImpl, MessageStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import AvatarView from '@/components/common/AvatarView';
 import CopyToClipBoard from '@/components/common/CopyToClipBoard';
+import { ShortcutIds } from '@/hooks/useShortcuts';
+import { shortcutAsText } from '@/utils/shortcuts';
 import { Button } from '../../../ui/button';
 import { Textarea } from '../../../ui/textarea';
 import OpenAI from '../../../icons/OpenAI';
@@ -256,7 +258,13 @@ function MessageComponent({
                           </div>
                         )}
                         {!isUser && (
-                          <Button variant="ghost" size="sm" onClick={onResendMessage}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            aria-label={t('Resend message')}
+                            title={`${t('Resend message')}  ${message.last ? shortcutAsText(ShortcutIds.RESEND_MESSAGE) : ''} `}
+                            onClick={onResendMessage}
+                          >
                             <RotateCcw
                               className="h-4 w-4 text-muted-foreground"
                               strokeWidth={1.5}
@@ -265,17 +273,31 @@ function MessageComponent({
                         )}
                         <CopyToClipBoard
                           copied={message.copied}
-                          title={t('Copy message to clipboard')}
+                          title={`${t('Copy message to clipboard')}  ${message.last && !isUser ? shortcutAsText(ShortcutIds.COPY_MESSAGE) : ''} `}
                           message={t('Message copied to clipboard')}
                           text={content}
                           onCopy={(copied) => onCopyMessage(message.id, copied)}
                         />
                         {message.status !== MessageStatus.Error && (
-                          <Button variant="ghost" size="sm" onClick={handleEdit}>
+                          <Button
+                            variant="ghost"
+                            aria-label={t('Edit message')}
+                            title={`${t('Edit message')}  ${message.last && isUser ? shortcutAsText(ShortcutIds.EDIT_MESSAGE) : ''} `}
+                            size="sm"
+                            onClick={handleEdit}
+                          >
                             <Pencil className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
                           </Button>
                         )}
-                        <DeleteButton onDeleteMessage={onDeleteMessage} />
+                        <Button
+                          variant="ghost"
+                          aria-label={t('Delete message and siblings')}
+                          title={`${t('Delete message and siblings')}  ${message.last ? shortcutAsText(ShortcutIds.DELETE_MESSAGE) : ''} `}
+                          size="sm"
+                          onClick={onDeleteMessage}
+                        >
+                          <Trash2 className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                        </Button>
                       </div>
                     )}
                   {state === DisplayMessageState.Edit && (

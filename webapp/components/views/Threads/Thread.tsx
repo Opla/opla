@@ -25,6 +25,7 @@ import {
   MessageStatus,
   AvatarRef,
   AIImplService,
+  MessageImpl,
 } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
@@ -115,7 +116,7 @@ function Thread({
 
   const [changedPrompt, setChangedPrompt] = useState<ParsedPrompt | undefined>(undefined);
   const { showModal } = useContext(ModalsContext);
-  const [messages, setMessages] = useState<Message[] | undefined>(undefined);
+  const [messages, setMessages] = useState<MessageImpl[] | undefined>(undefined);
   const [isMessageUpdating, setIsMessageUpdating] = useState<boolean>(false);
 
   const [isProcessing, setIsProcessing] = useState<{ [key: string]: boolean }>({});
@@ -126,9 +127,12 @@ function Thread({
 
   useEffect(() => {
     const getNewMessages = async () => {
-      let newMessages: Message[] = [];
+      let newMessages: MessageImpl[] = [];
       if (conversationId && selectedConversation) {
-        newMessages = await readConversationMessages(selectedConversation.id, []);
+        newMessages = (await readConversationMessages(
+          selectedConversation.id,
+          [],
+        )) as MessageImpl[];
         const stream = backendContext.streams?.[conversationId as string];
         newMessages = newMessages.filter((m) => !(m.author.role === 'system'));
         newMessages = newMessages.map((msg, index) => {
@@ -138,16 +142,25 @@ function Thread({
             author.name = model?.title || model?.name || author.name;
           }
           if (stream && index === newMessages.length - 1) {
-            return {
+            const m: MessageImpl = {
               ...msg,
               author,
-              status: 'stream',
+              status: MessageStatus.Stream,
               content: stream.content.join(''),
               contentHistory: undefined,
               conversationId,
-            } as Message;
+            };
+            return m;
           }
-          return { ...msg, author, conversationId, copied: copied[msg.id] };
+          let last;
+          if (
+            index === newMessages.length - 1 ||
+            (index === newMessages.length - 2 && author.role === 'user')
+          ) {
+            last = true;
+          }
+          const m: MessageImpl = { ...msg, author, conversationId, copied: copied[msg.id], last };
+          return m;
         });
       }
       setMessages(newMessages);
