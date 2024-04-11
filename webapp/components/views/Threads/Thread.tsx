@@ -227,7 +227,7 @@ function Thread({
   useEffect(() => {
     if (_conversationId && tempConversationId) {
       setTempConversationId(undefined);
-    } 
+    }
     if (!tempConversationId && !_conversationId) {
       const temp = conversations.find((c) => c.temp);
       if (temp) {
@@ -240,19 +240,21 @@ function Thread({
     if (tempConversationId) {
       let tempConversation = conversations.find((c) => c.temp) as Conversation;
       if (tempConversation) {
-        const service = getConversationService(tempConversation, AIServiceType.Assistant);
-        if (service?.type === AIServiceType.Assistant) {
-          const assistant = getAssistant(service.assistantId);
-          if (assistant?.hidden) {
+        const usedService = getConversationService(tempConversation, AIServiceType.Assistant);
+        if (usedService?.type === AIServiceType.Assistant) {
+          const tempAssistant = getAssistant(usedService.assistantId);
+          if (tempAssistant?.hidden) {
             tempConversation = removeConversationService(tempConversation, AIServiceType.Assistant);
-            updateConversations(conversations.map((conversation) => conversation.id === tempConversation.id ? tempConversation : conversation));
+            updateConversations(
+              conversations.map((conversation) =>
+                conversation.id === tempConversation.id ? tempConversation : conversation,
+              ),
+            );
           }
         }
       }
-
-
     }
-  }, [_conversationId, conversations, updateConversations, tempConversationId]);
+  }, [_conversationId, conversations, updateConversations, tempConversationId, getAssistant]);
 
   const tokenValidator = useCallback(
     (

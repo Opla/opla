@@ -55,7 +55,6 @@ export default function AssistantsList({
     if (currentAssistantId === assistantId) {
       router.replace(router.pathname, undefined, { shallow: true });
     }
-
   };
 
   const menuMyAssistants: Ui.MenuItem[] = [
