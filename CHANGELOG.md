@@ -1,3 +1,10 @@
+# [1.0.0-alpha.105](https://github.com/Opla/opla/compare/v1.0.0-alpha.104...v1.0.0-alpha.105) (2024-04-11)
+
+
+### Features
+
+* **MessageView:** display shortcuts in  buttons [#764](https://github.com/Opla/opla/issues/764) ([#774](https://github.com/Opla/opla/issues/774)) ([ea30ab1](https://github.com/Opla/opla/commit/ea30ab1e366c05a968c70703dfe5d2668a68b7e5))
+
 # [1.0.0-alpha.104](https://github.com/Opla/opla/compare/v1.0.0-alpha.103...v1.0.0-alpha.104) (2024-04-11)
 
 
