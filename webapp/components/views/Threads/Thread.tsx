@@ -38,6 +38,8 @@ import {
   addService,
   addConversationService,
   getDefaultConversationName,
+  getConversationService,
+  removeConversationService,
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
 import { completion, tokenize } from '@/utils/providers';
@@ -235,7 +237,24 @@ function Thread({
     if (_conversationId && conversations.find((c) => c.temp)) {
       updateConversations(conversations.filter((c) => !c.temp));
     }
-  }, [_conversationId, conversations, updateConversations, tempConversationId]);
+    if (tempConversationId) {
+      let tempConversation = conversations.find((c) => c.temp) as Conversation;
+      if (tempConversation) {
+        const usedService = getConversationService(tempConversation, AIServiceType.Assistant);
+        if (usedService?.type === AIServiceType.Assistant) {
+          const tempAssistant = getAssistant(usedService.assistantId);
+          if (tempAssistant?.hidden) {
+            tempConversation = removeConversationService(tempConversation, AIServiceType.Assistant);
+            updateConversations(
+              conversations.map((conversation) =>
+                conversation.id === tempConversation.id ? tempConversation : conversation,
+              ),
+            );
+          }
+        }
+      }
+    }
+  }, [_conversationId, conversations, updateConversations, tempConversationId, getAssistant]);
 
   const tokenValidator = useCallback(
     (
@@ -523,7 +542,7 @@ function Thread({
     );
 
     if (tempConversationId) {
-      router.push(`${Page.Threads}/${tempConversationId}`);
+      router.replace(`${Page.Threads}/${tempConversationId}`, undefined, { shallow: true });
     }
 
     setIsProcessing({ ...isProcessing, [conversationId]: false });
