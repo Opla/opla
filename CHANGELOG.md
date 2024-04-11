@@ -1,3 +1,10 @@
+# [1.0.0-alpha.103](https://github.com/Opla/opla/compare/v1.0.0-alpha.102...v1.0.0-alpha.103) (2024-04-11)
+
+
+### Features
+
+* add Rust PresetParameter [#444](https://github.com/Opla/opla/issues/444) ([#772](https://github.com/Opla/opla/issues/772)) ([4e16036](https://github.com/Opla/opla/commit/4e16036974f6b0a38a0ac58a0f8d49fc7882af2d))
+
 # [1.0.0-alpha.102](https://github.com/Opla/opla/compare/v1.0.0-alpha.101...v1.0.0-alpha.102) (2024-04-11)
 
 
