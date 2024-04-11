@@ -107,6 +107,10 @@ export type Message = BaseIdRecord & {
   assets?: string[];
 };
 
+export type MessageImpl = Message & {
+  copied?: boolean;
+};
+
 export type Messages = {
   conversationId: string;
   messages: Message[];

@@ -97,6 +97,7 @@ function Archive({
         onDeleteAssets={() => {}}
         onChangeMessageContent={() => {}}
         onStartMessageEdit={() => {}}
+        onCopyMessage={() => {}}
       />
     </ContentView>
   );

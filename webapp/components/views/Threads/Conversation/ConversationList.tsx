@@ -14,7 +14,7 @@
 
 import { ArrowDown } from 'lucide-react';
 import useScroll, { KeyedScrollPosition } from '@/hooks/useScroll';
-import { AvatarRef, Message } from '@/types';
+import { AvatarRef, Message, MessageImpl } from '@/types';
 // import logger from '@/utils/logger';
 import MessageView from './MessageView';
 import { Button } from '../../../ui/button';
@@ -22,7 +22,7 @@ import { Button } from '../../../ui/button';
 type ConversationListProps = {
   conversationId: string;
   scrollPosition: number | undefined;
-  messages: Message[];
+  messages: MessageImpl[];
   selectedMessageId: string | undefined;
   avatars: AvatarRef[];
   disabled?: boolean;
@@ -32,6 +32,7 @@ type ConversationListProps = {
   onDeleteAssets: (m: Message) => void;
   onChangeMessageContent: (m: Message, newContent: string, submit: boolean) => void;
   onStartMessageEdit: (messageId: string, index: number) => void;
+  onCopyMessage: (messageId: string, state: boolean) => void;
 };
 
 function ConversationList({
@@ -47,6 +48,7 @@ function ConversationList({
   onDeleteAssets,
   onChangeMessageContent,
   onStartMessageEdit,
+  onCopyMessage,
 }: ConversationListProps) {
   const handleUpdatePosition = (props: KeyedScrollPosition) => {
     // logger.info('updated newPosition', props);
@@ -84,6 +86,7 @@ function ConversationList({
               onChangeContent={(newContent, submit) => {
                 onChangeMessageContent(m, newContent, submit);
               }}
+              onCopyMessage={onCopyMessage}
             />
           ))}
         </div>

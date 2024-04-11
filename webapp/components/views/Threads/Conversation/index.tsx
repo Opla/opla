@@ -17,7 +17,7 @@ import EmptyView from '@/components/common/EmptyView';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyedScrollPosition } from '@/hooks/useScroll';
 import Opla from '@/components/icons/Opla';
-import { AvatarRef, Conversation, Message, PromptTemplate, Ui } from '@/types';
+import { AvatarRef, Conversation, Message, MessageImpl, PromptTemplate, Ui } from '@/types';
 // import logger from '@/utils/logger';
 import { AppContext } from '@/context';
 import { getConversation, updateConversation } from '@/utils/data/conversations';
@@ -31,7 +31,7 @@ export type ConversationPanelProps = {
   selectedAssistantId: string | undefined;
   selectedModelName: string | undefined;
   selectedMessageId: string | undefined;
-  messages: Message[] | undefined;
+  messages: MessageImpl[] | undefined;
   avatars: AvatarRef[];
   modelItems: Ui.MenuItem[];
   disabled: boolean;
@@ -44,6 +44,7 @@ export type ConversationPanelProps = {
   onSelectMenu: (menu: MenuAction, data: string) => void;
   onStartMessageEdit: (messageId: string, index: number) => void;
   parseAndValidatePrompt: (prompt: string) => ParsedPrompt;
+  onCopyMessage: (messageId: string, state: boolean) => void;
 };
 
 export function ConversationPanel({
@@ -64,17 +65,13 @@ export function ConversationPanel({
   onSelectMenu,
   onStartMessageEdit,
   parseAndValidatePrompt,
+  onCopyMessage,
 }: ConversationPanelProps) {
   const { t } = useTranslation();
   const { conversations, updateConversations } = useContext(AppContext);
 
   const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {
     const conversation = getConversation(key, conversations);
-    /* logger.info(
-      `handleScrollPosition ${key} ${conversation?.id}`,
-      position,
-      conversation?.scrollPosition,
-    ); */
     if (conversation && conversation.scrollPosition !== position.y) {
       conversation.scrollPosition = position.y === -1 ? undefined : position.y;
       const updatedConversations = updateConversation(conversation, conversations, true);
@@ -94,9 +91,6 @@ export function ConversationPanel({
       "Welcome to Opla! Our platform leverages the power of your device to deliver personalized AI assistance. To kick things off, you'll need to install a model or an assistant. Think of it like choosing your conversation partner. If you've used ChatGPT before, you'll feel right at home here. Remember, this step is essential to begin your journey with Opla. Let's get started!",
     );
     if (selectedAssistantId) {
-      /* buttonLabel = t('Start a conversation with {{assistant}}', {
-        assistant: selectedAssistantId,
-      }); */
       description = t('Opla works using your machine processing power.');
     } else if (selectedModelName) {
       buttonLabel = t('Start a conversation');
@@ -169,6 +163,7 @@ export function ConversationPanel({
           onDeleteAssets={onDeleteAssets}
           onChangeMessageContent={onChangeMessageContent}
           onStartMessageEdit={onStartMessageEdit}
+          onCopyMessage={onCopyMessage}
         />
       )}
       <div className="flex flex-col items-center text-sm" />

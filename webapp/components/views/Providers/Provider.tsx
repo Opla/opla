@@ -116,7 +116,11 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
           </TabsContent>
           <TabsContent value="debug" className="h-full w-full p-4">
             <div className="flex w-full flex-row-reverse">
-              <CopyToClipBoard title={t('Copy logs to clipboard')} text={buildLogs()} />
+              <CopyToClipBoard
+                title={t('Copy logs to clipboard')}
+                message={t('Logs copied to clipboard')}
+                text={buildLogs()}
+              />
             </div>
             {provider && (
               <ScrollArea>

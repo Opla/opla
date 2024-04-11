@@ -73,17 +73,22 @@ function CodeBlock({
   }, [children, className, context, node]);
 
   if (className) {
+    let copyMessage = t('copied to clipboard');
     let display = '';
     if (language === 'math' && showLatexPreview) {
       display = 'latex';
+      copyMessage = `${t('Formula')} ${copyMessage}`;
     } else if (language === 'mermaid' && showMermaidPreview) {
       display = 'mermaid';
+      copyMessage = `${t('Diagram')} ${copyMessage}`;
+    } else {
+      copyMessage = `${t('Code')} ${copyMessage}`;
     }
     return (
       <div className="m-0 flex w-full flex-col p-0">
         <div className="flex w-full flex-row items-center justify-end gap-1 bg-card">
           <p className="flex-grow pl-4 text-xs text-card-foreground">{language}</p>
-          <CopyToClipBoard title={t('Copy to clipboard')} text={content} />
+          <CopyToClipBoard title={t('Copy to clipboard')} message={copyMessage} text={content} />
           {language === 'mermaid' ? (
             <Button
               variant="ghost"

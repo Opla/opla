@@ -180,7 +180,11 @@ export default function Settings({
         </TabsContent>
         <TabsContent value="debug" className="flex w-full items-center justify-between px-4">
           <span className="text-muted-foreground">{t('Debug')}</span>
-          <CopyToClipBoard title={t('Copy logs to clipboard')} text={buildLogs()} />
+          <CopyToClipBoard
+            title={t('Copy logs to clipboard')}
+            message={t('Logs copied to clipboard')}
+            text={buildLogs()}
+          />
         </TabsContent>
         <TabsContent value="debug" className="px-4">
           {errors.map((error) => (

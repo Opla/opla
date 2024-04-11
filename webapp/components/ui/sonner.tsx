@@ -3,7 +3,7 @@ import { Toaster as Sonner, toast } from 'sonner';
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
-function Toaster({ ...props }: ToasterProps) {
+function Toaster({ duration = 50000, ...props }: ToasterProps) {
   const { theme = 'system' } = useTheme();
 
   return (
@@ -13,7 +13,7 @@ function Toaster({ ...props }: ToasterProps) {
       visibleToasts={9}
       closeButton
       toastOptions={{
-        duration: 50000,
+        duration,
         classNames: {
           toast:
             'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg',
