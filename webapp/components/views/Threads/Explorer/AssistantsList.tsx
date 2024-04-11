@@ -14,6 +14,7 @@
 
 import { useMemo } from 'react';
 import { useRouter } from 'next/router';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Bot, SquarePen, Store } from 'lucide-react';
 import AvatarView from '@/components/common/AvatarView';
@@ -39,6 +40,7 @@ export default function AssistantsList({
 }: AssistantsListProps) {
   const router = useRouter();
   const { t } = useTranslation();
+  const searchParams = useSearchParams();
   const { assistants, updateAssistant } = useAssistantStore();
 
   const handleEditAssistant = (assistantId: string) => {
@@ -49,6 +51,11 @@ export default function AssistantsList({
   const handleHideAssistant = (assistantId: string) => {
     const assistant = assistants.find((a) => a.id === assistantId) as Assistant;
     updateAssistant({ ...assistant, hidden: true });
+    const currentAssistantId = searchParams?.get('assistant');
+    if (currentAssistantId === assistantId) {
+      router.replace(router.pathname, undefined, { shallow: true });
+    }
+
   };
 
   const menuMyAssistants: Ui.MenuItem[] = [

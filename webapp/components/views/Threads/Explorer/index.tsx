@@ -173,23 +173,23 @@ export default function ThreadsExplorer({
   const handleSelectThread = (id: string, view: ViewName) => {
     logger.info(`onSelectThread ${id}`);
     const route = view === ViewName.Archives ? Ui.Page.Archives : Ui.Page.Threads;
-    router.push(`${route}/${id}`); // , undefined, { shallow: true });
+    router.replace(`${route}/${id}`, undefined, { shallow: true });
   };
 
   const handleSelectAssistant = (id: string) => {
     logger.info(`onSelectAssistant ${id}`);
     if (id === OplaAssistant.id) {
-      router.push(Ui.Page.Threads);
+      router.replace(Ui.Page.Threads, undefined, { shallow: true });
       return;
     }
-    router.push(`${Ui.Page.Threads}/?assistant=${id}`);
+    router.replace(`${Ui.Page.Threads}/?assistant=${id}`, undefined, { shallow: true });
   };
 
   useShortcuts(ShortcutIds.NEW_CONVERSATION, (event) => {
     if (selectedThreadId) {
       event.preventDefault();
       logger.info('shortcut new Conversation');
-      router.push(Ui.Page.Threads);
+      router.replace(Ui.Page.Threads, undefined, { shallow: true });
       toast.message('New Conversation');
     }
   });

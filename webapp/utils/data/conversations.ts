@@ -146,6 +146,10 @@ export const getConversationService = (
   return service;
 };
 
+export const removeConversationService = ( conversation: Conversation, serviceType: AIServiceType) => {
+  conversation.services = conversation.services?.filter((s) => s.type !== serviceType);
+  return conversation;
+}
 export const addService = (_services: AIService[] | undefined, service: AIService): AIService[] => {
   const services = _services || [];
   const index = services?.findIndex((c) => c.type === service.type) ?? -1;
