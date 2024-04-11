@@ -147,7 +147,7 @@ export default function Settings({
           <div className="w-full p-2">
             <Textarea
               value={selectedConversation?.note ?? ''}
-              disabled={!selectedConversation?.temp}
+              disabled={!!selectedConversation?.temp}
               placeholder={t('Write a note...')}
               className="min-h-[240px] resize-none  overflow-y-hidden"
               onChange={handleNoteChange}
