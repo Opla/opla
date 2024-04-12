@@ -74,7 +74,6 @@ export const findModelInAll = (
   full?: boolean,
 ) => {
   const allModels = getAllModels(providers, backendContext, full);
-  console.log('findModelInAll', modelIdOrName, allModels);
   return findModel(modelIdOrName, allModels);
 };
 

@@ -110,7 +110,6 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
           }
           return updatedConversation;
         });
-        console.log('updatedConversations', updatedConversations);
         await updateConversations(updatedConversations);
       }
       const nextModelId =

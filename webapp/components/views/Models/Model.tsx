@@ -246,7 +246,6 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
         }
         return updatedConversation;
       });
-      console.log('updatedConversations', updatedConversations);
       await updateConversations(updatedConversations);
     }
     await updateBackendStore();

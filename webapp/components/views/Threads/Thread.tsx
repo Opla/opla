@@ -222,7 +222,6 @@ function Thread({
     }
 
     const items = getModelsAsItems(providers, backendContext, modelId);
-    console.log('activeModel', activeModel, modelId, selectedConversation);
     let d = false;
     if (!activeModel) {
       modelId = undefined;

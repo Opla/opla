@@ -62,7 +62,6 @@ export default function ThreadHeader({
     selectedModelId,
   );
   const selectedModel = service.model;
-  console.log('Header', selectedModel, service);
   const modelId = selectedModel?.id || selectedModelId;
 
   const selectedItem = modelItems.find((item) => item.key === modelId);
