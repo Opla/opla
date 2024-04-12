@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { useContext } from 'react';
-import { Ui, Provider, ProviderType, Model } from '@/types';
+import { Provider, ProviderType, Model } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
@@ -25,11 +25,10 @@ import logger from '@/utils/logger';
 import ModelInfos from '../../../common/ModelInfos';
 
 type ModelTitleProps = {
-  selectedItem: Ui.MenuItem;
   selectedModel?: Model;
 };
 
-export default function ModelTitle({ selectedItem, selectedModel }: ModelTitleProps) {
+export default function ModelTitle({ selectedModel }: ModelTitleProps) {
   const { providers } = useContext(AppContext);
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
@@ -69,7 +68,7 @@ export default function ModelTitle({ selectedItem, selectedModel }: ModelTitlePr
     handleSetupChatGPT();
   });
 
-  return selectedItem.label ? (
+  return selectedModel ? (
     <>
       <div className="grow capitalize text-foreground">
         {selectedModel && <ModelInfos model={selectedModel} />}

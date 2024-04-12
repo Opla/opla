@@ -19,11 +19,15 @@ import { useRouter } from 'next/router';
 import { useSearchParams } from 'next/navigation';
 import { v4 as uuid } from 'uuid';
 import useBackend from '@/hooks/useBackendContext';
-import { Conversation, PageSettings, Provider, ProviderType, Ui } from '@/types';
+import { Conversation, ModelState, PageSettings, Provider, ProviderType, Ui } from '@/types';
 import { DefaultPageSettings, DefaultThreadsExplorerGroups } from '@/utils/constants';
 import logger from '@/utils/logger';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
-import { getConversation } from '@/utils/data/conversations';
+import {
+  getConversation,
+  getConversationAssistant,
+  getConversationModelId,
+} from '@/utils/data/conversations';
 import { ModalIds } from '@/modals';
 import { ModalsContext } from '@/context/modals';
 import { AppContext } from '@/context';
@@ -32,6 +36,9 @@ import { getAssistantId } from '@/utils/services';
 import { deepEqual } from '@/utils/data';
 import { createProvider } from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';
+import { useAssistantStore } from '@/stores';
+import { findModelInAll } from '@/utils/data/models';
+import { uninstallModel } from '@/utils/backend/commands';
 import { ResizableHandle, ResizablePanel } from '../../ui/resizable';
 import Settings from './Settings';
 import Threads from './Threads';
@@ -55,6 +62,8 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     setError([...errors, { id: uuid(), conversationId, message: error }]);
   };
 
+  const { getAssistant, deleteAssistant } = useAssistantStore();
+
   const {
     conversations,
     updateConversations,
@@ -66,7 +75,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     deleteArchive,
     providers,
   } = useContext(AppContext);
-  const { backendContext, setSettings } = useBackend();
+  const { backendContext, setSettings, updateBackendStore } = useBackend();
 
   const searchParams = useSearchParams();
   const selectedConversation = conversations.find((c) => c.id === selectedThreadId);
@@ -131,10 +140,40 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
   }
 
   const deleteAndCleanupConversation = async (conversationId: string, deleteFiles = false) =>
-    deleteConversation(conversationId, deleteFiles, async (cId) => {
-      // Delete associated settings
-      saveSettings(getSelectedPage(cId, ViewName.Recent));
-    });
+    deleteConversation(
+      conversationId,
+      deleteFiles,
+      async (removedConversation, updatedConversations) => {
+        const cAssistantId = getConversationAssistant(removedConversation);
+        const assistant = getAssistant(cAssistantId);
+        if (assistant?.hidden) {
+          let some = updatedConversations.some(
+            (conversation) => getConversationAssistant(conversation) === cAssistantId,
+          );
+          some =
+            some || archives.some((archive) => getConversationAssistant(archive) === cAssistantId);
+          if (!some) {
+            deleteAssistant(assistant.id);
+          }
+        }
+        const modelId = getConversationModelId(removedConversation, assistant);
+        const model = findModelInAll(modelId, providers, backendContext, true);
+        if (modelId && model?.state === ModelState.Removed) {
+          let some = updatedConversations.some(
+            (conversation) => getConversationModelId(conversation, assistant) === modelId,
+          );
+          some =
+            some ||
+            archives.some((archive) => getConversationModelId(archive, assistant) === modelId);
+          if (!some) {
+            await uninstallModel(modelId, false);
+            await updateBackendStore();
+          }
+        }
+        // Delete associated settings
+        saveSettings(getSelectedPage(removedConversation.id, ViewName.Recent));
+      },
+    );
 
   const handleResizeSettings = (size: number) => {
     saveSettings(selectedPage, { settingsWidth: size });

@@ -27,6 +27,7 @@ import { deepCopy } from '@/utils/data';
 import { defaultPresets, mergePresets } from '@/utils/data/presets';
 import { mergeMessages } from '@/utils/data/messages';
 import { deleteUnusedConversationsDir } from '@/utils/backend/tauri';
+import logger from '@/utils/logger';
 
 export type Context = {
   conversations: Array<Conversation>;
@@ -37,7 +38,7 @@ export type Context = {
   deleteConversation: (
     id: string,
     deleteFiles: boolean,
-    cleanup?: (id: string) => Promise<void>,
+    cleanup?: (conversation: Conversation, conversations: Conversation[]) => Promise<void>,
   ) => Promise<void>;
   readConversationMessages: (key: string, defaultValue: Message[]) => Promise<Message[]>;
   getConversationMessages: (id: string | undefined) => Message[];
@@ -197,12 +198,20 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
   );
 
   const deleteConversation = useCallback(
-    async (id: string, deleteFiles: boolean, cleanup?: (id: string) => Promise<void>) => {
+    async (
+      id: string,
+      deleteFiles: boolean,
+      cleanup?: (conversation: Conversation, conversations: Conversation[]) => Promise<void>,
+    ) => {
+      const conversation = getConversation(id, conversations) as Conversation;
+      if (!conversation) {
+        logger.info(`deleteConversation conversation doesn't exist : ${id}`);
+      }
       const updatedConversations = removeConversation(id, conversations);
       setConversations(updatedConversations);
       // Delete any orphans messages
       await deleteConversationMessages(id);
-      await cleanup?.(id);
+      await cleanup?.(conversation, updatedConversations);
       if (deleteFiles) {
         await deleteUnusedConversationsDir(conversations.map((c) => c.id));
       }
