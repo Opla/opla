@@ -1,3 +1,10 @@
+# [1.0.0-alpha.108](https://github.com/Opla/opla/compare/v1.0.0-alpha.107...v1.0.0-alpha.108) (2024-04-12)
+
+
+### Features
+
+* remove unused assistants or models [#460](https://github.com/Opla/opla/issues/460) [#735](https://github.com/Opla/opla/issues/735) ([#777](https://github.com/Opla/opla/issues/777)) ([38f6bc2](https://github.com/Opla/opla/commit/38f6bc2365dd681d24a2cb8f6a036b68de16dc00))
+
 # [1.0.0-alpha.107](https://github.com/Opla/opla/compare/v1.0.0-alpha.106...v1.0.0-alpha.107) (2024-04-12)
 
 
