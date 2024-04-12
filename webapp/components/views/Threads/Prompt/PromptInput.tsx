@@ -26,6 +26,7 @@ import { Textarea } from '../../../ui/textarea';
 type PromptInputProps = {
   value?: ParsedPrompt;
   placeholder?: string;
+  disabled?: boolean;
   textareaRef: React.RefObject<HTMLTextAreaElement>;
   onValueChange: (text: string, caretStartIndex: number) => void;
   className?: string;
@@ -36,6 +37,7 @@ type PromptInputProps = {
 function PromptInput({
   value,
   placeholder,
+  disabled,
   textareaRef,
   className,
   onValueChange,
@@ -63,6 +65,7 @@ function PromptInput({
     <Textarea
       autoresize
       autoFocus
+      disabled={disabled}
       tabIndex={0}
       ref={textareaRef}
       autoComplete="off"

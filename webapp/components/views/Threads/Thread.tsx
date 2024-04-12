@@ -26,6 +26,8 @@ import {
   AvatarRef,
   AIImplService,
   MessageImpl,
+  ModelState,
+  Model,
 } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
@@ -44,7 +46,7 @@ import {
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
 import { completion, tokenize } from '@/utils/providers';
-import { findModelInAll, getModelsAsItems } from '@/utils/data/models';
+import { findModel, findModelInAll, getModelsAsItems } from '@/utils/data/models';
 import { getActiveService, getAssistantId } from '@/utils/services';
 import { toast } from '@/components/ui/Toast';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
@@ -103,7 +105,7 @@ function Thread({
     setProviders,
     presets,
   } = useContext(AppContext);
-  const { backendContext, setActiveModel } = useBackend();
+  const { backendContext, getActiveModel, setActiveModel } = useBackend();
   const searchParams = useSearchParams();
   const [selectedMessageId, setSelectedMessageId] = useState<string | undefined>(undefined);
   const [service, setService] = useState<AIService | undefined>(undefined);
@@ -189,10 +191,12 @@ function Thread({
 
   const {
     modelItems,
+    selectedModelItem,
     commandManager,
     assistant,
     activeModelId: selectedModelId,
     disabled,
+    model,
   } = useMemo(() => {
     let modelId: string | undefined =
       getConversationModelId(selectedConversation) ||
@@ -200,20 +204,52 @@ function Thread({
       (getServiceModelId(backendContext.config.services.activeService) as string);
     const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);
     const newAssistant = getAssistant(assistantId);
+    let activeModel: Model | undefined;
+    if (!modelId) {
+      modelId = getActiveModel();
+      if (!modelId && backendContext.downloads && backendContext.downloads.length > 0) {
+        modelId = backendContext.downloads[0].id;
+      }
+      activeModel = findModel(modelId, backendContext.config.models.items);
+    } else {
+      activeModel = findModelInAll(modelId, providers, backendContext);
+    }
+
+    const download = backendContext.downloads?.find((d) => d.id === activeModel?.id);
+    if (activeModel && download) {
+      activeModel.state = ModelState.Downloading;
+    } else if (activeModel && activeModel.state === ModelState.Downloading) {
+      activeModel.state = ModelState.Ok;
+    }
+
     const items = getModelsAsItems(providers, backendContext, modelId);
     const mi = items.find((m) => m.key === modelId);
+    let d = false;
     if (!mi) {
       modelId = undefined;
+      d = true;
+    } else if (activeModel?.state === ModelState.Downloading) {
+      d = true;
     }
     const manager = getCommandManager(items);
     return {
       modelItems: items,
+      selectedModelItem: mi,
       commandManager: manager,
       assistant: newAssistant,
       activeModelId: modelId,
-      disabled: !modelId,
+      disabled: d,
+      model: activeModel,
     };
-  }, [backendContext, getAssistant, providers, searchParams, selectedConversation, service]);
+  }, [
+    backendContext,
+    getActiveModel,
+    getAssistant,
+    providers,
+    searchParams,
+    selectedConversation,
+    service,
+  ]);
 
   const avatars = useMemo(() => {
     const newAvatars: AvatarRef[] = [];
@@ -338,14 +374,14 @@ function Thread({
       `ChangeService ${modelIdOrName} ${providerIdOrName} activeModel=${selectedModelId}`,
       selectedConversation,
     );
-    const model = findModelInAll(modelIdOrName, providers, backendContext);
-    if (!model) {
+    const activeModel = findModelInAll(modelIdOrName, providers, backendContext);
+    if (!activeModel) {
       logger.error('Model not found', modelIdOrName);
       return;
     }
     const newService: AIService = {
       type: AIServiceType.Model,
-      modelId: model.id,
+      modelId: activeModel.id,
       providerIdOrName,
     };
     if (selectedConversation) {
@@ -357,8 +393,8 @@ function Thread({
       );
       updateConversations(newConversations);
     } else if (!selectedModelId && providerIdOrName === getLocalProvider(providers)?.id) {
-      await setActiveModel(model.id);
-    } else if (model.id) {
+      await setActiveModel(activeModel.id);
+    } else if (activeModel.id) {
       setService(newService);
     }
   };
@@ -817,6 +853,14 @@ function Thread({
 
   const prompt = changedPrompt === undefined ? currentPrompt : changedPrompt;
 
+  let isLoading = conversationId ? isProcessing[conversationId] || false : false;
+  let placeholder;
+  if (!selectedModelItem || model?.state === ModelState.Downloading) {
+    isLoading = true;
+    if (model?.state === ModelState.Downloading) {
+      placeholder = t('Loading the model, Please wait...');
+    }
+  }
   return (
     <ContentView
       header={
@@ -857,12 +901,13 @@ function Thread({
           disabled={disabled}
           commandManager={commandManager}
           prompt={prompt}
-          isLoading={conversationId ? isProcessing[conversationId] : false}
+          isLoading={isLoading}
           errorMessage={conversationId ? errorMessage[conversationId] : ''}
           onSendMessage={handleSendMessage}
           onUpdatePrompt={handleChangePrompt}
           tokenValidate={tokenValidator}
           usage={usage}
+          placeholder={placeholder}
         />
       )}
     </ContentView>
