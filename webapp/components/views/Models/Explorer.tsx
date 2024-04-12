@@ -17,7 +17,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { BrainCircuit, HardDriveDownload } from 'lucide-react';
-import { Ui, Model, ModelState } from '@/types';
+import { Ui, Model, ModelState, AIService, AIServiceType } from '@/types';
 import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
@@ -32,7 +32,8 @@ import { cn } from '@/lib/utils';
 import { getLocalModels } from '@/utils/data/models';
 import { AppContext } from '@/context';
 import { useAssistantStore } from '@/stores';
-import { isModelUsedInConversations } from '@/utils/data/conversations';
+import { addConversationService, isModelUsedInConversations } from '@/utils/data/conversations';
+import { getLocalProvider } from '@/utils/data/providers';
 import { Button } from '../../ui/button';
 import EditableItem from '../../common/EditableItem';
 import ModelInfos from '../../common/ModelInfos';
@@ -42,7 +43,7 @@ export type ModelsExplorerProps = {
 };
 
 function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
-  const { conversations } = useContext(AppContext);
+  const { conversations, updateConversations, providers } = useContext(AppContext);
   const { isModelUsedInAssistants } = useAssistantStore();
   const { backendContext, updateBackendStore } = useBackend();
   const router = useRouter();
@@ -91,8 +92,27 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
     logger.info(`Uninstall ${modelId}`);
     const model = models.find((m) => m.id === modelId);
     if (model) {
+      const { activeService } = backendContext.config.services;
       const isUsed: boolean =
-        isModelUsedInConversations(conversations, model) || isModelUsedInAssistants(model);
+        (activeService?.type === AIServiceType.Model && activeService.modelId === model.id) ||
+        isModelUsedInConversations(conversations, model) ||
+        isModelUsedInAssistants(model);
+      if (isUsed) {
+        const service: AIService = {
+          type: AIServiceType.Model,
+          modelId,
+          providerIdOrName: getLocalProvider(providers)?.id,
+        };
+        const updatedConversations = conversations.map((conversation) => {
+          let updatedConversation = conversation;
+          if (!conversation.services) {
+            updatedConversation = addConversationService(conversation, service);
+          }
+          return updatedConversation;
+        });
+        console.log('updatedConversations', updatedConversations);
+        await updateConversations(updatedConversations);
+      }
       const nextModelId =
         models.findLast((m) => m.state !== ModelState.Removed && m.id !== modelId)?.id || '';
       await uninstallModel(modelId, isUsed);

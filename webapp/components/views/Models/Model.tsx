@@ -29,7 +29,7 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { DownloadIcon } from '@radix-ui/react-icons';
 import useTranslation from '@/hooks/useTranslation';
-import { AIServiceType, Model, ModelState } from '@/types';
+import { AIService, AIServiceType, Model, ModelState } from '@/types';
 import { deepCopy, deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
 import useParameters from '@/hooks/useParameters';
 import ContentView from '@/components/common/ContentView';
@@ -52,10 +52,11 @@ import EmptyView from '@/components/common/EmptyView';
 import { BrainCircuit } from 'lucide-react';
 import { fileExists } from '@/utils/backend/tauri';
 import { toast } from 'sonner';
-import { isModelUsedInConversations } from '@/utils/data/conversations';
+import { addConversationService, isModelUsedInConversations } from '@/utils/data/conversations';
 import { AppContext } from '@/context';
 import { useAssistantStore } from '@/stores';
 import { OrangePill } from '@/components/ui/Pills';
+import { getLocalProvider } from '@/utils/data/providers';
 import Parameter, { ParametersRecord } from '../../common/Parameter';
 import { Button } from '../../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../../ui/table';
@@ -70,7 +71,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
 
   const [fullPathModel, setFullPathModel] = useState<string | undefined>();
   const { backendContext, updateBackendStore } = useBackend();
-  const { conversations } = useContext(AppContext);
+  const { conversations, updateConversations, providers } = useContext(AppContext);
   const { isModelUsedInAssistants } = useAssistantStore();
   const [collection, setCollection] = useState<Model[]>([]);
   const { showModal } = useContext(ModalsContext);
@@ -232,6 +233,22 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     const nextModelId =
       models.findLast((m) => m.state !== ModelState.Removed && m.id !== model.id)?.id || '';
     await uninstallModel(model.id, inUse);
+    if (inUse) {
+      const service: AIService = {
+        type: AIServiceType.Model,
+        modelId: model.id,
+        providerIdOrName: getLocalProvider(providers)?.id,
+      };
+      const updatedConversations = conversations.map((conversation) => {
+        let updatedConversation = conversation;
+        if (!conversation.services) {
+          updatedConversation = addConversationService(conversation, service);
+        }
+        return updatedConversation;
+      });
+      console.log('updatedConversations', updatedConversations);
+      await updateConversations(updatedConversations);
+    }
     await updateBackendStore();
     router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
   };

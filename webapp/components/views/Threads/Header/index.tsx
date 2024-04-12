@@ -62,6 +62,7 @@ export default function ThreadHeader({
     selectedModelId,
   );
   const selectedModel = service.model;
+  console.log('Header', selectedModel, service);
   const modelId = selectedModel?.id || selectedModelId;
 
   const selectedItem = modelItems.find((item) => item.key === modelId);
@@ -88,8 +89,8 @@ export default function ThreadHeader({
   let title;
   if (selectedAssistantId) {
     title = <AssistantTitle assistant={assistant} />;
-  } else if (selectedItem) {
-    title = <ModelTitle selectedItem={selectedItem} selectedModel={selectedModel} />;
+  } else if (selectedModel) {
+    title = <ModelTitle selectedModel={selectedModel} />;
   } else if (modelItems.length === 0 && !selectedConversationId) {
     return (
       <div className="flex w-full flex-col items-start justify-between px-4 py-0 sm:flex-row sm:items-center">

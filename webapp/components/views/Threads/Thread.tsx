@@ -140,7 +140,7 @@ function Thread({
         newMessages = newMessages.map((msg, index) => {
           const { author } = msg;
           if (author.role === 'assistant') {
-            const model = findModelInAll(author.name, providers, backendContext);
+            const model = findModelInAll(author.name, providers, backendContext, true);
             author.name = model?.title || model?.name || author.name;
           }
           if (stream && index === newMessages.length - 1) {
@@ -191,7 +191,6 @@ function Thread({
 
   const {
     modelItems,
-    selectedModelItem,
     commandManager,
     assistant,
     activeModelId: selectedModelId,
@@ -212,7 +211,7 @@ function Thread({
       }
       activeModel = findModel(modelId, backendContext.config.models.items);
     } else {
-      activeModel = findModelInAll(modelId, providers, backendContext);
+      activeModel = findModelInAll(modelId, providers, backendContext, true);
     }
 
     const download = backendContext.downloads?.find((d) => d.id === activeModel?.id);
@@ -223,18 +222,18 @@ function Thread({
     }
 
     const items = getModelsAsItems(providers, backendContext, modelId);
-    const mi = items.find((m) => m.key === modelId);
+    console.log('activeModel', activeModel, modelId, selectedConversation);
     let d = false;
-    if (!mi) {
+    if (!activeModel) {
       modelId = undefined;
       d = true;
-    } else if (activeModel?.state === ModelState.Downloading) {
+    } else if (activeModel.state === ModelState.Downloading) {
       d = true;
     }
     const manager = getCommandManager(items);
     return {
       modelItems: items,
-      selectedModelItem: mi,
+      /* selectedModelItem: mi, */
       commandManager: manager,
       assistant: newAssistant,
       activeModelId: modelId,
@@ -374,7 +373,7 @@ function Thread({
       `ChangeService ${modelIdOrName} ${providerIdOrName} activeModel=${selectedModelId}`,
       selectedConversation,
     );
-    const activeModel = findModelInAll(modelIdOrName, providers, backendContext);
+    const activeModel = findModelInAll(modelIdOrName, providers, backendContext, true);
     if (!activeModel) {
       logger.error('Model not found', modelIdOrName);
       return;
@@ -529,12 +528,13 @@ function Thread({
     }
     let selectedModel;
     if (result.modelName) {
-      selectedModel = findModelInAll(result.modelName, providers, backendContext);
+      selectedModel = findModelInAll(result.modelName, providers, backendContext, true);
     } else {
       selectedModel = findModelInAll(
         getConversationModelId(selectedConversation) || selectedModelId,
         providers,
         backendContext,
+        true,
       );
     }
 
@@ -619,12 +619,13 @@ function Thread({
     }
     let selectedModel;
     if (result.modelName) {
-      selectedModel = findModelInAll(result.modelName, providers, backendContext);
+      selectedModel = findModelInAll(result.modelName, providers, backendContext, true);
     } else {
       selectedModel = findModelInAll(
         getConversationModelId(selectedConversation) || selectedModelId,
         providers,
         backendContext,
+        true,
       );
     }
     if (!selectedModel) {
@@ -855,7 +856,7 @@ function Thread({
 
   let isLoading = conversationId ? isProcessing[conversationId] || false : false;
   let placeholder;
-  if (!selectedModelItem || model?.state === ModelState.Downloading) {
+  if (!model || model?.state === ModelState.Downloading) {
     isLoading = true;
     if (model?.state === ModelState.Downloading) {
       placeholder = t('Loading the model, Please wait...');

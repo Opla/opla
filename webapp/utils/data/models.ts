@@ -71,8 +71,10 @@ export const findModelInAll = (
   modelIdOrName: string | undefined,
   providers: Provider[],
   backendContext: OplaContext,
+  full?: boolean,
 ) => {
-  const allModels = getAllModels(providers, backendContext);
+  const allModels = getAllModels(providers, backendContext, full);
+  console.log('findModelInAll', modelIdOrName, allModels);
   return findModel(modelIdOrName, allModels);
 };
 

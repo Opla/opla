@@ -71,7 +71,7 @@ export const getActiveService = (
     provider = findProvider(providerIdOrName, providers);
     model = findModel(modelId, provider?.models || []);
     if (!model && modelId) {
-      model = findModelInAll(modelId, providers, backendContext);
+      model = findModelInAll(modelId, providers, backendContext, true);
     }
     if (!provider) {
       providerIdOrName = model?.provider || OplaProvider.name;
@@ -100,7 +100,7 @@ export const getActiveService = (
       }
     }
 
-    model = findModelInAll(modelId, providers, backendContext);
+    model = findModelInAll(modelId, providers, backendContext, true);
     provider = findProvider(model?.provider || providerIdOrName, providers);
     if (provider?.models?.find((m) => m.id === model?.id) === undefined) {
       provider = undefined;

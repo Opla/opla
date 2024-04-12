@@ -146,6 +146,15 @@ export const getConversationService = (
   return service;
 };
 
+export const getConversationAssistant = (conversation: Conversation) => {
+  let assistantId;
+  const service = conversation.services?.find((c) => c.type === AIServiceType.Assistant);
+  if (service?.type === AIServiceType.Assistant) {
+    ({ assistantId } = service);
+  }
+  return assistantId;
+};
+
 export const removeConversationService = (
   conversation: Conversation,
   serviceType: AIServiceType,
