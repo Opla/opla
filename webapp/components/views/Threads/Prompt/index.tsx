@@ -44,6 +44,7 @@ export type PromptProps = {
   isLoading: boolean;
   errorMessage: string;
   disabled: boolean;
+  placeholder: string | undefined;
   onUpdatePrompt: (prompt: ParsedPrompt) => void;
   onSendMessage: (prompt?: ParsedPrompt) => void;
   tokenValidate: TokenValidator;
@@ -56,6 +57,7 @@ export default function Prompt({
   commandManager,
   errorMessage,
   disabled,
+  placeholder,
   onUpdatePrompt,
   onSendMessage,
   tokenValidate,
@@ -180,11 +182,12 @@ export default function Prompt({
             <PromptInput
               value={prompt}
               textareaRef={textareaRef}
-              placeholder={t('Send a message...')}
+              placeholder={placeholder || t('Send a message...')}
               className="max-h-[240px] min-h-[36px]"
               onValueChange={handleValueChange}
               onFocus={handleFocus}
               onKeyDown={handleKeypress}
+              disabled={disabled}
             />
           </PromptCommands>
           <Tooltip>
