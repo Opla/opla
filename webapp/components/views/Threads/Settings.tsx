@@ -17,8 +17,6 @@ import useTranslation from '@/hooks/useTranslation';
 import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackendContext';
 import { getConversationAssets, updateConversation } from '@/utils/data/conversations';
-import { findModel } from '@/utils/data/models';
-import { findProvider, getLocalProvider } from '@/utils/data/providers';
 import { Conversation, Preset } from '@/types';
 import { getFilename } from '@/utils/misc';
 import EditPresets from '@/components/common/EditPresets';
@@ -38,21 +36,11 @@ export default function Settings({
 }) {
   const { t } = useTranslation();
   const { conversations, updateConversations, providers } = useContext(AppContext);
-  const { backendContext, getActiveModel } = useBackend();
+  const { backendContext } = useBackend();
 
   const selectedConversation = conversations.find((c) => c.id === conversationId);
-  const activeModel = getActiveModel();
-  const service = getActiveService(
-    selectedConversation,
-    undefined,
-    providers,
-    backendContext,
-    activeModel,
-  );
-  const model = findModel(activeModel, backendContext.config.models.items);
-  const provider = selectedConversation?.provider
-    ? findProvider(selectedConversation?.provider, providers)
-    : getLocalProvider(providers);
+  const service = getActiveService(selectedConversation, undefined, providers, backendContext);
+  const { model, provider } = service;
 
   const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;

@@ -76,7 +76,6 @@ export default function EditPreset<T>({
   const provider = service?.provider || _provider;
   const parametersDefinition = getCompletionParametersDefinition(provider);
   const modelName = service?.model?.id || presetProperties?.model || model?.name;
-  console.log('modelName', modelName, service, presetProperties, model, provider);
   const preset = findCompatiblePreset(presetProperties?.preset, presets, modelName, provider);
   const {
     parameters = {},

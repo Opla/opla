@@ -39,14 +39,13 @@ export const getActiveService = (
   assistant: Assistant | undefined,
   providers: Provider[],
   backendContext: OplaContext,
-  _modelId: string | undefined,
+  _modelId?: string | undefined,
 ): AIImplService => {
   const type = assistant ? AIServiceType.Assistant : AIServiceType.Model;
   let activeService: AIService | undefined = conversation
     ? getConversationService(conversation, type, assistant?.id)
     : backendContext.config.services.activeService;
   let modelId = _modelId;
-
   let model: Model | undefined;
   let provider: Provider | undefined;
   let providerIdOrName = conversation?.provider;

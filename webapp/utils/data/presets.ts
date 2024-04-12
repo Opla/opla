@@ -77,9 +77,10 @@ export const mergePresets = (presets: Preset[], newPresets: Preset[]) => {
 };
 
 export const matchModel = (p: Preset, model: string) =>
-  p.id.toLowerCase().indexOf(model.toLowerCase()) > -1;
+  model.toLowerCase().indexOf(p.id.toLowerCase()) > -1;
+
 export const matchProvider = (p: Preset, provider: Provider) =>
-  p.id.toLowerCase().indexOf(provider.name.toLowerCase()) > -1;
+  provider.name.toLowerCase().indexOf(p.id.toLowerCase()) > -1;
 
 export const findCompatiblePreset = (
   presetId: string | undefined,
@@ -88,7 +89,6 @@ export const findCompatiblePreset = (
   provider?: Provider,
 ) => {
   let compatiblePreset = presets.find((p) => p.id === presetId);
-  console.log('findCompatiblePreset', compatiblePreset, model, provider);
   if (!compatiblePreset) {
     if (model && !compatiblePreset) {
       compatiblePreset = presets.find((p) => matchModel(p, model));
