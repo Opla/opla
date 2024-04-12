@@ -33,6 +33,7 @@ import { AppContext } from '@/context';
 import Opla from '@/utils/providers/opla';
 import { getCompletionParametersDefinition } from '@/utils/providers';
 import {
+  AIImplService,
   ContextWindowPolicy,
   ConversationPreset,
   Model,
@@ -55,8 +56,9 @@ import Presets from './Presets';
 
 export default function EditPreset<T>({
   presetProperties,
-  provider,
+  provider: _provider,
   model,
+  service,
   portal = true,
   className,
   onChange,
@@ -64,14 +66,16 @@ export default function EditPreset<T>({
   presetProperties: Partial<Preset & ConversationPreset>;
   provider: Provider | undefined;
   model: Model | undefined;
+  service?: AIImplService;
   portal?: boolean;
   className?: string;
   onChange: (newpreset: Partial<T>) => void;
 }) {
   const { t } = useTranslation();
   const { presets } = useContext(AppContext);
+  const provider = service?.provider || _provider;
   const parametersDefinition = getCompletionParametersDefinition(provider);
-  const modelName = presetProperties?.model ?? model?.name;
+  const modelName = service?.model?.id || presetProperties?.model || model?.name;
   const preset = findCompatiblePreset(presetProperties?.preset, presets, modelName, provider);
   const {
     parameters = {},

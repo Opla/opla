@@ -17,13 +17,12 @@ import useTranslation from '@/hooks/useTranslation';
 import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackendContext';
 import { getConversationAssets, updateConversation } from '@/utils/data/conversations';
-import { findModel } from '@/utils/data/models';
-import { findProvider, getLocalProvider } from '@/utils/data/providers';
 import { Conversation, Preset } from '@/types';
 import { getFilename } from '@/utils/misc';
 import EditPresets from '@/components/common/EditPresets';
 import { ConversationError } from '@/types/ui';
 import CopyToClipBoard from '@/components/common/CopyToClipBoard';
+import { getActiveService } from '@/utils/services';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { Textarea } from '../../ui/textarea';
 import { Button } from '../../ui/button';
@@ -37,14 +36,11 @@ export default function Settings({
 }) {
   const { t } = useTranslation();
   const { conversations, updateConversations, providers } = useContext(AppContext);
-  const { backendContext, getActiveModel } = useBackend();
+  const { backendContext } = useBackend();
 
   const selectedConversation = conversations.find((c) => c.id === conversationId);
-  const activeModel = getActiveModel();
-  const model = findModel(activeModel, backendContext.config.models.items);
-  const provider = selectedConversation?.provider
-    ? findProvider(selectedConversation?.provider, providers)
-    : getLocalProvider(providers);
+  const service = getActiveService(selectedConversation, undefined, providers, backendContext);
+  const { model, provider } = service;
 
   const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
@@ -118,6 +114,7 @@ export default function Settings({
             presetProperties={selectedConversation as Partial<Preset>}
             provider={provider}
             model={model}
+            service={service}
             onChange={handleChangePreset}
             className="h-full"
           />

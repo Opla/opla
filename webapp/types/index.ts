@@ -145,6 +145,8 @@ export type Preset = BaseNamedRecord &
   };
 
 export type ConversationPreset = InlinePreset & {
+  services?: AIService[];
+
   // For compatibility with Conversation
   // Should be replaced
   preset?: string;
@@ -197,8 +199,6 @@ export type Conversation = BaseNamedRecord &
 
     currentPrompt?: string | ParsedPrompt;
     note?: string;
-
-    services?: AIService[];
 
     importedFrom?: string;
     temp?: boolean;
