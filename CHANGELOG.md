@@ -1,3 +1,10 @@
+# [1.0.0-alpha.107](https://github.com/Opla/opla/compare/v1.0.0-alpha.106...v1.0.0-alpha.107) (2024-04-12)
+
+
+### Features
+
+* If model downloading wait for in Prompt [#706](https://github.com/Opla/opla/issues/706) ([#776](https://github.com/Opla/opla/issues/776)) ([d933e76](https://github.com/Opla/opla/commit/d933e76087c6edee7161c746ce214b3c7d9977bf))
+
 # [1.0.0-alpha.106](https://github.com/Opla/opla/compare/v1.0.0-alpha.105...v1.0.0-alpha.106) (2024-04-12)
 
 
