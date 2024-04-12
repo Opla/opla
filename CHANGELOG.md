@@ -1,3 +1,10 @@
+# [1.0.0-alpha.106](https://github.com/Opla/opla/compare/v1.0.0-alpha.105...v1.0.0-alpha.106) (2024-04-12)
+
+
+### Bug Fixes
+
+* GPT-4 turbo preview use ChatGPT-4 preset [#769](https://github.com/Opla/opla/issues/769) ([#775](https://github.com/Opla/opla/issues/775)) ([2a2513c](https://github.com/Opla/opla/commit/2a2513ce87e38a7fc250a5feb2edefcf2b686a79))
+
 # [1.0.0-alpha.105](https://github.com/Opla/opla/compare/v1.0.0-alpha.104...v1.0.0-alpha.105) (2024-04-11)
 
 
