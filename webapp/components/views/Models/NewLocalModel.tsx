@@ -195,7 +195,7 @@ function NewLocalModel({
       router.push(`${Page.Models}/${id}`);
     }
     if (!restored) {
-      showModal(ModalIds.DownloadModel, { item: selectedModel });
+      showModal(ModalIds.Downloads, { item: selectedModel });
     } else {
       toast.success(`${t('Model restored')} ${selectedModel.name}`);
     }

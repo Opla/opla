@@ -199,3 +199,22 @@ export const getModelsAsItems = (
   const providerItems = getProviderModelsAsItems(providers, selectedModelname);
   return [...localItems, ...providerItems];
 };
+
+export const getModelStateAsString = (model: Model | undefined) => {
+  let state = 'Not found';
+  if (model) {
+    if (model.state === ModelState.Ok) {
+      state = 'Completed';
+    } else if (model.state === ModelState.Pending) {
+      state = 'Please wait...';
+    } else if (model.state === ModelState.Error) {
+      state = 'Error';
+    } else if (model.state === ModelState.Downloading) {
+      state = 'Downloading';
+    } else {
+      state = 'Not found';
+    }
+  }
+
+  return state;
+};

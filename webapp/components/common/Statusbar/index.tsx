@@ -64,13 +64,13 @@ export default function Statusbar() {
 
   const displayDownloads = () => {
     const id = download?.id;
-    const downloadModel = findModel(id, backendContext.config.models.items);
+    /* const downloadModel = findModel(id, backendContext.config.models.items);
     if (downloadModel) {
-      showModal(ModalIds.DownloadModel, {
+      showModal(ModalIds.Downloads, {
         item: downloadModel,
         onAction: handleCancelDownload,
       });
-    } else if (id) {
+    } else {
       showModal(ModalIds.Downloads, {
         item: {
           id,
@@ -79,7 +79,15 @@ export default function Statusbar() {
         },
         onAction: handleCancelDownload,
       });
-    }
+    } */
+    showModal(ModalIds.Downloads, {
+      item: {
+        id,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+      onAction: handleCancelDownload,
+    });
   };
 
   return (
@@ -113,21 +121,21 @@ export default function Statusbar() {
           )}
         </button>
 
-        {download && (
-          <button
-            className="ml-4 flex flex-row items-center justify-center gap-1"
-            type="button"
-            onClick={displayDownloads}
-          >
-            <span className="tabular-nums">
-              <DownloadCloud className="h-4 w-4" strokeWidth={1.5} />
-            </span>
+        <button
+          className="ml-4 flex flex-row items-center justify-center gap-1"
+          type="button"
+          onClick={displayDownloads}
+        >
+          <span className="tabular-nums">
+            <DownloadCloud className="h-4 w-4" strokeWidth={1.5} />
+          </span>
+          {download && (
             <span>
               <span>{download.fileName} </span>
               <span>{download.percentage} %</span>
             </span>
-          </button>
-        )}
+          )}
+        </button>
       </div>
       <div className="flex flex-row gap-2">
         {sys && (

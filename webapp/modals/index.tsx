@@ -25,7 +25,7 @@ import NewProviderDialog from './templates/NewProvider';
 import OpenAIDialog from './openai';
 import NewLocalModelDialog from './models';
 import NewPresetDialog from './presets';
-import DownloadModelDialog from './models/download';
+import DownloadsDialog from './downloads';
 
 const Modals: ModalRef[] = [
   {
@@ -165,29 +165,6 @@ const Modals: ModalRef[] = [
     },
   },
   {
-    id: ModalIds.Downloads,
-    Component: function DownloadsDialog({ visible, onClose, data }) {
-      const { t } = useTranslation();
-      const item = data?.item as BaseNamedRecord;
-      return (
-        <AlertDialog
-          key={ModalIds.Downloads}
-          id={ModalIds.Downloads}
-          title={t('Stop the download ?')}
-          actions={[
-            { label: t('Stop'), value: 'Stop' },
-            { label: t('Cancel'), value: 'Cancel' },
-          ]}
-          visible={visible}
-          onClose={onClose}
-          data={data}
-        >
-          <div>{item?.name || ''}</div>
-        </AlertDialog>
-      );
-    },
-  },
-  {
     id: ModalIds.NewPreset,
     Component: function NPDialog({ visible, onClose, data }) {
       return (
@@ -216,10 +193,10 @@ const Modals: ModalRef[] = [
     },
   },
   {
-    id: ModalIds.DownloadModel,
+    id: ModalIds.Downloads,
     Component: function DMDialog({ visible, onClose, data }) {
       return (
-        <DownloadModelDialog
+        <DownloadsDialog
           key={ModalIds.Downloads}
           id={ModalIds.Downloads}
           open={visible}

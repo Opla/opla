@@ -12,35 +12,119 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useEffect, useMemo, useState } from 'react';
+import { CloudDownload, File, Search, TriangleAlert, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Download, Model } from '@/types';
+import { Download, ModelState } from '@/types';
 import { Progress } from '@/components/ui/progress';
 import { formatFileSize } from '@/utils/download';
 import { Separator } from '@/components/ui/separator';
 import useTranslation from '@/hooks/useTranslation';
+import useBackend from '@/hooks/useBackendContext';
+import { Button } from '@/components/ui/button';
+import { findModel, getModelStateAsString } from '@/utils/data/models';
+import EmptyView from '@/components/common/EmptyView';
 
 type DownloadModelProps = {
   className?: string;
-  model: Model;
   download: Download | undefined;
+  onAction: (action: string) => void;
 };
-function DownloadModel({ className, model, download }: DownloadModelProps) {
+function DownloadModel({ className, download, onAction }: DownloadModelProps) {
   const { t } = useTranslation();
-  return (
-    <div className={cn('', className)}>
-      <h1 className="pb-4">{model.name}</h1>
+  const [downloading, setDownloading] = useState<boolean>(false);
+  const { backendContext, updateBackendStore } = useBackend();
 
-      <Progress value={download?.percentage || 100} className="m-8 w-[80%]" />
-      {download && (
-        <div className="ali flex h-5 w-full items-center justify-end space-x-2 px-14 text-sm text-muted-foreground">
-          <div>{formatFileSize(download.transfered)}</div> <Separator orientation="vertical" />{' '}
-          <div>{formatFileSize(download.fileSize)}</div>
-        </div>
-      )}
-      {!download && (
-        <p className="ali flex h-5 w-full items-center justify-end space-x-2 px-14 text-sm text-muted-foreground">
-          {t('Done')}
-        </p>
+  const model = useMemo(() => {
+    let modelId = download?.id;
+    const models = backendContext.config.models.items ?? [undefined];
+    if (!modelId) {
+      modelId = models.find(
+        (m) => m.state === ModelState.Pending || m.state === ModelState.Downloading,
+      )?.id;
+    }
+    return findModel(modelId, models);
+  }, [backendContext, download]);
+
+  useEffect(() => {
+    const asyncFunc = async () => {
+      if (downloading && !download && model?.state !== ModelState.Pending) {
+        await updateBackendStore();
+        onAction('Close');
+        setDownloading(false);
+      } else if (download) {
+        setDownloading(true);
+      }
+    };
+    asyncFunc();
+  }, [download, model, onAction]);
+
+  let state: 'downloading' | 'ok' | 'pending' | 'error';
+  if (download && model?.state === ModelState.Downloading) {
+    state = 'downloading';
+  } else if (model?.state === ModelState.Ok) {
+    state = 'ok';
+  } else if (model?.state === ModelState.Error) {
+    state = 'error';
+  } else {
+    state = 'pending';
+  }
+  if (!model) {
+    return (
+      <EmptyView
+        title="No downloads"
+        description=""
+        icon={<CloudDownload />}
+        className="h-full text-muted-foreground"
+      />
+    );
+  }
+
+  return (
+    <div className={cn('flex flex-row items-center gap-3', className)}>
+      <File className="h-12 w-12 p-2 text-primary" strokeWidth={1.5} />
+      <div className="flex w-full flex-col gap-2">
+        <p className="text-sm">{model?.name}</p>
+
+        {(download || model?.state === ModelState.Downloading) && (
+          <>
+            <Progress value={download?.percentage ?? 0} className="w-full" />
+            {download && (
+              <div className="flex h-3 w-full items-center gap-2 text-xs tabular-nums text-muted-foreground">
+                {formatFileSize(download.transfered)} {t('of')} {formatFileSize(download.fileSize)}{' '}
+                <Separator orientation="vertical" className="bg-muted-foreground" />(
+                {formatFileSize(download.transferRate)}/sec)
+              </div>
+            )}
+            {!download && (
+              <div className="flex h-3 w-full items-center gap-2 text-xs text-muted-foreground">
+                {t('Starting...')}
+              </div>
+            )}
+          </>
+        )}
+        {!download && model && (
+          <p className="flex h-3 w-full items-center gap-2 text-xs text-muted-foreground">
+            {t(getModelStateAsString(model))}{' '}
+            <Separator orientation="vertical" className="bg-muted-foreground" />{' '}
+            {formatFileSize(model?.size ?? 0)}
+          </p>
+        )}
+      </div>
+      {state !== 'pending' && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            if (state === 'downloading') {
+              onAction('Cancel');
+            }
+          }}
+        >
+          {state === 'downloading' && <X className="h-4 w-4" strokeWidth={1.5} />}
+          {state === 'ok' && <Search className="h-4 w-4" strokeWidth={1.5} />}
+          {state === 'error' && <TriangleAlert className="h-4 w-4 text-error" strokeWidth={1.5} />}
+        </Button>
       )}
     </div>
   );

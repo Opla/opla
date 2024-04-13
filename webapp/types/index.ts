@@ -284,7 +284,7 @@ export type Provider = BaseNamedRecord & {
 export enum ModelState {
   Pending = 'pending',
   Downloading = 'downloading',
-  Ok = 'Ok',
+  Ok = 'ok',
   Error = 'error',
   NotFound = 'not_found',
   Removed = 'removed',
