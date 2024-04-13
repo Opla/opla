@@ -1,3 +1,10 @@
+# [1.0.0-alpha.109](https://github.com/Opla/opla/compare/v1.0.0-alpha.108...v1.0.0-alpha.109) (2024-04-13)
+
+
+### Bug Fixes
+
+* refactor download models [#654](https://github.com/Opla/opla/issues/654) ([#779](https://github.com/Opla/opla/issues/779)) ([960bd1d](https://github.com/Opla/opla/commit/960bd1d470cf9895c19dd2d9a9b441b10efc9e76))
+
 # [1.0.0-alpha.108](https://github.com/Opla/opla/compare/v1.0.0-alpha.107...v1.0.0-alpha.108) (2024-04-12)
 
 
