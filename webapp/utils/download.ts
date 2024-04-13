@@ -13,9 +13,14 @@
 // limitations under the License.
 
 const formatFileSize = (bytes: number, fractionDigits = 2) => {
-  if (bytes === 0) return '0 b';
-  const k = 1000;
+  if (bytes === 0 || bytes === undefined || bytes === null) return '0 b';
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+  if (bytes < 1) {
+    return `${parseFloat(bytes.toFixed(fractionDigits))} ${sizes[3]}`;
+  }
+
+  const k = 1000;
+
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / k ** i).toFixed(fractionDigits))} ${sizes[i]}`;
 };

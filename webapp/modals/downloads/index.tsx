@@ -23,7 +23,7 @@ import logger from '@/utils/logger';
 import { cancelDownloadModel } from '@/utils/backend/commands';
 import { Page } from '@/types/ui';
 
-function DownloadModelDialog({
+function DownloadsDialog({
   id,
   open,
   data,
@@ -51,25 +51,22 @@ function DownloadModelDialog({
       if (pathname.startsWith(Page.Models)) {
         router.push(Page.Models);
       }
+    } else if (action === 'Close') {
+      onClose();
     }
   };
 
   return (
     <AlertDialog
       id={id}
-      title={`${t('Downloading')} ${model.title || model.name}`}
-      actions={
-        download
-          ? [{ label: t('Cancel'), value: 'Cancel' }]
-          : [{ label: t('Close'), value: 'Close' }]
-      }
+      title={t('Downloads')}
       visible={open}
       onClose={onClose}
       onAction={handleAction}
     >
-      <DownloadModel model={model} download={download} />
+      <DownloadModel download={download} onAction={handleAction} />
     </AlertDialog>
   );
 }
 
-export default DownloadModelDialog;
+export default DownloadsDialog;

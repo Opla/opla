@@ -92,7 +92,6 @@ export enum ModalIds {
   Downloads = 'downloads',
   NewPreset = 'newpreset',
   EditTarget = 'edittarget',
-  DownloadModel = 'downloadmodel',
 }
 
 export type ConversationError = {

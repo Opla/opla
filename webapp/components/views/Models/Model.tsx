@@ -320,10 +320,12 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       toolbar={
         model.state !== ModelState.Removed && (
           <div className="flex flex-row gap-2">
-            <Button variant="secondary" className="" onClick={() => handleLocalInstall()}>
-              {isDownloading && t('Downloading...')}
-              {!isDownloading && (local ? t('Uninstall') : t('Install'))}
-            </Button>
+            {model.state !== ModelState.Pending && (
+              <Button variant="secondary" className="" onClick={() => handleLocalInstall()}>
+                {isDownloading && t('Downloading...')}
+                {!isDownloading && (local ? t('Uninstall') : t('Install'))}
+              </Button>
+            )}
             {/* local && (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
