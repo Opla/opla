@@ -343,7 +343,7 @@ async fn install_model<R: Runtime>(
     let model_name = model.name.clone();
     let (mut model_entity, model_id) = store.models.create_model(
         model,
-        None,
+        Some("pending".to_string()),
         Some(path.clone()),
         Some(file_name.clone())
     );

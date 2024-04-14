@@ -57,7 +57,7 @@ function DownloadModel({ className, download, onAction }: DownloadModelProps) {
       }
     };
     asyncFunc();
-  }, [download, model, onAction]);
+  }, [download, model, onAction, downloading, updateBackendStore]);
 
   let state: 'downloading' | 'ok' | 'pending' | 'error';
   if (download && model?.state === ModelState.Downloading) {

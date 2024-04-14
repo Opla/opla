@@ -110,7 +110,12 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     return [backendContext.downloads || [], mdls, mdl, dls, l, isUsed];
   }, [selectedModelId, backendContext, collection, conversations, isModelUsedInAssistants]);
 
-  const isDownloading = downloads.findIndex((d) => d.id === model?.id) !== -1;
+  let isDownloading = false;
+  if (local) {
+    isDownloading =
+      model?.state === ModelState.Downloading ||
+      downloads.findIndex((d) => d.id === model?.id) !== -1;
+  }
 
   const handleParametersChange = async (id: string | undefined, parameters: ParametersRecord) => {
     logger.info(`change model parameters ${id} ${parameters}`);
