@@ -1,3 +1,10 @@
+# [1.0.0-alpha.111](https://github.com/Opla/opla/compare/v1.0.0-alpha.110...v1.0.0-alpha.111) (2024-04-14)
+
+
+### Bug Fixes
+
+* create legacy dialog [#728](https://github.com/Opla/opla/issues/728) ([#783](https://github.com/Opla/opla/issues/783)) ([650fa35](https://github.com/Opla/opla/commit/650fa352687dd6842870d438bea1d730ff7c57f3))
+
 # [1.0.0-alpha.110](https://github.com/Opla/opla/compare/v1.0.0-alpha.109...v1.0.0-alpha.110) (2024-04-14)
 
 
