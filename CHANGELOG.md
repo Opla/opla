@@ -1,3 +1,10 @@
+# [1.0.0-alpha.110](https://github.com/Opla/opla/compare/v1.0.0-alpha.109...v1.0.0-alpha.110) (2024-04-14)
+
+
+### Bug Fixes
+
+* wrong name of 'uninstall' button [#780](https://github.com/Opla/opla/issues/780) ([#782](https://github.com/Opla/opla/issues/782)) ([ce0360d](https://github.com/Opla/opla/commit/ce0360d03a7bbe834eabec9d60cf2f93979661f0))
+
 # [1.0.0-alpha.109](https://github.com/Opla/opla/compare/v1.0.0-alpha.108...v1.0.0-alpha.109) (2024-04-13)
 
 
