@@ -1,3 +1,10 @@
+# [1.0.0-alpha.116](https://github.com/Opla/opla/compare/v1.0.0-alpha.115...v1.0.0-alpha.116) (2024-04-15)
+
+
+### Bug Fixes
+
+* edit large message resize [#695](https://github.com/Opla/opla/issues/695) ([#787](https://github.com/Opla/opla/issues/787)) ([1ea6510](https://github.com/Opla/opla/commit/1ea65107005be11cb25c26456553270191685d4e))
+
 # [1.0.0-alpha.115](https://github.com/Opla/opla/compare/v1.0.0-alpha.114...v1.0.0-alpha.115) (2024-04-15)
 
 
