@@ -16,6 +16,7 @@ import { ArrowDown } from 'lucide-react';
 import useScroll, { KeyedScrollPosition } from '@/hooks/useScroll';
 import { AvatarRef, Message, MessageImpl } from '@/types';
 // import logger from '@/utils/logger';
+import { useState } from 'react';
 import MessageView from './MessageView';
 import { Button } from '../../../ui/button';
 
@@ -50,6 +51,13 @@ function ConversationList({
   onStartMessageEdit,
   onCopyMessage,
 }: ConversationListProps) {
+  const [edit, setEdit] = useState<boolean>(false);
+
+  const handleStartMessageEdit = (messageId: string, index: number) => {
+    setEdit(true);
+    onStartMessageEdit(messageId, index);
+  };
+
   const handleUpdatePosition = (props: KeyedScrollPosition) => {
     // logger.info('updated newPosition', props);
     onScrollPosition(props);
@@ -63,7 +71,7 @@ function ConversationList({
 
   return (
     <div className="flex grow flex-col overflow-hidden">
-      <div ref={ref} className="overflow-y-auto">
+      <div ref={ref} className={edit ? 'h-full overflow-y-auto' : 'overflow-y-auto'}>
         <div>
           {messages.map((m, index) => (
             <MessageView
@@ -73,7 +81,8 @@ function ConversationList({
               message={m}
               avatars={avatars}
               disabled={disabled}
-              onStartEdit={onStartMessageEdit}
+              onStartEdit={handleStartMessageEdit}
+              onCancelMessageEdit={() => setEdit(false)}
               onResendMessage={() => {
                 onResendMessage(m);
               }}

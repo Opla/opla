@@ -79,6 +79,7 @@ type MessageComponentProps = {
   disabled?: boolean;
   edit: boolean;
   onStartEdit: (messageId: string, index: number) => void;
+  onCancelMessageEdit: () => void;
   onResendMessage: () => void;
   onDeleteMessage: () => void;
   onDeleteAssets: () => void;
@@ -93,6 +94,7 @@ function MessageComponent({
   disabled = false,
   edit,
   onStartEdit,
+  onCancelMessageEdit,
   onResendMessage,
   onDeleteMessage,
   onChangeContent,
@@ -140,10 +142,12 @@ function MessageComponent({
       onChangeContent(newContent, isUser);
     }
     setEditValue(undefined);
+    onCancelMessageEdit();
   };
 
   const handleCancelEdit = () => {
     setEditValue(undefined);
+    onCancelMessageEdit();
   };
 
   let state = DisplayMessageState.Markdown;
@@ -201,15 +205,22 @@ function MessageComponent({
                       </div>
                     )}
                     {state === DisplayMessageState.Edit && (
-                      <Textarea
-                        autoFocus
-                        ref={inputRef}
-                        className="-mx-3 mb-4 mt-0 min-h-[40px] w-full resize-none text-sm"
-                        value={editValue !== undefined ? editValue : content}
-                        onChange={(e) => {
-                          setEditValue(e.target.value);
-                        }}
-                      />
+                      <div className="-ml-3 mb-4 p-2">
+                        <Textarea
+                          autoresize
+                          autoFocus
+                          tabIndex={0}
+                          ref={inputRef}
+                          autoComplete="off"
+                          autoCorrect="off"
+                          className="max-h-[600px] min-h-[36px] w-full text-sm"
+                          value={editValue !== undefined ? editValue : content}
+                          onChange={(e) => {
+                            setEditValue(e.target.value);
+                          }}
+                          maxRows={30}
+                        />
+                      </div>
                     )}
                   </div>
                   {state === DisplayMessageState.Asset && isHover && (

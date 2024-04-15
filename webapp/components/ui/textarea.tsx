@@ -6,11 +6,13 @@ import useAutoResizeTextarea from '@/hooks/useAutoResizeTextArea';
 
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   autoresize?: boolean;
+  minRows?: number;
+  maxRows?: number;
 }
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, autoresize, children, ...props }, ref) => {
-    const { textAreaRef } = useAutoResizeTextarea(ref);
+  ({ className, autoresize, minRows = 1, maxRows = 11, children, ...props }, ref) => {
+    const { textAreaRef } = useAutoResizeTextarea(ref, minRows, maxRows);
     const classes = cn(
       'focus-visible:caret-primary flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
       autoresize ? 'resize-none' : 'min-h-[80px]',
