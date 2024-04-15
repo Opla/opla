@@ -99,14 +99,14 @@ function Dialog({
     const dialog = modalRef;
     const legacyDialog = legacyModalRef;
     if (nativeDialog && dialog.current) {
-      dialog.current?.addEventListener('click', handleDialogClick);
+      dialog.current.addEventListener('click', handleDialogClick);
       if (open) {
         dialog.current.showModal();
       } else {
         dialog.current.close();
       }
     } else if (!nativeDialog && legacyDialog.current) {
-      legacyDialog.current?.addEventListener('click', handleDialogClick);
+      legacyDialog.current.addEventListener('click', handleDialogClick);
       if (open) {
         legacyDialog.current.classList.remove('hidden');
       } else {

@@ -14,7 +14,7 @@
 
 'use client';
 
-import { ChangeEvent, MouseEvent, useCallback, useContext, useRef } from 'react';
+import { ChangeEvent, MouseEvent, useCallback, useContext, useEffect, useRef } from 'react';
 import { AlertTriangle, Loader2, Paperclip, SendHorizontal } from 'lucide-react';
 import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
@@ -49,6 +49,7 @@ export type PromptProps = {
   onSendMessage: (prompt?: ParsedPrompt) => void;
   tokenValidate: TokenValidator;
   usage: { tokenCount: number; activeService?: AIImplService } | undefined;
+  needFocus: boolean;
 };
 
 export default function Prompt({
@@ -63,6 +64,7 @@ export default function Prompt({
   tokenValidate,
   isLoading,
   usage,
+  needFocus,
 }: PromptProps) {
   const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -101,6 +103,12 @@ export default function Prompt({
       }
     }
   };
+
+  useEffect(() => {
+    if (needFocus && !disabled) {
+      textareaRef.current?.focus();
+    }
+  }, [needFocus, disabled]);
 
   const handleKeypress = (e: KeyboardEvent) => {
     const textarea = e.target as HTMLTextAreaElement;
