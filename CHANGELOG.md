@@ -1,3 +1,10 @@
+# [1.0.0-alpha.114](https://github.com/Opla/opla/compare/v1.0.0-alpha.113...v1.0.0-alpha.114) (2024-04-15)
+
+
+### Features
+
+* select prompt input after 1st install [#781](https://github.com/Opla/opla/issues/781) ([#786](https://github.com/Opla/opla/issues/786)) ([c6b303e](https://github.com/Opla/opla/commit/c6b303e286fdd6d7d376186ee412e4e54b07bb71))
+
 # [1.0.0-alpha.113](https://github.com/Opla/opla/compare/v1.0.0-alpha.112...v1.0.0-alpha.113) (2024-04-15)
 
 
