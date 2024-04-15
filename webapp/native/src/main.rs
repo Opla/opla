@@ -48,7 +48,7 @@ use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
 use store::{ Store, Provider, ProviderType, ProviderMetadata, Settings, ServerConfiguration };
 use server::*;
-use sys::{Sys, SysInfos};
+use sys::{ Sys, SysInfos };
 use tauri::{ Runtime, State, Manager, App, EventLoopMessage };
 use utils::{ get_config_directory, get_data_directory };
 
@@ -109,7 +109,7 @@ async fn save_settings<R: Runtime>(
 }
 
 #[tauri::command]
-async fn get_config_dir<R: Runtime>(
+async fn get_config_path<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>
 ) -> Result<String, String> {
@@ -117,27 +117,48 @@ async fn get_config_dir<R: Runtime>(
     let config_dir = match config_dir.to_str() {
         Some(c) => { c }
         None => {
-            return Err(format!("Failed to get config directory"));
+            return Err(format!("Failed to get config path"));
         }
     };
-    println!("Config dir: {:?}", config_dir);
+    println!("Config path: {:?}", config_dir);
     Ok(config_dir.to_string())
 }
 
 #[tauri::command]
-async fn get_data_dir<R: Runtime>(
+async fn get_data_path<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>
 ) -> Result<String, String> {
-    let data_dir = get_data_directory()?;
-    let data_dir = match data_dir.to_str() {
+    let path = get_data_directory()?;
+    let path = match path.to_str() {
         Some(d) => { d }
         None => {
-            return Err(format!("Failed to get data directory"));
+            return Err(format!("Failed to get data path"));
         }
     };
-    // println!("Data dir: {:?}", data_dir);
-    Ok(data_dir.to_string())
+    Ok(path.to_string())
+}
+
+#[tauri::command]
+async fn get_models_path<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>
+) -> Result<String, String> {
+    let store = context.store.lock().await;
+    let path = match store.models.get_models_path() {
+        Ok(p) => { p }
+        _ => {
+            return Err(format!("Failed to get models path"));
+        }
+    };
+    let path = match path.to_str() {
+        Some(d) => { d }
+        None => {
+            return Err(format!("Failed to get models path"));
+        }
+    };
+    Ok(path.to_string())
 }
 
 #[tauri::command]
@@ -415,10 +436,9 @@ async fn cancel_download_model<R: Runtime>(
                     if m.is_some_id_or_name(&p.model_id) {
                         let _res = server.stop(&app).await;
                     }
-                },
-                None => {},
+                }
+                None => {}
             };
-
         }
         None => {
             return Err(format!("Model not found: {:?}", model_name_or_id));
@@ -477,14 +497,14 @@ async fn uninstall_model<R: Runtime>(
         Some(model) => {
             store.clear_active_service_if_model_equal(model.reference.id.clone());
             let mut server = context.server.lock().await;
-                        match &server.parameters {
+            match &server.parameters {
                 Some(p) => {
                     if model.reference.is_some_id_or_name(&p.model_id) {
                         let _res = server.stop(&app).await;
                         server.remove_model();
                     }
-                },
-                None => {},
+                }
+                None => {}
             };
         }
         None => {
@@ -567,14 +587,12 @@ async fn llm_call_completion<R: Runtime>(
                 p.model_id = Some(model_name.clone());
                 p.model_path = Some(model_path);
                 p
-            },
+            }
             None => {
                 return Err(format!("Opla server not started no parameters found"));
             }
         };
-        server
-            .bind::<R>(app.app_handle(), &parameters).await
-            .map_err(|err| err.to_string())?;
+        server.bind::<R>(app.app_handle(), &parameters).await.map_err(|err| err.to_string())?;
         let handle = app.app_handle();
         let response = {
             server
@@ -611,7 +629,7 @@ async fn llm_call_completion<R: Runtime>(
                 Some(p)
             },
             None => None
-        };  */      
+        };  */
         server.set_parameters(Some(parameters));
 
         let mut store = context.store.lock().await;
@@ -762,10 +780,11 @@ async fn model_download_event<R: Runtime>(
                     return Err(format!("Model download no parameters found"));
                 }
             };
-            
+
             if
                 state == "ok" &&
-                (m.reference.is_some_id_or_name(&parameters.model_id) || parameters.model_id.is_none())
+                (m.reference.is_some_id_or_name(&parameters.model_id) ||
+                    parameters.model_id.is_none())
             {
                 drop(server);
                 let res = start_server(handle, context).await;
@@ -998,8 +1017,9 @@ fn main() {
                 get_sys,
                 get_opla_configuration,
                 save_settings,
-                get_config_dir,
-                get_data_dir,
+                get_config_path,
+                get_data_path,
+                get_models_path,
                 create_dir,
                 file_exists,
                 get_provider_template,

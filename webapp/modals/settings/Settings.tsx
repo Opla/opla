@@ -37,12 +37,12 @@ export default function Settings({
       href: 'appearance',
       hrefAlias: '/settings',
     },
-    /* {
+    {
       name: 'Storage',
       id: 'storage',
       href: 'storage',
       hrefAlias: '/settings/storage',
-    }, */
+    },
   ];
 
   const { t } = useTranslation();

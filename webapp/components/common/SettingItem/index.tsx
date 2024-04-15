@@ -29,7 +29,7 @@ export default function SettingItem({
         <p className=" ">{title}</p>
         <p className="text-sm text-muted-foreground">{subtitle}</p>
       </div>
-      <div className="flex flex-row ">{children}</div>
+      <div className="flex flex-row items-center">{children}</div>
     </div>
   );
 }

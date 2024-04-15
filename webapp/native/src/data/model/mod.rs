@@ -204,6 +204,10 @@ impl ModelStorage {
         }
     }
 
+    pub fn get_models_path(&self) -> Result<PathBuf, String> {
+        Ok(get_data_directory()?.join("models"))
+    }
+
     pub fn get_path(&self, filepath: String, filename: Option<String>) -> Result<PathBuf, String> {
         let path_filename = Path::new(&filepath).join(&filename.unwrap_or("".to_string()));
         if path_filename.is_absolute() {
@@ -218,7 +222,7 @@ impl ModelStorage {
                     get_home_directory()?.join(path)
                 }
             }
-            None => get_data_directory()?.join("models"),
+            None => self.get_models_path()?,
         };
         let model_path = models_path.join(path_filename);
         Ok(model_path)

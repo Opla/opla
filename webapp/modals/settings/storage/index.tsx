@@ -17,20 +17,33 @@
 import useTranslation from '@/hooks/useTranslation';
 import SettingItem from '@/components/common/SettingItem';
 import { Button } from '@/components/ui/button';
+import { getConfigPath, getModelsPath } from '@/utils/backend/commands';
+import { useEffect, useState } from 'react';
 
 export default function Storage() {
   const { t } = useTranslation();
+  const [configDir, setConfigDir] = useState<string>();
+  const [dataDir, setDataDir] = useState<string>();
+  useEffect(() => {
+    const afunc = async () => {
+      let dir = await getConfigPath();
+      setConfigDir(dir);
+      dir = await getModelsPath();
+      setDataDir(dir);
+    };
+    afunc();
+  }, []);
+
   return (
     <>
-      <SettingItem title={t('Save data to')} subtitle={t('Choose how to save your data')}>
-        Cache / File / Database
-      </SettingItem>
       <SettingItem
         title={t('Application path')}
         subtitle={t("In this path all Opla's files are stored")}
       >
-        <p>{t('Path')}</p>
-        <Button variant="ghost">{t('Import')}</Button>
+        <p className="text-sm text-muted-foreground">{configDir}</p>
+      </SettingItem>
+      <SettingItem title={t('Models path')} subtitle={t('Where your models are saved')}>
+        <p className="text-sm text-muted-foreground">{dataDir}</p>
       </SettingItem>
       <SettingItem title={t('Backup data')} subtitle={t('From ChatGPT or others')}>
         <Button variant="ghost">{t('Import')}</Button>

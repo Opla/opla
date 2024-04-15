@@ -134,3 +134,27 @@ export const getAssistantsCollection = async (): Promise<{ assistants: []; tags:
   }
   return { assistants: [], tags: [] };
 };
+
+export const getConfigPath = async (): Promise<string | undefined> => {
+  try {
+    const configDir = await invokeTauri<string>('get_config_path');
+    logger.info('getConfigPath', configDir);
+    return configDir;
+  } catch (error) {
+    logger.error(error);
+    toast.error(`Error getting config path ${error}`);
+  }
+  return undefined;
+};
+
+export const getModelsPath = async (): Promise<string | undefined> => {
+  try {
+    const path = await invokeTauri<string>('get_models_path');
+    logger.info('getModelsPath', path);
+    return path;
+  } catch (error) {
+    logger.error(error);
+    toast.error(`Error getting data path ${error}`);
+  }
+  return undefined;
+};

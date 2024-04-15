@@ -84,7 +84,7 @@ export const writeTextFile = async (filename: string, contents: string, createDi
   const { join, dirname } = await import('@tauri-apps/api/path');
   let path = filename;
   if (createDir) {
-    const dataDir = (await invokeTauri('get_data_dir')) as string;
+    const dataDir = (await invokeTauri('get_data_path')) as string;
     path = await join(dataDir, filename);
     // const filepath = filename.split(sep).slice(0, -1).join(sep);
     const filepath = await dirname(filename);
@@ -104,7 +104,7 @@ export const readTextFile = async (filename: string, isDatadir = true) => {
   const { join } = await import('@tauri-apps/api/path');
   let dataDir = '';
   if (isDatadir) {
-    dataDir = (await invokeTauri('get_data_dir')) as string;
+    dataDir = (await invokeTauri('get_data_path')) as string;
   }
   return fsReadTextFile(await join(dataDir, filename));
 };
@@ -114,7 +114,7 @@ export const deleteFile = async (filename: string, isDatadir = true) => {
   const { join } = await import('@tauri-apps/api/path');
   let dataDir = '';
   if (isDatadir) {
-    dataDir = (await invokeTauri('get_data_dir')) as string;
+    dataDir = (await invokeTauri('get_data_path')) as string;
   }
   const path = await join(dataDir, filename);
   if (await exists(path)) {
@@ -127,7 +127,7 @@ export const deleteDir = async (dirname: string, isDatadir = true, recursive = f
   const { join } = await import('@tauri-apps/api/path');
   let dataDir = '';
   if (isDatadir) {
-    dataDir = (await invokeTauri('get_data_dir')) as string;
+    dataDir = (await invokeTauri('get_data_path')) as string;
   }
   return fsRemoveDir(await join(dataDir, dirname), { recursive });
 };
@@ -139,7 +139,7 @@ export const deleteUnusedConversationsDir = async (excludedDirs: string[]) => {
     readDir: fsReadDir,
   } = await import('@tauri-apps/api/fs');
   const { join } = await import('@tauri-apps/api/path');
-  const dataDir = (await invokeTauri('get_data_dir')) as string;
+  const dataDir = (await invokeTauri('get_data_path')) as string;
   const dirs = await fsReadDir(dataDir, { recursive: true });
   const promises: Promise<void>[] = [];
   dirs.forEach((dir) => {
