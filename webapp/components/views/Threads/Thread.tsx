@@ -110,6 +110,7 @@ function Thread({
   const [selectedMessageId, setSelectedMessageId] = useState<string | undefined>(undefined);
   const [service, setService] = useState<AIService | undefined>(undefined);
   const [usage, updateUsage] = useState<Usage | undefined>({ tokenCount: 0 });
+  const [notFocused, setNotFocused] = useState(false);
   const { getAssistant } = useAssistantStore();
 
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
@@ -171,7 +172,13 @@ function Thread({
     if (isMessageUpdating) {
       return;
     }
+    let notfocused = false;
+    if (!document.activeElement || document.activeElement.tagName === 'BODY') {
+      notfocused = true;
+    }
+    setNotFocused(notfocused);
     logger.info('getNewMessages', conversationId, selectedConversation, isMessageUpdating);
+
     setIsMessageUpdating(true);
     getNewMessages();
   }, [
@@ -230,9 +237,9 @@ function Thread({
       d = true;
     }
     const manager = getCommandManager(items);
+
     return {
       modelItems: items,
-      /* selectedModelItem: mi, */
       commandManager: manager,
       assistant: newAssistant,
       activeModelId: modelId,
@@ -908,6 +915,7 @@ function Thread({
           tokenValidate={tokenValidator}
           usage={usage}
           placeholder={placeholder}
+          needFocus={notFocused}
         />
       )}
     </ContentView>
