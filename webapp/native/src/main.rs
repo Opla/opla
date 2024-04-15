@@ -48,7 +48,7 @@ use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
 use store::{ Store, Provider, ProviderType, ProviderMetadata, Settings, ServerConfiguration };
 use server::*;
-use sys::Sys;
+use sys::{Sys, SysInfos};
 use tauri::{ Runtime, State, Manager, App, EventLoopMessage };
 use utils::{ get_config_directory, get_data_directory };
 
@@ -79,9 +79,8 @@ async fn get_sys<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>
-) -> Result<Sys, String> {
-    let mut sys: Sys = context.sys.lock().await.clone();
-    sys.refresh();
+) -> Result<SysInfos, String> {
+    let sys = context.sys.lock().await.refresh();
     Ok(sys)
 }
 
