@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { DownloadCloud, AlertTriangle, Server, BarChart3, Cpu } from 'lucide-react';
@@ -29,7 +30,7 @@ export default function Statusbar() {
   const router = useRouter();
   const { pathname } = router;
   const { t } = useTranslation();
-  const { backendContext, getActiveModel, updateBackendStore } = useBackend();
+  const { backendContext, updateBackendStore } = useBackend();
   const { usage } = useContext(AppContext);
   const [sys, setSys] = useState<Sys>();
   const { showModal } = useContext(ModalsContext);
@@ -45,8 +46,8 @@ export default function Statusbar() {
   const running = backendContext.server.status === 'started';
   const error = backendContext.server.status === 'error';
 
-  const activeModel = getActiveModel();
-  const model = findModel(activeModel, backendContext.config.models.items);
+  const modelId = backendContext.config.server.parameters.modelId as string;
+  const model = findModel(modelId, backendContext.config.models.items);
   const download = (backendContext.downloads ?? [undefined])[0];
 
   const displayServer = () => {
@@ -64,22 +65,6 @@ export default function Statusbar() {
 
   const displayDownloads = () => {
     const id = download?.id;
-    /* const downloadModel = findModel(id, backendContext.config.models.items);
-    if (downloadModel) {
-      showModal(ModalIds.Downloads, {
-        item: downloadModel,
-        onAction: handleCancelDownload,
-      });
-    } else {
-      showModal(ModalIds.Downloads, {
-        item: {
-          id,
-          createdAt: 0,
-          updatedAt: 0,
-        },
-        onAction: handleCancelDownload,
-      });
-    } */
     showModal(ModalIds.Downloads, {
       item: {
         id,
