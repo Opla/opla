@@ -1,3 +1,10 @@
+# [1.0.0-alpha.115](https://github.com/Opla/opla/compare/v1.0.0-alpha.114...v1.0.0-alpha.115) (2024-04-15)
+
+
+### Features
+
+* Settings display config/Models path [#610](https://github.com/Opla/opla/issues/610) ([6b62c3c](https://github.com/Opla/opla/commit/6b62c3c9f8668591f70b8f2d4bb1f2ceeb68f2e8))
+
 # [1.0.0-alpha.114](https://github.com/Opla/opla/compare/v1.0.0-alpha.113...v1.0.0-alpha.114) (2024-04-15)
 
 
