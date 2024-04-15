@@ -570,6 +570,7 @@ export type Sys = {
   usedSwap: number;
 
   cpus: Cpu[];
+  globalCpuPercentage: number;
 };
 
 export { Ui };

@@ -40,7 +40,8 @@ export default function Statusbar() {
       const s = await getSys();
       setSys(s);
     };
-    call();
+    const interval = setInterval(call, 2000);
+    return () => clearInterval(interval);
   }, [setSys]);
 
   const running = backendContext.server.status === 'started';
@@ -129,14 +130,9 @@ export default function Statusbar() {
               <Cpu className="h-4 w-4" strokeWidth={1.5} />
             </span>
             <span>
-              {sys?.cpus ? (
-                <span>
-                  {sys?.cpus.length} CPUs{' '}
-                  {(
-                    (sys?.cpus.reduce((acc, cpu) => acc + cpu.usage, 0) ?? 0) /
-                    (sys?.cpus.length ?? 1)
-                  ).toFixed()}
-                  %
+              {sys && sys?.cpus ? (
+                <span className="tabular-nums">
+                  {sys.cpus.length} CPUs {sys.globalCpuPercentage.toFixed()}%
                 </span>
               ) : (
                 <span> </span>

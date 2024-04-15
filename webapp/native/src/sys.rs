@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 use sysinfo::System;
-use serde::{Deserialize, Serialize};
+use serde::{ Deserialize, Serialize };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Cpu {
@@ -20,24 +20,38 @@ pub struct Cpu {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Sys {
+pub struct SysInfos {
     pub name: String,
     pub kernel_version: String,
     pub os_version: String,
     pub cpu_arch: String,
-    
+
     pub total_memory: u64,
     pub used_memory: u64,
     pub total_swap: u64,
     pub used_swap: u64,
 
     pub cpus: Vec<Cpu>,
+    pub global_cpu_percentage: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Sys {
+    #[serde(skip)]
+    sys: System,
+    infos: SysInfos,
 }
 
 impl Sys {
     pub fn new() -> Self {
-        let sys = System::new_all();
-        Self {
+        let mut sys = System::new_with_specifics(
+            sysinfo::RefreshKind
+                ::new()
+                .with_memory(sysinfo::MemoryRefreshKind::everything())
+                .with_cpu(sysinfo::CpuRefreshKind::everything())
+        );
+        sys.refresh_all();
+        let infos = SysInfos {
             name: System::name().unwrap_or("Unknown".to_owned()),
             kernel_version: System::kernel_version().unwrap_or("Unknown".to_owned()),
             os_version: System::long_os_version().unwrap_or("Unknown".to_owned()),
@@ -46,13 +60,40 @@ impl Sys {
             used_memory: sys.used_memory(),
             total_swap: sys.total_swap(),
             used_swap: sys.used_swap(),
-            cpus: sys.cpus().iter().map(|cpu| Cpu { usage: cpu.cpu_usage() }).collect(),
+            cpus: sys
+                .cpus()
+                .iter()
+                .map(|cpu| Cpu { usage: cpu.cpu_usage() })
+                .collect(),
+            global_cpu_percentage: sys.global_cpu_info().cpu_usage() as f64,
+        };
+        Self {
+            sys,
+            infos,
         }
     }
 
-    pub fn refresh(&mut self) {
-        let mut sys = System::new();
-        sys.refresh_cpu();
-        self.cpus = sys.cpus().iter().map(|cpu| Cpu { usage: cpu.cpu_usage() }).collect();
+    pub fn refresh(&mut self) -> SysInfos {
+        self.sys.refresh_specifics(
+            sysinfo::RefreshKind
+                ::new()
+                .with_memory(sysinfo::MemoryRefreshKind::everything())
+                .with_cpu(sysinfo::CpuRefreshKind::everything())
+        );
+        self.infos.global_cpu_percentage = self.sys.global_cpu_info().cpu_usage() as f64;
+        self.infos.used_memory = self.sys.used_memory();
+        self.infos.used_swap = self.sys.used_swap();
+        self.infos.cpus = self.sys
+            .cpus()
+            .iter()
+            .map(|cpu| {
+                cpu.cpu_usage();
+                let usage = cpu.cpu_usage();
+                return Cpu { usage };
+            })
+            .collect();
+        self.infos.global_cpu_percentage = self.sys.global_cpu_info().cpu_usage() as f64;
+
+        return self.infos.clone();
     }
 }
