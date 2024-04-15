@@ -1,3 +1,10 @@
+# [1.0.0-alpha.113](https://github.com/Opla/opla/compare/v1.0.0-alpha.112...v1.0.0-alpha.113) (2024-04-15)
+
+
+### Bug Fixes
+
+* poll cpu usage [#516](https://github.com/Opla/opla/issues/516) ([#785](https://github.com/Opla/opla/issues/785)) ([9c02d51](https://github.com/Opla/opla/commit/9c02d517f547091a62876a687e9979737d7c18d0))
+
 # [1.0.0-alpha.112](https://github.com/Opla/opla/compare/v1.0.0-alpha.111...v1.0.0-alpha.112) (2024-04-15)
 
 
