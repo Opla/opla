@@ -1,3 +1,10 @@
+# [1.0.0-alpha.112](https://github.com/Opla/opla/compare/v1.0.0-alpha.111...v1.0.0-alpha.112) (2024-04-15)
+
+
+### Features
+
+* statusbar show used model by llama.cpp [#778](https://github.com/Opla/opla/issues/778) ([#784](https://github.com/Opla/opla/issues/784)) ([6771b61](https://github.com/Opla/opla/commit/6771b61b2213d9b846998347cb004044f0fe9443))
+
 # [1.0.0-alpha.111](https://github.com/Opla/opla/compare/v1.0.0-alpha.110...v1.0.0-alpha.111) (2024-04-14)
 
 
