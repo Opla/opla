@@ -26,7 +26,7 @@ pub mod error;
 
 use tokenizer::encode;
 use tokio::sync::Mutex;
-use std::{path::{Path, PathBuf}, sync::Arc};
+use std::{ path::{ Path, PathBuf }, sync::Arc };
 
 use api::{
     assistants::{ fetch_assistants_collection, AssistantsCollection },
@@ -194,7 +194,7 @@ async fn start_opla_server<R: Runtime>(
 ) -> Result<Payload, String> {
     println!("Opla try to start ");
     let mut store = context.store.lock().await;
-    let model_name = match model {
+    let model_id = match model {
         Some(m) => { m }
         None => {
             match &store.get_local_active_model_id() {
@@ -207,7 +207,7 @@ async fn start_opla_server<R: Runtime>(
         }
     };
 
-    let res = store.models.get_model_path(model_name.clone());
+    let res = store.models.get_model_path(model_id.clone());
     let model_path = match res {
         Ok(m) => { m }
         Err(err) => {
@@ -217,7 +217,8 @@ async fn start_opla_server<R: Runtime>(
     // store.models.active_model = Some(model_name.clone());
     store.server.parameters.port = port;
     store.server.parameters.host = host.clone();
-    store.server.parameters.model = Some(model_path.clone());
+    store.server.parameters.model_id = Some(model_id.clone());
+    store.server.parameters.model_path = Some(model_path.clone());
     store.server.parameters.context_size = context_size;
     store.server.parameters.threads = threads;
     store.server.parameters.n_gpu_layers = n_gpu_layers;
@@ -226,7 +227,7 @@ async fn start_opla_server<R: Runtime>(
     // let args = store.server.parameters.to_args(model_path.as_str());
     let parameters = store.server.parameters.clone();
     let mut server = context.server.lock().await;
-    server.start(app, &model_name, &model_path, Some(&parameters)).await
+    server.start(app, &parameters).await
 }
 
 #[tauri::command]
@@ -410,9 +411,15 @@ async fn cancel_download_model<R: Runtime>(
             drop(store);
 
             let mut server = context.server.lock().await;
-            if m.is_some_id_or_name(&server.model) {
-                let _res = server.stop(&app).await;
-            }
+            match &server.parameters {
+                Some(p) => {
+                    if m.is_some_id_or_name(&p.model_id) {
+                        let _res = server.stop(&app).await;
+                    }
+                },
+                None => {},
+            };
+
         }
         None => {
             return Err(format!("Model not found: {:?}", model_name_or_id));
@@ -461,7 +468,7 @@ async fn uninstall_model<R: Runtime>(
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
     model_id: String,
-    in_use: bool,
+    in_use: bool
 ) -> Result<(), String> {
     let mut store = context.store.lock().await;
 
@@ -471,10 +478,15 @@ async fn uninstall_model<R: Runtime>(
         Some(model) => {
             store.clear_active_service_if_model_equal(model.reference.id.clone());
             let mut server = context.server.lock().await;
-            if model.reference.is_some_id_or_name(&server.model) {
-                let _res = server.stop(&app).await;
-                server.remove_model();
-            }
+                        match &server.parameters {
+                Some(p) => {
+                    if model.reference.is_some_id_or_name(&p.model_id) {
+                        let _res = server.stop(&app).await;
+                        server.remove_model();
+                    }
+                },
+                None => {},
+            };
         }
         None => {
             return Err(format!("Model not found: {:?}", model_id));
@@ -551,14 +563,24 @@ async fn llm_call_completion<R: Runtime>(
         let mut server = context_server.lock().await;
         let query = query.clone();
         let conversation_id = query.options.conversation_id.clone();
+        let parameters = match server.parameters.clone() {
+            Some(mut p) => {
+                p.model_id = Some(model_name.clone());
+                p.model_path = Some(model_path);
+                p
+            },
+            None => {
+                return Err(format!("Opla server not started no parameters found"));
+            }
+        };
         server
-            .bind::<R>(app.app_handle(), &model_name, &model_path).await
+            .bind::<R>(app.app_handle(), &parameters).await
             .map_err(|err| err.to_string())?;
         let handle = app.app_handle();
         let response = {
             server
                 .call_completion::<R>(
-                    &model_name,
+                    &model_name.clone(),
                     query,
                     completion_options,
                     Some(|result: Result<LlmCompletionResponse, LlmError>| {
@@ -583,8 +605,15 @@ async fn llm_call_completion<R: Runtime>(
                 ).await
                 .map_err(|err| err.to_string())?
         };
-        let parameters = server.parameters.clone();
-        server.set_parameters(&model, &model_path, parameters);
+        /* let parameters = match server.parameters.clone() {
+            Some(mut p) => {
+                p.model_id = Some(model_name);
+                p.model_path = Some(model_path);
+                Some(p)
+            },
+            None => None
+        };  */      
+        server.set_parameters(Some(parameters));
 
         let mut store = context.store.lock().await;
         store.set_local_active_model_id(&model);
@@ -698,11 +727,13 @@ async fn start_server<R: Runtime>(
     // let args = store.server.parameters.to_args(model_path.as_str());
     let mut parameters = store.server.parameters.clone();
     let mut server = context.server.lock().await;
-    let response = server.start(app, &active_model, &model_path, Some(&parameters)).await;
+    parameters.model_id = Some(active_model.clone());
+    parameters.model_path = Some(model_path.clone());
+    let response = server.start(app, &parameters).await;
     if response.is_err() {
         return Err(format!("Opla server not started: {:?}", response));
     }
-    parameters.model = Some(model_path.clone());
+
     store.server.parameters = parameters;
     store.save().map_err(|err| err.to_string())?;
     println!("Opla server started: {:?}", response);
@@ -726,9 +757,16 @@ async fn model_download_event<R: Runtime>(
             drop(store);
             // println!("model_download {} {}", state, model_id);
             let server = context.server.lock().await;
+            let parameters = match &server.parameters {
+                Some(p) => p,
+                None => {
+                    return Err(format!("Model download no parameters found"));
+                }
+            };
+            
             if
                 state == "ok" &&
-                (m.reference.is_some_id_or_name(&server.model) || server.model.is_none())
+                (m.reference.is_some_id_or_name(&parameters.model_id) || parameters.model_id.is_none())
             {
                 drop(server);
                 let res = start_server(handle, context).await;

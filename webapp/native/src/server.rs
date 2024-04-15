@@ -35,8 +35,8 @@ use std::thread;
 pub struct OplaServer {
     pub pid: Arc<Mutex<usize>>,
     pub name: String,
-    pub model: Option<String>,
-    pub model_path: Option<String>,
+    // pub model_id: Option<String>,
+    // pub model_path: Option<String>,
     pub status: Arc<Mutex<ServerStatus>>,
     pub parameters: Option<ServerParameters>,
     server: LLamaCppServer,
@@ -85,8 +85,8 @@ impl OplaServer {
             pid: Arc::new(Mutex::new(0)),
             name: "llama.cpp.server".to_string(),
             status: Arc::new(Mutex::new(ServerStatus::Init)),
-            model: None,
-            model_path: None,
+            // model_id: None,
+            // model_path: None,
             parameters: None,
             server: LLamaCppServer::new(),
             handle: None,
@@ -265,9 +265,17 @@ impl OplaServer {
     }
 
     pub fn remove_model(&mut self) {
-        if self.model.is_some() {
-            self.model = None;
-            self.model_path = None;
+        let parameters = match &self.parameters {
+            Some(p) => p,
+            None => {
+                return;
+            }
+        };
+        if parameters.model_id.is_some() {
+            let mut parameters = parameters.clone();
+            parameters.model_id = None;
+            parameters.model_path = None;
+            self.parameters = Some(parameters);
         }
     }
 
@@ -279,10 +287,17 @@ impl OplaServer {
                 return Err("Opla server can't read status".to_string());
             }
         };
-        let message = match &self.model {
-            Some(model) => model.to_string(),
-            None => "None".to_string(),
-        };
+        let mut message = "None".to_string();
+        match &self.parameters {
+            Some(parameters) =>
+                match &parameters.model_id {
+                    Some(model) => {
+                        message = model.to_string();
+                    }
+                    None => (),
+                }
+            None => (),
+        }
         Ok(Payload {
             status: status.to_string(),
             message,
@@ -306,21 +321,21 @@ impl OplaServer {
 
     pub fn set_parameters(
         &mut self,
-        model: &str,
-        model_path: &str,
+        /* model: &str,
+        model_path: &str, */
         parameters: Option<ServerParameters>
     ) {
         self.parameters = parameters;
-        self.model = Some(model.to_string());
-        self.model_path = Some(model_path.to_string());
+        // self.model_id = Some(model.to_string());
+        // self.model_path = Some(model_path.to_string());
     }
 
     pub async fn start<R: Runtime>(
         &mut self,
         app: tauri::AppHandle<R>,
-        model: &str,
-        model_path: &str,
-        parameters: Option<&ServerParameters>
+        // model: &str,
+        // model_path: &str,
+        parameters: &ServerParameters
     ) -> Result<Payload, String> {
         let status = match self.status.try_lock() {
             Ok(status) => status.as_str(),
@@ -329,9 +344,9 @@ impl OplaServer {
                 return Err("Opla server can't read status".to_string());
             }
         };
-        self.model = Some(model.to_string());
-        self.model_path = Some(model_path.to_string());
-        let parameters: &ServerParameters = match parameters {
+        // self.model_id = Some(model.to_string());
+        // self.model_path = Some(model_path.to_string());
+        /* let parameters: &ServerParameters = match parameters {
             Some(p) => {
                 self.parameters = Some(p.clone());
                 &p
@@ -344,6 +359,21 @@ impl OplaServer {
                         return Err("Opla server can't read parameters".to_string());
                     }
                 }
+            }
+        }; */
+        self.parameters = Some(parameters.clone());
+        let model_path = match &parameters.model_path {
+            Some(s) => s,
+            None => {
+                println!("Opla server error try to read parameters: model_path");
+                return Err("Opla server can't read parameters: model_path".to_string());
+            }
+        };
+        let model_id = match &parameters.model_id {
+            Some(s) => s,
+            None => {
+                println!("Opla server error try to read parameters: model_id");
+                return Err("Opla server can't read parameters: model_id".to_string());
             }
         };
         let arguments = parameters.to_args(&model_path);
@@ -363,7 +393,7 @@ impl OplaServer {
                 message: "llama.cpp.server".to_string(),
             });
         }
-        println!("Opla try to start {:?}", self.model);
+        println!("Opla try to start {:?}", parameters.model_id);
         let mut wstatus = match self.status.try_lock() {
             Ok(status) => status,
             Err(_) => {
@@ -375,7 +405,7 @@ impl OplaServer {
         let status_response = wstatus.as_str().to_string();
         app
             .emit_all("opla-server", Payload {
-                message: format!("{}", model),
+                message: format!("{:?}", parameters.model_id),
                 status: "waiting".to_string(),
             })
             .map_err(|err| err.to_string())?;
@@ -384,7 +414,7 @@ impl OplaServer {
         let wpid = Arc::clone(&self.pid);
         let wstatus = Arc::clone(&self.status);
         let command_child = Arc::clone(&self.command_child);
-        self.start_llama_cpp_server(app, model, arguments, wpid, wstatus, command_child).await?;
+        self.start_llama_cpp_server(app, &model_id, arguments, wpid, wstatus, command_child).await?;
 
         Ok(Payload { status: status_response, message: self.name.to_string() })
     }
@@ -505,14 +535,14 @@ impl OplaServer {
     pub async fn bind<R: Runtime>(
         &mut self,
         app: tauri::AppHandle<R>,
-        model: &str,
-        model_path: &str
+        parameters: &ServerParameters
     ) -> Result<(), Box<dyn std::error::Error>> {
-        if self.model != Some(model.to_string()) {
+        if !parameters.has_same_model(&self.parameters) {
+            // let parameters = parameters.clone();
             self.stop(&app).await?;
             let self_status = Arc::clone(&self.status);
             let mut wouldblock = true;
-            let _ = self.start(app, model, model_path, None).await?;
+            let _ = self.start(app, &parameters).await?;
 
             // Wait for server to start
             let result = tauri::async_runtime::spawn(async move {

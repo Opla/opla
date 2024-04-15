@@ -24,13 +24,28 @@ use crate::{
 pub struct ServerParameters {
     pub port: i32,
     pub host: String,
-    pub model: Option<String>,
+    pub model_id: Option<String>,
+    pub model_path: Option<String>,
     pub context_size: i32,
     pub threads: i32,
     pub n_gpu_layers: i32,
 }
 
 impl ServerParameters {
+    pub fn has_same_model(&self, other: &Option<ServerParameters>) -> bool {
+        match other {
+            Some(p) => {
+                if p.model_id == self.model_id {
+                    return true;
+                }
+                return false;
+            }
+            None => {
+                return false;
+            }
+        }
+    }
+
     pub fn to_args(&self, model_path: &str) -> Vec<String> {
         let mut parameters: Vec<String> = Vec::with_capacity(12);
         parameters.push(format!("-m"));
@@ -163,7 +178,8 @@ impl Store {
                 parameters: ServerParameters {
                     port: 8081,
                     host: String::from("127.0.0.1"),
-                    model: None,
+                    model_id: None,
+                    model_path: None,
                     context_size: 512,
                     threads: 6,
                     n_gpu_layers: 0,
@@ -250,13 +266,15 @@ impl Store {
             "get_local_active_model_id model_id: {:?}, provider: {:?} services: {:?}",
             model_id,
             provider,
-            self.services,
+            self.services
         );
         if model_id.is_none() && provider.is_none() {
             if self.models.items.len() > 0 {
                 let id = match self.models.items[0].reference.id {
                     Some(ref id) => id.clone(),
-                    None => return None,
+                    None => {
+                        return None;
+                    }
                 };
                 self.set_local_active_model_id(&id);
                 return Some(id);

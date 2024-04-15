@@ -28,6 +28,7 @@
 
 import Parameter, { ParameterValue } from '@/components/common/Parameter';
 import useTranslation from '@/hooks/useTranslation';
+import useBackend from '@/hooks/useBackendContext';
 import { Provider } from '@/types';
 import { deepGet } from '@/utils/data';
 
@@ -39,6 +40,8 @@ export default function Opla({
   onParameterChange: (name: string, value: ParameterValue) => void;
 }) {
   const { t } = useTranslation();
+  const { backendContext } = useBackend();
+  const modelPath = backendContext.config.server.parameters.modelPath as string;
 
   return (
     <div className="flex flex-col gap-2 px-8 py-4 text-sm">
@@ -60,7 +63,7 @@ export default function Opla({
       <Parameter
         label={t('Model')}
         name="metadata.server.parameters.model"
-        value={deepGet(provider, 'metadata.server.parameters.model', 'None')}
+        value={modelPath || deepGet(provider, 'metadata.server.parameters.modelPath', t('None'))}
         disabled
         type="file"
         onChange={onParameterChange}
