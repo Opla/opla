@@ -32,12 +32,12 @@ import { createMessage, mergeMessages } from '@/utils/data/messages';
 import { openFileDialog } from '@/utils/backend/tauri';
 import { AIImplService } from '@/types';
 import { getFileAssetExtensions } from '@/utils/backend/commands';
+import { toast } from '@/components/ui/Toast';
 import { Button } from '../../../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../../ui/tooltip';
 import { ShortcutBadge } from '../../../common/ShortCut';
 import PromptInput from './PromptInput';
 import PromptCommands from './PromptCommands';
-import { toast } from 'sonner';
 
 export type PromptProps = {
   conversationId: string;
@@ -96,9 +96,16 @@ export default function Prompt({
           files,
         );
         if (assets.length === 0 && files) {
-          toast.error(`${t("File is already present")}: ${Array.isArray(files) ? files.join(',') : files}`)
+          toast.error(
+            `${t('File is already present')}: ${Array.isArray(files) ? files.join(',') : files}`,
+          );
         } else {
-          const message = createMessage({ role: 'user', name: 'you' }, undefined, undefined, assets);
+          const message = createMessage(
+            { role: 'user', name: 'you' },
+            undefined,
+            undefined,
+            assets,
+          );
           const conversationMessages = getConversationMessages(updatedConversation.id);
           const updatedMessages = mergeMessages(conversationMessages, [message]);
           await updateConversationMessages(updatedConversation.id, updatedMessages);
