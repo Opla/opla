@@ -33,7 +33,7 @@ use api::{
     hf::search_hf_models,
     models,
 };
-use data::{asset::{Asset, AssetState}, model::{ Model, ModelEntity }};
+use data::{asset::Asset, model::{ Model, ModelEntity }};
 use downloader::Downloader;
 use llm::{
     openai::call_completion,
@@ -51,8 +51,6 @@ use server::*;
 use sys::{ Sys, SysInfos };
 use tauri::{ Runtime, State, Manager, App, EventLoopMessage };
 use utils::{ get_config_directory, get_data_directory };
-
-use crate::data::asset::AssetType;
 
 pub struct OplaContext {
     pub server: Arc<Mutex<OplaServer>>,
@@ -335,6 +333,15 @@ async fn validate_assets<R: Runtime>(
     }).collect();
 
     Ok(assets)
+}
+
+#[tauri::command]
+async fn get_file_asset_extensions<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+) -> Result<Vec<String>, String> {
+    let extensions = Asset::extensions().iter().map(|s| s.to_string()).collect();
+    Ok(extensions)
 }
 
 #[tauri::command]
@@ -1039,6 +1046,7 @@ fn main() {
                 get_models_path,
                 create_dir,
                 file_exists,
+                get_file_asset_extensions,
                 validate_assets,
                 get_provider_template,
                 get_opla_server_status,

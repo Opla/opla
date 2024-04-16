@@ -20,9 +20,8 @@ export const getAssetsAsArray = (assets: Asset | Asset[] | undefined): Asset[] |
   !assets || Array.isArray(assets) ? assets : [assets];
 
 export const createFileAssets = async (files: string | string[], previousAssets: Asset[]) => {
-  const filteredFiles = Array.isArray(files)
-    ? files.filter((a) => !previousAssets.find((as) => as.type === 'file' && as.file === a))
-    : [files];
+  const list = Array.isArray(files) ? files : [files];
+  const filteredFiles = list.filter((a) => !previousAssets.some((as) => as.type === AssetType.File && as.file === a));
   const createdAssets = filteredFiles.map<Asset>((file) => ({
     ...createBaseRecord<Asset>(),
     type: AssetType.File,
@@ -30,5 +29,5 @@ export const createFileAssets = async (files: string | string[], previousAssets:
     file,
   }));
   const assets = (await validateAssets(createdAssets)) || [];
-  return [...previousAssets, ...assets];
+  return assets;
 };

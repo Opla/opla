@@ -20,7 +20,7 @@ import {
   Assistant,
   Model,
 } from '@/types';
-import { createBaseNamedRecord, updateRecord } from '.';
+import { createBaseNamedRecord, deepCopy, updateRecord } from '.';
 import { createFileAssets, getAssetsAsArray } from './assets';
 
 export const getDefaultConversationName = (t = (value: string) => value) => t('Conversation');
@@ -35,11 +35,10 @@ export const addAssetsToConversation = async (
   const conversationAssets = getConversationAssets(conversation) || [];
   const assets = await createFileAssets(assetsAsFile, conversationAssets);
   return {
-    conversation: {
+    conversation: deepCopy<Conversation>({
       ...conversation,
       assets: [...conversationAssets, ...assets],
-    } as Conversation,
-    conversationAssets,
+    }),
     assets,
   };
 };

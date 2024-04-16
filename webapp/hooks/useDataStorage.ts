@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import dataStorage from '@/utils/dataStorage';
 import logger from '@/utils/logger';
 import { toast } from '@/components/ui/Toast';
+import { deepCopy } from '@/utils/data';
 
 export default function useDataStorage<T>(key: string, defaultValue: T): [T, (value: T) => void] {
   const [value, setValue] = useState(undefined as T);
@@ -35,8 +36,9 @@ export default function useDataStorage<T>(key: string, defaultValue: T): [T, (va
 
   const updateValue = (v: T) => {
     try {
-      setValue(v);
-      dataStorage().setItem(key, v);
+      const copy = deepCopy(v);
+      setValue(() => copy);
+      dataStorage().setItem(key, copy);
     } catch (e) {
       logger.error(e);
       toast.error(`Error saving data ${e}`);

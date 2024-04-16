@@ -163,12 +163,25 @@ export const getModelsPath = async (): Promise<string | undefined> => {
 export const validateAssets = async (toValidate: Asset[]): Promise<Asset[] | undefined> => {
   try {
     const args = mapKeys({ assets: toValidate }, toSnakeCase);
-    const assets = await invokeTauri<Asset[]>('validate_assets', args);
+    let assets = await invokeTauri<Asset[]>('validate_assets', args);
+    assets = await mapKeys(assets, toCamelCase);
     logger.info('validateAssets', assets);
-    return await mapKeys(assets, toCamelCase);
+    return assets;
   } catch (error) {
     logger.error(error);
     toast.error(`Error validating assets ${error}`);
   }
   return undefined;
+};
+
+export const getFileAssetExtensions = async (): Promise<string[]> => {
+  try {
+    const extensions = await invokeTauri<string[]>('get_file_asset_extensions');
+    logger.info('getFileAssetExtensions', extensions);
+    return extensions;
+  } catch (error) {
+    logger.error(error);
+    toast.error(`Error getFileAssetExtensions ${error}`);
+  }
+  return [];
 };

@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useMemo, useState } from 'react';
 import { ArrowDown } from 'lucide-react';
 import useScroll, { KeyedScrollPosition } from '@/hooks/useScroll';
 import { AvatarRef, Conversation, Message, MessageImpl } from '@/types';
 // import logger from '@/utils/logger';
-import { useState } from 'react';
 import { getConversationAssets } from '@/utils/data/conversations';
 import { getMessageFirstAsset } from '@/utils/data/messages';
 import { Button } from '../../../ui/button';
@@ -60,17 +60,16 @@ function ConversationList({
     onStartMessageEdit(messageId, index);
   };
 
-  const handleUpdatePosition = (props: KeyedScrollPosition) => {
-    // logger.info('updated newPosition', props);
-    onScrollPosition(props);
-  };
-
   const position = {
     x: scrollPosition === -1 ? -1 : 0,
     y: scrollPosition === undefined ? -1 : scrollPosition,
   };
-  const [ref, scrollTo] = useScroll(conversation.id, position, handleUpdatePosition);
-  const assets = getConversationAssets(conversation);
+  const [ref, scrollTo] = useScroll(conversation.id, position, onScrollPosition);
+  const assets = useMemo(
+    () => (conversation ? getConversationAssets(conversation) : []),
+    [conversation],
+  );
+
   return (
     <div className="flex grow flex-col overflow-hidden">
       <div ref={ref} className={edit ? 'h-full overflow-y-auto' : 'overflow-y-auto'}>
