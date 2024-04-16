@@ -83,17 +83,24 @@ export enum AssetState {
   Error = 'error',
 }
 
+export enum AssetType {
+  Link = 'link',
+  File = 'file',
+}
+
 export type Asset = BaseIdRecord & {
   metadata?: Metadata;
   state?: AssetState;
+  tokensCount?: number;
 } & (
     | {
-        type: 'link';
+        type: AssetType.Link;
         url: string;
       }
     | {
-        type: 'file';
+        type: AssetType.File;
         file: string;
+        size?: number;
       }
   );
 

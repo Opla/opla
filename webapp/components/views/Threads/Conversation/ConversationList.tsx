@@ -12,16 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useMemo, useState } from 'react';
 import { ArrowDown } from 'lucide-react';
 import useScroll, { KeyedScrollPosition } from '@/hooks/useScroll';
-import { AvatarRef, Message, MessageImpl } from '@/types';
+import { AvatarRef, Conversation, Message, MessageImpl } from '@/types';
 // import logger from '@/utils/logger';
-import { useState } from 'react';
-import MessageView from './MessageView';
+import { getConversationAssets } from '@/utils/data/conversations';
+import { getMessageFirstAsset } from '@/utils/data/messages';
 import { Button } from '../../../ui/button';
+import MessageView from './MessageView';
 
 type ConversationListProps = {
-  conversationId: string;
+  conversation: Conversation;
   scrollPosition: number | undefined;
   messages: MessageImpl[];
   selectedMessageId: string | undefined;
@@ -37,7 +39,7 @@ type ConversationListProps = {
 };
 
 function ConversationList({
-  conversationId,
+  conversation,
   scrollPosition,
   messages,
   selectedMessageId,
@@ -58,16 +60,15 @@ function ConversationList({
     onStartMessageEdit(messageId, index);
   };
 
-  const handleUpdatePosition = (props: KeyedScrollPosition) => {
-    // logger.info('updated newPosition', props);
-    onScrollPosition(props);
-  };
-
   const position = {
     x: scrollPosition === -1 ? -1 : 0,
     y: scrollPosition === undefined ? -1 : scrollPosition,
   };
-  const [ref, scrollTo] = useScroll(conversationId, position, handleUpdatePosition);
+  const [ref, scrollTo] = useScroll(conversation.id, position, onScrollPosition);
+  const assets = useMemo(
+    () => (conversation ? getConversationAssets(conversation) : []),
+    [conversation],
+  );
 
   return (
     <div className="flex grow flex-col overflow-hidden">
@@ -79,6 +80,7 @@ function ConversationList({
               index={index}
               edit={selectedMessageId === m.id}
               message={m}
+              asset={getMessageFirstAsset(m, assets)}
               avatars={avatars}
               disabled={disabled}
               onStartEdit={handleStartMessageEdit}

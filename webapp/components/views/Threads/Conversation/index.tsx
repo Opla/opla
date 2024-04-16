@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import EmptyView from '@/components/common/EmptyView';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyedScrollPosition } from '@/hooks/useScroll';
@@ -20,7 +20,7 @@ import Opla from '@/components/icons/Opla';
 import { AvatarRef, Conversation, Message, MessageImpl, PromptTemplate, Ui } from '@/types';
 // import logger from '@/utils/logger';
 import { AppContext } from '@/context';
-import { getConversation, updateConversation } from '@/utils/data/conversations';
+import { updateConversation } from '@/utils/data/conversations';
 import { ParsedPrompt } from '@/utils/parsers';
 import { MenuAction } from '@/types/ui';
 import ConversationList from './ConversationList';
@@ -69,13 +69,32 @@ export function ConversationPanel({
 }: ConversationPanelProps) {
   const { t } = useTranslation();
   const { conversations, updateConversations } = useContext(AppContext);
+  const [update, setUpdate] = useState<{
+    id?: string | undefined;
+    scrollPosition?: number | undefined;
+  }>({});
+
+  useEffect(() => {
+    const afunc = async () => {
+      if (
+        selectedConversation &&
+        selectedConversation.id === update.id &&
+        update.scrollPosition !== selectedConversation?.scrollPosition
+      ) {
+        const updatedConversation: Conversation = {
+          ...selectedConversation,
+          scrollPosition: update.scrollPosition === -1 ? undefined : update.scrollPosition,
+        };
+        const updatedConversations = updateConversation(updatedConversation, conversations, true);
+        await updateConversations(updatedConversations);
+      }
+    };
+    afunc();
+  }, [selectedConversation, update, conversations, updateConversations]);
 
   const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {
-    const conversation = getConversation(key, conversations);
-    if (conversation && conversation.scrollPosition !== position.y) {
-      conversation.scrollPosition = position.y === -1 ? undefined : position.y;
-      const updatedConversations = updateConversation(conversation, conversations, true);
-      updateConversations(updatedConversations);
+    if (update.id !== key || update.scrollPosition !== position.y) {
+      setUpdate({ scrollPosition: position.y, id: key });
     }
   };
 
@@ -148,7 +167,7 @@ export function ConversationPanel({
     <>
       {(isPrompt || (messages && messages[0]?.conversationId === selectedConversation.id)) && (
         <ConversationList
-          conversationId={selectedConversation?.id as string}
+          conversation={selectedConversation}
           selectedMessageId={selectedMessageId}
           scrollPosition={
             selectedConversation && selectedConversation.scrollPosition !== undefined

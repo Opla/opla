@@ -31,6 +31,8 @@ import {
 import { createMessage, mergeMessages } from '@/utils/data/messages';
 import { openFileDialog } from '@/utils/backend/tauri';
 import { AIImplService } from '@/types';
+import { getFileAssetExtensions } from '@/utils/backend/commands';
+import { toast } from '@/components/ui/Toast';
 import { Button } from '../../../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../../ui/tooltip';
 import { ShortcutBadge } from '../../../common/ShortCut';
@@ -86,20 +88,30 @@ export default function Prompt({
     e.preventDefault();
     const conversation = getConversation(conversationId, conversations);
     if (conversation) {
-      const files = await openFileDialog(false, [
-        { name: 'conversations', extensions: ['pdf', 'txt', 'csv', 'json', 'md'] },
-      ]);
+      const extensions = await getFileAssetExtensions();
+      const files = await openFileDialog(false, [{ name: 'conversations', extensions }]);
       if (files) {
-        const { conversation: updatedConversation, assets } = addAssetsToConversation(
+        const { conversation: updatedConversation, assets } = await addAssetsToConversation(
           conversation,
           files,
         );
-        const message = createMessage({ role: 'user', name: 'you' }, undefined, undefined, assets);
-        const conversationMessages = getConversationMessages(conversationId);
-        const updatedMessages = mergeMessages(conversationMessages, [message]);
-        updateConversationMessages(conversationId, updatedMessages);
-        const updatedConversations = updateConversation(updatedConversation, conversations, true);
-        updateConversations(updatedConversations);
+        if (assets.length === 0 && files) {
+          toast.error(
+            `${t('File is already present')}: ${Array.isArray(files) ? files.join(',') : files}`,
+          );
+        } else {
+          const message = createMessage(
+            { role: 'user', name: 'you' },
+            undefined,
+            undefined,
+            assets,
+          );
+          const conversationMessages = getConversationMessages(updatedConversation.id);
+          const updatedMessages = mergeMessages(conversationMessages, [message]);
+          await updateConversationMessages(updatedConversation.id, updatedMessages);
+          const updatedConversations = updateConversation(updatedConversation, conversations);
+          await updateConversations(updatedConversations);
+        }
       }
     }
   };

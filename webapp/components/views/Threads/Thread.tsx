@@ -17,7 +17,6 @@ import { useRouter } from 'next/router';
 import { useSearchParams } from 'next/navigation';
 import { AppContext } from '@/context';
 import {
-  Asset,
   Conversation,
   AIService,
   AIServiceType,
@@ -35,7 +34,6 @@ import {
   createConversation,
   getConversation,
   updateConversation,
-  getConversationAssets,
   getServiceModelId,
   getConversationModelId,
   addService,
@@ -105,6 +103,7 @@ function Thread({
     setProviders,
     presets,
   } = useContext(AppContext);
+
   const { backendContext, getActiveModel, setActiveModel } = useBackend();
   const searchParams = useSearchParams();
   const [selectedMessageId, setSelectedMessageId] = useState<string | undefined>(undefined);
@@ -692,11 +691,11 @@ function Thread({
             (m) => m.id !== message.id && m.id !== message.sibling,
           );
           updateConversationMessages(conversationId, updatedMessages);
-          if (message.assets) {
-            conversation.assets = getConversationAssets(conversation).filter(
+          /* if (message.assets) {
+            conversation.assets = getConversationAssets(conversation)?.filter(
               (a: Asset) => !message.assets?.find((ma: string) => ma === a.id),
             );
-          }
+          } */
         }
       }
     }
