@@ -11,8 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 import {
-  Asset,
   ContextWindowPolicy,
   Conversation,
   AIService,
@@ -20,31 +20,20 @@ import {
   Assistant,
   Model,
 } from '@/types';
-import { createBaseRecord, createBaseNamedRecord, updateRecord } from '.';
+import { createBaseNamedRecord, updateRecord } from '.';
+import { createFileAssets, getAssetsAsArray } from './assets';
 
 export const getDefaultConversationName = (t = (value: string) => value) => t('Conversation');
 
 export const getConversationAssets = (conversation: Conversation) =>
-  !conversation.assets || Array.isArray(conversation.assets)
-    ? conversation.assets || []
-    : [conversation.assets];
+  getAssetsAsArray(conversation.assets);
 
-export const addAssetsToConversation = (
+export const addAssetsToConversation = async (
   conversation: Conversation,
   assetsAsFile: string | string[],
 ) => {
-  const conversationAssets = getConversationAssets(conversation);
-  const updatedAssets = Array.isArray(assetsAsFile)
-    ? assetsAsFile.filter(
-        (a) => !conversationAssets.find((asset) => asset.type === 'file' && asset.file === a),
-      )
-    : [assetsAsFile];
-  const assets = updatedAssets.map<Asset>((a) => ({
-    ...createBaseRecord<Asset>(),
-    type: 'file',
-    file: a,
-  }));
-
+  const conversationAssets = getConversationAssets(conversation) || [];
+  const assets = await createFileAssets(assetsAsFile, conversationAssets);
   return {
     conversation: {
       ...conversation,

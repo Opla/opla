@@ -148,7 +148,7 @@ export function ConversationPanel({
     <>
       {(isPrompt || (messages && messages[0]?.conversationId === selectedConversation.id)) && (
         <ConversationList
-          conversationId={selectedConversation?.id as string}
+          conversation={selectedConversation}
           selectedMessageId={selectedMessageId}
           scrollPosition={
             selectedConversation && selectedConversation.scrollPosition !== undefined

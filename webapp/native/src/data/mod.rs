@@ -20,6 +20,7 @@ use std::str::FromStr;
 use serde::de::{ self, Visitor, MapAccess };
 use void::Void;
 
+pub mod asset;
 pub mod model;
 pub mod assistant;
 pub mod service;

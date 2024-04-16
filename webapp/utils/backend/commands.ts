@@ -14,6 +14,7 @@
 
 // import { invoke } from '@tauri-apps/api';
 import {
+  Asset,
   Model,
   ModelsCollection,
   OplaServer,
@@ -155,6 +156,19 @@ export const getModelsPath = async (): Promise<string | undefined> => {
   } catch (error) {
     logger.error(error);
     toast.error(`Error getting data path ${error}`);
+  }
+  return undefined;
+};
+
+export const validateAssets = async (toValidate: Asset[]): Promise<Asset[] | undefined> => {
+  try {
+    const args = mapKeys({ assets: toValidate }, toSnakeCase);
+    const assets = await invokeTauri<Asset[]>('validate_assets', args);
+    logger.info('validateAssets', assets);
+    return await mapKeys(assets, toCamelCase);
+  } catch (error) {
+    logger.error(error);
+    toast.error(`Error validating assets ${error}`);
   }
   return undefined;
 };

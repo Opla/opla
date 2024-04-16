@@ -90,7 +90,7 @@ export default function Prompt({
         { name: 'conversations', extensions: ['pdf', 'txt', 'csv', 'json', 'md'] },
       ]);
       if (files) {
-        const { conversation: updatedConversation, assets } = addAssetsToConversation(
+        const { conversation: updatedConversation, assets } = await addAssetsToConversation(
           conversation,
           files,
         );

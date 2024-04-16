@@ -84,21 +84,23 @@ function Archive({
         </div>
       }
     >
-      <ConversationList
-        conversationId={archiveId as string}
-        scrollPosition={undefined}
-        selectedMessageId={undefined}
-        messages={messages}
-        avatars={avatars}
-        disabled
-        onScrollPosition={() => {}}
-        onResendMessage={() => {}}
-        onDeleteMessage={() => {}}
-        onDeleteAssets={() => {}}
-        onChangeMessageContent={() => {}}
-        onStartMessageEdit={() => {}}
-        onCopyMessage={() => {}}
-      />
+      {archive && (
+        <ConversationList
+          conversation={archive}
+          scrollPosition={undefined}
+          selectedMessageId={undefined}
+          messages={messages}
+          avatars={avatars}
+          disabled
+          onScrollPosition={() => {}}
+          onResendMessage={() => {}}
+          onDeleteMessage={() => {}}
+          onDeleteAssets={() => {}}
+          onChangeMessageContent={() => {}}
+          onStartMessageEdit={() => {}}
+          onCopyMessage={() => {}}
+        />
+      )}
     </ContentView>
   );
 }

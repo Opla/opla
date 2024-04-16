@@ -31,12 +31,13 @@ import {
 } from '@/utils/data/messages';
 import useHover from '@/hooks/useHover';
 import useMarkdownProcessor from '@/hooks/useMarkdownProcessor/index';
-import { Avatar, AvatarRef, MessageImpl, MessageStatus } from '@/types';
+import { Asset, Avatar, AvatarRef, MessageImpl, MessageStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import AvatarView from '@/components/common/AvatarView';
 import CopyToClipBoard from '@/components/common/CopyToClipBoard';
 import { ShortcutIds } from '@/hooks/useShortcuts';
 import { shortcutAsText } from '@/utils/shortcuts';
+import { getFilename } from '@/utils/misc';
 import { Button } from '../../../ui/button';
 import { Textarea } from '../../../ui/textarea';
 import OpenAI from '../../../icons/OpenAI';
@@ -69,11 +70,12 @@ enum DisplayMessageState {
   Pending,
   Streaming,
   Edit,
-  Asset,
+  FileAsset,
 }
 
 type MessageComponentProps = {
   message: MessageImpl;
+  asset?: Asset;
   index: number;
   avatars: AvatarRef[];
   disabled?: boolean;
@@ -89,6 +91,7 @@ type MessageComponentProps = {
 
 function MessageComponent({
   message,
+  asset,
   index,
   avatars,
   disabled = false,
@@ -152,7 +155,7 @@ function MessageComponent({
 
   let state = DisplayMessageState.Markdown;
   if (message.assets) {
-    state = DisplayMessageState.Asset;
+    state = DisplayMessageState.FileAsset;
   } else if (editValue !== undefined) {
     state = DisplayMessageState.Edit;
   } else if (isUser) {
@@ -182,10 +185,13 @@ function MessageComponent({
                 <div className="flex min-h-20 flex-col items-start whitespace-pre-wrap break-words">
                   <div className="w-full break-words">
                     <p className="py-1 font-bold capitalize">{avatar.name}</p>
-                    {state === DisplayMessageState.Asset && (
+                    {state === DisplayMessageState.FileAsset && (
                       <div className="pointer-events-auto flex w-full cursor-text select-text flex-row items-center px-0 py-2">
                         <File className="mr-2 h-4 w-4" strokeWidth={1.5} />
-                        <span>{t('Document added')}</span>
+                        <span>
+                          {t('Document added')}:{' '}
+                          {asset?.type === 'file' ? getFilename(asset?.file) : t('Not found')}
+                        </span>
                       </div>
                     )}
                     {state === DisplayMessageState.Pending && (
@@ -223,7 +229,7 @@ function MessageComponent({
                       </div>
                     )}
                   </div>
-                  {state === DisplayMessageState.Asset && isHover && (
+                  {state === DisplayMessageState.FileAsset && isHover && (
                     <div className="left-34 absolute bottom-0 flex flex-row items-center">
                       <DeleteButton onDeleteMessage={onDeleteAssets} />
                     </div>

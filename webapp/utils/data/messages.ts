@@ -158,3 +158,8 @@ export const getMessageContentAuthorAsString = (message: Message, index = 0): Au
   }
   return author;
 };
+
+export const getMessageFirstAsset = (message: Message, assets: Asset[] | undefined) => {
+  const assetId = message.assets?.[0];
+  return assets?.find((a) => a.id === assetId);
+};

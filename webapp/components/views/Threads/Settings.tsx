@@ -59,7 +59,7 @@ export default function Settings({
       const newConversations = updateConversation(
         {
           ...selectedConversation,
-          assets: getConversationAssets(selectedConversation).filter((_, i) => i !== index),
+          assets: getConversationAssets(selectedConversation)?.filter((_, i) => i !== index),
         },
         conversations,
         true,
@@ -154,7 +154,7 @@ export default function Settings({
           {selectedConversation && (
             <div className="w-full p-2 text-sm text-muted-foreground">
               <div className="py-4">{t('Files')}</div>
-              {getConversationAssets(selectedConversation).map((asset, index) => (
+              {getConversationAssets(selectedConversation)?.map((asset, index) => (
                 <div className="flex w-full flex-row items-center p-1 text-xs" key={asset.id}>
                   <File className="mr-2 h-4 w-4" strokeWidth={1.5} />
                   <span className="ellipsis mr-2 line-clamp-1 grow break-all">

@@ -693,7 +693,7 @@ function Thread({
           );
           updateConversationMessages(conversationId, updatedMessages);
           if (message.assets) {
-            conversation.assets = getConversationAssets(conversation).filter(
+            conversation.assets = getConversationAssets(conversation)?.filter(
               (a: Asset) => !message.assets?.find((ma: string) => ma === a.id),
             );
           }
