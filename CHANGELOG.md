@@ -1,3 +1,10 @@
+# [1.0.0-alpha.117](https://github.com/Opla/opla/compare/v1.0.0-alpha.116...v1.0.0-alpha.117) (2024-04-16)
+
+
+### Features
+
+* validate files from a PDF, text, csv [#329](https://github.com/Opla/opla/issues/329) ([#800](https://github.com/Opla/opla/issues/800)) ([4e1ffec](https://github.com/Opla/opla/commit/4e1ffecd53773263715d8f9c3ba8c9070263150d))
+
 # [1.0.0-alpha.116](https://github.com/Opla/opla/compare/v1.0.0-alpha.115...v1.0.0-alpha.116) (2024-04-15)
 
 
