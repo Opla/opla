@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import EmptyView from '@/components/common/EmptyView';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyedScrollPosition } from '@/hooks/useScroll';
 import Opla from '@/components/icons/Opla';
 import { AvatarRef, Conversation, Message, MessageImpl, PromptTemplate, Ui } from '@/types';
 // import logger from '@/utils/logger';
-import { AppContext } from '@/context';
-import { updateConversation } from '@/utils/data/conversations';
+import useBackend from '@/hooks/useBackendContext';
 import { ParsedPrompt } from '@/utils/parsers';
-import { MenuAction } from '@/types/ui';
+import { MenuAction, Page, ViewName } from '@/types/ui';
+import logger from '@/utils/logger';
 import ConversationList from './ConversationList';
 import PromptsGrid from './PromptsGrid';
 
@@ -68,33 +68,53 @@ export function ConversationPanel({
   onCopyMessage,
 }: ConversationPanelProps) {
   const { t } = useTranslation();
-  const { conversations, updateConversations } = useContext(AppContext);
+  const { backendContext, setSettings } = useBackend();
   const [update, setUpdate] = useState<{
-    id?: string | undefined;
+    name?: string | undefined;
     scrollPosition?: number | undefined;
   }>({});
 
+  const getSelectedViewName = (selectedThreadId: string | undefined, view = ViewName.Recent) =>
+    `${view === ViewName.Recent ? Page.Threads : Page.Archives}${selectedThreadId ? `/${selectedThreadId}` : ''}`;
+
+  const pagesSettings = backendContext.config.settings.pages;
+  const conversationId = selectedConversation?.id;
+  const conversationViewName = getSelectedViewName(conversationId);
+  const conversationSettings = pagesSettings?.[conversationViewName];
   useEffect(() => {
     const afunc = async () => {
       if (
-        selectedConversation &&
-        selectedConversation.id === update.id &&
-        update.scrollPosition !== selectedConversation?.scrollPosition
+        conversationSettings &&
+        conversationViewName === update.name &&
+        update.scrollPosition !== conversationSettings?.scrollPosition
       ) {
-        const updatedConversation: Conversation = {
-          ...selectedConversation,
-          scrollPosition: update.scrollPosition === -1 ? undefined : update.scrollPosition,
-        };
-        const updatedConversations = updateConversation(updatedConversation, conversations, true);
-        await updateConversations(updatedConversations);
+        const scrollPosition = update.scrollPosition === -1 ? undefined : update.scrollPosition;
+        setSettings({
+          ...backendContext.config.settings,
+          pages: {
+            ...pagesSettings,
+            [conversationViewName]: { ...conversationSettings, scrollPosition },
+          },
+        });
       }
     };
     afunc();
-  }, [selectedConversation, update, conversations, updateConversations]);
+  }, [
+    conversationViewName,
+    conversationSettings,
+    pagesSettings,
+    setSettings,
+    update,
+    backendContext.config.settings,
+  ]);
 
   const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {
-    if (update.id !== key || update.scrollPosition !== position.y) {
-      setUpdate({ scrollPosition: position.y, id: key });
+    const name = getSelectedViewName(key);
+    // TODO debug
+    const { scrollPosition } = update;
+    if (update.name !== name || update.scrollPosition !== scrollPosition) {
+      logger.info('setUpdate', scrollPosition, position.y);
+      setUpdate({ scrollPosition: position.y, name });
     }
   };
 
@@ -102,7 +122,7 @@ export function ConversationPanel({
     onSelectPrompt(parseAndValidatePrompt(prompt.value), prompt.name);
   };
 
-  const showEmptyChat = !selectedConversation?.id;
+  const showEmptyChat = !conversationId;
   if (showEmptyChat) {
     let actions: Ui.MenuItem[] | undefined;
     let buttonLabel: string | undefined;
@@ -165,13 +185,13 @@ export function ConversationPanel({
   }
   return (
     <>
-      {(isPrompt || (messages && messages[0]?.conversationId === selectedConversation.id)) && (
+      {(isPrompt || (messages && messages[0]?.conversationId === conversationId)) && (
         <ConversationList
           conversation={selectedConversation}
           selectedMessageId={selectedMessageId}
           scrollPosition={
-            selectedConversation && selectedConversation.scrollPosition !== undefined
-              ? selectedConversation.scrollPosition
+            conversationSettings && conversationSettings.scrollPosition !== undefined
+              ? conversationSettings.scrollPosition
               : undefined
           }
           messages={messages || []}

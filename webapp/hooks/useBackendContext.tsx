@@ -28,6 +28,7 @@ import {
   Download,
   ServerParameters,
   AIServiceType,
+  Streams,
 } from '@/types';
 import {
   getOplaConfig,
@@ -71,6 +72,7 @@ type Context = {
   startBackend: () => Promise<void>;
   disconnectBackend: () => Promise<void>;
   backendContext: OplaContext;
+  getStreams: () => Streams | undefined;
   setSettings: (settings: Settings) => Promise<void>;
   updateBackendStore: () => Promise<void>;
   start: (params: ServerParameters | undefined) => Promise<BackendResult>;
@@ -91,6 +93,7 @@ const defaultContext: Context = {
   restart: async () => ({ status: 'error', error: 'not implemented' }),
   setActiveModel: async () => {},
   getActiveModel: () => undefined,
+  getStreams: () => undefined,
 };
 
 const BackendContext = createContext<Context>(defaultContext);
@@ -375,6 +378,12 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     return activeService?.type === AIServiceType.Model ? activeService.modelId : undefined;
   }, [backendContext]);
 
+  const getStreams = useCallback(() => {
+    const context = backendContextRef.current;
+    const { streams } = context || {};
+    return streams;
+  }, [backendContextRef]);
+
   const setActiveModel = useCallback(
     async (model: string, provider?: string) => {
       logger.info('setActiveModel', model);
@@ -418,6 +427,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       restart,
       setActiveModel,
       getActiveModel,
+      getStreams,
     }),
     [
       backendContext,
@@ -430,6 +440,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       startBackend,
       stop,
       updateBackendStore,
+      getStreams,
     ],
   );
 
