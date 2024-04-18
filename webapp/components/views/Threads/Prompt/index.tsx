@@ -20,7 +20,6 @@ import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
-import { ParsedPrompt, TokenValidator, parsePrompt } from '@/utils/parsers';
 import { getCaretPosition } from '@/utils/ui/caretposition';
 import { CommandManager } from '@/utils/commands/types';
 import {
@@ -30,46 +29,41 @@ import {
 } from '@/utils/data/conversations';
 import { createMessage, mergeMessages } from '@/utils/data/messages';
 import { openFileDialog } from '@/utils/backend/tauri';
-import { AIImplService } from '@/types';
 import { getFileAssetExtensions } from '@/utils/backend/commands';
 import { toast } from '@/components/ui/Toast';
+import { parsePrompt } from '@/utils/parsers';
 import { Button } from '../../../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../../ui/tooltip';
 import { ShortcutBadge } from '../../../common/ShortCut';
 import PromptInput from './PromptInput';
 import PromptCommands from './PromptCommands';
+import { usePromptContext } from './PromptContext';
+import { useConversationContext } from '../ConversationContext';
 
 export type PromptProps = {
   conversationId: string;
-  prompt: ParsedPrompt;
   commandManager: CommandManager;
   isLoading: boolean;
-  errorMessage: string;
   disabled: boolean;
   placeholder: string | undefined;
-  onUpdatePrompt: (prompt: ParsedPrompt) => void;
-  onSendMessage: (prompt?: ParsedPrompt) => void;
-  tokenValidate: TokenValidator;
-  usage: { tokenCount: number; activeService?: AIImplService } | undefined;
   needFocus: boolean;
 };
 
 export default function Prompt({
   conversationId,
-  prompt,
   commandManager,
-  errorMessage,
   disabled,
   placeholder,
-  onUpdatePrompt,
-  onSendMessage,
-  tokenValidate,
   isLoading,
-  usage,
   needFocus,
 }: PromptProps) {
   const { t } = useTranslation();
+  const { errorMessages, handleSendMessage: sendMessage } = useConversationContext();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { usage, changedPrompt, conversationPrompt, setChangedPrompt, tokenValidator } =
+    usePromptContext();
+  const prompt = changedPrompt === undefined ? conversationPrompt : changedPrompt;
+  const errorMessage = errorMessages[conversationId];
 
   const {
     conversations,
@@ -80,8 +74,10 @@ export default function Prompt({
 
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
-    logger.info('sending message', conversationId);
-    onSendMessage();
+    if (prompt) {
+      logger.info('sending message', conversationId);
+      sendMessage(prompt);
+    }
   };
 
   const handleUploadFile = async (e: MouseEvent) => {
@@ -123,34 +119,39 @@ export default function Prompt({
   }, [needFocus, disabled]);
 
   const handleKeypress = (e: KeyboardEvent) => {
+    if (!tokenValidator) return;
     const textarea = e.target as HTMLTextAreaElement;
     const { caretStartIndex } = getCaretPosition(textarea);
     const value = `${textarea.value} \n`;
-    const newPrompt = parsePrompt({ text: value, caretStartIndex }, tokenValidate);
+    const newPrompt = parsePrompt({ text: value, caretStartIndex }, tokenValidator);
     if (e.key === 'Enter' && e.shiftKey) {
       e.preventDefault();
-      onUpdatePrompt(newPrompt);
+      setChangedPrompt?.(newPrompt);
     } else if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      onSendMessage(newPrompt);
+      sendMessage(newPrompt);
     }
   };
 
   const handleValueChange = useCallback(
     (text: string, caretStartIndex: number) => {
-      const parsedPrompt = parsePrompt({ text, caretStartIndex }, tokenValidate);
-      if (prompt?.raw !== text) {
-        onUpdatePrompt(parsedPrompt);
+      if (!tokenValidator) return;
+      const parsedPrompt = parsePrompt({ text, caretStartIndex }, tokenValidator);
+      if (prompt?.raw !== text && setChangedPrompt) {
+        // onUpdatePrompt(parsedPrompt);
+        setChangedPrompt(parsedPrompt);
       }
     },
-    [tokenValidate, prompt?.raw, onUpdatePrompt],
+    [tokenValidator, prompt?.raw, setChangedPrompt],
   );
 
   const handleFocus = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const lengthOfInput = event.target.value.length;
     event.currentTarget.setSelectionRange(lengthOfInput, lengthOfInput);
-    const newPrompt = parsePrompt({ textarea: event.target }, tokenValidate);
-    onUpdatePrompt(newPrompt);
+    if (!tokenValidator) return;
+    const newPrompt = parsePrompt({ textarea: event.target }, tokenValidator);
+    // onUpdatePrompt(newPrompt);
+    setChangedPrompt?.(newPrompt);
   };
 
   const shortcutSend: KeyBinding = defaultShortcuts.find(

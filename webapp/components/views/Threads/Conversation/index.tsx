@@ -20,30 +20,28 @@ import Opla from '@/components/icons/Opla';
 import { AvatarRef, Conversation, Message, MessageImpl, PromptTemplate, Ui } from '@/types';
 // import logger from '@/utils/logger';
 import useBackend from '@/hooks/useBackendContext';
-import { ParsedPrompt } from '@/utils/parsers';
 import { MenuAction, Page, ViewName } from '@/types/ui';
 import logger from '@/utils/logger';
 import ConversationList from './ConversationList';
 import PromptsGrid from './PromptsGrid';
+import { useConversationContext } from '../ConversationContext';
 
 export type ConversationPanelProps = {
   selectedConversation: Conversation | undefined;
   selectedAssistantId: string | undefined;
   selectedModelName: string | undefined;
-  selectedMessageId: string | undefined;
   messages: MessageImpl[] | undefined;
   avatars: AvatarRef[];
   modelItems: Ui.MenuItem[];
   disabled: boolean;
-  isPrompt: boolean;
-  onResendMessage: (m: Message) => void;
+  // isPrompt: boolean;
+  // onResendMessage: (m: Message) => void;
   onDeleteMessage: (m: Message) => void;
   onDeleteAssets: (m: Message) => void;
-  onChangeMessageContent: (m: Message, newContent: string, submit: boolean) => void;
-  onSelectPrompt: (prompt: ParsedPrompt, name: string) => void;
+  // onChangeMessageContent: (m: Message, newContent: string, submit: boolean) => void;
+  onSelectPromptTemplate: (prompt: PromptTemplate) => void;
   onSelectMenu: (menu: MenuAction, data: string) => void;
-  onStartMessageEdit: (messageId: string, index: number) => void;
-  parseAndValidatePrompt: (prompt: string) => ParsedPrompt;
+  // onStartMessageEdit: (messageId: string, index: number) => void;
   onCopyMessage: (messageId: string, state: boolean) => void;
 };
 
@@ -53,22 +51,23 @@ export function ConversationPanel({
   selectedConversation,
   selectedAssistantId,
   selectedModelName,
-  selectedMessageId,
+
   modelItems,
   disabled,
-  isPrompt,
-  onResendMessage,
   onDeleteMessage,
   onDeleteAssets,
-  onChangeMessageContent,
-  onSelectPrompt,
+  onSelectPromptTemplate,
   onSelectMenu,
-  onStartMessageEdit,
-  parseAndValidatePrompt,
   onCopyMessage,
 }: ConversationPanelProps) {
   const { t } = useTranslation();
   const { config, setSettings } = useBackend();
+  const {
+    selectedMessageId,
+    handleResendMessage,
+    handleChangeMessageContent,
+    handleStartMessageEdit,
+  } = useConversationContext();
   const [update, setUpdate] = useState<{
     name?: string | undefined;
     scrollPosition?: number | undefined;
@@ -119,7 +118,7 @@ export function ConversationPanel({
   };
 
   const handlePromptTemplateSelected = (prompt: PromptTemplate) => {
-    onSelectPrompt(parseAndValidatePrompt(prompt.value), prompt.name);
+    onSelectPromptTemplate(prompt);
   };
 
   const showEmptyChat = !conversationId;
@@ -185,7 +184,7 @@ export function ConversationPanel({
   }
   return (
     <>
-      {(isPrompt || (messages && messages[0]?.conversationId === conversationId)) && (
+      {/* isPrompt || */ messages && messages[0]?.conversationId === conversationId && (
         <ConversationList
           conversation={selectedConversation}
           selectedMessageId={selectedMessageId}
@@ -197,11 +196,11 @@ export function ConversationPanel({
           messages={messages || []}
           avatars={avatars}
           onScrollPosition={handleScrollPosition}
-          onResendMessage={onResendMessage}
+          onResendMessage={handleResendMessage}
           onDeleteMessage={onDeleteMessage}
           onDeleteAssets={onDeleteAssets}
-          onChangeMessageContent={onChangeMessageContent}
-          onStartMessageEdit={onStartMessageEdit}
+          onChangeMessageContent={handleChangeMessageContent}
+          onStartMessageEdit={handleStartMessageEdit}
           onCopyMessage={onCopyMessage}
         />
       )}

@@ -53,6 +53,8 @@ import { getLocalProvider } from '@/utils/data/providers';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import ThreadHeader from './Header';
 import ConversationManager from './ConversationManager';
+import { PromptProvider } from './Prompt/PromptContext';
+import { ConversationProvider } from './ConversationContext';
 
 function Thread({
   conversationId: _conversationId,
@@ -380,7 +382,6 @@ function Thread({
     }
   });
 
-  // console.log('temp conv', tempConversationId);
   return (
     <ContentView
       header={
@@ -395,29 +396,48 @@ function Thread({
       }
       toolbar={rightToolbar}
     >
-      <ConversationManager
+      <PromptProvider
+        conversationId={conversationId}
         selectedConversation={selectedConversation}
-        messages={messages}
         commandManager={commandManager}
         assistant={assistant}
         service={service}
-        avatars={avatars}
-        model={model}
-        modelItems={modelItems}
-        disabled={disabled}
-        notFocused={notFocused}
         selectedModelId={selectedModelId}
-        tempConversationName={tempConversationName}
         tempConversationId={tempConversationId}
-        changeService={changeService}
-        onError={onError}
-        onCopyMessage={handleCopyMessage}
-        onDeleteMessage={handleShouldDeleteMessage}
-        onDeleteAssets={handleShouldDeleteAssets}
-        onSelectMenu={onSelectMenu}
         onUpdateService={setService}
         onUpdateTempConversation={setTempConversationId}
-      />
+      >
+        <ConversationProvider
+          conversationId={conversationId}
+          selectedConversation={selectedConversation}
+          messages={messages}
+          commandManager={commandManager}
+          assistant={assistant}
+          selectedModelId={selectedModelId}
+          tempConversationName={tempConversationName}
+          tempConversationId={tempConversationId}
+          changeService={changeService}
+          onError={onError}
+        >
+          <ConversationManager
+            conversationId={conversationId}
+            selectedConversation={selectedConversation}
+            messages={messages}
+            commandManager={commandManager}
+            assistant={assistant}
+            avatars={avatars}
+            model={model}
+            modelItems={modelItems}
+            disabled={disabled}
+            notFocused={notFocused}
+            selectedModelId={selectedModelId}
+            onCopyMessage={handleCopyMessage}
+            onDeleteMessage={handleShouldDeleteMessage}
+            onDeleteAssets={handleShouldDeleteAssets}
+            onSelectMenu={onSelectMenu}
+          />
+        </ConversationProvider>
+      </PromptProvider>
     </ContentView>
   );
 }

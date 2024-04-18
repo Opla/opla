@@ -40,6 +40,12 @@ export type PromptToken = {
   blockOtherCommands?: boolean;
 };
 
+export const EmptyPromptToken: PromptToken = {
+  type: PromptTokenType.Text,
+  value: '',
+  index: 0,
+};
+
 export type ParsedPrompt = {
   raw: string;
   text: string;
@@ -48,6 +54,14 @@ export type ParsedPrompt = {
   tokens: PromptToken[];
   locked?: boolean;
   tokenCount?: number;
+};
+
+export const EmptyParsedPrompt = {
+  raw: '',
+  text: '',
+  caretPosition: 0,
+  currentTokenIndex: 0,
+  tokens: [],
 };
 
 type ParsePromptOptions =
@@ -152,11 +166,11 @@ export function parsePrompt(options: ParsePromptOptions, validator: TokenValidat
 }
 
 export function toPrompt(
-  textOrPrompt: string | ParsedPrompt,
+  textOrPrompt: string | ParsedPrompt | undefined,
   tokenValidator: TokenValidator,
 ): ParsedPrompt {
-  return typeof textOrPrompt === 'string'
-    ? parsePrompt({ text: textOrPrompt }, tokenValidator)
+  return textOrPrompt === undefined || typeof textOrPrompt === 'string'
+    ? parsePrompt({ text: textOrPrompt || '' }, tokenValidator)
     : textOrPrompt;
 }
 
