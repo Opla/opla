@@ -1,3 +1,10 @@
+# [1.0.0-alpha.118](https://github.com/Opla/opla/compare/v1.0.0-alpha.117...v1.0.0-alpha.118) (2024-04-18)
+
+
+### Features
+
+* refactor Threads [#705](https://github.com/Opla/opla/issues/705) ([#802](https://github.com/Opla/opla/issues/802)) ([bb330bb](https://github.com/Opla/opla/commit/bb330bb1b108fdd9049a65ae6befa09a843e8ad0))
+
 # [1.0.0-alpha.117](https://github.com/Opla/opla/compare/v1.0.0-alpha.116...v1.0.0-alpha.117) (2024-04-16)
 
 
