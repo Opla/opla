@@ -133,6 +133,7 @@ function Thread({
   const defaultConversationName = getDefaultConversationName(t);
   const { messages, tempConversationName } = useMemo(() => {
     const stream = streams?.[conversationId as string];
+    console.log('streams', streams);
     let newMessages: MessageImpl[] = conversationMessages;
     if (stream) {
       newMessages = newMessages.map((msg, index) => {

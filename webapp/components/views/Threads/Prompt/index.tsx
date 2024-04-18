@@ -42,6 +42,7 @@ import { useConversationContext } from '../ConversationContext';
 
 export type PromptProps = {
   conversationId: string;
+  hasMessages: boolean;
   commandManager: CommandManager;
   isLoading: boolean;
   disabled: boolean;
@@ -51,6 +52,7 @@ export type PromptProps = {
 
 export default function Prompt({
   conversationId,
+  hasMessages,
   commandManager,
   disabled,
   placeholder,
@@ -161,6 +163,9 @@ export default function Prompt({
     (s) => s.command === ShortcutIds.NEW_LINE,
   ) as KeyBinding;
 
+  if (!prompt && !hasMessages) {
+    return undefined;
+  }
   return (
     <div className="w-full grow-0 !bg-transparent ">
       <form className="mx-2 flex flex-col gap-2 last:mb-2">

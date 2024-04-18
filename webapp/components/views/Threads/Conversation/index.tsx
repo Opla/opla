@@ -121,7 +121,7 @@ export function ConversationPanel({
     onSelectPromptTemplate(prompt);
   };
 
-  const showEmptyChat = !conversationId;
+  const showEmptyChat = !conversationId || !messages || messages.length === 0;
   if (showEmptyChat) {
     let actions: Ui.MenuItem[] | undefined;
     let buttonLabel: string | undefined;
@@ -184,26 +184,28 @@ export function ConversationPanel({
   }
   return (
     <>
-      {/* isPrompt || */ messages && messages[0]?.conversationId === conversationId && (
-        <ConversationList
-          conversation={selectedConversation}
-          selectedMessageId={selectedMessageId}
-          scrollPosition={
-            conversationSettings && conversationSettings.scrollPosition !== undefined
-              ? conversationSettings.scrollPosition
-              : undefined
-          }
-          messages={messages || []}
-          avatars={avatars}
-          onScrollPosition={handleScrollPosition}
-          onResendMessage={handleResendMessage}
-          onDeleteMessage={onDeleteMessage}
-          onDeleteAssets={onDeleteAssets}
-          onChangeMessageContent={handleChangeMessageContent}
-          onStartMessageEdit={handleStartMessageEdit}
-          onCopyMessage={onCopyMessage}
-        />
-      )}
+      {
+        /* isPrompt || */ messages && messages[0]?.conversationId === conversationId && (
+          <ConversationList
+            conversation={selectedConversation}
+            selectedMessageId={selectedMessageId}
+            scrollPosition={
+              conversationSettings && conversationSettings.scrollPosition !== undefined
+                ? conversationSettings.scrollPosition
+                : undefined
+            }
+            messages={messages || []}
+            avatars={avatars}
+            onScrollPosition={handleScrollPosition}
+            onResendMessage={handleResendMessage}
+            onDeleteMessage={onDeleteMessage}
+            onDeleteAssets={onDeleteAssets}
+            onChangeMessageContent={handleChangeMessageContent}
+            onStartMessageEdit={handleStartMessageEdit}
+            onCopyMessage={onCopyMessage}
+          />
+        )
+      }
       <div className="flex flex-col items-center text-sm" />
     </>
   );

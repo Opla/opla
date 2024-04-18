@@ -94,16 +94,15 @@ function ConversationManager({
         onCopyMessage={onCopyMessage}
         onSelectPromptTemplate={selectTemplate}
       />
-      {messages && messages[0]?.conversationId === conversationId && (
         <PromptArea
           conversationId={conversationId as string}
+          hasMessages={messages && messages[0]?.conversationId === conversationId}
           disabled={disabled}
           commandManager={commandManager}
           isLoading={isLoading}
           placeholder={placeholder}
           needFocus={notFocused}
         />
-      )}
     </>
   );
 }

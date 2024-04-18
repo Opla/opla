@@ -40,7 +40,7 @@ import {
 } from '@/utils/backend/commands';
 import { AppContext } from '@/context';
 import Backend, { BackendResult } from '@/utils/backend/Backend';
-import { mapKeys } from '@/utils/data';
+import { deepCopy, mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
 import { LlamaCppArgumentsSchema } from '@/utils/providers/llama.cpp/schema';
 import OplaProvider from '@/utils/providers/opla';
@@ -148,7 +148,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     // const context = backendContextRef.current;
     if (event.event === 'opla-server' && serverRef.current) {
       if (event.payload.status === ServerStatus.STDOUT) {
-        const { stdout = [] } = serverRef.current;
+        const stdout = deepCopy(serverRef.current.stdout || []);
         const len = stdout.unshift(event.payload.message);
         if (len > 50) {
           stdout.pop();
@@ -165,7 +165,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
           stdout,
         });
       } else if (event.payload.status === ServerStatus.STDERR) {
-        const { stderr = [] } = serverRef.current;
+        const stderr = deepCopy(serverRef.current.stderr || []);
         const len = stderr.unshift(event.payload.message);
         if (len > 50) {
           stderr.pop();
@@ -222,7 +222,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
 
         // logger.info('download', type, downloads);
         if (type === 'progress') {
-          const currentDownloads = downloadsRef.current || [];
+          const currentDownloads = deepCopy(downloadsRef.current || []);
           const index = currentDownloads.findIndex((d) => d.id === download.id);
           if (index === -1) {
             currentDownloads.push(download);
@@ -261,7 +261,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       /* if (!context) {
         return;
       } */
-      logger.info('stream event', event, streamsRef.current);
+      // logger.info('stream event', event, streamsRef.current);
       const response = (await mapKeys(event.payload, toCamelCase)) as LlmCompletionResponse;
       if (response.status === 'error') {
         logger.error('stream error', response);
@@ -274,7 +274,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       const { conversationId } = response;
 
       // const { streams = {} } = context || {};
-      const currentStreams: Streams = streamsRef.current || {};
+      const currentStreams: Streams = deepCopy(streamsRef.current || {});
       if (response.status === 'success') {
         const stream = currentStreams[conversationId] || ({} as LlmStreamResponse);
         if (stream.prevContent !== response.content) {
