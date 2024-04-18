@@ -74,7 +74,7 @@ function Thread({
     updateConversationMessages,
   } = useContext(AppContext);
 
-  const { backendContext, getActiveModel, setActiveModel } = useBackend();
+  const { config, downloads, streams, getActiveModel, setActiveModel } = useBackend();
   const searchParams = useSearchParams();
   const [service, setService] = useState<AIService | undefined>(undefined);
   const [notFocused, setNotFocused] = useState(false);
@@ -130,7 +130,7 @@ function Thread({
 
   const defaultConversationName = getDefaultConversationName(t);
   const { messages, tempConversationName } = useMemo(() => {
-    const stream = backendContext.streams?.[conversationId as string];
+    const stream = streams?.[conversationId as string];
     let newMessages: MessageImpl[] = conversationMessages;
     if (stream) {
       newMessages = newMessages.map((msg, index) => {
@@ -158,7 +158,7 @@ function Thread({
       ? getMessageContentAsString(newMessages?.[0])
       : defaultConversationName;
     return { messages: newMessages, tempConversationName: conversationName };
-  }, [conversationMessages, backendContext.streams, conversationId, defaultConversationName]);
+  }, [conversationMessages, streams, conversationId, defaultConversationName]);
 
   const {
     modelItems,
@@ -171,28 +171,28 @@ function Thread({
     let modelId: string | undefined =
       getConversationModelId(selectedConversation) ||
       getServiceModelId(service) ||
-      (getServiceModelId(backendContext.config.services.activeService) as string);
+      (getServiceModelId(config.services.activeService) as string);
     const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);
     const newAssistant = getAssistant(assistantId);
     let activeModel: Model | undefined;
     if (!modelId) {
       modelId = getActiveModel();
-      if (!modelId && backendContext.downloads && backendContext.downloads.length > 0) {
-        modelId = backendContext.downloads[0].id;
+      if (!modelId && downloads && downloads.length > 0) {
+        modelId = downloads[0].id;
       }
-      activeModel = findModel(modelId, backendContext.config.models.items);
+      activeModel = findModel(modelId, config.models.items);
     } else {
-      activeModel = findModelInAll(modelId, providers, backendContext, true);
+      activeModel = findModelInAll(modelId, providers, config, true);
     }
 
-    const download = backendContext.downloads?.find((d) => d.id === activeModel?.id);
+    const download = downloads?.find((d) => d.id === activeModel?.id);
     if (activeModel && download) {
       activeModel.state = ModelState.Downloading;
     } else if (activeModel && activeModel.state === ModelState.Downloading) {
       activeModel.state = ModelState.Ok;
     }
 
-    const items = getModelsAsItems(providers, backendContext, modelId);
+    const items = getModelsAsItems(providers, config, modelId);
     let d = false;
     if (!activeModel) {
       modelId = undefined;
@@ -211,7 +211,8 @@ function Thread({
       model: activeModel,
     };
   }, [
-    backendContext,
+    config,
+    downloads,
     getActiveModel,
     getAssistant,
     providers,
@@ -283,7 +284,7 @@ function Thread({
       `ChangeService ${modelIdOrName} ${providerIdOrName} activeModel=${selectedModelId}`,
       selectedConversation,
     );
-    const activeModel = findModelInAll(modelIdOrName, providers, backendContext, true);
+    const activeModel = findModelInAll(modelIdOrName, providers, config, true);
     if (!activeModel) {
       logger.error('Model not found', modelIdOrName);
       return;

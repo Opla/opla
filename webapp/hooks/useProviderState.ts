@@ -26,7 +26,7 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
   const [updatedProvider, setUpdatedProvider] = useState<Partial<Provider>>({ id: providerId });
   const { providers, setProviders } = useContext(AppContext);
 
-  const { backendContext, restart, start, stop } = useBackend();
+  const { server, restart, start, stop } = useBackend();
 
   useEffect(() => {
     if (providerId !== updatedProvider.id) {
@@ -47,10 +47,10 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
       p = deepMerge(p, updatedProvider);
     }
     if (p?.type === ProviderType.opla) {
-      p.disabled = backendContext.server.status === ServerStatus.STOPPED;
+      p.disabled = server.status === ServerStatus.STOPPED;
     }
     return p;
-  }, [backendContext, hasParametersChanged, providerId, providers, updatedProvider, newProvider]);
+  }, [server, hasParametersChanged, providerId, providers, updatedProvider, newProvider]);
 
   const handleParameterChange = (name: string, value: ParameterValue) => {
     const mergedProvider = deepSet<Provider, ParameterValue>(
@@ -72,8 +72,8 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
     setProviders(newProviders);
     setUpdatedProvider({ id: providerId });
     if (mergedProvider.type === ProviderType.opla) {
-      const server = mergedProvider.metadata?.server;
-      const parameters = server?.parameters; // deepCopy(provider?.metadata?.parameters);
+      const providerServer = mergedProvider.metadata?.server;
+      const parameters = providerServer?.parameters; // deepCopy(provider?.metadata?.parameters);
       logger.info('params', parameters);
       restart(parameters);
     }
@@ -81,21 +81,15 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
 
   const handleProviderToggle = async () => {
     if (provider?.type === ProviderType.opla) {
-      logger.info('backend.server', backendContext.server);
-      if (
-        backendContext.server.status === ServerStatus.STARTED ||
-        backendContext.server.status === ServerStatus.STARTING
-      ) {
+      logger.info('backend.server', server);
+      if (server.status === ServerStatus.STARTED || server.status === ServerStatus.STARTING) {
         const result = await stop();
         if (result.status === 'error') {
           toast.error(`Error stopping server: ${result.error}`);
         }
-      } else if (
-        backendContext.server.status === ServerStatus.STOPPED ||
-        backendContext.server.status === ServerStatus.ERROR
-      ) {
-        const server = provider?.metadata?.server;
-        const parameters = server?.parameters;
+      } else if (server.status === ServerStatus.STOPPED || server.status === ServerStatus.ERROR) {
+        const providerServer = provider?.metadata?.server;
+        const parameters = providerServer?.parameters;
         start(parameters);
       }
     } else {

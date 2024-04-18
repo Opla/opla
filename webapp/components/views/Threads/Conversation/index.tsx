@@ -68,7 +68,7 @@ export function ConversationPanel({
   onCopyMessage,
 }: ConversationPanelProps) {
   const { t } = useTranslation();
-  const { backendContext, setSettings } = useBackend();
+  const { config, setSettings } = useBackend();
   const [update, setUpdate] = useState<{
     name?: string | undefined;
     scrollPosition?: number | undefined;
@@ -77,7 +77,7 @@ export function ConversationPanel({
   const getSelectedViewName = (selectedThreadId: string | undefined, view = ViewName.Recent) =>
     `${view === ViewName.Recent ? Page.Threads : Page.Archives}${selectedThreadId ? `/${selectedThreadId}` : ''}`;
 
-  const pagesSettings = backendContext.config.settings.pages;
+  const pagesSettings = config.settings.pages;
   const conversationId = selectedConversation?.id;
   const conversationViewName = getSelectedViewName(conversationId);
   const conversationSettings = pagesSettings?.[conversationViewName];
@@ -90,7 +90,7 @@ export function ConversationPanel({
       ) {
         const scrollPosition = update.scrollPosition === -1 ? undefined : update.scrollPosition;
         setSettings({
-          ...backendContext.config.settings,
+          ...config.settings,
           pages: {
             ...pagesSettings,
             [conversationViewName]: { ...conversationSettings, scrollPosition },
@@ -105,7 +105,7 @@ export function ConversationPanel({
     pagesSettings,
     setSettings,
     update,
-    backendContext.config.settings,
+    config.settings,
   ]);
 
   const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {

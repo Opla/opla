@@ -20,13 +20,13 @@ import useBackend from '@/hooks/useBackendContext';
 
 export default function Home() {
   const router = useRouter();
-  const { backendContext } = useBackend();
+  const { config } = useBackend();
 
   useEffect(() => {
-    const { settings } = backendContext.config;
+    const { settings } = config;
     if (settings.selectedPage) {
       router.replace(settings.selectedPage);
     }
-  }, [router, backendContext]);
+  }, [router, config]);
   return <div className="relative flex h-screen w-full flex-col overflow-hidden" />;
 }

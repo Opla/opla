@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Assistant, Conversation, LlmUsage, Message, MessageStatus, OplaContext } from '@/types';
+import { Assistant, Conversation, LlmUsage, Message, MessageStatus, Store } from '@/types';
 import { toast } from '@/components/ui/Toast';
 import { Context } from '@/context';
 import { CommandManager } from '../commands/types';
@@ -63,7 +63,7 @@ export const sendMessage = async (
   assistant: Assistant | undefined,
   commandManager: CommandManager,
   context: Context,
-  backendContext: OplaContext,
+  config: Store,
   onSuccess: (usage: LlmUsage | undefined) => void,
   onError: (id: string, error: string) => void,
 ) => {
@@ -72,7 +72,7 @@ export const sendMessage = async (
     conversation,
     assistant,
     context.providers,
-    backendContext,
+    config,
     modelName,
   );
   logger.info('sendMessage', activeService, conversation, context.presets);

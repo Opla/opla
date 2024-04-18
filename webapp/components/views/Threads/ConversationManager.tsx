@@ -123,7 +123,7 @@ function ConversationManager({
     setUsage,
   } = context;
 
-  const { backendContext } = useBackend();
+  const { config } = useBackend();
   const [selectedMessageId, setSelectedMessageId] = useState<string | undefined>(undefined);
   const [usage, updateUsage] = useState<Usage | undefined>({ tokenCount: 0 });
   const [changedPrompt, setChangedPrompt] = useState<ParsedPrompt | undefined>(undefined);
@@ -163,7 +163,7 @@ function ConversationManager({
           selectedConversation,
           assistant,
           providers,
-          backendContext,
+          config,
           selectedModelNameOrId,
         );
         const response = await tokenize(activeService, text);
@@ -183,7 +183,7 @@ function ConversationManager({
     commandManager,
     assistant,
     providers,
-    backendContext,
+    config,
     selectedModelId,
     usage,
   ]);
@@ -244,12 +244,12 @@ function ConversationManager({
 
     let selectedModel;
     if (result.modelName) {
-      selectedModel = findModelInAll(result.modelName, providers, backendContext, true);
+      selectedModel = findModelInAll(result.modelName, providers, config, true);
     } else {
       selectedModel = findModelInAll(
         getConversationModelId(selectedConversation) || selectedModelId,
         providers,
-        backendContext,
+        config,
         true,
       );
     }
@@ -318,7 +318,7 @@ function ConversationManager({
       assistant,
       commandManager,
       context,
-      backendContext,
+      config,
       setUsage,
       handleError,
     );
@@ -382,7 +382,7 @@ function ConversationManager({
       assistant,
       commandManager,
       context,
-      backendContext,
+      config,
       setUsage,
       handleError,
     );

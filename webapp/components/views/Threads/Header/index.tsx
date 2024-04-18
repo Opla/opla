@@ -47,20 +47,14 @@ export default function ThreadHeader({
 }: ThreadMenuProps) {
   const { getAssistant } = useAssistantStore();
   const { conversations, providers, setProviders } = useContext(AppContext);
-  const { backendContext } = useBackend();
+  const { config } = useBackend();
 
   const conversation = conversations.find((c) => c.id === selectedConversationId) as
     | Conversation
     | undefined;
 
   const assistant = getAssistant(selectedAssistantId) as Assistant;
-  const service = getActiveService(
-    conversation,
-    assistant,
-    providers,
-    backendContext,
-    selectedModelId,
-  );
+  const service = getActiveService(conversation, assistant, providers, config, selectedModelId);
   const selectedModel = service.model;
   const modelId = selectedModel?.id || selectedModelId;
 

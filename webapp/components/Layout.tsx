@@ -37,7 +37,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { providers } = useContext(AppContext);
   const router = useRouter();
 
-  const { startBackend, disconnectBackend, backendContext, setSettings } = useBackendContext();
+  const { startBackend, disconnectBackend, config, setSettings } = useBackendContext();
 
   const { showModal } = useRegisterModals(Modals);
   const { toggleTheme } = useTheme();
@@ -54,7 +54,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const handleRouteChange = (url: any) => {
-      const { settings } = backendContext.config;
+      const { settings } = config;
       if (settings.selectedPage !== url) {
         settings.selectedPage = url;
         delete settings.pages?.[url]?.selectedId;
@@ -66,7 +66,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     return () => {
       router.events.off('routeChangeStart', handleRouteChange);
     };
-  }, [backendContext, router, setSettings]);
+  }, [config, router, setSettings]);
 
   useShortcuts(ShortcutIds.DISPLAY_THREADS, (e) => {
     e.preventDefault();
@@ -104,7 +104,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     toggleTheme();
   });
 
-  if (!backendContext || !providers) {
+  if (!config || !providers) {
     return <Loading />;
   }
 

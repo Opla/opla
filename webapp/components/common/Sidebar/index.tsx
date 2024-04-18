@@ -134,8 +134,8 @@ function Sidebar() {
   // logger.info('pathname', pathname);
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
-  const { backendContext } = useBackend();
-  const settings = backendContext?.config.settings;
+  const { config } = useBackend();
+  const { settings } = config;
 
   sidebarItems[0].items = (sidebarItems[0].items as Ui.Item[]).map((item) => {
     let { href } = item;

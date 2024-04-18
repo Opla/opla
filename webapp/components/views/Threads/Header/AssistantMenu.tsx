@@ -68,7 +68,7 @@ export default function AssistantMenu({
   onSelectMenu,
 }: AssistantMenuProps) {
   const { conversations, updateConversations, providers } = useContext(AppContext);
-  const { backendContext } = useBackend();
+  const { config } = useBackend();
   // const conversation = conversations.find((c) => c.id === selectedConversationId) as Conversation;
   const selectedConversationId = conversation?.id;
   const service = conversation?.services?.[0] || getDefaultAssistantService(assistant);
@@ -81,9 +81,7 @@ export default function AssistantMenu({
     () => (assistant ? getAssistantTargetsAsItems(assistant, target?.id) : []),
     [assistant, target],
   );
-  const selectedModel = backendContext.config.models.items.find(
-    (model) => model.name === selectedModelName,
-  );
+  const selectedModel = config.models.items.find((model) => model.name === selectedModelName);
   let chatGPT = providers.find(
     (p: Provider) => p.type === ProviderType.openai && p.name === OpenAI.template.name,
   );

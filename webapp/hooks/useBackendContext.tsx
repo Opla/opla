@@ -29,6 +29,8 @@ import {
   ServerParameters,
   AIServiceType,
   Streams,
+  Store,
+  OplaServer,
 } from '@/types';
 import {
   getOplaConfig,
@@ -68,10 +70,10 @@ const initialBackendContext: OplaContext = {
   },
 };
 
-type Context = {
+type Context = OplaContext & {
   startBackend: () => Promise<void>;
   disconnectBackend: () => Promise<void>;
-  backendContext: OplaContext;
+  // backendContext: OplaContext;
   getStreams: () => Streams | undefined;
   setSettings: (settings: Settings) => Promise<void>;
   updateBackendStore: () => Promise<void>;
@@ -83,9 +85,10 @@ type Context = {
 };
 
 const defaultContext: Context = {
+  server: initialBackendContext.server,
+  config: initialBackendContext.config,
   startBackend: async () => {},
   disconnectBackend: async () => {},
-  backendContext: initialBackendContext,
   setSettings: async () => {},
   updateBackendStore: async () => {},
   start: async () => ({ status: 'error', error: 'not implemented' }),
@@ -99,50 +102,87 @@ const defaultContext: Context = {
 const BackendContext = createContext<Context>(defaultContext);
 
 function BackendProvider({ children }: { children: React.ReactNode }) {
-  const [backendContext, saveBackendContext] = useState<OplaContext>();
-  const backendContextRef = useRef(backendContext);
+  const [server, saveServer] = useState<OplaServer>(defaultContext.server);
+  const serverRef = useRef<OplaServer>(server);
+
+  const [config, saveConfig] = useState<Store>(defaultContext.config);
+  const configRef = useRef<Store>(config);
+
+  const [downloads, saveDownloads] = useState<Download[]>();
+  const downloadsRef = useRef<Download[] | undefined>(downloads);
+  const [streams, saveStreams] = useState<Streams>();
+  const streamsRef = useRef<Streams | undefined>(streams);
+
   const { providers, setProviders } = useContext(AppContext);
   const backendRef = useRef<Backend>();
 
-  const setBackendContext = (context: OplaContext) => {
+  /* const setBackendContext = (context: OplaContext) => {
     backendContextRef.current = context;
     saveBackendContext((ctx) => ({ ...ctx, ...context }));
+  }; */
+
+  const updateServer = (partials: Partial<OplaServer>) => {
+    const updatedServer: OplaServer = { ...serverRef.current, ...partials } as OplaServer;
+    serverRef.current = updatedServer;
+    saveServer(updatedServer);
+  };
+
+  const updateConfig = (partials: Partial<Store>) => {
+    const updatedConfig: Store = { ...configRef.current, ...partials } as Store;
+    configRef.current = updatedConfig;
+    saveConfig(updatedConfig);
+  };
+
+  const updateDownloads = (updatedDownloads: Download[]) => {
+    downloadsRef.current = updatedDownloads;
+    saveDownloads(updatedDownloads);
+  };
+
+  const updateStreams = (updatedStreams: Streams) => {
+    streamsRef.current = updatedStreams;
+    saveStreams(updatedStreams);
   };
 
   const backendListener = useCallback(async (event: any) => {
     logger.info('backend event', event);
-    const context = backendContextRef.current;
-    if (event.event === 'opla-server' && context) {
+    // const context = backendContextRef.current;
+    if (event.event === 'opla-server' && serverRef.current) {
       if (event.payload.status === ServerStatus.STDOUT) {
-        const { stdout = [] } = context.server;
+        const { stdout = [] } = serverRef.current;
         const len = stdout.unshift(event.payload.message);
         if (len > 50) {
           stdout.pop();
         }
         logger.info('stdout', stdout);
-        setBackendContext({
+        /* setBackendContext({
           ...context,
           server: {
             ...context.server,
             stdout,
           },
+        }); */
+        updateServer({
+          stdout,
         });
       } else if (event.payload.status === ServerStatus.STDERR) {
-        const { stderr = [] } = context.server;
+        const { stderr = [] } = serverRef.current;
         const len = stderr.unshift(event.payload.message);
         if (len > 50) {
           stderr.pop();
         }
         logger.error('stderr', stderr);
-        setBackendContext({
+        /* setBackendContext({
           ...context,
           server: {
             ...context.server,
             stderr,
           },
+        }); */
+        updateServer({
+          stderr,
         });
-      } else {
-        const { services } = context.config;
+      } else if (configRef.current) {
+        const { services } = configRef.current; // context.config;
         if (
           event.payload.status === ServerStatus.STARTING &&
           services.activeService?.type !== AIServiceType.Assistant
@@ -152,7 +192,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
             modelId: event.payload.message,
           };
         }
-        setBackendContext({
+        /* setBackendContext({
           ...context,
           config: {
             ...context?.config,
@@ -167,7 +207,8 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
             status: event.payload.status,
             message: event.payload.message,
           },
-        });
+        }); */
+        updateConfig({ services });
       }
     }
   }, []);
@@ -175,47 +216,52 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   const downloadListener = useCallback(
     async (event: any) => {
       // logger.info('downloader event', event);
-      const context = backendContextRef.current;
+      // const context = backendContextRef.current;
       if (event.event === 'opla-downloader') {
         const [type, download]: [string, Download] = await mapKeys(event.payload, toCamelCase);
 
         // logger.info('download', type, downloads);
         if (type === 'progress') {
-          const { downloads = [] } = backendContext || {};
-          const index = downloads.findIndex((d) => d.id === download.id);
+          const currentDownloads = downloadsRef.current || [];
+          const index = currentDownloads.findIndex((d) => d.id === download.id);
           if (index === -1) {
-            downloads.push(download);
+            currentDownloads.push(download);
           } else {
-            downloads[index] = download;
+            currentDownloads[index] = download;
           }
-          setBackendContext({
+          /* setBackendContext({
             ...context,
             downloads,
-          } as OplaContext);
+          } as OplaContext); */
+          updateDownloads(currentDownloads);
         } else if (type === 'finished' || type === 'canceled') {
-          const { downloads = [] } = backendContext || {};
-          const index = downloads.findIndex((d) => d.id === download.id);
+          // const { downloads = [] } = backendContext || {};
+          const currentDownloads = downloadsRef.current || [];
+          const index = currentDownloads.findIndex((d) => d.id === download.id);
           logger.info(`download ${type}`, index, download);
           if (index !== -1) {
-            downloads.splice(index, 1);
+            currentDownloads.splice(index, 1);
+            updateDownloads(currentDownloads);
           }
-          setBackendContext({
+          /* setBackendContext({
             ...context,
             downloads,
-          } as OplaContext);
+          } as OplaContext); */
         }
       }
     },
-    [backendContext],
+    [
+      /* backendContext */
+    ],
   );
 
   const streamListener = useCallback(
     async (event: any) => {
-      const context = backendContextRef.current;
-      if (!context) {
+      // const context = backendContextRef.current;
+      /* if (!context) {
         return;
-      }
-      logger.info('stream event', event, backendContext, context);
+      } */
+      logger.info('stream event', event, streamsRef.current);
       const response = (await mapKeys(event.payload, toCamelCase)) as LlmCompletionResponse;
       if (response.status === 'error') {
         logger.error('stream error', response);
@@ -227,33 +273,38 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       }
       const { conversationId } = response;
 
-      const { streams = {} } = context || {};
+      // const { streams = {} } = context || {};
+      const currentStreams: Streams = streamsRef.current || {};
       if (response.status === 'success') {
-        const stream = streams[conversationId] || ({} as LlmStreamResponse);
+        const stream = currentStreams[conversationId] || ({} as LlmStreamResponse);
         if (stream.prevContent !== response.content) {
           const content = stream.content || [];
           content.push(response.content);
-          streams[conversationId] = {
+          currentStreams[conversationId] = {
             ...response,
             content,
             prevContent: response.content,
           } as LlmStreamResponse;
-          setBackendContext({
+          /* setBackendContext({
             ...context,
             streams,
-          } as OplaContext);
+          } as OplaContext); */
+          updateStreams(currentStreams);
         }
         return;
       }
-      if (response.status === 'finished' && streams[conversationId]) {
-        delete streams[conversationId];
-        setBackendContext({
+      if (response.status === 'finished' && currentStreams[conversationId]) {
+        delete currentStreams[conversationId];
+        /* setBackendContext({
           ...context,
           streams,
-        } as OplaContext);
+        } as OplaContext); */
+        updateStreams(currentStreams);
       }
     },
-    [backendContext],
+    [
+      /* backendContext */
+    ],
   );
 
   const startBackend = useCallback(async () => {
@@ -274,10 +325,13 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     };
     const backendImplContext: OplaContext = await backendImpl.connect(listeners);
     logger.info('connected backend impl', backendImpl);
-    setBackendContext({
+    /* setBackendContext({
       ...initialBackendContext,
       ...backendImplContext,
-    });
+    }); */
+    updateServer(backendImplContext.server);
+    updateConfig(backendImplContext.config);
+
     logger.info('start backend', opla.metadata, backendImplContext.config.server.parameters);
     const metadata = opla.metadata as Metadata;
     metadata.server = backendImplContext.config.server as Metadata;
@@ -292,14 +346,18 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
         result = await (backendRef.current?.restart?.(llmParameters) ||
           defaultContext.restart(params));
         if (result.status === 'error') {
-          setBackendContext({
+          /* setBackendContext({
             ...backendContext,
             server: {
               ...backendContext?.server,
               status: ServerStatus.ERROR,
               message: result.error,
             },
-          } as OplaContext);
+          } as OplaContext); */
+          updateServer({
+            status: ServerStatus.ERROR,
+            message: result.error,
+          });
         }
       } catch (error: any) {
         // logger.error('trstart error', error);
@@ -308,7 +366,9 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       }
       return result;
     },
-    [backendContext],
+    [
+      /* backendContext */
+    ],
   );
 
   const start = useCallback(
@@ -318,14 +378,18 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       try {
         result = await (backendRef.current?.start?.(llmParameters) || defaultContext.start(params));
         if (result.status === 'error') {
-          setBackendContext({
+          /* setBackendContext({
             ...backendContext,
             server: {
               ...backendContext?.server,
               status: ServerStatus.ERROR,
               message: result.error,
             },
-          } as OplaContext);
+          } as OplaContext); */
+          updateServer({
+            status: ServerStatus.ERROR,
+            message: result.error,
+          });
         }
       } catch (error: any) {
         // logger.error('trstart error', error);
@@ -334,62 +398,84 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       }
       return result;
     },
-    [backendContext],
+    [
+      /* backendContext */
+    ],
   );
 
-  const stop = useCallback(async (): Promise<BackendResult> => {
-    const result = await (backendRef.current?.stop?.() || defaultContext.stop());
-    if (result.status === 'error') {
-      setBackendContext({
+  const stop = useCallback(
+    async (): Promise<BackendResult> => {
+      const result = await (backendRef.current?.stop?.() || defaultContext.stop());
+      if (result.status === 'error') {
+        /* setBackendContext({
         ...backendContext,
         server: {
           ...backendContext?.server,
           status: ServerStatus.ERROR,
           message: result.error,
         },
-      } as OplaContext);
-    }
-    return result;
-  }, [backendContext]);
+      } as OplaContext); */
+        updateServer({
+          status: ServerStatus.ERROR,
+          message: result.error,
+        });
+      }
+      return result;
+    },
+    [
+      /* backendContext */
+    ],
+  );
 
   const setSettings = useCallback(
     async (settings: Settings) => {
       const store = await saveSettings(settings);
-      setBackendContext({
+      /* setBackendContext({
         ...backendContext,
         config: store,
-      } as OplaContext);
+      } as OplaContext); */
+      updateConfig(store);
     },
-    [backendContext],
+    [
+      /* backendContext */
+    ],
   );
 
-  const updateBackendStore = useCallback(async () => {
-    logger.info('updateBackendStore');
-    const store = await getOplaConfig();
-    setBackendContext({
+  const updateBackendStore = useCallback(
+    async () => {
+      logger.info('updateBackendStore');
+      const store = await getOplaConfig();
+      /* setBackendContext({
       ...backendContext,
       config: store,
-    } as OplaContext);
-  }, [backendContext]);
+    } as OplaContext); */
+      updateConfig(store);
+    },
+    [
+      /* backendContext */
+    ],
+  );
 
   const getActiveModel = useCallback(() => {
-    const { services = {} } = backendContext?.config || {};
+    const { services = {} } = configRef.current;
     const { activeService } = services;
     return activeService?.type === AIServiceType.Model ? activeService.modelId : undefined;
-  }, [backendContext]);
+  }, [/* backendContext */ configRef]);
 
-  const getStreams = useCallback(() => {
-    const context = backendContextRef.current;
-    const { streams } = context || {};
-    return streams;
-  }, [backendContextRef]);
+  const getStreams = useCallback(
+    () =>
+      // const context = backendContextRef.current;
+      // const { streams } = context || {};
+      streamsRef.current,
+    [/* backendContextRef */ streamsRef],
+  );
 
   const setActiveModel = useCallback(
     async (model: string, provider?: string) => {
       logger.info('setActiveModel', model);
       await setBackendActiveModel(model, provider);
       await updateBackendStore();
-      const { services = {} } = backendContext?.config || {};
+      const { services = {} } = config;
       const { activeService } = services;
       if (activeService?.type === AIServiceType.Model && activeService.modelId === model) {
         return;
@@ -399,16 +485,17 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
         modelId: model,
         providerIdOrName: provider,
       };
-      setBackendContext({
+      /* setBackendContext({
         ...backendContext,
         config: {
           ...backendContext?.config,
           models: { ...backendContext?.config.models },
           services,
         },
-      } as OplaContext);
+      } as OplaContext); */
+      updateConfig({ services });
     },
-    [backendContext, updateBackendStore],
+    [/* backendContext, updateBackendStore */ config, updateBackendStore],
   );
 
   const disconnectBackend = useCallback(async () => {
@@ -417,9 +504,14 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
 
   const contextValue = useMemo<Context>(
     () => ({
+      server,
+      config,
+      downloads,
+      streams,
+
       startBackend,
       disconnectBackend,
-      backendContext: backendContext as OplaContext,
+      // backendContext: backendContext as OplaContext,
       setSettings,
       updateBackendStore,
       start,
@@ -430,7 +522,11 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       getStreams,
     }),
     [
-      backendContext,
+      server,
+      config,
+      downloads,
+      streams,
+      // backendContext,
       disconnectBackend,
       restart,
       setActiveModel,

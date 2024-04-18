@@ -33,18 +33,18 @@ type DownloadModelProps = {
 function DownloadModel({ className, download, onAction }: DownloadModelProps) {
   const { t } = useTranslation();
   const [downloading, setDownloading] = useState<boolean>(false);
-  const { backendContext, updateBackendStore } = useBackend();
+  const { config, updateBackendStore } = useBackend();
 
   const model = useMemo(() => {
     let modelId = download?.id;
-    const models = backendContext.config.models.items ?? [undefined];
+    const models = config.models.items ?? [undefined];
     if (!modelId) {
       modelId = models.find(
         (m) => m.state === ModelState.Pending || m.state === ModelState.Downloading,
       )?.id;
     }
     return findModel(modelId, models);
-  }, [backendContext, download]);
+  }, [config, download]);
 
   useEffect(() => {
     const asyncFunc = async () => {

@@ -37,9 +37,9 @@ function DownloadsDialog({
   const router = useRouter();
   const { pathname } = router;
   const { t } = useTranslation();
-  const { backendContext, updateBackendStore } = useBackend();
+  const { downloads, updateBackendStore } = useBackend();
   const model: Model = data?.item as Model;
-  const download = (backendContext.downloads ?? [undefined])[0];
+  const download = (downloads ?? [undefined])[0];
 
   useEffect(() => {}, [download, onClose]);
 

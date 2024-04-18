@@ -87,8 +87,8 @@ export default function ThreadsExplorer({
 }: ExplorerProps) {
   const router = useRouter();
   const { getConversationMessages } = useContext(AppContext);
-  const { backendContext } = useBackend();
-  const { settings } = backendContext.config;
+  const { config } = useBackend();
+  const { settings } = config;
   const threadsSettings = settings.pages?.[Page.Threads] || {
     ...DefaultPageSettings,
     explorerGroups: DefaultThreadsExplorerGroups,

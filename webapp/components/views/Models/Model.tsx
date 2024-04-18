@@ -70,7 +70,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
   const { t } = useTranslation();
 
   const [fullPathModel, setFullPathModel] = useState<string | undefined>();
-  const { backendContext, updateBackendStore } = useBackend();
+  const { config, downloads, updateBackendStore } = useBackend();
   const { conversations, updateConversations, providers } = useContext(AppContext);
   const { isModelUsedInAssistants } = useAssistantStore();
   const [collection, setCollection] = useState<Model[]>([]);
@@ -88,9 +88,9 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     getCollection();
   }, []);
 
-  const [downloads, models, model, downloadables, local, inUse] = useMemo(() => {
+  const [downloadsModel, models, model, downloadables, local, inUse] = useMemo(() => {
     let l = true;
-    const mdls = backendContext.config.models.items;
+    const mdls = config.models.items;
     let mdl = mdls.find((m) => m.id === selectedModelId) as Model;
     if (!mdl && selectedModelId) {
       mdl = collection.find((m) => m.id === selectedModelId) as Model;
@@ -100,21 +100,21 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       ? []
       : getDownloadables(mdl).filter((d) => d.private !== true && isValidFormat(d));
 
-    const { activeService } = backendContext.config.services;
+    const { activeService } = config.services;
     const isUsed: boolean =
       mdl &&
       ((activeService?.type === AIServiceType.Model && activeService.modelId === mdl.id) ||
         isModelUsedInConversations(conversations, mdl) ||
         isModelUsedInAssistants(mdl));
 
-    return [backendContext.downloads || [], mdls, mdl, dls, l, isUsed];
-  }, [selectedModelId, backendContext, collection, conversations, isModelUsedInAssistants]);
+    return [downloads || [], mdls, mdl, dls, l, isUsed];
+  }, [selectedModelId, config, downloads, collection, conversations, isModelUsedInAssistants]);
 
   let isDownloading = false;
   if (local) {
     isDownloading =
       model?.state === ModelState.Downloading ||
-      downloads.findIndex((d) => d.id === model?.id) !== -1;
+      downloadsModel.findIndex((d) => d.id === model?.id) !== -1;
   }
 
   const handleParametersChange = async (id: string | undefined, parameters: ParametersRecord) => {
@@ -202,7 +202,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       delete selectedModel.include;
     }
     const path = getEntityName(selectedModel.creator || selectedModel.author);
-    const sameModel = findSameModel(selectedModel, backendContext);
+    const sameModel = findSameModel(selectedModel, config);
 
     if (sameModel && sameModel.state !== ModelState.Removed) {
       toast.error(`${t('Model already installed ')} ${selectedModel.name}`);

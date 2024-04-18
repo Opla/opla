@@ -40,8 +40,8 @@ export default function Opla({
   onParameterChange: (name: string, value: ParameterValue) => void;
 }) {
   const { t } = useTranslation();
-  const { backendContext } = useBackend();
-  const modelPath = backendContext.config.server.parameters.modelPath as string;
+  const { config } = useBackend();
+  const modelPath = config.server.parameters.modelPath as string;
 
   return (
     <div className="flex flex-col gap-2 px-8 py-4 text-sm">
