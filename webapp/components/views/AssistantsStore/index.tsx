@@ -44,16 +44,16 @@ const search = (query: string, assistant: Assistant) => {
 
 function AssistantsStore() {
   const router = useRouter();
-  const { backendContext, updateBackendStore, setSettings } = useBackend();
+  const { config, updateBackendStore, setSettings } = useBackend();
   const [collection, setCollection] = useState<Assistant[]>([]);
   const [query, setQuery] = useState<string>('');
   const { t } = useTranslation();
 
-  const defaultSettings = backendContext.config.settings;
+  const defaultSettings = config.settings;
   const pageSettings = defaultSettings.pages?.[`${Ui.Page.Threads}/store`] || DefaultPageSettings;
 
   const handleExplorerHidden = (hidden: boolean) => {
-    const { settings } = backendContext.config;
+    const { settings } = config;
     const { pages = {} } = settings;
     pages[`${Ui.Page.Threads}/store`] = { ...pageSettings, explorerHidden: !hidden };
     setSettings({ ...settings, pages });
@@ -65,7 +65,7 @@ function AssistantsStore() {
     let newAssistant = getAssistant(assistant.id);
     if (!newAssistant) {
       const { targets = [] } = assistant;
-      const allModels = backendContext.config.models.items;
+      const allModels = config.models.items;
       if (targets.length) {
         // TODO install first target model if not present
       }

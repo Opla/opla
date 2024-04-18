@@ -36,10 +36,10 @@ export default function Settings({
 }) {
   const { t } = useTranslation();
   const { conversations, updateConversations, providers } = useContext(AppContext);
-  const { backendContext } = useBackend();
+  const { config, server } = useBackend();
 
   const selectedConversation = conversations.find((c) => c.id === conversationId);
-  const service = getActiveService(selectedConversation, undefined, providers, backendContext);
+  const service = getActiveService(selectedConversation, undefined, providers, config);
   const { model, provider } = service;
 
   const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -82,8 +82,8 @@ export default function Settings({
   const buildLogs = () => {
     let logs = '';
     if (provider && provider.type === 'opla') {
-      logs = backendContext?.server.stderr?.join('\n') || '';
-      logs += backendContext?.server.stdout?.join('\n') || '';
+      logs = server.stderr?.join('\n') || '';
+      logs += server.stdout?.join('\n') || '';
     } else {
       logs = provider?.errors?.join('\n') || '';
     }

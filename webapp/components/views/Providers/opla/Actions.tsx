@@ -13,21 +13,21 @@
 // limitations under the License.
 
 import { Pause, Play, AlertTriangle, Loader2 } from 'lucide-react';
-import { OplaContext, Provider } from '@/types';
+import { OplaServer, Provider } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function Actions({
   provider,
-  backend,
+  server,
   onProviderToggle,
 }: {
   provider: Provider;
-  backend: OplaContext;
+  server: OplaServer;
   onProviderToggle: () => void;
 }) {
-  const { message, status } = backend.server;
+  const { message, status } = server;
   const { t } = useTranslation();
   const waiting = status === 'wait' || status === 'stopping' || status === 'starting';
   const disabled = message === 'no backend'; // (status === 'error' && message === 'no backend') || waiting;
@@ -49,7 +49,7 @@ export default function Actions({
       tooltipMessage = t('stopped');
       break;
     case 'error':
-      tooltipMessage = `${provider.name}: ${t(backend.server.message as string)}`;
+      tooltipMessage = `${provider.name}: ${t(server.message as string)}`;
       break;
     default:
       tooltipMessage = t('wait');

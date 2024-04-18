@@ -38,13 +38,13 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
 
   const { provider, hasParametersChanged, onParametersSave, onParameterChange, onProviderToggle } =
     useProviderState(selectedProviderId);
-  const { backendContext } = useBackend();
+  const { server } = useBackend();
 
   const buildLogs = () => {
     let logs = '';
     if (!provider || provider.type === ProviderType.opla) {
-      logs = backendContext?.server.stderr?.join('\n') || '';
-      logs += backendContext?.server.stdout?.join('\n') || '';
+      logs = server.stderr?.join('\n') || '';
+      logs += server.stdout?.join('\n') || '';
     } else {
       logs = provider?.errors?.join('\n') || '';
     }
@@ -86,7 +86,7 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
                   <OplaActions
                     onProviderToggle={onProviderToggle}
                     provider={provider}
-                    backend={backendContext}
+                    server={server}
                   />
                 )
               }
@@ -126,15 +126,15 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
               <ScrollArea>
                 {provider.type === ProviderType.opla && (
                   <>
-                    {backendContext?.server.status === ServerStatus.ERROR && (
+                    {server.status === ServerStatus.ERROR && (
                       <div className="w-full text-sm">
                         <div className="break-all pb-2 text-error dark:text-destructive">
-                          {t('Server Error')} : {backendContext?.server.message}
+                          {t('Server Error')} : {server.message}
                         </div>
                       </div>
                     )}
                     <div className="w-full text-sm">
-                      {backendContext?.server.stdout
+                      {server.stdout
                         ?.map((log, index) => ({ id: index, log }))
                         .map((log) => (
                           <div
@@ -146,7 +146,7 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
                         ))}
                     </div>
                     <div>
-                      {backendContext?.server.stderr
+                      {server.stderr
                         ?.map((log, index) => ({ id: index, log }))
                         .map((log) => (
                           <div key={log.id} className="break-all text-error dark:text-destructive">

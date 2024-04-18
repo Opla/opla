@@ -40,9 +40,9 @@ type TargetsTableProps = {
 function TargetsTable({ targets, onEdit, onDuplicate, onDelete }: TargetsTableProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState<Record<string, boolean>>({});
-  const { backendContext } = useBackend();
+  const { config } = useBackend();
   const { providers } = useContext(AppContext);
-  const models = getAllModels(providers, backendContext);
+  const models = getAllModels(providers, config);
   const renderModel = (targetModels: string[] | undefined) => {
     const model = targetModels ? models.find((m) => m.name === targetModels[0]) : undefined;
     if (!model) return <div>{t('Model not found')}</div>;

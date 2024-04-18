@@ -14,13 +14,20 @@
 
 'use client';
 
-import { ChangeEvent, MouseEvent, useCallback, useContext, useEffect, useRef } from 'react';
+import {
+  ChangeEvent,
+  MouseEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { AlertTriangle, Loader2, Paperclip, SendHorizontal } from 'lucide-react';
 import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
-import { ParsedPrompt, TokenValidator, parsePrompt } from '@/utils/parsers';
 import { getCaretPosition } from '@/utils/ui/caretposition';
 import { CommandManager } from '@/utils/commands/types';
 import {
@@ -30,46 +37,40 @@ import {
 } from '@/utils/data/conversations';
 import { createMessage, mergeMessages } from '@/utils/data/messages';
 import { openFileDialog } from '@/utils/backend/tauri';
-import { AIImplService } from '@/types';
 import { getFileAssetExtensions } from '@/utils/backend/commands';
 import { toast } from '@/components/ui/Toast';
+import { parsePrompt } from '@/utils/parsers';
 import { Button } from '../../../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../../ui/tooltip';
 import { ShortcutBadge } from '../../../common/ShortCut';
 import PromptInput from './PromptInput';
 import PromptCommands from './PromptCommands';
+import { usePromptContext } from './PromptContext';
+import { useConversationContext } from '../ConversationContext';
 
 export type PromptProps = {
   conversationId: string;
-  prompt: ParsedPrompt;
+  hasMessages: boolean;
   commandManager: CommandManager;
-  isLoading: boolean;
-  errorMessage: string;
+  isModelLoading: boolean | undefined;
   disabled: boolean;
-  placeholder: string | undefined;
-  onUpdatePrompt: (prompt: ParsedPrompt) => void;
-  onSendMessage: (prompt?: ParsedPrompt) => void;
-  tokenValidate: TokenValidator;
-  usage: { tokenCount: number; activeService?: AIImplService } | undefined;
-  needFocus: boolean;
 };
 
 export default function Prompt({
   conversationId,
-  prompt,
+  hasMessages,
   commandManager,
-  errorMessage,
   disabled,
-  placeholder,
-  onUpdatePrompt,
-  onSendMessage,
-  tokenValidate,
-  isLoading,
-  usage,
-  needFocus,
+  isModelLoading,
 }: PromptProps) {
   const { t } = useTranslation();
+  const { isProcessing, errorMessages, handleSendMessage: sendMessage } = useConversationContext();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [needFocus, setNeedFocus] = useState(false);
+  const { usage, changedPrompt, conversationPrompt, setChangedPrompt, tokenValidator } =
+    usePromptContext();
+  const prompt = changedPrompt === undefined ? conversationPrompt : changedPrompt;
+  const errorMessage = errorMessages[conversationId];
 
   const {
     conversations,
@@ -80,8 +81,10 @@ export default function Prompt({
 
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
-    logger.info('sending message', conversationId);
-    onSendMessage();
+    if (prompt) {
+      logger.info('sending message', conversationId);
+      sendMessage(prompt);
+    }
   };
 
   const handleUploadFile = async (e: MouseEvent) => {
@@ -116,41 +119,62 @@ export default function Prompt({
     }
   };
 
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>();
   useEffect(() => {
-    if (needFocus && !disabled) {
-      textareaRef.current?.focus();
+    if ((isModelLoading || isModelLoading === undefined) && !needFocus) {
+      setNeedFocus(true);
     }
-  }, [needFocus, disabled]);
+    if (needFocus && isModelLoading === false && !disabled && textareaRef.current) {
+      setNeedFocus(false);
+      textareaRef.current?.focus();
+      timeoutRef.current = setTimeout(() => {
+        textareaRef.current?.focus();
+        timeoutRef.current = undefined;
+      }, 500);
+    }
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        // setNeedFocus(true);
+        timeoutRef.current = undefined;
+      }
+    };
+  }, [needFocus, disabled, isModelLoading]);
 
   const handleKeypress = (e: KeyboardEvent) => {
+    if (!tokenValidator) return;
     const textarea = e.target as HTMLTextAreaElement;
     const { caretStartIndex } = getCaretPosition(textarea);
     const value = `${textarea.value} \n`;
-    const newPrompt = parsePrompt({ text: value, caretStartIndex }, tokenValidate);
+    const newPrompt = parsePrompt({ text: value, caretStartIndex }, tokenValidator);
     if (e.key === 'Enter' && e.shiftKey) {
       e.preventDefault();
-      onUpdatePrompt(newPrompt);
+      setChangedPrompt?.(newPrompt);
     } else if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      onSendMessage(newPrompt);
+      sendMessage(newPrompt);
     }
   };
 
   const handleValueChange = useCallback(
     (text: string, caretStartIndex: number) => {
-      const parsedPrompt = parsePrompt({ text, caretStartIndex }, tokenValidate);
-      if (prompt?.raw !== text) {
-        onUpdatePrompt(parsedPrompt);
+      if (!tokenValidator) return;
+      const parsedPrompt = parsePrompt({ text, caretStartIndex }, tokenValidator);
+      if (prompt?.raw !== text && setChangedPrompt) {
+        // onUpdatePrompt(parsedPrompt);
+        setChangedPrompt(parsedPrompt);
       }
     },
-    [tokenValidate, prompt?.raw, onUpdatePrompt],
+    [tokenValidator, prompt?.raw, setChangedPrompt],
   );
 
   const handleFocus = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const lengthOfInput = event.target.value.length;
     event.currentTarget.setSelectionRange(lengthOfInput, lengthOfInput);
-    const newPrompt = parsePrompt({ textarea: event.target }, tokenValidate);
-    onUpdatePrompt(newPrompt);
+    if (!tokenValidator) return;
+    const newPrompt = parsePrompt({ textarea: event.target }, tokenValidator);
+    // onUpdatePrompt(newPrompt);
+    setChangedPrompt?.(newPrompt);
   };
 
   const shortcutSend: KeyBinding = defaultShortcuts.find(
@@ -159,6 +183,19 @@ export default function Prompt({
   const shortcutNewLine: KeyBinding = defaultShortcuts.find(
     (s) => s.command === ShortcutIds.NEW_LINE,
   ) as KeyBinding;
+
+  if (!prompt && !hasMessages) {
+    return undefined;
+  }
+
+  let isLoading = conversationId ? isProcessing[conversationId] || false : false;
+  let placeholder;
+  if (isModelLoading || isModelLoading === undefined) {
+    isLoading = true;
+    if (isModelLoading) {
+      placeholder = t('Loading the model, Please wait...');
+    }
+  }
 
   return (
     <div className="w-full grow-0 !bg-transparent ">
@@ -207,7 +244,7 @@ export default function Prompt({
               onValueChange={handleValueChange}
               onFocus={handleFocus}
               onKeyDown={handleKeypress}
-              disabled={disabled}
+              disabled={isLoading || disabled}
             />
           </PromptCommands>
           <Tooltip>

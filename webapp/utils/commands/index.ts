@@ -231,10 +231,10 @@ export const preProcessingCommands = async (
 };
 
 export const getMentionCommands = (
-  prompt: ParsedPrompt,
+  prompt: ParsedPrompt | undefined,
   commandManager: CommandManager,
 ): Command[] => {
-  const mentions = prompt.tokens.filter((to) => to.type === PromptTokenType.Mention);
+  const mentions = prompt?.tokens.filter((to) => to.type === PromptTokenType.Mention) ?? [];
   const modelCommands = mentions
     .map((m) => commandManager.getCommand(m.value, CommandType.Mention))
     .filter((m) => m !== undefined) as Command[];

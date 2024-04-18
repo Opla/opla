@@ -12,38 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import EmptyView from '@/components/common/EmptyView';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyedScrollPosition } from '@/hooks/useScroll';
 import Opla from '@/components/icons/Opla';
 import { AvatarRef, Conversation, Message, MessageImpl, PromptTemplate, Ui } from '@/types';
 // import logger from '@/utils/logger';
-import { AppContext } from '@/context';
-import { updateConversation } from '@/utils/data/conversations';
-import { ParsedPrompt } from '@/utils/parsers';
-import { MenuAction } from '@/types/ui';
+import useBackend from '@/hooks/useBackendContext';
+import { MenuAction, Page, ViewName } from '@/types/ui';
+import logger from '@/utils/logger';
 import ConversationList from './ConversationList';
 import PromptsGrid from './PromptsGrid';
+import { useConversationContext } from '../ConversationContext';
+import { usePromptContext } from '../Prompt/PromptContext';
 
 export type ConversationPanelProps = {
   selectedConversation: Conversation | undefined;
   selectedAssistantId: string | undefined;
   selectedModelName: string | undefined;
-  selectedMessageId: string | undefined;
   messages: MessageImpl[] | undefined;
   avatars: AvatarRef[];
   modelItems: Ui.MenuItem[];
   disabled: boolean;
-  isPrompt: boolean;
-  onResendMessage: (m: Message) => void;
   onDeleteMessage: (m: Message) => void;
   onDeleteAssets: (m: Message) => void;
-  onChangeMessageContent: (m: Message, newContent: string, submit: boolean) => void;
-  onSelectPrompt: (prompt: ParsedPrompt, name: string) => void;
   onSelectMenu: (menu: MenuAction, data: string) => void;
-  onStartMessageEdit: (messageId: string, index: number) => void;
-  parseAndValidatePrompt: (prompt: string) => ParsedPrompt;
   onCopyMessage: (messageId: string, state: boolean) => void;
 };
 
@@ -53,56 +47,77 @@ export function ConversationPanel({
   selectedConversation,
   selectedAssistantId,
   selectedModelName,
-  selectedMessageId,
+
   modelItems,
   disabled,
-  isPrompt,
-  onResendMessage,
   onDeleteMessage,
   onDeleteAssets,
-  onChangeMessageContent,
-  onSelectPrompt,
   onSelectMenu,
-  onStartMessageEdit,
-  parseAndValidatePrompt,
   onCopyMessage,
 }: ConversationPanelProps) {
   const { t } = useTranslation();
-  const { conversations, updateConversations } = useContext(AppContext);
+  const { config, setSettings } = useBackend();
+  const {
+    selectedMessageId,
+    handleResendMessage,
+    handleChangeMessageContent,
+    handleStartMessageEdit,
+  } = useConversationContext();
+  const { selectTemplate } = usePromptContext();
   const [update, setUpdate] = useState<{
-    id?: string | undefined;
+    name?: string | undefined;
     scrollPosition?: number | undefined;
   }>({});
 
+  const getSelectedViewName = (selectedThreadId: string | undefined, view = ViewName.Recent) =>
+    `${view === ViewName.Recent ? Page.Threads : Page.Archives}${selectedThreadId ? `/${selectedThreadId}` : ''}`;
+
+  const pagesSettings = config.settings.pages;
+  const conversationId = selectedConversation?.id;
+  const conversationViewName = getSelectedViewName(conversationId);
+  const conversationSettings = pagesSettings?.[conversationViewName];
   useEffect(() => {
     const afunc = async () => {
       if (
-        selectedConversation &&
-        selectedConversation.id === update.id &&
-        update.scrollPosition !== selectedConversation?.scrollPosition
+        conversationSettings &&
+        conversationViewName === update.name &&
+        update.scrollPosition !== conversationSettings?.scrollPosition
       ) {
-        const updatedConversation: Conversation = {
-          ...selectedConversation,
-          scrollPosition: update.scrollPosition === -1 ? undefined : update.scrollPosition,
-        };
-        const updatedConversations = updateConversation(updatedConversation, conversations, true);
-        await updateConversations(updatedConversations);
+        const scrollPosition = update.scrollPosition === -1 ? undefined : update.scrollPosition;
+        setSettings({
+          ...config.settings,
+          pages: {
+            ...pagesSettings,
+            [conversationViewName]: { ...conversationSettings, scrollPosition },
+          },
+        });
       }
     };
     afunc();
-  }, [selectedConversation, update, conversations, updateConversations]);
+  }, [
+    conversationViewName,
+    conversationSettings,
+    pagesSettings,
+    setSettings,
+    update,
+    config.settings,
+  ]);
 
   const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {
-    if (update.id !== key || update.scrollPosition !== position.y) {
-      setUpdate({ scrollPosition: position.y, id: key });
+    const name = getSelectedViewName(key);
+    // TODO debug
+    const { scrollPosition } = update;
+    if (update.name !== name || update.scrollPosition !== scrollPosition) {
+      logger.info('setUpdate', scrollPosition, position.y);
+      setUpdate({ scrollPosition: position.y, name });
     }
   };
 
   const handlePromptTemplateSelected = (prompt: PromptTemplate) => {
-    onSelectPrompt(parseAndValidatePrompt(prompt.value), prompt.name);
+    selectTemplate(prompt);
   };
 
-  const showEmptyChat = !selectedConversation?.id;
+  const showEmptyChat = !conversationId || !messages || messages.length === 0;
   if (showEmptyChat) {
     let actions: Ui.MenuItem[] | undefined;
     let buttonLabel: string | undefined;
@@ -165,26 +180,28 @@ export function ConversationPanel({
   }
   return (
     <>
-      {(isPrompt || (messages && messages[0]?.conversationId === selectedConversation.id)) && (
-        <ConversationList
-          conversation={selectedConversation}
-          selectedMessageId={selectedMessageId}
-          scrollPosition={
-            selectedConversation && selectedConversation.scrollPosition !== undefined
-              ? selectedConversation.scrollPosition
-              : undefined
-          }
-          messages={messages || []}
-          avatars={avatars}
-          onScrollPosition={handleScrollPosition}
-          onResendMessage={onResendMessage}
-          onDeleteMessage={onDeleteMessage}
-          onDeleteAssets={onDeleteAssets}
-          onChangeMessageContent={onChangeMessageContent}
-          onStartMessageEdit={onStartMessageEdit}
-          onCopyMessage={onCopyMessage}
-        />
-      )}
+      {
+        /* isPrompt || */ messages && messages[0]?.conversationId === conversationId && (
+          <ConversationList
+            conversation={selectedConversation}
+            selectedMessageId={selectedMessageId}
+            scrollPosition={
+              conversationSettings && conversationSettings.scrollPosition !== undefined
+                ? conversationSettings.scrollPosition
+                : undefined
+            }
+            messages={messages || []}
+            avatars={avatars}
+            onScrollPosition={handleScrollPosition}
+            onResendMessage={handleResendMessage}
+            onDeleteMessage={onDeleteMessage}
+            onDeleteAssets={onDeleteAssets}
+            onChangeMessageContent={handleChangeMessageContent}
+            onStartMessageEdit={handleStartMessageEdit}
+            onCopyMessage={onCopyMessage}
+          />
+        )
+      }
       <div className="flex flex-col items-center text-sm" />
     </>
   );

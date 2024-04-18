@@ -45,7 +45,7 @@ export type ModelsExplorerProps = {
 function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
   const { conversations, updateConversations, providers } = useContext(AppContext);
   const { isModelUsedInAssistants } = useAssistantStore();
-  const { backendContext, updateBackendStore } = useBackend();
+  const { config, updateBackendStore } = useBackend();
   const router = useRouter();
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
@@ -62,7 +62,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
     getCollection();
   }, []);
 
-  const models = getLocalModels(backendContext);
+  const models = getLocalModels(config);
 
   const handleSelectModel = (id: string) => {
     logger.info(`onSelectModel ${id}`);
@@ -92,7 +92,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
     logger.info(`Uninstall ${modelId}`);
     const model = models.find((m) => m.id === modelId);
     if (model) {
-      const { activeService } = backendContext.config.services;
+      const { activeService } = config.services;
       const isUsed: boolean =
         (activeService?.type === AIServiceType.Model && activeService.modelId === model.id) ||
         isModelUsedInConversations(conversations, model) ||

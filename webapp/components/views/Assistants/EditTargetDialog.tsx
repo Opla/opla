@@ -39,11 +39,8 @@ type EditTargetDialogProps = {
 function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps) {
   const { t } = useTranslation();
   const { providers } = useContext(AppContext);
-  const { backendContext } = useBackend();
-  const modelItems = useMemo(
-    () => getModelsAsItems(providers, backendContext),
-    [providers, backendContext],
-  );
+  const { config } = useBackend();
+  const modelItems = useMemo(() => getModelsAsItems(providers, config), [providers, config]);
   const [newParameters, setNewParameters] = useState<Record<string, ParameterValue>>({});
   const target = data?.item as Preset;
   const { title, isNew, targetName } = useMemo(() => {
@@ -68,7 +65,7 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
   let provider: Provider | undefined;
   const modelName = (newParameters?.models as string[] | undefined)?.[0] || target.models?.[0];
   if (modelName) {
-    model = findModelInAll(modelName, providers, backendContext);
+    model = findModelInAll(modelName, providers, config);
     provider = target.provider
       ? findProvider(target?.provider, providers)
       : getLocalProvider(providers);

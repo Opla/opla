@@ -30,7 +30,7 @@ export default function Statusbar() {
   const router = useRouter();
   const { pathname } = router;
   const { t } = useTranslation();
-  const { backendContext, updateBackendStore } = useBackend();
+  const { server, config, downloads, updateBackendStore } = useBackend();
   const { usage } = useContext(AppContext);
   const [sys, setSys] = useState<Sys>();
   const { showModal } = useContext(ModalsContext);
@@ -44,12 +44,12 @@ export default function Statusbar() {
     return () => clearInterval(interval);
   }, [setSys]);
 
-  const running = backendContext.server.status === 'started';
-  const error = backendContext.server.status === 'error';
+  const running = server.status === 'started';
+  const error = server.status === 'error';
 
-  const modelId = backendContext.config.server.parameters.modelId as string;
-  const model = findModel(modelId, backendContext.config.models.items);
-  const download = (backendContext.downloads ?? [undefined])[0];
+  const modelId = config.server.parameters.modelId as string;
+  const model = findModel(modelId, config.models.items);
+  const download = (downloads ?? [undefined])[0];
 
   const displayServer = () => {
     router.push(Page.Providers);
@@ -94,15 +94,15 @@ export default function Statusbar() {
               <AlertTriangle className="h-4 w-4" strokeWidth={1.5} />
             </span>
           )}
-          {(backendContext.server.status === 'init' ||
-            backendContext.server.status === 'wait' ||
-            backendContext.server.status === 'starting') && <span>{t('Server is starting')}</span>}
-          {backendContext.server.status === 'started' && (
+          {(server.status === 'init' ||
+            server.status === 'wait' ||
+            server.status === 'starting') && <span>{t('Server is starting')}</span>}
+          {server.status === 'started' && (
             <span>{model?.title || model?.name || t('Model unknown')}</span>
           )}
-          {/* (backendContext.server.status === 'stopping' ||
-            backendContext.server.status === 'stopped') && <span>{t('Server is stopped')}</span> */}
-          {backendContext.server.status === 'error' && (
+          {/* (server.status === 'stopping' ||
+            server.status === 'stopped') && <span>{t('Server is stopped')}</span> */}
+          {server.status === 'error' && (
             <span className="text-destructive-foreground">{t('Server error')}</span>
           )}
         </button>

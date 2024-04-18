@@ -134,6 +134,7 @@ pub struct PageSettings {
     pub explorer_width: f32,
     pub settings_width: f32,
     pub explorer_groups: Option<Vec<ExplorerGroup>>,
+    pub scroll_position: Option<f32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

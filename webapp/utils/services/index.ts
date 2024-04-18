@@ -19,8 +19,8 @@ import {
   AIImplService,
   Model,
   Provider,
-  OplaContext,
   Assistant,
+  Store,
 } from '../../types';
 
 import { getConversationService } from '../data/conversations';
@@ -38,13 +38,13 @@ export const getActiveService = (
   conversation: Conversation | undefined,
   assistant: Assistant | undefined,
   providers: Provider[],
-  backendContext: OplaContext,
+  config: Store,
   _modelId?: string | undefined,
 ): AIImplService => {
   const type = assistant ? AIServiceType.Assistant : AIServiceType.Model;
   let activeService: AIService | undefined = conversation
     ? getConversationService(conversation, type, assistant?.id)
-    : backendContext.config.services.activeService;
+    : config.services.activeService;
   let modelId = _modelId;
   let model: Model | undefined;
   let provider: Provider | undefined;
@@ -71,7 +71,7 @@ export const getActiveService = (
     provider = findProvider(providerIdOrName, providers);
     model = findModel(modelId, provider?.models || []);
     if (!model && modelId) {
-      model = findModelInAll(modelId, providers, backendContext, true);
+      model = findModelInAll(modelId, providers, config, true);
     }
     if (!provider) {
       providerIdOrName = model?.provider || OplaProvider.name;
@@ -79,7 +79,7 @@ export const getActiveService = (
       activeService.providerIdOrName = providerIdOrName;
     }
     if (provider && !model) {
-      model = getFirstModel(provider.id, providers, backendContext);
+      model = getFirstModel(provider.id, providers, config);
       modelId = model?.id;
     }
   } else if (activeService.type === AIServiceType.Assistant) {
@@ -100,7 +100,7 @@ export const getActiveService = (
       }
     }
 
-    model = findModelInAll(modelId, providers, backendContext, true);
+    model = findModelInAll(modelId, providers, config, true);
     provider = findProvider(model?.provider || providerIdOrName, providers);
     if (provider?.models?.find((m) => m.id === model?.id) === undefined) {
       provider = undefined;

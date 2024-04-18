@@ -212,7 +212,7 @@ export type Conversation = BaseNamedRecord &
 
     usage?: ConversationUsage;
 
-    scrollPosition?: number;
+    // scrollPosition?: number;
 
     assets?: Asset | Asset[];
   };
@@ -403,6 +403,7 @@ export type PageSettings = {
   explorerWidth: number;
   settingsWidth: number;
   explorerGroups?: ExplorerGroup[];
+  scrollPosition?: number;
 };
 
 export type Settings = {
@@ -484,11 +485,13 @@ export type Download = {
   error?: string;
 };
 
+export type Streams = Record<string, LlmStreamResponse>;
+
 export type OplaContext = Readonly<{
   server: OplaServer;
   config: Store;
   downloads?: Download[];
-  streams?: Record<string, LlmStreamResponse>;
+  streams?: Streams;
 }>;
 
 export type LlmMessage = {
@@ -578,6 +581,13 @@ export type Sys = {
 
   cpus: Cpu[];
   globalCpuPercentage: number;
+};
+
+export type Usage = {
+  conversationId?: string;
+  text?: string;
+  tokenCount: number;
+  activeService?: AIImplService;
 };
 
 export { Ui };

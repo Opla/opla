@@ -46,7 +46,7 @@ type ProvidersExplorerProps = {
 
 function ProvidersExplorer({ selectedId: selectedProviderId }: ProvidersExplorerProps) {
   const { providers, setProviders } = useContext(AppContext);
-  const { backendContext } = useBackend();
+  const { server } = useBackend();
 
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
@@ -173,19 +173,12 @@ function ProvidersExplorer({ selectedId: selectedProviderId }: ProvidersExplorer
           items={providers}
           onSelectItem={handleSelectProvider}
           renderRightSide={(provider) => (
-            <div
-              className={getStateColor(
-                getProviderState(provider, backendContext.server?.status),
-                'text',
-              )}
-            >
+            <div className={getStateColor(getProviderState(provider, server.status), 'text')}>
               <Server className="h-4 w-4" strokeWidth={1.5} />
             </div>
           )}
           menu={(provider) =>
-            getProviderState(provider, backendContext.server?.status) !== BasicState.active
-              ? menuDisabled
-              : menu
+            getProviderState(provider, server.status) !== BasicState.active ? menuDisabled : menu
           }
         />
       </ExplorerGroup>

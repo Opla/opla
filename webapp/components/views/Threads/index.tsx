@@ -75,7 +75,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     deleteArchive,
     providers,
   } = useContext(AppContext);
-  const { backendContext, setSettings, updateBackendStore } = useBackend();
+  const { config, setSettings, updateBackendStore } = useBackend();
 
   const searchParams = useSearchParams();
   const selectedConversation = conversations.find((c) => c.id === selectedThreadId);
@@ -92,7 +92,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
 
   const { showModal } = useContext(ModalsContext);
 
-  const { settings } = backendContext.config;
+  const { settings } = config;
   const selectedPage = getSelectedPage(selectedThreadId, view);
   const threadsSettings = settings.pages?.[Page.Threads] || {
     ...DefaultPageSettings,
@@ -100,7 +100,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
   };
 
   const saveSettings = (currentPage = selectedPage, partialSettings?: Partial<PageSettings>) => {
-    logger.info('saveSettings', currentPage, partialSettings, backendContext.config);
+    logger.info('saveSettings', currentPage, partialSettings, config);
     if (settings.selectedPage) {
       const pages = settings.pages || {};
       const page = pages[currentPage] || DefaultPageSettings;
@@ -157,7 +157,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
           }
         }
         const modelId = getConversationModelId(removedConversation, assistant);
-        const model = findModelInAll(modelId, providers, backendContext, true);
+        const model = findModelInAll(modelId, providers, config, true);
         if (modelId && model?.state === ModelState.Removed) {
           let some = updatedConversations.some(
             (conversation) => getConversationModelId(conversation, assistant) === modelId,
@@ -268,7 +268,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     }
   };
 
-  const defaultSettings = backendContext.config.settings;
+  const defaultSettings = config.settings;
   const pageSettings =
     defaultSettings.pages?.[selectedPage] ||
     defaultSettings.pages?.[Page.Threads] ||
