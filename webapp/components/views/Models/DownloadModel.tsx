@@ -104,11 +104,11 @@ function DownloadModel({ className, download, onAction }: DownloadModelProps) {
           </>
         )}
         {!download && model && (
-          <p className="flex h-3 w-full items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex h-3 w-full items-center gap-2 text-xs text-muted-foreground">
             {t(getModelStateAsString(model))}{' '}
             <Separator orientation="vertical" className="bg-muted-foreground" />{' '}
             {formatFileSize(model?.size ?? 0)}
-          </p>
+          </div>
         )}
       </div>
       {state !== 'pending' && (

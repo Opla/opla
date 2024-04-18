@@ -161,6 +161,9 @@ function ConversationProvider({
       if (!selectedModel) {
         setErrorMessage({ ...errorMessages, [conversation.id]: 'Model not found' });
         setIsProcessing({ ...isProcessing, [conversation.id]: false });
+      } else {
+        setErrorMessage({ ...errorMessages, [conversation.id]: '' });
+        setIsProcessing({ ...isProcessing, [conversation.id]: true });
       }
 
       return selectedModel;

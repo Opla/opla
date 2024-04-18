@@ -52,9 +52,10 @@ import { useAssistantStore } from '@/stores';
 import { getLocalProvider } from '@/utils/data/providers';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import ThreadHeader from './Header';
-import ConversationManager from './ConversationManager';
 import { PromptProvider } from './Prompt/PromptContext';
 import { ConversationProvider } from './ConversationContext';
+import { ConversationPanel } from './Conversation';
+import Prompt from './Prompt';
 
 function Thread({
   conversationId: _conversationId,
@@ -79,7 +80,6 @@ function Thread({
   const { config, downloads, streams, getActiveModel, setActiveModel } = useBackend();
   const searchParams = useSearchParams();
   const [service, setService] = useState<AIService | undefined>(undefined);
-  const [notFocused, setNotFocused] = useState(false);
   const { getAssistant } = useAssistantStore();
 
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
@@ -119,11 +119,11 @@ function Thread({
     if (isMessageUpdating) {
       return;
     }
-    let notfocused = false;
+    /* let notfocused = false;
     if (!document.activeElement || document.activeElement.tagName === 'BODY') {
       notfocused = true;
     }
-    setNotFocused(notfocused);
+    setNotFocused(notfocused); */
     logger.info('getNewMessages', conversationId, isMessageUpdating);
 
     setIsMessageUpdating(true);
@@ -133,7 +133,6 @@ function Thread({
   const defaultConversationName = getDefaultConversationName(t);
   const { messages, tempConversationName } = useMemo(() => {
     const stream = streams?.[conversationId as string];
-    console.log('streams', streams);
     let newMessages: MessageImpl[] = conversationMessages;
     if (stream) {
       newMessages = newMessages.map((msg, index) => {
@@ -156,73 +155,66 @@ function Thread({
         return msg;
       });
     }
-    console.log('new messages');
     const conversationName: string = newMessages?.[0]
       ? getMessageContentAsString(newMessages?.[0])
       : defaultConversationName;
     return { messages: newMessages, tempConversationName: conversationName };
   }, [conversationMessages, streams, conversationId, defaultConversationName]);
 
-  const {
-    modelItems,
-    commandManager,
-    assistant,
-    activeModelId: selectedModelId,
-    disabled,
-    model,
-  } = useMemo(() => {
-    let modelId: string | undefined =
-      getConversationModelId(selectedConversation) ||
-      getServiceModelId(service) ||
-      (getServiceModelId(config.services.activeService) as string);
-    const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);
-    const newAssistant = getAssistant(assistantId);
-    let activeModel: Model | undefined;
-    if (!modelId) {
-      modelId = getActiveModel();
-      if (!modelId && downloads && downloads.length > 0) {
-        modelId = downloads[0].id;
+  const { modelItems, commandManager, assistant, selectedModelId, disabled, model } =
+    useMemo(() => {
+      let modelId: string | undefined =
+        getConversationModelId(selectedConversation) ||
+        getServiceModelId(service) ||
+        (getServiceModelId(config.services.activeService) as string);
+      const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);
+      const newAssistant = getAssistant(assistantId);
+      let activeModel: Model | undefined;
+      if (!modelId) {
+        modelId = getActiveModel();
+        if (!modelId && downloads && downloads.length > 0) {
+          modelId = downloads[0].id;
+        }
+        activeModel = findModel(modelId, config.models.items);
+      } else {
+        activeModel = findModelInAll(modelId, providers, config, true);
       }
-      activeModel = findModel(modelId, config.models.items);
-    } else {
-      activeModel = findModelInAll(modelId, providers, config, true);
-    }
 
-    const download = downloads?.find((d) => d.id === activeModel?.id);
-    if (activeModel && download) {
-      activeModel.state = ModelState.Downloading;
-    } else if (activeModel && activeModel.state === ModelState.Downloading) {
-      activeModel.state = ModelState.Ok;
-    }
+      const download = downloads?.find((d) => d.id === activeModel?.id);
+      if (activeModel && download) {
+        activeModel.state = ModelState.Downloading;
+      } else if (activeModel && activeModel.state === ModelState.Downloading) {
+        activeModel.state = ModelState.Ok;
+      }
 
-    const items = getModelsAsItems(providers, config, modelId);
-    let d = false;
-    if (!activeModel) {
-      modelId = undefined;
-      d = true;
-    } else if (activeModel.state === ModelState.Downloading) {
-      d = true;
-    }
-    const manager = getCommandManager(items);
+      const items = getModelsAsItems(providers, config, modelId);
+      let d = false;
+      if (!activeModel) {
+        modelId = undefined;
+        d = true;
+      } else if (activeModel.state === ModelState.Downloading) {
+        d = true;
+      }
+      const manager = getCommandManager(items);
 
-    return {
-      modelItems: items,
-      commandManager: manager,
-      assistant: newAssistant,
-      activeModelId: modelId,
-      disabled: d,
-      model: activeModel,
-    };
-  }, [
-    config,
-    downloads,
-    getActiveModel,
-    getAssistant,
-    providers,
-    searchParams,
-    selectedConversation,
-    service,
-  ]);
+      return {
+        modelItems: items,
+        commandManager: manager,
+        assistant: newAssistant,
+        selectedModelId: modelId,
+        disabled: d,
+        model: activeModel,
+      };
+    }, [
+      config,
+      downloads,
+      getActiveModel,
+      getAssistant,
+      providers,
+      searchParams,
+      selectedConversation,
+      service,
+    ]);
 
   const avatars = useMemo(() => {
     const newAvatars: AvatarRef[] = [];
@@ -420,22 +412,25 @@ function Thread({
           changeService={changeService}
           onError={onError}
         >
-          <ConversationManager
-            conversationId={conversationId}
+          <ConversationPanel
             selectedConversation={selectedConversation}
+            selectedAssistantId={assistant?.id}
+            selectedModelName={selectedModelId}
             messages={messages}
-            commandManager={commandManager}
-            assistant={assistant}
             avatars={avatars}
-            model={model}
             modelItems={modelItems}
             disabled={disabled}
-            notFocused={notFocused}
-            selectedModelId={selectedModelId}
-            onCopyMessage={handleCopyMessage}
             onDeleteMessage={handleShouldDeleteMessage}
             onDeleteAssets={handleShouldDeleteAssets}
             onSelectMenu={onSelectMenu}
+            onCopyMessage={handleCopyMessage}
+          />
+          <Prompt
+            conversationId={conversationId as string}
+            hasMessages={messages && messages[0]?.conversationId === conversationId}
+            disabled={disabled}
+            commandManager={commandManager}
+            isModelLoading={model ? model.state === ModelState.Downloading : undefined}
           />
         </ConversationProvider>
       </PromptProvider>

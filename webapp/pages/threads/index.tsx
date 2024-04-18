@@ -25,7 +25,7 @@ export default function DefaultThreads() {
   const { config } = useBackend();
   useEffect(() => {
     const { settings } = config;
-    if (settings.pages?.[Page.Threads].selectedId) {
+    if (settings.pages?.[Page.Threads]?.selectedId) {
       router.replace(`${Page.Threads}/${settings.pages?.[Page.Threads].selectedId}`);
     }
   }, [router, config]);

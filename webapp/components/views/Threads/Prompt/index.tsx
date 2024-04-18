@@ -14,7 +14,15 @@
 
 'use client';
 
-import { ChangeEvent, MouseEvent, useCallback, useContext, useEffect, useRef } from 'react';
+import {
+  ChangeEvent,
+  MouseEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { AlertTriangle, Loader2, Paperclip, SendHorizontal } from 'lucide-react';
 import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
@@ -44,10 +52,8 @@ export type PromptProps = {
   conversationId: string;
   hasMessages: boolean;
   commandManager: CommandManager;
-  isLoading: boolean;
+  isModelLoading: boolean | undefined;
   disabled: boolean;
-  placeholder: string | undefined;
-  needFocus: boolean;
 };
 
 export default function Prompt({
@@ -55,13 +61,12 @@ export default function Prompt({
   hasMessages,
   commandManager,
   disabled,
-  placeholder,
-  isLoading,
-  needFocus,
+  isModelLoading,
 }: PromptProps) {
   const { t } = useTranslation();
-  const { errorMessages, handleSendMessage: sendMessage } = useConversationContext();
+  const { isProcessing, errorMessages, handleSendMessage: sendMessage } = useConversationContext();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [needFocus, setNeedFocus] = useState(false);
   const { usage, changedPrompt, conversationPrompt, setChangedPrompt, tokenValidator } =
     usePromptContext();
   const prompt = changedPrompt === undefined ? conversationPrompt : changedPrompt;
@@ -114,11 +119,27 @@ export default function Prompt({
     }
   };
 
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>();
   useEffect(() => {
-    if (needFocus && !disabled) {
-      textareaRef.current?.focus();
+    if ((isModelLoading || isModelLoading === undefined) && !needFocus) {
+      setNeedFocus(true);
     }
-  }, [needFocus, disabled]);
+    if (needFocus && isModelLoading === false && !disabled && textareaRef.current) {
+      setNeedFocus(false);
+      textareaRef.current?.focus();
+      timeoutRef.current = setTimeout(() => {
+        textareaRef.current?.focus();
+        timeoutRef.current = undefined;
+      }, 500);
+    }
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        // setNeedFocus(true);
+        timeoutRef.current = undefined;
+      }
+    };
+  }, [needFocus, disabled, isModelLoading]);
 
   const handleKeypress = (e: KeyboardEvent) => {
     if (!tokenValidator) return;
@@ -166,6 +187,16 @@ export default function Prompt({
   if (!prompt && !hasMessages) {
     return undefined;
   }
+
+  let isLoading = conversationId ? isProcessing[conversationId] || false : false;
+  let placeholder;
+  if (isModelLoading || isModelLoading === undefined) {
+    isLoading = true;
+    if (isModelLoading) {
+      placeholder = t('Loading the model, Please wait...');
+    }
+  }
+
   return (
     <div className="w-full grow-0 !bg-transparent ">
       <form className="mx-2 flex flex-col gap-2 last:mb-2">
@@ -213,7 +244,7 @@ export default function Prompt({
               onValueChange={handleValueChange}
               onFocus={handleFocus}
               onKeyDown={handleKeypress}
-              disabled={disabled}
+              disabled={isLoading || disabled}
             />
           </PromptCommands>
           <Tooltip>

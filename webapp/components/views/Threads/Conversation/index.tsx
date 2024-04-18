@@ -25,6 +25,7 @@ import logger from '@/utils/logger';
 import ConversationList from './ConversationList';
 import PromptsGrid from './PromptsGrid';
 import { useConversationContext } from '../ConversationContext';
+import { usePromptContext } from '../Prompt/PromptContext';
 
 export type ConversationPanelProps = {
   selectedConversation: Conversation | undefined;
@@ -34,14 +35,9 @@ export type ConversationPanelProps = {
   avatars: AvatarRef[];
   modelItems: Ui.MenuItem[];
   disabled: boolean;
-  // isPrompt: boolean;
-  // onResendMessage: (m: Message) => void;
   onDeleteMessage: (m: Message) => void;
   onDeleteAssets: (m: Message) => void;
-  // onChangeMessageContent: (m: Message, newContent: string, submit: boolean) => void;
-  onSelectPromptTemplate: (prompt: PromptTemplate) => void;
   onSelectMenu: (menu: MenuAction, data: string) => void;
-  // onStartMessageEdit: (messageId: string, index: number) => void;
   onCopyMessage: (messageId: string, state: boolean) => void;
 };
 
@@ -56,7 +52,6 @@ export function ConversationPanel({
   disabled,
   onDeleteMessage,
   onDeleteAssets,
-  onSelectPromptTemplate,
   onSelectMenu,
   onCopyMessage,
 }: ConversationPanelProps) {
@@ -68,6 +63,7 @@ export function ConversationPanel({
     handleChangeMessageContent,
     handleStartMessageEdit,
   } = useConversationContext();
+  const { selectTemplate } = usePromptContext();
   const [update, setUpdate] = useState<{
     name?: string | undefined;
     scrollPosition?: number | undefined;
@@ -118,7 +114,7 @@ export function ConversationPanel({
   };
 
   const handlePromptTemplateSelected = (prompt: PromptTemplate) => {
-    onSelectPromptTemplate(prompt);
+    selectTemplate(prompt);
   };
 
   const showEmptyChat = !conversationId || !messages || messages.length === 0;
