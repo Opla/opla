@@ -1,3 +1,10 @@
+# [1.0.0-alpha.120](https://github.com/Opla/opla/compare/v1.0.0-alpha.119...v1.0.0-alpha.120) (2024-04-19)
+
+
+### Bug Fixes
+
+* on event update server status [#806](https://github.com/Opla/opla/issues/806) ([#808](https://github.com/Opla/opla/issues/808)) ([b0358cc](https://github.com/Opla/opla/commit/b0358ccb80b5d88a8664ec89d622eb326890114c))
+
 # [1.0.0-alpha.119](https://github.com/Opla/opla/compare/v1.0.0-alpha.118...v1.0.0-alpha.119) (2024-04-19)
 
 
