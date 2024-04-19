@@ -46,7 +46,7 @@ import { ShortcutBadge } from '../../../common/ShortCut';
 import PromptInput from './PromptInput';
 import PromptCommands from './PromptCommands';
 import { usePromptContext } from './PromptContext';
-import { useConversationContext } from '../ConversationContext';
+import { useConversationContext } from '../Conversation/ConversationContext';
 
 export type PromptProps = {
   conversationId: string;
@@ -149,7 +149,7 @@ export default function Prompt({
     const newPrompt = parsePrompt({ text: value, caretStartIndex }, tokenValidator);
     if (e.key === 'Enter' && e.shiftKey) {
       e.preventDefault();
-      setChangedPrompt?.(newPrompt);
+      setChangedPrompt(newPrompt);
     } else if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage(newPrompt);
@@ -158,23 +158,19 @@ export default function Prompt({
 
   const handleValueChange = useCallback(
     (text: string, caretStartIndex: number) => {
-      if (!tokenValidator) return;
       const parsedPrompt = parsePrompt({ text, caretStartIndex }, tokenValidator);
-      if (prompt?.raw !== text && setChangedPrompt) {
-        // onUpdatePrompt(parsedPrompt);
+      if (prompt?.raw !== text) {
         setChangedPrompt(parsedPrompt);
       }
     },
-    [tokenValidator, prompt?.raw, setChangedPrompt],
+    [tokenValidator, prompt, setChangedPrompt],
   );
 
   const handleFocus = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const lengthOfInput = event.target.value.length;
     event.currentTarget.setSelectionRange(lengthOfInput, lengthOfInput);
-    if (!tokenValidator) return;
     const newPrompt = parsePrompt({ textarea: event.target }, tokenValidator);
-    // onUpdatePrompt(newPrompt);
-    setChangedPrompt?.(newPrompt);
+    setChangedPrompt(newPrompt);
   };
 
   const shortcutSend: KeyBinding = defaultShortcuts.find(

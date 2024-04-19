@@ -24,7 +24,7 @@ import { MenuAction, Page, ViewName } from '@/types/ui';
 import logger from '@/utils/logger';
 import ConversationList from './ConversationList';
 import PromptsGrid from './PromptsGrid';
-import { useConversationContext } from '../ConversationContext';
+import { useConversationContext } from './ConversationContext';
 import { usePromptContext } from '../Prompt/PromptContext';
 
 export type ConversationPanelProps = {

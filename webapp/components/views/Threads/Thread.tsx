@@ -53,7 +53,7 @@ import { getLocalProvider } from '@/utils/data/providers';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import ThreadHeader from './Header';
 import { PromptProvider } from './Prompt/PromptContext';
-import { ConversationProvider } from './ConversationContext';
+import { ConversationProvider } from './Conversation/ConversationContext';
 import { ConversationPanel } from './Conversation';
 import Prompt from './Prompt';
 
@@ -119,11 +119,6 @@ function Thread({
     if (isMessageUpdating) {
       return;
     }
-    /* let notfocused = false;
-    if (!document.activeElement || document.activeElement.tagName === 'BODY') {
-      notfocused = true;
-    }
-    setNotFocused(notfocused); */
     logger.info('getNewMessages', conversationId, isMessageUpdating);
 
     setIsMessageUpdating(true);
@@ -243,7 +238,7 @@ function Thread({
       setTempConversationId(undefined);
     }
     if (!tempConversationId && !_conversationId) {
-      const temp = conversations.find((c) => c.temp);
+      const temp = conversations.find((c) => c.temp && c.currentPrompt);
       if (temp) {
         setTempConversationId(temp.id);
       }
