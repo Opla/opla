@@ -40,7 +40,7 @@ import { preProcessingCommands } from '@/utils/commands';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import { CommandManager } from '@/utils/commands/types';
 import { sendMessage, updateMessageContent } from '@/utils/messages';
-import { PromptContext } from './Prompt/PromptContext';
+import { PromptContext } from '../Prompt/PromptContext';
 
 type Context = {
   selectedMessageId: string | undefined;
@@ -226,7 +226,7 @@ function ConversationProvider({
       }
 
       if (clearPrompt) {
-        updatedConversations = clearPrompt(updatedConversation, updatedConversations);
+        updatedConversations = await clearPrompt(updatedConversation, updatedConversations);
       }
 
       logger.info(

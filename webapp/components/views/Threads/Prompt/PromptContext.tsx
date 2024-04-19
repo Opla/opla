@@ -59,9 +59,9 @@ type Context = {
   clearPrompt: (
     conversation: Conversation | undefined,
     newConversations: Conversation[],
-  ) => Conversation[];
-  handleChangePrompt: (prompt: ParsedPrompt) => void;
-  selectTemplate: (template: PromptTemplate) => void;
+  ) => Promise<Conversation[]>;
+  // handleChangePrompt: (prompt: ParsedPrompt) => void;
+  selectTemplate: (template: PromptTemplate) => Promise<void>;
   tokenValidator: TokenValidator;
   usage: Usage | undefined;
 };
@@ -162,7 +162,7 @@ function PromptProvider({
   ]);
 
   const clearPrompt = useCallback(
-    (conversation: Conversation | undefined, newConversations: Conversation[]) => {
+    async (conversation: Conversation | undefined, newConversations: Conversation[]) => {
       setChangedPrompt(undefined);
 
       let updatedConversations = newConversations;
@@ -171,7 +171,7 @@ function PromptProvider({
           { ...conversation, currentPrompt: undefined, temp: false },
           newConversations,
         );
-        updateConversations(updatedConversations);
+        await updateConversations(updatedConversations);
       }
       return updatedConversations;
     },
@@ -179,10 +179,10 @@ function PromptProvider({
   );
 
   const handleUpdatePrompt = useCallback(
-    (prompt: ParsedPrompt | undefined, conversationName = getDefaultConversationName(t)) => {
+    async (prompt: ParsedPrompt | undefined, conversationName = getDefaultConversationName(t)) => {
       if (prompt?.raw === '' && tempConversationId) {
         setChangedPrompt(undefined);
-        updateConversations(conversations.filter((c) => !c.temp));
+        await updateConversations(conversations.filter((c) => !c.temp));
         onUpdateTempConversation(undefined);
         return;
       }
@@ -191,12 +191,12 @@ function PromptProvider({
         setChangedPrompt(undefined);
         return;
       }
-      let updatedConversations: Conversation[];
+      let updatedConversations: Conversation[] | undefined;
       if (conversation) {
         conversation.currentPrompt = prompt;
         updatedConversations = conversations.filter((c) => !(c.temp && c.id !== conversationId));
         updatedConversations = updateConversation(conversation, updatedConversations, true);
-      } else {
+      } else if (prompt?.raw !== '') {
         updatedConversations = conversations.filter((c) => !c.temp);
         let newConversation = createConversation(conversationName);
         newConversation.temp = true;
@@ -211,8 +211,12 @@ function PromptProvider({
         }
         updatedConversations.push(newConversation);
         onUpdateTempConversation(newConversation.id);
+      } else {
+        updatedConversations = conversations.filter((c) => !c.temp);
       }
-      updateConversations(updatedConversations);
+      if (updatedConversations) {
+        await updateConversations(updatedConversations);
+      }
       setChangedPrompt(undefined);
     },
     [
@@ -230,17 +234,17 @@ function PromptProvider({
 
   useDebounceFunc<ParsedPrompt | undefined>(handleUpdatePrompt, changedPrompt, 500);
 
-  const handleChangePrompt = useCallback(
+  /* const handleChangePrompt = useCallback(
     (prompt: ParsedPrompt) => {
       if (prompt.raw !== conversationPrompt?.raw) {
         setChangedPrompt(prompt);
       }
     },
     [conversationPrompt],
-  );
+  ); */
 
   const selectTemplate = useCallback(
-    (template: PromptTemplate) => {
+    async (template: PromptTemplate) => {
       handleUpdatePrompt(parseAndValidatePrompt(template.value), template.name);
     },
     [handleUpdatePrompt, parseAndValidatePrompt],
@@ -253,7 +257,7 @@ function PromptProvider({
       parseAndValidatePrompt,
       changedPrompt,
       setChangedPrompt,
-      handleChangePrompt,
+      // handleChangePrompt,
       tokenValidator,
       selectTemplate,
       usage,
@@ -263,7 +267,7 @@ function PromptProvider({
       clearPrompt,
       parseAndValidatePrompt,
       changedPrompt,
-      handleChangePrompt,
+      // handleChangePrompt,
       tokenValidator,
       selectTemplate,
       usage,
@@ -278,12 +282,12 @@ const usePromptContext = (): Context => {
   if (!context) {
     return {
       conversationPrompt: EmptyParsedPrompt,
-      clearPrompt: () => [],
+      clearPrompt: async () => [],
       parseAndValidatePrompt: () => EmptyParsedPrompt,
       changedPrompt: undefined,
-      handleChangePrompt: () => {},
+      // handleChangePrompt: () => {},
       tokenValidator: () => [EmptyPromptToken, undefined],
-      selectTemplate: () => {},
+      selectTemplate: async () => {},
       setChangedPrompt: () => {},
       usage: undefined,
     };
