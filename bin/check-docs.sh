@@ -1,4 +1,4 @@
-CHANGED=$(git diff --name-only -- bin)
+CHANGED=$(git diff --name-only bin)
 if [[ -z "${CHANGED}" ]]
 then
       echo "No change."
