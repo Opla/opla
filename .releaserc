@@ -21,7 +21,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "cargo set-version ${nextRelease.version}",
+        "prepareCmd": "./bin/set-version.sh ${nextRelease.version}",
         "publishCmd": "echo 'version=${nextRelease.version}' >> $GITHUB_OUTPUT"
       }
     ],
