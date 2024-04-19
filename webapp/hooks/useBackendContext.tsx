@@ -169,6 +169,10 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
           };
         }
         updateConfig({ services });
+        updateServer({
+          status: event.payload.status,
+          message: event.payload.message,
+        });
       }
     }
   }, []);
