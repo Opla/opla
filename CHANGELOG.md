@@ -1,3 +1,10 @@
+# [1.0.0-alpha.119](https://github.com/Opla/opla/compare/v1.0.0-alpha.118...v1.0.0-alpha.119) (2024-04-19)
+
+
+### Bug Fixes
+
+* ghost temp conversation [#805](https://github.com/Opla/opla/issues/805) ([#807](https://github.com/Opla/opla/issues/807)) ([d2226f1](https://github.com/Opla/opla/commit/d2226f123136692efc2a98d4f9e334330e0f1509))
+
 # [1.0.0-alpha.118](https://github.com/Opla/opla/compare/v1.0.0-alpha.117...v1.0.0-alpha.118) (2024-04-18)
 
 
