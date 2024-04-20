@@ -115,6 +115,17 @@
     "security": {
       "csp": null
     },
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://gist.githubusercontent.com/oplabot/00b16759c1c866b062615f1fd355c88c/raw/latest.json"
+      ],
+      "dialog": true,
+      "windows": {
+        "installMode": "passive"
+      },
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDdENDg5MUFCRkFEOEYyMjIKUldRaTh0ajZxNUZJZlhtS040QWxqWmloZFFtZ01hRnpmZjEzWmIvSFdBSFY1UitXT21xYjFoZFAK"
+    },
     "windows": [
       {
         "fullscreen": false,

@@ -16,11 +16,11 @@ jobs:
         with:
           github-token: ${{ secrets.DEV_OPS_BOT_TOKEN }}
           script: |
-
             const { data } = await github.rest.repos.getLatestRelease({
               owner: context.repo.owner,
               repo: context.repo.repo
             });
+            console.log('data', data);
             const { name, body, published_at, assets } = data;
 
             /* const latest_url = assets.find((asset) => )
@@ -46,11 +46,15 @@ jobs:
               }
             }, null, 2);
 
-            await github.rest.gists.update({
-              gist_id: process.env.updater_gist_id,
-              files: {
-                "updater.json": {
-                  content: newGistContent
+            try {
+              await github.rest.gists.update({
+                gist_id: process.env.updater_gist_id,
+                files: {
+                  "updater.json": {
+                    content: newGistContent
+                  }
                 }
-              }
-            });
+              });
+            } catch (e) {
+              console.log(e);
+            }
