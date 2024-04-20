@@ -1,3 +1,10 @@
+# [1.0.0-alpha.122](https://github.com/Opla/opla/compare/v1.0.0-alpha.121...v1.0.0-alpha.122) (2024-04-20)
+
+
+### Bug Fixes
+
+* typo updater ([0b3c09e](https://github.com/Opla/opla/commit/0b3c09ecc3db98988c8819bd6a7cbd3dace0d276))
+
 # [1.0.0-alpha.121](https://github.com/Opla/opla/compare/v1.0.0-alpha.120...v1.0.0-alpha.121) (2024-04-20)
 
 
