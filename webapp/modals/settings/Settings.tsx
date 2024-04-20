@@ -100,7 +100,15 @@ export default function Settings({
         >
           <Bug className="h-4 w-4" strokeWidth={1.5} />
         </Button>
-        <Button asChild size="sm" variant="secondary"><Link href="https://github.com/Opla/opla/blob/main/CHANGELOG.md"  rel="noreferrer" target="_blank">Changelog</Link></Button>
+        <Button asChild size="sm" variant="secondary">
+          <Link
+            href="https://github.com/Opla/opla/blob/main/CHANGELOG.md"
+            rel="noreferrer"
+            target="_blank"
+          >
+            Changelog
+          </Link>
+        </Button>
       </div>
     </div>
   );
