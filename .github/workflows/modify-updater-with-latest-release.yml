@@ -25,25 +25,26 @@ jobs:
 
             const platforms = {};
             const promises = [];
-            const createPlatform = async (name, asset) => {
-              url = asset.browser_download_url;
-              const obj = await github.request(asset.browser_download_url);
-              const signature = new TextDecoder().decode(obj.data);
-              platforms['darwin-aarch64'] = { url, signature };
-            };
 
-            assets.forEach((asset) => {
+            for (const asset of assets) {
+              let name;
               if (asset.name.indexOf('_aarch64.app.tar.gz') > 0) {
-                promises.push(createPlaform('darwin-aarch64', asset));
+                name = 'darwin-aarch64';
               } else if (asset.name.indexOf('_x64.app.tar.gz') > 0) {
-                promises.push(createPlaform('darwin-x86_64', asset));
+                name = 'darwin-x86_64';
               } else if (asset.name.indexOf('_x64_en-US.msi.zip') > 0) {
-                promises.push(createPlaform('windows-x86_64', asset));
+                name = 'windows-x86_64';
               } else if (asset.name.indexOf('_amd64.AppImage.tar.gz') > 0) {
-                promises.push(createPlaform('linux-x86_64', asset));
+                name = 'linux-x86_64';
+              }
+              if (name) {
+                const url = asset.browser_download_url;
+                const obj = await github.request(url);
+                const signature = new TextDecoder().decode(obj.data);
+                platforms[name] = { url, signature };
               }
             });
-            /* const latest_url = assets.find((asset) => )
+            /*
             const linuxAssetUrl = assets[1].browser_download_url;
             const linuxSigObj = await github.request(assets[2].browser_download_url);
             const linuxSignature = new TextDecoder().decode(linuxSigObj.data);
