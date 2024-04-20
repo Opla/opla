@@ -24,7 +24,6 @@ jobs:
             const { name, body, published_at, assets } = data;
 
             const platforms = {};
-            const promises = [];
 
             for (const asset of assets) {
               let name;
@@ -43,7 +42,7 @@ jobs:
                 const signature = new TextDecoder().decode(obj.data);
                 platforms[name] = { url, signature };
               }
-            });
+            }
             /*
             const linuxAssetUrl = assets[1].browser_download_url;
             const linuxSigObj = await github.request(assets[2].browser_download_url);
@@ -63,8 +62,7 @@ jobs:
               version: name,
               notes,
               pub_date: published_at,
-              platforms: { 
-              }
+              platforms,
             }, null, 2);
 
             try {
