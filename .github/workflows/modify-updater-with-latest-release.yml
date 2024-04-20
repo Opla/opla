@@ -29,7 +29,7 @@ jobs:
               let name;
               if (asset.name.endsWith('_aarch64.app.tar.gz') > 0) {
                 name = 'darwin-aarch64';
-              } else if (asset.name.indexOf('_x64.app.tar.gz') > 0) {
+              } else if (asset.name.endsWith('_x64.app.tar.gz') > 0) {
                 name = 'darwin-x86_64';
               } else if (asset.name.endsWith('_x64_en-US.msi.zip') > 0) {
                 name = 'windows-x86_64';
@@ -46,20 +46,7 @@ jobs:
                 }
                 platforms[name] = { url, signature };
               }
-            }
-            /*
-            const linuxAssetUrl = assets[1].browser_download_url;
-            const linuxSigObj = await github.request(assets[2].browser_download_url);
-            const linuxSignature = new TextDecoder().decode(linuxSigObj.data);
-
-            const macAssetUrl = assets[4].browser_download_url;
-            const macSigObj = await github.request(assets[5].browser_download_url);
-            const macSignature = new TextDecoder().decode(macSigObj.data);
-
-            const winAssetUrl = assets[8].browser_download_url;
-            const winSigObj = await github.request(assets[9].browser_download_url);
-            const winSignature = new TextDecoder().decode(winSigObj.data); */
-            
+            }            
             const notes = body.replace(/ *\([^)]*\)|#|\) */g, '');
 
             const newGistContent = JSON.stringify({
@@ -73,7 +60,7 @@ jobs:
               await github.rest.gists.update({
                 gist_id: process.env.updater_gist_id,
                 files: {
-                  "updater.json": {
+                  "latest.json": {
                     content: newGistContent
                   }
                 }
