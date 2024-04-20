@@ -38,8 +38,12 @@ jobs:
               }
               if (name) {
                 const url = asset.browser_download_url;
-                const obj = await github.request(url);
-                const signature = new TextDecoder().decode(obj.data);
+                const sig = assets.find((a) => a.name === asset.name + '.sig');
+                let signature;
+                if (sig) { 
+                  const obj = await github.request(sig.browser_download_url);
+                  signature = new TextDecoder().decode(obj.data);
+                }
                 platforms[name] = { url, signature };
               }
             }
