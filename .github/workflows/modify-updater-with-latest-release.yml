@@ -23,6 +23,7 @@ jobs:
             });
             const { name, body, published_at, assets } = data;
 
+            /* const latest_url = assets.find((asset) => )
             const linuxAssetUrl = assets[1].browser_download_url;
             const linuxSigObj = await github.request(assets[2].browser_download_url);
             const linuxSignature = new TextDecoder().decode(linuxSigObj.data);
@@ -33,7 +34,7 @@ jobs:
 
             const winAssetUrl = assets[8].browser_download_url;
             const winSigObj = await github.request(assets[9].browser_download_url);
-            const winSignature = new TextDecoder().decode(winSigObj.data);
+            const winSignature = new TextDecoder().decode(winSigObj.data); */
             
             const notes = body.replace(/ *\([^)]*\)|#|\) */g, '');
 
@@ -42,18 +43,6 @@ jobs:
               notes,
               pub_date: published_at,
               platforms: { 
-                "darwin-x86_64": {
-                  signature: macSignature,
-                  url: macAssetUrl,
-                },
-                "linux-x86_64": {
-                  signature: linuxSignature,
-                  url: linuxAssetUrl,
-                },
-                "windows-x86_64": {
-                  signature: winSignature,
-                  url: winAssetUrl,
-                }
               }
             }, null, 2);
 
