@@ -1,3 +1,10 @@
+# [1.0.0-alpha.121](https://github.com/Opla/opla/compare/v1.0.0-alpha.120...v1.0.0-alpha.121) (2024-04-20)
+
+
+### Features
+
+* add changelog button [#496](https://github.com/Opla/opla/issues/496) ([#809](https://github.com/Opla/opla/issues/809)) ([bc2d33a](https://github.com/Opla/opla/commit/bc2d33a06614df9ab445b7b7a35cadf408a10580))
+
 # [1.0.0-alpha.120](https://github.com/Opla/opla/compare/v1.0.0-alpha.119...v1.0.0-alpha.120) (2024-04-19)
 
 
