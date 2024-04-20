@@ -27,13 +27,13 @@ jobs:
 
             for (const asset of assets) {
               let name;
-              if (asset.name.indexOf('_aarch64.app.tar.gz') > 0) {
+              if (asset.name.endsWith('_aarch64.app.tar.gz') > 0) {
                 name = 'darwin-aarch64';
               } else if (asset.name.indexOf('_x64.app.tar.gz') > 0) {
                 name = 'darwin-x86_64';
-              } else if (asset.name.indexOf('_x64_en-US.msi.zip') > 0) {
+              } else if (asset.name.endsWith('_x64_en-US.msi.zip') > 0) {
                 name = 'windows-x86_64';
-              } else if (asset.name.indexOf('_amd64.AppImage.tar.gz') > 0) {
+              } else if (asset.name.endsWith('_amd64.AppImage.tar.gz') > 0) {
                 name = 'linux-x86_64';
               }
               if (name) {
