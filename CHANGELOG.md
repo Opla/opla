@@ -1,3 +1,10 @@
+# [1.0.0-alpha.123](https://github.com/Opla/opla/compare/v1.0.0-alpha.122...v1.0.0-alpha.123) (2024-04-21)
+
+
+### Features
+
+* clipboard copy rtf [#766](https://github.com/Opla/opla/issues/766) ([#811](https://github.com/Opla/opla/issues/811)) ([cadf1d8](https://github.com/Opla/opla/commit/cadf1d8ceb1c26c57f31f857b305878a05fb379e))
+
 # [1.0.0-alpha.122](https://github.com/Opla/opla/compare/v1.0.0-alpha.121...v1.0.0-alpha.122) (2024-04-20)
 
 
