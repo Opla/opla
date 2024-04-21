@@ -11,6 +11,9 @@ type CopyToClipBoardProps = {
   text: string;
   message: string;
   duration?: number;
+  options?: {
+    html?: string;
+  };
   onCopy?: (copied: boolean) => void;
 };
 
@@ -22,6 +25,7 @@ function CopyToClipBoard({
   text,
   message,
   duration = 2000,
+  options = {},
   onCopy,
 }: CopyToClipBoardProps) {
   const { t } = useTranslation();
@@ -58,7 +62,31 @@ function CopyToClipBoard({
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(text);
+      if (options.html) {
+        /* type = "text/html";
+        blob = new Blob([options.html], { type });
+        data.push(new ClipboardItem({ [type]: blob })) */
+        const tempElement = document.createElement('div');
+        tempElement.innerHTML = options.html;
+        const allElements = tempElement.querySelectorAll('*');
+        allElements.forEach((e) => e.removeAttribute('class'));
+        document.body.appendChild(tempElement);
+        const range = document.createRange();
+        range.selectNode(tempElement);
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+        document.execCommand('copy');
+        selection?.removeAllRanges();
+        document.body.removeChild(tempElement);
+      } else {
+        const type = 'text/plain';
+        const blob = new Blob([text], { type });
+        const data = [new ClipboardItem({ [type]: blob })];
+        await navigator.clipboard.write(data);
+      }
+
+      // await navigator.clipboard.writeText(text);
       setCopySuccess('copied');
       toast.success(message, { duration });
       onCopy?.(true);

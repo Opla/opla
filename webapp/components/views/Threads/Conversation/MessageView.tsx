@@ -107,6 +107,7 @@ function MessageComponent({
   const { t } = useTranslation();
   const [ref, isHover] = useHover();
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [editValue, setEditValue] = useState<string | undefined>(undefined);
   const [current, setCurrent] = useState(0);
 
@@ -201,7 +202,10 @@ function MessageComponent({
                     )}
                     {(state === DisplayMessageState.Markdown ||
                       state === DisplayMessageState.Streaming) && (
-                      <div className="pointer-events-auto w-full cursor-text select-text px-0 py-2">
+                      <div
+                        ref={contentRef}
+                        className="pointer-events-auto w-full cursor-text select-text px-0 py-2"
+                      >
                         {Content}
                       </div>
                     )}
@@ -293,6 +297,7 @@ function MessageComponent({
                           title={`${t('Copy message to clipboard')}  ${message.last && !isUser ? shortcutAsText(ShortcutIds.COPY_MESSAGE) : ''} `}
                           message={t('Message copied to clipboard')}
                           text={content}
+                          options={{ html: contentRef.current?.outerHTML ?? undefined }}
                           onCopy={(copied) => onCopyMessage(message.id, copied)}
                         />
                         {message.status !== MessageStatus.Error && (
