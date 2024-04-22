@@ -1,3 +1,10 @@
+# [1.0.0-alpha.124](https://github.com/Opla/opla/compare/v1.0.0-alpha.123...v1.0.0-alpha.124) (2024-04-22)
+
+
+### Features
+
+* validate downloaded model sha file_size [#489](https://github.com/Opla/opla/issues/489) ([#812](https://github.com/Opla/opla/issues/812)) ([328497a](https://github.com/Opla/opla/commit/328497a6b9f714135f3dd3f3d4d48503d802296c))
+
 # [1.0.0-alpha.123](https://github.com/Opla/opla/compare/v1.0.0-alpha.122...v1.0.0-alpha.123) (2024-04-21)
 
 
