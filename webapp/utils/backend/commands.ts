@@ -78,12 +78,13 @@ export const getModelsCollection = async (): Promise<{ models: [] }> => {
 };
 
 export const installModel = async (
-  model: Model,
+  _model: Model,
   url: string | undefined,
   path: string,
   fileName: string,
 ): Promise<string> => {
   try {
+    const model = mapKeys(_model, toSnakeCase);
     const id = await invokeTauri<string>('install_model', { model, url, path, fileName });
     return id;
   } catch (error) {
