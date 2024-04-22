@@ -35,8 +35,6 @@ use std::thread;
 pub struct OplaServer {
     pub pid: Arc<Mutex<usize>>,
     pub name: String,
-    // pub model_id: Option<String>,
-    // pub model_path: Option<String>,
     pub status: Arc<Mutex<ServerStatus>>,
     pub parameters: Option<ServerParameters>,
     server: LLamaCppServer,
@@ -85,8 +83,6 @@ impl OplaServer {
             pid: Arc::new(Mutex::new(0)),
             name: "llama.cpp.server".to_string(),
             status: Arc::new(Mutex::new(ServerStatus::Init)),
-            // model_id: None,
-            // model_path: None,
             parameters: None,
             server: LLamaCppServer::new(),
             handle: None,
@@ -321,20 +317,14 @@ impl OplaServer {
 
     pub fn set_parameters(
         &mut self,
-        /* model: &str,
-        model_path: &str, */
         parameters: Option<ServerParameters>
     ) {
         self.parameters = parameters;
-        // self.model_id = Some(model.to_string());
-        // self.model_path = Some(model_path.to_string());
     }
 
     pub async fn start<R: Runtime>(
         &mut self,
         app: tauri::AppHandle<R>,
-        // model: &str,
-        // model_path: &str,
         parameters: &ServerParameters
     ) -> Result<Payload, String> {
         let status = match self.status.try_lock() {
@@ -344,23 +334,6 @@ impl OplaServer {
                 return Err("Opla server can't read status".to_string());
             }
         };
-        // self.model_id = Some(model.to_string());
-        // self.model_path = Some(model_path.to_string());
-        /* let parameters: &ServerParameters = match parameters {
-            Some(p) => {
-                self.parameters = Some(p.clone());
-                &p
-            }
-            None => {
-                match &self.parameters {
-                    Some(p) => p, // Dereference the &ServerParameters
-                    None => {
-                        println!("Opla server error try to read parameters");
-                        return Err("Opla server can't read parameters".to_string());
-                    }
-                }
-            }
-        }; */
         self.parameters = Some(parameters.clone());
         let model_path = match &parameters.model_path {
             Some(s) => s,
@@ -538,7 +511,6 @@ impl OplaServer {
         parameters: &ServerParameters
     ) -> Result<(), Box<dyn std::error::Error>> {
         if !parameters.has_same_model(&self.parameters) {
-            // let parameters = parameters.clone();
             self.stop(&app).await?;
             let self_status = Arc::clone(&self.status);
             let mut wouldblock = true;

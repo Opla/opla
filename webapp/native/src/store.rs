@@ -188,7 +188,6 @@ impl Store {
             },
             models: ModelStorage {
                 path: None,
-                // active_model: None,
                 items: vec![],
             },
             downloads: vec![],

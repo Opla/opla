@@ -235,7 +235,7 @@ async fn start_opla_server<R: Runtime>(
             return Err(format!("Opla server not started model not found: {:?}", err));
         }
     };
-    // store.models.active_model = Some(model_name.clone());
+
     store.server.parameters.port = port;
     store.server.parameters.host = host.clone();
     store.server.parameters.model_id = Some(model_id.clone());
@@ -245,7 +245,6 @@ async fn start_opla_server<R: Runtime>(
     store.server.parameters.n_gpu_layers = n_gpu_layers;
     store.save().map_err(|err| err.to_string())?;
 
-    // let args = store.server.parameters.to_args(model_path.as_str());
     let parameters = store.server.parameters.clone();
     let mut server = context.server.lock().await;
     server.start(app, &parameters).await
@@ -402,7 +401,6 @@ async fn install_model<R: Runtime>(
         Some(file_name.clone())
     );
 
-    // let model_id = store.models.add_model(model, None, Some(path.clone()), Some(file_name.clone()));
     let res = store.models.create_model_path_filename(path, file_name.clone());
     let model_path = match res {
         Ok(m) => { m }
@@ -664,14 +662,7 @@ async fn llm_call_completion<R: Runtime>(
                 ).await
                 .map_err(|err| err.to_string())?
         };
-        /* let parameters = match server.parameters.clone() {
-            Some(mut p) => {
-                p.model_id = Some(model_name);
-                p.model_path = Some(model_path);
-                Some(p)
-            },
-            None => None
-        };  */
+
         server.set_parameters(Some(parameters));
 
         let mut store = context.store.lock().await;
@@ -783,7 +774,6 @@ async fn start_server<R: Runtime>(
             return Err(format!("Opla server not started model path not found: {:?}", err));
         }
     };
-    // let args = store.server.parameters.to_args(model_path.as_str());
     let mut parameters = store.server.parameters.clone();
     let mut server = context.server.lock().await;
     parameters.model_id = Some(active_model.clone());
@@ -917,17 +907,6 @@ fn handle_download_event<EventLoopMessage>(app: &tauri::AppHandle, payload: &str
     });
 }
 
-/* async fn finish_download(handle: &tauri::AppHandle, payload: &str) {
-    println!("finish download {}", payload);
-    let id = match payload.strip_suffix("ok:") {
-        Some(id) => id,
-        None => return,
-    };
-    let context = handle.state::<OplaContext>();
-    let mut downloader = context.downloader.lock().await;
-    downloader.finish_download(id);
-} */
-
 async fn opla_setup(app: &mut App) -> Result<(), String> {
     println!("Opla setup: ");
     let context = app.state::<OplaContext>();
@@ -960,7 +939,6 @@ async fn opla_setup(app: &mut App) -> Result<(), String> {
         println!("Opla server model not found: {:?}", active_model);
         // Remove default model from server
         server.remove_model();
-        //store.models.active_model = None;
         store.services.active_service = None;
         store.save().map_err(|err| err.to_string())?;
     }
@@ -1059,11 +1037,6 @@ fn main() {
                     };
                     // println!("download event {}", payload);
                     handle_download_event::<EventLoopMessage>(&handle, payload);
-                    /* if payload.starts_with("ok:") {
-                        tauri::async_runtime::block_on(async {
-                            finish_download(&handle, payload).await;
-                        });
-                    } */
                 });
             }
 
