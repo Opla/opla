@@ -1,3 +1,10 @@
+# [1.0.0-alpha.125](https://github.com/Opla/opla/compare/v1.0.0-alpha.124...v1.0.0-alpha.125) (2024-04-22)
+
+
+### Features
+
+* update llama.cpp for LLama3 [#813](https://github.com/Opla/opla/issues/813) ([#814](https://github.com/Opla/opla/issues/814)) ([075d23e](https://github.com/Opla/opla/commit/075d23ee082b95d3eb573c52a8f668f47d7688ae))
+
 # [1.0.0-alpha.124](https://github.com/Opla/opla/compare/v1.0.0-alpha.123...v1.0.0-alpha.124) (2024-04-22)
 
 
