@@ -113,7 +113,7 @@ export default function EditPreset<T>({
             logger.error('updateParameters invalid', result.error);
             toast.error(result.error.message);
           } else {
-            parameters[key] = result.data;
+            parameters[key] = result.data as PresetParameter;
             delete newParams?.[key];
             needUpdate = true;
           }
