@@ -202,7 +202,7 @@ jobs:
               prerelease: false
             })
 
-  # modify-updater-gist:
-  #  needs: build-pre-release
-  #  uses: Opla/opla/.github/workflows/modify-updater-with-latest-release.yml@main
-  #  secrets: inherit
+  modify-updater-gist:
+    needs: [create-pre-release,build-pre-release,undraft-pre-release]
+    uses: Opla/opla/.github/workflows/modify-updater-with-latest-release.yml@main
+    secrets: inherit
