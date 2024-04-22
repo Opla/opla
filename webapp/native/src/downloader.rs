@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ cmp::min, collections::HashMap, error::Error, fs::File, io::Write, time::Instant };
+use crate::{ hash::Hasher, OplaContext };
+
+use std::{ cmp::min, collections::HashMap, error::Error, fmt, fs::File, io::Write, time::Instant };
 
 use reqwest::Response;
 use serde::{ Serialize, Deserialize };
@@ -29,36 +31,60 @@ pub struct Download {
     pub error: Option<String>,
 }
 
+#[derive(Debug, Clone)]
+struct DownloadError {
+    details: String,
+}
+
+impl DownloadError {
+    fn new(msg: &str) -> DownloadError {
+        DownloadError { details: msg.to_string() }
+    }
+}
+
+impl fmt::Display for DownloadError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.details)
+    }
+}
+
+impl Error for DownloadError {
+    fn description(&self) -> &str {
+        &self.details
+    }
+}
+
 impl Download {
     pub fn emit_progress<R: Runtime>(&self, handle: &AppHandle<R>) {
         let payload = ("progress", &self);
         handle.emit_all("opla-downloader", payload).ok();
-        handle.trigger_global("opla-downloader", Some(format!("progress:{}",self.id.clone())));
+        handle.trigger_global("opla-downloader", Some(format!("progress:{}", self.id.clone())));
     }
 
     pub fn emit_finished<R: Runtime>(&self, handle: &AppHandle<R>) {
         let payload = ("finished", &self);
         handle.emit_all("opla-downloader", payload).ok();
-        handle.trigger_global("opla-downloader", Some(format!("ok:{}",self.id.clone())));
+        handle.trigger_global("opla-downloader", Some(format!("ok:{}", self.id.clone())));
     }
 
     pub fn emit_canceled<R: Runtime>(&self, handle: &AppHandle<R>) {
         let payload = ("canceled", &self);
         handle.emit_all("opla-downloader", payload).ok();
-        handle.trigger_global("opla-downloader", Some(format!("canceled:{}",self.id.clone())));
+        handle.trigger_global("opla-downloader", Some(format!("canceled:{}", self.id.clone())));
     }
 
     pub fn emit_error<R: Runtime>(&mut self, handle: &AppHandle<R>, error: Box<dyn Error>) {
         self.error = Some(error.to_string());
         let payload = ("error", &self, error.to_string());
         handle.emit_all("opla-downloader", payload).ok();
-        handle.trigger_global("opla-downloader", Some(format!("error:{}",self.id.clone())));
+        handle.trigger_global("opla-downloader", Some(format!("error:{}", self.id.clone())));
     }
 }
 
 pub struct Downloader {
     pub downloads: Vec<Download>,
     handles: HashMap<String, JoinHandle<()>>,
+    hashes: HashMap<String, Hasher>,
 }
 
 const UPDATE_SPEED: u128 = 50;
@@ -68,7 +94,21 @@ impl Downloader {
         Downloader {
             downloads: Vec::new(),
             handles: HashMap::new(),
+            hashes: HashMap::new(),
         }
+    }
+
+    async fn update_downloaded_model<EventLoopMessage: Runtime + 'static>(
+        id: &String,
+        state: String,
+        handle: &AppHandle<EventLoopMessage>
+    ) {
+        let context = handle.state::<OplaContext>();
+        let mut downloader = context.downloader.lock().await;
+        downloader.finish_download(id);
+        let mut store = context.store.lock().await;
+        store.models.set_model_state(id, &state);
+        let _ = store.save();
     }
 
     pub fn download_file<EventLoopMessage: Runtime + 'static>(
@@ -77,28 +117,35 @@ impl Downloader {
         url: String,
         path: String,
         file_name: &str,
+        sha: Option<String>,
+        file_size: u64,
         handle: AppHandle<EventLoopMessage>
     ) -> () {
         println!("Downloading {}...", url);
+
         let file_name = file_name.to_string();
 
+        let mut hasher = Hasher::new(sha);
+        self.hashes.insert(id.to_string(), hasher.clone());
+        // println!("hasher {:?}", hasher);
         let mut download = Download {
             id: id.to_string(),
             file_name: file_name.to_string(),
-            file_size: 0,
+            file_size,
             transfered: 0,
             transfer_rate: 0.0,
             percentage: 0.0,
             error: None,
         };
         self.downloads.push(download.clone());
+        let nid = id.clone();
         let join_handle = tauri::async_runtime::spawn(async move {
             let start_time = Instant::now();
-
             let mut file = match File::create(path.clone()) {
                 Ok(file) => file,
                 Err(error) => {
                     println!("Failed to create file: {} {}", path, error);
+                    Downloader::update_downloaded_model(&id, "error".to_string(), &handle).await;
                     download.emit_error(&handle, Box::new(error));
                     return;
                 }
@@ -108,29 +155,55 @@ impl Downloader {
                 Ok(res) => res,
                 Err(error) => {
                     println!("Failed to download ressource: {}", error);
+                    Downloader::update_downloaded_model(&id, "error".to_string(), &handle).await;
                     download.emit_error(&handle, Box::new(error));
                     return;
                 }
             };
-
             Downloader::download_chunks(
                 &mut download,
                 &file,
                 response,
                 start_time,
-                &handle
+                &handle,
+                &mut hasher
             ).await.ok();
             match file.flush() {
                 Ok(_) => {}
                 Err(error) => {
                     println!("Failed to finish download: {}", error);
+                    Downloader::update_downloaded_model(&id, "error".to_string(), &handle).await;
                     download.emit_error(&handle, Box::new(error));
                     return;
                 }
             }
+            let id = download.id.to_string();
+            println!(
+                "Download finished {} {} {} {}",
+                id,
+                file_size,
+                download.file_size,
+                download.transfered
+            );
+
+            if download.file_size != download.transfered {
+                println!("Wrong uploaded file size {}", id);
+                Downloader::update_downloaded_model(&id, "error".to_string(), &handle).await;
+                download.emit_error(&handle, Box::new(DownloadError::new("Wrong uploaded file size")));
+                return;
+            }
+
+            if !hasher.compare_signature() {
+                println!("Wrong checksum {}", id);
+                Downloader::update_downloaded_model(&id, "error".to_string(), &handle).await;
+                download.emit_error(&handle, Box::new(DownloadError::new("Wrong checksum")));
+                return;
+            }
+
+            Downloader::update_downloaded_model(&id, "ok".to_string(), &handle).await;
             download.emit_finished(&handle);
         });
-        self.handles.insert(id, join_handle);
+        self.handles.insert(nid.to_string(), join_handle);
     }
 
     async fn download_chunks<R: Runtime>(
@@ -138,11 +211,21 @@ impl Downloader {
         mut file: &File,
         mut response: Response,
         start_time: Instant,
-        handle: &AppHandle<R>
+        handle: &AppHandle<R>,
+        hasher: &mut Hasher
     ) -> Result<(), Box<dyn Error>> {
         let mut last_update = Instant::now();
-        download.file_size = response.content_length().unwrap_or_else(|| 0);
 
+        let file_size = response.content_length().unwrap_or(1);
+        println!("download chunks {} {}", file_size, download.file_size);
+        if download.file_size != 0 && file_size != download.file_size {
+            println!("Wrong file size: {}", file_size);
+            let error = Box::new(DownloadError::new(&format!("Wrong file size: {}", file_size)));
+            download.emit_error(&handle, error.clone());
+            return Err(error);
+        } else {
+            download.file_size = file_size;
+        }
         while let Some(chunk) = response.chunk().await? {
             let res = file.write_all(&chunk);
             match res {
@@ -153,6 +236,7 @@ impl Downloader {
                     break;
                 }
             }
+            hasher.update(&chunk);
             download.transfered = min(
                 download.transfered + (chunk.len() as u64),
                 download.file_size
@@ -180,11 +264,17 @@ impl Downloader {
                 (download.file_size as f64) / 1024.0 / 1024.0
             );
         }
-        println!("Download finished");
         Ok(())
     }
 
+    pub fn finish_download(&mut self, id: &str) -> () {
+        println!("finish download removes hashes and handles {}", id);
+        self.hashes.remove(id);
+        self.handles.remove(id);
+    }
+
     pub fn cancel_download<R: Runtime>(&mut self, id: &str, app_handle: &AppHandle<R>) -> () {
+        self.hashes.remove(id);
         if let Some(handle) = self.handles.remove(id) {
             handle.abort();
             if let Some(download) = self.downloads.iter_mut().find(|d| d.id == id) {

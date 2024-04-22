@@ -23,6 +23,7 @@ pub mod api;
 pub mod data;
 pub mod llm;
 pub mod error;
+pub mod hash;
 
 use tokenizer::encode;
 use tokio::sync::Mutex;
@@ -33,7 +34,7 @@ use api::{
     hf::search_hf_models,
     models,
 };
-use data::{asset::Asset, model::{ Model, ModelEntity }};
+use data::{ asset::Asset, model::{ Model, ModelEntity } };
 use downloader::Downloader;
 use llm::{
     openai::call_completion,
@@ -326,11 +327,14 @@ async fn validate_assets<R: Runtime>(
     _window: tauri::Window<R>,
     assets: Vec<Asset>
 ) -> Result<Vec<Asset>, String> {
-    let assets = assets.iter().map(|asset| {
-        let mut asset = asset.clone();
-        asset.validate();
-        asset
-    }).collect();
+    let assets = assets
+        .iter()
+        .map(|asset| {
+            let mut asset = asset.clone();
+            asset.validate();
+            asset
+        })
+        .collect();
 
     Ok(assets)
 }
@@ -338,9 +342,12 @@ async fn validate_assets<R: Runtime>(
 #[tauri::command]
 async fn get_file_asset_extensions<R: Runtime>(
     _app: tauri::AppHandle<R>,
-    _window: tauri::Window<R>,
+    _window: tauri::Window<R>
 ) -> Result<Vec<String>, String> {
-    let extensions = Asset::extensions().iter().map(|s| s.to_string()).collect();
+    let extensions = Asset::extensions()
+        .iter()
+        .map(|s| s.to_string())
+        .collect();
     Ok(extensions)
 }
 
@@ -386,12 +393,15 @@ async fn install_model<R: Runtime>(
     let mut store = context.store.lock().await;
     let was_empty = store.models.items.is_empty();
     let model_name = model.name.clone();
+    let file_size = model.get_file_size();
+    let sha = model.get_sha();
     let (mut model_entity, model_id) = store.models.create_model(
         model,
         Some("pending".to_string()),
         Some(path.clone()),
         Some(file_name.clone())
     );
+
     // let model_id = store.models.add_model(model, None, Some(path.clone()), Some(file_name.clone()));
     let res = store.models.create_model_path_filename(path, file_name.clone());
     let model_path = match res {
@@ -411,7 +421,15 @@ async fn install_model<R: Runtime>(
             store.save().map_err(|err| err.to_string())?;
             drop(store);
             let mut downloader = context.downloader.lock().await;
-            downloader.download_file(model_id.clone(), u, model_path, file_name.as_str(), app);
+            downloader.download_file(
+                model_id.clone(),
+                u,
+                model_path,
+                file_name.as_str(),
+                sha,
+                file_size,
+                app
+            );
         }
         None => {
             model_entity.state = Some("ok".to_string());
@@ -899,6 +917,17 @@ fn handle_download_event<EventLoopMessage>(app: &tauri::AppHandle, payload: &str
     });
 }
 
+/* async fn finish_download(handle: &tauri::AppHandle, payload: &str) {
+    println!("finish download {}", payload);
+    let id = match payload.strip_suffix("ok:") {
+        Some(id) => id,
+        None => return,
+    };
+    let context = handle.state::<OplaContext>();
+    let mut downloader = context.downloader.lock().await;
+    downloader.finish_download(id);
+} */
+
 async fn opla_setup(app: &mut App) -> Result<(), String> {
     println!("Opla setup: ");
     let context = app.state::<OplaContext>();
@@ -972,10 +1001,11 @@ async fn opla_setup(app: &mut App) -> Result<(), String> {
 }
 
 fn main() {
+    let downloader = Mutex::new(Downloader::new());
     let context: OplaContext = OplaContext {
         server: Arc::new(Mutex::new(OplaServer::new())),
         store: Mutex::new(Store::new()),
-        downloader: Mutex::new(Downloader::new()),
+        downloader: downloader,
         sys: Mutex::new(Sys::new()),
     };
     tauri::Builder
@@ -1027,7 +1057,13 @@ fn main() {
                             return;
                         }
                     };
+                    // println!("download event {}", payload);
                     handle_download_event::<EventLoopMessage>(&handle, payload);
+                    /* if payload.starts_with("ok:") {
+                        tauri::async_runtime::block_on(async {
+                            finish_download(&handle, payload).await;
+                        });
+                    } */
                 });
             }
 

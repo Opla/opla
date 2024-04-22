@@ -323,6 +323,8 @@ export type Model = BaseNamedRecord & {
   bits?: number;
   size?: number;
   maxRam?: number;
+  sha?: string;
+  fileSize?: number;
 
   repository?: Resource | string;
   download?: Resource | string;

@@ -57,7 +57,7 @@ impl Hasher {
 
     pub fn get_digest(&mut self) -> String {
         if self.signature.is_some() {
-            return format!("{:X}",self.hasher.clone().finalize());
+            return format!("{:X}",self.hasher.clone().finalize()).to_lowercase();
         }
         "".to_string()
     }

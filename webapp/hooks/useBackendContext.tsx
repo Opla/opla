@@ -134,6 +134,12 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     saveStreams(updatedStreams);
   };
 
+  const updateBackendStore = useCallback(async () => {
+    logger.info('updateBackendStore');
+    const store = await getOplaConfig();
+    updateConfig(store);
+  }, []);
+
   const backendListener = useCallback(async (event: any) => {
     logger.info('backend event', event);
     if (event.event === 'opla-server' && serverRef.current) {
@@ -177,30 +183,34 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const downloadListener = useCallback(async (event: any) => {
-    if (event.event === 'opla-downloader') {
-      const [type, download]: [string, Download] = await mapKeys(event.payload, toCamelCase);
+  const downloadListener = useCallback(
+    async (event: any) => {
+      if (event.event === 'opla-downloader') {
+        const [type, download]: [string, Download] = await mapKeys(event.payload, toCamelCase);
 
-      if (type === 'progress') {
-        const currentDownloads = deepCopy(downloadsRef.current || []);
-        const index = currentDownloads.findIndex((d) => d.id === download.id);
-        if (index === -1) {
-          currentDownloads.push(download);
-        } else {
-          currentDownloads[index] = download;
-        }
-        updateDownloads(currentDownloads);
-      } else if (type === 'finished' || type === 'canceled') {
-        const currentDownloads = downloadsRef.current || [];
-        const index = currentDownloads.findIndex((d) => d.id === download.id);
-        logger.info(`download ${type}`, index, download);
-        if (index !== -1) {
-          currentDownloads.splice(index, 1);
+        if (type === 'progress') {
+          const currentDownloads = deepCopy(downloadsRef.current || []);
+          const index = currentDownloads.findIndex((d) => d.id === download.id);
+          if (index === -1) {
+            currentDownloads.push(download);
+          } else {
+            currentDownloads[index] = download;
+          }
           updateDownloads(currentDownloads);
+        } else if (type === 'finished' || type === 'canceled') {
+          const currentDownloads = downloadsRef.current || [];
+          const index = currentDownloads.findIndex((d) => d.id === download.id);
+          logger.info(`download ${type}`, index, download);
+          if (index !== -1) {
+            currentDownloads.splice(index, 1);
+            updateDownloads(currentDownloads);
+          }
+          updateBackendStore();
         }
       }
-    }
-  }, []);
+    },
+    [updateBackendStore],
+  );
 
   const streamListener = useCallback(async (event: any) => {
     const response = (await mapKeys(event.payload, toCamelCase)) as LlmCompletionResponse;
@@ -319,12 +329,6 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
 
   const setSettings = useCallback(async (settings: Settings) => {
     const store = await saveSettings(settings);
-    updateConfig(store);
-  }, []);
-
-  const updateBackendStore = useCallback(async () => {
-    logger.info('updateBackendStore');
-    const store = await getOplaConfig();
     updateConfig(store);
   }, []);
 

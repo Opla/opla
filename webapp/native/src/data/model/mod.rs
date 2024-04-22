@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::fs::create_dir_all;
-use std::path::{Path, PathBuf};
+use std::path::{ Path, PathBuf };
 use chrono::{ DateTime, Utc };
 use serde::{ self, Deserialize, Serialize };
 use serde_with::{ serde_as, OneOrMany, formats::PreferOne };
@@ -21,7 +21,7 @@ use uuid::Uuid;
 use crate::utils::{ get_home_directory, get_data_directory };
 use crate::data::{ option_date_format, option_string_or_struct };
 
-use super::{Entity, Resource};
+use super::{ Entity, Resource };
 
 #[serde_as]
 #[serde_with::skip_serializing_none]
@@ -75,6 +75,8 @@ pub struct Model {
     pub bits: Option<i32>,
     pub size: Option<f32>,
     pub max_ram: Option<f32>,
+    pub sha: Option<String>,
+    pub file_size: Option<u64>,
 
     #[serde(
         skip_serializing_if = "Option::is_none",
@@ -152,6 +154,8 @@ impl Model {
             system: None,
             context_window: None,
             editable: None,
+            sha: None,
+            file_size: None,
         }
     }
 
@@ -176,6 +180,14 @@ impl Model {
             Some(id_or_name) => self.is_same_id_or_name(&id_or_name),
             None => false,
         }
+    }
+
+    pub fn get_file_size(&self) -> u64 {
+        return self.file_size.unwrap_or(0);
+    }
+
+    pub fn get_sha(&self) -> Option<String> {
+        return self.sha.clone();
     }
 }
 
@@ -324,24 +336,23 @@ impl ModelStorage {
         model.base_model = model.id;
         let uuid = Uuid::new_v4().to_string();
         model.id = Some(uuid.clone());
-        
-        (ModelEntity {
-            reference: model,
-            state,
-            path,
-            file_name,
-        }, uuid)
+
+        (
+            ModelEntity {
+                reference: model,
+                state,
+                path,
+                file_name,
+            },
+            uuid,
+        )
     }
 
-    pub fn add_model(
-        &mut self,
-        model: ModelEntity,
-    ) {
-        self.items.push(model);
+    pub fn add_model(&mut self, model: ModelEntity) {
+        self.items.push(model.clone());
     }
 
     pub fn remove_model(&mut self, id: &str, in_use: bool) -> Option<ModelEntity> {
-
         if in_use {
             println!("remove_model: {:?} in_use", id);
             let mut model = match self.get_model_entity(id) {
@@ -376,9 +387,22 @@ impl ModelStorage {
     }
 
     pub fn update_model_entity(&mut self, model_entity: &ModelEntity) {
-        if let Some(index) = self.items.iter().position(|m| m.reference.is_same_model(&model_entity.reference)) {
+        if
+            let Some(index) = self.items
+                .iter()
+                .position(|m| m.reference.is_same_model(&model_entity.reference))
+        {
             self.items.remove(index);
             self.items.insert(index, model_entity.clone());
         }
+    }
+
+    pub fn set_model_state(&mut self, model_id: &str, state: &str) {
+        let mut model_entity = match self.get_model_entity(model_id) {
+            Some(model_entity) => model_entity,
+            None => return,
+        };
+        model_entity.state = Some(state.to_string());
+        self.update_model_entity(&model_entity);
     }
 }
