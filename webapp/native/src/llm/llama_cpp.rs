@@ -234,7 +234,7 @@ impl LLamaCppServer {
 
         let client = reqwest::Client::new();
         let result = client
-            .post(api_url) // TODO remove hardcoding
+            .post(api_url) 
             .json(&parameters)
             .send().await;
         let response = match result {
