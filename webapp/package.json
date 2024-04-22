@@ -31,7 +31,7 @@
     "@radix-ui/react-toggle": "^1.0.3",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@sentry/nextjs": "^7.109.0",
-    "@tauri-apps/api": "^1.5.3",
+    "@tauri-apps/api": "^1.5.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cmdk": "^1.0.0",
