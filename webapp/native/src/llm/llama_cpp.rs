@@ -12,13 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{ llm::{ LlmQueryCompletion, LlmResponseError }, store::ServerParameters };
+use crate::{
+    llm::{ LlmQueryCompletion, LlmResponseError },
+    store::ServerParameters,
+    utils::http_client::{ self, HttpError, HttpResponse },
+};
 
 use tauri::Runtime;
 use eventsource_stream::Eventsource;
 use futures_util::stream::StreamExt;
 
 use serde::{ Deserialize, Serialize };
+use tokio::{spawn, sync::mpsc::Sender, task::JoinHandle};
 use crate::llm::{ LlmQuery, LlmCompletionResponse, LlmUsage };
 
 use super::{ LlmCompletionOptions, LlmError, LlmTokenizeResponse };
@@ -159,6 +164,47 @@ impl LlamaCppChatCompletion {
     }
 }
 
+impl HttpError for LlamaCppChatCompletion {
+    fn to_error(&self, status: String) -> Box<dyn std::error::Error> {
+        let error = LlmError {
+            message: format!("HTTP error {} : {}", status, self.content.to_string()),
+            r#type: "http_error".to_string(),
+        };
+        Box::new(error)
+    }
+    fn to_error_string(&self, status: String) -> String {
+        format!("HTTP error {} : {}", status, self.content.to_string())
+    }
+}
+
+impl HttpResponse<LlmCompletionResponse> for LlamaCppChatCompletion {
+    fn convert_into(&self) -> LlmCompletionResponse {
+        LlmCompletionResponse {
+            created: None,
+            status: Some("success".to_owned()),
+            content: self.content.clone(),
+            conversation_id: None,
+            usage: Some(self.timings.to_llm_usage()),
+            message: None,
+        }
+    }
+
+    fn new(content: String, end_time: u64) -> Self {
+        LlamaCppChatCompletion {
+            content,
+            timings: LlamaCppChatTimings {
+                predicted_ms: 0.0,
+                predicted_n: 0,
+                predicted_per_second: 0.0,
+                predicted_per_token_ms: 0.0,
+                prompt_ms: 0.0,
+                prompt_n: 0,
+                prompt_per_second: 0.0,
+                prompt_per_token_ms: 0.0,
+            },
+        }
+    }
+}
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlamaCppChatCompletionChunk {
     pub content: String,
@@ -212,7 +258,7 @@ impl LLamaCppServer {
             }
         };
         let status = response.status();
-        
+
         let response = match response.json::<LlamaCppChatCompletion>().await {
             Ok(r) => r,
             Err(error) => {
@@ -222,6 +268,8 @@ impl LLamaCppServer {
         };
         println!("Response Status: {} {:?}", status, response);
         Ok(response.to_llm_response())
+        // let response = http_client::HttpClient::post_request::<LlamaCppQueryCompletion, LlamaCppChatCompletion, LlmCompletionResponse, LlamaCppChatCompletion >(api_url, parameters, None).await;
+        // response
     }
 
     async fn post_stream_request<R: Runtime>(
@@ -233,10 +281,7 @@ impl LLamaCppServer {
         let start_time = chrono::Utc::now().timestamp_millis();
 
         let client = reqwest::Client::new();
-        let result = client
-            .post(api_url) 
-            .json(&parameters)
-            .send().await;
+        let result = client.post(api_url).json(&parameters).send().await;
         let response = match result {
             Ok(res) => res,
             Err(error) => {
@@ -365,26 +410,85 @@ impl LLamaCppServer {
         })
     }
 
+    fn handle_stream_chunk(
+        data: String,
+        created: i64,
+        /* callback: Option<impl FnMut(Result<LlmCompletionResponse, LlmError>) +
+                Copy> */
+        /* sender: Sender<Result<LlmCompletionResponse, LlmError>>, */
+    ) -> Result<Option<String>, LlmError> {
+        /* let mut callback = match callback {
+            Some(cb) => cb,
+            None => return Err("Not implemented".to_string()),
+        }; */
+        let chunk = match serde_json::from_str::<LlamaCppChatCompletionChunk>(&data) {
+            Ok(r) => r,
+            Err(error) => {
+                let message = format!("Failed to parse response: {}", error);
+                println!("{}", message);
+                // sender.send(Err(LlmError::new(&message, "FailedParsingResponse")));
+                return Err(LlmError::new(&message, "FailedParsingResponse")); // Err(Box::new(error));
+            }
+        };
+        println!("chunk: {:?}", chunk);
+        if chunk.stop.unwrap_or(false) {
+            println!("chunk: stop");
+            /* sender.send(
+                        Ok(
+                            LlmCompletionResponse::new(
+                                chrono::Utc::now().timestamp_millis(),
+                                "finished",
+                                "done"
+                            )
+                        )
+                    ); */
+            // break;
+            return Ok(None);
+        } else {
+            // content.push_str(chunk.content.as_str());
+            // sender.send(Ok(LlmCompletionResponse::new(created, "success", chunk.content.as_str())));
+            // return Ok(Some(chunk.content));
+            return Ok(Some(chunk.content.to_string()));
+        }
+    }
     pub async fn call_completion<R: Runtime>(
         &mut self,
         query: LlmQuery<LlmQueryCompletion>,
         server_parameters: &ServerParameters,
         completion_options: Option<LlmCompletionOptions>,
-        callback: Option<impl FnMut(Result<LlmCompletionResponse, LlmError>) + Copy>
-    ) -> Result<LlmCompletionResponse, Box<dyn std::error::Error>> {
+        /* callback: Option<
+            impl FnMut(Result<LlmCompletionResponse, LlmError>) +
+                Copy 
+        > */
+        sender: Sender<Result<LlmCompletionResponse, LlmError>>,
+    ) -> JoinHandle<Result<LlmCompletionResponse, String>> {
         let parameters = query.options.to_llama_cpp_parameters(completion_options);
 
-        let stream = parameters.stream.unwrap_or(false);
+        let is_stream = parameters.stream.unwrap_or(false);
 
         let api_url = self.get_api(server_parameters, query.command);
 
-        let result;
-        if stream {
+        spawn(async move {
+        let result = http_client::HttpClient::post_request::<
+            LlamaCppQueryCompletion,
+            LlamaCppChatCompletion,
+            LlmCompletionResponse,
+            LlmError,
+        >(
+            api_url,
+            parameters,
+            None,
+            is_stream,
+            &mut LLamaCppServer::handle_stream_chunk,
+            sender,
+        ).await.map_err(|err| err.to_string())?;
+        /* if stream {
             result = self.post_stream_request::<R>(api_url, parameters, callback).await?;
         } else {
             result = self.post_request::<R>(api_url, parameters).await?;
-        }
+        } */
         Ok(result)
+        })
     }
 
     pub async fn call_tokenize<R: Runtime>(
@@ -397,10 +501,7 @@ impl LLamaCppServer {
         };
         let api_url = self.get_api(server_parameters, "tokenize".to_owned());
         let client = reqwest::Client::new();
-        let res = client
-            .post(api_url)
-            .json(&parameters)
-            .send().await;
+        let res = client.post(api_url).json(&parameters).send().await;
         let response = match res {
             Ok(res) => res,
             Err(error) => {

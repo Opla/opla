@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use tokio::sync::Mutex;
+use tokio::sync::{ mpsc::channel, Mutex };
+use tokio::spawn;
 use std::sync::Arc;
 use crate::{
     error::Error,
@@ -32,7 +33,7 @@ use crate::llm::{ LlmQuery, LlmCompletionResponse };
 use std::time::Duration;
 use std::thread;
 
-pub struct OplaServer {
+pub struct LocalServer {
     pub pid: Arc<Mutex<usize>>,
     pub name: String,
     pub status: Arc<Mutex<ServerStatus>>,
@@ -77,9 +78,9 @@ pub struct Payload {
     pub status: String,
 }
 
-impl OplaServer {
+impl LocalServer {
     pub fn new() -> Self {
-        OplaServer {
+        LocalServer {
             pid: Arc::new(Mutex::new(0)),
             name: "llama.cpp.server".to_string(),
             status: Arc::new(Mutex::new(ServerStatus::Init)),
@@ -315,10 +316,7 @@ impl OplaServer {
         })
     }
 
-    pub fn set_parameters(
-        &mut self,
-        parameters: Option<ServerParameters>
-    ) {
+    pub fn set_parameters(&mut self, parameters: Option<ServerParameters>) {
         self.parameters = parameters;
     }
 
@@ -559,27 +557,56 @@ impl OplaServer {
 
     pub async fn call_completion<R: Runtime>(
         &mut self,
-        model: &str,
+        app: tauri::AppHandle<R>,
+        model: String,
+        model_path: String,
         query: LlmQuery<LlmQueryCompletion>,
-        completion_options: Option<LlmCompletionOptions>,
-        callback: Option<impl FnMut(Result<LlmCompletionResponse, LlmError>) + Copy>
-    ) -> Result<LlmCompletionResponse, Box<dyn std::error::Error>> {
+        completion_options: Option<LlmCompletionOptions>
+        /* callback: Option<impl FnMut(Result<LlmCompletionResponse, LlmError>) + Copy> */
+    ) -> Result<LlmCompletionResponse, String> {
         println!("{}", format!("Opla llm call: {:?} / {:?}", query.command, &model));
+        let query = query.clone();
+        let conversation_id = query.options.conversation_id.clone();
+        let parameters = match self.parameters.clone() {
+            Some(mut p) => {
+                p.model_id = Some(model.clone());
+                p.model_path = Some(model_path);
+                p
+            }
+            None => {
+                return Err(
+                    LlmError::new("Opla server not started no parameters found", "server_error").to_string()
+                );
+            }
+        };
+        self.bind::<R>(app.app_handle(), &parameters).await.map_err(|err| err.to_string())?;
 
         let server_parameters = match &self.parameters {
             Some(p) => p,
             None => {
                 println!("Opla server error try to read parameters");
-                return Err(Box::new(Error::BadParameters));
+                return Err(Error::BadParameters.to_string());
             }
         };
 
-        self.server.call_completion::<R>(
-            query,
-            server_parameters,
-            completion_options,
-            callback
-        ).await
+        // self.parameters = Some(server_parameters.clone());
+
+        let (sender, mut receiver) = channel::<Result<LlmCompletionResponse, LlmError>>(1);
+
+        let handle = 
+            self.server.call_completion::<R>(
+                query,
+                server_parameters,
+                completion_options,
+                sender
+            ).await;
+
+        // TODO handle receiver
+        while let Some(message) = receiver.recv().await {
+            // println!("GOT = {}", message);
+        }
+        let result = handle.await.map_err(|err| err.to_string())?;
+        result
     }
 
     pub async fn call_tokenize<R: Runtime>(

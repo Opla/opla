@@ -14,7 +14,7 @@
 
 #![cfg_attr(all(not(debug_assertions), target_os = "windows"), windows_subsystem = "windows")]
 
-mod server;
+mod local_server;
 mod store;
 mod downloader;
 mod sys;
@@ -48,13 +48,13 @@ use llm::{
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
 use store::{ Store, Provider, ProviderType, ProviderMetadata, Settings, ServerConfiguration };
-use server::*;
+use local_server::*;
 use sys::{ Sys, SysInfos };
 use tauri::{ Runtime, State, Manager, App, EventLoopMessage };
 use utils::{ get_config_directory, get_data_directory };
 
 pub struct OplaContext {
-    pub server: Arc<Mutex<OplaServer>>,
+    pub server: Arc<Mutex<LocalServer>>,
     pub store: Mutex<Store>,
     pub downloader: Mutex<Downloader>,
     pub sys: Mutex<Sys>,
@@ -620,7 +620,7 @@ async fn llm_call_completion<R: Runtime>(
             (model.name, model_path)
         };
         let mut server = context_server.lock().await;
-        let query = query.clone();
+        /* let query = query.clone();
         let conversation_id = query.options.conversation_id.clone();
         let parameters = match server.parameters.clone() {
             Some(mut p) => {
@@ -631,16 +631,18 @@ async fn llm_call_completion<R: Runtime>(
             None => {
                 return Err(format!("Opla server not started no parameters found"));
             }
-        };
-        server.bind::<R>(app.app_handle(), &parameters).await.map_err(|err| err.to_string())?;
+        }; */
+        // server.bind::<R>(app.app_handle(), &parameters).await.map_err(|err| err.to_string())?;
         let handle = app.app_handle();
-        let response = {
+        let response =
             server
                 .call_completion::<R>(
-                    &model_name.clone(),
+                    handle,
+                    model_name.clone(),
+                    model_path,
                     query,
                     completion_options,
-                    Some(|result: Result<LlmCompletionResponse, LlmError>| {
+                    /* Some(|result: Result<LlmCompletionResponse, LlmError>| {
                         match result {
                             Ok(response) => {
                                 let mut response = response.clone();
@@ -658,18 +660,16 @@ async fn llm_call_completion<R: Runtime>(
                                     .map_err(|err| err.to_string());
                             }
                         }
-                    })
-                ).await
-                .map_err(|err| err.to_string())?
-        };
+                    }) */
+                ).await;
 
-        server.set_parameters(Some(parameters));
+        // server.set_parameters(Some(parameters));
 
         let mut store = context.store.lock().await;
         store.set_local_active_model_id(&model);
         store.save().map_err(|err| err.to_string())?;
         // println!("Opla call completion: {:?}", response);
-        return Ok(response);
+        return Ok(response?);
     }
     if llm_provider_type == "openai" || llm_provider_type == "server" {
         let response = {
@@ -754,6 +754,7 @@ async fn llm_call_tokenize<R: Runtime>(
     }
     return Err(format!("LLM provider not found: {:?}", llm_provider_type));
 }
+
 async fn start_server<R: Runtime>(
     app: tauri::AppHandle<R>,
     context: State<'_, OplaContext>
@@ -981,7 +982,7 @@ async fn opla_setup(app: &mut App) -> Result<(), String> {
 fn main() {
     let downloader = Mutex::new(Downloader::new());
     let context: OplaContext = OplaContext {
-        server: Arc::new(Mutex::new(OplaServer::new())),
+        server: Arc::new(Mutex::new(LocalServer::new())),
         store: Mutex::new(Store::new()),
         downloader: downloader,
         sys: Mutex::new(Sys::new()),

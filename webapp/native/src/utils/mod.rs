@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub mod http_client;
+
 use std::{ path::{ Path, PathBuf }, fs };
 
 pub fn get_home_directory() -> Result<PathBuf, String> {
