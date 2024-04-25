@@ -26,7 +26,6 @@ use crate::{
             LlmQueryCompletion,
             LlmTokenizeResponse,
         },
-        ProvidersManager,
     },
     store::{ ServerConfiguration, ServerParameters },
 };
@@ -44,7 +43,7 @@ pub struct LocalServer {
     inference_client: LLamaCppInferenceClient,
     handle: Option<JoinHandle<()>>,
     command_child: Arc<Mutex<Option<CommandChild>>>,
-    completion_handles: Arc<Mutex<HashMap<String, Arc<tokio::task::JoinHandle<()>>>>>,
+    completion_handles: HashMap<String, Arc<tokio::task::AbortHandle>>,
 }
 
 #[derive(Clone, serde::Serialize, Copy, PartialEq, Debug)]
@@ -92,7 +91,7 @@ impl LocalServer {
             inference_client: LLamaCppInferenceClient::new(None),
             handle: None,
             command_child: Arc::new(Mutex::new(None)),
-            completion_handles: Arc::new(Mutex::new(HashMap::new())),
+            completion_handles: HashMap::new(),
         }
     }
 
@@ -561,20 +560,20 @@ impl LocalServer {
     }
 
     pub async fn cancel_completion(&mut self, conversation_id: &str) -> Result<(), String> {
-            let mut handles = self.completion_handles.lock().await;
-            let handle = handles.remove(conversation_id);
-            match handle {
-                Some(h) => {
-                    h.abort();
-                },
-                None => {
-                    let err = format!("cancel_completion Handle not found {}", conversation_id);
-                    println!("{}",err);
-                    return Err(err);
-                }
+        let handle = self.completion_handles.remove(conversation_id);
+        println!("Cancel completion {}", conversation_id);
+        match handle {
+            Some(h) => {
+                h.abort();
             }
-            drop(handles);
-            Ok(())
+            None => {
+                let err = format!("cancel_completion Handle not found {}", conversation_id);
+                println!("{}", err);
+                return Err(err);
+            }
+        }
+
+        Ok(())
     }
 
     pub async fn call_completion<R: Runtime>(
@@ -583,7 +582,7 @@ impl LocalServer {
         model: String,
         model_path: String,
         query: LlmQuery<LlmQueryCompletion>,
-        completion_options: Option<LlmCompletionOptions>,
+        completion_options: Option<LlmCompletionOptions>
     ) -> Result<LlmCompletionResponse, String> {
         println!("{}", format!("Opla llm call: {:?} / {:?}", query.command, &model));
         let query = query.clone();
@@ -615,26 +614,27 @@ impl LocalServer {
             client_instance.call_completion(&query, completion_options.clone(), sender).await
         });
 
-        {
-            let mut handles = self.completion_handles.lock().await;
-            handles.insert(
-                conversation_id.clone().unwrap_or(String::from("default")),
-                Arc::new(handle)
-            );
-            drop(handles);
-        }
+        self.completion_handles.insert(
+            conversation_id.clone().unwrap_or(String::from("default")),
+            Arc::new(handle.abort_handle())
+        );
+
         let mut result: Result<LlmCompletionResponse, String> = Err(
             String::from("Not initialized")
         );
+        let mut finished = false;
         while let Some(response) = receiver.recv().await {
             result = match response {
                 Ok(response) => {
                     let mut response = response.clone();
                     response.conversation_id = conversation_id.clone();
-                    if is_stream {
+                    if is_stream && !finished {
                         let _ = app
                             .emit_all("opla-sse", response.clone())
                             .map_err(|err| err.to_string());
+                    }
+                    if response.status == Some(String::from("finished")) {
+                        finished = true;
                     }
                     Ok(response.clone())
                 }
@@ -651,11 +651,8 @@ impl LocalServer {
                 }
             };
         }
-        {
-            let mut handles = self.completion_handles.lock().await;
-            handles.remove(&conversation_id.clone().unwrap_or(String::from("default")));
-            drop(handles);
-        }
+        self.completion_handles.remove(&conversation_id.clone().unwrap_or(String::from("default")));
+        println!("call completion result {:?}", result);
         result
     }
 
@@ -665,6 +662,7 @@ impl LocalServer {
         text: String
     ) -> Result<LlmTokenizeResponse, Box<dyn std::error::Error>> {
         println!("{}", format!("Opla llm call tokenize: {:?}", &model));
-        self.inference_client.call_tokenize::<R>(text).await
+        let mut client_instance = self.inference_client.create(&self.parameters);
+        client_instance.call_tokenize::<R>(text).await
     }
 }

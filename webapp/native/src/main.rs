@@ -25,7 +25,7 @@ pub mod providers;
 pub mod error;
 pub mod hash;
 
-use tokio::sync::Mutex;
+use tokio::{ spawn, sync::Mutex };
 use std::{ path::{ Path, PathBuf }, sync::Arc };
 
 use api::{
@@ -50,7 +50,14 @@ use serde::Serialize;
 use store::{ Store, Provider, Settings };
 use local_server::*;
 use sys::{ Sys, SysInfos };
-use tauri::{ Runtime, State, Manager, App, EventLoopMessage };
+use tauri::{
+    async_runtime::{ block_on, spawn_blocking },
+    App,
+    EventLoopMessage,
+    Manager,
+    Runtime,
+    State,
+};
 use utils::{ get_config_directory, get_data_directory };
 
 pub struct OplaContext {
@@ -584,7 +591,7 @@ async fn llm_cancel_completion<R: Runtime>(
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
     llm_provider: Option<Provider>,
-    conversation_id: String,
+    conversation_id: String
 ) -> Result<(), String> {
     let mut manager = context.providers_manager.lock().await;
     manager.llm_cancel_completion::<R>(app, llm_provider, &conversation_id).await
@@ -684,7 +691,7 @@ async fn model_download_event<R: Runtime>(
     Ok(())
 }
 
-async fn window_setup<EventLoopMessage>(app: &mut App) -> Result<(), String> {
+async fn window_setup<EventLoopMessage>(app: &mut tauri::AppHandle) -> Result<(), String> {
     let context = app.state::<OplaContext>();
     let window = app.get_window("main").ok_or("Opla failed to get window")?;
     let store = context.store.lock().await;
@@ -745,7 +752,7 @@ fn handle_download_event<EventLoopMessage>(app: &tauri::AppHandle, payload: &str
     let (state, id) = (vec[0].to_string(), vec[1].to_string());
 
     let handler = app.app_handle();
-    tauri::async_runtime::spawn(async move {
+    spawn(async move {
         let handler = handler.app_handle();
         match model_download_event(handler, id.to_string(), state.to_string()).await {
             Ok(_) => {}
@@ -756,7 +763,7 @@ fn handle_download_event<EventLoopMessage>(app: &tauri::AppHandle, payload: &str
     });
 }
 
-async fn opla_setup(app: &mut App) -> Result<(), String> {
+async fn opla_setup(app: &mut tauri::AppHandle) -> Result<(), String> {
     println!("Opla setup: ");
     let context = app.state::<OplaContext>();
     let mut store = context.store.lock().await;
@@ -827,7 +834,44 @@ async fn opla_setup(app: &mut App) -> Result<(), String> {
     Ok(())
 }
 
-fn main() {
+async fn core(app: &mut tauri::AppHandle) {
+    let mut error = None;
+    match opla_setup(app).await {
+        Ok(_) => {}
+        Err(err) => {
+            println!("Opla setup error: {:?}", err);
+            error = Some(err);
+        }
+    }
+
+    if error.is_none() {
+        match window_setup::<EventLoopMessage>(app).await {
+            Ok(_) => {}
+            Err(err) => {
+                println!("Window setup error: {:?}", err);
+                error = Some(err);
+            }
+        }
+    }
+    if !error.is_some() {
+                println!("Opla setup done");
+                let handle = app.app_handle();
+                let _id = app.listen_global("opla-downloader", move |event| {
+                    let payload = match event.payload() {
+                        Some(p) => { p }
+                        None => {
+                            return;
+                        }
+                    };
+                    // println!("download event {}", payload);
+                    handle_download_event::<EventLoopMessage>(&handle, payload);
+                });
+            }
+
+}
+#[tokio::main]
+async fn main() {
+    tauri::async_runtime::set(tokio::runtime::Handle::current());
     let downloader = Mutex::new(Downloader::new());
     let context: OplaContext = OplaContext {
         server: Arc::new(Mutex::new(LocalServer::new())),
@@ -854,46 +898,13 @@ fn main() {
                 }
             }
 
-            let mut error: Option<String> = None;
-            tauri::async_runtime::block_on(async {
-                match opla_setup(app).await {
-                    Ok(_) => {}
-                    Err(err) => {
-                        println!("Opla setup error: {:?}", err);
-                        error = Some(err);
-                    }
-                }
-
-                if error.is_none() {
-                    match window_setup::<EventLoopMessage>(app).await {
-                        Ok(_) => {}
-                        Err(err) => {
-                            println!("Window setup error: {:?}", err);
-                            error = Some(err);
-                        }
-                    }
-                }
+            let mut handle = app.handle();
+            spawn(async move {
+                core(&mut handle).await;
             });
 
-            if !error.is_some() {
-                println!("Opla setup done");
-                let handle = app.handle();
-                let _id = app.listen_global("opla-downloader", move |event| {
-                    let payload = match event.payload() {
-                        Some(p) => { p }
-                        None => {
-                            return;
-                        }
-                    };
-                    // println!("download event {}", payload);
-                    handle_download_event::<EventLoopMessage>(&handle, payload);
-                });
-            }
-
-            match error {
-                Some(err) => { Err(err.into()) }
-                None => { Ok(()) }
-            }
+            
+            Ok(())
         })
         .invoke_handler(
             tauri::generate_handler![

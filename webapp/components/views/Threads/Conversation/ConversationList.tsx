@@ -36,6 +36,7 @@ type ConversationListProps = {
   onChangeMessageContent: (m: Message, newContent: string, submit: boolean) => void;
   onStartMessageEdit: (messageId: string, index: number) => void;
   onCopyMessage: (messageId: string, state: boolean) => void;
+  onCancelSending: (messageId: string) => void;
 };
 
 function ConversationList({
@@ -52,6 +53,7 @@ function ConversationList({
   onChangeMessageContent,
   onStartMessageEdit,
   onCopyMessage,
+  onCancelSending,
 }: ConversationListProps) {
   const [edit, setEdit] = useState<boolean>(false);
 
@@ -98,6 +100,9 @@ function ConversationList({
                 onChangeMessageContent(m, newContent, submit);
               }}
               onCopyMessage={onCopyMessage}
+              onCancelSending={() => {
+                onCancelSending(m.id);
+              }}
             />
           ))}
         </div>

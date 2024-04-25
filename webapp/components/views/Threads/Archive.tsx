@@ -99,6 +99,7 @@ function Archive({
           onChangeMessageContent={() => {}}
           onStartMessageEdit={() => {}}
           onCopyMessage={() => {}}
+          onCancelSending={() => {}}
         />
       )}
     </ContentView>

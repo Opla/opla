@@ -39,7 +39,7 @@ import {
 import { preProcessingCommands } from '@/utils/commands';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import { CommandManager } from '@/utils/commands/types';
-import { sendMessage, updateMessageContent } from '@/utils/messages';
+import { cancelSending, sendMessage, updateMessageContent } from '@/utils/messages';
 import { PromptContext } from '../Prompt/PromptContext';
 
 type Context = {
@@ -57,6 +57,7 @@ type Context = {
     submit: boolean,
   ) => Promise<void>;
   handleStartMessageEdit: (messageId: string, index: number) => void;
+  handleCancelSending: (messageId: string) => void;
 };
 
 type ConversationProviderProps = {
@@ -356,6 +357,22 @@ function ConversationProvider({
     ],
   );
 
+  const handleCancelSending = useCallback(
+    async (messageId: string) => {
+      if (selectedConversation && selectedModelId) {
+        await cancelSending(
+          messageId,
+          selectedConversation,
+          selectedModelId,
+          assistant,
+          context,
+          config,
+        );
+      }
+    },
+    [assistant, config, context, selectedConversation, selectedModelId],
+  );
+
   const handleChangeMessageContent = useCallback(
     async (message: Message, newContent: string, submit: boolean) => {
       if (conversationId === undefined || !parseAndValidatePrompt) {
@@ -418,6 +435,7 @@ function ConversationProvider({
       handleResendMessage,
       handleChangeMessageContent,
       handleStartMessageEdit,
+      handleCancelSending,
     }),
     [
       selectedMessageId,
@@ -426,6 +444,7 @@ function ConversationProvider({
       handleResendMessage,
       handleSendMessage,
       handleStartMessageEdit,
+      handleCancelSending,
       isProcessing,
     ],
   );
@@ -444,6 +463,7 @@ const useConversationContext = (): Context => {
       handleResendMessage: async () => {},
       handleChangeMessageContent: async () => {},
       handleStartMessageEdit: () => {},
+      handleCancelSending: () => {},
     };
   }
   return context;

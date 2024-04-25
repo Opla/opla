@@ -9,7 +9,6 @@ import {
   LlmParameters,
   LlmCompletionResponse,
   Message,
-  Model,
   Preset,
   Provider,
   ProviderType,
@@ -186,10 +185,15 @@ export const completion = async (
   throw new Error(`${implProvider.name} completion error ${response}`);
 };
 
-export const models = async (provider: Provider): Promise<Model[]> => {
-  if (provider.type === ProviderType.openai) {
-    // TODO: implement
-    return [];
+export const cancelCompletion = async (
+  activeService: AIImplService,
+  conversationId: string,
+): Promise<void> => {
+  const { provider } = activeService;
+  if (provider) {
+    await invokeTauri<LlmTokenizeResponse>('llm_cancel_completion', {
+      provider: mapKeys(provider, toSnakeCase),
+      conversationId,
+    });
   }
-  return [];
 };

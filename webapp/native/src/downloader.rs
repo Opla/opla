@@ -18,7 +18,8 @@ use std::{ cmp::min, collections::HashMap, error::Error, fmt, fs::File, io::Writ
 
 use reqwest::Response;
 use serde::{ Serialize, Deserialize };
-use tauri::{ async_runtime::JoinHandle, AppHandle, Manager, Runtime };
+use tauri::{ AppHandle, Manager, Runtime };
+use tokio::{spawn, task::JoinHandle};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Download {
@@ -139,7 +140,7 @@ impl Downloader {
         };
         self.downloads.push(download.clone());
         let nid = id.clone();
-        let join_handle = tauri::async_runtime::spawn(async move {
+        let join_handle = spawn(async move {
             let start_time = Instant::now();
             let mut file = match File::create(path.clone()) {
                 Ok(file) => file,

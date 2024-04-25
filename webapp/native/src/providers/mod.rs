@@ -74,12 +74,13 @@ impl ProvidersManager {
                 (ProvidersManager::get_opla_provider(server), "opla".to_string())
             }
         };
+        println!("llm_cancel_completion {} {}", llm_provider_type, conversation_id);
         if llm_provider_type == "opla" {
             let context_server = Arc::clone(&context.server);
             let mut server = context_server.lock().await;
             server.cancel_completion(conversation_id).await
         } else {
-            println!("TODO");
+            
             return Err(String::from("Not implemented"));
         }
     }

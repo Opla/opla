@@ -241,6 +241,7 @@ impl LLamaCppInferenceClient {
         instance.server_parameters = server_parameters.clone();
         instance
     }
+    
     fn get_api(&self, endpoint: String) -> Result<String, String> {
         // TODO https support
         let (host, port) = match &self.server_parameters {
