@@ -235,10 +235,6 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
           content,
           prevContent: response.content,
         } as LlmStreamResponse;
-        /* setBackendContext({
-            ...context,
-            streams,
-          } as OplaContext); */
         updateStreams(currentStreams);
       }
       return;

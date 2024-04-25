@@ -14,19 +14,18 @@
 
 #![cfg_attr(all(not(debug_assertions), target_os = "windows"), windows_subsystem = "windows")]
 
-mod server;
+mod local_server;
 mod store;
 mod downloader;
 mod sys;
 pub mod utils;
 pub mod api;
 pub mod data;
-pub mod llm;
+pub mod providers;
 pub mod error;
 pub mod hash;
 
-use tokenizer::encode;
-use tokio::sync::Mutex;
+use tokio::{ spawn, sync::Mutex };
 use std::{ path::{ Path, PathBuf }, sync::Arc };
 
 use api::{
@@ -36,43 +35,37 @@ use api::{
 };
 use data::{ asset::Asset, model::{ Model, ModelEntity } };
 use downloader::Downloader;
-use llm::{
-    openai::call_completion,
-    LlmCompletionOptions,
-    LlmCompletionResponse,
-    LlmError,
-    LlmQuery,
-    LlmQueryCompletion,
-    LlmTokenizeResponse,
+use providers::{
+    llm::{
+        LlmCompletionOptions,
+        LlmCompletionResponse,
+        LlmQuery,
+        LlmQueryCompletion,
+        LlmTokenizeResponse,
+    },
+    ProvidersManager,
 };
 use models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
-use store::{ Store, Provider, ProviderType, ProviderMetadata, Settings, ServerConfiguration };
-use server::*;
+use store::{ Store, Provider, Settings };
+use local_server::*;
 use sys::{ Sys, SysInfos };
-use tauri::{ Runtime, State, Manager, App, EventLoopMessage };
+use tauri::{
+    async_runtime::{ block_on, spawn_blocking },
+    App,
+    EventLoopMessage,
+    Manager,
+    Runtime,
+    State,
+};
 use utils::{ get_config_directory, get_data_directory };
 
 pub struct OplaContext {
-    pub server: Arc<Mutex<OplaServer>>,
+    pub server: Arc<Mutex<LocalServer>>,
+    pub providers_manager: Arc<Mutex<ProvidersManager>>,
     pub store: Mutex<Store>,
     pub downloader: Mutex<Downloader>,
     pub sys: Mutex<Sys>,
-}
-
-pub fn get_opla_provider(server: ServerConfiguration) -> Provider {
-    Provider {
-        name: "Opla".to_string(),
-        r#type: ProviderType::Opla.to_string(),
-        description: Some("Opla is a free and open source AI assistant.".to_string()),
-        url: format!("{:}:{:}", server.parameters.host.clone(), server.parameters.port.clone()),
-        disabled: Some(false),
-        key: None,
-        doc_url: Some("https://opla.ai/docs".to_string()),
-        metadata: Option::Some(ProviderMetadata {
-            server: Some(server.clone()),
-        }),
-    }
 }
 
 #[tauri::command]
@@ -187,7 +180,7 @@ async fn get_provider_template<R: Runtime>(
 ) -> Result<Provider, String> {
     let store = context.store.lock().await;
     let server = store.server.clone();
-    let template = get_opla_provider(server);
+    let template = ProvidersManager::get_opla_provider(server);
     Ok(template.clone())
 }
 
@@ -588,172 +581,35 @@ async fn llm_call_completion<R: Runtime>(
     query: LlmQuery<LlmQueryCompletion>,
     completion_options: Option<LlmCompletionOptions>
 ) -> Result<LlmCompletionResponse, String> {
-    let (llm_provider, llm_provider_type) = match llm_provider {
-        Some(p) => { (p.clone(), p.r#type) }
-        None => {
-            let store = context.store.lock().await;
-            let server = store.server.clone();
-            (get_opla_provider(server), "opla".to_string())
-        }
-    };
-    if llm_provider_type == "opla" {
-        let context_server = Arc::clone(&context.server);
+    let mut manager = context.providers_manager.lock().await;
+    manager.llm_call_completion::<R>(app, model, llm_provider, query, completion_options).await
+}
 
-        let (model_name, model_path) = {
-            let store = context.store.lock().await;
-            let result = store.models.get_model(model.as_str());
-            let model = match result {
-                Some(model) => model.clone(),
-                None => {
-                    return Err(format!("Model not found: {:?}", model));
-                }
-            };
-            let res = store.models.get_model_path(model.name.clone());
-            let model_path = match res {
-                Ok(m) => { m }
-                Err(err) => {
-                    return Err(format!("Opla server not started model not found: {:?}", err));
-                }
-            };
-            drop(store);
-
-            (model.name, model_path)
-        };
-        let mut server = context_server.lock().await;
-        let query = query.clone();
-        let conversation_id = query.options.conversation_id.clone();
-        let parameters = match server.parameters.clone() {
-            Some(mut p) => {
-                p.model_id = Some(model_name.clone());
-                p.model_path = Some(model_path);
-                p
-            }
-            None => {
-                return Err(format!("Opla server not started no parameters found"));
-            }
-        };
-        server.bind::<R>(app.app_handle(), &parameters).await.map_err(|err| err.to_string())?;
-        let handle = app.app_handle();
-        let response = {
-            server
-                .call_completion::<R>(
-                    &model_name.clone(),
-                    query,
-                    completion_options,
-                    Some(|result: Result<LlmCompletionResponse, LlmError>| {
-                        match result {
-                            Ok(response) => {
-                                let mut response = response.clone();
-                                response.conversation_id = conversation_id.clone();
-                                let _ = handle
-                                    .emit_all("opla-sse", response)
-                                    .map_err(|err| err.to_string());
-                            }
-                            Err(err) => {
-                                let _ = handle
-                                    .emit_all("opla-sse", Payload {
-                                        message: err.to_string(),
-                                        status: ServerStatus::Error.as_str().to_string(),
-                                    })
-                                    .map_err(|err| err.to_string());
-                            }
-                        }
-                    })
-                ).await
-                .map_err(|err| err.to_string())?
-        };
-
-        server.set_parameters(Some(parameters));
-
-        let mut store = context.store.lock().await;
-        store.set_local_active_model_id(&model);
-        store.save().map_err(|err| err.to_string())?;
-        // println!("Opla call completion: {:?}", response);
-        return Ok(response);
-    }
-    if llm_provider_type == "openai" || llm_provider_type == "server" {
-        let response = {
-            let api = format!("{:}", llm_provider.url);
-            let secret_key = match llm_provider.key {
-                Some(k) => { k }
-                None => {
-                    if llm_provider_type == "openai" {
-                        return Err(format!("OpenAI provider key not set: {:?}", llm_provider_type));
-                    }
-                    ' '.to_string()
-                }
-            };
-            let model = model.clone();
-            let query = query.clone();
-            let conversation_id = query.options.conversation_id.clone();
-            call_completion::<R>(
-                &api,
-                &secret_key,
-                &model,
-                query,
-                completion_options,
-                Some(|result: Result<LlmCompletionResponse, LlmError>| {
-                    match result {
-                        Ok(response) => {
-                            let mut response = response.clone();
-                            response.conversation_id = conversation_id.clone();
-                            let _ = app
-                                .emit_all("opla-sse", response)
-                                .map_err(|err| err.to_string());
-                        }
-                        Err(err) => {
-                            let _ = app
-                                .emit_all("opla-sse", Payload {
-                                    message: err.to_string(),
-                                    status: ServerStatus::Error.as_str().to_string(),
-                                })
-                                .map_err(|err| err.to_string());
-                        }
-                    }
-                })
-            ).await.map_err(|err| err.to_string())?
-        };
-        return Ok(response);
-    }
-    return Err(format!("LLM provider not found: {:?}", llm_provider_type));
+#[tauri::command]
+async fn llm_cancel_completion<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>,
+    llm_provider: Option<Provider>,
+    conversation_id: String
+) -> Result<(), String> {
+    let mut manager = context.providers_manager.lock().await;
+    manager.llm_cancel_completion::<R>(app, llm_provider, &conversation_id).await
 }
 
 #[tauri::command]
 async fn llm_call_tokenize<R: Runtime>(
-    _app: tauri::AppHandle<R>,
+    app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
     model: String,
     provider: Provider,
     text: String
 ) -> Result<LlmTokenizeResponse, String> {
-    let llm_provider_type = provider.r#type;
-    if llm_provider_type == "opla" {
-        let context_server = Arc::clone(&context.server);
-        let mut server = context_server.lock().await;
-        let response = server
-            .call_tokenize::<R>(&model, text).await
-            .map_err(|err| err.to_string())?;
-        return Ok(response);
-    } else if llm_provider_type == "openai" {
-        let encoded = match encode(text, model, None) {
-            Ok(e) => { e }
-            Err(err) => {
-                return Err(format!("LLM encode error: {:?}", err));
-            }
-        };
-        let tokens: Vec<u64> = encoded
-            .iter()
-            .map(|&x| x as u64)
-            .collect();
-        println!("Tokens: {:?}", tokens);
-        let response = LlmTokenizeResponse {
-            tokens,
-        };
-        return Ok(response);
-    }
-    return Err(format!("LLM provider not found: {:?}", llm_provider_type));
+    let mut manager = context.providers_manager.lock().await;
+    manager.llm_call_tokenize::<R>(app, model, provider, text).await
 }
+
 async fn start_server<R: Runtime>(
     app: tauri::AppHandle<R>,
     context: State<'_, OplaContext>
@@ -835,7 +691,7 @@ async fn model_download_event<R: Runtime>(
     Ok(())
 }
 
-async fn window_setup<EventLoopMessage>(app: &mut App) -> Result<(), String> {
+async fn window_setup<EventLoopMessage>(app: &mut tauri::AppHandle) -> Result<(), String> {
     let context = app.state::<OplaContext>();
     let window = app.get_window("main").ok_or("Opla failed to get window")?;
     let store = context.store.lock().await;
@@ -896,7 +752,7 @@ fn handle_download_event<EventLoopMessage>(app: &tauri::AppHandle, payload: &str
     let (state, id) = (vec[0].to_string(), vec[1].to_string());
 
     let handler = app.app_handle();
-    tauri::async_runtime::spawn(async move {
+    spawn(async move {
         let handler = handler.app_handle();
         match model_download_event(handler, id.to_string(), state.to_string()).await {
             Ok(_) => {}
@@ -907,7 +763,7 @@ fn handle_download_event<EventLoopMessage>(app: &tauri::AppHandle, payload: &str
     });
 }
 
-async fn opla_setup(app: &mut App) -> Result<(), String> {
+async fn opla_setup(app: &mut tauri::AppHandle) -> Result<(), String> {
     println!("Opla setup: ");
     let context = app.state::<OplaContext>();
     let mut store = context.store.lock().await;
@@ -978,10 +834,48 @@ async fn opla_setup(app: &mut App) -> Result<(), String> {
     Ok(())
 }
 
-fn main() {
+async fn core(app: &mut tauri::AppHandle) {
+    let mut error = None;
+    match opla_setup(app).await {
+        Ok(_) => {}
+        Err(err) => {
+            println!("Opla setup error: {:?}", err);
+            error = Some(err);
+        }
+    }
+
+    if error.is_none() {
+        match window_setup::<EventLoopMessage>(app).await {
+            Ok(_) => {}
+            Err(err) => {
+                println!("Window setup error: {:?}", err);
+                error = Some(err);
+            }
+        }
+    }
+    if !error.is_some() {
+                println!("Opla setup done");
+                let handle = app.app_handle();
+                let _id = app.listen_global("opla-downloader", move |event| {
+                    let payload = match event.payload() {
+                        Some(p) => { p }
+                        None => {
+                            return;
+                        }
+                    };
+                    // println!("download event {}", payload);
+                    handle_download_event::<EventLoopMessage>(&handle, payload);
+                });
+            }
+
+}
+#[tokio::main]
+async fn main() {
+    tauri::async_runtime::set(tokio::runtime::Handle::current());
     let downloader = Mutex::new(Downloader::new());
     let context: OplaContext = OplaContext {
-        server: Arc::new(Mutex::new(OplaServer::new())),
+        server: Arc::new(Mutex::new(LocalServer::new())),
+        providers_manager: Arc::new(Mutex::new(ProvidersManager::new())),
         store: Mutex::new(Store::new()),
         downloader: downloader,
         sys: Mutex::new(Sys::new()),
@@ -1004,46 +898,13 @@ fn main() {
                 }
             }
 
-            let mut error: Option<String> = None;
-            tauri::async_runtime::block_on(async {
-                match opla_setup(app).await {
-                    Ok(_) => {}
-                    Err(err) => {
-                        println!("Opla setup error: {:?}", err);
-                        error = Some(err);
-                    }
-                }
-
-                if error.is_none() {
-                    match window_setup::<EventLoopMessage>(app).await {
-                        Ok(_) => {}
-                        Err(err) => {
-                            println!("Window setup error: {:?}", err);
-                            error = Some(err);
-                        }
-                    }
-                }
+            let mut handle = app.handle();
+            spawn(async move {
+                core(&mut handle).await;
             });
 
-            if !error.is_some() {
-                println!("Opla setup done");
-                let handle = app.handle();
-                let _id = app.listen_global("opla-downloader", move |event| {
-                    let payload = match event.payload() {
-                        Some(p) => { p }
-                        None => {
-                            return;
-                        }
-                    };
-                    // println!("download event {}", payload);
-                    handle_download_event::<EventLoopMessage>(&handle, payload);
-                });
-            }
-
-            match error {
-                Some(err) => { Err(err.into()) }
-                None => { Ok(()) }
-            }
+            
+            Ok(())
         })
         .invoke_handler(
             tauri::generate_handler![
@@ -1072,6 +933,7 @@ fn main() {
                 set_active_model,
                 get_assistants_collection,
                 llm_call_completion,
+                llm_cancel_completion,
                 llm_call_tokenize
             ]
         )

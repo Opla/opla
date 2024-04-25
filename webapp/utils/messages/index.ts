@@ -19,7 +19,7 @@ import { CommandManager } from '../commands/types';
 import logger from '../logger';
 import { ParsedPrompt } from '../parsers';
 import { getActiveService } from '../services';
-import { completion } from '../providers';
+import { cancelCompletion, completion } from '../providers';
 import { getConversation } from '../data/conversations';
 import { changeMessageContent } from '../data/messages';
 
@@ -130,4 +130,23 @@ export const sendMessage = async (
     updatedConversations,
   );
   return returnedMessage;
+};
+
+export const cancelSending = async (
+  messageId: String,
+  conversation: Conversation,
+  modelName: string,
+  assistant: Assistant | undefined,
+  context: Context,
+  config: Store,
+) => {
+  const activeService = getActiveService(
+    conversation,
+    assistant,
+    context.providers,
+    config,
+    modelName,
+  );
+  logger.info('cancelSending', activeService, conversation, context.presets);
+  await cancelCompletion(activeService, conversation.id);
 };

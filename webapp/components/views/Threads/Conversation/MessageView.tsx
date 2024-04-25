@@ -24,6 +24,7 @@ import {
   ChevronLeft,
   ChevronRight,
   File,
+  X,
 } from 'lucide-react';
 import {
   getMessageContentAuthorAsString,
@@ -87,6 +88,7 @@ type MessageComponentProps = {
   onDeleteAssets: () => void;
   onChangeContent: (content: string, submit: boolean) => void;
   onCopyMessage: (messageId: string, state: boolean) => void;
+  onCancelSending: () => void;
 };
 
 function MessageComponent({
@@ -103,6 +105,7 @@ function MessageComponent({
   onChangeContent,
   onDeleteAssets,
   onCopyMessage,
+  onCancelSending,
 }: MessageComponentProps) {
   const { t } = useTranslation();
   const [ref, isHover] = useHover();
@@ -238,6 +241,15 @@ function MessageComponent({
                       <DeleteButton onDeleteMessage={onDeleteAssets} />
                     </div>
                   )}
+                  {(state === DisplayMessageState.Pending ||
+                    state === DisplayMessageState.Streaming) &&
+                    isHover && (
+                      <div className="left-34 absolute bottom-0 flex flex-row items-center">
+                        <Button variant="ghost" size="sm" onClick={onCancelSending}>
+                          <X className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                        </Button>
+                      </div>
+                    )}
                   {(state === DisplayMessageState.Markdown || state === DisplayMessageState.Text) &&
                     isHover && (
                       <div className="left-34 absolute bottom-0 flex flex-row items-center">

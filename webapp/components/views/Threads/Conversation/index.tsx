@@ -62,6 +62,7 @@ export function ConversationPanel({
     handleResendMessage,
     handleChangeMessageContent,
     handleStartMessageEdit,
+    handleCancelSending,
   } = useConversationContext();
   const { selectTemplate } = usePromptContext();
   const [update, setUpdate] = useState<{
@@ -199,6 +200,7 @@ export function ConversationPanel({
             onChangeMessageContent={handleChangeMessageContent}
             onStartMessageEdit={handleStartMessageEdit}
             onCopyMessage={onCopyMessage}
+            onCancelSending={handleCancelSending}
           />
         )
       }

@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod openai;
-pub mod llama_cpp;
-
 use std::fmt;
 
 use serde::{ Deserialize, Serialize };
+
+use crate::utils::http_client::{HttpChunk, HttpError};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmError {
@@ -40,6 +39,19 @@ impl fmt::Display for LlmError {
 impl std::error::Error for LlmError {
     fn description(&self) -> &str {
         &self.message
+    }
+}
+
+impl HttpError for LlmError {
+    fn to_error(&self, status: String) -> Box<dyn std::error::Error> {
+        let error = LlmError {
+            message: format!("HTTP error {} : {}", status, self.message.to_string()),
+            r#type: "http_error".to_string(),
+        };
+        Box::new(error)
+    }
+    fn to_error_string(&self, status: String) -> String {
+        format!("HTTP error {} : {}", status, self.message.to_string())
     }
 }
 
@@ -178,6 +190,19 @@ pub struct LlmCompletionResponse {
     pub usage: Option<LlmUsage>,
     pub message: Option<String>,
 }
+impl HttpChunk for LlmCompletionResponse {
+    fn new(created: i64, status: &str, content: &str) -> Self {
+        Self {
+            created: Some(created),
+            status: Some(status.to_owned()),
+            content: content.to_owned(),
+            conversation_id: None,
+            usage: None,
+            message: None,
+        }
+    }
+}
+
 impl LlmCompletionResponse {
     pub fn new(created: i64, status: &str, content: &str) -> Self {
         Self {
@@ -190,7 +215,6 @@ impl LlmCompletionResponse {
         }
     }
 }
-
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmResponseError {
     pub error: LlmError,

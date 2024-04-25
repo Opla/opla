@@ -12,34 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use tokio::sync::Mutex;
-use std::sync::Arc;
+use tokio::{ spawn, sync::{ mpsc::channel, Mutex } };
+use std::{ collections::HashMap, sync::Arc };
 use crate::{
     error::Error,
-    llm::{
-        llama_cpp::LLamaCppServer,
-        LlmCompletionOptions,
-        LlmError,
-        LlmQueryCompletion,
-        LlmTokenizeResponse,
+    providers::{
+        llama_cpp::LLamaCppInferenceClient,
+        llm::{
+            LlmCompletionOptions,
+            LlmCompletionResponse,
+            LlmError,
+            LlmQuery,
+            LlmQueryCompletion,
+            LlmTokenizeResponse,
+        },
     },
     store::{ ServerConfiguration, ServerParameters },
 };
 use sysinfo::System;
 use tauri::{ api::process::CommandChild, async_runtime::JoinHandle };
 use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
-use crate::llm::{ LlmQuery, LlmCompletionResponse };
 use std::time::Duration;
 use std::thread;
 
-pub struct OplaServer {
+pub struct LocalServer {
     pub pid: Arc<Mutex<usize>>,
     pub name: String,
     pub status: Arc<Mutex<ServerStatus>>,
     pub parameters: Option<ServerParameters>,
-    server: LLamaCppServer,
+    inference_client: LLamaCppInferenceClient,
     handle: Option<JoinHandle<()>>,
     command_child: Arc<Mutex<Option<CommandChild>>>,
+    completion_handles: HashMap<String, Arc<tokio::task::AbortHandle>>,
 }
 
 #[derive(Clone, serde::Serialize, Copy, PartialEq, Debug)]
@@ -77,16 +81,17 @@ pub struct Payload {
     pub status: String,
 }
 
-impl OplaServer {
+impl LocalServer {
     pub fn new() -> Self {
-        OplaServer {
+        LocalServer {
             pid: Arc::new(Mutex::new(0)),
             name: "llama.cpp.server".to_string(),
             status: Arc::new(Mutex::new(ServerStatus::Init)),
             parameters: None,
-            server: LLamaCppServer::new(),
+            inference_client: LLamaCppInferenceClient::new(None),
             handle: None,
             command_child: Arc::new(Mutex::new(None)),
+            completion_handles: HashMap::new(),
         }
     }
 
@@ -315,10 +320,7 @@ impl OplaServer {
         })
     }
 
-    pub fn set_parameters(
-        &mut self,
-        parameters: Option<ServerParameters>
-    ) {
+    pub fn set_parameters(&mut self, parameters: Option<ServerParameters>) {
         self.parameters = parameters;
     }
 
@@ -557,29 +559,101 @@ impl OplaServer {
         Ok(())
     }
 
+    pub async fn cancel_completion(&mut self, conversation_id: &str) -> Result<(), String> {
+        let handle = self.completion_handles.remove(conversation_id);
+        println!("Cancel completion {}", conversation_id);
+        match handle {
+            Some(h) => {
+                h.abort();
+            }
+            None => {
+                let err = format!("cancel_completion Handle not found {}", conversation_id);
+                println!("{}", err);
+                return Err(err);
+            }
+        }
+
+        Ok(())
+    }
+
     pub async fn call_completion<R: Runtime>(
         &mut self,
-        model: &str,
+        app: tauri::AppHandle<R>,
+        model: String,
+        model_path: String,
         query: LlmQuery<LlmQueryCompletion>,
-        completion_options: Option<LlmCompletionOptions>,
-        callback: Option<impl FnMut(Result<LlmCompletionResponse, LlmError>) + Copy>
-    ) -> Result<LlmCompletionResponse, Box<dyn std::error::Error>> {
+        completion_options: Option<LlmCompletionOptions>
+    ) -> Result<LlmCompletionResponse, String> {
         println!("{}", format!("Opla llm call: {:?} / {:?}", query.command, &model));
-
-        let server_parameters = match &self.parameters {
-            Some(p) => p,
+        let query = query.clone();
+        let conversation_id = query.options.conversation_id.clone();
+        let parameters = match self.parameters.clone() {
+            Some(mut p) => {
+                p.model_id = Some(model.clone());
+                p.model_path = Some(model_path);
+                p
+            }
             None => {
-                println!("Opla server error try to read parameters");
-                return Err(Box::new(Error::BadParameters));
+                return Err(
+                    LlmError::new(
+                        "Opla server not started no parameters found",
+                        "server_error"
+                    ).to_string()
+                );
             }
         };
+        let is_stream = query.options.get_parameter_as_boolean("stream").unwrap_or(false);
+        self.bind::<R>(app.app_handle(), &parameters).await.map_err(|err| err.to_string())?;
 
-        self.server.call_completion::<R>(
-            query,
-            server_parameters,
-            completion_options,
-            callback
-        ).await
+        let (sender, mut receiver) = channel::<Result<LlmCompletionResponse, LlmError>>(1);
+
+        let query = query.clone();
+        let mut client_instance = self.inference_client.create(&self.parameters);
+
+        let handle = spawn(async move {
+            client_instance.call_completion(&query, completion_options.clone(), sender).await
+        });
+
+        self.completion_handles.insert(
+            conversation_id.clone().unwrap_or(String::from("default")),
+            Arc::new(handle.abort_handle())
+        );
+
+        let mut result: Result<LlmCompletionResponse, String> = Err(
+            String::from("Not initialized")
+        );
+        let mut finished = false;
+        while let Some(response) = receiver.recv().await {
+            result = match response {
+                Ok(response) => {
+                    let mut response = response.clone();
+                    response.conversation_id = conversation_id.clone();
+                    if is_stream && !finished {
+                        let _ = app
+                            .emit_all("opla-sse", response.clone())
+                            .map_err(|err| err.to_string());
+                    }
+                    if response.status == Some(String::from("finished")) {
+                        finished = true;
+                    }
+                    Ok(response.clone())
+                }
+                Err(err) => {
+                    if is_stream {
+                        let _ = app
+                            .emit_all("opla-sse", Payload {
+                                message: err.to_string(),
+                                status: ServerStatus::Error.as_str().to_string(),
+                            })
+                            .map_err(|err| err.to_string());
+                    }
+                    Err(err.to_string())
+                }
+            };
+        }
+        self.completion_handles.remove(&conversation_id.clone().unwrap_or(String::from("default")));
+        println!("call completion result {:?}", result);
+        result
     }
 
     pub async fn call_tokenize<R: Runtime>(
@@ -588,15 +662,7 @@ impl OplaServer {
         text: String
     ) -> Result<LlmTokenizeResponse, Box<dyn std::error::Error>> {
         println!("{}", format!("Opla llm call tokenize: {:?}", &model));
-
-        let server_parameters = match &self.parameters {
-            Some(p) => p,
-            None => {
-                println!("Opla server error try to read parameters");
-                return Err(Box::new(Error::BadParameters));
-            }
-        };
-
-        self.server.call_tokenize::<R>(text, server_parameters).await
+        let mut client_instance = self.inference_client.create(&self.parameters);
+        client_instance.call_tokenize::<R>(text).await
     }
 }
