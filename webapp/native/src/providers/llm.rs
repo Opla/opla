@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod openai;
-pub mod llama_cpp;
-
 use std::fmt;
 
 use serde::{ Deserialize, Serialize };

@@ -66,9 +66,8 @@ pub struct HttpClient {}
 impl HttpClient {
     async fn stream_request<S: Serialize + std::marker::Sync + 'static, D, R, E>(
         response: Response,
-        /* callback: Mutex<impl FnMut(Result<(String, i64), String>) -> Result<Option<String>, String> + Copy + Send + 'static> */
         build_chunk: &mut impl FnMut(String, i64) -> Result<Option<String>, E>,
-        sender: Sender<Result<R, E>>,
+        sender: Sender<Result<R, E>>
     )
         -> Result<R, Box<dyn std::error::Error>>
         where
@@ -76,121 +75,64 @@ impl HttpClient {
             R: HttpChunk + std::marker::Send + 'static,
             E: for<'de> Deserialize<'de> + HttpError + std::fmt::Debug + std::error::Error + 'static
     {
-
-            let mut stream = response.bytes_stream().eventsource();
-            let mut content = String::new();
-            let created = chrono::Utc::now().timestamp_millis();
-            // let mut callback = callback.lock().await;
-            while let Some(event) = stream.next().await {
-                match event {
-                    Ok(event) => {
-                        let data = event.data;
-                        let chunk = build_chunk(data, created);
-                        // callback(Ok((data, created)));
-                        match chunk {
-                            Ok(r) => {
-                                let mut stop = false;
-                                let command = match r {
-                                    Some(chunk_content) => {
-                                        content.push_str(chunk_content.as_str());
-                                        R::new(
-                                                chrono::Utc::now().timestamp_millis(),
-                                                "success",
-                                                &chunk_content
-                                            )
-                                        },
-                                    None => {
-                                        stop = true;
-                                        R::new(
-                                                chrono::Utc::now().timestamp_millis(),
-                                                "finished",
-                                                "done"
-                                            )
-                                    },
-                                };
-                                sender.send(Ok(command)).await?;
-                                if stop {
-                                    break;
-                                } 
-                            },
-                            Err(e) => { sender.send(Err(e)).await?; },
+        let mut stream = response.bytes_stream().eventsource();
+        let mut content = String::new();
+        let created = chrono::Utc::now().timestamp_millis();
+        while let Some(event) = stream.next().await {
+            match event {
+                Ok(event) => {
+                    let data = event.data;
+                    let chunk = build_chunk(data, created);
+                    match chunk {
+                        Ok(r) => {
+                            let mut stop = false;
+                            let response = match r {
+                                Some(chunk_content) => {
+                                    content.push_str(chunk_content.as_str());
+                                    R::new(
+                                        chrono::Utc::now().timestamp_millis(),
+                                        "success",
+                                        &chunk_content
+                                    )
+                                }
+                                None => {
+                                    stop = true;
+                                    R::new(
+                                        chrono::Utc::now().timestamp_millis(),
+                                        "finished",
+                                        "done"
+                                    )
+                                }
+                            };
+                            sender.send(Ok(response)).await?;
+                            if stop {
+                                break;
+                            }
                         }
-
-                        /* let chunk = match
-                            serde_json::from_str::<C>(&data)
-                        {
-                            Ok(r) => r,
-                            Err(error) => {
-                                let message = format!("Failed to parse response: {}", error);
-                                println!("{}", message);
-                                match callback {
-                                    Some(mut cb) => {
-                                        cb(Err(LlmError::new(&message, "FailedParsingResponse")));
-                                    }
-                                    None => (),
-                                }
-                                return Err(Box::new(error));
-                            }
-                        };
-                        println!("chunk: {:?}", chunk);
-                        if chunk.stop.unwrap_or(false) {
-                            println!("chunk: stop");
-                            match callback {
-                                Some(mut cb) => {
-                                    cb(
-                                        Ok(
-                                            LlmCompletionResponse::new(
-                                                chrono::Utc::now().timestamp_millis(),
-                                                "finished",
-                                                "done"
-                                            )
-                                        )
-                                    );
-                                }
-                                None => (),
-                            }
-                            break;
-                        } else {
-                            content.push_str(chunk.content.as_str());
-                            match callback {
-                                Some(mut cb) => {
-                                    cb(
-                                        Ok(
-                                            LlmCompletionResponse::new(
-                                                created,
-                                                "success",
-                                                chunk.content.as_str()
-                                            )
-                                        )
-                                    );
-                                }
-                                None => (),
-                            }
-                        } */
-                    }
-                    Err(error) => {
-                        let message = format!("Failed to get event: {}", error);
-                        println!("{}", message);
-                        /* match callback {
-                            Some(mut cb) => {
-                                cb(Err(LlmError::new(&message, "FailedEvent")));
-                            }
-                            None => (),
-                        } */
-                        let err = HttpResponseError::new(&error.to_string(), "http_error");
-                        return Err(Box::new(err));
+                        Err(e) => {
+                            sender.send(Err(e)).await?;
+                        }
                     }
                 }
+                Err(error) => {
+                    let message = format!("Failed to get event: {}", error);
+                    println!("{}", message);
+                    let err = HttpResponseError::new(&error.to_string(), "http_error");
+                    return Err(Box::new(err));
+                }
             }
-            let end_time = 0;
-            let response = D::new(content, end_time);
-            // Ok(response)
+        }
+        let end_time = 0;
+        let response = D::new(content, end_time);
+        sender.send(Ok(response.convert_into())).await?;
+        // Ok(response)
 
         Ok(response.convert_into())
     }
 
-    async fn request<S: Serialize + std::marker::Sync + 'static, D, R>(
-        response: Response
+    async fn request<S: Serialize + std::marker::Sync + 'static, D, R, E>(
+        response: Response,
+        sender: Sender<Result<R, E>>
     )
         -> Result<R, Box<dyn std::error::Error>>
         where
@@ -198,13 +140,14 @@ impl HttpClient {
             R: std::marker::Send
     {
         let response = match response.json::<D>().await {
-                Ok(r) => r,
-                Err(error) => {
-                    println!("Failed to parse response: {}", error);
-                    let err = HttpResponseError::new(&error.to_string(), "http_error");
-                    return Err(Box::new(err));
-                }
-            };
+            Ok(r) => r,
+            Err(error) => {
+                println!("Failed to parse response: {}", error);
+                let err = HttpResponseError::new(&error.to_string(), "http_error");
+                return Err(Box::new(err));
+            }
+        };
+        sender.send(Ok(response.convert_into())).await.map_err(|_e| String::from("Can't send"))?;
         Ok(response.convert_into())
     }
 
@@ -217,29 +160,29 @@ impl HttpClient {
             R: HttpChunk + std::marker::Send,
             E: for<'de> Deserialize<'de> + HttpError + std::fmt::Debug + std::error::Error + 'static
     {
-            let result = client_builder.send().await;
-            let response = match result {
-                Ok(res) => res,
+        let result = client_builder.send().await;
+        let response = match result {
+            Ok(res) => res,
+            Err(error) => {
+                println!("Failed to get response: {}", error);
+                let err = HttpResponseError::new(&error.to_string(), "http_error");
+                return Err(Box::new(err));
+            }
+        };
+        let status = response.status();
+        if !status.is_success() {
+            let error = match response.json::<E>().await {
+                Ok(t) => t,
                 Err(error) => {
-                    println!("Failed to get response: {}", error);
+                    println!("Failed to dezerialize error response: {}", error);
                     let err = HttpResponseError::new(&error.to_string(), "http_error");
                     return Err(Box::new(err));
                 }
             };
-            let status = response.status();
-            if !status.is_success() {
-                let error = match response.json::<E>().await {
-                    Ok(t) => t,
-                    Err(error) => {
-                        println!("Failed to dezerialize error response: {}", error);
-                        let err = HttpResponseError::new(&error.to_string(), "http_error");
-                        return Err(Box::new(err));
-                    }
-                };
-                println!("Failed to get response: {} {:?}", status, error);
-                return Err(Box::new(error));
-            }
-            Ok(response)
+            println!("Failed to get response: {} {:?}", status, error);
+            return Err(Box::new(error));
+        }
+        Ok(response)
     }
 
     pub async fn post_request<S: Serialize + std::marker::Sync + 'static, D, R, E>(
@@ -247,13 +190,10 @@ impl HttpClient {
         parameters: S,
         secret_key: Option<&str>,
         is_stream: bool,
-        /* callback: Mutex<
-            impl (FnMut(Result<(String, i64), String>) -> Result<Option<String>, String>) + Copy + Send + 'static
-        > */
         build_chunk: &mut impl FnMut(String, i64) -> Result<Option<String>, E>,
-        sender: Sender<Result<R, E>>,
+        sender: Sender<Result<R, E>>
     )
-        -> Result<R, Box<dyn std::error::Error>>
+        -> ()
         where
             D: for<'de> Deserialize<'de> + HttpResponse<R> + std::marker::Send + 'static,
             R: HttpChunk + std::marker::Send + 'static,
@@ -266,13 +206,19 @@ impl HttpClient {
         };
         let client_builder = client_builder.json(&parameters);
 
-        let response = HttpClient::get_response::<S, D, R, E>(client_builder).await?;
-        let result;
+        let response = match HttpClient::get_response::<S, D, R, E>(client_builder).await {
+            Ok(r) => r,
+            Err(err) => {
+                // TODO send error sender.send(Err(Httperr));
+                return;
+            },
+        };
+        let _result;
         if is_stream {
-            result = HttpClient::stream_request::<S, D, R, E>(response, build_chunk, sender).await;
+            _result = HttpClient::stream_request::<S, D, R, E>(response, build_chunk, sender).await;
         } else {
-            result = HttpClient::request::<S, D, R>(response).await;
+            _result = HttpClient::request::<S, D, R, E>(response, sender).await;
         }
-        result
+        // result
     }
 }

@@ -19,7 +19,8 @@ use futures_util::stream::StreamExt;
 
 use tokenizer::encode;
 
-use crate::llm::{
+use crate::providers::llm::{
+    LlmCompletionOptions,
     LlmQuery,
     LlmQueryCompletion,
     LlmCompletionResponse,
@@ -28,8 +29,6 @@ use crate::llm::{
     LlmError,
     LlmMessage,
 };
-
-use super::LlmCompletionOptions;
 
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
