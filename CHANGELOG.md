@@ -1,3 +1,10 @@
+# [1.0.0-alpha.126](https://github.com/Opla/opla/compare/v1.0.0-alpha.125...v1.0.0-alpha.126) (2024-04-25)
+
+
+### Features
+
+* refactor http request and completion [#688](https://github.com/Opla/opla/issues/688) ([#829](https://github.com/Opla/opla/issues/829)) ([d14c989](https://github.com/Opla/opla/commit/d14c989f908c3f3dd4ad72ff7b4ca5ebf07c5b3d))
+
 # [1.0.0-alpha.125](https://github.com/Opla/opla/compare/v1.0.0-alpha.124...v1.0.0-alpha.125) (2024-04-22)
 
 
