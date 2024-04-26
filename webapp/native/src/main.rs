@@ -51,8 +51,6 @@ use store::{ Store, Provider, Settings };
 use local_server::*;
 use sys::{ Sys, SysInfos };
 use tauri::{
-    async_runtime::{ block_on, spawn_blocking },
-    App,
     EventLoopMessage,
     Manager,
     Runtime,
@@ -580,9 +578,9 @@ async fn llm_call_completion<R: Runtime>(
     llm_provider: Option<Provider>,
     query: LlmQuery<LlmQueryCompletion>,
     completion_options: Option<LlmCompletionOptions>
-) -> Result<LlmCompletionResponse, String> {
+) -> Result<(), String> {
     let mut manager = context.providers_manager.lock().await;
-    manager.llm_call_completion::<R>(app, model, llm_provider, query, completion_options).await
+    manager.llm_call_completion::<R>(app, &model, llm_provider, query, completion_options).await
 }
 
 #[tauri::command]
@@ -869,9 +867,9 @@ async fn core(app: &mut tauri::AppHandle) {
             }
 
 }
-#[tokio::main]
-async fn main() {
-    tauri::async_runtime::set(tokio::runtime::Handle::current());
+
+fn main() {
+
     let downloader = Mutex::new(Downloader::new());
     let context: OplaContext = OplaContext {
         server: Arc::new(Mutex::new(LocalServer::new())),
@@ -899,7 +897,7 @@ async fn main() {
             }
 
             let mut handle = app.handle();
-            spawn(async move {
+            tauri::async_runtime::block_on(async {
                 core(&mut handle).await;
             });
 

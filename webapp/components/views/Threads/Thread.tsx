@@ -130,13 +130,13 @@ function Thread({
     const stream = streams?.[conversationId as string];
     let newMessages: MessageImpl[] = conversationMessages;
     if (stream) {
-      newMessages = newMessages.map((msg, index) => {
+      newMessages = newMessages.map((msg) => {
         const { author } = msg;
         /* if (author.role === 'assistant') {
           const model = findModelInAll(author.name, providers, backendContext, true);
           author.name = model?.title || model?.name || author.name;
         } */
-        if (stream && index === newMessages.length - 1) {
+        if (stream.messageId === msg.id /* && index === newMessages.length - 1 */) {
           const m: MessageImpl = {
             ...msg,
             author,
@@ -150,6 +150,7 @@ function Thread({
         return msg;
       });
     }
+    console.log('newMessages', newMessages, stream);
     const conversationName: string = newMessages?.[0]
       ? getMessageContentAsString(newMessages?.[0])
       : defaultConversationName;

@@ -39,9 +39,9 @@ export default function useCollectionStorage<T>(
 
   const updateValue = async (key: string, v: T) => {
     try {
-      const newCollection = deepCopy<Record<string, T>>(collection || {});
+      const newCollection = deepCopy<Record<string, T>>(v || {});
       newCollection[key] = v;
-
+      console.log('updateValue', v, 'newCollection', newCollection);
       await dataStorage().setItem(collectionId, v, key);
       setCollection(newCollection);
     } catch (e) {

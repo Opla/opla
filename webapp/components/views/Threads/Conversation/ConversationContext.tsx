@@ -202,7 +202,7 @@ function ConversationProvider({
       }
 
       const userMessage = createMessage({ role: 'user', name: 'you' }, prompt.text, prompt.raw);
-      let message = createMessage({ role: 'assistant', name: selectedModel.name }, '...');
+      const message = createMessage({ role: 'assistant', name: selectedModel.name }, '...');
       message.author.metadata = { ...message.author.metadata, modelId: selectedModel.id };
       if (assistant) {
         message.author.metadata.assistantId = assistant.id;
@@ -236,8 +236,10 @@ function ConversationProvider({
         selectedModelId,
         updatedMessages,
         updatedConversation,
+        message,
+        userMessage,
       );
-      message = await sendMessage(
+      /* message = */ await sendMessage(
         message,
         updatedMessages,
         updatedConversation,
@@ -301,7 +303,7 @@ function ConversationProvider({
         return;
       }
 
-      let message: Message = changeMessageContent(
+      const message: Message = changeMessageContent(
         previousMessage,
         '...',
         '...',
@@ -322,7 +324,7 @@ function ConversationProvider({
           conversationId,
         );
 
-      message = await sendMessage(
+      /* message = */ await sendMessage(
         message,
         updatedMessages,
         updatedConversation,

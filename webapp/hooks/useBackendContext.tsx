@@ -12,7 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import logger from '@/utils/logger';
 import { createProvider } from '@/utils/data/providers';
 import getBackend from '@/utils/backend';
@@ -31,6 +39,8 @@ import {
   Streams,
   Store,
   OplaServer,
+  MessageStatus,
+  Message,
 } from '@/types';
 import {
   getOplaConfig,
@@ -44,6 +54,9 @@ import { deepCopy, mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
 import { LlamaCppArgumentsSchema } from '@/utils/providers/llama.cpp/schema';
 import OplaProvider from '@/utils/providers/opla';
+import { getConversation } from '@/utils/data/conversations';
+import { changeMessageContent } from '@/utils/data/messages';
+import { ParsedPrompt } from '@/utils/parsers';
 
 const initialBackendContext: OplaContext = {
   server: {
@@ -109,7 +122,14 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   const [streams, saveStreams] = useState<Streams>();
   const streamsRef = useRef<Streams | undefined>(streams);
 
-  const { providers, setProviders } = useContext(AppContext);
+  const {
+    conversations,
+    getConversationMessages,
+    updateMessagesAndConversation,
+    providers,
+    setProviders,
+  } = useContext(AppContext);
+
   const backendRef = useRef<Backend>();
 
   const updateServer = (partials: Partial<OplaServer>) => {
@@ -129,7 +149,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     saveDownloads(updatedDownloads);
   };
 
-  const updateStreams = (updatedStreams: Streams) => {
+  const updateStreams = (updatedStreams: Streams | undefined) => {
     streamsRef.current = updatedStreams;
     saveStreams(updatedStreams);
   };
@@ -140,8 +160,82 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     updateConfig(store);
   }, []);
 
+  const updateMessageContent = useCallback(
+    async (
+      message_or_id: Message | String,
+      content: ParsedPrompt | String,
+      conversationId: string,
+      tempConversationName: string | undefined,
+      status?: MessageStatus,
+    ) => {
+      console.log('updateMessageContent', message_or_id);
+      let message = typeof message_or_id !== 'string' ? (message_or_id as Message) : undefined;
+      // const { conversations, getConversationMessages, updateMessagesAndConversation } = context;
+
+      const conversationMessages = getConversationMessages(conversationId);
+      if (!message) {
+        const id = message_or_id as string;
+        message = conversationMessages.find((m) => m.id === id) as Message;
+        console.log('conversationMessages', conversationMessages);
+        if (!message) {
+          logger.error('message not found');
+        }
+      }
+
+      const conversation = getConversation(conversationId, conversations);
+      if (conversation && message?.content) {
+        const text = typeof content === 'string' ? content : (content as ParsedPrompt).text;
+        const raw = typeof content === 'string' ? content : (content as ParsedPrompt).raw;
+        const newMessage = changeMessageContent(message, text, raw);
+        if (status) {
+          newMessage.status = status;
+        }
+        const newMessages = conversationMessages.map((m) => {
+          if (m.id === message.id) {
+            return newMessage;
+          }
+          return m;
+        });
+        const { updatedMessages } = await updateMessagesAndConversation(
+          newMessages,
+          conversationMessages,
+          { name: tempConversationName },
+          conversationId,
+          conversations,
+        );
+        return updatedMessages;
+      }
+      return undefined;
+    },
+    [conversations, getConversationMessages, updateMessagesAndConversation],
+  );
+
+  useEffect(() => {
+    const afunc = async () => {
+      if (streams) {
+        const finished = Object.keys(streams).filter((k) => streams[k].status === 'finished');
+        console.log(finished);
+        if (finished.length === 1) {
+          const stream = streams[finished[0]];
+          console.log('finished', stream);
+          await updateMessageContent(
+            stream.messageId,
+            stream.content.join(''),
+            stream.conversationId,
+            undefined,
+            MessageStatus.Delivered,
+          );
+          updateStreams(undefined);
+        } else if (finished.length > 1) {
+          logger.error('todo multi finished');
+        }
+      }
+    };
+    afunc();
+  }, [streams, updateMessageContent]);
+
   const backendListener = useCallback(async (event: any) => {
-    logger.info('backend event', event);
+    // logger.info('backend event', event);
     if (event.event === 'opla-server' && serverRef.current) {
       if (event.payload.status === ServerStatus.STDOUT) {
         const stdout = deepCopy(serverRef.current.stdout || []);
@@ -149,7 +243,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
         if (len > 50) {
           stdout.pop();
         }
-        logger.info('stdout', stdout);
+        // logger.info('stdout', stdout);
         updateServer({
           stdout,
         });
@@ -159,7 +253,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
         if (len > 50) {
           stderr.pop();
         }
-        logger.error('stderr', stderr);
+        // logger.error('stderr', stderr);
         updateServer({
           stderr,
         });
@@ -214,6 +308,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
 
   const streamListener = useCallback(async (event: any) => {
     const response = (await mapKeys(event.payload, toCamelCase)) as LlmCompletionResponse;
+    console.log('stream event', response, streams);
     if (response.status === 'error') {
       logger.error('stream error', response);
       return;
@@ -239,9 +334,20 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       }
       return;
     }
-    if (response.status === 'finished' && currentStreams[conversationId]) {
-      delete currentStreams[conversationId];
+    if (response.status === 'finished' /* && currentStreams[conversationId] */) {
+      let stream = currentStreams[conversationId];
+      if (stream) {
+        stream.status = 'finished';
+      } else {
+        stream = {
+          ...response,
+          content: [response.content],
+        } as LlmStreamResponse;
+      }
+      currentStreams[conversationId] = stream;
       updateStreams(currentStreams);
+      console.log('finished', response, stream);
+      // await updateMessageContent(response.messageId, stream.content.join(''), conversationId, undefined, MessageStatus.Delivered);
     }
   }, []);
 

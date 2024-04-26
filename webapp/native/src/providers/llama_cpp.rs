@@ -12,18 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
 use crate::{
     providers::llm::LlmQueryCompletion,
     store::ServerParameters,
     utils::http_client::{ self, HttpError, HttpResponse },
 };
 
-use tauri::Runtime;
+use async_trait::async_trait;
 use serde::{ Deserialize, Serialize };
 use tokio::sync::mpsc::Sender;
 use crate::providers::llm::{ LlmQuery, LlmCompletionResponse, LlmUsage };
 
-use super::llm::{ LlmCompletionOptions, LlmError, LlmTokenizeResponse };
+use super::llm::{ LlmCompletionOptions, LlmError, LlmInferenceClient, LlmTokenizeResponse };
 
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -155,6 +156,7 @@ impl LlamaCppChatCompletion {
             status: Some("success".to_owned()),
             content: self.content.clone(),
             conversation_id: None,
+            message_id: None,
             usage: Some(self.timings.to_llm_usage()),
             message: None,
         }
@@ -165,7 +167,7 @@ impl HttpError for LlamaCppChatCompletion {
     fn to_error(&self, status: String) -> Box<dyn std::error::Error> {
         let error = LlmError {
             message: format!("HTTP error {} : {}", status, self.content.to_string()),
-            r#type: "http_error".to_string(),
+            status: "http_error".to_string(),
         };
         Box::new(error)
     }
@@ -178,9 +180,10 @@ impl HttpResponse<LlmCompletionResponse> for LlamaCppChatCompletion {
     fn convert_into(&self) -> LlmCompletionResponse {
         LlmCompletionResponse {
             created: None,
-            status: Some("success".to_owned()),
+            status: Some("finished".to_owned()),
             content: self.content.clone(),
             conversation_id: None,
+            message_id: None,
             usage: Some(self.timings.to_llm_usage()),
             message: None,
         }
@@ -225,13 +228,13 @@ impl LlamaCppTokenize {
     }
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LLamaCppInferenceClient {
+pub struct LlamaCppInferenceClient {
     pub server_parameters: Option<ServerParameters>,
 }
 
-impl LLamaCppInferenceClient {
+impl LlamaCppInferenceClient {
     pub fn new(parameters: Option<ServerParameters>) -> Self {
-        LLamaCppInferenceClient {
+        LlamaCppInferenceClient {
             server_parameters: parameters.clone(),
         }
     }
@@ -241,14 +244,14 @@ impl LLamaCppInferenceClient {
         instance.server_parameters = server_parameters.clone();
         instance
     }
-    
+
     fn get_api(&self, endpoint: String) -> Result<String, String> {
         // TODO https support
         let (host, port) = match &self.server_parameters {
             Some(parameters) => (parameters.host.clone(), parameters.port),
             None => {
-                println!("LLama inference client server error try to read parameters");
-                return Err(String::from("LLama inference client error try to read parameters"));
+                println!("LlamaCpp inference client server error try to read parameters");
+                return Err(String::from("LlamaCpp inference client error try to read parameters"));
             }
         };
         Ok(format!("http://{:}:{:}/{}", host, port, endpoint))
@@ -271,11 +274,19 @@ impl LLamaCppInferenceClient {
             return Ok(Some(chunk.content.to_string()));
         }
     }
-    pub async fn call_completion(
+}
+
+#[async_trait]
+impl LlmInferenceClient for LlamaCppInferenceClient {
+    fn set_parameters(&mut self, parameters: ServerParameters) {
+        self.server_parameters = Some(parameters);
+    }
+
+    async fn call_completion(
         &mut self,
         query: &LlmQuery<LlmQueryCompletion>,
         completion_options: Option<LlmCompletionOptions>,
-        sender: Sender<Result<LlmCompletionResponse, LlmError>>
+        sender: Sender<Result<LlmCompletionResponse, LlmError>>,
     ) {
         let parameters = query.options.to_llama_cpp_parameters(completion_options);
 
@@ -284,12 +295,7 @@ impl LLamaCppInferenceClient {
         let api_url = match self.get_api(query.command.clone()) {
             Ok(url) => url,
             Err(msg) => {
-                match sender.send(Err(LlmError::new(&msg, "Parameters_error"))).await {
-                    Ok(()) => {}
-                    Err(err) => {
-                        print!("Error sending message {}", err);
-                    }
-                }
+                let _ = sender.send(Err(LlmError::new(&msg, "Parameters_error"))).await;
                 return;
             }
         };
@@ -304,15 +310,17 @@ impl LLamaCppInferenceClient {
             parameters,
             None,
             is_stream,
-            &mut LLamaCppInferenceClient::build_stream_chunk,
-            sender
+            &mut LlamaCppInferenceClient::build_stream_chunk,
+            sender,
         ).await;
     }
 
-    pub async fn call_tokenize<R: Runtime>(
+    async fn call_tokenize(
         &mut self,
+        model: &str,
         text: String
     ) -> Result<LlmTokenizeResponse, Box<dyn std::error::Error>> {
+        // TODO handle model
         let parameters = LlamaCppQueryTokenize {
             content: text,
         };
@@ -332,7 +340,7 @@ impl LLamaCppInferenceClient {
             }
         };
         let status = response.status();
-        println!("Response Status: {}", status);
+        println!("Response Status: {} {}", status, model);
         let response = match response.json::<LlamaCppTokenize>().await {
             Ok(r) => r,
             Err(error) => {

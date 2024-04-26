@@ -25,8 +25,8 @@ import { ParsedPrompt } from '../parsers';
 import { CommandManager } from '../commands/types';
 import { invokeTauri } from '../backend/tauri';
 import { mapKeys } from '../data';
-import { toCamelCase, toSnakeCase } from '../string';
-import logger from '../logger';
+import { /* toCamelCase, */ toSnakeCase } from '../string';
+// import logger from '../logger';
 
 export const tokenize = async (
   activeService: AIImplService,
@@ -97,7 +97,7 @@ export const completion = async (
   presets: Preset[],
   prompt: ParsedPrompt,
   commandManager: CommandManager,
-): Promise<LlmCompletionResponse> => {
+): Promise<void /* LlmCompletionResponse */> => {
   if (!activeService.model) {
     throw new Error('Model not set');
   }
@@ -160,20 +160,21 @@ export const completion = async (
     {
       messages, // : [systemMessage, ...messages],
       conversationId: conversation.id,
+      messageId: message.id,
       parameters: llmParameters,
     },
     toSnakeCase,
   );
 
   const llmProvider = mapKeys({ ...provider, key }, toSnakeCase);
-  const response: LlmCompletionResponse = (await invokeTauri('llm_call_completion', {
+  /* const response: LlmCompletionResponse = */ (await invokeTauri('llm_call_completion', {
     model: model.id,
     llmProvider,
     query: { command: 'completion', options },
     completionOptions: mapKeys(completionOptions, toSnakeCase),
   })) as LlmCompletionResponse;
 
-  if (response.status === 'error') {
+  /* if (response.status === 'error') {
     throw new Error(response.message);
   }
 
@@ -182,7 +183,7 @@ export const completion = async (
     logger.info(`${implProvider.name} completion response`, response);
     return mapKeys(response, toCamelCase);
   }
-  throw new Error(`${implProvider.name} completion error ${response}`);
+  throw new Error(`${implProvider.name} completion error ${response}`); */
 };
 
 export const cancelCompletion = async (

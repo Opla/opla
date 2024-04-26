@@ -14,11 +14,11 @@
 
 use std::fmt;
 
-use tokio::sync::mpsc::Sender;
 use reqwest::{ Client, RequestBuilder, Response };
 use serde::{ Deserialize, Serialize };
 use eventsource_stream::Eventsource;
 use futures_util::stream::StreamExt;
+use tokio::sync::mpsc::Sender;
 
 pub trait HttpResponse<R> {
     fn convert_into(&self) -> R;
@@ -28,12 +28,16 @@ pub trait HttpResponse<R> {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct HttpResponseError {
     pub message: String,
-    pub r#type: String,
+    pub status: String,
+}
+
+pub trait HttpResponseErr {
+    fn create<R, E>(msg: &str, status: &str) -> Result<R,E>;
 }
 
 impl HttpResponseError {
-    pub fn new(msg: &str, r#type: &str) -> HttpResponseError {
-        HttpResponseError { message: msg.to_string(), r#type: r#type.to_string() }
+    pub fn new(msg: &str, status: &str) -> HttpResponseError {
+        HttpResponseError { message: msg.to_string(), status: status.to_string() }
     }
 
     pub fn to_error_string(&self) -> String {
@@ -43,7 +47,7 @@ impl HttpResponseError {
 
 impl fmt::Display for HttpResponseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}: {}", self.r#type, self.message)
+        write!(f, "{}: {}", self.status, self.message)
     }
 }
 
@@ -64,12 +68,12 @@ pub trait HttpChunk {
 pub struct HttpClient {}
 
 impl HttpClient {
-    async fn stream_request<S: Serialize + std::marker::Sync + 'static, D, R, E>(
+    async fn stream_request<S: Serialize + std::marker::Sync + 'static, D, R: Serialize + Clone, E: Serialize + Clone>(
         response: Response,
         build_chunk: &mut impl FnMut(String, i64) -> Result<Option<String>, E>,
-        sender: Sender<Result<R, E>>
+        sender: Sender<Result<R, E>>,
     )
-        -> Result<R, Box<dyn std::error::Error>>
+        -> Result<R, String>
         where
             D: for<'de> Deserialize<'de> + HttpResponse<R> + std::marker::Send + 'static,
             R: HttpChunk + std::marker::Send + 'static,
@@ -104,13 +108,14 @@ impl HttpClient {
                                     )
                                 }
                             };
-                            sender.send(Ok(response)).await?;
+                            // sender.send(Ok(response)).await?;
+                            sender.send(Ok(response)).await.map_err(|e| e.to_string())?;
                             if stop {
                                 break;
                             }
                         }
                         Err(e) => {
-                            sender.send(Err(e)).await?;
+                            sender.send(Err(e)).await.map_err(|e| e.to_string())?;
                         }
                     }
                 }
@@ -118,23 +123,23 @@ impl HttpClient {
                     let message = format!("Failed to get event: {}", error);
                     println!("{}", message);
                     let err = HttpResponseError::new(&error.to_string(), "http_error");
-                    return Err(Box::new(err));
+                    return Err(err.to_string());
                 }
             }
         }
         let end_time = 0;
         let response = D::new(content, end_time);
-        sender.send(Ok(response.convert_into())).await?;
+        sender.send(Ok(response.convert_into())).await.map_err(|e| e.to_string())?;
         // Ok(response)
 
         Ok(response.convert_into())
     }
 
-    async fn request<S: Serialize + std::marker::Sync + 'static, D, R, E>(
+    async fn request<S: Serialize + std::marker::Sync + 'static, D, R: Serialize + Clone, E: Serialize + Clone>(
         response: Response,
-        sender: Sender<Result<R, E>>
+        sender: Sender<Result<R, E>>,
     )
-        -> Result<R, Box<dyn std::error::Error>>
+        -> Result<R, String>
         where
             D: for<'de> Deserialize<'de> + HttpResponse<R> + std::marker::Send + 'static,
             R: std::marker::Send
@@ -144,7 +149,7 @@ impl HttpClient {
             Err(error) => {
                 println!("Failed to parse response: {}", error);
                 let err = HttpResponseError::new(&error.to_string(), "http_error");
-                return Err(Box::new(err));
+                return Err(err.to_string());
             }
         };
         sender.send(Ok(response.convert_into())).await.map_err(|_e| String::from("Can't send"))?;
@@ -185,13 +190,13 @@ impl HttpClient {
         Ok(response)
     }
 
-    pub async fn post_request<S: Serialize + std::marker::Sync + 'static, D, R, E>(
+    pub async fn post_request<S: Serialize + std::marker::Sync + 'static, D, R: Serialize + Clone, E: Serialize + Clone>(
         url: String,
         parameters: S,
         secret_key: Option<&str>,
         is_stream: bool,
         build_chunk: &mut impl FnMut(String, i64) -> Result<Option<String>, E>,
-        sender: Sender<Result<R, E>>
+        sender: Sender<Result<R, E>>,
     )
         -> ()
         where
@@ -209,7 +214,8 @@ impl HttpClient {
         let response = match HttpClient::get_response::<S, D, R, E>(client_builder).await {
             Ok(r) => r,
             Err(err) => {
-                // TODO send error sender.send(Err(Httperr));
+                println!("HttpClient getResponse error {}", err);
+                // sender.send(E::create(&format!("HttpClient getResponse error {}", err), "httpclient"));
                 return;
             },
         };

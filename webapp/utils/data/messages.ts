@@ -86,32 +86,8 @@ export const mergeMessages = (messages: Message[], newMessages: Message[]) => {
     }
     return m;
   });
+  console.log('mergeMessages', mergedMessages, 'fresh', freshNewMessages);
   return [...mergedMessages, ...freshNewMessages];
-};
-
-export const changeMessageContent = (
-  previousMessage: Message,
-  content: string,
-  rawContent = content,
-  status = previousMessage.status,
-): Message => {
-  const message: Message = {
-    ...previousMessage,
-    status,
-    content: createTextContent(content, rawContent),
-  };
-  if (
-    previousMessage.content &&
-    previousMessage.content !== content &&
-    previousMessage.status !== MessageStatus.Error
-  ) {
-    const { contentHistory = [] } = previousMessage;
-    const previousContent = createContent(previousMessage.content);
-    previousContent.author = { ...previousMessage.author };
-    contentHistory.unshift(previousContent);
-    message.contentHistory = contentHistory;
-  }
-  return message;
 };
 
 export const getRawContentAsString = (messageContent: string | Content | undefined): string => {
@@ -162,4 +138,31 @@ export const getMessageContentAuthorAsString = (message: Message, index = 0): Au
 export const getMessageFirstAsset = (message: Message, assets: Asset[] | undefined) => {
   const assetId = message.assets?.[0];
   return assets?.find((a) => a.id === assetId);
+};
+
+export const changeMessageContent = (
+  previousMessage: Message,
+  content: string,
+  rawContent = content,
+  status = previousMessage.status,
+): Message => {
+  const message: Message = {
+    ...previousMessage,
+    status,
+    content: createTextContent(content, rawContent),
+  };
+  const previousContentText = getMessageContentAsString(previousMessage);
+  if (
+    previousContentText &&
+    previousContentText !== '...' &&
+    previousContentText !== content &&
+    previousMessage.status !== MessageStatus.Error
+  ) {
+    const { contentHistory = [] } = previousMessage;
+    const previousContent = createContent(previousContentText);
+    previousContent.author = { ...previousMessage.author };
+    contentHistory.unshift(previousContent);
+    message.contentHistory = contentHistory;
+  }
+  return message;
 };
