@@ -16,9 +16,6 @@ pub mod http_client;
 
 use std::{ path::{ Path, PathBuf }, fs };
 
-use serde::Serialize;
-use tauri::{App, AppHandle, EventLoopMessage, Manager, Runtime};
-
 pub fn get_home_directory() -> Result<PathBuf, String> {
     let home_dir = dirs::home_dir().ok_or("Failed to get home directory")?;
     Ok(home_dir)

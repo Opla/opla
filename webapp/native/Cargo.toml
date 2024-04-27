@@ -33,6 +33,7 @@ tokenizer = { path = "../../crates/tokenizer"}
 sha2 = "0.10.8"
 async-trait = "0.1.80"
 dyn-clone = "1.0.17"
+bytes = "1.6.0"
 
 [features]
 # by default Tauri runs in production mode

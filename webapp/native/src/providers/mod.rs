@@ -13,13 +13,13 @@
 // limitations under the License.
 
 use std::{ collections::HashMap, sync::Arc };
-
 use tauri::{ AppHandle, Manager, Runtime };
 use tokenizer::encode;
 use tokio::{ spawn, sync::mpsc::channel };
+use bytes::Bytes;
 
 use crate::{
-    store::{ Provider, ProviderMetadata, ProviderType, ServerConfiguration, ServerParameters }, OplaContext, Payload, ServerStatus
+    store::{ Provider, ProviderMetadata, ProviderType, ServerConfiguration, ServerParameters }, utils::http_client::{HttpError, NewHttpError}, OplaContext, Payload, ServerStatus
 };
 
 use self::{
@@ -38,6 +38,46 @@ use self::{
 pub mod openai;
 pub mod llama_cpp;
 pub mod llm;
+
+#[derive(Clone)]
+pub struct Worker {
+    pub id: String,
+    pub created: i64,
+    pub client: Box<dyn LlmInferenceClient + Send + Sync>,
+}
+
+impl Worker {
+    pub fn new(id: &str, client: Box<dyn LlmInferenceClient + Send + Sync>) -> Self {
+        Worker { id: id.to_string(), created: chrono::Utc::now().timestamp_millis(), client }
+    }
+
+    pub fn deserialize_response_error(&mut self, response: Result<Bytes, (String, String)>) -> (String,String) {
+        match response {
+            Ok(full) => { match self.client.deserialize_response_error(&full) {
+                Ok(err) => (err.error.message, err.error.status),
+                Err(err) => (err.message, err.status),
+            }},
+            Err(err) => err,
+        }
+    }
+
+    pub fn build_stream_chunk<E>(&mut self, data: String, created: i64) -> Result<Option<String>, E> where E: NewHttpError  {
+        self.client.build_stream_chunk(data, created).map_err(|e| E::new(&e.message, &e.status))
+    }
+
+    pub fn handle_input_response(&mut self) {
+
+    }
+
+    pub fn handle_chunk_response(&mut self) {}
+
+    pub fn response_to_output(&mut self) {}
+
+    pub fn to_err(&mut self) {
+
+    }
+}
+
 #[derive(Clone)]
 pub struct ProvidersManager {
     clients: HashMap<String, Box<dyn LlmInferenceClient + 'static + Send + Sync>>,
@@ -192,14 +232,15 @@ impl ProvidersManager {
         completion_options: Option<LlmCompletionOptions>,
         inference_client: &Box<dyn LlmInferenceClient + Send + Sync>
     ) -> Result<(), String> {
-        let is_stream = query.options.get_parameter_as_boolean("stream").unwrap_or(false);
+        // let is_stream = query.options.get_parameter_as_boolean("stream").unwrap_or(false);
         let (sender, mut receiver) = channel::<Result<LlmCompletionResponse, LlmError>>(1);
 
         let query = query.clone();
         let completion_options = completion_options.clone();
+        let mut worker = Worker::new(conversation_id, inference_client.clone());
         let mut inference_client = inference_client.clone();
         let handle = spawn(async move {
-            inference_client.call_completion(&query, completion_options, sender).await
+            inference_client.call_completion(&query, completion_options,&mut worker, sender).await
         });
 
         self.completion_handles.insert(
@@ -210,7 +251,7 @@ impl ProvidersManager {
         let mut result: Result<LlmCompletionResponse, String> = Err(
             String::from("Not initialized")
         );
-    
+
         while let Some(response) = receiver.recv().await {
             println!("received {:?}", response);
             result = match response {

@@ -16,19 +16,20 @@
 use crate::{
     providers::llm::LlmQueryCompletion,
     store::ServerParameters,
-    utils::http_client::{ self, HttpError, HttpResponse },
+    utils::http_client::{ self, HttpConnection, HttpError, HttpResponse, NewHttpError },
 };
 
 use async_trait::async_trait;
-use serde::{ Deserialize, Serialize };
+use bytes::Bytes;
+use serde::{ de::DeserializeOwned, Deserialize, Serialize };
 use tokio::sync::mpsc::Sender;
 use crate::providers::llm::{ LlmQuery, LlmCompletionResponse, LlmUsage };
 
-use super::llm::{ LlmCompletionOptions, LlmError, LlmInferenceClient, LlmTokenizeResponse };
+use super::{llm::{ LlmCompletionOptions, LlmError, LlmInferenceClient, LlmResponseError, LlmTokenizeResponse }, Worker};
 
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LlamaCppQueryCompletion {
+pub struct LlamaCppCompletionQuery {
     pub prompt: String,
     pub stream: Option<bool>,
     pub temperature: Option<f32>,
@@ -58,7 +59,7 @@ impl LlmQueryCompletion {
     fn to_llama_cpp_parameters(
         &self,
         options: Option<LlmCompletionOptions>
-    ) -> LlamaCppQueryCompletion {
+    ) -> LlamaCppCompletionQuery {
         let mut prompt = String::new();
         match options {
             Some(options) => {
@@ -87,7 +88,7 @@ impl LlmQueryCompletion {
         }
         prompt.push_str("Answer:");
         println!("prompt: {}", prompt);
-        LlamaCppQueryCompletion {
+        LlamaCppCompletionQuery {
             prompt,
             stream: self.get_parameter_as_boolean("stream"),
             temperature: self.get_parameter_as_f32("temperature"),
@@ -144,12 +145,12 @@ impl LlamaCppChatTimings {
 }
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct LlamaCppChatCompletion {
+pub struct LlamaCppCompletionResponse {
     pub content: String,
     pub timings: LlamaCppChatTimings,
 }
 
-impl LlamaCppChatCompletion {
+impl LlamaCppCompletionResponse {
     pub fn to_llm_response(&self) -> LlmCompletionResponse {
         LlmCompletionResponse {
             created: None,
@@ -163,7 +164,13 @@ impl LlamaCppChatCompletion {
     }
 }
 
-impl HttpError for LlamaCppChatCompletion {
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LlamaCppResponseError {
+    pub message: String,
+    pub status: String,
+}
+
+impl HttpError for LlamaCppCompletionResponse {
     fn to_error(&self, status: String) -> Box<dyn std::error::Error> {
         let error = LlmError {
             message: format!("HTTP error {} : {}", status, self.content.to_string()),
@@ -176,7 +183,7 @@ impl HttpError for LlamaCppChatCompletion {
     }
 }
 
-impl HttpResponse<LlmCompletionResponse> for LlamaCppChatCompletion {
+impl HttpResponse<LlmCompletionResponse> for LlamaCppCompletionResponse {
     fn convert_into(&self) -> LlmCompletionResponse {
         LlmCompletionResponse {
             created: None,
@@ -190,7 +197,7 @@ impl HttpResponse<LlmCompletionResponse> for LlamaCppChatCompletion {
     }
 
     fn new(content: String, _end_time: u64) -> Self {
-        LlamaCppChatCompletion {
+        LlamaCppCompletionResponse {
             content,
             timings: LlamaCppChatTimings {
                 predicted_ms: 0.0,
@@ -256,8 +263,20 @@ impl LlamaCppInferenceClient {
         };
         Ok(format!("http://{:}:{:}/{}", host, port, endpoint))
     }
+}
 
-    fn build_stream_chunk(data: String, _created: i64) -> Result<Option<String>, LlmError> {
+#[async_trait]
+impl LlmInferenceClient for LlamaCppInferenceClient {
+    fn set_parameters(&mut self, parameters: ServerParameters) {
+        self.server_parameters = Some(parameters);
+    }
+
+    fn deserialize_response_error(&mut self, full: &Bytes) -> Result<LlmResponseError, LlmError> {
+        // TODO handle correct response error
+        serde_json::from_slice::<LlmResponseError>(&full).map_err(|e| LlmError::new(&e.to_string(), "LlamaCpp Inference"))
+    }
+
+    fn build_stream_chunk(&mut self, data: String, _created: i64) -> Result<Option<String>, LlmError> {
         let chunk = match serde_json::from_str::<LlamaCppChatCompletionChunk>(&data) {
             Ok(r) => r,
             Err(error) => {
@@ -274,18 +293,12 @@ impl LlamaCppInferenceClient {
             return Ok(Some(chunk.content.to_string()));
         }
     }
-}
-
-#[async_trait]
-impl LlmInferenceClient for LlamaCppInferenceClient {
-    fn set_parameters(&mut self, parameters: ServerParameters) {
-        self.server_parameters = Some(parameters);
-    }
 
     async fn call_completion(
         &mut self,
         query: &LlmQuery<LlmQueryCompletion>,
         completion_options: Option<LlmCompletionOptions>,
+        worker: &mut Worker,
         sender: Sender<Result<LlmCompletionResponse, LlmError>>,
     ) {
         let parameters = query.options.to_llama_cpp_parameters(completion_options);
@@ -300,9 +313,11 @@ impl LlmInferenceClient for LlamaCppInferenceClient {
             }
         };
 
-        http_client::HttpClient::post_request::<
-            LlamaCppQueryCompletion,
-            LlamaCppChatCompletion,
+        // let mut worker = Worker::new::<dyn LlmInferenceClient + Send + Sync + Sized>(conversation_id, self);
+    
+        /* http_client::HttpClient::post_request::<
+            LlamaCppCompletionQuery,
+            LlamaCppCompletionResponse,
             LlmCompletionResponse,
             LlmError
         >(
@@ -310,9 +325,14 @@ impl LlmInferenceClient for LlamaCppInferenceClient {
             parameters,
             None,
             is_stream,
-            &mut LlamaCppInferenceClient::build_stream_chunk,
+            worker,
             sender,
-        ).await;
+        ).await; */
+        let mut connection: HttpConnection<LlamaCppCompletionQuery,
+            LlamaCppCompletionResponse,
+            LlmCompletionResponse,
+            LlmError> = HttpConnection::post(api_url, parameters, None, worker);
+        connection.fetch(is_stream, sender).await;
     }
 
     async fn call_tokenize(

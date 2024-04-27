@@ -1,3 +1,4 @@
+use bytes::Bytes;
 // Copyright 2024 mik
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,12 +18,20 @@ use std::fmt;
 use async_trait::async_trait;
 use serde::{ Deserialize, Serialize };
 
-use crate::{ store::ServerParameters, utils::http_client::{ HttpChunk, HttpError, HttpResponseErr, HttpResponseError } };
+use crate::{ store::ServerParameters, utils::http_client::{ HttpChunk, HttpError, NewHttpError } };
+
+use super::Worker;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmError {
     pub message: String,
     pub status: String,
+}
+
+impl NewHttpError for LlmError {
+    fn new(msg: &str, status: &str) -> Self {
+        LlmError { message: msg.to_string(), status: status.to_string() }
+    }
 }
 
 impl LlmError {
@@ -241,10 +250,15 @@ pub struct LlmTokenizeResponse {
 #[async_trait]
 pub trait LlmInferenceClient: DynClone {
     fn set_parameters(&mut self, parameters: ServerParameters);
+    
+    fn deserialize_response_error(&mut self, full: &Bytes) -> Result<LlmResponseError, LlmError>;
+    fn build_stream_chunk(&mut self, data: String, _created: i64) -> Result<Option<String>, LlmError>;
+
     async fn call_completion(
         &mut self,
         query: &LlmQuery<LlmQueryCompletion>,
         completion_options: Option<LlmCompletionOptions>,
+        worker: &mut Worker,
         sender: Sender<Result<LlmCompletionResponse, LlmError>>
     );
 
