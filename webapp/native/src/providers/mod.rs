@@ -19,7 +19,11 @@ use tokio::{ spawn, sync::mpsc::channel };
 use bytes::Bytes;
 
 use crate::{
-    store::{ Provider, ProviderMetadata, ProviderType, ServerConfiguration, ServerParameters }, utils::http_client::{HttpError, NewHttpError}, OplaContext, Payload, ServerStatus
+    store::{ Provider, ProviderMetadata, ProviderType, ServerConfiguration, ServerParameters },
+    utils::http_client::{ HttpError, NewHttpError },
+    OplaContext,
+    Payload,
+    ServerStatus,
 };
 
 use self::{
@@ -51,31 +55,33 @@ impl Worker {
         Worker { id: id.to_string(), created: chrono::Utc::now().timestamp_millis(), client }
     }
 
-    pub fn deserialize_response_error(&mut self, response: Result<Bytes, (String, String)>) -> (String,String) {
+    pub fn deserialize_response_error<E>(&mut self, response: Result<Bytes, E>) -> E
+        where E: NewHttpError
+    {
         match response {
-            Ok(full) => { match self.client.deserialize_response_error(&full) {
-                Ok(err) => (err.error.message, err.error.status),
-                Err(err) => (err.message, err.status),
-            }},
+            Ok(full) => {
+                match self.client.deserialize_response_error(&full) {
+                    Ok(err) => E::new(&err.error.message, &err.error.status),
+                    Err(err) => E::new(&err.message, &err.status),
+                }
+            }
             Err(err) => err,
         }
     }
 
-    pub fn build_stream_chunk<E>(&mut self, data: String, created: i64) -> Result<Option<String>, E> where E: NewHttpError  {
+    pub fn build_stream_chunk<E>(&mut self, data: String, created: i64) -> Result<Option<String>, E>
+        where E: NewHttpError
+    {
         self.client.build_stream_chunk(data, created).map_err(|e| E::new(&e.message, &e.status))
     }
 
-    pub fn handle_input_response(&mut self) {
-
-    }
+    pub fn handle_input_response(&mut self) {}
 
     pub fn handle_chunk_response(&mut self) {}
 
     pub fn response_to_output(&mut self) {}
 
-    pub fn to_err(&mut self) {
-
-    }
+    pub fn to_err(&mut self) {}
 }
 
 #[derive(Clone)]
@@ -240,7 +246,7 @@ impl ProvidersManager {
         let mut worker = Worker::new(conversation_id, inference_client.clone());
         let mut inference_client = inference_client.clone();
         let handle = spawn(async move {
-            inference_client.call_completion(&query, completion_options,&mut worker, sender).await
+            inference_client.call_completion(&query, completion_options, &mut worker, sender).await
         });
 
         self.completion_handles.insert(

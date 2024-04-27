@@ -311,18 +311,10 @@ impl<S: Serialize + std::marker::Sync + 'static + Clone, D, R, E> HttpConnection
         };
         let status = response.status();
         if !status.is_success() {
-            let result = response.bytes().await.map_err(|err| (err.to_string(), String::from("Http client")));
-            let (msg, status) = self.worker.deserialize_response_error(result);
-            /* let error = match response.json::<E>().await {
-                Ok(t) => t,
-                Err(error) => {
-                    println!("Failed to dezerialize error response: {}", error);
-                    let err = E::new(&error.to_string(), "http_error");
-                    return Err(err);
-                }
-            }; */
-            println!("Failed to get response: {} {:?}", status, msg);
-            return Err(E::new(&msg, &status));
+            let result = response.bytes().await.map_err(|err| E::new(&err.to_string(), "Http client"));
+            let error = self.worker.deserialize_response_error::<E>(result);
+            println!("Failed to get response: {:?}", error);
+            return Err(error);
         }
         Ok(response)
     }
