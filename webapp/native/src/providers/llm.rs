@@ -20,7 +20,7 @@ use serde::{ Deserialize, Serialize };
 
 use crate::{ store::ServerParameters, utils::http_client::{ HttpChunk, HttpError, NewHttpError } };
 
-use super::Worker;
+use super::ProviderAdapter;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmError {
@@ -65,14 +65,6 @@ impl HttpError for LlmError {
     }
 }
 
-/* impl HttpResponseErr for LlmError {
-    fn create<R,E>(msg: &str, status: &str) -> Result<R,E> {
-        Err(HttpResponseErr {
-            message: msg.to_string(),
-            status: status.to_string(),
-        })
-    }
-} */
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmMessage {
@@ -199,6 +191,15 @@ impl LlmUsage {
     }
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LlmResponse {
+
+}
+
+trait LlmResponseInterface {
+    // TODO
+}
+
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmCompletionResponse {
@@ -237,6 +238,11 @@ impl LlmCompletionResponse {
         }
     }
 }
+
+impl LlmResponseInterface for LlmCompletionResponse {
+
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmResponseError {
     pub error: LlmError,
@@ -248,17 +254,23 @@ pub struct LlmTokenizeResponse {
 }
 
 #[async_trait]
-pub trait LlmInferenceClient: DynClone {
+pub trait LlmInferenceInterface: DynClone {
     fn set_parameters(&mut self, parameters: ServerParameters);
-    
+
+    fn deserialize_response(&mut self, full: &Bytes) -> Result<LlmResponse, LlmError>;
+
     fn deserialize_response_error(&mut self, full: &Bytes) -> Result<LlmResponseError, LlmError>;
-    fn build_stream_chunk(&mut self, data: String, _created: i64) -> Result<Option<String>, LlmError>;
+    fn build_stream_chunk(
+        &mut self,
+        data: String,
+        _created: i64
+    ) -> Result<Option<String>, LlmError>;
 
     async fn call_completion(
         &mut self,
         query: &LlmQuery<LlmQueryCompletion>,
         completion_options: Option<LlmCompletionOptions>,
-        worker: &mut Worker,
+        adapter: &mut ProviderAdapter,
         sender: Sender<Result<LlmCompletionResponse, LlmError>>
     );
 
@@ -269,4 +281,4 @@ pub trait LlmInferenceClient: DynClone {
     ) -> Result<LlmTokenizeResponse, Box<dyn std::error::Error>>;
 }
 
-dyn_clone::clone_trait_object!(LlmInferenceClient);
+dyn_clone::clone_trait_object!(LlmInferenceInterface);

@@ -38,7 +38,6 @@ use downloader::Downloader;
 use providers::{
     llm::{
         LlmCompletionOptions,
-        LlmCompletionResponse,
         LlmQuery,
         LlmQueryCompletion,
         LlmTokenizeResponse,

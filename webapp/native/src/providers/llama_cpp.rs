@@ -12,20 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 use crate::{
     providers::llm::LlmQueryCompletion,
     store::ServerParameters,
-    utils::http_client::{ self, HttpConnection, HttpError, HttpResponse, NewHttpError },
+    utils::http_client::{ HttpError, HttpResponse },
 };
 
 use async_trait::async_trait;
 use bytes::Bytes;
-use serde::{ de::DeserializeOwned, Deserialize, Serialize };
+use serde::{ Deserialize, Serialize };
 use tokio::sync::mpsc::Sender;
 use crate::providers::llm::{ LlmQuery, LlmCompletionResponse, LlmUsage };
 
-use super::{llm::{ LlmCompletionOptions, LlmError, LlmInferenceClient, LlmResponseError, LlmTokenizeResponse }, Worker};
+use super::{
+    llm::{
+        LlmCompletionOptions, LlmError, LlmInferenceInterface, LlmResponse, LlmResponseError, LlmTokenizeResponse
+    },
+    services::HttpService,
+    ProviderAdapter,
+};
 
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -266,17 +271,30 @@ impl LlamaCppInferenceClient {
 }
 
 #[async_trait]
-impl LlmInferenceClient for LlamaCppInferenceClient {
+impl LlmInferenceInterface for LlamaCppInferenceClient {
     fn set_parameters(&mut self, parameters: ServerParameters) {
         self.server_parameters = Some(parameters);
     }
 
-    fn deserialize_response_error(&mut self, full: &Bytes) -> Result<LlmResponseError, LlmError> {
-        // TODO handle correct response error
-        serde_json::from_slice::<LlmResponseError>(&full).map_err(|e| LlmError::new(&e.to_string(), "LlamaCpp Inference"))
+    fn deserialize_response(&mut self, full: &Bytes) -> Result<LlmResponse, LlmError> {
+
+                serde_json
+            ::from_slice::<LlmResponse>(&full)
+            .map_err(|e| LlmError::new(&e.to_string(), "LlamaCpp Inference"))
     }
 
-    fn build_stream_chunk(&mut self, data: String, _created: i64) -> Result<Option<String>, LlmError> {
+    fn deserialize_response_error(&mut self, full: &Bytes) -> Result<LlmResponseError, LlmError> {
+        // TODO handle correct response error
+        serde_json
+            ::from_slice::<LlmResponseError>(&full)
+            .map_err(|e| LlmError::new(&e.to_string(), "LlamaCpp Inference"))
+    }
+
+    fn build_stream_chunk(
+        &mut self,
+        data: String,
+        _created: i64
+    ) -> Result<Option<String>, LlmError> {
         let chunk = match serde_json::from_str::<LlamaCppChatCompletionChunk>(&data) {
             Ok(r) => r,
             Err(error) => {
@@ -298,8 +316,8 @@ impl LlmInferenceClient for LlamaCppInferenceClient {
         &mut self,
         query: &LlmQuery<LlmQueryCompletion>,
         completion_options: Option<LlmCompletionOptions>,
-        worker: &mut Worker,
-        sender: Sender<Result<LlmCompletionResponse, LlmError>>,
+        adapter: &mut ProviderAdapter,
+        sender: Sender<Result<LlmCompletionResponse, LlmError>>
     ) {
         let parameters = query.options.to_llama_cpp_parameters(completion_options);
 
@@ -313,26 +331,13 @@ impl LlmInferenceClient for LlamaCppInferenceClient {
             }
         };
 
-        // let mut worker = Worker::new::<dyn LlmInferenceClient + Send + Sync + Sized>(conversation_id, self);
-    
-        /* http_client::HttpClient::post_request::<
+        let mut service: HttpService<
             LlamaCppCompletionQuery,
             LlamaCppCompletionResponse,
             LlmCompletionResponse,
             LlmError
-        >(
-            api_url,
-            parameters,
-            None,
-            is_stream,
-            worker,
-            sender,
-        ).await; */
-        let mut connection: HttpConnection<LlamaCppCompletionQuery,
-            LlamaCppCompletionResponse,
-            LlmCompletionResponse,
-            LlmError> = HttpConnection::post(api_url, parameters, None, worker);
-        connection.fetch(is_stream, sender).await;
+        > = HttpService::post(api_url, parameters, None, adapter);
+        service.run(is_stream, sender).await;
     }
 
     async fn call_tokenize(

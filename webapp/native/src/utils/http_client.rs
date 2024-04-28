@@ -20,7 +20,7 @@ use eventsource_stream::Eventsource;
 use futures_util::stream::StreamExt;
 use tokio::sync::mpsc::Sender;
 
-use crate::providers::Worker;
+use crate::providers::ProviderAdapter;
 
 pub trait HttpResponse<R> {
     fn convert_into(&self) -> R;
@@ -74,9 +74,9 @@ pub trait HttpChunk {
 pub struct HttpClient {}
 
 impl HttpClient {
-    async fn stream_request<D, R: Serialize + Clone, E: Serialize + Clone>(
+    pub async fn stream_request<D, R: Serialize + Clone, E: Serialize + Clone>(
         response: Response,
-        worker: &mut Worker,
+        adapter: &mut ProviderAdapter,
         sender: Sender<Result<R, E>>
     )
         -> Result<R, String>
@@ -97,8 +97,8 @@ impl HttpClient {
             match event {
                 Ok(event) => {
                     let data = event.data;
-                    worker.handle_chunk_response();
-                    let chunk = worker.build_stream_chunk::<E>(data, created);
+                    adapter.handle_chunk_response();
+                    let chunk = adapter.build_stream_chunk::<E>(data, created);
                     match chunk {
                         Ok(r) => {
                             let mut stop = false;
@@ -139,7 +139,7 @@ impl HttpClient {
                 }
             }
         }
-        worker.response_to_output();
+        adapter.response_to_output();
         let end_time = 0;
         let response = D::new(content, end_time);
         sender.send(Ok(response.convert_into())).await.map_err(|e| e.to_string())?;
@@ -147,9 +147,9 @@ impl HttpClient {
         Ok(response.convert_into())
     }
 
-    async fn request<D, R: Serialize + Clone, E: Serialize + Clone>(
+    pub async fn request<D, R: Serialize + Clone, E: Serialize + Clone>(
         response: Response,
-        worker: &mut Worker,
+        adapter: &mut ProviderAdapter,
         sender: Sender<Result<R, E>>
     )
         -> Result<R, String>
@@ -157,7 +157,7 @@ impl HttpClient {
             D: for<'de> Deserialize<'de> + HttpResponse<R> + std::marker::Send + 'static,
             R: std::marker::Send
     {
-        worker.handle_input_response();
+        adapter.handle_input_response();
         let response = match response.json::<D>().await {
             Ok(r) => r,
             Err(error) => {
@@ -166,7 +166,7 @@ impl HttpClient {
                 return Err(err.to_string());
             }
         };
-        worker.response_to_output();
+        adapter.response_to_output();
         sender.send(Ok(response.convert_into())).await.map_err(|_e| String::from("Can't send"))?;
         Ok(response.convert_into())
     }
@@ -212,7 +212,7 @@ impl HttpClient {
         body: S,
         secret_key: Option<&str>,
         is_stream: bool,
-        worker: &mut Worker,
+        worker: &mut ProviderAdapter,
         sender: Sender<Result<R, E>>
     )
         -> ()
@@ -251,98 +251,3 @@ impl HttpClient {
     }
 }
 
-pub struct HttpConnection<S, D, R, E> {
-    pub worker: Worker,
-    pub url: String,
-    pub body: S,
-    pub secret_key: Option<String>,
-    pub input: Option<D>,
-    pub output: Option<R>,
-    pub error: Option<E>,
-}
-
-impl<S: Serialize + std::marker::Sync + 'static + Clone, D, R, E> HttpConnection<S, D, R, E>
-    where
-        D: Serialize +
-            Clone +
-            for<'de> Deserialize<'de> +
-            HttpResponse<R> +
-            std::marker::Send +
-            'static,
-        R: Serialize + Clone + HttpChunk + std::marker::Send + 'static,
-        E: Serialize +
-            Clone +
-            for<'de> Deserialize<'de> +
-            HttpError +
-            NewHttpError +
-            std::fmt::Debug +
-            std::error::Error +
-            'static
-{
-    pub fn post(url: String, body: S, secret_key: Option<String>, worker: &mut Worker) -> Self {
-        HttpConnection {
-            url,
-            body: body.clone(),
-            secret_key,
-            worker: worker.clone(),
-            input: None,
-            output: None,
-            error: None,
-        }
-    }
-
-    async fn get_response(&mut self, client_builder: RequestBuilder) -> Result<Response, E>
-        where
-            E: for<'de> Deserialize<'de> +
-                HttpError +
-                NewHttpError +
-                std::fmt::Debug +
-                std::error::Error +
-                'static
-    {
-        let result = client_builder.send().await;
-        let response = match result {
-            Ok(res) => res,
-            Err(error) => {
-                println!("Failed to get response: {}", error);
-                let err = E::new(&error.to_string(), "http_error");
-                return Err(err);
-            }
-        };
-        let status = response.status();
-        if !status.is_success() {
-            let result = response.bytes().await.map_err(|err| E::new(&err.to_string(), "Http client"));
-            let error = self.worker.deserialize_response_error::<E>(result);
-            println!("Failed to get response: {:?}", error);
-            return Err(error);
-        }
-        Ok(response)
-    }
-
-    pub async fn fetch(&mut self, is_stream: bool, sender: Sender<Result<R, E>>) {
-        let client_builder = Client::new().post(&self.url);
-        let client_builder = match &self.secret_key {
-            Some(secret) => client_builder.bearer_auth(&secret),
-            None => client_builder,
-        };
-        let client_builder = client_builder.json(&self.body);
-        let response = match self.get_response(client_builder).await {
-            Ok(r) => r,
-            Err(err) => {
-                println!("HttpClient getResponse error {}", err);
-                let _ = sender.send(Err(err)).await;
-                return;
-            }
-        };
-        let _result;
-        if is_stream {
-            _result = HttpClient::stream_request::<D, R, E>(
-                response,
-                &mut self.worker,
-                sender
-            ).await;
-        } else {
-            _result = HttpClient::request::<D, R, E>(response, &mut self.worker, sender).await;
-        }
-    }
-}

@@ -20,7 +20,7 @@ use bytes::Bytes;
 
 use crate::{
     store::{ Provider, ProviderMetadata, ProviderType, ServerConfiguration, ServerParameters },
-    utils::http_client::{ HttpError, NewHttpError },
+    utils::http_client::NewHttpError,
     OplaContext,
     Payload,
     ServerStatus,
@@ -32,7 +32,7 @@ use self::{
         LlmCompletionOptions,
         LlmCompletionResponse,
         LlmError,
-        LlmInferenceClient,
+        LlmInferenceInterface,
         LlmQuery,
         LlmQueryCompletion,
         LlmTokenizeResponse,
@@ -42,17 +42,28 @@ use self::{
 pub mod openai;
 pub mod llama_cpp;
 pub mod llm;
-
+pub mod services;
 #[derive(Clone)]
-pub struct Worker {
+pub struct ProviderAdapter {
     pub id: String,
     pub created: i64,
-    pub client: Box<dyn LlmInferenceClient + Send + Sync>,
+    pub interface: Box<dyn LlmInferenceInterface + Send + Sync>,
 }
 
-impl Worker {
-    pub fn new(id: &str, client: Box<dyn LlmInferenceClient + Send + Sync>) -> Self {
-        Worker { id: id.to_string(), created: chrono::Utc::now().timestamp_millis(), client }
+impl ProviderAdapter {
+    pub fn new(id: &str, interface: Box<dyn LlmInferenceInterface + Send + Sync>) -> Self {
+        ProviderAdapter {
+            id: id.to_string(),
+            created: chrono::Utc::now().timestamp_millis(),
+            interface,
+        }
+    }
+
+    pub fn deserialize_response<D, E>(&mut self, full: Bytes) -> Result<D,E> where E: NewHttpError {
+        match self.interface.deserialize_response(&full) {
+            Ok(_err) => Err(E::new("TODO", "ProviderAdapter")),
+            Err(err) => Err(E::new(&err.message, &err.status)),
+        }
     }
 
     pub fn deserialize_response_error<E>(&mut self, response: Result<Bytes, E>) -> E
@@ -60,7 +71,7 @@ impl Worker {
     {
         match response {
             Ok(full) => {
-                match self.client.deserialize_response_error(&full) {
+                match self.interface.deserialize_response_error(&full) {
                     Ok(err) => E::new(&err.error.message, &err.error.status),
                     Err(err) => E::new(&err.message, &err.status),
                 }
@@ -72,7 +83,7 @@ impl Worker {
     pub fn build_stream_chunk<E>(&mut self, data: String, created: i64) -> Result<Option<String>, E>
         where E: NewHttpError
     {
-        self.client.build_stream_chunk(data, created).map_err(|e| E::new(&e.message, &e.status))
+        self.interface.build_stream_chunk(data, created).map_err(|e| E::new(&e.message, &e.status))
     }
 
     pub fn handle_input_response(&mut self) {}
@@ -86,19 +97,19 @@ impl Worker {
 
 #[derive(Clone)]
 pub struct ProvidersManager {
-    clients: HashMap<String, Box<dyn LlmInferenceClient + 'static + Send + Sync>>,
+    interfaces: HashMap<String, Box<dyn LlmInferenceInterface + 'static + Send + Sync>>,
     completion_handles: HashMap<String, Arc<tokio::task::AbortHandle>>,
 }
 
 impl ProvidersManager {
     pub fn new() -> Self {
-        let mut clients: HashMap<
+        let mut interfaces: HashMap<
             String,
-            Box<dyn LlmInferenceClient + Send + Sync>
+            Box<dyn LlmInferenceInterface + Send + Sync>
         > = HashMap::new();
-        clients.insert(String::from("opla"), Box::new(LlamaCppInferenceClient::new(None)));
+        interfaces.insert(String::from("opla"), Box::new(LlamaCppInferenceClient::new(None)));
         ProvidersManager {
-            clients,
+            interfaces,
             completion_handles: HashMap::new(),
         }
     }
@@ -169,24 +180,24 @@ impl ProvidersManager {
         Ok(parameters)
     }
 
-    async fn build_inference_client<R: Runtime>(
+    async fn create_interface<R: Runtime>(
         &self,
         app: AppHandle<R>,
         model: String,
-        client_name: String
-    ) -> Result<Box<dyn LlmInferenceClient + Send + Sync>, String> {
-        let client = match self.clients.get(&client_name) {
+        provider_name: String
+    ) -> Result<Box<dyn LlmInferenceInterface + Send + Sync>, String> {
+        let interface = match self.interfaces.get(&provider_name) {
             Some(c) => c,
             None => {
-                return Err(format!("Inference client not found: {:?}", client_name));
+                return Err(format!("Inference interface not found: {:?}", provider_name));
             }
         };
         // TODO if local inference client
         let parameters = self.bind_local_server(app, model).await?;
         // let mut client_instance = client.create(server.parameters);
-        let mut client = client.clone();
-        client.set_parameters(parameters);
-        Ok(client)
+        let mut interface = interface.clone();
+        interface.set_parameters(parameters);
+        Ok(interface)
     }
 
     pub async fn cancel_completion(&mut self, conversation_id: &str) -> Result<(), String> {
@@ -236,17 +247,16 @@ impl ProvidersManager {
         message_id: &str,
         query: LlmQuery<LlmQueryCompletion>,
         completion_options: Option<LlmCompletionOptions>,
-        inference_client: &Box<dyn LlmInferenceClient + Send + Sync>
+        interface: &Box<dyn LlmInferenceInterface + Send + Sync>
     ) -> Result<(), String> {
-        // let is_stream = query.options.get_parameter_as_boolean("stream").unwrap_or(false);
         let (sender, mut receiver) = channel::<Result<LlmCompletionResponse, LlmError>>(1);
 
         let query = query.clone();
         let completion_options = completion_options.clone();
-        let mut worker = Worker::new(conversation_id, inference_client.clone());
-        let mut inference_client = inference_client.clone();
+        let mut interface = interface.clone();
+        let mut adapter = ProviderAdapter::new(conversation_id, interface.clone());
         let handle = spawn(async move {
-            inference_client.call_completion(&query, completion_options, &mut worker, sender).await
+            interface.call_completion(&query, completion_options, &mut adapter, sender).await
         });
 
         self.completion_handles.insert(
@@ -316,7 +326,7 @@ impl ProvidersManager {
             }
         };
         if llm_provider_type == "opla" {
-            let client = self.build_inference_client(
+            let interface = self.create_interface(
                 app.app_handle(),
                 model.to_string(),
                 llm_provider_type
@@ -328,7 +338,7 @@ impl ProvidersManager {
                 &message_id,
                 query,
                 completion_options,
-                &client.clone()
+                &interface.clone()
             ).await;
 
             // server.set_parameters(Some(parameters));
@@ -400,7 +410,7 @@ impl ProvidersManager {
             // let context = app.state::<OplaContext>();
             // let context_server = Arc::clone(&context.server);
             // let mut server = context_server.lock().await;
-            let client = self.build_inference_client(
+            let client = self.create_interface(
                 app.app_handle(),
                 model.to_string(),
                 llm_provider_type
