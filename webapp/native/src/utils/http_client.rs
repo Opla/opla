@@ -92,7 +92,7 @@ impl HttpClient {
     {
         let mut stream = response.bytes_stream().eventsource();
         let mut content = String::new();
-        let created = chrono::Utc::now().timestamp_millis();
+        let _created = chrono::Utc::now().timestamp_millis();
         while let Some(event) = stream.next().await {
             match event {
                 Ok(event) => {
