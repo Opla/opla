@@ -97,8 +97,8 @@ impl HttpClient {
             match event {
                 Ok(event) => {
                     let data = event.data;
-                    adapter.handle_chunk_response();
-                    let chunk = adapter.build_stream_chunk::<E>(data, created);
+                    // adapter.handle_chunk_response();
+                    let chunk = adapter.build_stream_chunk::<E>(data);
                     match chunk {
                         Ok(r) => {
                             let mut stop = false;
@@ -139,7 +139,7 @@ impl HttpClient {
                 }
             }
         }
-        adapter.response_to_output();
+        // adapter.response_to_output();
         let end_time = 0;
         let response = D::new(content, end_time);
         sender.send(Ok(response.convert_into())).await.map_err(|e| e.to_string())?;
@@ -166,7 +166,7 @@ impl HttpClient {
                 return Err(err.to_string());
             }
         };
-        adapter.response_to_output();
+        // adapter.response_to_output();
         sender.send(Ok(response.convert_into())).await.map_err(|_e| String::from("Can't send"))?;
         Ok(response.convert_into())
     }

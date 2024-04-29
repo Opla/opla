@@ -13,14 +13,16 @@
 // limitations under the License.
 
 use std::{ collections::HashMap, sync::Arc };
+// use futures_util::FutureExt;
+use serde::Serialize;
 use tauri::{ AppHandle, Manager, Runtime };
 use tokenizer::encode;
-use tokio::{ spawn, sync::mpsc::channel };
+use tokio::{ spawn, sync::Mutex};
 use bytes::Bytes;
 
 use crate::{
     store::{ Provider, ProviderMetadata, ProviderType, ServerConfiguration, ServerParameters },
-    utils::http_client::NewHttpError,
+    utils::http_client::{ HttpChunk, NewHttpError },
     OplaContext,
     Payload,
     ServerStatus,
@@ -35,6 +37,7 @@ use self::{
         LlmInferenceInterface,
         LlmQuery,
         LlmQueryCompletion,
+        LlmResponseImpl,
         LlmTokenizeResponse,
     },
 };
@@ -47,6 +50,7 @@ pub mod services;
 pub struct ProviderAdapter {
     pub id: String,
     pub created: i64,
+    pub content: String,
     pub interface: Box<dyn LlmInferenceInterface + Send + Sync>,
 }
 
@@ -54,12 +58,24 @@ impl ProviderAdapter {
     pub fn new(id: &str, interface: Box<dyn LlmInferenceInterface + Send + Sync>) -> Self {
         ProviderAdapter {
             id: id.to_string(),
+            content: String::new(),
             created: chrono::Utc::now().timestamp_millis(),
             interface,
         }
     }
 
-    pub fn deserialize_response<D, E>(&mut self, full: Bytes) -> Result<D,E> where E: NewHttpError {
+    pub fn reset_content(&mut self) {
+        self.content = String::new();
+        self.created = chrono::Utc::now().timestamp_millis();
+    }
+
+    pub fn serialize_parameters<S, E>(&mut self, json: S) -> Result<Vec<u8>, E>
+        where E: NewHttpError, S: Serialize
+    {
+        serde_json::to_vec::<S>(&json).map_err(|e| E::new(&e.to_string(), "ProviderAdapter"))
+    }
+
+    pub fn deserialize_response<D, E>(&mut self, full: Bytes) -> Result<D, E> where E: NewHttpError {
         match self.interface.deserialize_response(&full) {
             Ok(_err) => Err(E::new("TODO", "ProviderAdapter")),
             Err(err) => Err(E::new(&err.message, &err.status)),
@@ -80,17 +96,46 @@ impl ProviderAdapter {
         }
     }
 
-    pub fn build_stream_chunk<E>(&mut self, data: String, created: i64) -> Result<Option<String>, E>
+    pub fn build_stream_chunk<E>(&mut self, data: String) -> Result<Option<String>, E>
         where E: NewHttpError
     {
-        self.interface.build_stream_chunk(data, created).map_err(|e| E::new(&e.message, &e.status))
+        self.interface
+            .build_stream_chunk(data, self.created)
+            .map_err(|e| E::new(&e.message, &e.status))
     }
 
     pub fn handle_input_response(&mut self) {}
 
-    pub fn handle_chunk_response(&mut self) {}
+    pub fn handle_chunk_response<R, E>(&mut self, data: String) -> (bool, Result<R, E>)
+        where R: HttpChunk, E: NewHttpError
+    {
+        let chunk = self.build_stream_chunk::<E>(data);
+        match chunk {
+            Ok(r) => {
+                let mut stop = false;
+                let response = match r {
+                    Some(chunk_content) => {
+                        self.content.push_str(chunk_content.as_str());
+                        R::new(chrono::Utc::now().timestamp_millis(), "success", &chunk_content)
+                    }
+                    None => {
+                        stop = true;
+                        R::new(chrono::Utc::now().timestamp_millis(), "finished", "done")
+                    }
+                };
+                return (stop, Ok(response));
+            }
+            Err(e) => {
+                return (false, Err(e));
+            }
+        }
+    }
 
-    pub fn response_to_output(&mut self) {}
+    pub fn response_to_output<R: LlmResponseImpl, E>(&mut self) -> Result<R, E> {
+        // let end_time = 0;
+        let response = R::new(self.created, "finished", &self.content);
+        Ok(response)
+    }
 
     pub fn to_err(&mut self) {}
 }
@@ -98,7 +143,7 @@ impl ProviderAdapter {
 #[derive(Clone)]
 pub struct ProvidersManager {
     interfaces: HashMap<String, Box<dyn LlmInferenceInterface + 'static + Send + Sync>>,
-    completion_handles: HashMap<String, Arc<tokio::task::AbortHandle>>,
+    completion_handles: Arc<Mutex<HashMap<String, Arc<tokio::task::AbortHandle>>>>,
 }
 
 impl ProvidersManager {
@@ -110,7 +155,7 @@ impl ProvidersManager {
         interfaces.insert(String::from("opla"), Box::new(LlamaCppInferenceClient::new(None)));
         ProvidersManager {
             interfaces,
-            completion_handles: HashMap::new(),
+            completion_handles: Arc::new(Mutex::new(HashMap::new())),
         }
     }
 
@@ -201,7 +246,8 @@ impl ProvidersManager {
     }
 
     pub async fn cancel_completion(&mut self, conversation_id: &str) -> Result<(), String> {
-        let handle = self.completion_handles.remove(conversation_id);
+        let mut completion_handles = self.completion_handles.lock().await;
+        let handle = completion_handles.remove(conversation_id);
         println!("Cancel completion {}", conversation_id);
         match handle {
             Some(h) => {
@@ -249,26 +295,82 @@ impl ProvidersManager {
         completion_options: Option<LlmCompletionOptions>,
         interface: &Box<dyn LlmInferenceInterface + Send + Sync>
     ) -> Result<(), String> {
-        let (sender, mut receiver) = channel::<Result<LlmCompletionResponse, LlmError>>(1);
+        // let (sender, mut receiver) = channel::<Result<LlmCompletionResponse, LlmError>>(1);
 
         let query = query.clone();
+        let is_stream = query.options.get_parameter_as_boolean("stream").unwrap_or(false);
         let completion_options = completion_options.clone();
         let mut interface = interface.clone();
         let mut adapter = ProviderAdapter::new(conversation_id, interface.clone());
+
+        let mut service = match
+            interface.call_completion(&query, completion_options, &mut adapter).await
+        {
+            Ok(service) => service,
+            Err(err) => {
+                // let e = sender.send(Err(err.clone())).await;
+                let e = app
+                            .emit_all("opla-sse", Payload {
+                                message: err.to_string(),
+                                status: ServerStatus::Error.as_str().to_string(),
+                            })
+                            .map_err(|err| err.to_string());
+                if e.is_err() {
+                    println!("Send error: {}", e.unwrap_err());
+                }
+                return Err(err.to_string());
+            }
+        };
+
+        let cid = format!("{}",conversation_id);
+        let message_id = format!("{}",message_id);
+        let completion_handles = self.completion_handles.clone();
         let handle = spawn(async move {
-            interface.call_completion(&query, completion_options, &mut adapter, sender).await
+            let send = |response: Result<LlmCompletionResponse, LlmError>| {
+                let mut finished = false;
+                let result = match response {
+                    Ok(response) => {
+                        let mut response = response.clone();
+                        if response.status == Some(String::from("finished")) {
+                            finished = true;
+                        }
+                        response.conversation_id = Some(cid.to_string());
+                        response.message_id = Some(message_id.to_string());
+                        let _ = app
+                            .emit_all("opla-sse", response.clone())
+                            .map_err(|err| err.to_string());
+                        Ok(response.clone())
+                    }
+                    Err(err) => {
+                        let _ = app
+                            .emit_all("opla-sse", Payload {
+                                message: err.to_string(),
+                                status: ServerStatus::Error.as_str().to_string(),
+                            })
+                            .map_err(|err| err.to_string());
+                        Err(err.to_string())
+                    }
+                };
+                if finished {
+                    let completion_handles = completion_handles.clone();
+                    let cid = cid.clone();
+                    spawn(async move {
+                        let mut handles = completion_handles.lock().await;
+                        handles.remove(&cid.to_string());
+                    });
+                    println!("call completion result {:?}", result);
+                }
+            };
+            service.run(is_stream, send).await;
         });
 
-        self.completion_handles.insert(
+        let mut handles = self.completion_handles.lock().await;
+        handles.insert(
             conversation_id.to_string(),
             Arc::new(handle.abort_handle())
         );
 
-        let mut result: Result<LlmCompletionResponse, String> = Err(
-            String::from("Not initialized")
-        );
-
-        while let Some(response) = receiver.recv().await {
+        /* while let Some(response) = receiver.recv().await {
             println!("received {:?}", response);
             result = match response {
                 Ok(response) => {
@@ -290,9 +392,9 @@ impl ProvidersManager {
                     Err(err.to_string())
                 }
             };
-        }
-        self.completion_handles.remove(&conversation_id.to_string());
-        println!("call completion result {:?}", result);
+        } */
+        /* self.completion_handles.remove(&conversation_id.to_string());
+        println!("call completion result {:?}", result); */
         Ok(())
     }
 

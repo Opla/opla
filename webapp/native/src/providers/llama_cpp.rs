@@ -21,12 +21,15 @@ use crate::{
 use async_trait::async_trait;
 use bytes::Bytes;
 use serde::{ Deserialize, Serialize };
-use tokio::sync::mpsc::Sender;
 use crate::providers::llm::{ LlmQuery, LlmCompletionResponse, LlmUsage };
 
 use super::{
     llm::{
-        LlmCompletionOptions, LlmError, LlmInferenceInterface, LlmResponse, LlmResponseError, LlmTokenizeResponse
+        LlmCompletionOptions,
+        LlmError,
+        LlmInferenceInterface,
+        LlmResponseError,
+        LlmTokenizeResponse,
     },
     services::HttpService,
     ProviderAdapter,
@@ -276,10 +279,10 @@ impl LlmInferenceInterface for LlamaCppInferenceClient {
         self.server_parameters = Some(parameters);
     }
 
-    fn deserialize_response(&mut self, full: &Bytes) -> Result<LlmResponse, LlmError> {
-
-                serde_json
-            ::from_slice::<LlmResponse>(&full)
+    fn deserialize_response(&mut self, full: &Bytes) -> Result<LlmCompletionResponse, LlmError> {
+        serde_json
+            ::from_slice::<LlamaCppCompletionResponse>(&full)
+            .map(|response| response.to_llm_response())
             .map_err(|e| LlmError::new(&e.to_string(), "LlamaCpp Inference"))
     }
 
@@ -317,27 +320,28 @@ impl LlmInferenceInterface for LlamaCppInferenceClient {
         query: &LlmQuery<LlmQueryCompletion>,
         completion_options: Option<LlmCompletionOptions>,
         adapter: &mut ProviderAdapter,
-        sender: Sender<Result<LlmCompletionResponse, LlmError>>
-    ) {
+        /* sender: Sender<Result<LlmCompletionResponse, LlmError>> */
+    ) -> Result<HttpService<LlmCompletionResponse, LlmError>, LlmError>{
         let parameters = query.options.to_llama_cpp_parameters(completion_options);
 
-        let is_stream = parameters.stream.unwrap_or(false);
+        // let is_stream = parameters.stream.unwrap_or(false);
 
         let api_url = match self.get_api(query.command.clone()) {
             Ok(url) => url,
             Err(msg) => {
-                let _ = sender.send(Err(LlmError::new(&msg, "Parameters_error"))).await;
-                return;
+                // let _ = sender.send(Err(LlmError::new(&msg, "Parameters_error"))).await;
+                return Err(LlmError::new(&msg, "Parameters_error"));
             }
         };
 
-        let mut service: HttpService<
-            LlamaCppCompletionQuery,
-            LlamaCppCompletionResponse,
-            LlmCompletionResponse,
-            LlmError
-        > = HttpService::post(api_url, parameters, None, adapter);
-        service.run(is_stream, sender).await;
+        let service: HttpService<LlmCompletionResponse, LlmError> = HttpService::post(
+            api_url,
+            parameters,
+            None,
+            adapter
+        );
+        Ok(service)
+        // service.run(is_stream, sender).await;
     }
 
     async fn call_tokenize(

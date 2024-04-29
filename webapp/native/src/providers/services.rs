@@ -12,41 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use reqwest::{ Client, RequestBuilder, Response };
+use reqwest::{ header::{ HeaderValue, CONTENT_TYPE }, Client, RequestBuilder, Response };
 use serde::{ Deserialize, Serialize };
-use tokio::sync::mpsc::Sender;
+use eventsource_stream::Eventsource;
+use futures_util::stream::StreamExt;
 
 use crate::{
     providers::ProviderAdapter,
-    utils::http_client::{
-        HttpChunk,
-        HttpClient,
-        HttpError,
-        HttpResponse,
-        HttpResponseError,
-        NewHttpError,
-    },
+    utils::http_client::{ HttpChunk, HttpError, NewHttpError },
 };
 
-pub struct HttpService<S, D, R, E> {
+use super::llm::LlmResponseImpl;
+
+pub struct HttpService<R, E> {
     pub adapter: ProviderAdapter,
     pub url: String,
-    pub body: S,
+    pub body: Result<Vec<u8>, E>,
     pub secret_key: Option<String>,
-    pub input: Option<D>,
     pub output: Option<R>,
     pub error: Option<E>,
 }
 
-impl<S: Serialize + std::marker::Sync + 'static + Clone, D, R, E> HttpService<S, D, R, E>
+impl<R, E> HttpService<R, E>
     where
-        D: Serialize +
-            Clone +
-            for<'de> Deserialize<'de> +
-            HttpResponse<R> +
-            std::marker::Send +
-            'static,
-        R: Serialize + Clone + HttpChunk + std::marker::Send + 'static,
+        R: Serialize + Clone + LlmResponseImpl + HttpChunk + std::marker::Send + 'static,
         E: Serialize +
             Clone +
             for<'de> Deserialize<'de> +
@@ -56,7 +45,7 @@ impl<S: Serialize + std::marker::Sync + 'static + Clone, D, R, E> HttpService<S,
             std::error::Error +
             'static
 {
-    pub fn post(
+    pub fn post<S: Serialize + std::marker::Sync + 'static + Clone>(
         url: String,
         body: S,
         secret_key: Option<String>,
@@ -64,46 +53,122 @@ impl<S: Serialize + std::marker::Sync + 'static + Clone, D, R, E> HttpService<S,
     ) -> Self {
         HttpService {
             url,
-            body: body.clone(),
+            body: adapter.serialize_parameters(body),
             secret_key,
             adapter: adapter.clone(),
-            input: None,
             output: None,
             error: None,
         }
     }
 
+    pub async fn stream_request(
+        &mut self,
+        response: Response,
+        // sender: Sender<Result<R, E>>
+        mut send: impl FnMut(Result<R, E>) -> (),
+    )
+        -> Result<R, E>
+        where
+            R: HttpChunk + std::marker::Send + 'static,
+            E: for<'de> Deserialize<'de> +
+                HttpError +
+                NewHttpError +
+                std::fmt::Debug +
+                std::error::Error +
+                'static
+    {
+        let mut stream = response.bytes_stream().eventsource();
+        // let mut content = String::new();
+        // let created = chrono::Utc::now().timestamp_millis();
+        self.adapter.reset_content();
+        while let Some(event) = stream.next().await {
+            match event {
+                Ok(event) => {
+                    let data = event.data;
+                    let (stop, result) = self.adapter.handle_chunk_response::<R, E>(data);
+                    send(result);
+                    /* sender
+                        .send(result).await
+                        .map_err(|err| E::new(&err.to_string(), "http_service"))?; */
+                    /* let chunk = self.adapter.build_stream_chunk::<E>(data, created);
+                    match chunk {
+                        Ok(r) => {
+                            let mut stop = false;
+                            let response = match r {
+                                Some(chunk_content) => {
+                                    content.push_str(chunk_content.as_str());
+                                    R::new(
+                                        chrono::Utc::now().timestamp_millis(),
+                                        "success",
+                                        &chunk_content
+                                    )
+                                }
+                                None => {
+                                    stop = true;
+                                    R::new(
+                                        chrono::Utc::now().timestamp_millis(),
+                                        "finished",
+                                        "done"
+                                    )
+                                }
+                            };
+                            // sender.send(Ok(response)).await?;
+                            sender.send(Ok(response)).await.map_err(|e| e.to_string())?;
+                            if stop {
+                                break;
+                            }
+                        }
+                        Err(e) => {
+                            sender.send(Err(e)).await.map_err(|e| e.to_string())?;
+                        }
+                    } */
+                    if stop {
+                        break;
+                    }
+                }
+                Err(error) => {
+                    let message = format!("Failed to get event: {}", error);
+                    println!("{}", message);
+                    let err = E::new(&error.to_string(), "http_service");
+                    return Err(err);
+                }
+            }
+        }
+        let result = self.adapter.response_to_output::<R, E>();
+        send(result.clone());
+        // sender.send(result.clone()).await.map_err(|err| E::new(&err.to_string(), "http_service"))?;
+        // let end_time = 0;
+        // let response = D::new(content, end_time);
+        // sender.send(Ok(response.convert_into())).await.map_err(|e| e.to_string())?;
+        // Ok(response)
+        // Ok(response.convert_into())
+        result
+    }
+
     async fn request(
         response: Response,
         adapter: &mut ProviderAdapter,
-        sender: Sender<Result<R, E>>
-    )
-        -> Result<R, String>
-        where
-            D: for<'de> Deserialize<'de> + HttpResponse<R> + std::marker::Send + 'static,
-            R: std::marker::Send
+        mut send: impl FnMut(Result<R, E>) -> (),
+        // sender: Sender<Result<R, E>>
+    ) -> Result<R, E>
+        where R: std::marker::Send
     {
         // adapter.handle_input_response();
-        let result = response.bytes().await.map_err(|err| err.to_string())?;
-        let response = match adapter.deserialize_response::<D, E>(result) {
+        let result = response
+            .bytes().await
+            .map_err(|err| E::new(&err.to_string(), "http_service"))?;
+        let response = match adapter.deserialize_response::<R, E>(result) {
             Ok(r) => r,
             Err(error) => {
                 println!("Failed to parse response: {}", error);
-                let err = HttpResponseError::new(&error.to_string(), "http_error");
-                return Err(err.to_string());
+                return Err(error);
             }
         };
-        /* let response = match response.json::<D>().await {
-            Ok(r) => r,
-            Err(error) => {
-                println!("Failed to parse response: {}", error);
-                let err = HttpResponseError::new(&error.to_string(), "http_error");
-                return Err(err.to_string());
-            }
-        }; */
-        adapter.response_to_output();
-        sender.send(Ok(response.convert_into())).await.map_err(|_e| String::from("Can't send"))?;
-        Ok(response.convert_into())
+        // adapter.response_to_output();
+        let result = Ok(response);
+        // sender.send(result.clone()).await.map_err(|err| E::new(&err.to_string(), "http_service"))?;
+        send(result.clone());
+        result
     }
 
     async fn get_response(&mut self, client_builder: RequestBuilder) -> Result<Response, E>
@@ -136,30 +201,37 @@ impl<S: Serialize + std::marker::Sync + 'static + Clone, D, R, E> HttpService<S,
         Ok(response)
     }
 
-    pub async fn run(&mut self, is_stream: bool, sender: Sender<Result<R, E>>) {
+    pub async fn run(&mut self, is_stream: bool, /* sender: Sender<Result<R, E>> */ mut send: impl FnMut(Result<R, E>) -> ()) {
+        let body = match &self.body {
+            Ok(body) => body.clone(),
+            Err(err) => {
+                println!("HttpClient body error {}", err);
+                let _ = send(Err(err.clone()));
+                return;
+            }
+        };
         let client_builder = Client::new().post(&self.url);
         let client_builder = match &self.secret_key {
             Some(secret) => client_builder.bearer_auth(&secret),
             None => client_builder,
         };
-        let client_builder = client_builder.json(&self.body);
+        // let client_builder = client_builder.json(&self.body);
+        let client_builder = client_builder
+            .body(body)
+            .header(CONTENT_TYPE, HeaderValue::from_static("application/json"));
         let response = match self.get_response(client_builder).await {
             Ok(r) => r,
             Err(err) => {
                 println!("HttpClient getResponse error {}", err);
-                let _ = sender.send(Err(err)).await;
+                let _ = send(Err(err));
                 return;
             }
         };
         let _result;
         if is_stream {
-            _result = HttpClient::stream_request::<D, R, E>(
-                response,
-                &mut self.adapter,
-                sender
-            ).await;
+            _result = self.stream_request(response, send).await;
         } else {
-            _result = HttpService::<S, D, R, E>::request(response, &mut self.adapter, sender).await;
+            _result = HttpService::<R, E>::request(response, &mut self.adapter, send).await;
         }
     }
 }
