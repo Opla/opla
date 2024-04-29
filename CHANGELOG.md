@@ -1,3 +1,10 @@
+# [1.0.0-alpha.129](https://github.com/Opla/opla/compare/v1.0.0-alpha.128...v1.0.0-alpha.129) (2024-04-29)
+
+
+### Bug Fixes
+
+* build on Darwin x86_64-apple-darwin [#832](https://github.com/Opla/opla/issues/832) ([#833](https://github.com/Opla/opla/issues/833)) ([4f37783](https://github.com/Opla/opla/commit/4f3778391d5e603a995ae2fa77f7ebee9fa529a6))
+
 # [1.0.0-alpha.128](https://github.com/Opla/opla/compare/v1.0.0-alpha.127...v1.0.0-alpha.128) (2024-04-29)
 
 
