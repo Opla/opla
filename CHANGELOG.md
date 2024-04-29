@@ -1,3 +1,10 @@
+# [1.0.0-alpha.130](https://github.com/Opla/opla/compare/v1.0.0-alpha.129...v1.0.0-alpha.130) (2024-04-29)
+
+
+### Features
+
+* validate gguf file [#628](https://github.com/Opla/opla/issues/628) ([#834](https://github.com/Opla/opla/issues/834)) ([3bd09db](https://github.com/Opla/opla/commit/3bd09dbb509293c60a59f2420e9e569233b07f3e))
+
 # [1.0.0-alpha.129](https://github.com/Opla/opla/compare/v1.0.0-alpha.128...v1.0.0-alpha.129) (2024-04-29)
 
 
