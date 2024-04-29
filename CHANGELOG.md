@@ -1,3 +1,10 @@
+# [1.0.0-alpha.131](https://github.com/Opla/opla/compare/v1.0.0-alpha.130...v1.0.0-alpha.131) (2024-04-29)
+
+
+### Bug Fixes
+
+* tauri-action bugs on x86_64 mac m1 ([634316a](https://github.com/Opla/opla/commit/634316a59d2a389de2e2b891e7e2546c28bbc8ac))
+
 # [1.0.0-alpha.130](https://github.com/Opla/opla/compare/v1.0.0-alpha.129...v1.0.0-alpha.130) (2024-04-29)
 
 
