@@ -91,6 +91,7 @@ dependencies = [
  "dyn-clone",
  "eventsource-stream",
  "futures-util",
+ "opla_core",
  "reqwest 0.12.4",
  "rusqlite",
  "serde",

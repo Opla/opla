@@ -68,7 +68,7 @@
     "zustand": "^4.5.1"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.5.10",
+    "@tauri-apps/cli": "1.5.11",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

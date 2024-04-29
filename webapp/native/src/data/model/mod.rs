@@ -281,25 +281,6 @@ impl ModelStorage {
         Ok(model_path.to_string())
     }
 
-    pub fn validate_model(&self, model: &Model) -> Result<(), String> {
-        if model.id.is_none() {
-            return Err("Model ID is required".to_string());
-        }
-        if model.name.is_empty() {
-            return Err("Model name is required".to_string());
-        }
-        Ok(())
-    }
-    pub fn get_model_entity(&self, id_or_name: &str) -> Option<ModelEntity> {
-        self.items
-            .iter()
-            .find(|m| m.reference.is_same_id_or_name(id_or_name))
-            .map(|m| m.clone())
-    }
-
-    pub fn get_model(&self, id_or_name: &str) -> Option<Model> {
-        self.get_model_entity(id_or_name).map(|m| m.reference.clone())
-    }
 
     pub fn get_model_path(&self, id_or_name: String) -> Result<String, String> {
         let (file_name, path) = match self.get_model_entity(&id_or_name) {
@@ -320,7 +301,40 @@ impl ModelStorage {
                 return Err(format!("Model file name not found: {:?}", id_or_name));
             }
         };
-        self.get_model_path_filename(path, file_name)
+        let model_path = match self.get_model_path_filename(path, file_name) {
+            Ok(p) => p,
+            Err(err) => return Err(err),
+        };
+
+        let mut gguf = opla_core::gguf::GGUF::new();
+        match gguf.read(&model_path) {
+            Ok(_) => {},
+            Err(err) => return Err(err),
+        }
+
+        Ok(model_path)
+
+    }
+
+    pub fn validate_model(&self, model: &Model) -> Result<(), String> {
+        if model.id.is_none() {
+            return Err("Model ID is required".to_string());
+        }
+        if model.name.is_empty() {
+            return Err("Model name is required".to_string());
+        }
+        Ok(())
+    }
+
+    pub fn get_model_entity(&self, id_or_name: &str) -> Option<ModelEntity> {
+        self.items
+            .iter()
+            .find(|m| m.reference.is_same_id_or_name(id_or_name))
+            .map(|m| m.clone())
+    }
+
+    pub fn get_model(&self, id_or_name: &str) -> Option<Model> {
+        self.get_model_entity(id_or_name).map(|m| m.reference.clone())
     }
 
     pub fn create_model(
