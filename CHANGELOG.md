@@ -1,3 +1,10 @@
+# [1.0.0-alpha.128](https://github.com/Opla/opla/compare/v1.0.0-alpha.127...v1.0.0-alpha.128) (2024-04-29)
+
+
+### Features
+
+* add Phi-3 support ([#831](https://github.com/Opla/opla/issues/831)) ([eb17db2](https://github.com/Opla/opla/commit/eb17db28f78cfa1770be9ac9e9d45d3f6e2c5984))
+
 # [1.0.0-alpha.127](https://github.com/Opla/opla/compare/v1.0.0-alpha.126...v1.0.0-alpha.127) (2024-04-29)
 
 
