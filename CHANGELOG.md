@@ -1,3 +1,10 @@
+# [1.0.0-alpha.127](https://github.com/Opla/opla/compare/v1.0.0-alpha.126...v1.0.0-alpha.127) (2024-04-29)
+
+
+### Features
+
+* refactor inference providers [#688](https://github.com/Opla/opla/issues/688) ([#830](https://github.com/Opla/opla/issues/830)) ([f875a9a](https://github.com/Opla/opla/commit/f875a9ae84425bb67006f5a0e4041bd430b23b72))
+
 # [1.0.0-alpha.126](https://github.com/Opla/opla/compare/v1.0.0-alpha.125...v1.0.0-alpha.126) (2024-04-25)
 
 
