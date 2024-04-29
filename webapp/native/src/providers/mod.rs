@@ -17,7 +17,7 @@ use std::{ collections::HashMap, sync::Arc };
 use serde::Serialize;
 use tauri::{ AppHandle, Manager, Runtime };
 use tokenizer::encode;
-use tokio::{ spawn, sync::Mutex};
+use tokio::{ spawn, sync::Mutex };
 use bytes::Bytes;
 
 use crate::{
@@ -75,9 +75,11 @@ impl ProviderAdapter {
         serde_json::to_vec::<S>(&json).map_err(|e| E::new(&e.to_string(), "ProviderAdapter"))
     }
 
-    pub fn deserialize_response<D, E>(&mut self, full: Bytes) -> Result<D, E> where E: NewHttpError {
+    pub fn deserialize_response<D: LlmResponseImpl, E>(&mut self, full: Bytes) -> Result<D, E>
+        where E: NewHttpError
+    {
         match self.interface.deserialize_response(&full) {
-            Ok(_err) => Err(E::new("TODO", "ProviderAdapter")),
+            Ok(response) => Ok(D::completion_to(response)),
             Err(err) => Err(E::new(&err.message, &err.status)),
         }
     }
@@ -245,29 +247,12 @@ impl ProvidersManager {
         Ok(interface)
     }
 
-    pub async fn cancel_completion(&mut self, conversation_id: &str) -> Result<(), String> {
-        let mut completion_handles = self.completion_handles.lock().await;
-        let handle = completion_handles.remove(conversation_id);
-        println!("Cancel completion {}", conversation_id);
-        match handle {
-            Some(h) => {
-                h.abort();
-            }
-            None => {
-                let err = format!("cancel_completion Handle not found {}", conversation_id);
-                println!("{}", err);
-                return Err(err);
-            }
-        }
-
-        Ok(())
-    }
-
     pub async fn llm_cancel_completion<R: Runtime>(
         &mut self,
         app: tauri::AppHandle<R>,
         llm_provider: Option<Provider>,
-        conversation_id: &str
+        conversation_id: &str,
+        message_id: &str
     ) -> Result<(), String> {
         let context = app.state::<OplaContext>();
         let (_llm_provider, llm_provider_type) = match llm_provider {
@@ -280,7 +265,32 @@ impl ProvidersManager {
         };
         println!("llm_cancel_completion {} {}", llm_provider_type, conversation_id);
         if llm_provider_type == "opla" {
-            self.cancel_completion(conversation_id).await
+            // self.cancel_completion(conversation_id).await
+            let mut completion_handles = self.completion_handles.lock().await;
+            let handle = completion_handles.remove(conversation_id);
+            println!("Cancel completion {}", conversation_id);
+            let _ = app
+                .emit_all("opla-sse", LlmCompletionResponse {
+                    created: None,
+                    status: Some(String::from("cancel")),
+                    content: String::from(""),
+                    conversation_id: Some(conversation_id.to_string()),
+                    message_id: Some(message_id.to_string()),
+                    usage: None,
+                    message: None,
+                })
+                .map_err(|err| err.to_string());
+            match handle {
+                Some(h) => {
+                    h.abort();
+                    Ok(())
+                }
+                None => {
+                    let err = format!("cancel_completion Handle not found {}", conversation_id);
+                    println!("{}", err);
+                    Err(err)
+                }
+            }
         } else {
             return Err(String::from("Not implemented"));
         }
@@ -295,8 +305,6 @@ impl ProvidersManager {
         completion_options: Option<LlmCompletionOptions>,
         interface: &Box<dyn LlmInferenceInterface + Send + Sync>
     ) -> Result<(), String> {
-        // let (sender, mut receiver) = channel::<Result<LlmCompletionResponse, LlmError>>(1);
-
         let query = query.clone();
         let is_stream = query.options.get_parameter_as_boolean("stream").unwrap_or(false);
         let completion_options = completion_options.clone();
@@ -308,13 +316,12 @@ impl ProvidersManager {
         {
             Ok(service) => service,
             Err(err) => {
-                // let e = sender.send(Err(err.clone())).await;
                 let e = app
-                            .emit_all("opla-sse", Payload {
-                                message: err.to_string(),
-                                status: ServerStatus::Error.as_str().to_string(),
-                            })
-                            .map_err(|err| err.to_string());
+                    .emit_all("opla-sse", Payload {
+                        message: err.to_string(),
+                        status: ServerStatus::Error.as_str().to_string(),
+                    })
+                    .map_err(|err| err.to_string());
                 if e.is_err() {
                     println!("Send error: {}", e.unwrap_err());
                 }
@@ -322,8 +329,8 @@ impl ProvidersManager {
             }
         };
 
-        let cid = format!("{}",conversation_id);
-        let message_id = format!("{}",message_id);
+        let cid = format!("{}", conversation_id);
+        let message_id = format!("{}", message_id);
         let completion_handles = self.completion_handles.clone();
         let handle = spawn(async move {
             let send = |response: Result<LlmCompletionResponse, LlmError>| {
@@ -365,36 +372,8 @@ impl ProvidersManager {
         });
 
         let mut handles = self.completion_handles.lock().await;
-        handles.insert(
-            conversation_id.to_string(),
-            Arc::new(handle.abort_handle())
-        );
+        handles.insert(conversation_id.to_string(), Arc::new(handle.abort_handle()));
 
-        /* while let Some(response) = receiver.recv().await {
-            println!("received {:?}", response);
-            result = match response {
-                Ok(response) => {
-                    let mut response = response.clone();
-                    response.conversation_id = Some(conversation_id.to_string());
-                    response.message_id = Some(message_id.to_string());
-                    let _ = app
-                        .emit_all("opla-sse", response.clone())
-                        .map_err(|err| err.to_string());
-                    Ok(response.clone())
-                }
-                Err(err) => {
-                    let _ = app
-                        .emit_all("opla-sse", Payload {
-                            message: err.to_string(),
-                            status: ServerStatus::Error.as_str().to_string(),
-                        })
-                        .map_err(|err| err.to_string());
-                    Err(err.to_string())
-                }
-            };
-        } */
-        /* self.completion_handles.remove(&conversation_id.to_string());
-        println!("call completion result {:?}", result); */
         Ok(())
     }
 

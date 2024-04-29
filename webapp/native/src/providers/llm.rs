@@ -201,6 +201,7 @@ pub struct LlmResponse {}
 
 pub trait LlmResponseImpl {
     fn new(created: i64, status: &str, content: &str) -> Self;
+    fn completion_to(response: LlmCompletionResponse) -> Self;
 }
 
 #[serde_with::skip_serializing_none]
@@ -253,6 +254,10 @@ impl LlmResponseImpl for LlmCompletionResponse {
             usage: None,
             message: None,
         }
+    }
+
+    fn completion_to(response: LlmCompletionResponse) -> Self {
+        response
     }
 }
 

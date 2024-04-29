@@ -168,15 +168,12 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       tempConversationName: string | undefined,
       status?: MessageStatus,
     ) => {
-      console.log('updateMessageContent', message_or_id);
       let message = typeof message_or_id !== 'string' ? (message_or_id as Message) : undefined;
-      // const { conversations, getConversationMessages, updateMessagesAndConversation } = context;
 
       const conversationMessages = getConversationMessages(conversationId);
       if (!message) {
         const id = message_or_id as string;
         message = conversationMessages.find((m) => m.id === id) as Message;
-        console.log('conversationMessages', conversationMessages);
         if (!message) {
           logger.error('message not found');
         }
@@ -214,10 +211,8 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     const afunc = async () => {
       if (streams) {
         const finished = Object.keys(streams).filter((k) => streams[k].status === 'finished');
-        console.log(finished);
         if (finished.length === 1) {
           const stream = streams[finished[0]];
-          console.log('finished', stream);
           await updateMessageContent(
             stream.messageId,
             stream.content.join(''),
@@ -228,6 +223,25 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
           updateStreams(undefined);
         } else if (finished.length > 1) {
           logger.error('todo multi finished');
+        }
+
+        const cancelled = Object.keys(streams).filter((k) => streams[k].status === 'cancel');
+        if (cancelled.length === 1) {
+          const stream = streams[cancelled[0]];
+          let content = stream.content?.join?.('').trim() || '';
+          if (content.length === 0) {
+            content = 'Cancelled...';
+          }
+          await updateMessageContent(
+            stream.messageId,
+            content,
+            stream.conversationId,
+            undefined,
+            MessageStatus.Delivered,
+          );
+          updateStreams(undefined);
+        } else if (cancelled.length > 1) {
+          logger.error('todo multi cancelled');
         }
       }
     };
@@ -308,7 +322,6 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
 
   const streamListener = useCallback(async (event: any) => {
     const response = (await mapKeys(event.payload, toCamelCase)) as LlmCompletionResponse;
-    console.log('stream event', response, streams);
     if (response.status === 'error') {
       logger.error('stream error', response);
       return;
@@ -346,8 +359,19 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       }
       currentStreams[conversationId] = stream;
       updateStreams(currentStreams);
-      console.log('finished', response, stream);
-      // await updateMessageContent(response.messageId, stream.content.join(''), conversationId, undefined, MessageStatus.Delivered);
+    }
+    if (response.status === 'cancel' /* && currentStreams[conversationId] */) {
+      let stream = currentStreams[conversationId];
+      if (stream) {
+        stream.status = 'cancel';
+      } else {
+        stream = {
+          ...response,
+        } as LlmStreamResponse;
+      }
+      currentStreams[conversationId] = stream;
+      updateStreams(currentStreams);
+      logger.info('cancelled', response, stream);
     }
   }, []);
 

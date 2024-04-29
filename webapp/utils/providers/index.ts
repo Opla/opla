@@ -189,12 +189,14 @@ export const completion = async (
 export const cancelCompletion = async (
   activeService: AIImplService,
   conversationId: string,
+  messageId: string,
 ): Promise<void> => {
   const { provider } = activeService;
   if (provider) {
     await invokeTauri<LlmTokenizeResponse>('llm_cancel_completion', {
       provider: mapKeys(provider, toSnakeCase),
       conversationId,
+      messageId,
     });
   }
 };

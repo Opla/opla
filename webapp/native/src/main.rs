@@ -588,10 +588,11 @@ async fn llm_cancel_completion<R: Runtime>(
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
     llm_provider: Option<Provider>,
-    conversation_id: String
+    conversation_id: String,
+    message_id: String,
 ) -> Result<(), String> {
     let mut manager = context.providers_manager.lock().await;
-    manager.llm_cancel_completion::<R>(app, llm_provider, &conversation_id).await
+    manager.llm_cancel_completion::<R>(app, llm_provider, &conversation_id, &message_id).await
 }
 
 #[tauri::command]

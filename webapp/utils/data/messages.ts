@@ -86,7 +86,6 @@ export const mergeMessages = (messages: Message[], newMessages: Message[]) => {
     }
     return m;
   });
-  console.log('mergeMessages', mergedMessages, 'fresh', freshNewMessages);
   return [...mergedMessages, ...freshNewMessages];
 };
 

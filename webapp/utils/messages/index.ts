@@ -31,7 +31,6 @@ export const updateMessageContent = async (
   context: Context,
   status?: MessageStatus,
 ) => {
-  console.log('updateMessageContent', message_or_id);
   let message = typeof message_or_id !== 'string' ? (message_or_id as Message) : undefined;
   const { conversations, getConversationMessages, updateMessagesAndConversation } = context;
 
@@ -39,7 +38,6 @@ export const updateMessageContent = async (
   if (!message) {
     const id = message_or_id as string;
     message = conversationMessages.find((m) => m.id === id) as Message;
-    console.log('conversationMessages', conversationMessages);
     if (!message) {
       logger.error('message not found');
     }
@@ -152,7 +150,7 @@ export const sendMessage = async (
 };
 
 export const cancelSending = async (
-  messageId: String,
+  messageId: string,
   conversation: Conversation,
   modelName: string,
   assistant: Assistant | undefined,
@@ -167,5 +165,5 @@ export const cancelSending = async (
     modelName,
   );
   logger.info('cancelSending', activeService, conversation, context.presets);
-  await cancelCompletion(activeService, conversation.id);
+  await cancelCompletion(activeService, conversation.id, messageId);
 };

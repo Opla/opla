@@ -553,6 +553,11 @@ export type LlmCompletionResponse =
       usage?: LlmUsage;
     }
   | {
+      status: 'cancel';
+      conversationId: string;
+      messageId: string;
+    }
+  | {
       status: 'error';
       message: string;
     };

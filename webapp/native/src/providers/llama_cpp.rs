@@ -162,7 +162,7 @@ impl LlamaCppCompletionResponse {
     pub fn to_llm_response(&self) -> LlmCompletionResponse {
         LlmCompletionResponse {
             created: None,
-            status: Some("success".to_owned()),
+            status: Some("finished".to_owned()),
             content: self.content.clone(),
             conversation_id: None,
             message_id: None,
