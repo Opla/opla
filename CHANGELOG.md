@@ -1,3 +1,10 @@
+# [1.0.0-alpha.132](https://github.com/Opla/opla/compare/v1.0.0-alpha.131...v1.0.0-alpha.132) (2024-04-29)
+
+
+### Bug Fixes
+
+* setup rust x86_64-apple-darwin ([fe11000](https://github.com/Opla/opla/commit/fe11000eb4970e0111b15f742993fa2df339c92b))
+
 # [1.0.0-alpha.131](https://github.com/Opla/opla/compare/v1.0.0-alpha.130...v1.0.0-alpha.131) (2024-04-29)
 
 
