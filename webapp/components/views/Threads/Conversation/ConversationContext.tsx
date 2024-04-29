@@ -19,6 +19,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useEffect,
 } from 'react';
 import { useRouter } from 'next/router';
 import { AppContext } from '@/context';
@@ -46,6 +47,7 @@ type Context = {
   selectedMessageId: string | undefined;
   isProcessing: { [key: string]: boolean };
   errorMessages: { [key: string]: string };
+  handleProcessing: (id: string, state?: boolean) => void;
   handleSendMessage: (prompt: ParsedPrompt | undefined) => Promise<void>;
   handleResendMessage: (
     previousMessage: Message,
@@ -69,7 +71,7 @@ type ConversationProviderProps = {
   selectedModelId: string | undefined;
   tempConversationName: string | undefined;
   tempConversationId: string | undefined;
-
+  processing: boolean;
   changeService: (
     modelIdOrName: string,
     providerIdOrName: string,
@@ -89,6 +91,7 @@ function ConversationProvider({
   selectedModelId,
   tempConversationName,
   tempConversationId,
+  processing,
   changeService,
   onError,
   children,
@@ -109,6 +112,21 @@ function ConversationProvider({
   const [errorMessages, setErrorMessage] = useState<{ [key: string]: string }>({});
 
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (conversationId && processing !== isProcessing[conversationId]) {
+      setIsProcessing({ ...isProcessing, [conversationId]: processing });
+    }
+  }, [conversationId, processing, isProcessing, setIsProcessing]);
+
+  const handleProcessing = useCallback(
+    (id: string, state = false) => {
+      if (isProcessing[id] !== state) {
+        setIsProcessing({ ...isProcessing, [id]: state });
+      }
+    },
+    [isProcessing],
+  );
 
   const handleError = useCallback(
     (id: string, error: string) => {
@@ -202,7 +220,7 @@ function ConversationProvider({
       }
 
       const userMessage = createMessage({ role: 'user', name: 'you' }, prompt.text, prompt.raw);
-      let message = createMessage({ role: 'assistant', name: selectedModel.name }, '...');
+      const message = createMessage({ role: 'assistant', name: selectedModel.name }, '...');
       message.author.metadata = { ...message.author.metadata, modelId: selectedModel.id };
       if (assistant) {
         message.author.metadata.assistantId = assistant.id;
@@ -236,8 +254,10 @@ function ConversationProvider({
         selectedModelId,
         updatedMessages,
         updatedConversation,
+        message,
+        userMessage,
       );
-      message = await sendMessage(
+      /* message = */ await sendMessage(
         message,
         updatedMessages,
         updatedConversation,
@@ -256,7 +276,7 @@ function ConversationProvider({
         router.replace(`${Page.Threads}/${tempConversationId}`, undefined, { shallow: true });
       }
 
-      setIsProcessing({ ...isProcessing, [conversationId]: false });
+      // setIsProcessing({ ...isProcessing, [conversationId]: false });
     },
     [
       assistant,
@@ -267,7 +287,6 @@ function ConversationProvider({
       conversationId,
       getConversationMessages,
       handleError,
-      isProcessing,
       preProcessingSendMessage,
       router,
       selectedConversation,
@@ -301,7 +320,7 @@ function ConversationProvider({
         return;
       }
 
-      let message: Message = changeMessageContent(
+      const message: Message = changeMessageContent(
         previousMessage,
         '...',
         '...',
@@ -322,7 +341,7 @@ function ConversationProvider({
           conversationId,
         );
 
-      message = await sendMessage(
+      /* message = */ await sendMessage(
         message,
         updatedMessages,
         updatedConversation,
@@ -337,7 +356,7 @@ function ConversationProvider({
         handleError,
       );
 
-      setIsProcessing({ ...isProcessing, [conversationId]: false });
+      // setIsProcessing({ ...isProcessing, [conversationId]: false });
     },
     [
       assistant,
@@ -347,7 +366,6 @@ function ConversationProvider({
       conversationId,
       getConversationMessages,
       handleError,
-      isProcessing,
       parseAndValidatePrompt,
       preProcessingSendMessage,
       selectedConversation,
@@ -431,6 +449,7 @@ function ConversationProvider({
       selectedMessageId,
       errorMessages,
       isProcessing,
+      handleProcessing,
       handleSendMessage,
       handleResendMessage,
       handleChangeMessageContent,
@@ -440,6 +459,7 @@ function ConversationProvider({
     [
       selectedMessageId,
       errorMessages,
+      handleProcessing,
       handleChangeMessageContent,
       handleResendMessage,
       handleSendMessage,
@@ -459,6 +479,7 @@ const useConversationContext = (): Context => {
       selectedMessageId: undefined,
       isProcessing: {},
       errorMessages: {},
+      handleProcessing: () => {},
       handleSendMessage: async () => {},
       handleResendMessage: async () => {},
       handleChangeMessageContent: async () => {},

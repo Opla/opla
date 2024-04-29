@@ -12,21 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use tokio::{ spawn, sync::{ mpsc::channel, Mutex } };
-use std::{ collections::HashMap, sync::Arc };
+use tokio::sync::Mutex;
+use std::sync::Arc;
 use crate::{
     error::Error,
-    providers::{
-        llama_cpp::LLamaCppInferenceClient,
-        llm::{
-            LlmCompletionOptions,
-            LlmCompletionResponse,
-            LlmError,
-            LlmQuery,
-            LlmQueryCompletion,
-            LlmTokenizeResponse,
-        },
-    },
     store::{ ServerConfiguration, ServerParameters },
 };
 use sysinfo::System;
@@ -40,10 +29,10 @@ pub struct LocalServer {
     pub name: String,
     pub status: Arc<Mutex<ServerStatus>>,
     pub parameters: Option<ServerParameters>,
-    inference_client: LLamaCppInferenceClient,
+    // inference_client: LlamaCppInferenceClient,
     handle: Option<JoinHandle<()>>,
     command_child: Arc<Mutex<Option<CommandChild>>>,
-    completion_handles: HashMap<String, Arc<tokio::task::AbortHandle>>,
+    // completion_handles: HashMap<String, Arc<tokio::task::AbortHandle>>,
 }
 
 #[derive(Clone, serde::Serialize, Copy, PartialEq, Debug)]
@@ -88,10 +77,10 @@ impl LocalServer {
             name: "llama.cpp.server".to_string(),
             status: Arc::new(Mutex::new(ServerStatus::Init)),
             parameters: None,
-            inference_client: LLamaCppInferenceClient::new(None),
+            // inference_client: LlamaCppInferenceClient::new(None),
             handle: None,
             command_child: Arc::new(Mutex::new(None)),
-            completion_handles: HashMap::new(),
+            // completion_handles: HashMap::new(),
         }
     }
 
@@ -559,7 +548,7 @@ impl LocalServer {
         Ok(())
     }
 
-    pub async fn cancel_completion(&mut self, conversation_id: &str) -> Result<(), String> {
+    /* pub async fn cancel_completion(&mut self, conversation_id: &str) -> Result<(), String> {
         let handle = self.completion_handles.remove(conversation_id);
         println!("Cancel completion {}", conversation_id);
         match handle {
@@ -574,37 +563,21 @@ impl LocalServer {
         }
 
         Ok(())
-    }
+    } */
 
-    pub async fn call_completion<R: Runtime>(
+    /* pub async fn call_completion<R: Runtime>(
         &mut self,
         app: tauri::AppHandle<R>,
-        model: String,
-        model_path: String,
+        // model: String,
+        // model_path: String,
         query: LlmQuery<LlmQueryCompletion>,
         completion_options: Option<LlmCompletionOptions>
     ) -> Result<LlmCompletionResponse, String> {
-        println!("{}", format!("Opla llm call: {:?} / {:?}", query.command, &model));
+        println!("{}", format!("Opla llm call: {:?}", query.command));
         let query = query.clone();
         let conversation_id = query.options.conversation_id.clone();
-        let parameters = match self.parameters.clone() {
-            Some(mut p) => {
-                p.model_id = Some(model.clone());
-                p.model_path = Some(model_path);
-                p
-            }
-            None => {
-                return Err(
-                    LlmError::new(
-                        "Opla server not started no parameters found",
-                        "server_error"
-                    ).to_string()
-                );
-            }
-        };
-        let is_stream = query.options.get_parameter_as_boolean("stream").unwrap_or(false);
-        self.bind::<R>(app.app_handle(), &parameters).await.map_err(|err| err.to_string())?;
 
+        let is_stream = query.options.get_parameter_as_boolean("stream").unwrap_or(false);
         let (sender, mut receiver) = channel::<Result<LlmCompletionResponse, LlmError>>(1);
 
         let query = query.clone();
@@ -654,9 +627,9 @@ impl LocalServer {
         self.completion_handles.remove(&conversation_id.clone().unwrap_or(String::from("default")));
         println!("call completion result {:?}", result);
         result
-    }
+    } */
 
-    pub async fn call_tokenize<R: Runtime>(
+    /* pub async fn call_tokenize<R: Runtime>(
         &mut self,
         model: &str,
         text: String
@@ -664,5 +637,5 @@ impl LocalServer {
         println!("{}", format!("Opla llm call tokenize: {:?}", &model));
         let mut client_instance = self.inference_client.create(&self.parameters);
         client_instance.call_tokenize::<R>(text).await
-    }
+    } */
 }

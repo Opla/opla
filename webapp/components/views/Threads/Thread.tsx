@@ -89,7 +89,7 @@ function Thread({
   const { showModal } = useContext(ModalsContext);
   const [conversationMessages, setConversationMessages] = useState<Message[]>([]);
   const [isMessageUpdating, setIsMessageUpdating] = useState<boolean>(false);
-
+  const [processing, setProcessing] = useState<boolean>(false);
   const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
 
   const { t } = useTranslation();
@@ -98,6 +98,7 @@ function Thread({
     const getNewMessages = async () => {
       let newMessages: MessageImpl[] = [];
       if (conversationId) {
+        let p = false;
         newMessages = (await readConversationMessages(conversationId, [])) as Message[];
         newMessages = newMessages?.filter((m) => !(m.author.role === 'system')) || [];
         newMessages = newMessages.map((msg, index) => {
@@ -110,8 +111,16 @@ function Thread({
             last = true;
           }
           const m: MessageImpl = { ...msg, author, conversationId, copied: copied[msg.id], last };
+          if (
+            msg.status &&
+            msg.status !== MessageStatus.Delivered &&
+            msg.status !== MessageStatus.Error
+          ) {
+            p = true;
+          }
           return m;
         });
+        setProcessing(p);
       }
       setConversationMessages(newMessages);
       setIsMessageUpdating(false);
@@ -130,18 +139,18 @@ function Thread({
     const stream = streams?.[conversationId as string];
     let newMessages: MessageImpl[] = conversationMessages;
     if (stream) {
-      newMessages = newMessages.map((msg, index) => {
+      newMessages = newMessages.map((msg) => {
         const { author } = msg;
         /* if (author.role === 'assistant') {
           const model = findModelInAll(author.name, providers, backendContext, true);
           author.name = model?.title || model?.name || author.name;
         } */
-        if (stream && index === newMessages.length - 1) {
+        if (stream.messageId === msg.id /* && index === newMessages.length - 1 */) {
           const m: MessageImpl = {
             ...msg,
             author,
             status: MessageStatus.Stream,
-            content: stream.content.join(''),
+            content: stream.content?.join?.(''),
             contentHistory: undefined,
             conversationId,
           };
@@ -397,6 +406,7 @@ function Thread({
       >
         <ConversationProvider
           conversationId={conversationId}
+          processing={processing}
           selectedConversation={selectedConversation}
           messages={messages}
           commandManager={commandManager}

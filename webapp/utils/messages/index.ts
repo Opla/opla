@@ -24,17 +24,33 @@ import { getConversation } from '../data/conversations';
 import { changeMessageContent } from '../data/messages';
 
 export const updateMessageContent = async (
-  message: Message,
-  content: ParsedPrompt,
+  message_or_id: Message | String,
+  content: ParsedPrompt | String,
   conversationId: string,
   tempConversationName: string | undefined,
   context: Context,
+  status?: MessageStatus,
 ) => {
+  let message = typeof message_or_id !== 'string' ? (message_or_id as Message) : undefined;
   const { conversations, getConversationMessages, updateMessagesAndConversation } = context;
+
+  const conversationMessages = getConversationMessages(conversationId);
+  if (!message) {
+    const id = message_or_id as string;
+    message = conversationMessages.find((m) => m.id === id) as Message;
+    if (!message) {
+      logger.error('message not found');
+    }
+  }
+
   const conversation = getConversation(conversationId, conversations);
-  if (conversation && message.content) {
-    const newMessage = changeMessageContent(message, content.text, content.raw);
-    const conversationMessages = getConversationMessages(conversationId);
+  if (conversation && message?.content) {
+    const text = typeof content === 'string' ? content : (content as ParsedPrompt).text;
+    const raw = typeof content === 'string' ? content : (content as ParsedPrompt).raw;
+    const newMessage = changeMessageContent(message, text, raw);
+    if (status) {
+      newMessage.status = status;
+    }
     const newMessages = conversationMessages.map((m) => {
       if (m.id === message.id) {
         return newMessage;
@@ -75,10 +91,10 @@ export const sendMessage = async (
     config,
     modelName,
   );
-  logger.info('sendMessage', activeService, conversation, context.presets);
+  logger.info('sendMessage', message, activeService, conversation, context.presets);
 
   try {
-    const response = await completion(
+    /* const response = */ await completion(
       activeService,
       message,
       conversationMessages,
@@ -88,14 +104,14 @@ export const sendMessage = async (
       commandManager,
     );
 
-    if (response.status === 'error') {
+    /* if (response.status === 'error') {
       throw new Error(response.message);
     }
     if (response.status === 'success') {
       // setUsage(response.usage);
       onSuccess(response.usage);
       returnedMessage.content = response.content.trim();
-    }
+    } */
   } catch (e: any) {
     logger.error('sendMessage', e, typeof e);
     const error = String(e);
@@ -120,6 +136,7 @@ export const sendMessage = async (
   }
   if (returnedMessage.status !== MessageStatus.Error) {
     returnedMessage.status = MessageStatus.Delivered;
+    return; // returnedMessage;
   }
 
   await context.updateMessagesAndConversation(
@@ -129,11 +146,11 @@ export const sendMessage = async (
     conversation.id,
     updatedConversations,
   );
-  return returnedMessage;
+  // return returnedMessage;
 };
 
 export const cancelSending = async (
-  messageId: String,
+  messageId: string,
   conversation: Conversation,
   modelName: string,
   assistant: Assistant | undefined,
@@ -148,5 +165,5 @@ export const cancelSending = async (
     modelName,
   );
   logger.info('cancelSending', activeService, conversation, context.presets);
-  await cancelCompletion(activeService, conversation.id);
+  await cancelCompletion(activeService, conversation.id, messageId);
 };

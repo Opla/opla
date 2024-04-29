@@ -1,3 +1,4 @@
+use bytes::Bytes;
 // Copyright 2024 mik
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,28 +12,42 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+use dyn_clone::DynClone;
 use std::fmt;
-
+use async_trait::async_trait;
 use serde::{ Deserialize, Serialize };
 
-use crate::utils::http_client::{HttpChunk, HttpError};
+use crate::{ store::ServerParameters, utils::http_client::{ HttpChunk, HttpError, NewHttpError } };
+
+use super::{services::HttpService, ProviderAdapter};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmError {
     pub message: String,
-    pub r#type: String,
+    pub status: String,
 }
 
+
 impl LlmError {
-    pub fn new(msg: &str, r#type: &str) -> LlmError {
-        LlmError { message: msg.to_string(), r#type: r#type.to_string() }
+    pub fn new(msg: &str, status: &str) -> LlmError {
+        LlmError { message: msg.to_string(), status: status.to_string() }
+    }
+
+    pub fn to_string(&self) -> String {
+        return format!("{}: {}", self.status, self.message);
     }
 }
 
+impl NewHttpError for LlmError {
+    fn new(msg: &str, status: &str) -> Self {
+        LlmError { message: msg.to_string(), status: status.to_string() }
+    }
+}
+
+
 impl fmt::Display for LlmError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}: {}", self.r#type, self.message)
+        write!(f, "{}: {}", self.status, self.message)
     }
 }
 
@@ -46,7 +61,7 @@ impl HttpError for LlmError {
     fn to_error(&self, status: String) -> Box<dyn std::error::Error> {
         let error = LlmError {
             message: format!("HTTP error {} : {}", status, self.message.to_string()),
-            r#type: "http_error".to_string(),
+            status: "http_error".to_string(),
         };
         Box::new(error)
     }
@@ -73,6 +88,7 @@ pub struct LlmParameter {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmQueryCompletion {
     pub conversation_id: Option<String>,
+    pub message_id: Option<String>,
     pub messages: Vec<LlmMessage>,
     pub prompt: Option<String>,
     pub parameters: Option<Vec<LlmParameter>>,
@@ -180,6 +196,14 @@ impl LlmUsage {
     }
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LlmResponse {}
+
+pub trait LlmResponseImpl {
+    fn new(created: i64, status: &str, content: &str) -> Self;
+    fn completion_to(response: LlmCompletionResponse) -> Self;
+}
+
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmCompletionResponse {
@@ -187,6 +211,7 @@ pub struct LlmCompletionResponse {
     pub status: Option<String>,
     pub content: String,
     pub conversation_id: Option<String>,
+    pub message_id: Option<String>,
     pub usage: Option<LlmUsage>,
     pub message: Option<String>,
 }
@@ -197,6 +222,7 @@ impl HttpChunk for LlmCompletionResponse {
             status: Some(status.to_owned()),
             content: content.to_owned(),
             conversation_id: None,
+            message_id: None,
             usage: None,
             message: None,
         }
@@ -210,11 +236,31 @@ impl LlmCompletionResponse {
             status: Some(status.to_owned()),
             content: content.to_owned(),
             conversation_id: None,
+            message_id: None,
             usage: None,
             message: None,
         }
     }
 }
+
+impl LlmResponseImpl for LlmCompletionResponse {
+    fn new(created: i64, status: &str, content: &str) -> Self {
+        Self {
+            created: Some(created),
+            status: Some(status.to_owned()),
+            content: content.to_owned(),
+            conversation_id: None,
+            message_id: None,
+            usage: None,
+            message: None,
+        }
+    }
+
+    fn completion_to(response: LlmCompletionResponse) -> Self {
+        response
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmResponseError {
     pub error: LlmError,
@@ -224,3 +270,33 @@ pub struct LlmResponseError {
 pub struct LlmTokenizeResponse {
     pub tokens: Vec<u64>,
 }
+
+#[async_trait]
+pub trait LlmInferenceInterface: DynClone {
+    fn set_parameters(&mut self, parameters: ServerParameters);
+
+    fn deserialize_response(&mut self, full: &Bytes) -> Result<LlmCompletionResponse, LlmError>;
+
+    fn deserialize_response_error(&mut self, full: &Bytes) -> Result<LlmResponseError, LlmError>;
+    fn build_stream_chunk(
+        &mut self,
+        data: String,
+        _created: i64
+    ) -> Result<Option<String>, LlmError>;
+
+    async fn call_completion(
+        &mut self,
+        query: &LlmQuery<LlmQueryCompletion>,
+        completion_options: Option<LlmCompletionOptions>,
+        adapter: &mut ProviderAdapter,
+        /* sender: Sender<Result<LlmCompletionResponse, LlmError>> */
+    )  -> Result<HttpService<LlmCompletionResponse, LlmError>, LlmError>;
+
+    async fn call_tokenize(
+        &mut self,
+        model: &str,
+        text: String
+    ) -> Result<LlmTokenizeResponse, Box<dyn std::error::Error>>;
+}
+
+dyn_clone::clone_trait_object!(LlmInferenceInterface);

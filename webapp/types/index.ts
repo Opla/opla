@@ -540,14 +540,22 @@ export type LlmCompletionResponse =
       status: 'success';
       created?: number;
       content: string;
-      conversationId?: string;
+      conversationId: string;
+      messageId: string;
       usage?: LlmUsage;
     }
   | {
       status: 'finished';
-      content: 'done';
-      conversationId?: string;
+      content: string;
+      conversationId: string;
+      messageId: string;
       created: number;
+      usage?: LlmUsage;
+    }
+  | {
+      status: 'cancel';
+      conversationId: string;
+      messageId: string;
     }
   | {
       status: 'error';
@@ -560,6 +568,8 @@ export type LlmStreamResponse = {
   content: string[];
   prevContent?: string;
   conversationId: string;
+  messageId: string;
+  usage?: LlmUsage;
 };
 
 export type Cpu = {

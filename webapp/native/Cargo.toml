@@ -28,9 +28,12 @@ void = "1.0.2"
 thiserror = "1.0.59"
 eventsource-stream = "0.2.3"
 futures-util = "0.3.30"
-tokio = { version = "1.37.0", features = ["sync", "rt-multi-thread", "macros"] }
+tokio = { version = "1.37.0", features = ["sync"] }
 tokenizer = { path = "../../crates/tokenizer"}
 sha2 = "0.10.8"
+async-trait = "0.1.80"
+dyn-clone = "1.0.17"
+bytes = "1.6.0"
 
 [features]
 # by default Tauri runs in production mode
