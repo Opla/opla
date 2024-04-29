@@ -91,12 +91,16 @@ jobs:
       matrix:
         settings:
           - platform: "macos-latest"
+            target: "x86_64-apple-darwin"
             args: "--target x86_64-apple-darwin"
           - platform: "macos-latest"
+            target: "aarch64-apple-darwin"
             args: "--target aarch64-apple-darwin"
           - platform: "ubuntu-20.04"
+            target: "x86_64-unknown-linux-gnu"
             args: "--target x86_64-unknown-linux-gnu"
           - platform: "windows-latest"
+            target: "x86_64-pc-windows-msvc"
             args: "--target x86_64-pc-windows-msvc"
 
     runs-on: ${{ matrix.settings.platform }}
@@ -122,29 +126,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: fix mac x86_64 target
-        if: matrix.settings.args == '--target x86_64-apple-darwin'
-        run: |
-          rustup target add x86_64-apple-darwin
-
-      #- name: get-npm-version
-      #  id: package-version
-      # uses: beaconbrigade/package-json-version@v0.3
-      #  with:
-      #    path: .
-
-      #- run: echo ${{ steps.package-version.outputs.version }}
-      #- run: |
-      #    cd webapp/native
-      #    cargo install cargo-edit
-      #    cargo set-version ${{ steps.package-version.outputs.version }}
+      - name: Rustup add target
+        run: rustup target add ${{ matrix.settings.target }}
 
       - uses: Swatinem/rust-cache@v2
         with:
           cache-on-failure: true
 
       - name: install frontend dependencies
-        run: npm install # change this to npm or pnpm depending on which one you use
+        run: npm instal
 
       #- name: import windows certificate
       #  if: matrix.settings.platform == 'windows-latest'
@@ -159,7 +149,7 @@ jobs:
       #    Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_CERTIFICATE_PASSWORD -Force -AsPlainText)
       
       # If tagName and releaseId are omitted tauri-action will only build the app and won't try to upload any assets.
-      - uses: tauri-apps/tauri-action@v0.5.3
+      - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
