@@ -21,3 +21,16 @@ export const getFilename = (path: string) => {
   const p = path.replace(/\\/g, '/');
   return p.split('/').pop();
 };
+
+export const fetchJson = () => {
+  const abortController = new AbortController();
+  const fetchData = async (endpoint: string, options: RequestInit) => {
+    const response = await fetch(endpoint, {
+      ...options,
+      signal: abortController.signal,
+    });
+    const newData = await response.json();
+    return newData;
+  };
+  return [fetchData, abortController];
+};
