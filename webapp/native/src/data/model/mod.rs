@@ -114,6 +114,9 @@ pub struct Model {
 
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub editable: Option<bool>,
+
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub chat_template: Option<String>,
 }
 
 impl Model {
@@ -154,6 +157,7 @@ impl Model {
             system: None,
             context_window: None,
             editable: None,
+            chat_template: None,
             sha: None,
             file_size: None,
         }
