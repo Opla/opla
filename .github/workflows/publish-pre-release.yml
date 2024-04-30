@@ -126,7 +126,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: Rustup add target
+      - name: Rustup add target # Do it for all ?
+        if: matrix.settings.target == 'x86_64-apple-darwin'
         run: rustup target add ${{ matrix.settings.target }}
 
       - uses: Swatinem/rust-cache@v2
