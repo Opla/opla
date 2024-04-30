@@ -365,11 +365,40 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
                 value={updatedParameters?.description || t(model.description || '')}
                 disabled={!model.editable}
                 type="large-text"
+                placeholder="Description"
                 onChange={setUpdatedParameters}
               />
             )}
             {!model?.editable && (
               <p>{(updatedParameters?.description as string) || t(model.description || '')}</p>
+            )}
+            {model?.editable && (
+              <Parameter
+                label=""
+                name="system"
+                value={updatedParameters?.system || t(model.system || '')}
+                disabled={!model.editable}
+                type="large-text"
+                placeholder="System"
+                onChange={setUpdatedParameters}
+              />
+            )}
+            {!model?.editable && (
+              <p>{(updatedParameters?.system as string) || t(model.system || '')}</p>
+            )}
+            {model?.editable && (
+              <Parameter
+                label=""
+                name="Chat template"
+                value={updatedParameters?.chatTemplate || t(model.chatTemplate || '')}
+                disabled={!model.editable}
+                type="large-text"
+                placeholder="Chat template"
+                onChange={setUpdatedParameters}
+              />
+            )}
+            {!model?.editable && (
+              <p>{(updatedParameters?.chatTemplate as string) || t(model.chatTemplate || '')}</p>
             )}
             {model.fileName && (
               <Parameter

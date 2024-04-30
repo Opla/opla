@@ -341,6 +341,7 @@ export type Model = BaseNamedRecord & {
   system?: string;
   contextWindow?: number;
   editable?: boolean;
+  chatTemplate?: string;
 };
 
 export type ModelsCollection = {
