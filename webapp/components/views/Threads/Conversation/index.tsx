@@ -13,19 +13,20 @@
 // limitations under the License.
 
 import { useEffect, useState } from 'react';
-import EmptyView from '@/components/common/EmptyView';
-import useTranslation from '@/hooks/useTranslation';
+// import EmptyView from '@/components/common/EmptyView';
+// import useTranslation from '@/hooks/useTranslation';
 import { KeyedScrollPosition } from '@/hooks/useScroll';
-import Opla from '@/components/icons/Opla';
+// import Opla from '@/components/icons/Opla';
 import { AvatarRef, Conversation, Message, MessageImpl, PromptTemplate, Ui } from '@/types';
 // import logger from '@/utils/logger';
 import useBackend from '@/hooks/useBackendContext';
 import { MenuAction, Page, ViewName } from '@/types/ui';
 import logger from '@/utils/logger';
 import ConversationList from './ConversationList';
-import PromptsGrid from './PromptsGrid';
+// import PromptsGrid from './PromptsGrid';
 import { useConversationContext } from './ConversationContext';
 import { usePromptContext } from '../Prompt/PromptContext';
+import Onboarding from './Onboarding';
 
 export type ConversationPanelProps = {
   selectedConversation: Conversation | undefined;
@@ -47,7 +48,6 @@ export function ConversationPanel({
   selectedConversation,
   selectedAssistantId,
   selectedModelName,
-
   modelItems,
   disabled,
   onDeleteMessage,
@@ -55,7 +55,7 @@ export function ConversationPanel({
   onSelectMenu,
   onCopyMessage,
 }: ConversationPanelProps) {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const { config, setSettings } = useBackend();
   const {
     selectedMessageId,
@@ -120,7 +120,7 @@ export function ConversationPanel({
 
   const showEmptyChat = !conversationId || !messages || messages.length === 0;
   if (showEmptyChat) {
-    let actions: Ui.MenuItem[] | undefined;
+    /* let actions: Ui.MenuItem[] | undefined;
     let buttonLabel: string | undefined;
     let description = t(
       "Welcome to Opla! Our platform leverages the power of your device to deliver personalized AI assistance. To kick things off, you'll need to install a model or an assistant. Think of it like choosing your conversation partner. If you've used ChatGPT before, you'll feel right at home here. Remember, this step is essential to begin your journey with Opla. Let's get started!",
@@ -177,6 +177,16 @@ export function ConversationPanel({
           />
         )}
       </div>
+    ); */
+    return (
+      <Onboarding
+        selectedAssistantId={selectedAssistantId}
+        selectedModelName={selectedModelName}
+        hasModels={modelItems.length > 0}
+        disabled={disabled}
+        onSelectMenu={onSelectMenu}
+        onPromptSelected={handlePromptTemplateSelected}
+      />
     );
   }
   return (

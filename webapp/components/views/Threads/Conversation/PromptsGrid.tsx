@@ -19,14 +19,20 @@ import PromptCard from '../../../common/PromptCard';
 
 function PromptsGrid({
   className,
+  assistantPrompts,
   onPromptSelected,
   disabled,
 }: {
   className?: string;
+  assistantPrompts: PromptTemplate[] | undefined;
   onPromptSelected: (prompt: PromptTemplate) => void;
   disabled: boolean;
 }) {
-  const [prompts] = useFetch<PromptTemplate[]>('https://opla.github.io/prompts/default.json');
+  const [defaultPrompts] = useFetch<PromptTemplate[]>(
+    'https://opla.github.io/prompts/default.json',
+  );
+
+  const prompts = assistantPrompts || defaultPrompts;
 
   return (
     <div

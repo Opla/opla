@@ -17,7 +17,7 @@ use serde::{ self, Deserialize, Serialize };
 use serde_with::{ serde_as, OneOrMany, formats::PreferOne };
 use crate::data::{ option_date_format, option_string_or_struct };
 
-use super::{ Avatar, Entity, Preset, Resource };
+use super::{ Avatar, Entity, Preset, PromptTemplates, Resource };
 
 #[serde_as]
 #[serde_with::skip_serializing_none]
@@ -90,4 +90,6 @@ pub struct Assistant {
     pub system: Option<String>,
 
     pub targets: Option<Vec<Preset>>,
+
+    pub prompt_templates: Option<Vec<PromptTemplates>>,
 }

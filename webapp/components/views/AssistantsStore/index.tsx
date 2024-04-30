@@ -85,10 +85,14 @@ function AssistantsStore() {
         }
       }
       newAssistant = createAssistant(assistant.name, { ...assistant, targets, readonly: true });
-    }
-    if (newAssistant.hidden) {
+    } else {
       newAssistant.hidden = false;
-      updateAssistant(newAssistant);
+      updateAssistant({
+        ...newAssistant,
+        ...assistant,
+        targets: newAssistant.targets,
+        readonly: true,
+      });
     }
     router.push(`${Ui.Page.Threads}/?assistant=${assistant.id}`);
   };
@@ -107,6 +111,7 @@ function AssistantsStore() {
     () => collection.filter((assistant) => search(query, assistant)),
     [collection, query],
   );
+
   return (
     <Threads onSelectMenu={() => {}} onShouldDelete={() => {}} onResizeExplorer={() => {}}>
       <ResizablePanel id="assistant-store">

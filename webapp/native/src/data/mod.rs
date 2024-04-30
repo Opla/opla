@@ -14,6 +14,7 @@
 
 use chrono::{ DateTime, Utc };
 use serde::{ self, Deserialize, Deserializer, Serialize };
+use serde_with::{ serde_as, OneOrMany, formats::PreferOne };
 use std::{collections::HashMap, fmt};
 use std::marker::PhantomData;
 use std::str::FromStr;
@@ -49,6 +50,22 @@ pub struct Preset {
     pub models: Option<Vec<String>>,
     pub provider: Option<String>,
     pub parameters: Option<HashMap<String, Option<PresetParameter>>>,
+}
+
+#[serde_as]
+#[serde_with::skip_serializing_none]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct PromptTemplates {
+    pub id: Option<String>,
+    pub title: String,
+    pub icon: Option<Avatar>,
+    #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
+    pub created_at: Option<DateTime<Utc>>,
+    #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
+    pub updated_at: Option<DateTime<Utc>>,
+    pub value: Option<String>,
+    #[serde_as(deserialize_as = "Option<OneOrMany<_, PreferOne>>")]
+    pub tags: Option<Vec<String>>,
 }
 
 #[serde_with::skip_serializing_none]
