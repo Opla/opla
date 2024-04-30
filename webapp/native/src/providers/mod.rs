@@ -431,7 +431,9 @@ impl ProvidersManager {
             return Ok(response?);
         }
         if llm_provider_type == "openai" || llm_provider_type == "server" {
-            let response = {
+            let conversation_id = query.options.conversation_id.clone();
+            let message_id = query.options.message_id.clone();
+            let mut response = {
                 let api = format!("{:}", llm_provider.url);
                 let secret_key = match llm_provider.key {
                     Some(k) => { k }
@@ -446,7 +448,6 @@ impl ProvidersManager {
                 };
                 // let model = model;
                 let query = query.clone();
-                let conversation_id = query.options.conversation_id.clone();
                 openai
                     ::call_completion::<R>(
                         &api,
@@ -459,6 +460,7 @@ impl ProvidersManager {
                                 Ok(response) => {
                                     let mut response = response.clone();
                                     response.conversation_id = conversation_id.clone();
+                                    response.message_id = message_id.clone();
                                     let _ = app
                                         .emit_all("opla-sse", response)
                                         .map_err(|err| err.to_string());
@@ -473,6 +475,8 @@ impl ProvidersManager {
                     ).await
                     .map_err(|err| err.to_string())?
             };
+            response.conversation_id = conversation_id.clone();
+            response.message_id = message_id.clone();
             let _ = app.emit_all("opla-sse", response).map_err(|err| err.to_string());
             return Ok(());
         }

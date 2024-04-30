@@ -188,7 +188,7 @@ impl OpenAIChatCompletion {
     fn to_llm_response(&self) -> LlmCompletionResponse {
         let mut response = LlmCompletionResponse::new(
             self.created,
-            "success",
+            "finished",
             &self.choices[0].message.content
         );
         let usage = LlmUsage {
