@@ -1,3 +1,10 @@
+# [1.0.0-alpha.133](https://github.com/Opla/opla/compare/v1.0.0-alpha.132...v1.0.0-alpha.133) (2024-04-30)
+
+
+### Features
+
+* assistant add prompt templates [#454](https://github.com/Opla/opla/issues/454) ([#847](https://github.com/Opla/opla/issues/847)) ([a06fada](https://github.com/Opla/opla/commit/a06fadac9f04421aad5d14201ef6539553112667))
+
 # [1.0.0-alpha.132](https://github.com/Opla/opla/compare/v1.0.0-alpha.131...v1.0.0-alpha.132) (2024-04-29)
 
 
