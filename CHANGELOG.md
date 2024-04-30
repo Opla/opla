@@ -1,3 +1,10 @@
+# [1.0.0-alpha.135](https://github.com/Opla/opla/compare/v1.0.0-alpha.134...v1.0.0-alpha.135) (2024-04-30)
+
+
+### Bug Fixes
+
+* regression openAI completion [#849](https://github.com/Opla/opla/issues/849) ([#850](https://github.com/Opla/opla/issues/850)) ([4404b6f](https://github.com/Opla/opla/commit/4404b6fc6a7ad34fd6aaa56f61c86e390f76a16b))
+
 # [1.0.0-alpha.134](https://github.com/Opla/opla/compare/v1.0.0-alpha.133...v1.0.0-alpha.134) (2024-04-30)
 
 
