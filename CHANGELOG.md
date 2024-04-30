@@ -1,3 +1,10 @@
+# [1.0.0-alpha.134](https://github.com/Opla/opla/compare/v1.0.0-alpha.133...v1.0.0-alpha.134) (2024-04-30)
+
+
+### Features
+
+* add model chat template [#569](https://github.com/Opla/opla/issues/569) ([#848](https://github.com/Opla/opla/issues/848)) ([261456b](https://github.com/Opla/opla/commit/261456b70ea5e726e80b96cdec115ce9c3ec585e))
+
 # [1.0.0-alpha.133](https://github.com/Opla/opla/compare/v1.0.0-alpha.132...v1.0.0-alpha.133) (2024-04-30)
 
 
