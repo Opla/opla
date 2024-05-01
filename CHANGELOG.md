@@ -1,3 +1,10 @@
+# [1.0.0-alpha.136](https://github.com/Opla/opla/compare/v1.0.0-alpha.135...v1.0.0-alpha.136) (2024-05-01)
+
+
+### Features
+
+* search [#470](https://github.com/Opla/opla/issues/470) ([#851](https://github.com/Opla/opla/issues/851)) ([888c3a2](https://github.com/Opla/opla/commit/888c3a2fffea32be6a8f71fc3cbbad78d79a40c8))
+
 # [1.0.0-alpha.135](https://github.com/Opla/opla/compare/v1.0.0-alpha.134...v1.0.0-alpha.135) (2024-04-30)
 
 
