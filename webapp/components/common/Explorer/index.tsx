@@ -16,15 +16,31 @@ import useTranslation from '@/hooks/useTranslation';
 import { Separator } from '@/components/ui/separator';
 import ExplorerList from './ExplorerList';
 import ExplorerGroup from './ExplorerGroup';
+import Searchbar from '../Searchbar';
 
 export type ExplorerProps = {
   icon?: React.ReactNode;
+  isSearching?: boolean;
+  searchQuery?: string;
+  searchPlaceholder?: string;
   title?: string;
   children?: React.ReactNode;
   toolbar?: React.ReactNode;
+  onCancelSearch?: () => void;
+  onSearchQuery?: (query: string | undefined) => void;
 };
 
-export default function Explorer({ icon, title = '', children, toolbar }: ExplorerProps) {
+export default function Explorer({
+  icon,
+  isSearching = false,
+  searchQuery,
+  searchPlaceholder,
+  title = '',
+  children,
+  toolbar,
+  onSearchQuery,
+  onCancelSearch,
+}: ExplorerProps) {
   const { t } = useTranslation();
 
   return (
@@ -32,9 +48,21 @@ export default function Explorer({ icon, title = '', children, toolbar }: Explor
       <nav className="flex h-full flex-1 flex-col space-y-1">
         <div className="flex w-full items-center">
           <div className="flex grow items-center p-2">
-            {icon}
-            <h1 className="text-l flex-1 font-extrabold">{t(title)}</h1>
-            {toolbar}
+            {!isSearching && (
+              <>
+                {icon}
+                <h1 className="text-l flex-1 font-extrabold">{t(title)}</h1>
+                {toolbar}
+              </>
+            )}
+            {isSearching && (
+              <Searchbar
+                query={searchQuery}
+                onQuery={onSearchQuery}
+                onCancel={onCancelSearch}
+                placeholder={searchPlaceholder}
+              />
+            )}
           </div>
         </div>
         <Separator />

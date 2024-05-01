@@ -603,4 +603,23 @@ export type Usage = {
   activeService?: AIImplService;
 };
 
+export type QueryResultEntry = {
+  id: string; // EQ message.id
+  index: number;
+  match: string;
+  previousText: string; // max 20
+  afterText: string; // max 20
+};
+
+export type QueryResult = {
+  id: string; // EQ conversation.id
+  name: string; // EQ conversation.name
+  entries: QueryResultEntry[];
+};
+
+export type QueryResponse = {
+  results: QueryResult[];
+  count: number;
+};
+
 export { Ui };

@@ -101,5 +101,9 @@
   "Uninstall & Delete": "Désinstaller et supprimer",
   "Open in Finder": "Ouvrir dans le Finder",
   "Change version": "Changer de version",
-  "More": "Plus"
+  "More": "Plus",
+  "result_one": "{{count}} resultat",
+  "result_other": "{{count}} resultats",
+  "in_conversation_one": "dans {{count}} conversation",
+  "in_conversation_other": "dans {{count}} conversations"
 }

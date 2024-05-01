@@ -20,7 +20,7 @@ import { Ui } from '@/types';
 type EmptyViewProps = {
   title: string;
   description: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   buttonLabel?: string;
   actions?: Ui.MenuItem[];
   onCreateItem?: () => void;

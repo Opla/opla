@@ -26,6 +26,7 @@ import {
   Import,
   MessageSquareWarning,
   MoreHorizontal,
+  Search,
   SquarePen,
 } from 'lucide-react';
 import { Conversation, Ui } from '@/types';
@@ -65,6 +66,7 @@ import { ShortcutBadge } from '../../../common/ShortCut';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../../../ui/tooltip';
 import EmptyView from '../../../common/EmptyView';
 import AssistantsList from './AssistantsList';
+import SearchPanel from './SearchPanel';
 
 type ExplorerProps = {
   selectedAssistantId: string | undefined;
@@ -95,6 +97,8 @@ export default function ThreadsExplorer({
   };
 
   const [editableConversation, setEditableConversation] = useState<string | undefined>(undefined);
+  const [isSearching, setSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
@@ -233,31 +237,56 @@ export default function ThreadsExplorer({
   return (
     <Explorer
       title="Threads"
+      isSearching={isSearching}
+      searchQuery={searchQuery}
+      searchPlaceholder="Search in conversations..."
+      onSearchQuery={(query) => setSearchQuery(query)}
+      onCancelSearch={() => setSearching(false)}
       toolbar={
         <>
           {(selectedThreadId || selectedAssistantId) && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  disabled={!selectedThreadId}
-                  className="cursor-pointer items-center p-1"
-                >
-                  <Link href={Ui.Page.Threads}>
-                    <SquarePen className="mr-2 h-4 w-4" strokeWidth={1.5} />
-                    {t('Chat with Local AI')}
-                  </Link>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" sideOffset={12} className="mt-1">
-                <div className="flex w-full flex-row gap-2">
-                  <p>{t('Playground for your local AI Models')}</p>
-                  <ShortcutBadge command={ShortcutIds.NEW_CONVERSATION} />
-                </div>
-              </TooltipContent>
-            </Tooltip>
+            <div className="mr-2 flex gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="icon"
+                    disabled={!selectedThreadId}
+                    className="items-center"
+                  >
+                    <Link href={Ui.Page.Threads}>
+                      <SquarePen className="h-4 w-4" strokeWidth={1.5} />
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" sideOffset={12} className="mt-1">
+                  <div className="flex w-full flex-row gap-2">
+                    <p>{t('Chat with Local AI')}</p>
+                    <ShortcutBadge command={ShortcutIds.NEW_CONVERSATION} />
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={!selectedThreadId}
+                    className="items-center"
+                    onClick={() => setSearching(true)}
+                  >
+                    <Search className="h-4 w-4" strokeWidth={1.5} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" sideOffset={12} className="mt-1">
+                  <div className="flex w-full flex-row gap-2">
+                    <p>{t('Search in conversations...')}</p>
+                    {/* <ShortcutBadge command={ShortcutIds.NEW_CONVERSATION} /> */}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </div>
           )}
 
           <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -325,123 +354,130 @@ export default function ThreadsExplorer({
     >
       <div className="flex-1 flex-col space-y-1 overflow-y-auto overflow-x-hidden p-1 dark:border-white/20">
         <div className="flex h-full grow flex-col gap-2 pb-2 text-sm">
-          <ResizablePanelGroup direction="vertical">
-            {showAssistants && (
-              <>
-                <ResizablePanel id="assistant" className="!overflow-y-auto pt-2" minSize={4}>
-                  <AssistantsList
-                    closed={closedAssistants}
-                    onToggle={() => {
-                      onSelectMenu(MenuAction.ToggleGroup, ViewName.Assistants);
-                    }}
-                    selectedId={selectedAssistantId}
-                    onSelect={handleSelectAssistant}
-                  />
-                </ResizablePanel>
-                <ResizableHandle />{' '}
-              </>
-            )}
-            {showRecent && (
-              <>
-                <ResizablePanel id="recent" className="!overflow-y-auto pt-2" minSize={3}>
-                  <ExplorerGroup
-                    title={t(ViewName.Recent)}
-                    closed={closedRecent}
-                    onToggle={() => {
-                      onSelectMenu(MenuAction.ToggleGroup, ViewName.Recent);
-                    }}
-                    className="h-full pb-8"
-                  >
-                    {threads.length > 0 && (
-                      <ExplorerList<Conversation>
-                        selectedId={selectedThreadId}
-                        items={threads.sort(
-                          (c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt,
-                        )}
-                        editable
-                        getItemTitle={(c) => `${getConversationTitle(c, t)}${c.temp ? '...' : ''}`}
-                        isEditable={(c) => !c.temp && c.id === selectedThreadId}
-                        renderItem={(c) => (
-                          <>
-                            <span>{getConversationTitle(c, t).replaceAll(' ', '\u00a0')}</span>
-                            {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
-                          </>
-                        )}
-                        onSelectItem={(item) => handleSelectThread(item, ViewName.Recent)}
-                        onChange={handleChangeConversationName}
-                        menu={() => menu}
-                      />
-                    )}
-                    {threads.length === 0 && (
-                      <div className="h-full">
-                        <EmptyView
-                          title={t('No threads')}
-                          description={t("Don't be shy, say hi!")}
-                          icon={
-                            <MessageSquareWarning
-                              className="h-12 w-12 text-muted-foreground"
-                              strokeWidth={1.5}
-                            />
+          {!isSearching && (
+            <ResizablePanelGroup direction="vertical">
+              {showAssistants && (
+                <>
+                  <ResizablePanel id="assistant" className="!overflow-y-auto pt-2" minSize={4}>
+                    <AssistantsList
+                      closed={closedAssistants}
+                      onToggle={() => {
+                        onSelectMenu(MenuAction.ToggleGroup, ViewName.Assistants);
+                      }}
+                      selectedId={selectedAssistantId}
+                      onSelect={handleSelectAssistant}
+                    />
+                  </ResizablePanel>
+                  <ResizableHandle />{' '}
+                </>
+              )}
+              {showRecent && (
+                <>
+                  <ResizablePanel id="recent" className="!overflow-y-auto pt-2" minSize={3}>
+                    <ExplorerGroup
+                      title={t(ViewName.Recent)}
+                      closed={closedRecent}
+                      onToggle={() => {
+                        onSelectMenu(MenuAction.ToggleGroup, ViewName.Recent);
+                      }}
+                      className="h-full pb-8"
+                    >
+                      {threads.length > 0 && (
+                        <ExplorerList<Conversation>
+                          selectedId={selectedThreadId}
+                          items={threads.sort(
+                            (c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt,
+                          )}
+                          editable
+                          getItemTitle={(c) =>
+                            `${getConversationTitle(c, t)}${c.temp ? '...' : ''}`
                           }
-                          className="h-full"
+                          isEditable={(c) => !c.temp && c.id === selectedThreadId}
+                          renderItem={(c) => (
+                            <>
+                              <span>{getConversationTitle(c, t).replaceAll(' ', '\u00a0')}</span>
+                              {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
+                            </>
+                          )}
+                          onSelectItem={(item) => handleSelectThread(item, ViewName.Recent)}
+                          onChange={handleChangeConversationName}
+                          menu={() => menu}
                         />
-                      </div>
-                    )}
-                  </ExplorerGroup>
-                </ResizablePanel>
-                <ResizableHandle />
-              </>
-            )}
-            {showArchives && (
-              <>
-                <ResizablePanel id="archives" className="!overflow-y-auto pt-2" minSize={3}>
-                  <ExplorerGroup
-                    title={t(ViewName.Archives)}
-                    closed={closedArchives}
-                    onToggle={() => {
-                      onSelectMenu(MenuAction.ToggleGroup, ViewName.Archives);
-                    }}
-                    className="h-full pb-8"
-                  >
-                    {archives.length > 0 && (
-                      <ExplorerList<Conversation>
-                        selectedId={selectedThreadId}
-                        items={archives.sort(
-                          (c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt,
-                        )}
-                        getItemTitle={(c) => `${getConversationTitle(c, t)}${c.temp ? '...' : ''}`}
-                        renderItem={(c) => (
-                          <>
-                            <span>{getConversationTitle(c, t).replaceAll(' ', '\u00a0')}</span>
-                            {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
-                          </>
-                        )}
-                        onSelectItem={(item) => handleSelectThread(item, ViewName.Archives)}
-                        onChange={handleChangeConversationName}
-                        menu={() => menu}
-                      />
-                    )}
-                    {archives.length === 0 && (
-                      <div className="h-full">
-                        <EmptyView
-                          title={t('No archives')}
-                          description={t('No conversation in archives')}
-                          icon={
-                            <Archive
-                              className="h-12 w-12 text-muted-foreground"
-                              strokeWidth={1.5}
-                            />
+                      )}
+                      {threads.length === 0 && (
+                        <div className="h-full">
+                          <EmptyView
+                            title={t('No threads')}
+                            description={t("Don't be shy, say hi!")}
+                            icon={
+                              <MessageSquareWarning
+                                className="h-12 w-12 text-muted-foreground"
+                                strokeWidth={1.5}
+                              />
+                            }
+                            className="h-full"
+                          />
+                        </div>
+                      )}
+                    </ExplorerGroup>
+                  </ResizablePanel>
+                  <ResizableHandle />
+                </>
+              )}
+              {showArchives && (
+                <>
+                  <ResizablePanel id="archives" className="!overflow-y-auto pt-2" minSize={3}>
+                    <ExplorerGroup
+                      title={t(ViewName.Archives)}
+                      closed={closedArchives}
+                      onToggle={() => {
+                        onSelectMenu(MenuAction.ToggleGroup, ViewName.Archives);
+                      }}
+                      className="h-full pb-8"
+                    >
+                      {archives.length > 0 && (
+                        <ExplorerList<Conversation>
+                          selectedId={selectedThreadId}
+                          items={archives.sort(
+                            (c1, c2) => c2.updatedAt - c1.updatedAt || c2.createdAt - c1.createdAt,
+                          )}
+                          getItemTitle={(c) =>
+                            `${getConversationTitle(c, t)}${c.temp ? '...' : ''}`
                           }
-                          className="h-full"
+                          renderItem={(c) => (
+                            <>
+                              <span>{getConversationTitle(c, t).replaceAll(' ', '\u00a0')}</span>
+                              {c.temp ? <span className="ml-2 animate-pulse">...</span> : ''}
+                            </>
+                          )}
+                          onSelectItem={(item) => handleSelectThread(item, ViewName.Archives)}
+                          onChange={handleChangeConversationName}
+                          menu={() => menu}
                         />
-                      </div>
-                    )}
-                  </ExplorerGroup>
-                </ResizablePanel>
-                <ResizableHandle />
-              </>
-            )}
-          </ResizablePanelGroup>
+                      )}
+                      {archives.length === 0 && (
+                        <div className="h-full">
+                          <EmptyView
+                            title={t('No archives')}
+                            description={t('No conversation in archives')}
+                            icon={
+                              <Archive
+                                className="h-12 w-12 text-muted-foreground"
+                                strokeWidth={1.5}
+                              />
+                            }
+                            className="h-full"
+                          />
+                        </div>
+                      )}
+                    </ExplorerGroup>
+                  </ResizablePanel>
+                  <ResizableHandle />
+                </>
+              )}
+            </ResizablePanelGroup>
+          )}
+          {isSearching && <SearchPanel query={searchQuery} />}
         </div>
       </div>
     </Explorer>

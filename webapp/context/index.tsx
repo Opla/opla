@@ -15,7 +15,16 @@
 'use client';
 
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
-import { Conversation, LlmUsage, Message, Preset, Provider } from '@/types';
+import {
+  Conversation,
+  LlmUsage,
+  Message,
+  Preset,
+  Provider,
+  QueryResponse,
+  QueryResultEntry,
+  QueryResult,
+} from '@/types';
 import useDataStorage from '@/hooks/useDataStorage';
 import useCollectionStorage from '@/hooks/useCollectionStorage';
 import {
@@ -25,7 +34,7 @@ import {
 } from '@/utils/data/conversations';
 import { deepCopy } from '@/utils/data';
 import { defaultPresets, mergePresets } from '@/utils/data/presets';
-import { mergeMessages } from '@/utils/data/messages';
+import { getMessageContentAsString, mergeMessages } from '@/utils/data/messages';
 import { deleteUnusedConversationsDir } from '@/utils/backend/tauri';
 import logger from '@/utils/logger';
 
@@ -58,6 +67,7 @@ export type Context = {
     updatedConversations: Conversation[];
     updatedMessages: Message[];
   }>;
+  searchConversationMessages: (query: string) => Promise<QueryResponse>;
   setArchives: (newArchives: Conversation[]) => void;
   deleteArchive: (id: string, cleanup?: (id: string) => Promise<void>) => Promise<void>;
   setProviders: (newProviders: Provider[]) => void;
@@ -74,6 +84,7 @@ const initialContext: Context = {
   readConversationMessages: async () => [],
   filterConversationMessages: () => [],
   updateConversationMessages: async () => {},
+  searchConversationMessages: async () => ({ count: 0, results: [] }),
   updateMessagesAndConversation: async () => ({
     updatedConversation: { id: '', createdAt: 0, updatedAt: 0 } as Conversation,
     updatedConversations: [],
@@ -148,6 +159,59 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       }
     },
     [storeConversationMessages],
+  );
+
+  const searchConversationMessages = useCallback(
+    async (query: string): Promise<QueryResponse> => {
+      const result: QueryResponse = {
+        count: 0,
+        results: [],
+      };
+      const promises: Promise<void>[] = [];
+      const filteredQuery = query.toUpperCase();
+      conversations.forEach((c) => {
+        const search = async (conversation: Conversation) => {
+          const group: QueryResult = {
+            id: conversation.id,
+            name: conversation.name || 'Conversation',
+            entries: [],
+          };
+          const messages = await getConversationMessages(conversation.id);
+          messages.forEach((message) => {
+            const text = getMessageContentAsString(message);
+            const index = text.toUpperCase().indexOf(filteredQuery);
+            if (index !== -1) {
+              result.count += 1;
+              let length = 40;
+              if (filteredQuery.length > 40) {
+                length = 10;
+              }
+              const previousLength = index < length ? length - index : length;
+              const afterLength =
+                index + filteredQuery.length > text.length - length ? text.length - index : length;
+              const entry: QueryResultEntry = {
+                id: message.id,
+                index,
+                match: text.substring(index, index + filteredQuery.length),
+                previousText: text.substring(index - previousLength, index),
+                afterText: text.substring(
+                  index + filteredQuery.length,
+                  index + filteredQuery.length + afterLength,
+                ),
+              };
+              group.entries.push(entry);
+            }
+          });
+          if (group.entries.length > 0) {
+            result.results.push(group);
+          }
+        };
+        promises.push(search(c));
+      });
+      await Promise.all(promises);
+      return result;
+    },
+    [conversations, getConversationMessages],
   );
 
   const updateConversations = useCallback(
@@ -238,6 +302,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       readConversationMessages,
       filterConversationMessages,
       updateConversationMessages,
+      searchConversationMessages,
       updateMessagesAndConversation,
       archives,
       setArchives,
@@ -257,6 +322,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       readConversationMessages,
       filterConversationMessages,
       updateConversationMessages,
+      searchConversationMessages,
       updateMessagesAndConversation,
       archives,
       setArchives,
