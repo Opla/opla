@@ -21,7 +21,7 @@ const initI18n = () => {
   if (!(global as any).initI18n) {
     i18n.use(LanguageDetector).use(initReactI18next).init({
       fallbackLng: 'en',
-      debug: false,
+      debug: true,
     });
     i18n.addResourceBundle('en', 'translation', en);
     i18n.addResourceBundle('fr', 'translation', fr);
