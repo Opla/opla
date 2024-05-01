@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Conversation, Message, PresetParameter, ProviderType } from '@/types';
+import { Assistant, Conversation, Message, PresetParameter, ProviderType } from '@/types';
 import {
   ParsedPrompt,
   PromptToken,
@@ -84,7 +84,10 @@ export const compareCommands = (
   return (!type || (type === type1 && type === type2)) && command1 === command2;
 };
 
-export const getCommandManager = (cmds: Partial<Command>[]): CommandManager => {
+export const getCommandManager = (
+  cmds: Partial<Command>[],
+  assistants: Assistant[],
+): CommandManager => {
   const commands = [
     ...cmds
       .filter((item) => !item.selected)
@@ -97,6 +100,17 @@ export const getCommandManager = (cmds: Partial<Command>[]): CommandManager => {
             type: CommandType.Mention,
           }) as Command,
       ),
+    ...assistants.map(
+      (a) =>
+        ({
+          key: a.id,
+          label: a.name,
+          avatar: a.avatar,
+          value: getMentionName(a.name),
+          group: 'assistants',
+          type: CommandType.Mention,
+        }) as Command,
+    ),
     ...getHashtagCommands(),
     ...getActionCommands(),
   ];

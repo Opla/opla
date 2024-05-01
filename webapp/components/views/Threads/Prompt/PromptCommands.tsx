@@ -13,14 +13,17 @@
 // limitations under the License.
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Bot, BrainCircuit } from 'lucide-react';
 import { ParsedPrompt, isCommand } from '@/utils/parsers';
 import { CommandManager } from '@/utils/commands/types';
 import { getCaretCoordinates, getCurrentWord } from '@/utils/ui/caretposition';
 import { getCommandType } from '@/utils/commands';
+import AvatarView from '@/components/common/AvatarView';
+import { Button } from '@/components/ui/button';
+import { GrayPill } from '@/components/ui/Pills';
 import { cn } from '@/lib/utils';
 import logger from '@/utils/logger';
 import useTranslation from '@/hooks/useTranslation';
-import { Button } from '../../../ui/button';
 
 type PromptCommandProps = {
   commandManager: CommandManager;
@@ -218,7 +221,7 @@ function PromptCommandInput({
           'absolute hidden h-auto min-w-[240px] max-w-[320px] overflow-visible rounded-md border bg-popover p-0 text-popover-foreground shadow',
         )}
       >
-        <div className="gap-2">
+        <div className="w-full gap-2">
           {filteredCommands.length === 0 && (
             <div className="rounded-sm px-2 py-1.5 text-left text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
               {t(notFound)}
@@ -239,7 +242,18 @@ function PromptCommandInput({
                   focusIndex !== -1 ? 'hover:bg-transparent' : '',
                 )}
               >
-                <div className="w-full grow">{item.label}</div>
+                <div className="flex w-full flex-row content-between items-center gap-2">
+                  {item.avatar && <AvatarView avatar={item.avatar} className="h-4 w-4" />}
+                  {!item.avatar && item.group === 'models' && (
+                    <BrainCircuit className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  {!item.avatar && item.group === 'assistants' && (
+                    <Bot className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <div className="flex-1">{item.label} </div>
+                  {item.group === 'models' && <GrayPill label={t('Model')} />}
+                  {item.group === 'assistants' && <GrayPill label={t('Assistant')} />}
+                </div>
               </Button>
             ))}
         </div>

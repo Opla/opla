@@ -80,7 +80,7 @@ function Thread({
   const { config, downloads, streams, getActiveModel, setActiveModel } = useBackend();
   const searchParams = useSearchParams();
   const [service, setService] = useState<AIService | undefined>(undefined);
-  const { getAssistant } = useAssistantStore();
+  const { assistants, getAssistant } = useAssistantStore();
 
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
   const conversationId = _conversationId || tempConversationId;
@@ -199,7 +199,10 @@ function Thread({
       } else if (activeModel.state === ModelState.Downloading) {
         d = true;
       }
-      const manager = getCommandManager(items);
+      const manager = getCommandManager(
+        items,
+        assistants.filter((a) => a.id !== assistantId),
+      );
 
       return {
         modelItems: items,
@@ -210,6 +213,7 @@ function Thread({
         model: activeModel,
       };
     }, [
+      assistants,
       config,
       downloads,
       getActiveModel,
