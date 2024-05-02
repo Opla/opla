@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PresetParameter, Ui } from '@/types';
+import { Avatar, PresetParameter, Ui } from '@/types';
 import { ParsedPrompt } from '../parsers';
 
 export enum CommandType {
@@ -23,14 +23,16 @@ export enum CommandType {
 
 export type Command = Ui.MenuItem & {
   type: CommandType;
+  tag?: string;
   execute?: (value: string) => void;
   postValidate?: (value?: string) => boolean;
   validate?: (value?: string) => boolean;
+  avatar?: Avatar;
 };
 
 export type CommandManager = {
   commands: Command[];
-  getCommand: (value: string, type: CommandType) => Command | undefined;
+  getCommand: (value: string, type: CommandType, tag?: string) => Command | undefined;
   filterCommands: (commandValue: string) => Command[];
   findCommandParameters: (prompt: ParsedPrompt) => Record<string, PresetParameter>;
 };

@@ -41,6 +41,7 @@ import { preProcessingCommands } from '@/utils/commands';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import { CommandManager } from '@/utils/commands/types';
 import { cancelSending, sendMessage, updateMessageContent } from '@/utils/messages';
+import { useAssistantStore } from '@/stores';
 import { PromptContext } from '../Prompt/PromptContext';
 
 type Context = {
@@ -107,6 +108,7 @@ function ConversationProvider({
   } = context;
   const { parseAndValidatePrompt, clearPrompt } = useContext(PromptContext) || {};
   const { config } = useBackend();
+  const { getAssistant } = useAssistantStore();
   const [selectedMessageId, setSelectedMessageId] = useState<string | undefined>(undefined);
   const [isProcessing, setIsProcessing] = useState<{ [key: string]: boolean }>({});
   const [errorMessages, setErrorMessage] = useState<{ [key: string]: string }>({});
@@ -144,7 +146,7 @@ function ConversationProvider({
     ) => {
       if (!selectedModelId) {
         setErrorMessage({ type: 'error', error: 'No model selected' });
-        return undefined;
+        return {};
       }
       const result = await preProcessingCommands(
         conversation.id,
@@ -159,13 +161,17 @@ function ConversationProvider({
       );
       if (result.type === 'error') {
         setErrorMessage({ ...errorMessages, [conversation.id]: result.error });
-        return undefined;
+        return {};
       }
       if (result.type === 'return') {
         clearPrompt?.(result.updatedConversation, result.updatedConversations);
-        return undefined;
+        return {};
       }
 
+      let selectedAssistant: Assistant | undefined;
+      if (result.assistantId) {
+        selectedAssistant = getAssistant(result.assistantId);
+      }
       let selectedModel;
       if (result.modelName) {
         selectedModel = findModelInAll(result.modelName, providers, config, true);
@@ -177,7 +183,7 @@ function ConversationProvider({
           true,
         );
       }
-      if (!selectedModel) {
+      if (!selectedModel && !selectedAssistant) {
         setErrorMessage({ ...errorMessages, [conversation.id]: 'Model not found' });
         setIsProcessing({ ...isProcessing, [conversation.id]: false });
       } else {
@@ -185,7 +191,7 @@ function ConversationProvider({
         setIsProcessing({ ...isProcessing, [conversation.id]: true });
       }
 
-      return selectedModel;
+      return { selectedModel, selectedAssistant };
     },
     [
       changeService,
@@ -194,6 +200,7 @@ function ConversationProvider({
       config,
       conversations,
       errorMessages,
+      getAssistant,
       getConversationMessages,
       isProcessing,
       providers,
@@ -211,7 +218,7 @@ function ConversationProvider({
         return;
       }
 
-      const selectedModel = await preProcessingSendMessage(
+      const { selectedModel, selectedAssistant } = await preProcessingSendMessage(
         prompt,
         selectedConversation as Conversation,
       );
@@ -220,10 +227,12 @@ function ConversationProvider({
       }
 
       const userMessage = createMessage({ role: 'user', name: 'you' }, prompt.text, prompt.raw);
-      const message = createMessage({ role: 'assistant', name: selectedModel.name }, '...');
-      message.author.metadata = { ...message.author.metadata, modelId: selectedModel.id };
-      if (assistant) {
-        message.author.metadata.assistantId = assistant.id;
+      const message = createMessage({ role: 'assistant', name: selectedModel?.name }, '...');
+      message.author.metadata = { ...message.author.metadata, modelId: selectedModel?.id };
+      if (selectedAssistant) {
+        message.author.metadata = { ...message.author.metadata, assistantId: selectedAssistant.id };
+      } else if (assistant) {
+        message.author.metadata = { ...message.author.metadata, assistantId: assistant.id };
       }
       message.status = MessageStatus.Pending;
       userMessage.sibling = message.id;
@@ -257,14 +266,14 @@ function ConversationProvider({
         message,
         userMessage,
       );
-      /* message = */ await sendMessage(
+      await sendMessage(
         message,
         updatedMessages,
         updatedConversation,
         updatedConversations,
         prompt,
-        selectedModel.name as string,
-        assistant,
+        selectedModel?.name as string,
+        selectedAssistant || assistant,
         commandManager,
         context,
         config,
@@ -275,8 +284,6 @@ function ConversationProvider({
       if (tempConversationId) {
         router.replace(`${Page.Threads}/${tempConversationId}`, undefined, { shallow: true });
       }
-
-      // setIsProcessing({ ...isProcessing, [conversationId]: false });
     },
     [
       assistant,
@@ -311,7 +318,7 @@ function ConversationProvider({
       const prompt = parseAndValidatePrompt(
         getMessageRawContentAsString(conversationMessages[index - 1]) || '',
       );
-      const selectedModel = await preProcessingSendMessage(
+      const { selectedModel, selectedAssistant } = await preProcessingSendMessage(
         prompt,
         selectedConversation as Conversation,
         previousMessage,
@@ -326,12 +333,15 @@ function ConversationProvider({
         '...',
         MessageStatus.Pending,
       );
-      if (message.author.name !== selectedModel.name) {
+      if (selectedModel && message.author.name !== selectedModel.name) {
         message.author.name = selectedModel.name;
         message.author.metadata = { ...message.author.metadata, modelId: selectedModel.id };
         if (assistant) {
           message.author.metadata.assistantId = assistant.id;
         }
+      }
+      if (selectedAssistant && message.author.metadata?.assistantId !== selectedAssistant.id) {
+        message.author.metadata = { ...message.author.metadata, assistantId: selectedAssistant.id };
       }
       const { updatedConversation, updatedConversations, updatedMessages } =
         await updateMessagesAndConversation(
@@ -341,22 +351,20 @@ function ConversationProvider({
           conversationId,
         );
 
-      /* message = */ await sendMessage(
+      await sendMessage(
         message,
         updatedMessages,
         updatedConversation,
         updatedConversations,
         prompt,
-        selectedModel.name as string,
-        assistant,
+        selectedModel?.name as string,
+        selectedAssistant || assistant,
         commandManager,
         context,
         config,
         setUsage,
         handleError,
       );
-
-      // setIsProcessing({ ...isProcessing, [conversationId]: false });
     },
     [
       assistant,

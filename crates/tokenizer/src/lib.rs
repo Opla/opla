@@ -33,7 +33,7 @@ pub fn encode(text: String, model: String, encoding: Option<String>) -> Result<V
     if encoding.is_some() {
         return Err("Encoding not supported".to_string());
     }
-    Err("Model not supported".to_string())
+    Err(format!("Model not supported {}", model))
 }
 
 #[cfg(test)]

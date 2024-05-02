@@ -80,7 +80,7 @@ function Thread({
   const { config, downloads, streams, getActiveModel, setActiveModel } = useBackend();
   const searchParams = useSearchParams();
   const [service, setService] = useState<AIService | undefined>(undefined);
-  const { getAssistant } = useAssistantStore();
+  const { assistants, getAssistant } = useAssistantStore();
 
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
   const conversationId = _conversationId || tempConversationId;
@@ -145,7 +145,7 @@ function Thread({
           const model = findModelInAll(author.name, providers, backendContext, true);
           author.name = model?.title || model?.name || author.name;
         } */
-        if (stream.messageId === msg.id /* && index === newMessages.length - 1 */) {
+        if (stream.messageId === msg.id) {
           const m: MessageImpl = {
             ...msg,
             author,
@@ -199,7 +199,10 @@ function Thread({
       } else if (activeModel.state === ModelState.Downloading) {
         d = true;
       }
-      const manager = getCommandManager(items);
+      const manager = getCommandManager(
+        items,
+        assistants.filter((a) => a.id !== assistantId),
+      );
 
       return {
         modelItems: items,
@@ -210,6 +213,7 @@ function Thread({
         model: activeModel,
       };
     }, [
+      assistants,
       config,
       downloads,
       getActiveModel,
@@ -224,14 +228,22 @@ function Thread({
     const newAvatars: AvatarRef[] = [];
     if (messages) {
       newAvatars.push({ ref: 'you', name: 'you' } as AvatarRef);
-      if (assistant) {
+      assistants.forEach((a) => {
+        const avatar = { ref: a.id as string, name: a.name } as AvatarRef;
+        avatar.url = a.avatar?.url;
+        avatar.color = a.avatar?.color;
+        avatar.fallback = a.avatar?.name;
+        avatar.ref = a.id as string;
+        newAvatars.push(avatar);
+      });
+      /* if (assistant) {
         const avatar = { ref: assistant.id as string, name: assistant.name } as AvatarRef;
         avatar.url = assistant.avatar?.url;
         avatar.color = assistant.avatar?.color;
         avatar.fallback = assistant.avatar?.name;
         avatar.ref = assistant.id as string;
         newAvatars.push(avatar);
-      }
+      } */
       if (modelItems) {
         modelItems.forEach((item) => {
           const avatar = { ref: item.key, name: item.label } as AvatarRef;
@@ -240,7 +252,7 @@ function Thread({
       }
     }
     return newAvatars;
-  }, [assistant, messages, modelItems]);
+  }, [assistants, messages, modelItems]);
 
   useEffect(() => {
     if (_conversationId && tempConversationId) {
@@ -285,7 +297,7 @@ function Thread({
     );
     const activeModel = findModelInAll(modelIdOrName, providers, config, true);
     if (!activeModel) {
-      logger.error('Model not found', modelIdOrName);
+      logger.error('changeService Model not found', modelIdOrName);
       return;
     }
     const newService: AIService = {
