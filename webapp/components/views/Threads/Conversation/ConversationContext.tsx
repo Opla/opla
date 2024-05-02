@@ -139,60 +139,103 @@ function ConversationProvider({
     [errorMessages, onError],
   );
 
+  const updateMessages = useCallback(
+    async (
+      raw: string,
+      content: string,
+      status: MessageStatus,
+      conversationMessages: Message[],
+      conversation: Conversation,
+      previousMessage: Message | undefined,
+      modelName: string,
+    ) => {
+      let updatedConversation = conversation;
+      let updatedMessages: Message[] | undefined;
+      let message;
+      if (previousMessage) {
+        message = changeMessageContent(previousMessage, content);
+        message.status = status;
+        ({ updatedConversation, updatedMessages } = await updateMessagesAndConversation(
+          [message],
+          conversationMessages,
+          updatedConversation,
+          conversation.id,
+        ));
+      } else {
+        const userMessage = createMessage({ role: 'user', name: 'You' }, raw, raw);
+        message = createMessage({ role: 'assistant', name: modelName || 'Assistant' }, content);
+        message.status = status;
+        userMessage.sibling = message.id;
+        message.sibling = userMessage.id;
+        ({ updatedConversation, updatedMessages } = await updateMessagesAndConversation(
+          [userMessage, message],
+          getConversationMessages(conversation.id),
+          conversation,
+          conversation.id,
+        ));
+      }
+      return {
+        updatedConversation,
+        updatedMessages,
+        message,
+      };
+    },
+    [getConversationMessages, updateMessagesAndConversation],
+  );
+
   const handleImageGeneration = useCallback(
     async (
       prompt: ParsedPrompt,
       conversation: Conversation,
       previousMessage?: Message | undefined,
     ) => {
+      let updatedConversation = conversation;
+      
+      if (!previousMessage) {
+        updatedConversation = (await clearPrompt?.(conversation, conversations))?.find((c) => c.id === conversation.id) || conversation;
+      }
+      if (updatedConversation.temp) {
+        updatedConversation.name = getConversationTitle(updatedConversation, t);
+      }
+      
+      let updatedMessages = getConversationMessages(conversation.id);
+      let message = previousMessage;
       const openai = context.providers.find((p) => p.name.toLowerCase() === 'openai');
-      console.log('imagine openai', openai);
       let content: string | undefined;
       let modelName: string | undefined;
       if (openai) {
+        modelName = 'Dall-E'; // TODO remove hardcoding
+        ({ updatedConversation, updatedMessages, message } = await updateMessages(
+          prompt.raw,
+          '...',
+          MessageStatus.Pending,
+          updatedMessages,
+          updatedConversation,
+          message,
+          modelName || 'Image Gen',
+        ));
         const { text } = prompt;
         const response = await imageGeneration(openai, text);
-        modelName = 'Dall-E'; // TODO remove hardcoding
-        console.log('imagine response', response);
+
         if (response?.images[0]) {
           content = `![${text}](${response.images[0]} "${text}")`;
         }
       }
-      if (previousMessage) {
-        const message = changeMessageContent(
-          previousMessage,
-          t(content || "Sure, I'll be able to imagine wonderfull images..."),
-        );
-        await updateMessagesAndConversation(
-          [message],
-          getConversationMessages(conversation.id),
-          conversation,
-          conversation.id,
-        );
-      } else {
-        const userMessage = createMessage({ role: 'user', name: 'You' }, prompt.raw, prompt.raw);
-        const message = createMessage(
-          { role: 'assistant', name: modelName || selectedModelId || 'Image gen' },
-          t(content || "Soon, I'll be able to imagine wonderfull images..."),
-        );
-        userMessage.sibling = message.id;
-        message.sibling = userMessage.id;
-        await context.updateMessagesAndConversation(
-          [userMessage, message],
-          context.getConversationMessages(conversation.id),
-          conversation,
-          conversation.id,
-        );
+      await updateMessages(
+        prompt.raw,
+        content || t('Not available for this AI provider'),
+        MessageStatus.Delivered,
+        updatedMessages,
+        updatedConversation,
+        message,
+        modelName|| 'Image Gen',
+      );
+
+      if (tempConversationId) {
+        router.replace(`${Page.Threads}/${tempConversationId}`, undefined, { shallow: true });
       }
     },
-    [
-      context,
-      conversations,
-      getConversationMessages,
-      selectedModelId,
-      t,
-      updateMessagesAndConversation,
-    ],
+    [clearPrompt, context.providers, conversations, getConversationMessages, router, t, tempConversationId, updateMessages],
   );
 
   const preProcessingSendMessage = useCallback(
@@ -224,8 +267,7 @@ function ConversationProvider({
         clearPrompt?.(result.updatedConversation, result.updatedConversations);
         return {};
       }
-      if (result.type === 'image') {
-        clearPrompt?.(conversation, conversations);
+      if (result.type === 'imagine') {
         setIsProcessing({ ...isProcessing, [conversation.id]: true });
         try {
           await handleImageGeneration(prompt, conversation, previousMessage);
@@ -233,6 +275,7 @@ function ConversationProvider({
           setErrorMessage({ ...errorMessages, [conversation.id]: `${error}` });
         }
         setIsProcessing({ ...isProcessing, [conversation.id]: false });
+
         return {};
       }
 
@@ -270,6 +313,7 @@ function ConversationProvider({
       errorMessages,
       getAssistant,
       getConversationMessages,
+      handleImageGeneration,
       isProcessing,
       providers,
       selectedConversation,

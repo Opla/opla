@@ -171,11 +171,11 @@ export const preProcessingCommands = async (
     providers: Provider[];
   },
 ): Promise<
-  { type: 'error' | 'ok' | 'return' | 'image' } & (
+  { type: 'error' | 'ok' | 'return' | 'imagine' } & (
     | { type: 'return'; updatedConversation: Conversation; updatedConversations: Conversation[] }
     | { type: 'ok'; modelName: string | undefined; assistantId: string | undefined }
     | { type: 'error'; error: string }
-    | { type: 'image' }
+    | { type: 'imagine' }
   )
 > => {
   const mentions = prompt.tokens.filter((to) => to.type === PromptTokenType.Mention);
@@ -209,7 +209,7 @@ export const preProcessingCommands = async (
             cId,
           ));
       } else if (command.label === 'Imagine') {
-        return { type: 'image' };
+        return { type: 'imagine' };
       }
     }
     return { type: 'return', updatedConversation, updatedConversations };
