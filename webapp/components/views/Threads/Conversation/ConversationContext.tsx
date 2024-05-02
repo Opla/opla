@@ -190,14 +190,17 @@ function ConversationProvider({
       previousMessage?: Message | undefined,
     ) => {
       let updatedConversation = conversation;
-      
+
       if (!previousMessage) {
-        updatedConversation = (await clearPrompt?.(conversation, conversations))?.find((c) => c.id === conversation.id) || conversation;
+        updatedConversation =
+          (await clearPrompt?.(conversation, conversations))?.find(
+            (c) => c.id === conversation.id,
+          ) || conversation;
       }
       if (updatedConversation.temp) {
         updatedConversation.name = getConversationTitle(updatedConversation, t);
       }
-      
+
       let updatedMessages = getConversationMessages(conversation.id);
       let message = previousMessage;
       const openai = context.providers.find((p) => p.name.toLowerCase() === 'openai');
@@ -228,14 +231,23 @@ function ConversationProvider({
         updatedMessages,
         updatedConversation,
         message,
-        modelName|| 'Image Gen',
+        modelName || 'Image Gen',
       );
 
       if (tempConversationId) {
         router.replace(`${Page.Threads}/${tempConversationId}`, undefined, { shallow: true });
       }
     },
-    [clearPrompt, context.providers, conversations, getConversationMessages, router, t, tempConversationId, updateMessages],
+    [
+      clearPrompt,
+      context.providers,
+      conversations,
+      getConversationMessages,
+      router,
+      t,
+      tempConversationId,
+      updateMessages,
+    ],
   );
 
   const preProcessingSendMessage = useCallback(
