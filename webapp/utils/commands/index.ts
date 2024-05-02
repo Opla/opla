@@ -78,10 +78,16 @@ export const compareCommands = (
   command1: string | undefined,
   command2: string | string,
   type?: CommandType,
+  tag1?: string | undefined,
+  tag2?: string | undefined,
 ): boolean => {
   const type1 = getCommandType(command1);
   const type2 = getCommandType(command2);
-  return (!type || (type === type1 && type === type2)) && command1 === command2;
+  return (
+    (!type || (type === type1 && type === type2)) &&
+    command1 === command2 &&
+    (tag1 === undefined || tag1 === tag2)
+  );
 };
 
 export const getCommandManager = (
@@ -96,7 +102,7 @@ export const getCommandManager = (
           ({
             ...item,
             value: getMentionName(item.value as string),
-            group: 'models',
+            tag: 'models',
             type: CommandType.Mention,
           }) as Command,
       ),
@@ -107,7 +113,7 @@ export const getCommandManager = (
           label: a.name,
           avatar: a.avatar,
           value: getMentionName(a.name),
-          group: 'assistants',
+          tag: 'assistants',
           type: CommandType.Mention,
         }) as Command,
     ),
@@ -116,8 +122,10 @@ export const getCommandManager = (
   ];
   return {
     commands,
-    getCommand: (value: string, type: string) => {
-      const command = commands.find((m) => compareCommands(m.value, value, type as CommandType));
+    getCommand: (value: string, type: string, tag?: string) => {
+      const command = commands.find((m) =>
+        compareCommands(m.value, value, type as CommandType, tag, m.tag),
+      );
       return command;
     },
     filterCommands: (commandValue: string): Command[] =>
@@ -162,16 +170,22 @@ export const preProcessingCommands = async (
 ): Promise<
   { type: 'error' | 'ok' | 'return' } & (
     | { type: 'return'; updatedConversation: Conversation; updatedConversations: Conversation[] }
-    | { type: 'ok'; modelName: string | undefined }
+    | { type: 'ok'; modelName: string | undefined; assistantId: string | undefined }
     | { type: 'error'; error: string }
   )
 > => {
   const mentions = prompt.tokens.filter((to) => to.type === PromptTokenType.Mention);
-  const modelItem =
+  const mentionCommand =
     mentions.length === 1
       ? commandManager.commands.find((cmd) => compareMentions(cmd.value, mentions[0].value))
       : undefined;
-  const modelName = modelItem?.label;
+  let modelName: string | undefined;
+  let assistantId: string | undefined;
+  if (mentionCommand && mentionCommand.tag === 'models') {
+    modelName = mentionCommand.label;
+  } else if (mentionCommand && mentionCommand.tag === 'assistants') {
+    assistantId = mentionCommand.key;
+  }
 
   const action = prompt.tokens.find((to) => to.type === PromptTokenType.Action);
 
@@ -227,7 +241,7 @@ export const preProcessingCommands = async (
   if (prompt.text.length < 1) {
     if (modelName) {
       // Change conversation's model if there is only a model mention in the prompt
-      context.changeService(modelName, modelItem.group as ProviderType, {
+      context.changeService(modelName, mentionCommand?.group as ProviderType, {
         currentPrompt: undefined,
       });
       return { type: 'return', updatedConversation, updatedConversations };
@@ -241,16 +255,17 @@ export const preProcessingCommands = async (
   if (mentions.length === 1 && (!modelName || mentions[0].state === PromptTokenState.Error)) {
     return { type: 'error', error: context.t('This model is not available.') };
   }
-  return { type: 'ok', modelName };
+  return { type: 'ok', modelName, assistantId };
 };
 
 export const getMentionCommands = (
   prompt: ParsedPrompt | undefined,
   commandManager: CommandManager,
+  tag?: string,
 ): Command[] => {
   const mentions = prompt?.tokens.filter((to) => to.type === PromptTokenType.Mention) ?? [];
   const modelCommands = mentions
-    .map((m) => commandManager.getCommand(m.value, CommandType.Mention))
+    .map((m) => commandManager.getCommand(m.value, CommandType.Mention, tag))
     .filter((m) => m !== undefined) as Command[];
 
   return modelCommands;

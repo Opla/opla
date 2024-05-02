@@ -50,6 +50,7 @@ import useBackend from '@/hooks/useBackendContext';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { getDefaultAssistantService } from '@/utils/data/assistants';
 import useTranslation from '@/hooks/useTranslation';
+import { useAssistantStore } from '@/stores';
 
 type Context = {
   conversationPrompt: ParsedPrompt;
@@ -60,7 +61,6 @@ type Context = {
     conversation: Conversation | undefined,
     newConversations: Conversation[],
   ) => Promise<Conversation[]>;
-  // handleChangePrompt: (prompt: ParsedPrompt) => void;
   selectTemplate: (template: PromptTemplate) => Promise<void>;
   tokenValidator: TokenValidator;
   usage: Usage | undefined;
@@ -93,6 +93,7 @@ function PromptProvider({
 }: PropsWithChildren<PromptProviderProps>) {
   const { t } = useTranslation();
   const context = useContext(AppContext);
+  const { getAssistant } = useAssistantStore();
   const { conversations, providers, updateConversations } = context;
   const { config } = useBackend();
   const [usage, updateUsage] = useState<Usage | undefined>({ tokenCount: 0 });
@@ -127,14 +128,24 @@ function PromptProvider({
         const modelsCommands = getMentionCommands(
           changedPrompt || conversationPrompt,
           commandManager,
+          'models',
         );
+        const assistantCommands = getMentionCommands(
+          changedPrompt || conversationPrompt,
+          commandManager,
+          'models',
+        );
+        const selectedAssistantId = assistantCommands[0]?.key;
+        const selectedAssistant = selectedAssistantId
+          ? getAssistant(selectedAssistantId)
+          : assistant;
         const selectedModelNameOrId =
           modelsCommands[0]?.key ||
-          getConversationModelId(selectedConversation, assistant) ||
+          getConversationModelId(selectedConversation, selectedAssistant) ||
           selectedModelId;
         const activeService = getActiveService(
           selectedConversation,
-          assistant,
+          selectedAssistant,
           providers,
           config,
           selectedModelNameOrId,
@@ -155,6 +166,7 @@ function PromptProvider({
     selectedConversation,
     commandManager,
     assistant,
+    getAssistant,
     providers,
     config,
     selectedModelId,
@@ -234,15 +246,6 @@ function PromptProvider({
 
   useDebounceFunc<ParsedPrompt | undefined>(handleUpdatePrompt, changedPrompt, 500);
 
-  /* const handleChangePrompt = useCallback(
-    (prompt: ParsedPrompt) => {
-      if (prompt.raw !== conversationPrompt?.raw) {
-        setChangedPrompt(prompt);
-      }
-    },
-    [conversationPrompt],
-  ); */
-
   const selectTemplate = useCallback(
     async (template: PromptTemplate) => {
       handleUpdatePrompt(parseAndValidatePrompt(template.value), template.name);
@@ -257,7 +260,6 @@ function PromptProvider({
       parseAndValidatePrompt,
       changedPrompt,
       setChangedPrompt,
-      // handleChangePrompt,
       tokenValidator,
       selectTemplate,
       usage,
@@ -267,7 +269,6 @@ function PromptProvider({
       clearPrompt,
       parseAndValidatePrompt,
       changedPrompt,
-      // handleChangePrompt,
       tokenValidator,
       selectTemplate,
       usage,
@@ -285,7 +286,6 @@ const usePromptContext = (): Context => {
       clearPrompt: async () => [],
       parseAndValidatePrompt: () => EmptyParsedPrompt,
       changedPrompt: undefined,
-      // handleChangePrompt: () => {},
       tokenValidator: () => [EmptyPromptToken, undefined],
       selectTemplate: async () => {},
       setChangedPrompt: () => {},

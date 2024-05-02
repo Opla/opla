@@ -251,8 +251,8 @@ function PromptCommandInput({
                     <Bot className="h-4 w-4 text-muted-foreground" />
                   )}
                   <div className="flex-1">{item.label} </div>
-                  {item.group === 'models' && <GrayPill label={t('Model')} />}
-                  {item.group === 'assistants' && <GrayPill label={t('Assistant')} />}
+                  {item.tag === 'models' && <GrayPill label={t('Model')} />}
+                  {item.tag === 'assistants' && <GrayPill label={t('Assistant')} />}
                 </div>
               </Button>
             ))}
