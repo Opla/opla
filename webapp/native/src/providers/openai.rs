@@ -21,14 +21,16 @@ use tokenizer::encode;
 
 use crate::providers::llm::{
     LlmCompletionOptions,
-    LlmQuery,
-    LlmQueryCompletion,
     LlmCompletionResponse,
-    LlmResponseError,
-    LlmUsage,
     LlmError,
     LlmMessage,
+    LlmQuery,
+    LlmQueryCompletion,
+    LlmResponseError,
+    LlmUsage,
 };
+
+use super::llm::LlmImageGenerationResponse;
 
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -207,6 +209,53 @@ impl OpenAIChatCompletion {
     }
 }
 
+#[serde_with::skip_serializing_none]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct OpenAIBodyImageGeneration {
+    pub prompt: String,
+    pub model: Option<String>,
+    pub n: Option<u8>,
+    pub quality: Option<String>,
+    pub response_format: Option<String>,
+    pub size: Option<String>,
+    pub style: Option<String>,
+}
+
+impl OpenAIBodyImageGeneration {
+    pub fn new(prompt: String, model: Option<String>) -> Self {
+        OpenAIBodyImageGeneration {
+            prompt: prompt.clone(),
+            model: model.clone(),
+            n: None,
+            quality: None,
+            response_format: None,
+            size: None,
+            style: None,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct OpenAIImageUrl {
+    pub url: String,
+}
+
+#[serde_with::skip_serializing_none]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct OpenAIImageGenerationResponse {
+    pub created: u64,
+    pub data: Vec<OpenAIImageUrl>,
+}
+impl OpenAIImageGenerationResponse {
+    pub fn to_llm_response(&mut self) -> LlmImageGenerationResponse {
+        return LlmImageGenerationResponse {
+            images: self.data
+                .iter()
+                .map(|d| format!("{}", d.url))
+                .collect(),
+        };
+    }
+}
 async fn request<R: Runtime>(
     url: String,
     secret_key: &str,
@@ -234,6 +283,43 @@ async fn request<R: Runtime>(
         return Err(Box::new(error.error));
     }
     let response = match response.json::<OpenAIChatCompletion>().await {
+        Ok(r) => r,
+        Err(error) => {
+            println!("Failed to dezerialize response: {}", error);
+            return Err(Box::new(error));
+        }
+    };
+
+    Ok(response.to_llm_response())
+}
+
+async fn request_image(
+    url: String,
+    secret_key: &str,
+    parameters: OpenAIBodyImageGeneration
+) -> Result<LlmImageGenerationResponse, Box<dyn std::error::Error>> {
+    let client = reqwest::Client::new();
+    let result = client.post(url).bearer_auth(&secret_key).json(&parameters).send().await;
+    let response = match result {
+        Ok(res) => res,
+        Err(error) => {
+            println!("Failed to send: {}", error);
+            return Err(Box::new(error));
+        }
+    };
+    let status = response.status();
+    if !status.is_success() {
+        let error = match response.json::<LlmResponseError>().await {
+            Ok(t) => t,
+            Err(error) => {
+                println!("Failed to dezerialize error response: {}", error);
+                return Err(Box::new(error));
+            }
+        };
+        println!("Failed to get response: {} {:?}", status, error);
+        return Err(Box::new(error.error));
+    }
+    let mut response = match response.json::<OpenAIImageGenerationResponse>().await {
         Ok(r) => r,
         Err(error) => {
             println!("Failed to dezerialize response: {}", error);
@@ -401,6 +487,22 @@ pub async fn call_completion<R: Runtime>(
     }
     println!("llm call duration:  {:?} usage={:?}", end_time, usage);
     result.usage = Some(usage);
+    Ok(result)
+}
+
+pub async fn call_image_generation(
+    api: &str,
+    secret_key: &str,
+    prompt: &str,
+    model: Option<String>
+) -> Result<LlmImageGenerationResponse, Box<dyn std::error::Error>> {
+    let url = format!("{}/image/generations", api);
+    println!("{}", format!("image generation call:  {:?} / {:?}", url, &model));
+
+    let parameters = OpenAIBodyImageGeneration::new(prompt.to_owned(), model.to_owned());
+    println!("image generation call parameters:  {:?}", parameters);
+
+    let result = request_image(url, secret_key, parameters).await?;
     Ok(result)
 }
 

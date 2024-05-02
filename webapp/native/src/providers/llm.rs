@@ -300,3 +300,7 @@ pub trait LlmInferenceInterface: DynClone {
 }
 
 dyn_clone::clone_trait_object!(LlmInferenceInterface);
+
+pub struct LlmImageGenerationResponse {
+    pub images: Vec<String>,
+}

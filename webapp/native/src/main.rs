@@ -37,10 +37,7 @@ use data::{ asset::Asset, model::{ Model, ModelEntity } };
 use downloader::Downloader;
 use providers::{
     llm::{
-        LlmCompletionOptions,
-        LlmQuery,
-        LlmQueryCompletion,
-        LlmTokenizeResponse,
+        LlmCompletionOptions, LlmImageGenerationResponse, LlmQuery, LlmQueryCompletion, LlmTokenizeResponse
     },
     ProvidersManager,
 };
@@ -606,6 +603,19 @@ async fn llm_call_tokenize<R: Runtime>(
 ) -> Result<LlmTokenizeResponse, String> {
     let mut manager = context.providers_manager.lock().await;
     manager.llm_call_tokenize::<R>(app, model, provider, text).await
+}
+
+#[tauri::command]
+async fn llm_call_image_generation<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>,
+    model: Option<String>,
+    provider: Provider,
+    prompt: String
+) -> Result<LlmImageGenerationResponse, String> {
+    let mut manager = context.providers_manager.lock().await;
+    manager.llm_call_image_generation(model, provider, prompt).await
 }
 
 async fn start_server<R: Runtime>(

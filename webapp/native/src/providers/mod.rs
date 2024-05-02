@@ -34,6 +34,7 @@ use self::{
         LlmCompletionOptions,
         LlmCompletionResponse,
         LlmError,
+        LlmImageGenerationResponse,
         LlmInferenceInterface,
         LlmQuery,
         LlmQueryCompletion,
@@ -526,5 +527,30 @@ impl ProvidersManager {
             return Ok(response);
         }
         return Err(format!("LLM provider not found: {:?}", llm_provider_type));
+    }
+
+    pub async fn llm_call_image_generation(
+        &mut self,
+        model: Option<String>,
+        provider: Provider,
+        prompt: String
+    ) -> Result<LlmImageGenerationResponse, String> {
+        let llm_provider_type = provider.r#type;
+        if llm_provider_type == "openai" {
+            let api = format!("{:}", provider.url);
+            let secret_key = match provider.key {
+                Some(k) => { k }
+                None => {
+                    if llm_provider_type == "openai" {
+                        return Err(format!("OpenAI provider key not set: {:?}", llm_provider_type));
+                    }
+                    ' '.to_string()
+                }
+            };
+            let result = openai::call_image_generation(&api, &secret_key, &prompt, model).await.map_err(|err| err.to_string());
+
+            return result;
+        }
+        return Err(format!("LLM provider image generation not implemented: {:?}", llm_provider_type));
     }
 }
