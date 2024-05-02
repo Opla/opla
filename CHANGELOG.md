@@ -1,3 +1,10 @@
+# [1.0.0-alpha.138](https://github.com/Opla/opla/compare/v1.0.0-alpha.137...v1.0.0-alpha.138) (2024-05-02)
+
+
+### Features
+
+* image generation [#537](https://github.com/Opla/opla/issues/537) ([#853](https://github.com/Opla/opla/issues/853)) ([c3402d3](https://github.com/Opla/opla/commit/c3402d398f10bf897c89fbeb4672c07553b61e54))
+
 # [1.0.0-alpha.137](https://github.com/Opla/opla/compare/v1.0.0-alpha.136...v1.0.0-alpha.137) (2024-05-02)
 
 
