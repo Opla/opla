@@ -16,6 +16,7 @@ import {
   ContextWindowPolicy,
   ImplProvider,
   LlmQueryCompletion,
+  LlmImageGenerationResponse,
 } from '@/types';
 import OpenAI from './openai';
 import Opla from './opla';
@@ -97,7 +98,7 @@ export const completion = async (
   presets: Preset[],
   prompt: ParsedPrompt,
   commandManager: CommandManager,
-): Promise<void /* LlmCompletionResponse */> => {
+): Promise<void> => {
   if (!activeService.model) {
     throw new Error('Model not set');
   }
@@ -199,4 +200,18 @@ export const cancelCompletion = async (
       messageId,
     });
   }
+};
+
+export const imageGeneration = async (
+  _provider: Provider,
+  prompt: string,
+  modelId?: string | undefined,
+): Promise<LlmImageGenerationResponse> => {
+  const provider = mapKeys({ ..._provider }, toSnakeCase);
+  const response: LlmImageGenerationResponse = (await invokeTauri('llm_call_image_generation', {
+    model: modelId || 'dall-e-3',
+    provider,
+    prompt,
+  })) as LlmImageGenerationResponse;
+  return response;
 };
