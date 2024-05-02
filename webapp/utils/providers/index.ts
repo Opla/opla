@@ -209,7 +209,7 @@ export const imageGeneration = async (
 ): Promise<LlmImageGenerationResponse> => {
   const provider = mapKeys({ ..._provider }, toSnakeCase);
   const response: LlmImageGenerationResponse = (await invokeTauri('llm_call_image_generation', {
-    model: modelId,
+    model: modelId || 'dall-e-3',
     provider,
     prompt,
   })) as LlmImageGenerationResponse;
