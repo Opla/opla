@@ -236,7 +236,8 @@ impl OpenAIBodyImageGeneration {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct OpenAIImageUrl {
+pub struct OpenAIImage {
+    pub revisited_prompt: Option<String>,
     pub url: String,
 }
 
@@ -244,7 +245,7 @@ pub struct OpenAIImageUrl {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct OpenAIImageGenerationResponse {
     pub created: u64,
-    pub data: Vec<OpenAIImageUrl>,
+    pub data: Vec<OpenAIImage>,
 }
 impl OpenAIImageGenerationResponse {
     pub fn to_llm_response(&mut self) -> LlmImageGenerationResponse {
@@ -496,7 +497,7 @@ pub async fn call_image_generation(
     prompt: &str,
     model: Option<String>
 ) -> Result<LlmImageGenerationResponse, Box<dyn std::error::Error>> {
-    let url = format!("{}/image/generations", api);
+    let url = format!("{}/images/generations", api);
     println!("{}", format!("image generation call:  {:?} / {:?}", url, &model));
 
     let parameters = OpenAIBodyImageGeneration::new(prompt.to_owned(), model.to_owned());

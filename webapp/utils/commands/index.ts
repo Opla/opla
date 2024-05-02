@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Assistant, Conversation, Message, PresetParameter, ProviderType } from '@/types';
+import { Assistant, Conversation, Message, PresetParameter, Provider, ProviderType } from '@/types';
 import {
   ParsedPrompt,
   PromptToken,
@@ -22,7 +22,7 @@ import {
   getMentionName,
 } from '../parsers';
 import { Command, CommandManager, CommandType } from './types';
-import { changeMessageContent, createMessage } from '../data/messages';
+import { createMessage } from '../data/messages';
 
 const actionsItems: Command[] = [
   {
@@ -168,12 +168,14 @@ export const preProcessingCommands = async (
     getConversationMessages: Function;
     t: Function;
     updateMessagesAndConversation: Function;
+    providers: Provider[];
   },
 ): Promise<
-  { type: 'error' | 'ok' | 'return' } & (
+  { type: 'error' | 'ok' | 'return' | 'image' } & (
     | { type: 'return'; updatedConversation: Conversation; updatedConversations: Conversation[] }
     | { type: 'ok'; modelName: string | undefined; assistantId: string | undefined }
     | { type: 'error'; error: string }
+    | { type: 'image' }
   )
 > => {
   const mentions = prompt.tokens.filter((to) => to.type === PromptTokenType.Mention);
@@ -207,34 +209,7 @@ export const preProcessingCommands = async (
             cId,
           ));
       } else if (command.label === 'Imagine') {
-        if (previousMessage) {
-          const message = changeMessageContent(
-            previousMessage,
-            context.t("Sure, I'll be able to imagine wonderfull images..."),
-          );
-          ({ updatedConversation, updatedConversations } =
-            await context.updateMessagesAndConversation(
-              [message],
-              context.getConversationMessages(cId),
-              tempConversationName,
-              cId,
-            ));
-        } else {
-          const userMessage = createMessage({ role: 'user', name: 'You' }, prompt.raw, prompt.raw);
-          const message = createMessage(
-            { role: 'assistant', name: modelName || selectedModelNameOrId },
-            context.t("Soon, I'll be able to imagine wonderfull images..."),
-          );
-          userMessage.sibling = message.id;
-          message.sibling = userMessage.id;
-          ({ updatedConversation, updatedConversations } =
-            await context.updateMessagesAndConversation(
-              [userMessage, message],
-              context.getConversationMessages(cId),
-              tempConversationName,
-              cId,
-            ));
-        }
+        return { type: 'image' };
       }
     }
     return { type: 'return', updatedConversation, updatedConversations };

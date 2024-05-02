@@ -573,12 +573,16 @@ export type LlmStreamResponse = {
   usage?: LlmUsage;
 };
 
-export type Cpu = {
-  usage: number;
-};
-
 export type LlmTokenizeResponse = {
   tokens: number[];
+};
+
+export type LlmImageGenerationResponse = {
+  images: string[];
+};
+
+export type Cpu = {
+  usage: number;
 };
 
 export type Sys = {

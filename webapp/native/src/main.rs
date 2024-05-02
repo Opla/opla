@@ -37,7 +37,11 @@ use data::{ asset::Asset, model::{ Model, ModelEntity } };
 use downloader::Downloader;
 use providers::{
     llm::{
-        LlmCompletionOptions, LlmImageGenerationResponse, LlmQuery, LlmQueryCompletion, LlmTokenizeResponse
+        LlmCompletionOptions,
+        LlmImageGenerationResponse,
+        LlmQuery,
+        LlmQueryCompletion,
+        LlmTokenizeResponse,
     },
     ProvidersManager,
 };
@@ -46,12 +50,7 @@ use serde::Serialize;
 use store::{ Store, Provider, Settings };
 use local_server::*;
 use sys::{ Sys, SysInfos };
-use tauri::{
-    EventLoopMessage,
-    Manager,
-    Runtime,
-    State,
-};
+use tauri::{ EventLoopMessage, Manager, Runtime, State };
 use utils::{ get_config_directory, get_data_directory };
 
 pub struct OplaContext {
@@ -586,7 +585,7 @@ async fn llm_cancel_completion<R: Runtime>(
     context: State<'_, OplaContext>,
     llm_provider: Option<Provider>,
     conversation_id: String,
-    message_id: String,
+    message_id: String
 ) -> Result<(), String> {
     let mut manager = context.providers_manager.lock().await;
     manager.llm_cancel_completion::<R>(app, llm_provider, &conversation_id, &message_id).await
@@ -615,7 +614,7 @@ async fn llm_call_image_generation<R: Runtime>(
     prompt: String
 ) -> Result<LlmImageGenerationResponse, String> {
     let mut manager = context.providers_manager.lock().await;
-    manager.llm_call_image_generation(model, provider, prompt).await
+    manager.llm_call_image_generation::<R>(model, provider, prompt).await
 }
 
 async fn start_server<R: Runtime>(
@@ -862,24 +861,22 @@ async fn core(app: &mut tauri::AppHandle) {
         }
     }
     if !error.is_some() {
-                println!("Opla setup done");
-                let handle = app.app_handle();
-                let _id = app.listen_global("opla-downloader", move |event| {
-                    let payload = match event.payload() {
-                        Some(p) => { p }
-                        None => {
-                            return;
-                        }
-                    };
-                    // println!("download event {}", payload);
-                    handle_download_event::<EventLoopMessage>(&handle, payload);
-                });
-            }
-
+        println!("Opla setup done");
+        let handle = app.app_handle();
+        let _id = app.listen_global("opla-downloader", move |event| {
+            let payload = match event.payload() {
+                Some(p) => { p }
+                None => {
+                    return;
+                }
+            };
+            // println!("download event {}", payload);
+            handle_download_event::<EventLoopMessage>(&handle, payload);
+        });
+    }
 }
 
 fn main() {
-
     let downloader = Mutex::new(Downloader::new());
     let context: OplaContext = OplaContext {
         server: Arc::new(Mutex::new(LocalServer::new())),
@@ -911,7 +908,6 @@ fn main() {
                 core(&mut handle).await;
             });
 
-            
             Ok(())
         })
         .invoke_handler(
@@ -942,7 +938,8 @@ fn main() {
                 get_assistants_collection,
                 llm_call_completion,
                 llm_cancel_completion,
-                llm_call_tokenize
+                llm_call_tokenize,
+                llm_call_image_generation
             ]
         )
         .run(tauri::generate_context!())

@@ -529,7 +529,7 @@ impl ProvidersManager {
         return Err(format!("LLM provider not found: {:?}", llm_provider_type));
     }
 
-    pub async fn llm_call_image_generation(
+    pub async fn llm_call_image_generation<R: Runtime>(
         &mut self,
         model: Option<String>,
         provider: Provider,

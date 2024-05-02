@@ -42,6 +42,7 @@ import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import { CommandManager } from '@/utils/commands/types';
 import { cancelSending, sendMessage, updateMessageContent } from '@/utils/messages';
 import { useAssistantStore } from '@/stores';
+import { imageGeneration } from '@/utils/providers';
 import { PromptContext } from '../Prompt/PromptContext';
 
 type Context = {
@@ -138,6 +139,62 @@ function ConversationProvider({
     [errorMessages, onError],
   );
 
+  const handleImageGeneration = useCallback(
+    async (
+      prompt: ParsedPrompt,
+      conversation: Conversation,
+      previousMessage?: Message | undefined,
+    ) => {
+      const openai = context.providers.find((p) => p.name.toLowerCase() === 'openai');
+      console.log('imagine openai', openai);
+      let content: string | undefined;
+      let modelName: string | undefined;
+      if (openai) {
+        const { text } = prompt;
+        const response = await imageGeneration(openai, text);
+        modelName = 'Dall-E'; // TODO remove hardcoding
+        console.log('imagine response', response);
+        if (response?.images[0]) {
+          content = `![${text}](${response.images[0]} "${text}")`;
+        }
+      }
+      if (previousMessage) {
+        const message = changeMessageContent(
+          previousMessage,
+          t(content || "Sure, I'll be able to imagine wonderfull images..."),
+        );
+        await updateMessagesAndConversation(
+          [message],
+          getConversationMessages(conversation.id),
+          conversation,
+          conversation.id,
+        );
+      } else {
+        const userMessage = createMessage({ role: 'user', name: 'You' }, prompt.raw, prompt.raw);
+        const message = createMessage(
+          { role: 'assistant', name: modelName || selectedModelId || 'Image gen' },
+          t(content || "Soon, I'll be able to imagine wonderfull images..."),
+        );
+        userMessage.sibling = message.id;
+        message.sibling = userMessage.id;
+        await context.updateMessagesAndConversation(
+          [userMessage, message],
+          context.getConversationMessages(conversation.id),
+          conversation,
+          conversation.id,
+        );
+      }
+    },
+    [
+      context,
+      conversations,
+      getConversationMessages,
+      selectedModelId,
+      t,
+      updateMessagesAndConversation,
+    ],
+  );
+
   const preProcessingSendMessage = useCallback(
     async (
       prompt: ParsedPrompt,
@@ -157,7 +214,7 @@ function ConversationProvider({
         tempConversationName || '',
         selectedModelId,
         previousMessage,
-        { changeService, getConversationMessages, updateMessagesAndConversation, t },
+        { changeService, getConversationMessages, updateMessagesAndConversation, t, providers },
       );
       if (result.type === 'error') {
         setErrorMessage({ ...errorMessages, [conversation.id]: result.error });
@@ -165,6 +222,17 @@ function ConversationProvider({
       }
       if (result.type === 'return') {
         clearPrompt?.(result.updatedConversation, result.updatedConversations);
+        return {};
+      }
+      if (result.type === 'image') {
+        clearPrompt?.(conversation, conversations);
+        setIsProcessing({ ...isProcessing, [conversation.id]: true });
+        try {
+          await handleImageGeneration(prompt, conversation, previousMessage);
+        } catch (error) {
+          setErrorMessage({ ...errorMessages, [conversation.id]: `${error}` });
+        }
+        setIsProcessing({ ...isProcessing, [conversation.id]: false });
         return {};
       }
 
