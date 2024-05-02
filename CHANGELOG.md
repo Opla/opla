@@ -1,3 +1,10 @@
+# [1.0.0-alpha.137](https://github.com/Opla/opla/compare/v1.0.0-alpha.136...v1.0.0-alpha.137) (2024-05-02)
+
+
+### Features
+
+* add assistants in prompt mentions [#375](https://github.com/Opla/opla/issues/375) ([#852](https://github.com/Opla/opla/issues/852)) ([6e8c565](https://github.com/Opla/opla/commit/6e8c5651991ac43a1ed3d30c4f3531ed6af7fc43))
+
 # [1.0.0-alpha.136](https://github.com/Opla/opla/compare/v1.0.0-alpha.135...v1.0.0-alpha.136) (2024-05-01)
 
 
