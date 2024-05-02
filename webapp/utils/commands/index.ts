@@ -106,17 +106,19 @@ export const getCommandManager = (
             type: CommandType.Mention,
           }) as Command,
       ),
-    ...assistants.map(
-      (a) =>
-        ({
-          key: a.id,
-          label: a.name,
-          avatar: a.avatar,
-          value: getMentionName(a.name),
-          tag: 'assistants',
-          type: CommandType.Mention,
-        }) as Command,
-    ),
+    ...assistants
+      .filter((a) => !a.hidden)
+      .map(
+        (a) =>
+          ({
+            key: a.id,
+            label: a.name,
+            avatar: a.avatar,
+            value: getMentionName(a.name),
+            tag: 'assistants',
+            type: CommandType.Mention,
+          }) as Command,
+      ),
     ...getHashtagCommands(),
     ...getActionCommands(),
   ];
@@ -252,7 +254,14 @@ export const preProcessingCommands = async (
   if (mentions.length > 1) {
     return { type: 'error', error: context.t('Only one model at a time.') };
   }
-  if (mentions.length === 1 && (!modelName || mentions[0].state === PromptTokenState.Error)) {
+  if (
+    mentions.length === 1 &&
+    assistantId === undefined &&
+    (!modelName || mentions[0].state === PromptTokenState.Error)
+  ) {
+    return { type: 'error', error: context.t('This model is not available.') };
+  }
+  if (mentions.length === 1 && assistantId && mentions[0].state === PromptTokenState.Error) {
     return { type: 'error', error: context.t('This model is not available.') };
   }
   return { type: 'ok', modelName, assistantId };

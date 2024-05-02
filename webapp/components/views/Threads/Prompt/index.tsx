@@ -82,7 +82,7 @@ export default function Prompt({
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
     if (prompt) {
-      logger.info('sending message', conversationId);
+      logger.info('sending message', conversationId, prompt);
       sendMessage(prompt);
     }
   };

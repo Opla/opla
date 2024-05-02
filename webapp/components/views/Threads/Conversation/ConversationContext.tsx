@@ -222,17 +222,17 @@ function ConversationProvider({
         prompt,
         selectedConversation as Conversation,
       );
-      if (!selectedModel || !selectedAssistant) {
+      if (!selectedModel) {
         return;
       }
 
       const userMessage = createMessage({ role: 'user', name: 'you' }, prompt.text, prompt.raw);
-      const message = createMessage({ role: 'assistant', name: selectedModel.name }, '...');
-      message.author.metadata = { ...message.author.metadata, modelId: selectedModel.id };
+      const message = createMessage({ role: 'assistant', name: selectedModel?.name }, '...');
+      message.author.metadata = { ...message.author.metadata, modelId: selectedModel?.id };
       if (selectedAssistant) {
-        message.author.metadata.assistantId = selectedAssistant.id;
+        message.author.metadata = { ...message.author.metadata, assistantId: selectedAssistant.id };
       } else if (assistant) {
-        message.author.metadata.assistantId = assistant.id;
+        message.author.metadata = { ...message.author.metadata, assistantId: assistant.id };
       }
       message.status = MessageStatus.Pending;
       userMessage.sibling = message.id;
@@ -272,8 +272,8 @@ function ConversationProvider({
         updatedConversation,
         updatedConversations,
         prompt,
-        selectedModel.name as string,
-        assistant,
+        selectedModel?.name as string,
+        selectedAssistant || assistant,
         commandManager,
         context,
         config,
@@ -323,7 +323,7 @@ function ConversationProvider({
         selectedConversation as Conversation,
         previousMessage,
       );
-      if (!selectedModel || !selectedAssistant) {
+      if (!selectedModel) {
         return;
       }
 
@@ -333,7 +333,7 @@ function ConversationProvider({
         '...',
         MessageStatus.Pending,
       );
-      if (message.author.name !== selectedModel.name) {
+      if (selectedModel && message.author.name !== selectedModel.name) {
         message.author.name = selectedModel.name;
         message.author.metadata = { ...message.author.metadata, modelId: selectedModel.id };
         if (assistant) {
@@ -357,8 +357,8 @@ function ConversationProvider({
         updatedConversation,
         updatedConversations,
         prompt,
-        selectedModel.name as string,
-        assistant,
+        selectedModel?.name as string,
+        selectedAssistant || assistant,
         commandManager,
         context,
         config,

@@ -290,7 +290,7 @@ impl ModelStorage {
         let (file_name, path) = match self.get_model_entity(&id_or_name) {
             Some(model) => (model.file_name.clone(), model.path.clone()),
             None => {
-                return Err(format!("Model not found: {:?}", id_or_name));
+                return Err(format!("get_model_path Model not found: {:?}", id_or_name));
             }
         };
         let path = match path {

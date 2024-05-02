@@ -49,6 +49,7 @@ export const getActiveService = (
   let model: Model | undefined;
   let provider: Provider | undefined;
   let providerIdOrName = conversation?.provider;
+
   if (!activeService) {
     if (assistant) {
       activeService = activeServiceFrom({
@@ -73,7 +74,7 @@ export const getActiveService = (
     if (!model && modelId) {
       model = findModelInAll(modelId, providers, config, true);
     }
-    if (!provider) {
+    if (!provider || (model && provider.name !== model.provider)) {
       providerIdOrName = model?.provider || OplaProvider.name;
       provider = findProvider(providerIdOrName, providers);
       activeService.providerIdOrName = providerIdOrName;
