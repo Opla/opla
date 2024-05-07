@@ -1,6 +1,6 @@
 [package]
 name = "tokenizer"
-version = "1.0.0-alpha.138"
+version = "1.0.0-alpha.139"
 edition = "2021"
 
 include = ["encodings/**/*", "src/**/*"]

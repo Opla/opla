@@ -1,3 +1,10 @@
+# [1.0.0-alpha.139](https://github.com/Opla/opla/compare/v1.0.0-alpha.138...v1.0.0-alpha.139) (2024-05-07)
+
+
+### Bug Fixes
+
+* dependabot locks ([97769ab](https://github.com/Opla/opla/commit/97769abb1c57b32d0841cef6274fc044f5409e14))
+
 # [1.0.0-alpha.138](https://github.com/Opla/opla/compare/v1.0.0-alpha.137...v1.0.0-alpha.138) (2024-05-02)
 
 
