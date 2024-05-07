@@ -82,7 +82,7 @@ checksum = "0952808a6c2afd1aa8947271f3a60f1a6763c7b912d210184c5149b5cf147247"
 
 [[package]]
 name = "app"
-version = "1.0.0-alpha.132"
+version = "1.0.0-alpha.138"
 dependencies = [
  "async-trait",
  "bytes",
@@ -2182,7 +2182,7 @@ dependencies = [
 
 [[package]]
 name = "opla_core"
-version = "1.0.0-alpha.132"
+version = "1.0.0-alpha.138"
 dependencies = [
  "anyhow",
 ]
@@ -3009,18 +3009,18 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.199"
+version = "1.0.200"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c9f6e76df036c77cd94996771fb40db98187f096dd0b9af39c6c6e452ba966a"
+checksum = "ddc6f9cc94d67c0e21aaf7eda3a010fd3af78ebf6e096aa6e2e13c79749cce4f"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.199"
+version = "1.0.200"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11bd257a6541e141e42ca6d24ae26f7714887b47e89aa739099104c7e4d3b7fc"
+checksum = "856f046b9400cee3c8c94ed572ecdb752444c24528c035cd35882aad6f492bcb"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3759,7 +3759,7 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokenizer"
-version = "1.0.0-alpha.132"
+version = "1.0.0-alpha.138"
 dependencies = [
  "anyhow",
  "base64 0.21.7",
