@@ -30,7 +30,7 @@ export const CompletionParameters: CompletionParametersDefinition = {
   stream: {
     z: z.coerce.boolean().nullable().optional().default(false),
     type: 'boolean',
-    defaultValue: false,
+    defaultValue: true,
     name: 'Stream',
     description:
       'It allows receiving each predicted token in real-time instead of waiting for the completion to finish. To enable this, set to true.',
