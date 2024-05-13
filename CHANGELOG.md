@@ -1,3 +1,10 @@
+# [1.0.0-alpha.140](https://github.com/Opla/opla/compare/v1.0.0-alpha.139...v1.0.0-alpha.140) (2024-05-13)
+
+
+### Features
+
+* local AI default stream [#868](https://github.com/Opla/opla/issues/868) ([#869](https://github.com/Opla/opla/issues/869)) ([3bb6886](https://github.com/Opla/opla/commit/3bb6886ffc7f3e5b5ba91b213fbc20201a406883))
+
 # [1.0.0-alpha.139](https://github.com/Opla/opla/compare/v1.0.0-alpha.138...v1.0.0-alpha.139) (2024-05-07)
 
 
