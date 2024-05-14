@@ -1,3 +1,10 @@
+# [1.0.0-alpha.141](https://github.com/Opla/opla/compare/v1.0.0-alpha.140...v1.0.0-alpha.141) (2024-05-14)
+
+
+### Features
+
+* don't call tokenize if prompt is empty [#883](https://github.com/Opla/opla/issues/883) ([#884](https://github.com/Opla/opla/issues/884)) ([657033e](https://github.com/Opla/opla/commit/657033ed0a4dbc8862b4817b9d65faa4410c066e))
+
 # [1.0.0-alpha.140](https://github.com/Opla/opla/compare/v1.0.0-alpha.139...v1.0.0-alpha.140) (2024-05-13)
 
 
