@@ -71,7 +71,7 @@ export default function ModelTitle({ selectedModel }: ModelTitleProps) {
   return selectedModel ? (
     <>
       <div className="grow capitalize text-foreground">
-        {selectedModel && <ModelInfos model={selectedModel} />}
+        {selectedModel && <ModelInfos model={selectedModel} displayIcon />}
       </div>
       <div className="flex-1" />
     </>

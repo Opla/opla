@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Bot } from 'lucide-react';
 import { PromptTemplate, Ui } from '@/types';
 import { MenuAction } from '@/types/ui';
 import useTranslation from '@/hooks/useTranslation';
@@ -96,7 +97,11 @@ function Onboarding({
         buttonLabel={disabled ? buttonLabel : undefined}
         icon={
           assistant ? (
-            <AvatarView avatar={assistant.avatar} className="h-10 w-10" />
+            <AvatarView
+              avatar={assistant.avatar}
+              className="h-10 w-10"
+              icon={assistant.avatar ? undefined : <Bot className="h-10 w-10" strokeWidth={1.5} />}
+            />
           ) : (
             <Opla className="h-10 w-10 animate-pulse" />
           )

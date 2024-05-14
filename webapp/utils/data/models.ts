@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BrainCircuit } from 'lucide-react';
 import { Ui, Model, Provider, ProviderType, ModelState, Store } from '@/types';
-import Opla from '@/components/icons/Opla';
-import OpenAI from '@/components/icons/OpenAI';
 import { deepMerge, getEntityName, getResourceUrl } from '.';
 import { getLocalProvider, getProviderState } from './providers';
 import OplaProvider from '../providers/opla';
@@ -142,7 +139,7 @@ export const getLocalModelsAsItems = (
         label: model.title || model.name,
         value: model.name,
         group: localProvider?.name || OplaProvider.name,
-        icon: Opla,
+        icon: model.icon, // BrainCircuit,
         selected: model.name === selectedModelname,
         state,
       }) as Ui.MenuItem,
@@ -166,7 +163,7 @@ export const getProviderModelsAsItems = (
             value: model.name,
             group: provider.name,
             selected: model.name === selectedModelname,
-            icon: provider.type === ProviderType.openai ? OpenAI : BrainCircuit,
+            icon: model.icon, // provider.type === ProviderType.openai ? OpenAI : BrainCircuit,
             state,
           }) as Ui.MenuItem,
       ) || [];

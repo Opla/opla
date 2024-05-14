@@ -34,6 +34,7 @@ import { AppContext } from '@/context';
 import { useAssistantStore } from '@/stores';
 import { addConversationService, isModelUsedInConversations } from '@/utils/data/conversations';
 import { getLocalProvider } from '@/utils/data/providers';
+import ModelIcon from '@/components/common/ModelIcon';
 import { Button } from '../../ui/button';
 import EditableItem from '../../common/EditableItem';
 import ModelInfos from '../../common/ModelInfos';
@@ -155,6 +156,9 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
           <ExplorerList<Model>
             selectedId={selectedModelId}
             items={models}
+            renderLeftSide={(m) => (
+              <ModelIcon icon={m.icon} name={m.name} className="h-4 w-4" providerName={m.creator} />
+            )}
             renderItem={(model) => (
               <>
                 {!model.editable && (
@@ -209,6 +213,14 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
       <ExplorerGroup title={t('Featured models')}>
         <ExplorerList<Model>
           selectedId={selectedModelId}
+          renderLeftSide={(m) => (
+            <ModelIcon
+              icon={m.icon}
+              name={m.name}
+              className="h-4 w-4 text-muted-foreground"
+              providerName={m.creator}
+            />
+          )}
           items={collection}
           onSelectItem={handleSelectModel}
         />

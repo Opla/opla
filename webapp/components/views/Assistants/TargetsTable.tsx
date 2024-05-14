@@ -48,8 +48,7 @@ function TargetsTable({ targets, onEdit, onDuplicate, onDelete }: TargetsTablePr
     if (!model) return <div>{t('Model not found')}</div>;
     return (
       <div className="flex w-full justify-between gap-2 pr-4">
-        {model.title || model.name}
-        <ModelInfos model={model} displayName={false} />
+        <ModelInfos model={model} displayIcon className="font-light text-muted-foreground" />
       </div>
     );
   };

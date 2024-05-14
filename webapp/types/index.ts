@@ -303,6 +303,7 @@ export type Model = BaseNamedRecord & {
   description?: string;
   summary?: string;
   version?: string;
+  icon?: Logo;
   creator?: string;
   author?: Entity | string;
   publisher?: Entity | string;
@@ -445,6 +446,8 @@ export type Avatar = {
   url?: string;
   name?: string;
 };
+
+export type Logo = Avatar;
 
 export type AvatarRef = Avatar & {
   ref: string;

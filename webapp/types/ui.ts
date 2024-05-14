@@ -47,6 +47,7 @@ export type MenuItem = {
   value?: string;
   group?: string;
   icon?: LucideIcon | React.Component;
+  renderIcon?: () => JSX.Element;
   selected?: boolean;
   onSelect?: (data: string) => void;
   state?: MenuItemState;

@@ -16,7 +16,7 @@ import { useContext, useMemo, useState } from 'react';
 import { BrainCircuit, Settings2 } from 'lucide-react';
 import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
-import { Preset, Model, Provider } from '@/types';
+import { Preset, Model, Provider, Logo } from '@/types';
 import { AppContext } from '@/context';
 import { findModelInAll, getModelsAsItems } from '@/utils/data/models';
 import logger from '@/utils/logger';
@@ -24,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import EditPreset from '@/components/common/EditPresets';
 import { findProvider, getLocalProvider } from '@/utils/data/providers';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import ModelIcon from '@/components/common/ModelIcon';
 import AlertDialog from '../../common/AlertDialog';
 import Parameter, { ParameterValue } from '../../common/Parameter';
 import Combobox from '../../common/Combobox';
@@ -40,7 +41,20 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
   const { t } = useTranslation();
   const { providers } = useContext(AppContext);
   const { config } = useBackend();
-  const modelItems = useMemo(() => getModelsAsItems(providers, config), [providers, config]);
+  const modelItems = useMemo(() => getModelsAsItems(providers, config), [providers, config]).map(
+    (m) => ({
+      ...m,
+      icon: undefined,
+      renderIcon: () => (
+        <ModelIcon
+          icon={m.icon as unknown as Logo}
+          name={m.label}
+          className="h-4 w-4"
+          providerName={m.group?.toLowerCase()}
+        />
+      ),
+    }),
+  );
   const [newParameters, setNewParameters] = useState<Record<string, ParameterValue>>({});
   const target = data?.item as Preset;
   const { title, isNew, targetName } = useMemo(() => {

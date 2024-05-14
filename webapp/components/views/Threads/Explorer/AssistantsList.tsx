@@ -112,7 +112,11 @@ export default function AssistantsList({
           items={filteredAssistants}
           getItemTitle={(assistant) => assistant.name}
           renderLeftSide={(assistant) => (
-            <AvatarView avatar={assistant.avatar} className="h-4 w-4" />
+            <AvatarView
+              avatar={assistant.avatar}
+              className="h-4 w-4"
+              icon={assistant.avatar ? undefined : <Bot className="h-4 w-4" strokeWidth={1.5} />}
+            />
           )}
           renderRightSide={(assistant) =>
             assistant.disabled !== true && (

@@ -59,6 +59,7 @@ function ComboItem({
       />
       <div className="grow">{item.label}</div>
       {I && <I className="h-4 w-4 shrink-0 opacity-50" />}
+      {item.renderIcon?.()}
     </CommandItem>
   );
 }

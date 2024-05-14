@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Bot } from 'lucide-react';
 import { Assistant } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import AvatarView from '@/components/common/AvatarView';
@@ -25,7 +26,13 @@ export default function AssistantTitle({ assistant }: AssistantTitleProps) {
 
   return (
     <div className="flex grow items-center capitalize text-foreground">
-      {assistant && <AvatarView avatar={assistant.avatar} className="mr-2 h-4 w-4" />}
+      {assistant && (
+        <AvatarView
+          avatar={assistant.avatar}
+          className="mr-2 h-4 w-4"
+          icon={assistant.avatar ? undefined : <Bot className="h-4 w-4" strokeWidth={1.5} />}
+        />
+      )}
       <span>{assistant?.name ?? t('Assistant not found')}</span>{' '}
     </div>
   );
