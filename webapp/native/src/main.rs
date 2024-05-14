@@ -221,7 +221,7 @@ async fn start_opla_server<R: Runtime>(
             return Err(format!("Opla server not started model not found: {:?}", err));
         }
     };
-
+    store.server.launch_at_startup = true;
     store.server.parameters.port = port;
     store.server.parameters.host = host.clone();
     store.server.parameters.model_id = Some(model_id.clone());
@@ -243,6 +243,9 @@ async fn stop_opla_server<R: Runtime>(
     context: State<'_, OplaContext>
 ) -> Result<Payload, String> {
     let mut server = context.server.lock().await;
+    let mut store = context.store.lock().await;
+    store.server.launch_at_startup = false;
+    store.save().map_err(|err| err.to_string())?;
     server.stop(&app).await
 }
 
