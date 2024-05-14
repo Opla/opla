@@ -150,13 +150,22 @@ function PromptProvider({
           config,
           selectedModelNameOrId,
         );
-        const response = await tokenize(activeService, text || '');
-        updateUsage({
-          conversationId: selectedConversation?.id,
-          text,
-          tokenCount: response?.tokens.length || 0,
-          activeService,
-        });
+        if (text && text.length > 0) {
+          const response = await tokenize(activeService, text);
+          updateUsage({
+            conversationId: selectedConversation?.id,
+            text,
+            tokenCount: response?.tokens.length || 0,
+            activeService,
+          });
+        } else {
+          updateUsage({
+            conversationId: selectedConversation?.id,
+            text: '',
+            tokenCount: 0,
+            activeService,
+          });
+        }
       }
     };
     afunc();
