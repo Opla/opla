@@ -256,7 +256,7 @@ function NewLocalModel({
                     handleSelect(m);
                   }}
                 >
-                  <ModelInfos model={getFirstValidModel(m)} className="w-full" />
+                  <ModelInfos model={getFirstValidModel(m)} displayIcon className="w-full" />
                 </CommandItem>
               ))}
           </CommandGroup>

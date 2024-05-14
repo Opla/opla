@@ -25,6 +25,7 @@ import {
   MessageImpl,
   ModelState,
   Model,
+  Avatar,
 } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
@@ -247,6 +248,11 @@ function Thread({
       if (modelItems) {
         modelItems.forEach((item) => {
           const avatar = { ref: item.key, name: item.label } as AvatarRef;
+          const icon = item.icon as unknown as Avatar;
+          avatar.url = icon?.url;
+          avatar.color = icon?.color;
+          avatar.fallback = icon?.name;
+          avatar.ref = item.key as string;
           newAvatars.push(avatar);
         });
       }

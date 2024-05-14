@@ -14,14 +14,44 @@
 
 use std::fs::create_dir_all;
 use std::path::{ Path, PathBuf };
+use std::str::FromStr;
 use chrono::{ DateTime, Utc };
 use serde::{ self, Deserialize, Serialize };
 use serde_with::{ serde_as, OneOrMany, formats::PreferOne };
 use uuid::Uuid;
+use void::Void;
 use crate::utils::{ get_home_directory, get_data_directory };
 use crate::data::{ option_date_format, option_string_or_struct };
 
 use super::{ Entity, Resource };
+
+#[serde_with::skip_serializing_none]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct Logo {
+    pub url: String,
+    pub name: Option<String>,
+    pub color: Option<String>,
+}
+
+impl FromStr for Logo {
+    type Err = Void;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // TODO check if s is a valid URL or a file path
+        if s.starts_with("http") {
+            Ok(Logo {
+                url: s.to_string(),
+                name: None,
+                color: None,
+            })
+        } else {
+            Ok(Logo {
+                url: "".to_string(),
+                name: Some(s.to_string()),
+                color: None,
+            })
+        }
+    }
+}
 
 #[serde_as]
 #[serde_with::skip_serializing_none]
@@ -38,6 +68,12 @@ pub struct Model {
     pub description: Option<String>,
     pub summary: Option<String>,
     pub version: Option<String>,
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        default,
+        deserialize_with = "option_string_or_struct"
+    )]
+    pub icon: Option<Logo>,
     pub creator: Option<String>,
     #[serde(
         skip_serializing_if = "Option::is_none",
@@ -131,6 +167,7 @@ impl Model {
             description: None,
             summary: None,
             version: None,
+            icon: None,
             creator: None,
             author: None,
             publisher: None,

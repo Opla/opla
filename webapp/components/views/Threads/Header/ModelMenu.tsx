@@ -36,7 +36,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Ui, Provider, ProviderType } from '@/types';
+import { Ui, Provider, ProviderType, Logo } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
@@ -47,6 +47,7 @@ import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
 import { MenuAction } from '@/types/ui';
 import { getStateColor } from '@/utils/ui';
+import ModelIcon from '@/components/common/ModelIcon';
 import { Badge } from '../../../ui/badge';
 import { ShortcutBadge } from '../../../common/ShortCut';
 
@@ -139,7 +140,16 @@ export default function ModelMenu({
                             }}
                             className="flex w-full items-center justify-between"
                           >
-                            <span className="capitalize">{item.label}</span>
+                            <div className="flex w-full items-center gap-2">
+                              <ModelIcon
+                                icon={item.icon as unknown as Logo}
+                                name={item.label}
+                                providerName={item.group?.toLowerCase()}
+                                className="h-4 w-4"
+                              />
+                              <span className="capitalize">{item.label}</span>{' '}
+                            </div>
+
                             <Badge
                               variant="secondary"
                               className={`ml-4 bg-gray-300 capitalize text-gray-600 ${getStateColor(item.state, 'text', true)}`}

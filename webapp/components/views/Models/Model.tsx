@@ -57,6 +57,7 @@ import { AppContext } from '@/context';
 import { useAssistantStore } from '@/stores';
 import { OrangePill } from '@/components/ui/Pills';
 import { getLocalProvider } from '@/utils/data/providers';
+import ModelIcon from '@/components/common/ModelIcon';
 import Parameter, { ParametersRecord } from '../../common/Parameter';
 import { Button } from '../../ui/button';
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '../../ui/table';
@@ -356,7 +357,15 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     >
       <ScrollArea className="h-full px-8 py-4">
         <div className="flex w-full flex-col px-8 py-4 text-sm">
-          <h1 className="items-right bold w-full text-xl">{model.title || model.name}</h1>
+          <div className="flex w-full flex-row items-center gap-2 ">
+            <ModelIcon
+              icon={model.icon}
+              name={model.name}
+              className="h-4 w-4"
+              providerName={model.creator}
+            />
+            <h1 className="items-right bold w-full text-xl">{model.title || model.name}</h1>
+          </div>
           <div className="flex w-full flex-col items-center gap-2 text-sm">
             {model?.editable && (
               <Parameter

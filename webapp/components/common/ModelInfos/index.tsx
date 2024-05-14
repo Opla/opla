@@ -16,10 +16,12 @@ import { BluePill, GreenPill, PurplePill, RedPill, YellowPill } from '@/componen
 import useTranslation from '@/hooks/useTranslation';
 import { cn } from '@/lib/utils';
 import { Model, ModelState } from '@/types';
+import ModelIcon from '../ModelIcon';
 
 type ModelInfosProps = {
   model: Model;
   displayName?: boolean;
+  displayIcon?: boolean;
   stateAsIcon?: boolean;
   className?: string;
 };
@@ -27,16 +29,23 @@ type ModelInfosProps = {
 function ModelInfos({
   model,
   displayName = true,
+  displayIcon = false,
   stateAsIcon = false,
   className,
 }: ModelInfosProps) {
   const { t } = useTranslation();
   return (
-    <div className={cn('flex items-center space-x-2', className)}>
+    <div className={cn('flex items-center space-x-2 font-extrabold', className)}>
+      {displayIcon && (
+        <ModelIcon
+          icon={model.icon}
+          name={model.name}
+          className="h-4 w-4"
+          providerName={model.creator}
+        />
+      )}
       {displayName && (
-        <span className="grow rounded px-2.5 py-0.5 font-extrabold">
-          {model.title || model.name}
-        </span>
+        <span className="grow rounded px-2.5 py-0.5">{model.title || model.name}</span>
       )}
       <div className="flex items-center justify-between space-x-2">
         {model.quantization && <BluePill label={model.quantization} />}
