@@ -1,3 +1,10 @@
+# [1.0.0-alpha.142](https://github.com/Opla/opla/compare/v1.0.0-alpha.141...v1.0.0-alpha.142) (2024-05-14)
+
+
+### Features
+
+* set launch_at_startup server stop/start [#885](https://github.com/Opla/opla/issues/885) ([#886](https://github.com/Opla/opla/issues/886)) ([a4cc7bd](https://github.com/Opla/opla/commit/a4cc7bdf255ddb48ba4907721406a78562018f2c))
+
 # [1.0.0-alpha.141](https://github.com/Opla/opla/compare/v1.0.0-alpha.140...v1.0.0-alpha.141) (2024-05-14)
 
 
