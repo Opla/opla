@@ -1,3 +1,10 @@
+# [1.0.0-alpha.143](https://github.com/Opla/opla/compare/v1.0.0-alpha.142...v1.0.0-alpha.143) (2024-05-15)
+
+
+### Bug Fixes
+
+* add missing translations [#887](https://github.com/Opla/opla/issues/887) ([#891](https://github.com/Opla/opla/issues/891)) ([eecd179](https://github.com/Opla/opla/commit/eecd179716322a1adfe5b2aa9dcc9abfc0f07ca4))
+
 # [1.0.0-alpha.142](https://github.com/Opla/opla/compare/v1.0.0-alpha.141...v1.0.0-alpha.142) (2024-05-14)
 
 
