@@ -75,7 +75,7 @@ Opla stands on the shoulders of giants. A huge thank you to the following projec
 
 ## License
 
-Opla is proudly open source, available under the[Apache license 2.0](/LICENSE). Dive into the code, tweak it, and make it your own!
+Opla is proudly open source, available under the [Apache license 2.0](/LICENSE). Dive into the code, tweak it, and make it your own!
 
 ---
 
