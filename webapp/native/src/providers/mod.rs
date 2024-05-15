@@ -241,7 +241,13 @@ impl ProvidersManager {
             }
         };
         // TODO if local inference client
+        let app_handle = app.app_handle();
         let parameters = self.bind_local_server(app, model).await?;
+        let context = app_handle.state::<OplaContext>();
+        let mut store = context.store.lock().await;
+        store.server.launch_at_startup = true;
+        store.server.parameters = parameters.clone();
+        store.save().map_err(|err| err.to_string())?;
         // let mut client_instance = client.create(server.parameters);
         let mut interface = interface.clone();
         interface.set_parameters(parameters);

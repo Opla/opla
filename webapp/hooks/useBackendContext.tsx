@@ -248,48 +248,52 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     afunc();
   }, [streams, updateMessageContent]);
 
-  const backendListener = useCallback(async (event: any) => {
-    // logger.info('backend event', event);
-    if (event.event === 'opla-server' && serverRef.current) {
-      if (event.payload.status === ServerStatus.STDOUT) {
-        const stdout = deepCopy(serverRef.current.stdout || []);
-        const len = stdout.unshift(event.payload.message);
-        if (len > 50) {
-          stdout.pop();
+  const backendListener = useCallback(
+    async (event: any) => {
+      // logger.info('backend event', event);
+      if (event.event === 'opla-server' && serverRef.current) {
+        if (event.payload.status === ServerStatus.STDOUT) {
+          const stdout = deepCopy(serverRef.current.stdout || []);
+          const len = stdout.unshift(event.payload.message);
+          if (len > 50) {
+            stdout.pop();
+          }
+          // logger.info('stdout', stdout);
+          updateServer({
+            stdout,
+          });
+        } else if (event.payload.status === ServerStatus.STDERR) {
+          const stderr = deepCopy(serverRef.current.stderr || []);
+          const len = stderr.unshift(event.payload.message);
+          if (len > 50) {
+            stderr.pop();
+          }
+          // logger.error('stderr', stderr);
+          updateServer({
+            stderr,
+          });
+        } else if (configRef.current) {
+          const { services } = configRef.current; // context.config;
+          if (
+            event.payload.status === ServerStatus.STARTING &&
+            services.activeService?.type !== AIServiceType.Assistant
+          ) {
+            services.activeService = {
+              type: AIServiceType.Model,
+              modelId: event.payload.message,
+            };
+          }
+          await updateBackendStore();
+          updateConfig({ services });
+          updateServer({
+            status: event.payload.status,
+            message: event.payload.message,
+          });
         }
-        // logger.info('stdout', stdout);
-        updateServer({
-          stdout,
-        });
-      } else if (event.payload.status === ServerStatus.STDERR) {
-        const stderr = deepCopy(serverRef.current.stderr || []);
-        const len = stderr.unshift(event.payload.message);
-        if (len > 50) {
-          stderr.pop();
-        }
-        // logger.error('stderr', stderr);
-        updateServer({
-          stderr,
-        });
-      } else if (configRef.current) {
-        const { services } = configRef.current; // context.config;
-        if (
-          event.payload.status === ServerStatus.STARTING &&
-          services.activeService?.type !== AIServiceType.Assistant
-        ) {
-          services.activeService = {
-            type: AIServiceType.Model,
-            modelId: event.payload.message,
-          };
-        }
-        updateConfig({ services });
-        updateServer({
-          status: event.payload.status,
-          message: event.payload.message,
-        });
       }
-    }
-  }, []);
+    },
+    [updateBackendStore],
+  );
 
   const downloadListener = useCallback(
     async (event: any) => {
