@@ -72,7 +72,7 @@ function PromptInput({
       autoCorrect="off"
       className={cn(
         className,
-        'focus-visible:ring-none overflow-hidden whitespace-pre border-none text-transparent shadow-none focus-visible:border-none focus-visible:shadow-none focus-visible:outline-none',
+        'overflow-hidden whitespace-pre-wrap border-none text-transparent shadow-none  focus-visible:border-none focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-0',
       )}
       value={value?.raw || ''}
       placeholder={placeholder}
@@ -80,17 +80,17 @@ function PromptInput({
       onFocus={handleFocus}
       onKeyDown={onKeyDown as unknown as KeyboardEventHandler<HTMLTextAreaElement>}
     >
-      <p className="textarea-overlay pointer-events-none absolute left-[0.0px] top-[0.0px] h-full w-full overflow-visible px-3 py-2 text-sm">
+      <div className="textarea-overlay pointer-events-none absolute left-[0.0px] top-[0.0px] h-full w-full overflow-visible px-3 py-2 text-sm">
         {value?.tokens?.map((token) =>
           token.type !== 'newline' ? (
-            <span key={token.index} className={cn('whitespace-pre', getTokenColor(token))}>
+            <span key={token.index} className={cn('whitespace-pre-wrap', getTokenColor(token))}>
               {token.value}
             </span>
           ) : (
             <br key={token.index} />
           ),
         )}
-      </p>
+      </div>
     </Textarea>
   );
 }
