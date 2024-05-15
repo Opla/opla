@@ -167,7 +167,7 @@ function ProvidersExplorer({ selectedId: selectedProviderId }: ProvidersExplorer
         </>
       }
     >
-      <ExplorerGroup>
+      <ExplorerGroup className="h-full pb-12">
         <ExplorerList<Provider>
           selectedId={selectedProviderId}
           items={providers}

@@ -44,7 +44,7 @@ export default function Explorer({
   const { t } = useTranslation();
 
   return (
-    <div className="scrollbar-trigger flex h-full w-full flex-1 items-start border-r-[1px] bg-secondary/70">
+    <div className="flex h-full w-full flex-1 items-start border-r-[1px] bg-secondary/70">
       <nav className="flex h-full flex-1 flex-col space-y-1">
         <div className="flex w-full items-center">
           <div className="flex grow items-center p-2">
