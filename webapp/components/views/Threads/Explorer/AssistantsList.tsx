@@ -24,6 +24,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { useAssistantStore } from '@/stores';
 import { Assistant, Ui } from '@/types';
 import EmptyView from '@/components/common/EmptyView';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type AssistantsListProps = {
   selectedId?: string;
@@ -130,7 +131,7 @@ export default function AssistantsList({
         />
       )}
       {filteredAssistants.length === 0 && (
-        <div className="h-full pb-8">
+        <ScrollArea className="h-full pb-8">
           <EmptyView
             title={t('No Assistants')}
             description={t(
@@ -141,7 +142,7 @@ export default function AssistantsList({
           >
             {!store && StoreButton}
           </EmptyView>
-        </div>
+        </ScrollArea>
       )}
     </ExplorerGroup>
   );

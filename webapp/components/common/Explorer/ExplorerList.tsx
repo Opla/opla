@@ -16,6 +16,7 @@ import { ContextMenu, ContextMenuTrigger } from '@/components/ui/context-menu';
 import ContextMenuList from '@/components/ui/ContextMenu/ContextMenuList';
 import { BaseNamedRecord, Ui } from '@/types';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import EditableItem from '../EditableItem';
 
 export type ExplorerListProps<T> = {
@@ -88,33 +89,35 @@ export default function ExplorerList<T>({
     </div>
   );
   return (
-    <ul
-      className={cn(
-        'flex h-full flex-col break-all rounded-md px-1 py-3 text-sm dark:border-white/20',
-        className,
-      )}
-    >
-      {(items as BaseNamedRecord[]).map((item: BaseNamedRecord) => {
-        const menuItems = menu?.(item as T);
-        return (
-          <li
-            key={item.id}
-            className={cn(
-              selectedId === item.id ? 'text-foreground' : 'text-muted-foreground',
-              'rounded-md px-2 py-2 transition-colors duration-200 hover:bg-foreground/10',
-            )}
-          >
-            {menuItems && menuItems.length > 0 ? (
-              <ContextMenu>
-                <ContextMenuTrigger>{itemRendering(item)}</ContextMenuTrigger>
-                <ContextMenuList data={item.id} menu={menuItems} />
-              </ContextMenu>
-            ) : (
-              itemRendering(item)
-            )}
-          </li>
-        );
-      })}
-    </ul>
+    <ScrollArea className="h-full">
+      <ul
+        className={cn(
+          'flex flex-col break-all rounded-md px-1 py-3 text-sm dark:border-white/20',
+          className,
+        )}
+      >
+        {(items as BaseNamedRecord[]).map((item: BaseNamedRecord) => {
+          const menuItems = menu?.(item as T);
+          return (
+            <li
+              key={item.id}
+              className={cn(
+                selectedId === item.id ? 'text-foreground' : 'text-muted-foreground',
+                'rounded-md px-2 py-2 transition-colors duration-200 hover:bg-foreground/10',
+              )}
+            >
+              {menuItems && menuItems.length > 0 ? (
+                <ContextMenu>
+                  <ContextMenuTrigger>{itemRendering(item)}</ContextMenuTrigger>
+                  <ContextMenuList data={item.id} menu={menuItems} />
+                </ContextMenu>
+              ) : (
+                itemRendering(item)
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </ScrollArea>
   );
 }

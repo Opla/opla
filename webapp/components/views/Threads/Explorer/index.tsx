@@ -51,6 +51,7 @@ import Explorer, { ExplorerList, ExplorerGroup } from '@/components/common/Explo
 import { OplaAssistant } from '@/stores/assistants';
 import { DefaultPageSettings, DefaultThreadsExplorerGroups } from '@/utils/constants';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '../../../ui/Toast';
 import {
   DropdownMenu,
@@ -368,7 +369,7 @@ export default function ThreadsExplorer({
                       onSelect={handleSelectAssistant}
                     />
                   </ResizablePanel>
-                  <ResizableHandle />{' '}
+                  <ResizableHandle />
                 </>
               )}
               {showRecent && (
@@ -405,7 +406,7 @@ export default function ThreadsExplorer({
                         />
                       )}
                       {threads.length === 0 && (
-                        <div className="h-full">
+                        <ScrollArea className="h-full">
                           <EmptyView
                             title={t('No threads')}
                             description={t("Don't be shy, say hi!")}
@@ -417,7 +418,7 @@ export default function ThreadsExplorer({
                             }
                             className="h-full"
                           />
-                        </div>
+                        </ScrollArea>
                       )}
                     </ExplorerGroup>
                   </ResizablePanel>
@@ -456,7 +457,7 @@ export default function ThreadsExplorer({
                         />
                       )}
                       {archives.length === 0 && (
-                        <div className="h-full">
+                        <ScrollArea className="h-full">
                           <EmptyView
                             title={t('No archives')}
                             description={t('No conversation in archives')}
@@ -468,7 +469,7 @@ export default function ThreadsExplorer({
                             }
                             className="h-full"
                           />
-                        </div>
+                        </ScrollArea>
                       )}
                     </ExplorerGroup>
                   </ResizablePanel>

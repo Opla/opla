@@ -35,6 +35,7 @@ import { useAssistantStore } from '@/stores';
 import { addConversationService, isModelUsedInConversations } from '@/utils/data/conversations';
 import { getLocalProvider } from '@/utils/data/providers';
 import ModelIcon from '@/components/common/ModelIcon';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Button } from '../../ui/button';
 import EditableItem from '../../common/EditableItem';
 import ModelInfos from '../../common/ModelInfos';
@@ -151,80 +152,93 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
         </Button>
       }
     >
-      <ExplorerGroup title={t('Local models')}>
-        {models.length > 0 && (
-          <ExplorerList<Model>
-            selectedId={selectedModelId}
-            items={models}
-            renderLeftSide={(m) => (
-              <ModelIcon icon={m.icon} name={m.name} className="h-4 w-4" providerName={m.creator} />
-            )}
-            renderItem={(model) => (
-              <>
-                {!model.editable && (
-                  <div className="flex w-full grow flex-row items-center justify-between overflow-hidden pl-3">
-                    <div
-                      className={cn(
-                        'flex-1 text-ellipsis break-all pr-1',
-                        model.state === ModelState.Error || model.state === ModelState.NotFound
-                          ? 'text-error'
-                          : '',
-                      )}
-                    >
-                      {model.title || model.name}
-                    </div>
-                    <ModelInfos model={model} displayName={false} stateAsIcon />
-                  </div>
+      <ResizablePanelGroup direction="vertical">
+        <ResizablePanel id="models" className="!overflow-y-auto pt-2" minSize={4}>
+          <ExplorerGroup title={t('Local models')} className="h-full">
+            {models.length > 0 && (
+              <ExplorerList<Model>
+                selectedId={selectedModelId}
+                items={models}
+                renderLeftSide={(m) => (
+                  <ModelIcon
+                    icon={m.icon}
+                    name={m.name}
+                    className="h-4 w-4"
+                    providerName={m.creator}
+                  />
                 )}
-                {model.editable && (
-                  <div className="flex w-full grow">
-                    <EditableItem
-                      id={model.id}
-                      title={model.title || model.name}
-                      editable
-                      className={cn(
-                        'line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1',
-                        model.state === ModelState.Error || model.state === ModelState.NotFound
-                          ? 'text-error'
-                          : '',
-                      )}
-                      onChange={handleChangeModelName}
-                    />
-                  </div>
+                renderItem={(model) => (
+                  <>
+                    {!model.editable && (
+                      <div className="flex w-full grow flex-row items-center justify-between overflow-hidden pl-3">
+                        <div
+                          className={cn(
+                            'flex-1 text-ellipsis break-all pr-1',
+                            model.state === ModelState.Error || model.state === ModelState.NotFound
+                              ? 'text-error'
+                              : '',
+                          )}
+                        >
+                          {model.title || model.name}
+                        </div>
+                        <ModelInfos model={model} displayName={false} stateAsIcon />
+                      </div>
+                    )}
+                    {model.editable && (
+                      <div className="flex w-full grow">
+                        <EditableItem
+                          id={model.id}
+                          title={model.title || model.name}
+                          editable
+                          className={cn(
+                            'line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1',
+                            model.state === ModelState.Error || model.state === ModelState.NotFound
+                              ? 'text-error'
+                              : '',
+                          )}
+                          onChange={handleChangeModelName}
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
-              </>
+                onSelectItem={handleSelectModel}
+                menu={() => menu}
+              />
             )}
-            onSelectItem={handleSelectModel}
-            menu={() => menu}
-          />
-        )}
-        {models.length === 0 && (
-          <div className="h-full pb-8">
-            <EmptyView
-              title={t('No models')}
-              description={t("Let's add one!")}
-              icon={<BrainCircuit className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} />}
-              className="h-full"
+            {models.length === 0 && (
+              <div className="h-full pb-8">
+                <EmptyView
+                  title={t('No models')}
+                  description={t("Let's add one!")}
+                  icon={
+                    <BrainCircuit className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} />
+                  }
+                  className="h-full"
+                />
+              </div>
+            )}
+          </ExplorerGroup>
+        </ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel id="featured" className="!overflow-y-auto pt-2" minSize={3}>
+          <ExplorerGroup title={t('Featured models')} className="h-full pb-8">
+            <ExplorerList<Model>
+              selectedId={selectedModelId}
+              renderLeftSide={(m) => (
+                <ModelIcon
+                  icon={m.icon}
+                  name={m.name}
+                  className="h-4 w-4 text-muted-foreground"
+                  providerName={m.creator}
+                />
+              )}
+              items={collection}
+              onSelectItem={handleSelectModel}
             />
-          </div>
-        )}
-      </ExplorerGroup>
-
-      <ExplorerGroup title={t('Featured models')}>
-        <ExplorerList<Model>
-          selectedId={selectedModelId}
-          renderLeftSide={(m) => (
-            <ModelIcon
-              icon={m.icon}
-              name={m.name}
-              className="h-4 w-4 text-muted-foreground"
-              providerName={m.creator}
-            />
-          )}
-          items={collection}
-          onSelectItem={handleSelectModel}
-        />
-      </ExplorerGroup>
+          </ExplorerGroup>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </Explorer>
   );
 }
