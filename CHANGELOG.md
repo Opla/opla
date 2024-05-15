@@ -1,3 +1,10 @@
+# [1.0.0-alpha.145](https://github.com/Opla/opla/compare/v1.0.0-alpha.144...v1.0.0-alpha.145) (2024-05-15)
+
+
+### Bug Fixes
+
+* promptInput wrap [#888](https://github.com/Opla/opla/issues/888) ([#893](https://github.com/Opla/opla/issues/893)) ([70e3907](https://github.com/Opla/opla/commit/70e3907d9753d66dbddf8b20ced9609ab1c421e5))
+
 # [1.0.0-alpha.144](https://github.com/Opla/opla/compare/v1.0.0-alpha.143...v1.0.0-alpha.144) (2024-05-15)
 
 
