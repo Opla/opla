@@ -108,7 +108,7 @@ function ConversationProvider({
     setUsage,
   } = context;
   const { parseAndValidatePrompt, clearPrompt } = useContext(PromptContext) || {};
-  const { config } = useBackend();
+  const { config, updateBackendStore } = useBackend();
   const { getAssistant } = useAssistantStore();
   const [selectedMessageId, setSelectedMessageId] = useState<string | undefined>(undefined);
   const [isProcessing, setIsProcessing] = useState<{ [key: string]: boolean }>({});
@@ -404,6 +404,7 @@ function ConversationProvider({
         setUsage,
         handleError,
       );
+      await updateBackendStore();
 
       if (tempConversationId) {
         router.replace(`${Page.Threads}/${tempConversationId}`, undefined, { shallow: true });
@@ -426,6 +427,7 @@ function ConversationProvider({
       t,
       tempConversationId,
       tempConversationName,
+      updateBackendStore,
       updateMessagesAndConversation,
     ],
   );
@@ -489,6 +491,8 @@ function ConversationProvider({
         setUsage,
         handleError,
       );
+
+      await updateBackendStore();
     },
     [
       assistant,
@@ -503,6 +507,7 @@ function ConversationProvider({
       selectedConversation,
       setUsage,
       tempConversationName,
+      updateBackendStore,
       updateMessagesAndConversation,
     ],
   );
