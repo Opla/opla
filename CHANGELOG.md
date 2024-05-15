@@ -1,3 +1,10 @@
+# [1.0.0-alpha.144](https://github.com/Opla/opla/compare/v1.0.0-alpha.143...v1.0.0-alpha.144) (2024-05-15)
+
+
+### Bug Fixes
+
+* scrollable ExplorerGroup [#889](https://github.com/Opla/opla/issues/889) ([#892](https://github.com/Opla/opla/issues/892)) ([7bdb947](https://github.com/Opla/opla/commit/7bdb9470decc3b143da55d15dfe0929822b496db))
+
 # [1.0.0-alpha.143](https://github.com/Opla/opla/compare/v1.0.0-alpha.142...v1.0.0-alpha.143) (2024-05-15)
 
 
