@@ -44,6 +44,15 @@ const openAIProviderTemplate: Partial<Provider> = {
       contextWindow: 16384,
     },
     {
+      id: 'gpt-4o',
+      name: 'gpt-4o',
+      icon: { url: 'https://opla.github.io/models/assets/gpt-4.webp' },
+      createdAt: 1715367049,
+      updatedAt: 1715367049,
+      creator: 'openai',
+      contextWindow: 4096,
+    },
+    {
       id: 'gpt-4',
       name: 'gpt-4',
       icon: { url: 'https://opla.github.io/models/assets/gpt-4.webp' },
