@@ -45,7 +45,7 @@ function ProviderCreate({
             onChange={onParameterChange}
           />
           <Parameter
-            label={t('Secret key')}
+            label={t('API key')}
             name="key"
             value={provider?.key}
             type="text"
