@@ -100,7 +100,7 @@ export default function NewProvider({
                 title="OpenAI"
                 disabled={providers.find((p) => p.type === ProviderType.openai) !== undefined}
                 selected={provider?.type === ProviderType.openai}
-                description={t('Using your access token')}
+                description={t('Using your OpenAI account')}
                 onClick={() => handleChoose(ProviderType.openai, 'OpenAI')}
               />
               <Card

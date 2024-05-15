@@ -153,8 +153,8 @@ function ProvidersExplorer({ selectedId: selectedProviderId }: ProvidersExplorer
             </Button>
           )}
           <Button
-            aria-label={t('New AI Provider')}
-            title={`${t('New AI Provider')} ${shortcutAsText(ShortcutIds.NEW_PROVIDER)}`}
+            aria-label={t('New AI provider')}
+            title={`${t('New AI provider')} ${shortcutAsText(ShortcutIds.NEW_PROVIDER)}`}
             variant="ghost"
             size="icon"
             onClick={(e) => {

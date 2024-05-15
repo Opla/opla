@@ -72,7 +72,7 @@ function DownloadModel({ className, download, onAction }: DownloadModelProps) {
   if (!model) {
     return (
       <EmptyView
-        title="No downloads"
+        title={t('No downloads')}
         description=""
         icon={<CloudDownload />}
         className="h-full text-muted-foreground"
