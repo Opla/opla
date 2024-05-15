@@ -1,3 +1,10 @@
+# [1.0.0-alpha.146](https://github.com/Opla/opla/compare/v1.0.0-alpha.145...v1.0.0-alpha.146) (2024-05-15)
+
+
+### Features
+
+* add gpt-4o model from OpenAI [#894](https://github.com/Opla/opla/issues/894) ([#898](https://github.com/Opla/opla/issues/898)) ([6553995](https://github.com/Opla/opla/commit/655399592816aab3bd81b4dcc159ff8ae86e333f))
+
 # [1.0.0-alpha.145](https://github.com/Opla/opla/compare/v1.0.0-alpha.144...v1.0.0-alpha.145) (2024-05-15)
 
 
