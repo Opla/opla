@@ -79,12 +79,30 @@ export function ConversationPanel({
   const conversationSettings = pagesSettings?.[conversationViewName];
   useEffect(() => {
     const afunc = async () => {
+      const prevScrollPosition =
+        conversationSettings?.scrollPosition === undefined ||
+        conversationSettings?.scrollPosition === null ||
+        conversationSettings.scrollPosition === -1
+          ? undefined
+          : +conversationSettings.scrollPosition;
+      const scrollPosition =
+        update.scrollPosition === undefined ||
+        update.scrollPosition === null ||
+        update.scrollPosition === -1
+          ? undefined
+          : +(update.scrollPosition * 1000).toFixed(0);
       if (
         conversationSettings &&
         conversationViewName === update.name &&
-        update.scrollPosition !== conversationSettings?.scrollPosition
+        scrollPosition !== prevScrollPosition
       ) {
-        const scrollPosition = update.scrollPosition === -1 ? undefined : update.scrollPosition;
+        logger.info(
+          'save ScrollPosition',
+          update,
+          conversationViewName,
+          scrollPosition,
+          conversationSettings?.scrollPosition,
+        );
         setSettings({
           ...config.settings,
           pages: {
@@ -108,9 +126,11 @@ export function ConversationPanel({
     const name = getSelectedViewName(key);
     // TODO debug
     const { scrollPosition } = update;
-    if (update.name !== name || update.scrollPosition !== scrollPosition) {
-      logger.info('setUpdate', scrollPosition, position.y);
-      setUpdate({ scrollPosition: position.y, name });
+    const py = +position.y.toFixed(2);
+    // logger.info('handleScrollPosition', update, name, scrollPosition, position.y);
+    if (update.name !== name || update.scrollPosition !== py) {
+      logger.info('setUpdate', scrollPosition, py);
+      setUpdate({ scrollPosition: py, name });
     }
   };
 
@@ -120,64 +140,6 @@ export function ConversationPanel({
 
   const showEmptyChat = !conversationId || !messages || messages.length === 0;
   if (showEmptyChat) {
-    /* let actions: Ui.MenuItem[] | undefined;
-    let buttonLabel: string | undefined;
-    let description = t(
-      "Welcome to Opla! Our platform leverages the power of your device to deliver personalized AI assistance. To kick things off, you'll need to install a model or an assistant. Think of it like choosing your conversation partner. If you've used ChatGPT before, you'll feel right at home here. Remember, this step is essential to begin your journey with Opla. Let's get started!",
-    );
-    if (selectedAssistantId) {
-      description = t('Opla works using your machine processing power.');
-    } else if (selectedModelName) {
-      buttonLabel = t('Start a conversation');
-      description = t('Opla works using your machine processing power.');
-    } else if (modelItems.length > 0) {
-      description = t('Opla works using your machine processing power.');
-    } else {
-      actions = [
-        {
-          label: t('Choose an assistant'),
-          onSelect: (data: string) => onSelectMenu(MenuAction.ChooseAssistant, data),
-          value: 'choose_assistant',
-          description:
-            'Opt for a specialized AI agent or GPT to navigate and enhance your daily activities. These assistants can utilize both local models and external services like OpenAI, offering versatile support.',
-        },
-        {
-          label: t('Install a local model'),
-          onSelect: (data: string) => onSelectMenu(MenuAction.InstallModel, data),
-          value: 'install_model',
-          variant: 'outline',
-          description:
-            'Incorporate an open-source Large Language Model (LLM) such as Gemma or LLama2 directly onto your device. Dive into the world of advanced generative AI and unlock new experimental possibilities.',
-        },
-        {
-          label: t('Use OpenAI'),
-          onSelect: (data: string) => onSelectMenu(MenuAction.ConfigureOpenAI, data),
-          value: 'configure_openai',
-          variant: 'ghost',
-          description:
-            'Integrate using your OpenAI API key to import ChatGPT conversations and tap into the extensive capabilities of OpenAI. Experience the contrast with local AI solutions. Remember, ChatGPT operates remotely and at a cost!',
-        },
-      ];
-    }
-    return (
-      <div className="flex grow flex-col">
-        <EmptyView
-          className="m-2 flex grow"
-          title={t('Empower Your Productivity with Local AI Assistants')}
-          description={description}
-          buttonLabel={disabled ? buttonLabel : undefined}
-          icon={<Opla className="h-10 w-10 animate-pulse" />}
-          actions={actions}
-        />
-        {(selectedAssistantId || selectedModelName) && (
-          <PromptsGrid
-            onPromptSelected={handlePromptTemplateSelected}
-            disabled={disabled}
-            className="pb-4"
-          />
-        )}
-      </div>
-    ); */
     return (
       <Onboarding
         selectedAssistantId={selectedAssistantId}
@@ -191,29 +153,27 @@ export function ConversationPanel({
   }
   return (
     <>
-      {
-        /* isPrompt || */ messages && messages[0]?.conversationId === conversationId && (
-          <ConversationList
-            conversation={selectedConversation}
-            selectedMessageId={selectedMessageId}
-            scrollPosition={
-              conversationSettings && conversationSettings.scrollPosition !== undefined
-                ? conversationSettings.scrollPosition
-                : undefined
-            }
-            messages={messages || []}
-            avatars={avatars}
-            onScrollPosition={handleScrollPosition}
-            onResendMessage={handleResendMessage}
-            onDeleteMessage={onDeleteMessage}
-            onDeleteAssets={onDeleteAssets}
-            onChangeMessageContent={handleChangeMessageContent}
-            onStartMessageEdit={handleStartMessageEdit}
-            onCopyMessage={onCopyMessage}
-            onCancelSending={handleCancelSending}
-          />
-        )
-      }
+      {messages && messages[0]?.conversationId === conversationId && (
+        <ConversationList
+          conversation={selectedConversation}
+          selectedMessageId={selectedMessageId}
+          scrollPosition={
+            conversationSettings && conversationSettings.scrollPosition !== undefined
+              ? conversationSettings.scrollPosition / 1000
+              : undefined
+          }
+          messages={messages || []}
+          avatars={avatars}
+          onScrollPosition={handleScrollPosition}
+          onResendMessage={handleResendMessage}
+          onDeleteMessage={onDeleteMessage}
+          onDeleteAssets={onDeleteAssets}
+          onChangeMessageContent={handleChangeMessageContent}
+          onStartMessageEdit={handleStartMessageEdit}
+          onCopyMessage={onCopyMessage}
+          onCancelSending={handleCancelSending}
+        />
+      )}
       <div className="flex flex-col items-center text-sm" />
     </>
   );

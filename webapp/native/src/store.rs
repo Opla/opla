@@ -122,7 +122,7 @@ pub struct WindowSettings {
 pub struct ExplorerGroup {
     pub title: String,
     pub hidden: bool,
-    pub height: f32,
+    pub height: f64,
     pub closed: bool,
 }
 
@@ -131,10 +131,10 @@ pub struct PageSettings {
     pub selected_id: Option<String>,
     pub explorer_hidden: bool,
     pub settings_hidden: bool,
-    pub explorer_width: f32,
-    pub settings_width: f32,
+    pub explorer_width: f64,
+    pub settings_width: f64,
     pub explorer_groups: Option<Vec<ExplorerGroup>>,
-    pub scroll_position: Option<f32>,
+    pub scroll_position: Option<u32>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

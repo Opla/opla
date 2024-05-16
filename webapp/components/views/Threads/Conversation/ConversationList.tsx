@@ -64,9 +64,9 @@ function ConversationList({
 
   const position = {
     x: scrollPosition === -1 ? -1 : 0,
-    y: scrollPosition === undefined ? -1 : scrollPosition,
+    y: scrollPosition === undefined || scrollPosition === null ? -1 : scrollPosition,
   };
-  const [ref, scrollTo] = useScroll(conversation.id, position, onScrollPosition);
+  const [ref, onScroll] = useScroll(conversation.id, position, onScrollPosition);
   const assets = useMemo(
     () => (conversation ? getConversationAssets(conversation) : []),
     [conversation],
@@ -114,7 +114,13 @@ function ConversationList({
             variant="ghost"
             size="icon"
             className="absolute bottom-4 right-8"
-            onClick={() => scrollTo({ x: 0, y: 100 })}
+            onClick={
+              () =>
+                onScroll({
+                  x: -1,
+                  y: 100,
+                }) /* onScrollPosition({ key: conversation.id, position: { x: -1, y: 100 } }) */
+            }
           >
             <ArrowDown />
           </Button>
