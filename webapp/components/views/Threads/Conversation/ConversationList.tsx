@@ -114,7 +114,13 @@ function ConversationList({
             variant="ghost"
             size="icon"
             className="absolute bottom-4 right-8"
-            onClick={() => onScroll({ x: -1, y: 100 }) /* onScrollPosition({ key: conversation.id, position: { x: -1, y: 100 } }) */}
+            onClick={
+              () =>
+                onScroll({
+                  x: -1,
+                  y: 100,
+                }) /* onScrollPosition({ key: conversation.id, position: { x: -1, y: 100 } }) */
+            }
           >
             <ArrowDown />
           </Button>

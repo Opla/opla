@@ -105,9 +105,9 @@ export default function useScroll(
   position: Position2D,
   onUpdatePosition: (props: KeyedScrollPosition) => void,
 ): [
-    React.RefCallback<HTMLDivElement>,
-    (scrollPosition: Position2D, forceUpdate?: boolean) => void,
-  ] {
+  React.RefCallback<HTMLDivElement>,
+  (scrollPosition: Position2D, forceUpdate?: boolean) => void,
+] {
   const previousNode: MutableRefObject<HTMLDivElement | undefined> = useRef();
   const keyedRect = useRef<KeyedScrollPosition>({
     key,
@@ -173,7 +173,7 @@ export default function useScroll(
   const handleScrollEnd = useCallback(
     (rect: Rect) => {
       // logger.info(`handleScrollEnd newPosition ${key}`, keyedRect.current, position, rect);
-      if (!compareXY(rect, position) && rect.width > 0 || rect.height > 0) {
+      if ((!compareXY(rect, position) && rect.width > 0) || rect.height > 0) {
         const newKeyedPosition: KeyedScrollPosition = {
           key,
           position: { x: rect.x, y: rect.y },
