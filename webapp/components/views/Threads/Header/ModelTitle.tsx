@@ -12,16 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext } from 'react';
-import { Provider, ProviderType, Model } from '@/types';
+import { Model } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
-import { ModalsContext } from '@/context/modals';
-import { ModalIds } from '@/modals';
-import { AppContext } from '@/context';
-import { createProvider } from '@/utils/data/providers';
-import OpenAI from '@/utils/providers/openai';
-import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
-import logger from '@/utils/logger';
 import ModelInfos from '../../../common/ModelInfos';
 
 type ModelTitleProps = {
@@ -29,44 +21,7 @@ type ModelTitleProps = {
 };
 
 export default function ModelTitle({ selectedModel }: ModelTitleProps) {
-  const { providers } = useContext(AppContext);
   const { t } = useTranslation();
-  const { showModal } = useContext(ModalsContext);
-
-  let chatGPT = providers.find(
-    (p: Provider) => p.type === ProviderType.openai && p.name === OpenAI.template.name,
-  );
-
-  const handleSetupChatGPT = () => {
-    if (!chatGPT) {
-      chatGPT = createProvider(OpenAI.template.name as string, OpenAI.template);
-    }
-    showModal(ModalIds.OpenAI, { item: chatGPT });
-  };
-
-  const handleNewLocalModel = () => {
-    showModal(ModalIds.NewLocalModel);
-  };
-
-  const handleNewProviderModel = () => {
-    showModal(ModalIds.NewProvider);
-  };
-
-  useShortcuts(ShortcutIds.INSTALL_MODEL, (event) => {
-    event.preventDefault();
-    logger.info('shortcut install Model');
-    handleNewLocalModel();
-  });
-  useShortcuts(ShortcutIds.NEW_PROVIDER, (event) => {
-    event.preventDefault();
-    logger.info('shortcut new provider');
-    handleNewProviderModel();
-  });
-  useShortcuts(ShortcutIds.CONFIG_GPT, (event) => {
-    event.preventDefault();
-    logger.info('shortcut configure ChatGPT');
-    handleSetupChatGPT();
-  });
 
   return selectedModel ? (
     <>

@@ -151,8 +151,8 @@ export default function ThreadHeader({
   );
 
   return (
-    <div className="flex w-full flex-col items-start justify-between rounded-md border px-4 py-0 sm:flex-row sm:items-center">
-      <div className="flex grow items-center justify-between text-sm font-medium leading-none">
+    <div className="flex w-full flex-col items-start px-4 py-0 sm:flex-row sm:items-center">
+      <div className="flex items-center justify-between rounded-md border p-2 text-sm font-medium leading-none">
         {title}
         <div className="flex-1" />
         {badge}
