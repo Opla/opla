@@ -129,11 +129,11 @@ function Thread({
     if (isMessageUpdating) {
       return;
     }
-    logger.info('getNewMessages', conversationId, isMessageUpdating);
+    logger.info('getNewMessages', conversationId, isMessageUpdating, selectedConversation);
 
     setIsMessageUpdating(true);
     getNewMessages();
-  }, [conversationId, readConversationMessages, isMessageUpdating, copied]);
+  }, [conversationId, readConversationMessages, isMessageUpdating, copied, selectedConversation]);
 
   const defaultConversationName = getDefaultConversationName(t);
   const { messages, tempConversationName } = useMemo(() => {
@@ -142,10 +142,6 @@ function Thread({
     if (stream) {
       newMessages = newMessages.map((msg) => {
         const { author } = msg;
-        /* if (author.role === 'assistant') {
-          const model = findModelInAll(author.name, providers, backendContext, true);
-          author.name = model?.title || model?.name || author.name;
-        } */
         if (stream.messageId === msg.id) {
           const m: MessageImpl = {
             ...msg,
@@ -237,14 +233,7 @@ function Thread({
         avatar.ref = a.id as string;
         newAvatars.push(avatar);
       });
-      /* if (assistant) {
-        const avatar = { ref: assistant.id as string, name: assistant.name } as AvatarRef;
-        avatar.url = assistant.avatar?.url;
-        avatar.color = assistant.avatar?.color;
-        avatar.fallback = assistant.avatar?.name;
-        avatar.ref = assistant.id as string;
-        newAvatars.push(avatar);
-      } */
+
       if (modelItems) {
         modelItems.forEach((item) => {
           const avatar = { ref: item.key, name: item.label } as AvatarRef;

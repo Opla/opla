@@ -133,7 +133,7 @@ export default function useScroll(
       const rect = percentagePositionToContainerRect(elementRect, parent, position);
       const { width, height } = rect;
       const currentY = +(-rect.y + parentRect.y).toFixed(2);
-      logger.info(
+      /* logger.info(
         'handleResize',
         position,
         currentY,
@@ -142,7 +142,7 @@ export default function useScroll(
         elementRect,
         currentRect,
         parentRect,
-      );
+      ); */
       if (!currentRect || width !== currentRect.width || height !== currentRect.height) {
         // const rect = percentagePositionToContainerRect(contentRect, parent, position);
         if (rect.height < 1 && rect.width < 1) {
