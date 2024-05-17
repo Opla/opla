@@ -81,14 +81,18 @@ export const updateOrCreateConversation = (
   conversationId: string | undefined,
   conversations: Conversation[],
   partial: Partial<Conversation>,
+  conversationName: string,
 ) => {
   let conversation = conversations.find((c) => c.id === conversationId);
   let updatedConversations;
+  const defaultName = getDefaultConversationName();
+  let name = conversation?.name || partial.name;
+  name = name === defaultName ? conversationName : partial.name || defaultName;
+  name = name.trim().substring(0, 200);
   if (conversation) {
-    updatedConversations = updateConversation({ ...conversation, ...partial }, conversations);
+    updatedConversations = updateConversation({ ...conversation, ...partial, name }, conversations);
   } else {
-    const name = partial.name || getDefaultConversationName();
-    conversation = createConversation(name.trim().substring(0, 200));
+    conversation = createConversation(name);
     updatedConversations = [...conversations, conversation];
   }
   return updatedConversations;

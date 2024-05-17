@@ -245,7 +245,8 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       const updatedConversations = updateOrCreateConversation(
         selectedConversationId,
         selectedConversations,
-        partialConversation, // messages?.[0]?.content as string,
+        partialConversation,
+        getMessageContentAsString(conversationMessages?.[0]),
       );
       const updatedMessages = mergeMessages(conversationMessages, changedMessages);
       await updateConversations(updatedConversations);

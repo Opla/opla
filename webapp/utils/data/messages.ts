@@ -109,11 +109,11 @@ export const getContentAsString = (messageContent: string | Content | undefined)
   return content;
 };
 
-export const getMessageContentAsString = (message: Message): string =>
-  getContentAsString(message.content);
+export const getMessageContentAsString = (message: Message | undefined): string =>
+  getContentAsString(message?.content);
 
-export const getMessageRawContentAsString = (message: Message): string =>
-  getContentAsString(message.content);
+export const getMessageRawContentAsString = (message: Message | undefined): string =>
+  getContentAsString(message?.content);
 
 export const getMessageContentHistoryAsString = (
   message: Message,
