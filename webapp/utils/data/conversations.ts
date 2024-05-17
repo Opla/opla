@@ -134,6 +134,8 @@ export const getConversationService = (
         assistantId,
       };
     }
+  } else {
+    service = deepCopy(service);
   }
   return service;
 };

@@ -74,7 +74,14 @@ export const getActiveService = (
     if (!model && modelId) {
       model = findModelInAll(modelId, providers, config, true);
     }
-    if (!provider || (model && provider.name !== model.provider)) {
+    if (
+      !provider ||
+      (model &&
+        !(
+          provider.name.toLowerCase() === model.provider?.toLowerCase() ||
+          provider.name.toLowerCase() === model.creator?.toLowerCase()
+        ))
+    ) {
       providerIdOrName = model?.provider || OplaProvider.name;
       provider = findProvider(providerIdOrName, providers);
       activeService.providerIdOrName = providerIdOrName;
