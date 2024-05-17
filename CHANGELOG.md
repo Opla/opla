@@ -1,3 +1,10 @@
+# [1.0.0-alpha.150](https://github.com/Opla/opla/compare/v1.0.0-alpha.149...v1.0.0-alpha.150) (2024-05-17)
+
+
+### Bug Fixes
+
+* openAI wrong provider [#895](https://github.com/Opla/opla/issues/895) ([#904](https://github.com/Opla/opla/issues/904)) ([60200e8](https://github.com/Opla/opla/commit/60200e814545e2f9ea865c443cd25db67ad897db))
+
 # [1.0.0-alpha.149](https://github.com/Opla/opla/compare/v1.0.0-alpha.148...v1.0.0-alpha.149) (2024-05-17)
 
 
