@@ -1,3 +1,10 @@
+# [1.0.0-alpha.149](https://github.com/Opla/opla/compare/v1.0.0-alpha.148...v1.0.0-alpha.149) (2024-05-17)
+
+
+### Bug Fixes
+
+* conversation name is not saved [#896](https://github.com/Opla/opla/issues/896) ([#903](https://github.com/Opla/opla/issues/903)) ([4861db7](https://github.com/Opla/opla/commit/4861db75a6435bd43a6ff2baaaba2b35942d0ddf))
+
 # [1.0.0-alpha.148](https://github.com/Opla/opla/compare/v1.0.0-alpha.147...v1.0.0-alpha.148) (2024-05-16)
 
 
