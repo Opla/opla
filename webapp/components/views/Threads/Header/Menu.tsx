@@ -13,16 +13,8 @@
 // limitations under the License.
 
 import { useContext, useState } from 'react';
-import { Archive, Check, HardDriveDownload, MoreHorizontal, Plug, Plus, Trash } from 'lucide-react';
+import { Archive, HardDriveDownload, MoreHorizontal, Plug, Plus, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,12 +23,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Ui, Provider, ProviderType, Logo } from '@/types';
+import { Provider, ProviderType } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
@@ -47,30 +36,18 @@ import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
 import { MenuAction } from '@/types/ui';
 import { getStateColor } from '@/utils/ui';
-import ModelIcon from '@/components/common/ModelIcon';
-import { Badge } from '../../../ui/badge';
 import { ShortcutBadge } from '../../../common/ShortCut';
 
-type ModelMenuProps = {
-  selectedModelId?: string;
+type HeaderMenuProps = {
   selectedConversationId?: string;
-  modelItems: Ui.MenuItem[];
-  onSelectModel: (model: string, provider: ProviderType) => void;
   onSelectMenu: (menu: MenuAction, data: string) => void;
 };
 
-export default function ModelMenu({
-  selectedModelId,
-  selectedConversationId,
-  modelItems,
-  onSelectModel,
-  onSelectMenu,
-}: ModelMenuProps) {
+export default function HeaderMenu({ selectedConversationId, onSelectMenu }: HeaderMenuProps) {
   const { providers } = useContext(AppContext);
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
-  const selectedItem = modelItems.find((item) => item.key === selectedModelId);
 
   let chatGPT = providers.find(
     (p: Provider) => p.type === ProviderType.openai && p.name === OpenAI.template.name,
@@ -115,57 +92,7 @@ export default function ModelMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-full">
-        <DropdownMenuLabel>{t('Model')}</DropdownMenuLabel>
         <DropdownMenuGroup>
-          {modelItems.length > 0 && (
-            <>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <Check className="mr-2 h-4 w-4" strokeWidth={1.5} />
-                  <span className="capitalize">{selectedItem?.label || t('Select a model')}</span>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent className="p-0">
-                  <Command>
-                    <CommandInput placeholder={t('Filter model...')} autoFocus />
-                    <CommandList>
-                      <CommandEmpty>{t('No Model found.')}</CommandEmpty>
-                      <CommandGroup>
-                        {modelItems.map((item) => (
-                          <CommandItem
-                            key={item.key}
-                            value={item.value}
-                            onSelect={() => {
-                              onSelectModel(item.key as string, item.group as ProviderType);
-                              setOpen(false);
-                            }}
-                            className="flex w-full items-center justify-between"
-                          >
-                            <div className="flex w-full items-center gap-2">
-                              <ModelIcon
-                                icon={item.icon as unknown as Logo}
-                                name={item.label}
-                                providerName={item.group?.toLowerCase()}
-                                className="h-4 w-4"
-                              />
-                              <span className="capitalize">{item.label}</span>{' '}
-                            </div>
-
-                            <Badge
-                              variant="secondary"
-                              className={`ml-4 bg-gray-300 capitalize text-gray-600 ${getStateColor(item.state, 'text', true)}`}
-                            >
-                              {item.group && item.group !== 'Opla' ? item.group : 'local'}
-                            </Badge>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              <DropdownMenuSeparator />
-            </>
-          )}
           <DropdownMenuItem onSelect={handleNewLocalModel}>
             <HardDriveDownload className="mr-2 h-4 w-4" strokeWidth={1.5} />
             {t('Install local model')}
