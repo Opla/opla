@@ -1,3 +1,10 @@
+# [1.0.0-alpha.151](https://github.com/Opla/opla/compare/v1.0.0-alpha.150...v1.0.0-alpha.151) (2024-05-18)
+
+
+### Features
+
+* model or assistant title & menu [#899](https://github.com/Opla/opla/issues/899) ([#906](https://github.com/Opla/opla/issues/906)) ([181abf4](https://github.com/Opla/opla/commit/181abf444ee24a628071b9557ebd5c7604f99617))
+
 # [1.0.0-alpha.150](https://github.com/Opla/opla/compare/v1.0.0-alpha.149...v1.0.0-alpha.150) (2024-05-17)
 
 
