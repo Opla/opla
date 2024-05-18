@@ -12,69 +12,111 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext } from 'react';
-import { Provider, ProviderType, Model } from '@/types';
+import { useState } from 'react';
+import { Check } from 'lucide-react';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import { Logo, Model, ProviderType, Ui } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
-import { ModalsContext } from '@/context/modals';
-import { ModalIds } from '@/modals';
-import { AppContext } from '@/context';
-import { createProvider } from '@/utils/data/providers';
-import OpenAI from '@/utils/providers/openai';
-import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
-import logger from '@/utils/logger';
+import { cn } from '@/lib/utils';
+import { getStateColor } from '@/utils/ui';
+import ModelIcon from '@/components/common/ModelIcon';
+import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
 import ModelInfos from '../../../common/ModelInfos';
+import ServiceBadge from './ServiceBadge';
 
 type ModelTitleProps = {
   selectedModel?: Model;
+  selectedItem: Ui.MenuItem | undefined;
+  modelItems: Ui.MenuItem[];
+  onSelectModel: (model: string, provider: ProviderType) => void;
+  onEnableProvider: () => void;
 };
 
-export default function ModelTitle({ selectedModel }: ModelTitleProps) {
-  const { providers } = useContext(AppContext);
+export default function ModelTitle({
+  selectedModel,
+  selectedItem,
+  modelItems,
+  onSelectModel,
+  onEnableProvider,
+}: ModelTitleProps) {
   const { t } = useTranslation();
-  const { showModal } = useContext(ModalsContext);
-
-  let chatGPT = providers.find(
-    (p: Provider) => p.type === ProviderType.openai && p.name === OpenAI.template.name,
-  );
-
-  const handleSetupChatGPT = () => {
-    if (!chatGPT) {
-      chatGPT = createProvider(OpenAI.template.name as string, OpenAI.template);
-    }
-    showModal(ModalIds.OpenAI, { item: chatGPT });
-  };
-
-  const handleNewLocalModel = () => {
-    showModal(ModalIds.NewLocalModel);
-  };
-
-  const handleNewProviderModel = () => {
-    showModal(ModalIds.NewProvider);
-  };
-
-  useShortcuts(ShortcutIds.INSTALL_MODEL, (event) => {
-    event.preventDefault();
-    logger.info('shortcut install Model');
-    handleNewLocalModel();
-  });
-  useShortcuts(ShortcutIds.NEW_PROVIDER, (event) => {
-    event.preventDefault();
-    logger.info('shortcut new provider');
-    handleNewProviderModel();
-  });
-  useShortcuts(ShortcutIds.CONFIG_GPT, (event) => {
-    event.preventDefault();
-    logger.info('shortcut configure ChatGPT');
-    handleSetupChatGPT();
-  });
+  const [open, setOpen] = useState(false);
 
   return selectedModel ? (
-    <>
-      <div className="grow capitalize text-foreground">
-        {selectedModel && <ModelInfos model={selectedModel} displayIcon />}
-      </div>
-      <div className="flex-1" />
-    </>
+    <Popover open={modelItems.length > 1 && open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          disabled={modelItems.length < 2}
+          className="flex gap-4 px-2 capitalize text-foreground"
+        >
+          {selectedModel && <ModelInfos model={selectedModel} displayIcon />}
+          {selectedItem && (
+            <ServiceBadge
+              state={selectedItem.state}
+              providerName={selectedItem?.group}
+              handleEnableProvider={onEnableProvider}
+            />
+          )}
+        </Button>
+      </PopoverTrigger>
+
+      <PopoverContent className="w-full p-0">
+        {modelItems.length > 0 && (
+          <Command>
+            <CommandInput placeholder={t('Filter model...')} autoFocus />
+            <CommandList>
+              <CommandEmpty>{t('No Model found.')}</CommandEmpty>
+              <CommandGroup>
+                {modelItems.map((item) => (
+                  <CommandItem
+                    key={item.key}
+                    value={item.value}
+                    onSelect={() => {
+                      onSelectModel(item.key as string, item.group as ProviderType);
+                      setOpen(false);
+                    }}
+                    className="flex w-full items-center justify-between"
+                  >
+                    <Check
+                      className={cn(
+                        'mr-2 h-4 w-4',
+                        item.key === selectedModel.id ? 'opacity-100' : 'opacity-0',
+                      )}
+                    />
+                    <div className="flex w-full items-center gap-2">
+                      <ModelIcon
+                        icon={item.icon as unknown as Logo}
+                        name={item.label}
+                        providerName={item.group?.toLowerCase()}
+                        className="h-4 w-4"
+                      />
+                      <span className="capitalize">{item.label}</span>{' '}
+                    </div>
+
+                    <Badge
+                      variant="secondary"
+                      className={`ml-4 bg-gray-300 capitalize text-gray-600 ${getStateColor(item.state, 'text', true)}`}
+                    >
+                      {item.group && item.group !== 'Opla' ? item.group : 'local'}
+                    </Badge>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        )}
+      </PopoverContent>
+    </Popover>
   ) : (
     <span>{t('Select a model')}</span>
   );

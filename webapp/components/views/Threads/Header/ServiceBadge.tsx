@@ -37,7 +37,7 @@ export default function ServiceBadge({
     <Button asChild onClick={handleEnableProvider}>
       <Badge
         className={cn(
-          'mr-4 h-[24px] bg-gray-300 capitalize text-gray-600 hover:bg-gray-400',
+          'h-[12px] rounded-sm bg-gray-300 text-xs capitalize text-gray-600 hover:bg-gray-400',
           disabled || !state || state === (BasicState.disabled || BasicState.error)
             ? 'cursor-pointer'
             : '',

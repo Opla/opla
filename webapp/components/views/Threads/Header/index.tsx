@@ -16,17 +16,15 @@ import { useContext } from 'react';
 import { AlertTriangle, ArrowRight } from 'lucide-react';
 import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackendContext';
-import { AIServiceType, Assistant, Conversation, Provider, ProviderType, Ui } from '@/types';
+import { AIServiceType, Conversation, Provider, ProviderType, Ui } from '@/types';
 import { MenuAction } from '@/types/ui';
 import { findProvider, updateProvider } from '@/utils/data/providers';
 import { useAssistantStore } from '@/stores';
 import useTranslation from '@/hooks/useTranslation';
 import { getActiveService } from '@/utils/services';
-import ModelMenu from './ModelMenu';
-import AssistantMenu from './AssistantMenu';
+import HeaderMenu from './Menu';
 import AssistantTitle from './AssistantTitle';
 import ModelTitle from './ModelTitle';
-import ServiceBadge from './ServiceBadge';
 
 export type ThreadMenuProps = {
   selectedAssistantId: string | undefined;
@@ -53,7 +51,7 @@ export default function ThreadHeader({
     | Conversation
     | undefined;
 
-  const assistant = getAssistant(selectedAssistantId) as Assistant;
+  const assistant = getAssistant(selectedAssistantId);
   const service = getActiveService(conversation, assistant, providers, config, selectedModelId);
   const selectedModel = service.model;
   const modelId = selectedModel?.id || selectedModelId;
@@ -62,7 +60,6 @@ export default function ThreadHeader({
 
   const selectedTargetId =
     service?.type === AIServiceType.Assistant ? service.targetId : assistant?.targets?.[0]?.id;
-  const target = assistant?.targets?.find((t) => t.id === selectedTargetId);
 
   const { t } = useTranslation();
 
@@ -80,10 +77,26 @@ export default function ThreadHeader({
   };
 
   let title;
-  if (selectedAssistantId) {
-    title = <AssistantTitle assistant={assistant} />;
+  if (assistant) {
+    title = (
+      <AssistantTitle
+        assistant={assistant}
+        conversation={conversation}
+        selectedTargetId={selectedTargetId}
+        selectedItem={selectedItem}
+        onEnableProvider={handleEnableProvider}
+      />
+    );
   } else if (selectedModel) {
-    title = <ModelTitle selectedModel={selectedModel} />;
+    title = (
+      <ModelTitle
+        modelItems={modelItems}
+        selectedModel={selectedModel}
+        selectedItem={selectedItem}
+        onEnableProvider={handleEnableProvider}
+        onSelectModel={onSelectModel}
+      />
+    );
   } else if (modelItems.length === 0 && !selectedConversationId) {
     return (
       <div className="flex w-full flex-col items-start justify-between px-4 py-0 sm:flex-row sm:items-center">
@@ -94,7 +107,7 @@ export default function ThreadHeader({
     );
   } else {
     title = (
-      <div className="flex items-center justify-center text-error">
+      <div className="flex items-center justify-between rounded-md border p-2 text-sm font-medium leading-none text-error">
         <AlertTriangle className="mr-4 h-4 w-4" strokeWidth={1.5} />
         <span>
           {t('No local model found.')}{' '}
@@ -105,33 +118,7 @@ export default function ThreadHeader({
     );
   }
 
-  let targetState = Ui.BasicState.disabled;
-
-  if (target && !target.disabled) {
-    targetState = Ui.BasicState.active;
-  } else if (selectedItem && selectedItem.state) {
-    targetState = selectedItem.state;
-  }
-  let badge;
-
-  if (target && targetState) {
-    badge = (
-      <ServiceBadge
-        state={targetState}
-        providerName={target?.provider}
-        handleEnableProvider={handleEnableProvider}
-      />
-    );
-  } else if (selectedItem) {
-    badge = (
-      <ServiceBadge
-        state={selectedItem.state}
-        providerName={selectedItem?.group}
-        handleEnableProvider={handleEnableProvider}
-      />
-    );
-  }
-  const menu = selectedAssistantId ? (
+  /* const menu = selectedAssistantId ? (
     <AssistantMenu
       assistant={assistant}
       target={target}
@@ -141,24 +128,13 @@ export default function ThreadHeader({
       }}
     />
   ) : (
-    <ModelMenu
-      selectedModelId={selectedModelId}
-      selectedConversationId={selectedConversationId}
-      modelItems={modelItems}
-      onSelectModel={onSelectModel}
-      onSelectMenu={onSelectMenu}
-    />
-  );
+    <HeaderMenu selectedConversationId={selectedConversationId} onSelectMenu={onSelectMenu} />
+  ); */
 
   return (
-    <div className="flex w-full flex-col items-start justify-between rounded-md border px-4 py-0 sm:flex-row sm:items-center">
-      <div className="flex grow items-center justify-between text-sm font-medium leading-none">
-        {title}
-        <div className="flex-1" />
-        {badge}
-      </div>
-
-      {menu}
+    <div className="flex w-full flex-col items-start px-4 py-0 sm:flex-row sm:items-center">
+      {title}
+      <HeaderMenu selectedConversationId={selectedConversationId} onSelectMenu={onSelectMenu} />
     </div>
   );
 }
