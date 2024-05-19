@@ -1,3 +1,10 @@
+# [1.0.0-alpha.152](https://github.com/Opla/opla/compare/v1.0.0-alpha.151...v1.0.0-alpha.152) (2024-05-19)
+
+
+### Bug Fixes
+
+* load previous services [#905](https://github.com/Opla/opla/issues/905) ([#907](https://github.com/Opla/opla/issues/907)) ([7465f34](https://github.com/Opla/opla/commit/7465f34fbfc233bc2d01a892114921eca7d548e7))
+
 # [1.0.0-alpha.151](https://github.com/Opla/opla/compare/v1.0.0-alpha.150...v1.0.0-alpha.151) (2024-05-18)
 
 
