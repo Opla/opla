@@ -201,6 +201,7 @@ impl Store {
         self.settings = new_config.settings.clone();
         self.server = new_config.server.clone();
         self.models = new_config.models.clone();
+        self.services = new_config.services.clone();
     }
 
     pub fn load(&mut self, asset_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
