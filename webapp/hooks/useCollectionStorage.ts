@@ -21,19 +21,21 @@ import { deepCopy } from '@/utils/data';
 export default function useCollectionStorage<T>(
   collectionId: string,
 ): [
-  (key: string, defaultValue: T) => T,
-  (key: string, defaultValue: T) => Promise<T>,
+  (key: string, defaultValue?: T) => T | undefined,
+  (key: string, defaultValue: T, cache?: boolean) => Promise<T>,
   (key: string, value: T) => Promise<void>,
   (key: string) => Promise<void>,
   Record<string, T>,
 ] {
   const [collection, setCollection] = useState<Record<string, T>>({});
 
-  const readValue = async (key: string, defaultValue: T) => {
+  const readValue = async (key: string, defaultValue: T, cache = true) => {
     let v = collection[key];
     if (!v) {
       v = (await dataStorage().getItem(collectionId, defaultValue, key)) as T;
-      setCollection({ ...collection, [key]: v });
+      if (cache) {
+        setCollection({ ...collection, [key]: v });
+      }
     }
     return v;
   };
@@ -50,7 +52,7 @@ export default function useCollectionStorage<T>(
     }
   };
 
-  const getValue = (key: string, defaultValue: T) => collection?.[key] || defaultValue;
+  const getValue = (key: string, defaultValue?: T) => collection?.[key] || defaultValue;
 
   const deleteValue = async (key: string) => {
     try {

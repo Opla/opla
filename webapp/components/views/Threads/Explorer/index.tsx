@@ -245,8 +245,8 @@ export default function ThreadsExplorer({
       onCancelSearch={() => setSearching(false)}
       toolbar={
         <>
-          {(selectedThreadId || selectedAssistantId) && (
-            <div className="mr-2 flex gap-2">
+          <div className="mr-2 flex gap-2">
+            {(selectedThreadId || selectedAssistantId) && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
@@ -268,27 +268,27 @@ export default function ThreadsExplorer({
                   </div>
                 </TooltipContent>
               </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    disabled={!selectedThreadId}
-                    className="items-center"
-                    onClick={() => setSearching(true)}
-                  >
-                    <Search className="h-4 w-4" strokeWidth={1.5} />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" sideOffset={12} className="mt-1">
-                  <div className="flex w-full flex-row gap-2">
-                    <p>{t('Search in conversations...')}</p>
-                    {/* <ShortcutBadge command={ShortcutIds.NEW_CONVERSATION} /> */}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          )}
+            )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={threads.length === 0}
+                  className="items-center"
+                  onClick={() => setSearching(true)}
+                >
+                  <Search className="h-4 w-4" strokeWidth={1.5} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" sideOffset={12} className="mt-1">
+                <div className="flex w-full flex-row gap-2">
+                  <p>{t('Search in conversations...')}</p>
+                  {/* <ShortcutBadge command={ShortcutIds.NEW_CONVERSATION} /> */}
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </div>
 
           <DropdownMenu open={open} onOpenChange={setOpen}>
             <DropdownMenuTrigger asChild>
