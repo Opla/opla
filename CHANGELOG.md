@@ -1,3 +1,10 @@
+# [1.0.0-alpha.153](https://github.com/Opla/opla/compare/v1.0.0-alpha.152...v1.0.0-alpha.153) (2024-05-20)
+
+
+### Bug Fixes
+
+* search in not loaded messages [#908](https://github.com/Opla/opla/issues/908) ([#909](https://github.com/Opla/opla/issues/909)) ([4942f49](https://github.com/Opla/opla/commit/4942f4968bd4c5a0e30ab50a78637bb20cbf1712))
+
 # [1.0.0-alpha.152](https://github.com/Opla/opla/compare/v1.0.0-alpha.151...v1.0.0-alpha.152) (2024-05-19)
 
 
