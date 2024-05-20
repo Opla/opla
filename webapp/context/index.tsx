@@ -130,7 +130,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
 
   const getConversationMessages = useCallback(
     (id: string | undefined): Message[] => {
-      const messages: Message[] = id ? getStoredConversationMessages(id, []) : [];
+      const messages: Message[] = id ? (getStoredConversationMessages(id, []) as Message[]) : [];
       return messages;
     },
     [getStoredConversationMessages],
@@ -176,7 +176,10 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
             name: conversation.name || 'Conversation',
             entries: [],
           };
-          const messages = await getConversationMessages(conversation.id);
+          let messages = getStoredConversationMessages(conversation.id);
+          if (!messages) {
+            messages = await readStoredConversationMessages(conversation.id, [], false);
+          }
           messages.forEach((message) => {
             const text = getMessageContentAsString(message);
             const index = text.toUpperCase().indexOf(filteredQuery);
@@ -211,7 +214,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       await Promise.all(promises);
       return result;
     },
-    [conversations, getConversationMessages],
+    [conversations, getStoredConversationMessages, readStoredConversationMessages],
   );
 
   const updateConversations = useCallback(
