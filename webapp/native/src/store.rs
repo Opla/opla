@@ -15,7 +15,11 @@
 use std::{ fs, path::PathBuf, fmt, collections::HashMap };
 use serde::{ Deserialize, Serialize };
 use crate::{
-    data::{ model::ModelStorage, service::{ Service, ServiceStorage, ServiceType } },
+    data::{
+        model::ModelStorage,
+        service::{ Service, ServiceStorage, ServiceType },
+        workspace::WorkspaceStorage,
+    },
     downloader::Download,
     utils::get_config_directory,
 };
@@ -154,12 +158,16 @@ pub struct Store {
     pub downloads: Vec<Download>,
     #[serde(default = "service_default")]
     pub services: ServiceStorage,
+    #[serde(default = "workspace_default")]
+    pub workspaces: WorkspaceStorage,
 }
 
 fn service_default() -> ServiceStorage {
-    ServiceStorage {
-        active_service: None,
-    }
+    ServiceStorage::new()
+}
+
+fn workspace_default() -> WorkspaceStorage {
+    WorkspaceStorage::new()
 }
 
 impl Store {
@@ -191,9 +199,8 @@ impl Store {
                 items: vec![],
             },
             downloads: vec![],
-            services: ServiceStorage {
-                active_service: None,
-            },
+            services: ServiceStorage::new(),
+            workspaces: WorkspaceStorage::new(),
         }
     }
 
@@ -202,6 +209,7 @@ impl Store {
         self.server = new_config.server.clone();
         self.models = new_config.models.clone();
         self.services = new_config.services.clone();
+        self.workspaces = new_config.workspaces.clone();
     }
 
     pub fn load(&mut self, asset_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {

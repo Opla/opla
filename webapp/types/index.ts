@@ -629,4 +629,9 @@ export type QueryResponse = {
   count: number;
 };
 
+export type Workspace = BaseNamedRecord & {
+  organizationIdOrName?: string;
+  projectsPath: string[];
+};
+
 export { Ui };

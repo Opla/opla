@@ -12,44 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::HashMap;
-
+use chrono::{ DateTime, Utc };
 use serde::{ self, Deserialize, Serialize };
 use serde_with::serde_as;
 
-use self::project::Project;
-
-pub mod project;
+use crate::data::option_date_format;
 
 #[serde_as]
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Workspace {
+pub struct Project {
     pub id: Option<String>,
     pub name: Option<String>,
-    pub organization_id_or_name: Option<String>,
-    pub projects_path: Vec<String>,
+    #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
+    pub created_at: Option<DateTime<Utc>>,
+    #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
+    pub updated_at: Option<DateTime<Utc>>,
+    pub path: Option<String>,
+    pub projects: Option<String>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct WorkspaceStorage {
-    #[serde(
-        skip_serializing_if = "Option::is_none",
-        default,
-    )]
-    pub active_workspace: Option<String>,
-    pub workspaces: HashMap<String,Workspace>,
-}
-
-impl WorkspaceStorage {
-    pub fn new()  -> Self {
-        Self {
-            active_workspace: None,
-            workspaces: HashMap::new(),
-        }
-    }
-
-    pub fn load_active_workspace() {
+impl Project {
+    pub fn open() {
 
     }
 }

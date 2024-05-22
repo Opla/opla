@@ -25,6 +25,7 @@ pub mod asset;
 pub mod model;
 pub mod assistant;
 pub mod service;
+pub mod workspace;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(untagged)]
