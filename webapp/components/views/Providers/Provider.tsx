@@ -14,13 +14,14 @@
 
 'use client';
 
-import { Bug, Settings2 } from 'lucide-react';
+import { Bug, Settings2, Trash } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import useBackend from '@/hooks/useBackendContext';
 import useProviderState from '@/hooks/useProviderState';
 import { ProviderType, ServerStatus } from '@/types';
 import ContentView from '@/components/common/ContentView';
 import CopyToClipBoard from '@/components/common/CopyToClipBoard';
+import { Button } from '@/components/ui/button';
 import Toolbar from './Toolbar';
 import Server from './server';
 import OpenAI from './openai';
@@ -36,9 +37,15 @@ type ProviderViewProps = {
 function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
   const { t } = useTranslation();
 
-  const { provider, hasParametersChanged, onParametersSave, onParameterChange, onProviderToggle } =
-    useProviderState(selectedProviderId);
-  const { server } = useBackend();
+  const {
+    provider,
+    hasParametersChanged,
+    onParametersSave,
+    onParameterChange,
+    onProviderToggle,
+    updateProvider,
+  } = useProviderState(selectedProviderId);
+  const { server, updateBackendServer } = useBackend();
 
   const buildLogs = () => {
     let logs = '';
@@ -51,6 +58,20 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
     return logs;
   };
 
+  const handleClearLogs = () => {
+    if (provider?.type === ProviderType.opla) {
+      updateBackendServer({ stderr: [], stdout: [] });
+    } else {
+      updateProvider({ errors: [] });
+    }
+  };
+
+  let emptyLogs = true;
+  if (provider?.type === ProviderType.opla) {
+    emptyLogs = (server.stderr?.length ?? 0) + (server.stdout?.length ?? 0) === 0;
+  } else {
+    emptyLogs = (provider?.errors?.length ?? 0) === 0;
+  }
   return (
     <Tabs defaultValue="settings" className="h-full">
       <ContentView
@@ -114,8 +135,18 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
               </ScrollArea>
             )}
           </TabsContent>
-          <TabsContent value="debug" className="h-full w-full p-4">
-            <div className="flex w-full flex-row-reverse">
+          <TabsContent value="debug" className="h-full w-full">
+            <div className="flex w-full flex-row-reverse items-center px-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                aria-label={t('Clear logs')}
+                title={t('Clear logs')}
+                disabled={emptyLogs}
+                onClick={handleClearLogs}
+              >
+                <Trash className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+              </Button>
               <CopyToClipBoard
                 title={t('Copy logs to clipboard')}
                 message={t('Logs copied to clipboard')}
@@ -123,7 +154,7 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
               />
             </div>
             {provider && (
-              <ScrollArea>
+              <ScrollArea className="h-full  p-4">
                 {provider.type === ProviderType.opla && (
                   <>
                     {server.status === ServerStatus.ERROR && (

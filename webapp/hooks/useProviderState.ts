@@ -62,14 +62,28 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
     setUpdatedProvider(mergedProvider);
   };
 
-  const handleParametersSave = (partialProvider: Partial<Provider> = {}) => {
+  const update = (partialProvider: Partial<Provider> = {}): Provider | undefined => {
     if (!provider) {
+      return undefined;
+    }
+    const mergedProvider = deepMerge<Provider>(provider, partialProvider);
+    const updatedProviders = updateProvider(mergedProvider, providers);
+    setProviders(updatedProviders);
+    logger.info('update Provider', mergedProvider, updatedProviders);
+    return mergedProvider;
+  };
+
+  const handleParametersSave = (partialProvider: Partial<Provider> = {}) => {
+    const mergedProvider = update(partialProvider);
+    if (!mergedProvider) {
+      return;
+    }
+    /* if (!provider) {
       return;
     }
     const mergedProvider = deepMerge<Provider>(provider, partialProvider);
     const newProviders = updateProvider(mergedProvider, providers);
-    logger.info('handleParametersSave', mergedProvider, newProviders);
-    setProviders(newProviders);
+    setProviders(newProviders); */
     setUpdatedProvider({ id: providerId });
     if (mergedProvider.type === ProviderType.opla) {
       const providerServer = mergedProvider.metadata?.server;
@@ -108,6 +122,7 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
     onParameterChange: handleParameterChange,
     onParametersSave: handleParametersSave,
     onProviderToggle: handleProviderToggle,
+    updateProvider: update,
   };
 };
 
