@@ -1,3 +1,10 @@
+# [1.0.0-alpha.154](https://github.com/Opla/opla/compare/v1.0.0-alpha.153...v1.0.0-alpha.154) (2024-05-22)
+
+
+### Features
+
+* providers clear logs [#921](https://github.com/Opla/opla/issues/921) ([#922](https://github.com/Opla/opla/issues/922)) ([095037e](https://github.com/Opla/opla/commit/095037e82305402d306f24d32987cea7c779818f))
+
 # [1.0.0-alpha.153](https://github.com/Opla/opla/compare/v1.0.0-alpha.152...v1.0.0-alpha.153) (2024-05-20)
 
 
