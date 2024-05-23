@@ -24,17 +24,17 @@ type ServiceBadgeProps = {
   state?: Ui.BasicState;
   providerName?: string;
   disabled?: boolean;
-  handleEnableProvider: () => void;
+  onEnableProvider?: () => void;
 };
 
 export default function ServiceBadge({
   state,
   providerName,
   disabled,
-  handleEnableProvider,
+  onEnableProvider,
 }: ServiceBadgeProps) {
   return (
-    <Button asChild onClick={handleEnableProvider}>
+    <Button asChild onClick={onEnableProvider}>
       <Badge
         className={cn(
           'h-[12px] rounded-sm bg-gray-300 text-xs capitalize text-gray-600 hover:bg-gray-400',

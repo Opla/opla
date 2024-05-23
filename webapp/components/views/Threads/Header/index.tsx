@@ -24,7 +24,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { getActiveService } from '@/utils/services';
 import HeaderMenu from './Menu';
 import AssistantTitle from './AssistantTitle';
-import ModelTitle from './ModelTitle';
+import SelectModel from '../../../common/SelectModel';
 
 export type ThreadMenuProps = {
   selectedAssistantId: string | undefined;
@@ -89,7 +89,7 @@ export default function ThreadHeader({
     );
   } else if (selectedModel) {
     title = (
-      <ModelTitle
+      <SelectModel
         modelItems={modelItems}
         selectedModel={selectedModel}
         selectedItem={selectedItem}

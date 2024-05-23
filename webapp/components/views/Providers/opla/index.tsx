@@ -29,8 +29,12 @@
 import Parameter, { ParameterValue } from '@/components/common/Parameter';
 import useTranslation from '@/hooks/useTranslation';
 import useBackend from '@/hooks/useBackendContext';
-import { Provider } from '@/types';
+import { Provider, ServerStatus } from '@/types';
 import { deepGet } from '@/utils/data';
+import { Separator } from '@/components/ui/separator';
+import SelectModel from '@/components/common/SelectModel';
+import { getLocalModels, getLocalModelsAsItems } from '@/utils/data/models';
+import { setActiveModel } from '@/utils/backend/commands';
 
 export default function Opla({
   provider,
@@ -40,11 +44,34 @@ export default function Opla({
   onParameterChange: (name: string, value: ParameterValue) => void;
 }) {
   const { t } = useTranslation();
-  const { config } = useBackend();
+  const { server, restart, config } = useBackend();
+  const models = getLocalModels(config);
+  const modelId = config.server.parameters.modelId as string;
+  const selectedModel = models.find((m) => m.id === modelId || m.fileName === modelId);
   const modelPath = config.server.parameters.modelPath as string;
+  const items = getLocalModelsAsItems(config, selectedModel?.id);
 
+  const changeActiveModel = async (modelIdOrName: string) => {
+    await setActiveModel(modelIdOrName);
+    if (server.status === ServerStatus.STARTED || server.status === ServerStatus.STARTING) {
+      const { parameters } = config.server;
+      await restart(parameters);
+    }
+  };
+
+  const disabled = server.status === ServerStatus.STARTING;
   return (
     <div className="flex flex-col gap-2 px-8 py-4 text-sm">
+      <div className="flex w-full items-center justify-between py-2">
+        {t('Active model')}
+        <SelectModel
+          disabled={disabled}
+          selectedModel={selectedModel}
+          modelItems={items}
+          onSelectModel={changeActiveModel}
+        />
+      </div>
+      <Separator className="my-4" />
       <Parameter
         label={t('Description')}
         name="description"
@@ -60,8 +87,9 @@ export default function Opla({
         type="text"
         onChange={onParameterChange}
       />
+      <Separator className="my-4" />
       <Parameter
-        label={t('Model')}
+        label={t('Model path')}
         name="metadata.server.parameters.model"
         value={modelPath || deepGet(provider, 'metadata.server.parameters.modelPath', t('None'))}
         disabled
