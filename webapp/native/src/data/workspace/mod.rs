@@ -12,18 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::HashMap;
-
 use serde::{ self, Deserialize, Serialize };
 use serde_with::serde_as;
-
-use self::project::Project;
 
 pub mod project;
 
 #[serde_as]
 #[serde_with::skip_serializing_none]
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Workspace {
     pub id: Option<String>,
     pub name: Option<String>,
@@ -31,25 +27,13 @@ pub struct Workspace {
     pub projects_path: Vec<String>,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct WorkspaceStorage {
-    #[serde(
-        skip_serializing_if = "Option::is_none",
-        default,
-    )]
-    pub active_workspace: Option<String>,
-    pub workspaces: HashMap<String,Workspace>,
-}
-
-impl WorkspaceStorage {
-    pub fn new()  -> Self {
-        Self {
-            active_workspace: None,
-            workspaces: HashMap::new(),
+impl Clone for Workspace {
+    fn clone(&self) -> Workspace {
+        Workspace {
+            id: self.id.clone(),
+            name: self.name.clone(),
+            organization_id_or_name: self.organization_id_or_name.clone(),
+            projects_path: self.projects_path.clone(),
         }
-    }
-
-    pub fn load_active_workspace() {
-
     }
 }

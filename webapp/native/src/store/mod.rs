@@ -15,14 +15,18 @@
 use std::{ fs, path::PathBuf, fmt, collections::HashMap };
 use serde::{ Deserialize, Serialize };
 use crate::{
-    data::{
-        model::ModelStorage,
-        service::{ Service, ServiceStorage, ServiceType },
-        workspace::WorkspaceStorage,
-    },
+    data::service::{ Service, ServiceType },
     downloader::Download,
     utils::get_config_directory,
 };
+
+use self::model_storage::ModelStorage;
+use self::service_storage::ServiceStorage;
+use self::workspace_storage::WorkspaceStorage;
+
+pub mod model_storage;
+pub mod service_storage;
+pub mod workspace_storage;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ServerParameters {
