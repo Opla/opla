@@ -1,3 +1,10 @@
+# [1.0.0-alpha.156](https://github.com/Opla/opla/compare/v1.0.0-alpha.155...v1.0.0-alpha.156) (2024-05-23)
+
+
+### Features
+
+* hide OpenAI/Providers secret key [#925](https://github.com/Opla/opla/issues/925) ([#926](https://github.com/Opla/opla/issues/926)) ([c96bf07](https://github.com/Opla/opla/commit/c96bf071de19a4b535249a4699a81cdb282cf729))
+
 # [1.0.0-alpha.155](https://github.com/Opla/opla/compare/v1.0.0-alpha.154...v1.0.0-alpha.155) (2024-05-23)
 
 
