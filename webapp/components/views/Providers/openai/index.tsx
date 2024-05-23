@@ -70,6 +70,7 @@ export default function OpenAI({
             <Label htmlFor="name">{t('API key')}</Label>
             <Input
               id="name"
+              type="password"
               placeholder={t('Your secret API key')}
               value={provider?.key || ''}
               onChange={(e) => {

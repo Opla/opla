@@ -26,21 +26,7 @@ import { BaseNamedRecord } from '@/types';
 export type ParameterValue = string | number | boolean | BaseNamedRecord[] | string[];
 export type ParametersRecord = Record<string, ParameterValue | undefined>;
 
-export default function Parameter({
-  label,
-  placeholder,
-  name,
-  sublabel = '',
-  description,
-  inputCss,
-  value,
-  min,
-  max,
-  type = 'text',
-  disabled = false,
-  children,
-  onChange = () => {},
-}: {
+type ParameterProps = {
   label?: string;
   placeholder?: string;
   name: string;
@@ -63,7 +49,23 @@ export default function Parameter({
   disabled?: boolean;
   children?: React.ReactNode;
   onChange?: (name: string, value: ParameterValue) => void;
-}) {
+};
+
+export default function Parameter({
+  label,
+  placeholder,
+  name,
+  sublabel = '',
+  description,
+  inputCss,
+  value,
+  min,
+  max,
+  type = 'text',
+  disabled = false,
+  children,
+  onChange = () => {},
+}: ParameterProps) {
   const textCss = 'pr-2 w-sm';
   const boxCss =
     type === 'large-text' ? 'flex w-full flex-col px-0 py-2' : 'flex w-full flex-row px-0 py-2';
@@ -123,6 +125,7 @@ export default function Parameter({
         )}
         {(type === 'text' ||
           type === 'number' ||
+          type === 'password' ||
           (type === 'url' && !disabled) ||
           (type === 'file' && !disabled)) && (
           <Input
