@@ -45,7 +45,7 @@ export default function Server({
         label={t('API key')}
         name="key"
         value={provider?.key}
-        type="text"
+        type="password"
         onChange={onParameterChange}
       />
       <Parameter
