@@ -100,7 +100,7 @@ export default function AssistantTitle({
             <ServiceBadge
               state={targetState}
               providerName={target?.provider}
-              handleEnableProvider={onEnableProvider}
+              onEnableProvider={onEnableProvider}
             />
           )}
         </Button>

@@ -1,3 +1,17 @@
+# [1.0.0-alpha.155](https://github.com/Opla/opla/compare/v1.0.0-alpha.154...v1.0.0-alpha.155) (2024-05-23)
+
+
+### Features
+
+* display & choose active model [#923](https://github.com/Opla/opla/issues/923) ([#924](https://github.com/Opla/opla/issues/924)) ([b120b30](https://github.com/Opla/opla/commit/b120b3076c19d409caa3865e0b7efe2ad2606d76))
+
+# [1.0.0-alpha.154](https://github.com/Opla/opla/compare/v1.0.0-alpha.153...v1.0.0-alpha.154) (2024-05-22)
+
+
+### Features
+
+* providers clear logs [#921](https://github.com/Opla/opla/issues/921) ([#922](https://github.com/Opla/opla/issues/922)) ([095037e](https://github.com/Opla/opla/commit/095037e82305402d306f24d32987cea7c779818f))
+
 # [1.0.0-alpha.153](https://github.com/Opla/opla/compare/v1.0.0-alpha.152...v1.0.0-alpha.153) (2024-05-20)
 
 

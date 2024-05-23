@@ -87,6 +87,7 @@ type Context = OplaContext & {
   disconnectBackend: () => Promise<void>;
   setSettings: (settings: Settings) => Promise<void>;
   updateBackendStore: () => Promise<void>;
+  updateBackendServer: (partials: Partial<OplaServer>) => Promise<void>;
   start: (params: ServerParameters | undefined) => Promise<BackendResult>;
   stop: () => Promise<BackendResult>;
   restart: (params: ServerParameters | undefined) => Promise<BackendResult>;
@@ -101,6 +102,7 @@ const defaultContext: Context = {
   disconnectBackend: async () => {},
   setSettings: async () => {},
   updateBackendStore: async () => {},
+  updateBackendServer: async () => {},
   start: async () => ({ status: 'error', error: 'not implemented' }),
   stop: async () => ({ status: 'error', error: 'not implemented' }),
   restart: async () => ({ status: 'error', error: 'not implemented' }),
@@ -158,6 +160,10 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     logger.info('updateBackendStore');
     const store = await getOplaConfig();
     updateConfig(store);
+  }, []);
+
+  const updateBackendServer = useCallback(async (partials: Partial<OplaServer>) => {
+    updateServer(partials);
   }, []);
 
   const updateMessageContent = useCallback(
@@ -503,6 +509,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       disconnectBackend,
       setSettings,
       updateBackendStore,
+      updateBackendServer,
       start,
       stop,
       restart,
@@ -524,6 +531,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       startBackend,
       stop,
       updateBackendStore,
+      updateBackendServer,
     ],
   );
 
