@@ -30,33 +30,35 @@ import ModelIcon from '@/components/common/ModelIcon';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import ModelInfos from '../../../common/ModelInfos';
-import ServiceBadge from './ServiceBadge';
+import ModelInfos from '../ModelInfos';
+import ServiceBadge from '../../views/Threads/Header/ServiceBadge';
 
-type ModelTitleProps = {
+type SelectModelProps = {
   selectedModel?: Model;
-  selectedItem: Ui.MenuItem | undefined;
+  disabled?: boolean;
+  selectedItem?: Ui.MenuItem;
   modelItems: Ui.MenuItem[];
   onSelectModel: (model: string, provider: ProviderType) => void;
-  onEnableProvider: () => void;
+  onEnableProvider?: () => void;
 };
 
-export default function ModelTitle({
+export default function SelectModel({
   selectedModel,
+  disabled = false,
   selectedItem,
   modelItems,
   onSelectModel,
   onEnableProvider,
-}: ModelTitleProps) {
+}: SelectModelProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   return selectedModel ? (
-    <Popover open={modelItems.length > 1 && open} onOpenChange={setOpen}>
+    <Popover open={modelItems.length > 1 && open && !disabled} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          disabled={modelItems.length < 2}
+          disabled={modelItems.length < 2 || disabled}
           className="flex gap-4 px-2 capitalize text-foreground"
         >
           {selectedModel && <ModelInfos model={selectedModel} displayIcon />}
@@ -64,7 +66,7 @@ export default function ModelTitle({
             <ServiceBadge
               state={selectedItem.state}
               providerName={selectedItem?.group}
-              handleEnableProvider={onEnableProvider}
+              onEnableProvider={onEnableProvider}
             />
           )}
         </Button>

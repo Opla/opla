@@ -78,12 +78,7 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
     if (!mergedProvider) {
       return;
     }
-    /* if (!provider) {
-      return;
-    }
-    const mergedProvider = deepMerge<Provider>(provider, partialProvider);
-    const newProviders = updateProvider(mergedProvider, providers);
-    setProviders(newProviders); */
+
     setUpdatedProvider({ id: providerId });
     if (mergedProvider.type === ProviderType.opla) {
       const providerServer = mergedProvider.metadata?.server;
