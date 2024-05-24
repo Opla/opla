@@ -1,3 +1,10 @@
+# [1.0.0-alpha.157](https://github.com/Opla/opla/compare/v1.0.0-alpha.156...v1.0.0-alpha.157) (2024-05-24)
+
+
+### Features
+
+* add workspace [#910](https://github.com/Opla/opla/issues/910) ([#920](https://github.com/Opla/opla/issues/920)) ([2e33aa1](https://github.com/Opla/opla/commit/2e33aa1302f6e557d3899a60ad8c0169c28f1607))
+
 # [1.0.0-alpha.156](https://github.com/Opla/opla/compare/v1.0.0-alpha.155...v1.0.0-alpha.156) (2024-05-23)
 
 
