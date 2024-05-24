@@ -132,7 +132,7 @@ impl WorkspaceStorage {
         spawn(async move { WorkspaceStorage::emit_state_async(data, app_handle) });
     }
 
-    pub async fn subscribe_state_events(app_handle: AppHandle) {
+    pub fn subscribe_state_events(&mut self, app_handle: AppHandle) {
         let app_handle_clone = app_handle.clone();
         let _id = app_handle.listen_global(STATE_CHANGE_EVENT, move |event| {
             if let Some(payload) = event.payload() {
@@ -147,5 +147,10 @@ impl WorkspaceStorage {
                 }
             }
         });
+    }
+
+
+    pub fn init(&mut self, app_handle: AppHandle) {
+        self.subscribe_state_events(app_handle);
     }
 }

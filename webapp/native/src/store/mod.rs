@@ -14,6 +14,7 @@
 
 use std::{ fs, path::PathBuf, fmt, collections::HashMap };
 use serde::{ Deserialize, Serialize };
+use tauri::AppHandle;
 use crate::{
     data::service::{ Service, ServiceType },
     downloader::Download,
@@ -206,6 +207,10 @@ impl Store {
             services: ServiceStorage::new(),
             workspaces: WorkspaceStorage::new(),
         }
+    }
+
+    pub fn init(&mut self, app_handle: AppHandle) {
+        self.workspaces.init(app_handle);
     }
 
     pub fn set(&mut self, new_config: Store) {
