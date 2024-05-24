@@ -49,19 +49,19 @@ export const useWorkspaceStore = create<WorkspaceSlice>()((...a) => ({
 
 const getKey = (key: number) => {
   if (key === GlobalAppStateWorkspace.ACTIVE) {
-    return 'active';
+    return 'activeWorkspaceId';
   }
   if (key === GlobalAppStateWorkspace.WORKSPACE) {
     return 'workspace';
   }
-  return 'unknown';
+  return 'error';
 };
 
 export const subscribeStateSync = async () => {
   const { listen } = await import('@tauri-apps/api/event');
   const unsubscribeStateSyncListener = await listen(EVENTS.STATE_SYNC_EVENT, (event) => {
     const { key, value } = event.payload as any;
-    console.log(event);
+    console.log(`State event: ${event} ${key} ${value}`);
     useWorkspaceStore.setState({ [getKey(key) as string]: value });
   });
 

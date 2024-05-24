@@ -21,12 +21,22 @@ pub mod project;
 #[serde_with::skip_serializing_none]
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Workspace {
-    pub id: Option<String>,
+    pub id: String,
     pub name: Option<String>,
     pub organization_id_or_name: Option<String>,
     pub projects_path: Vec<String>,
 }
 
+impl Workspace {
+    pub fn new(id: String) -> Self {
+        Self {
+            id,
+            name: None,
+            organization_id_or_name: None,
+            projects_path: Vec::new(),
+        }
+    }
+}
 impl Clone for Workspace {
     fn clone(&self) -> Workspace {
         Workspace {
