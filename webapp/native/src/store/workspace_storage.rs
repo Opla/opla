@@ -19,7 +19,6 @@ use tauri::AppHandle;
 use tokio::spawn;
 use uuid::Uuid;
 
-use crate::data::workspace;
 use crate::data::workspace::Workspace;
 use crate::OplaContext;
 
@@ -119,17 +118,23 @@ impl WorkspaceStorage {
                     let _ = store.save().map_err(|err| err.to_string());
                 } else {
                     let mut store = context.store.lock().await;
-                    let workspace = &store.workspaces.create_workspace();
-                    let id = workspace.id.to_string();
-                    store.workspaces.active_workspace_id = Some(id.to_string());
+                    let id = match &store.workspaces.active_workspace_id {
+                        Some(id) => id.to_string(),
+                        None => {
+                            let workspace = &store.workspaces.create_workspace();
+                            store.workspaces.active_workspace_id = Some(workspace.id.to_string());
+                            let _ = store.save().map_err(|err| err.to_string());
+                            println!("create active workspace {:?}", workspace.id.to_string());
+                            workspace.id.to_string()
+                        }
+                    };
+
                     app_handle
                         .emit_all(STATE_SYNC_EVENT, Payload {
                             key: payload.key,
                             value: Some(Value::String(id)),
                         })
                         .unwrap();
-                    let _ = store.save().map_err(|err| err.to_string());
-                    println!("create active workspace {:?}", workspace.id.to_string());
                 }
             }
             GlobalAppStateWorkspace::WORKSPACE => {
@@ -153,7 +158,6 @@ impl WorkspaceStorage {
             }
         }
     }
-
 
     pub fn subscribe_state_events(&mut self, app_handle: AppHandle) {
         let app_handle_copy = app_handle.app_handle();

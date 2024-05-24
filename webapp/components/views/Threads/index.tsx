@@ -81,11 +81,11 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
 
   useEffect(() => {
     if (!workspaces || !activeWorkspace) {
-      console.log('loadWorkspace', workspaces, activeWorkspace);
+      logger.info('loadWorkspace', workspaces, activeWorkspace);
       loadWorkspace(activeWorkspace);
     }
   }, [loadWorkspace, activeWorkspace, workspaces]);
-  console.log('activeWorkspace', activeWorkspace);
+  logger.info('activeWorkspace', activeWorkspace);
   const searchParams = useSearchParams();
   const selectedConversation = conversations.find((c) => c.id === selectedThreadId);
   const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);

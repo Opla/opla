@@ -16,6 +16,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Assistant } from '@/types';
+import logger from '@/utils/logger';
 import createAssistantSlice, { AssistantSlice } from './assistant';
 import Storage, { createJSONSliceStorage } from './storage';
 import createWorkspaceSlice, { WorkspaceSlice } from './workspace';
@@ -24,7 +25,6 @@ import { EVENTS, Emitter, GlobalAppStateWorkspace } from './constants';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const emit: Emitter = async (key: number, value: any) => {
   const { emit: emitStateEvent } = await import('@tauri-apps/api/event');
-  /* console.log(Object.keys(value)[0]); */
   emitStateEvent(EVENTS.STATE_CHANGE_EVENT, {
     key,
     value,
@@ -61,7 +61,7 @@ export const subscribeStateSync = async () => {
   const { listen } = await import('@tauri-apps/api/event');
   const unsubscribeStateSyncListener = await listen(EVENTS.STATE_SYNC_EVENT, (event) => {
     const { key, value } = event.payload as any;
-    console.log(`State event: ${event} ${key} ${value}`);
+    logger.info(`State event: ${event} ${key} ${value}`);
     useWorkspaceStore.setState({ [getKey(key) as string]: value });
   });
 
