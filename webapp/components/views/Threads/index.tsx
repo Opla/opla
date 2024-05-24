@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useSearchParams } from 'next/navigation';
 import { v4 as uuid } from 'uuid';
@@ -36,7 +36,7 @@ import { getAssistantId } from '@/utils/services';
 import { deepEqual } from '@/utils/data';
 import { createProvider } from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';
-import { useAssistantStore } from '@/stores';
+import { useAssistantStore, useWorkspaceStore } from '@/stores';
 import { findModelInAll } from '@/utils/data/models';
 import { uninstallModel } from '@/utils/backend/commands';
 import { ResizableHandle, ResizablePanel } from '../../ui/resizable';
@@ -77,6 +77,15 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
   } = useContext(AppContext);
   const { config, setSettings, updateBackendStore } = useBackend();
 
+  const { loadWorkspace, activeWorkspaceId: activeWorkspace, workspaces } = useWorkspaceStore();
+
+  useEffect(() => {
+    if (!workspaces || !activeWorkspace) {
+      logger.info('loadWorkspace', workspaces, activeWorkspace);
+      loadWorkspace(activeWorkspace);
+    }
+  }, [loadWorkspace, activeWorkspace, workspaces]);
+  logger.info('activeWorkspace', activeWorkspace);
   const searchParams = useSearchParams();
   const selectedConversation = conversations.find((c) => c.id === selectedThreadId);
   const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);

@@ -48,7 +48,7 @@ import { getConversationTitle, validateConversations } from '@/utils/conversatio
 import { MenuAction, Page, ViewName } from '@/types/ui';
 import { AppContext } from '@/context';
 import Explorer, { ExplorerList, ExplorerGroup } from '@/components/common/Explorer';
-import { OplaAssistant } from '@/stores/assistants';
+import { OplaAssistant } from '@/stores/assistant';
 import { DefaultPageSettings, DefaultThreadsExplorerGroups } from '@/utils/constants';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { ScrollArea } from '@/components/ui/scroll-area';

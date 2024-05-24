@@ -21,6 +21,7 @@ import { ThemeProvider } from 'next-themes';
 import { AppContextProvider } from '@/context';
 import { ModalsProvider } from '@/context/modals';
 import { BackendProvider } from '@/hooks/useBackendContext';
+import { subscribeStateSync } from '@/stores';
 
 export default function App({ Component }: AppProps) {
   // Dirty hack to fix hydration mismatch using i18n
@@ -34,6 +35,13 @@ export default function App({ Component }: AppProps) {
 
     return () => {
       window.removeEventListener('contextmenu', listener);
+    };
+  }, []);
+
+  useEffect(() => {
+    const unsubscribeStateSync = subscribeStateSync();
+    return () => {
+      unsubscribeStateSync.then((unsubscribe) => unsubscribe());
     };
   }, []);
 

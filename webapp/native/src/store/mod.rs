@@ -14,11 +14,20 @@
 
 use std::{ fs, path::PathBuf, fmt, collections::HashMap };
 use serde::{ Deserialize, Serialize };
+use tauri::AppHandle;
 use crate::{
-    data::{ model::ModelStorage, service::{ Service, ServiceStorage, ServiceType } },
+    data::service::{ Service, ServiceType },
     downloader::Download,
     utils::get_config_directory,
 };
+
+use self::model_storage::ModelStorage;
+use self::service_storage::ServiceStorage;
+use self::workspace_storage::WorkspaceStorage;
+
+pub mod model_storage;
+pub mod service_storage;
+pub mod workspace_storage;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ServerParameters {
@@ -154,12 +163,16 @@ pub struct Store {
     pub downloads: Vec<Download>,
     #[serde(default = "service_default")]
     pub services: ServiceStorage,
+    #[serde(default = "workspace_default")]
+    pub workspaces: WorkspaceStorage,
 }
 
 fn service_default() -> ServiceStorage {
-    ServiceStorage {
-        active_service: None,
-    }
+    ServiceStorage::new()
+}
+
+fn workspace_default() -> WorkspaceStorage {
+    WorkspaceStorage::new()
 }
 
 impl Store {
@@ -191,10 +204,13 @@ impl Store {
                 items: vec![],
             },
             downloads: vec![],
-            services: ServiceStorage {
-                active_service: None,
-            },
+            services: ServiceStorage::new(),
+            workspaces: WorkspaceStorage::new(),
         }
+    }
+
+    pub fn init(&mut self, app_handle: AppHandle) {
+        self.workspaces.init(app_handle);
     }
 
     pub fn set(&mut self, new_config: Store) {
@@ -202,6 +218,7 @@ impl Store {
         self.server = new_config.server.clone();
         self.models = new_config.models.clone();
         self.services = new_config.services.clone();
+        self.workspaces = new_config.workspaces.clone();
     }
 
     pub fn load(&mut self, asset_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
