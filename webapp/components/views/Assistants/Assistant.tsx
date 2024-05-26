@@ -27,7 +27,6 @@ import { ScrollArea } from '../../ui/scroll-area';
 import Parameter, { ParameterValue } from '../../common/Parameter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import AssistantIcon from '../../common/AssistantIcon';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../ui/card';
 import EmptyView from '../../common/EmptyView';
 import TargetsTable from './TargetsTable';
 
@@ -173,9 +172,9 @@ export default function AssistantView({ selectedId: assistantId }: AssistantProp
           <>
             <TabsContent value="settings" className="m-0 h-full p-0">
               <ScrollArea className="h-full px-8 py-4">
-                <div className="flex h-full flex-col gap-2 pb-16 text-sm">
-                  <Card>
-                    <CardHeader>
+                <div className="flex h-full flex-col gap-2 p-4 pb-16 text-sm">
+                  <form className="grid w-full items-start gap-6 overflow-auto pt-4">
+                    <fieldset className="grid gap-6 rounded-lg border p-4">
                       <div className="flex w-full flex-row gap-4">
                         <Button
                           variant="ghost"
@@ -195,69 +194,76 @@ export default function AssistantView({ selectedId: assistantId }: AssistantProp
                           onChange={handleUpdateParameter}
                         />
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <Parameter
-                        label={t('Description')}
-                        name="description"
-                        value={assistant?.description}
-                        type="large-text"
-                        onChange={handleUpdateParameter}
-                      />
+                      <div>
+                        <Parameter
+                          label={t('Description')}
+                          name="description"
+                          value={assistant?.description}
+                          type="large-text"
+                          onChange={handleUpdateParameter}
+                        />
 
-                      <Parameter
-                        label={t('Version')}
-                        name="version"
-                        value={assistant?.version}
-                        type="text"
-                        onChange={handleUpdateParameter}
-                      />
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>{t('System')}</CardTitle>
-                      <CardDescription>{t('Default system configuration.')}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Parameter
-                        name="system"
-                        value={assistant?.system}
-                        type="large-text"
-                        onChange={handleUpdateParameter}
-                      />
-                    </CardContent>
-                  </Card>
-                  <Card className="min-h-[400px]">
-                    <CardHeader className="flex w-full flex-row items-center">
-                      <div className="grow">
-                        <CardTitle>{t('Targets')}</CardTitle>
-                        <CardDescription>Deploy your assistant to.</CardDescription>
+                        <Parameter
+                          label={t('Version')}
+                          name="version"
+                          value={assistant?.version}
+                          type="text"
+                          onChange={handleUpdateParameter}
+                        />
                       </div>
-                      <Button variant="ghost" size="sm" onClick={handleCreateTarget}>
-                        <Plus className="h-4 w-4" strokeWidth={1.5} />
-                      </Button>
-                    </CardHeader>
-                    <CardContent>
-                      {(!assistant.targets || assistant.targets.length === 0) && (
-                        <EmptyView
-                          title={t('No target associated')}
-                          description={t('You have not added any targets. Add one below.')}
-                          icon={<Target className="h-16 w-16 text-muted" />}
-                          buttonLabel={t('Add a target')}
-                          onCreateItem={handleCreateTarget}
+                    </fieldset>
+                  </form>
+                  <form className="grid w-full items-start gap-6 overflow-auto pt-8">
+                    <fieldset className="grid gap-6 rounded-lg border p-4">
+                      <legend className="-ml-1 px-1 text-sm font-medium">{t('System')}</legend>
+                      <div className="text-muted-foreground">
+                        {t('Default system configuration.')}
+                      </div>
+                      <div>
+                        <Parameter
+                          name="system"
+                          value={assistant?.system}
+                          type="large-text"
+                          onChange={handleUpdateParameter}
                         />
-                      )}
-                      {assistant.targets && (
-                        <TargetsTable
-                          targets={assistant.targets}
-                          onEdit={handleEditTarget}
-                          onDuplicate={handleDuplicateTarget}
-                          onDelete={handleToDeleteTarget}
-                        />
-                      )}
-                    </CardContent>
-                  </Card>
+                      </div>
+                    </fieldset>
+                  </form>
+                  <form className="grid min-h-[400px] w-full items-start gap-6 overflow-auto pt-8">
+                    <fieldset className="grid gap-6 rounded-lg border p-4">
+                      <legend className="-ml-1 px-1 text-sm font-medium">{t('Targets')}</legend>
+
+                      <div className="flex w-full flex-row items-center">
+                        <div className="grow">
+                          <div className="text-muted-foreground">
+                            {t('Deploy your assistant to.')}
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={handleCreateTarget}>
+                          <Plus className="h-4 w-4" strokeWidth={1.5} />
+                        </Button>
+                      </div>
+                      <div>
+                        {(!assistant.targets || assistant.targets.length === 0) && (
+                          <EmptyView
+                            title={t('No target associated')}
+                            description={t('You have not added any targets. Add one below.')}
+                            icon={<Target className="h-16 w-16 text-muted" />}
+                            buttonLabel={t('Add a target')}
+                            onCreateItem={handleCreateTarget}
+                          />
+                        )}
+                        {assistant.targets && (
+                          <TargetsTable
+                            targets={assistant.targets}
+                            onEdit={handleEditTarget}
+                            onDuplicate={handleDuplicateTarget}
+                            onDelete={handleToDeleteTarget}
+                          />
+                        )}
+                      </div>
+                    </fieldset>
+                  </form>
                 </div>
               </ScrollArea>
             </TabsContent>

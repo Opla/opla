@@ -355,167 +355,179 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
         )
       }
     >
-      <ScrollArea className="h-full px-8 py-4">
-        <div className="flex w-full flex-col px-8 py-4 text-sm">
-          <div className="flex w-full flex-row items-center gap-2 ">
-            <ModelIcon
-              icon={model.icon}
-              name={model.name}
-              className="h-4 w-4"
-              providerName={model.creator}
-            />
-            <h1 className="items-right bold w-full text-xl">{model.title || model.name}</h1>
-          </div>
-          <div className="flex w-full flex-col items-center gap-2 text-sm">
-            {model?.editable && (
-              <Parameter
-                label=""
-                name="description"
-                value={updatedParameters?.description || t(model.description || '')}
-                disabled={!model.editable}
-                type="large-text"
-                placeholder="Description"
-                onChange={setUpdatedParameters}
-              />
-            )}
-            {!model?.editable && (
-              <p>{(updatedParameters?.description as string) || t(model.description || '')}</p>
-            )}
-            {model?.editable && (
-              <Parameter
-                label=""
-                name="system"
-                value={updatedParameters?.system || t(model.system || '')}
-                disabled={!model.editable}
-                type="large-text"
-                placeholder="System"
-                onChange={setUpdatedParameters}
-              />
-            )}
-            {!model?.editable && (
-              <p>{(updatedParameters?.system as string) || t(model.system || '')}</p>
-            )}
-            {model?.editable && (
-              <Parameter
-                label=""
-                name="Chat template"
-                value={updatedParameters?.chatTemplate || t(model.chatTemplate || '')}
-                disabled={!model.editable}
-                type="large-text"
-                placeholder="Chat template"
-                onChange={setUpdatedParameters}
-              />
-            )}
-            {!model?.editable && (
-              <p>{(updatedParameters?.chatTemplate as string) || t(model.chatTemplate || '')}</p>
-            )}
-            {model.fileName && (
-              <Parameter
-                label={t('File')}
-                name="file"
-                value={fullPathModel}
-                disabled
-                type="file"
-                inputCss={model.state === ModelState.NotFound ? 'text-error' : ''}
-              />
-            )}
-            {model.author && (
-              <Parameter
-                label={t('Author')}
-                name="author"
-                value={updatedParameters?.author || `${getEntityName(model.author)}`}
-                disabled={!model.editable}
-                type="text"
-                onChange={setUpdatedParameters}
-              />
-            )}
-            {getEntityName(model.creator).toLowerCase() !==
-              getEntityName(model.author).toLowerCase() && (
-              <Parameter
-                label={t('Creator')}
-                name="version"
-                value={`${getEntityName(model.creator)}`}
-                disabled={!model.editable}
-                type="text"
-              />
-            )}
-            {model.publisher &&
-              getEntityName(model.publisher).toLowerCase() !==
-                getEntityName(model.author).toLowerCase() &&
-              getEntityName(model.publisher).toLowerCase() !==
-                getEntityName(model.creator).toLowerCase() && (
-                <Parameter
-                  label={t('Publisher')}
-                  name="version"
-                  value={`${getEntityName(model.publisher)}`}
-                  disabled={!model.editable}
-                  type="text"
+      <ScrollArea className="h-full px-8 py-8">
+        <div className="flex w-full flex-col p-4 text-sm">
+          <form className="grid w-full items-start gap-6 overflow-auto">
+            <fieldset className="grid gap-6 rounded-lg border p-4">
+              <div className="flex w-full flex-row items-center gap-2 ">
+                <ModelIcon
+                  icon={model.icon}
+                  name={model.name}
+                  className="h-4 w-4"
+                  providerName={model.creator}
                 />
-              )}
-            {model.version && (
-              <Parameter
-                label={t('Version')}
-                name="version"
-                value={`${model.version}`}
-                disabled={!model.editable}
-                type="text"
-              />
-            )}
-            {model.license && (
-              <Parameter
-                label={t('License')}
-                name="license"
-                value={`${getEntityName(model.license)}`}
-                disabled={!model.editable}
-                type="text"
-              />
-            )}
-            {model.repository && (
-              <Parameter
-                label={t('Repository')}
-                name="url"
-                value={`${getResourceUrl(model.repository)}`}
-                disabled={!model.editable}
-                type="url"
-              />
-            )}
-          </div>
+                <h1 className="items-right bold w-full text-xl font-extrabold">
+                  {model.title || model.name}
+                </h1>
+              </div>
+              <div className="flex w-full flex-col items-center gap-2 text-sm">
+                {model?.editable && (
+                  <Parameter
+                    label=""
+                    name="description"
+                    value={updatedParameters?.description || t(model.description || '')}
+                    disabled={!model.editable}
+                    type="large-text"
+                    placeholder="Description"
+                    onChange={setUpdatedParameters}
+                  />
+                )}
+                {!model?.editable && (
+                  <p>{(updatedParameters?.description as string) || t(model.description || '')}</p>
+                )}
+                {model?.editable && (
+                  <Parameter
+                    label=""
+                    name="system"
+                    value={updatedParameters?.system || t(model.system || '')}
+                    disabled={!model.editable}
+                    type="large-text"
+                    placeholder="System"
+                    onChange={setUpdatedParameters}
+                  />
+                )}
+                {!model?.editable && (
+                  <p>{(updatedParameters?.system as string) || t(model.system || '')}</p>
+                )}
+                {model?.editable && (
+                  <Parameter
+                    label=""
+                    name="Chat template"
+                    value={updatedParameters?.chatTemplate || t(model.chatTemplate || '')}
+                    disabled={!model.editable}
+                    type="large-text"
+                    placeholder="Chat template"
+                    onChange={setUpdatedParameters}
+                  />
+                )}
+                {!model?.editable && (
+                  <p>
+                    {(updatedParameters?.chatTemplate as string) || t(model.chatTemplate || '')}
+                  </p>
+                )}
+                {model.fileName && (
+                  <Parameter
+                    label={t('File')}
+                    name="file"
+                    value={fullPathModel}
+                    disabled
+                    type="file"
+                    inputCss={model.state === ModelState.NotFound ? 'text-error' : ''}
+                  />
+                )}
+                {model.author && (
+                  <Parameter
+                    label={t('Author')}
+                    name="author"
+                    value={updatedParameters?.author || `${getEntityName(model.author)}`}
+                    disabled={!model.editable}
+                    type="text"
+                    onChange={setUpdatedParameters}
+                  />
+                )}
+                {getEntityName(model.creator).toLowerCase() !==
+                  getEntityName(model.author).toLowerCase() && (
+                  <Parameter
+                    label={t('Creator')}
+                    name="version"
+                    value={`${getEntityName(model.creator)}`}
+                    disabled={!model.editable}
+                    type="text"
+                  />
+                )}
+                {model.publisher &&
+                  getEntityName(model.publisher).toLowerCase() !==
+                    getEntityName(model.author).toLowerCase() &&
+                  getEntityName(model.publisher).toLowerCase() !==
+                    getEntityName(model.creator).toLowerCase() && (
+                    <Parameter
+                      label={t('Publisher')}
+                      name="version"
+                      value={`${getEntityName(model.publisher)}`}
+                      disabled={!model.editable}
+                      type="text"
+                    />
+                  )}
+                {model.version && (
+                  <Parameter
+                    label={t('Version')}
+                    name="version"
+                    value={`${model.version}`}
+                    disabled={!model.editable}
+                    type="text"
+                  />
+                )}
+                {model.license && (
+                  <Parameter
+                    label={t('License')}
+                    name="license"
+                    value={`${getEntityName(model.license)}`}
+                    disabled={!model.editable}
+                    type="text"
+                  />
+                )}
+                {model.repository && (
+                  <Parameter
+                    label={t('Repository')}
+                    name="url"
+                    value={`${getResourceUrl(model.repository)}`}
+                    disabled={!model.editable}
+                    type="url"
+                  />
+                )}
+              </div>
+            </fieldset>
+          </form>
           {downloadables.length > 0 && (
-            <div className="flex w-full flex-col text-sm">
-              <p className="py-4">{t('Downloadable implementations')}</p>
-              <Table className="w-full">
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t('File')}</TableHead>
-                    <TableHead>{t('Description')}</TableHead>
-                    <TableHead>{t('Parameters')}</TableHead>
-                    <TableHead>{t('Action')}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {downloadables.map((download) => (
-                    <TableRow onClick={() => {}} key={download.id || download.name}>
-                      <TableCell className="truncate">{download.name}</TableCell>
-                      <TableCell className="truncate">
-                        <span>{download.recommendations || ''}</span>
-                      </TableCell>
-                      <TableCell className="truncate">
-                        <ModelInfos model={download} displayName={false} />
-                      </TableCell>
-                      <TableCell aria-label={t('Download')}>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleLocalInstall(download)}
-                        >
-                          <DownloadIcon />
-                        </Button>
-                      </TableCell>
+            <form className="grid w-full items-start gap-6 overflow-auto pt-8">
+              <fieldset className="grid gap-6 rounded-lg border p-4">
+                <legend className="-ml-1 px-1 text-sm font-medium">
+                  {t('Downloadable implementations')}
+                </legend>
+                <Table className="w-full">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('File')}</TableHead>
+                      <TableHead>{t('Description')}</TableHead>
+                      <TableHead>{t('Parameters')}</TableHead>
+                      <TableHead>{t('Action')}</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {downloadables.map((download) => (
+                      <TableRow onClick={() => {}} key={download.id || download.name}>
+                        <TableCell className="truncate">{download.name}</TableCell>
+                        <TableCell className="truncate">
+                          <span>{download.recommendations || ''}</span>
+                        </TableCell>
+                        <TableCell className="truncate">
+                          <ModelInfos model={download} displayName={false} />
+                        </TableCell>
+                        <TableCell aria-label={t('Download')}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleLocalInstall(download)}
+                          >
+                            <DownloadIcon />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </fieldset>
+            </form>
           )}
         </div>
       </ScrollArea>
