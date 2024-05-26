@@ -1,6 +1,6 @@
 [package]
 name = "opla_core"
-version = "1.0.0-alpha.157"
+version = "1.0.0-alpha.158"
 edition = "2021"
 
 include = ["src/**/*"]

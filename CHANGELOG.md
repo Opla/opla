@@ -1,3 +1,10 @@
+# [1.0.0-alpha.158](https://github.com/Opla/opla/compare/v1.0.0-alpha.157...v1.0.0-alpha.158) (2024-05-26)
+
+
+### Features
+
+* unify views design [#930](https://github.com/Opla/opla/issues/930) ([#931](https://github.com/Opla/opla/issues/931)) ([ab05723](https://github.com/Opla/opla/commit/ab0572333b6e1f128fbdd307be9e76f7efdf87e7))
+
 # [1.0.0-alpha.157](https://github.com/Opla/opla/compare/v1.0.0-alpha.156...v1.0.0-alpha.157) (2024-05-24)
 
 
