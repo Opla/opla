@@ -116,9 +116,9 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
         }
       >
         <>
-          <TabsContent value="settings" className="h-full p-4">
+          <TabsContent value="settings" className="h-full px-8 py-4">
             {provider && (
-              <ScrollArea className="h-full">
+              <ScrollArea className="h-full p-4">
                 {provider.type === ProviderType.opla && (
                   <Opla provider={provider} onParameterChange={onParameterChange} />
                 )}

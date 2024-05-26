@@ -26,48 +26,54 @@ export default function Server({
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col items-center gap-2 px-8 py-4 text-sm">
-      <Parameter
-        label={t('Name')}
-        name="name"
-        value={provider?.name}
-        type="text"
-        onChange={onParameterChange}
-      />
-      <Parameter
-        label={t('Url')}
-        name="url"
-        value={provider?.url}
-        type="text"
-        onChange={onParameterChange}
-      />
-      <Parameter
-        label={t('API key')}
-        name="key"
-        value={provider?.key}
-        type="password"
-        onChange={onParameterChange}
-      />
-      <Parameter
-        label={t('Models')}
-        name="models"
-        value={provider?.models || ([] as BaseNamedRecord[])}
-        type="array"
-        onChange={onParameterChange}
-      />
-      <Parameter
-        label={t('Documentation')}
-        name="docUrl"
-        value={provider?.docUrl}
-        type="text"
-        onChange={onParameterChange}
-      />
-      <Parameter
-        label={t('Description')}
-        name="description"
-        value={provider?.description}
-        type="large-text"
-      />
+    <div className="flex flex-col items-center gap-2 text-sm">
+      <form className="grid w-full items-start gap-6 overflow-auto">
+        <fieldset className="grid gap-6 rounded-lg border p-4">
+          <legend className="-ml-1 px-1 text-sm font-medium">{t('Server')}</legend>
+
+          <Parameter
+            label={t('Name')}
+            name="name"
+            value={provider?.name}
+            type="text"
+            onChange={onParameterChange}
+          />
+          <Parameter
+            label={t('Url')}
+            name="url"
+            value={provider?.url}
+            type="text"
+            onChange={onParameterChange}
+          />
+          <Parameter
+            label={t('API key')}
+            name="key"
+            value={provider?.key}
+            type="password"
+            onChange={onParameterChange}
+          />
+          <Parameter
+            label={t('Models')}
+            name="models"
+            value={provider?.models || ([] as BaseNamedRecord[])}
+            type="array"
+            onChange={onParameterChange}
+          />
+          <Parameter
+            label={t('Documentation')}
+            name="docUrl"
+            value={provider?.docUrl}
+            type="text"
+            onChange={onParameterChange}
+          />
+          <Parameter
+            label={t('Description')}
+            name="description"
+            value={provider?.description}
+            type="large-text"
+          />
+        </fieldset>
+      </form>
     </div>
   );
 }

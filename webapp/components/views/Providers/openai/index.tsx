@@ -57,7 +57,7 @@ export default function OpenAI({
   const noKey = !provider?.key;
 
   return (
-    <Card className={cn('flex h-full w-[350px] flex-col', className)}>
+    <Card className={cn('flex h-full w-[350px] flex-col bg-transparent', className)}>
       <CardHeader className="flex-none">
         <CardTitle>{t('Configure OpenAI ChatGPT')}</CardTitle>
         <CardDescription className="pt-3">

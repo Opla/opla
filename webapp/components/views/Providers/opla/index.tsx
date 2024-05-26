@@ -31,7 +31,6 @@ import useTranslation from '@/hooks/useTranslation';
 import useBackend from '@/hooks/useBackendContext';
 import { Provider, ServerStatus } from '@/types';
 import { deepGet } from '@/utils/data';
-import { Separator } from '@/components/ui/separator';
 import SelectModel from '@/components/common/SelectModel';
 import { getLocalModels, getLocalModelsAsItems } from '@/utils/data/models';
 import { setActiveModel } from '@/utils/backend/commands';
@@ -61,76 +60,90 @@ export default function Opla({
 
   const disabled = server.status === ServerStatus.STARTING;
   return (
-    <div className="flex flex-col gap-2 px-8 py-4 text-sm">
-      <div className="flex w-full items-center justify-between py-2">
-        {t('Active model')}
-        <SelectModel
-          disabled={disabled}
-          selectedModel={selectedModel}
-          modelItems={items}
-          onSelectModel={changeActiveModel}
-        />
-      </div>
-      <Separator className="my-4" />
-      <Parameter
-        label={t('Description')}
-        name="description"
-        value={t(deepGet<Provider, string>(provider, 'description'))}
-        disabled
-        type="large-text"
-      />
-      <Parameter
-        label={t('Local server')}
-        name="metadata.server.name"
-        value={deepGet(provider, 'metadata.server.name', '')}
-        disabled
-        type="text"
-        onChange={onParameterChange}
-      />
-      <Separator className="my-4" />
-      <Parameter
-        label={t('Model path')}
-        name="metadata.server.parameters.model"
-        value={modelPath || deepGet(provider, 'metadata.server.parameters.modelPath', t('None'))}
-        disabled
-        type="file"
-        onChange={onParameterChange}
-      />
-      <Parameter
-        label={t('Host')}
-        name="metadata.server.parameters.host"
-        value={deepGet(provider, 'metadata.server.parameters.host', '')}
-        type="text"
-        onChange={onParameterChange}
-      />
-      <Parameter
-        label={t('Port')}
-        name="metadata.server.parameters.port"
-        value={deepGet(provider, 'metadata.server.parameters.port', '')}
-        type="number"
-        onChange={onParameterChange}
-      />
-      <Parameter
-        label={t('Context size')}
-        name="metadata.server.parameters.contextSize"
-        value={deepGet(provider, 'metadata.server.parameters.contextSize', '')}
-        type="number"
-        onChange={onParameterChange}
-      />
-      <Parameter
-        label={t('Threads')}
-        name="metadata.server.parameters.threads"
-        value={deepGet(provider, 'metadata.server.parameters.threads', '')}
-        type="number"
-        onChange={onParameterChange}
-      />
-      <Parameter
-        label={t('Number of GPU layers')}
-        name="metadata.server.parameters.nGpuLayers"
-        value={deepGet(provider, 'metadata.server.parameters.nGpuLayers', '')}
-        type="number"
-        onChange={onParameterChange}
-      />
+    <div className="flex flex-col gap-2 text-sm">
+      <form className="grid w-full items-start gap-6 overflow-auto pt-4">
+        <fieldset className="grid gap-6 rounded-lg border p-4">
+          <div className="flex w-full items-center justify-between px-4 py-2">
+            {t('Active model')}
+            <SelectModel
+              disabled={disabled}
+              selectedModel={selectedModel}
+              modelItems={items}
+              onSelectModel={changeActiveModel}
+            />
+          </div>
+        </fieldset>
+      </form>
+      <form className="grid w-full items-start gap-6 overflow-auto pt-8">
+        <fieldset className="grid gap-6 rounded-lg border p-4">
+          <legend className="-ml-1 px-1 text-sm font-medium">{t('Local server')}</legend>
+          <Parameter
+            label={t('Description')}
+            name="description"
+            value={t(deepGet<Provider, string>(provider, 'description'))}
+            disabled
+            type="large-text"
+          />
+          <Parameter
+            label={t('Inference engine')}
+            name="metadata.server.name"
+            value={deepGet(provider, 'metadata.server.name', '')}
+            disabled
+            type="text"
+            onChange={onParameterChange}
+          />
+        </fieldset>
+      </form>
+      <form className="grid w-full items-start gap-6 overflow-auto pt-8">
+        <fieldset className="grid gap-6 rounded-lg border p-4">
+          <legend className="-ml-1 px-1 text-sm font-medium">{t('Parameters')}</legend>
+          <Parameter
+            label={t('Model path')}
+            name="metadata.server.parameters.model"
+            value={
+              modelPath || deepGet(provider, 'metadata.server.parameters.modelPath', t('None'))
+            }
+            disabled
+            type="file"
+            onChange={onParameterChange}
+          />
+          <Parameter
+            label={t('Host')}
+            name="metadata.server.parameters.host"
+            value={deepGet(provider, 'metadata.server.parameters.host', '')}
+            type="text"
+            onChange={onParameterChange}
+          />
+          <Parameter
+            label={t('Port')}
+            name="metadata.server.parameters.port"
+            value={deepGet(provider, 'metadata.server.parameters.port', '')}
+            type="number"
+            onChange={onParameterChange}
+          />
+          <Parameter
+            label={t('Context size')}
+            name="metadata.server.parameters.contextSize"
+            value={deepGet(provider, 'metadata.server.parameters.contextSize', '')}
+            type="number"
+            onChange={onParameterChange}
+          />
+          <Parameter
+            label={t('Threads')}
+            name="metadata.server.parameters.threads"
+            value={deepGet(provider, 'metadata.server.parameters.threads', '')}
+            type="number"
+            onChange={onParameterChange}
+          />
+          <Parameter
+            label={t('Number of GPU layers')}
+            name="metadata.server.parameters.nGpuLayers"
+            value={deepGet(provider, 'metadata.server.parameters.nGpuLayers', '')}
+            type="number"
+            onChange={onParameterChange}
+          />
+        </fieldset>
+      </form>
     </div>
   );
 }
