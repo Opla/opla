@@ -116,9 +116,9 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
         }
       >
         <>
-          <TabsContent value="settings" className="h-full px-8 py-4">
+          <TabsContent value="settings" className="h-full">
             {provider && (
-              <ScrollArea className="h-full p-4">
+              <ScrollArea className="h-full px-12 py-4">
                 {provider.type === ProviderType.opla && (
                   <Opla provider={provider} onParameterChange={onParameterChange} />
                 )}
@@ -154,7 +154,7 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
               />
             </div>
             {provider && (
-              <ScrollArea className="h-full  p-4">
+              <ScrollArea className="h-full p-4">
                 {provider.type === ProviderType.opla && (
                   <>
                     {server.status === ServerStatus.ERROR && (
