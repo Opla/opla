@@ -25,9 +25,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useContext, useEffect, useState } from 'react';
+import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
 import { Model, Provider } from '@/types';
-import { useEffect, useState } from 'react';
 import { listModels } from '@/utils/providers';
 import {
   Table,
@@ -39,29 +40,61 @@ import {
 } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import logger from '@/utils/logger';
+import { updateProvider } from '@/utils/data/providers';
+import { deepCopy } from '@/utils/data';
 
 type OpenAIModelsProps = {
   provider: Provider;
 };
 
+type SelectedModel = Model & { selected?: boolean };
+
 export default function OpenAIModels({ provider }: OpenAIModelsProps) {
   const { t } = useTranslation();
-  const [models, setModels] = useState<(Model & { selected?: boolean })[]>([]);
+  const { providers, setProviders } = useContext(AppContext);
+  const [isLoading, setIsLoading] = useState(false);
+  const [models, setModels] = useState<SelectedModel[]>([]);
   useEffect(() => {
     const afunc = async () => {
+      setIsLoading(true);
       const response = await listModels(provider);
       setModels(
         response.models
           .filter((m) => m.id.startsWith('gpt'))
           .map((m) => ({ ...m, selected: !!provider.models?.find((pm) => pm.id === m.id) })),
       );
+      setIsLoading(false);
     };
+    /* if (isLoading) {
+        return;
+    } */
     afunc();
   }, [provider]);
   console.log('models', models);
 
-  const handleSelectModel = (selectedModel: Model) => {
+  const handleSelectModel = (selectedModel: SelectedModel) => {
     logger.info('selected Model', selectedModel);
+    const { models: providerModels = [] } = provider;
+    let updatedModels: Model[] | undefined;
+    const updatedModel = { ...selectedModel };
+    delete updatedModel.selected;
+    if (selectedModel.selected) {
+      updatedModels = providerModels.filter((m) => m.id !== selectedModel.id);
+    } else if (providerModels.findIndex((m) => m.id === selectedModel.id) === -1) {
+      updatedModels = deepCopy(providerModels);
+      updatedModels.push(updatedModel);
+    }
+    if (updatedModels) {
+      const seen: Record<string, boolean> = {};
+      updatedModels = updatedModels.filter((m) => {
+        const dup = seen[m.id] || false;
+        seen[m.id] = true;
+        return !dup;
+      });
+      const updatedProviders = updateProvider({ ...provider, models: updatedModels }, providers);
+      setProviders(updatedProviders);
+    }
+    console.log('updatedModels', updatedModels, updatedModel);
   };
 
   return (
@@ -84,6 +117,7 @@ export default function OpenAIModels({ provider }: OpenAIModelsProps) {
                   <TableRow onClick={() => {}} key={model.id || model.name}>
                     <TableCell className="truncate">
                       <Checkbox
+                        disabled={isLoading}
                         checked={model.selected}
                         onCheckedChange={() => handleSelectModel(model)}
                       />
