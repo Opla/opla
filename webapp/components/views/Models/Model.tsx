@@ -45,7 +45,12 @@ import {
   updateModelEntity,
 } from '@/utils/backend/commands';
 import useBackend from '@/hooks/useBackendContext';
-import { findSameModel, getDownloadables, isValidFormat } from '@/utils/data/models';
+import {
+  findSameModel,
+  getDownloadables,
+  getProviderModels,
+  isValidFormat,
+} from '@/utils/data/models';
 import { ModalIds, Page } from '@/types/ui';
 import { ModalsContext } from '@/context/modals';
 import EmptyView from '@/components/common/EmptyView';
@@ -97,6 +102,10 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       mdl = collection.find((m) => m.id === selectedModelId) as Model;
       l = false;
     }
+    if (!mdl && selectedModelId) {
+      mdl = getProviderModels(providers).find((m) => m.id === selectedModelId) as Model;
+      l = false;
+    }
     const dls: Model[] = l
       ? []
       : getDownloadables(mdl).filter((d) => d.private !== true && isValidFormat(d));
@@ -109,7 +118,16 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
         isModelUsedInAssistants(mdl));
 
     return [downloads || [], mdls, mdl, dls, l, isUsed];
-  }, [selectedModelId, config, downloads, collection, conversations, isModelUsedInAssistants]);
+  }, [
+    config.models.items,
+    config.services,
+    selectedModelId,
+    conversations,
+    isModelUsedInAssistants,
+    downloads,
+    collection,
+    providers,
+  ]);
 
   let isDownloading = false;
   if (local) {
@@ -291,6 +309,11 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     }
   };
 
+  const handleRemoveCloudModel = (selectedModel?: Model) => {
+    // TODO
+    console.log('selectedModel', selectedModel);
+  };
+
   if (!model) {
     return (
       <ContentView className="pb-8">
@@ -326,10 +349,19 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       toolbar={
         model.state !== ModelState.Removed && (
           <div className="flex flex-row gap-2">
-            {model.state !== ModelState.Pending && (
-              <Button variant="secondary" className="" onClick={() => handleLocalInstall()}>
+            {model.state !== ModelState.Pending && !model.provider && (
+              <Button variant="secondary" className="" onClick={() => handleLocalInstall(model)}>
                 {isDownloading && t('Downloading...')}
                 {!isDownloading && (local ? t('Uninstall') : t('Install'))}
+              </Button>
+            )}
+            {model.provider === 'OpenAI' && (
+              <Button
+                variant="secondary"
+                className=""
+                onClick={() => handleRemoveCloudModel(model)}
+              >
+                {t('Remove')}
               </Button>
             )}
             {/* local && (

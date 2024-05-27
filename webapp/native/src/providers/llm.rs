@@ -17,7 +17,7 @@ use std::fmt;
 use async_trait::async_trait;
 use serde::{ Deserialize, Serialize };
 
-use crate::{ store::ServerParameters, utils::http_client::{ HttpChunk, HttpError, NewHttpError } };
+use crate::{ data::model::Model, store::ServerParameters, utils::http_client::{ HttpChunk, HttpError, NewHttpError } };
 
 use super::{services::HttpService, ProviderAdapter};
 
@@ -304,4 +304,9 @@ dyn_clone::clone_trait_object!(LlmInferenceInterface);
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmImageGenerationResponse {
     pub images: Vec<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LlmModelsResponse {
+    pub models: Vec<Model>,
 }

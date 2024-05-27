@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use chrono::DateTime;
 use serde::{ Deserialize, Serialize };
 use tauri::Runtime;
 use eventsource_stream::Eventsource;
@@ -19,18 +20,21 @@ use futures_util::stream::StreamExt;
 
 use tokenizer::encode;
 
-use crate::providers::llm::{
-    LlmCompletionOptions,
-    LlmCompletionResponse,
-    LlmError,
-    LlmMessage,
-    LlmQuery,
-    LlmQueryCompletion,
-    LlmResponseError,
-    LlmUsage,
+use crate::{
+    data::model::Model,
+    providers::llm::{
+        LlmCompletionOptions,
+        LlmCompletionResponse,
+        LlmError,
+        LlmMessage,
+        LlmQuery,
+        LlmQueryCompletion,
+        LlmResponseError,
+        LlmUsage,
+    },
 };
 
-use super::llm::LlmImageGenerationResponse;
+use super::llm::{ LlmImageGenerationResponse, LlmModelsResponse };
 
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -244,7 +248,7 @@ pub struct OpenAIImage {
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct OpenAIImageGenerationResponse {
-    pub created: u64,
+    pub created: i64,
     pub data: Vec<OpenAIImage>,
 }
 impl OpenAIImageGenerationResponse {
@@ -257,6 +261,21 @@ impl OpenAIImageGenerationResponse {
         };
     }
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct OpenAIObjectResponse {
+    pub object: String,
+    pub id: String,
+    pub created: i64,
+    pub owned_by: String,
+}
+#[serde_with::skip_serializing_none]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct OpenAIListResponse {
+    pub object: String,
+    pub data: Vec<OpenAIObjectResponse>,
+}
+
 async fn request<R: Runtime>(
     url: String,
     secret_key: &str,
@@ -505,6 +524,61 @@ pub async fn call_image_generation(
 
     let result = request_image(url, secret_key, parameters).await?;
     Ok(result)
+}
+
+pub async fn call_models(
+    api: &str,
+    secret_key: &str
+) -> Result<LlmModelsResponse, Box<dyn std::error::Error>> {
+    let url = format!("{}/models", api);
+    println!("{}", format!("models call:  {:?}", url));
+
+    let client = reqwest::Client::new();
+    let result = client.get(url).bearer_auth(&secret_key).send().await;
+    let response = match result {
+        Ok(res) => res,
+        Err(error) => {
+            println!("Failed to send: {}", error);
+            return Err(Box::new(error));
+        }
+    };
+    let status = response.status();
+    if !status.is_success() {
+        let error = match response.json::<LlmResponseError>().await {
+            Ok(t) => t,
+            Err(error) => {
+                println!("Failed to dezerialize error response: {}", error);
+                return Err(Box::new(error));
+            }
+        };
+        println!("Failed to get response: {} {:?}", status, error);
+        return Err(Box::new(error.error));
+    }
+    let response = match response.json::<OpenAIListResponse>().await {
+        Ok(r) => r,
+        Err(error) => {
+            println!("Failed to dezerialize response: {}", error);
+            return Err(Box::new(error));
+        }
+    };
+
+    let models = response.data
+        .iter()
+        .map(|obj| {
+            // TODO retrieve name, context_window, featured, deprecated and icon
+            let name = obj.id.to_string();
+            let mut model = Model::new(name);
+            model.id = Some(obj.id.to_string());
+            model.created_at = DateTime::from_timestamp(obj.created, 0);
+            model.updated_at = DateTime::from_timestamp(obj.created, 0);
+            model.creator = Some("openai".to_string());
+            model
+        })
+        .collect();
+
+    Ok(LlmModelsResponse {
+        models,
+    })
 }
 
 fn encode_length(text: String) -> usize {

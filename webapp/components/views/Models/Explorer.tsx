@@ -14,9 +14,9 @@
 
 'use client';
 
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { BrainCircuit, HardDriveDownload } from 'lucide-react';
+import { BrainCircuit, HardDriveDownload, Plus } from 'lucide-react';
 import { Ui, Model, ModelState, AIService, AIServiceType } from '@/types';
 import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
@@ -29,7 +29,7 @@ import Explorer, { ExplorerGroup, ExplorerList } from '@/components/common/Explo
 import { getModelsCollection, uninstallModel, updateModel } from '@/utils/backend/commands';
 import EmptyView from '@/components/common/EmptyView';
 import { cn } from '@/lib/utils';
-import { getLocalModels } from '@/utils/data/models';
+import { getLocalModels, getProviderModels } from '@/utils/data/models';
 import { AppContext } from '@/context';
 import { useAssistantStore } from '@/stores';
 import { addConversationService, isModelUsedInConversations } from '@/utils/data/conversations';
@@ -46,6 +46,9 @@ export type ModelsExplorerProps = {
 
 function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
   const { conversations, updateConversations, providers } = useContext(AppContext);
+  const [closeLocal, toggleCloseLocal] = useState(false);
+  const [closeCloud, toggleCloseCloud] = useState(false);
+  const [closeFeatured, toggleCloseFeatured] = useState(false);
   const { isModelUsedInAssistants } = useAssistantStore();
   const { config, updateBackendStore } = useBackend();
   const router = useRouter();
@@ -64,7 +67,8 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
     getCollection();
   }, []);
 
-  const models = getLocalModels(config);
+  const models = useMemo(() => getLocalModels(config), [config]);
+  const cloudModels = useMemo(() => getProviderModels(providers), [providers]);
 
   const handleSelectModel = (id: string) => {
     logger.info(`onSelectModel ${id}`);
@@ -141,20 +145,38 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
     <Explorer
       title={t('Models')}
       toolbar={
-        <Button
-          aria-label={t('Install local model')}
-          title={`${t('Install local model')} ${shortcutAsText(ShortcutIds.INSTALL_MODEL)}`}
-          variant="ghost"
-          size="icon"
-          onClick={handleNewLocalModel}
-        >
-          <HardDriveDownload className="h-4 w-4" strokeWidth={1.5} />
-        </Button>
+        <div className="mr-2 flex content-center gap-2">
+          <Button
+            aria-label={t('Install local model')}
+            title={`${t('Install local model')} ${shortcutAsText(ShortcutIds.INSTALL_MODEL)}`}
+            variant="ghost"
+            size="icon"
+            onClick={handleNewLocalModel}
+          >
+            <HardDriveDownload className="h-4 w-4" strokeWidth={1.5} />
+          </Button>
+          <Button
+            aria-label={t('Add cloud model')}
+            title={`${t('Add cloud model')} ${shortcutAsText(ShortcutIds.INSTALL_MODEL)}`}
+            variant="ghost"
+            size="icon"
+            onClick={handleNewLocalModel}
+          >
+            <Plus className="h-4 w-4" strokeWidth={1.5} />
+          </Button>
+        </div>
       }
     >
       <ResizablePanelGroup direction="vertical">
         <ResizablePanel id="models" className="!overflow-y-auto pt-2" minSize={4}>
-          <ExplorerGroup title={t('Local models')} className="h-full">
+          <ExplorerGroup
+            title={t('Local models')}
+            className="h-full"
+            closed={closeLocal}
+            onToggle={() => {
+              toggleCloseLocal(!closeLocal);
+            }}
+          >
             {models.length > 0 && (
               <ExplorerList<Model>
                 selectedId={selectedModelId}
@@ -170,7 +192,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
                 renderItem={(model) => (
                   <>
                     {!model.editable && (
-                      <div className="flex w-full grow flex-row items-center justify-between overflow-hidden pl-3">
+                      <div className="flex w-full grow flex-row items-center justify-between overflow-hidden pl-0">
                         <div
                           className={cn(
                             'flex-1 text-ellipsis break-all pr-1',
@@ -191,7 +213,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
                           title={model.title || model.name}
                           editable
                           className={cn(
-                            'line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-3 py-1',
+                            'line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-0 py-1',
                             model.state === ModelState.Error || model.state === ModelState.NotFound
                               ? 'text-error'
                               : '',
@@ -221,8 +243,40 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
           </ExplorerGroup>
         </ResizablePanel>
         <ResizableHandle />
+        <ResizablePanel id="cloud" className="!overflow-y-auto pt-2" minSize={3}>
+          <ExplorerGroup
+            title={t('Cloud models')}
+            className="h-full pb-8"
+            closed={closeCloud}
+            onToggle={() => {
+              toggleCloseCloud(!closeCloud);
+            }}
+          >
+            <ExplorerList<Model>
+              selectedId={selectedModelId}
+              renderLeftSide={(m) => (
+                <ModelIcon
+                  icon={m.icon}
+                  name={m.name}
+                  className="h-4 w-4 text-muted-foreground"
+                  providerName={m.creator}
+                />
+              )}
+              items={cloudModels}
+              onSelectItem={handleSelectModel}
+            />
+          </ExplorerGroup>
+        </ResizablePanel>
+        <ResizableHandle />
         <ResizablePanel id="featured" className="!overflow-y-auto pt-2" minSize={3}>
-          <ExplorerGroup title={t('Featured models')} className="h-full pb-8">
+          <ExplorerGroup
+            title={t('Featured models')}
+            className="h-full pb-8"
+            closed={closeFeatured}
+            onToggle={() => {
+              toggleCloseFeatured(!closeFeatured);
+            }}
+          >
             <ExplorerList<Model>
               selectedId={selectedModelId}
               renderLeftSide={(m) => (

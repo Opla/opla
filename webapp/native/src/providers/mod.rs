@@ -31,15 +31,7 @@ use crate::{
 use self::{
     llama_cpp::LlamaCppInferenceClient,
     llm::{
-        LlmCompletionOptions,
-        LlmCompletionResponse,
-        LlmError,
-        LlmImageGenerationResponse,
-        LlmInferenceInterface,
-        LlmQuery,
-        LlmQueryCompletion,
-        LlmResponseImpl,
-        LlmTokenizeResponse,
+        LlmCompletionOptions, LlmCompletionResponse, LlmError, LlmImageGenerationResponse, LlmInferenceInterface, LlmModelsResponse, LlmQuery, LlmQueryCompletion, LlmResponseImpl, LlmTokenizeResponse
     },
 };
 
@@ -558,5 +550,28 @@ impl ProvidersManager {
             return result;
         }
         return Err(format!("LLM provider image generation not implemented: {:?}", llm_provider_type));
+    }
+
+        pub async fn llm_call_models<R: Runtime>(
+        &mut self,
+        provider: Provider,
+    ) -> Result<LlmModelsResponse, String> {
+        let llm_provider_type = provider.r#type;
+        if llm_provider_type == "openai" {
+            let api = format!("{:}", provider.url);
+            let secret_key = match provider.key {
+                Some(k) => { k }
+                None => {
+                    if llm_provider_type == "openai" {
+                        return Err(format!("OpenAI provider key not set: {:?}", llm_provider_type));
+                    }
+                    ' '.to_string()
+                }
+            };
+            let result = openai::call_models(&api, &secret_key).await.map_err(|err| err.to_string());
+
+            return result;
+        }
+        return Err(format!("LLM provider models not implemented: {:?}", llm_provider_type));
     }
 }
