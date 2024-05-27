@@ -1,3 +1,10 @@
+# [1.0.0-alpha.159](https://github.com/Opla/opla/compare/v1.0.0-alpha.158...v1.0.0-alpha.159) (2024-05-27)
+
+
+### Bug Fixes
+
+* provider scroll padding [#930](https://github.com/Opla/opla/issues/930) ([#932](https://github.com/Opla/opla/issues/932)) ([5ea2e27](https://github.com/Opla/opla/commit/5ea2e27afebf666bc06a36d28d08c9f5d4e8d33d))
+
 # [1.0.0-alpha.158](https://github.com/Opla/opla/compare/v1.0.0-alpha.157...v1.0.0-alpha.158) (2024-05-26)
 
 
