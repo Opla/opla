@@ -21,7 +21,7 @@ use futures_util::stream::StreamExt;
 use tokenizer::encode;
 
 use crate::{
-    data::model::Model,
+    data::model::{Logo, Model},
     providers::llm::{
         LlmCompletionOptions,
         LlmCompletionResponse,
@@ -566,12 +566,94 @@ pub async fn call_models(
         .iter()
         .map(|obj| {
             // TODO retrieve name, context_window, featured, deprecated and icon
-            let name = obj.id.to_string();
+            let id = obj.id.to_string();
+            let tokens: Vec<String> = id
+                .split("-")
+                .map(|t| {
+                    let t: &mut str = &mut t.to_string();
+                    if !t.is_empty() {
+                        t[0..1].make_ascii_uppercase();
+                    }
+                    t.to_string()
+                })
+                .collect();
+            let mut name = tokens.join(" ");
+            name = name.replace("Gpt ", "GPT-");
+            name = name.replace("Dall ", "DALL-");
+            name = name.replace("Tts ", "TTS-");
+
+            let mut description = String::new();
+            let mut context_window = 0;
+            let mut deprecated = false;
+            let mut featured = false;
+            let mut icon_url = String::new();
+            if id.contains("gpt-3.5") && id.contains("instruct") {
+                context_window = 4096;
+                deprecated = true;
+                icon_url = "https://opla.github.io/models/assets/gpt-35.webp".to_string();
+                description = "Similar capabilities as GPT-3 era models. Compatible with legacy Completions endpoint and not Chat Completions.".to_string();
+            } else if id.contains("gpt-3.5-turbo") {
+                context_window = 16385;
+                featured = true;
+                icon_url = "https://opla.github.io/models/assets/gpt-35.webp".to_string();
+                description = "GPT-3.5 Turbo models can understand and generate natural language or code and have been optimized for chat using the Chat Completions API but work well for non-chat tasks as well.".to_string();
+            } else if id.contains("gpt-3.5") {
+                context_window = 4096;
+                icon_url = "https://opla.github.io/models/assets/gpt-35.webp".to_string();
+                deprecated = true;
+            } else if id.contains("gpt-4o") {
+                context_window = 128000;
+                featured = true;
+                icon_url = "https://opla.github.io/models/assets/gpt-4.webp".to_string();
+                description = "GPT-4o (“o” for “omni”) is our most advanced model. It is multimodal (accepting text or image inputs and outputting text), and it has the same high intelligence as GPT-4 Turbo but is much more efficient—it generates text 2x faster and is 50% cheaper. Additionally, GPT-4o has the best vision and performance across non-English languages of any of our models.".to_string();
+            } else if id.contains("gpt-4-turbo") || id.contains("preview") {
+                context_window = 128000;
+                featured = true;
+                icon_url = "https://opla.github.io/models/assets/gpt-4.webp".to_string();
+                description = "GPT-4 Turbo with Vision. GPT-4 is a large multimodal model (accepting text or image inputs and outputting text) that can solve difficult problems with greater accuracy than any of our previous models, thanks to its broader general knowledge and advanced reasoning capabilities.".to_string();
+            } else if id.contains("gpt-4-32k") {
+                context_window = 32768;
+                icon_url = "https://opla.github.io/models/assets/gpt-4.webp".to_string();
+                description = "This model was never rolled out widely in favor of GPT-4 Turbo.".to_string();
+            } else if id.contains("gpt-4") {
+                context_window = 8192;
+                icon_url = "https://opla.github.io/models/assets/gpt-4.webp".to_string();
+                description = "GPT-4 is a large multimodal model (accepting text or image inputs and outputting text) that can solve difficult problems with greater accuracy than any of our previous models, thanks to its broader general knowledge and advanced reasoning capabilities.".to_string();
+            } else if id.contains("dall-e") {
+                context_window = 0;
+                description = "DALL·E is a AI system that can create realistic images and art from a description in natural language. DALL·E 3 currently supports the ability, given a prompt, to create a new image with a specific size. DALL·E 2 also support the ability to edit an existing image, or create variations of a user provided image.".to_string();
+            } else if id.contains("tts") {
+                context_window = 0;
+                description = "TTS is an AI model that converts text to natural sounding spoken text.".to_string();
+            } else if id.contains("whisper") {
+                context_window = 0;
+                description = "Whisper is a general-purpose speech recognition model. It is trained on a large dataset of diverse audio and is also a multi-task model that can perform multilingual speech recognition as well as speech translation and language identification.".to_string();
+            }
+
             let mut model = Model::new(name);
             model.id = Some(obj.id.to_string());
             model.created_at = DateTime::from_timestamp(obj.created, 0);
             model.updated_at = DateTime::from_timestamp(obj.created, 0);
             model.creator = Some("openai".to_string());
+            if context_window != 0 {
+                model.context_window = Some(context_window);
+            }
+            if description.len() > 0 {
+                model.description = Some(description);
+            }
+            if icon_url.len() > 0 {
+                model.icon = Some(Logo {
+                    url: icon_url,
+                    name: None,
+                    color: None,
+                });
+            }
+            if deprecated {
+                model.deprecated = Some(deprecated);
+            }
+            if featured {
+                model.featured = Some(featured);
+            }
             model
         })
         .collect();

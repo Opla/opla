@@ -35,10 +35,10 @@ const openAIProviderTemplate: Partial<Provider> = {
   description: DESCRIPTION,
   url: 'https://api.openai.com/v1',
   docUrl: 'https://platform.openai.com/docs',
-  models: [
+  /* models: [
     {
       id: 'gpt-3.5-turbo',
-      name: 'gpt-3.5 turbo',
+      name: 'GPT-3.5 Turbo',
       icon: { url: 'https://opla.github.io/models/assets/gpt-35.webp' },
       createdAt: 1677610602,
       updatedAt: 1677610602,
@@ -47,7 +47,7 @@ const openAIProviderTemplate: Partial<Provider> = {
     },
     {
       id: 'gpt-3.5-turbo-16k',
-      name: 'gpt-3.5 turbo 16k',
+      name: 'GPT-3.5 Turbo 16k',
       icon: { url: 'https://opla.github.io/models/assets/gpt-35.webp' },
       createdAt: 1683758102,
       updatedAt: 1683758102,
@@ -56,7 +56,7 @@ const openAIProviderTemplate: Partial<Provider> = {
     },
     {
       id: 'gpt-4o',
-      name: 'gpt-4o',
+      name: 'GPT-4o',
       icon: { url: 'https://opla.github.io/models/assets/gpt-4.webp' },
       createdAt: 1715367049,
       updatedAt: 1715367049,
@@ -65,7 +65,7 @@ const openAIProviderTemplate: Partial<Provider> = {
     },
     {
       id: 'gpt-4',
-      name: 'gpt-4',
+      name: 'GPT-4',
       icon: { url: 'https://opla.github.io/models/assets/gpt-4.webp' },
       createdAt: 1687882411,
       updatedAt: 1687882411,
@@ -74,14 +74,14 @@ const openAIProviderTemplate: Partial<Provider> = {
     },
     {
       id: 'gpt-4-turbo-preview',
-      name: 'gpt-4 turbo preview',
+      name: 'GPT-4 Turbo preview',
       icon: { url: 'https://opla.github.io/models/assets/gpt-4.webp' },
       createdAt: 1706037777,
       updatedAt: 1706037777,
       creator: 'openai',
       contextWindow: 4096,
     },
-  ],
+  ], */
 };
 
 // https://platform.openai.com/docs/api-reference/chat/create
