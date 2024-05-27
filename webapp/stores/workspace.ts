@@ -35,16 +35,16 @@ const DEFAULT_PROPS: WorkspaceProps = {
 
 const createWorkspaceSlice =
   (emit: Emitter, initProps?: Partial<WorkspaceSlice>): StateCreator<WorkspaceSlice> =>
-    (set, get) => ({
-      ...DEFAULT_PROPS,
-      ...initProps,
-      getAllWorkspaces: () => Object.values(get().workspaces),
-      getWorkspace: (id = get().activeWorkspaceId) => (id ? get().workspaces[id] : undefined),
-      loadWorkspace: (id = get().activeWorkspaceId) => {
-        const w = id ? get().workspaces[id] : undefined;
-        emit(GlobalAppStateWorkspace.ACTIVE, id);
-        return w;
-      },
-    });
+  (set, get) => ({
+    ...DEFAULT_PROPS,
+    ...initProps,
+    getAllWorkspaces: () => Object.values(get().workspaces),
+    getWorkspace: (id = get().activeWorkspaceId) => (id ? get().workspaces[id] : undefined),
+    loadWorkspace: (id = get().activeWorkspaceId) => {
+      const w = id ? get().workspaces[id] : undefined;
+      emit(GlobalAppStateWorkspace.ACTIVE, id);
+      return w;
+    },
+  });
 
 export default createWorkspaceSlice;

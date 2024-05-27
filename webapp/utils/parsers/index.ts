@@ -66,12 +66,12 @@ export const EmptyParsedPrompt = {
 
 type ParsePromptOptions =
   | {
-    text: string;
-    caretStartIndex?: number;
-  }
+      text: string;
+      caretStartIndex?: number;
+    }
   | {
-    textarea: HTMLTextAreaElement;
-  };
+      textarea: HTMLTextAreaElement;
+    };
 
 export type TokenValidator = (
   token: PromptToken,

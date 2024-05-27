@@ -50,74 +50,74 @@ const DEFAULT_PROPS: AssistantProps = {
 
 const createAssistantSlice =
   (initProps?: Partial<AssistantSlice>): StateCreator<AssistantSlice> =>
-    (set, get) => ({
-      ...DEFAULT_PROPS,
-      ...initProps,
-      getAllAssistants: () => [OplaAssistant, ...get().assistants.filter((a) => !a.hidden)],
-      getAssistant: (id: string | undefined) =>
-        OplaAssistant.id === id ? OplaAssistant : get().assistants.find((a) => a.id === id),
-      createAssistant: (name: string, template?: Partial<Assistant>) => {
-        const newAssistant = createBaseNamedRecord<Assistant>(name, template);
-        set((state: AssistantSlice) => ({ assistants: [...state.assistants, newAssistant] }));
-        return newAssistant;
-      },
-      updateAssistant: (newAssistant: Assistant) => {
-        const updatedAssistant: Assistant = updateRecord<Assistant>(newAssistant);
-        set((state: AssistantSlice) => ({
-          assistants: state.assistants.map((a) =>
-            a.id === updatedAssistant.id ? updatedAssistant : a,
-          ),
-        }));
-      },
-      deleteAssistant: (id: string) => {
-        set((state: AssistantSlice) => ({ assistants: state.assistants.filter((a) => a.id !== id) }));
-      },
-      createTarget: (template?: Partial<Assistant>) => {
-        const newTarget: Preset = createBaseRecord<Preset>(template);
-        return newTarget;
-      },
-      updateTarget: (assistant: Assistant, newTarget: Preset) => {
-        const updatedTarget: Preset = updateRecord<Preset>(newTarget);
-        let targets = assistant.targets || [];
-        if (targets.find((t) => t.id === updatedTarget.id)) {
-          targets = targets.map((t) => (t.id === updatedTarget.id ? updatedTarget : t));
-        } else {
-          targets = [...targets, updatedTarget];
-        }
-        const updatedAssistant: Assistant = updateRecord<Assistant>({
-          ...assistant,
-          targets,
-        } as Assistant);
-        set((state: AssistantSlice) => ({
-          assistants: state.assistants.map((a) =>
-            a.id === updatedAssistant.id ? updatedAssistant : a,
-          ),
-        }));
-      },
-      deleteTarget: (assistant: Assistant, targetId: string) => {
-        const targets = assistant.targets?.filter((t) => t.id !== targetId);
-        const updatedAssistant: Assistant = updateRecord<Assistant>({
-          ...assistant,
-          targets,
-        } as Assistant);
-        set((state: AssistantSlice) => ({
-          assistants: state.assistants.map((a) =>
-            a.id === updatedAssistant.id ? updatedAssistant : a,
-          ),
-        }));
-      },
-      duplicateTarget: (target: Preset) => {
-        const newTarget: Preset = createBaseRecord<Preset>();
-        return { ...target, ...newTarget };
-      },
-      isModelUsedInAssistants: (model: Model) => {
-        const { assistants } = get();
-        return assistants.some((a) =>
-          a.targets?.some((t) =>
-            t.models?.some((modelNameId) => modelNameId === model.id || modelNameId === model.name),
-          ),
-        );
-      },
-    });
+  (set, get) => ({
+    ...DEFAULT_PROPS,
+    ...initProps,
+    getAllAssistants: () => [OplaAssistant, ...get().assistants.filter((a) => !a.hidden)],
+    getAssistant: (id: string | undefined) =>
+      OplaAssistant.id === id ? OplaAssistant : get().assistants.find((a) => a.id === id),
+    createAssistant: (name: string, template?: Partial<Assistant>) => {
+      const newAssistant = createBaseNamedRecord<Assistant>(name, template);
+      set((state: AssistantSlice) => ({ assistants: [...state.assistants, newAssistant] }));
+      return newAssistant;
+    },
+    updateAssistant: (newAssistant: Assistant) => {
+      const updatedAssistant: Assistant = updateRecord<Assistant>(newAssistant);
+      set((state: AssistantSlice) => ({
+        assistants: state.assistants.map((a) =>
+          a.id === updatedAssistant.id ? updatedAssistant : a,
+        ),
+      }));
+    },
+    deleteAssistant: (id: string) => {
+      set((state: AssistantSlice) => ({ assistants: state.assistants.filter((a) => a.id !== id) }));
+    },
+    createTarget: (template?: Partial<Assistant>) => {
+      const newTarget: Preset = createBaseRecord<Preset>(template);
+      return newTarget;
+    },
+    updateTarget: (assistant: Assistant, newTarget: Preset) => {
+      const updatedTarget: Preset = updateRecord<Preset>(newTarget);
+      let targets = assistant.targets || [];
+      if (targets.find((t) => t.id === updatedTarget.id)) {
+        targets = targets.map((t) => (t.id === updatedTarget.id ? updatedTarget : t));
+      } else {
+        targets = [...targets, updatedTarget];
+      }
+      const updatedAssistant: Assistant = updateRecord<Assistant>({
+        ...assistant,
+        targets,
+      } as Assistant);
+      set((state: AssistantSlice) => ({
+        assistants: state.assistants.map((a) =>
+          a.id === updatedAssistant.id ? updatedAssistant : a,
+        ),
+      }));
+    },
+    deleteTarget: (assistant: Assistant, targetId: string) => {
+      const targets = assistant.targets?.filter((t) => t.id !== targetId);
+      const updatedAssistant: Assistant = updateRecord<Assistant>({
+        ...assistant,
+        targets,
+      } as Assistant);
+      set((state: AssistantSlice) => ({
+        assistants: state.assistants.map((a) =>
+          a.id === updatedAssistant.id ? updatedAssistant : a,
+        ),
+      }));
+    },
+    duplicateTarget: (target: Preset) => {
+      const newTarget: Preset = createBaseRecord<Preset>();
+      return { ...target, ...newTarget };
+    },
+    isModelUsedInAssistants: (model: Model) => {
+      const { assistants } = get();
+      return assistants.some((a) =>
+        a.targets?.some((t) =>
+          t.models?.some((modelNameId) => modelNameId === model.id || modelNameId === model.name),
+        ),
+      );
+    },
+  });
 
 export default createAssistantSlice;
