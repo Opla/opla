@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -108,9 +108,7 @@ impl HFModel {
     }
 }
 
-pub async fn search_hf_models(
-    query: &str
-) -> Result<ModelsCollection, Box<dyn std::error::Error>> {
+pub async fn search_hf_models(query: &str) -> Result<ModelsCollection, Box<dyn std::error::Error>> {
     let url =
         format!("https://huggingface.co/api/models?search={}&filter=gguf&limit=10&full=true&config=true", query);
     let response = reqwest::get(url).await?;

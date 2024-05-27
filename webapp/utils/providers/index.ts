@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 
 import {

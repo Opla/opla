@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -319,9 +319,9 @@ impl LlmInferenceInterface for LlamaCppInferenceClient {
         &mut self,
         query: &LlmQuery<LlmQueryCompletion>,
         completion_options: Option<LlmCompletionOptions>,
-        adapter: &mut ProviderAdapter,
+        adapter: &mut ProviderAdapter
         /* sender: Sender<Result<LlmCompletionResponse, LlmError>> */
-    ) -> Result<HttpService<LlmCompletionResponse, LlmError>, LlmError>{
+    ) -> Result<HttpService<LlmCompletionResponse, LlmError>, LlmError> {
         let parameters = query.options.to_llama_cpp_parameters(completion_options);
 
         // let is_stream = parameters.stream.unwrap_or(false);

@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 export const ANCHOR_CLASS_NAME =
-  'font-semibold underline  underline-offset-[2px] decoration-1 transition-colors';
+    'font-semibold underline  underline-offset-[2px] decoration-1 transition-colors';
 
 export const MARKDOWN_TEST_MESSAGE = `
     # Heading level 1

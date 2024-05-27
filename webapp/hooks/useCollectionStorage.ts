@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,12 +21,12 @@ import { deepCopy } from '@/utils/data';
 export default function useCollectionStorage<T>(
   collectionId: string,
 ): [
-  (key: string, defaultValue?: T) => T | undefined,
-  (key: string, defaultValue: T, cache?: boolean) => Promise<T>,
-  (key: string, value: T) => Promise<void>,
-  (key: string) => Promise<void>,
-  Record<string, T>,
-] {
+    (key: string, defaultValue?: T) => T | undefined,
+    (key: string, defaultValue: T, cache?: boolean) => Promise<T>,
+    (key: string, value: T) => Promise<void>,
+    (key: string) => Promise<void>,
+    Record<string, T>,
+  ] {
   const [collection, setCollection] = useState<Record<string, T>>({});
 
   const readValue = async (key: string, defaultValue: T, cache = true) => {

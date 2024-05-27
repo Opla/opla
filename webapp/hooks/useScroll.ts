@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -105,9 +105,9 @@ export default function useScroll(
   position: Position2D,
   onUpdatePosition: (props: KeyedScrollPosition) => void,
 ): [
-  React.RefCallback<HTMLDivElement>,
-  (scrollPosition: Position2D, forceUpdate?: boolean) => void,
-] {
+    React.RefCallback<HTMLDivElement>,
+    (scrollPosition: Position2D, forceUpdate?: boolean) => void,
+  ] {
   const previousNode: MutableRefObject<HTMLDivElement | undefined> = useRef();
   const keyedRect = useRef<KeyedScrollPosition>({
     key,

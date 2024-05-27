@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
 import type { Plugin, PostCssOptions } from '@docusaurus/types';
 
 function tailwindPlugin(): Plugin {
-    return {
-      name: 'tailwind-plugin',
-      configurePostCss(postcssOptions: PostCssOptions): PostCssOptions {
-        postcssOptions.plugins = [
-          require('postcss-import'),
-          require('tailwindcss'),
-          require('autoprefixer'),
-        ];
-        return postcssOptions;
-      },
-    };
-  }
-  
-  export default tailwindPlugin;
+  return {
+    name: 'tailwind-plugin',
+    configurePostCss(postcssOptions: PostCssOptions): PostCssOptions {
+      postcssOptions.plugins = [
+        require('postcss-import'),
+        require('tailwindcss'),
+        require('autoprefixer'),
+      ];
+      return postcssOptions;
+    },
+  };
+}
+
+export default tailwindPlugin;

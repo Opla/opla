@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -66,12 +66,12 @@ export const EmptyParsedPrompt = {
 
 type ParsePromptOptions =
   | {
-      text: string;
-      caretStartIndex?: number;
-    }
+    text: string;
+    caretStartIndex?: number;
+  }
   | {
-      textarea: HTMLTextAreaElement;
-    };
+    textarea: HTMLTextAreaElement;
+  };
 
 export type TokenValidator = (
   token: PromptToken,

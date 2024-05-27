@@ -1,5 +1,5 @@
 use bytes::Bytes;
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,16 +17,19 @@ use std::fmt;
 use async_trait::async_trait;
 use serde::{ Deserialize, Serialize };
 
-use crate::{ data::model::Model, store::ServerParameters, utils::http_client::{ HttpChunk, HttpError, NewHttpError } };
+use crate::{
+    data::model::Model,
+    store::ServerParameters,
+    utils::http_client::{ HttpChunk, HttpError, NewHttpError },
+};
 
-use super::{services::HttpService, ProviderAdapter};
+use super::{ services::HttpService, ProviderAdapter };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmError {
     pub message: String,
     pub status: String,
 }
-
 
 impl LlmError {
     pub fn new(msg: &str, status: &str) -> LlmError {
@@ -43,7 +46,6 @@ impl NewHttpError for LlmError {
         LlmError { message: msg.to_string(), status: status.to_string() }
     }
 }
-
 
 impl fmt::Display for LlmError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -288,9 +290,9 @@ pub trait LlmInferenceInterface: DynClone {
         &mut self,
         query: &LlmQuery<LlmQueryCompletion>,
         completion_options: Option<LlmCompletionOptions>,
-        adapter: &mut ProviderAdapter,
+        adapter: &mut ProviderAdapter
         /* sender: Sender<Result<LlmCompletionResponse, LlmError>> */
-    )  -> Result<HttpService<LlmCompletionResponse, LlmError>, LlmError>;
+    ) -> Result<HttpService<LlmCompletionResponse, LlmError>, LlmError>;
 
     async fn call_tokenize(
         &mut self,
