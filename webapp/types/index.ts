@@ -638,4 +638,9 @@ export type Workspace = BaseNamedRecord & {
   projectsPath: string[];
 };
 
+export type Project = BaseNamedRecord & {
+  workspaceId: string;
+  path: string;
+};
+
 export { Ui };

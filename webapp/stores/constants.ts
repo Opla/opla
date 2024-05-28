@@ -16,6 +16,7 @@ export enum GlobalAppStateWorkspace {
   ACTIVE = 0,
   WORKSPACE = 1,
   ERROR = 2,
+  PROJECT = 3,
 }
 
 export const EVENTS: {
