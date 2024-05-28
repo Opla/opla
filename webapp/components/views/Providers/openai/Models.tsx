@@ -42,14 +42,22 @@ import { Checkbox } from '@/components/ui/checkbox';
 import logger from '@/utils/logger';
 import { updateProvider } from '@/utils/data/providers';
 import { deepCopy } from '@/utils/data';
+import ModelIcon from '@/components/common/ModelIcon';
+import { cn } from '@/lib/utils';
 
 type OpenAIModelsProps = {
   provider: Provider;
+  className?: string;
+  title?: string;
 };
 
 type SelectedModel = Model & { selected?: boolean };
 
-export default function OpenAIModels({ provider }: OpenAIModelsProps) {
+export default function OpenAIModels({
+  provider,
+  className,
+  title = 'Available models',
+}: OpenAIModelsProps) {
   const { t } = useTranslation();
   const { providers, setProviders } = useContext(AppContext);
   const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +78,6 @@ export default function OpenAIModels({ provider }: OpenAIModelsProps) {
     } */
     afunc();
   }, [provider]);
-  console.log('models', models);
 
   const handleSelectModel = (selectedModel: SelectedModel) => {
     logger.info('selected Model', selectedModel);
@@ -94,37 +101,50 @@ export default function OpenAIModels({ provider }: OpenAIModelsProps) {
       const updatedProviders = updateProvider({ ...provider, models: updatedModels }, providers);
       setProviders(updatedProviders);
     }
-    console.log('updatedModels', updatedModels, updatedModel);
+    logger.info('updatedModels', updatedModels, updatedModel);
   };
 
   return (
     <div className="pb-16 pt-4">
       {models.length > 0 && (
-        <form className="grid w-full items-start gap-6 overflow-auto pt-8">
+        <form className="w-full items-start gap-6 overflow-auto pt-8">
           <fieldset className="grid gap-6 rounded-lg border p-4">
-            <legend className="-ml-1 px-1 text-sm font-medium">{t('Models available')}</legend>
-            <Table className="w-full">
-              <TableHeader>
+            <legend className="-ml-1 px-1 text-sm font-medium">{t(title)}</legend>
+            <Table
+              className=""
+              containerClassname={cn('overflow-y-scroll', className || 'h-[400px]')}
+            >
+              <TableHeader className="sticky top-0 z-50 bg-secondary">
                 <TableRow>
-                  <TableHead>{t('Select')}</TableHead>
-                  <TableHead>{t('Model')}</TableHead>
-                  <TableHead>{t('Description')}</TableHead>
-                  <TableHead>{t('Context window')}</TableHead>
+                  <TableHead className="w-1/7 px-2 py-1">{t('Select')}</TableHead>
+                  <TableHead className="w-2/7 px-2 py-1">{t('Model')}</TableHead>
+                  <TableHead className="w-3/7 px-2 py-1">{t('Description')}</TableHead>
+                  <TableHead className="w-1/7 px-2 py-1">{t('Context window')}</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              <TableBody className="">
                 {models.map((model) => (
-                  <TableRow onClick={() => {}} key={model.id || model.name}>
-                    <TableCell className="truncate">
+                  <TableRow onClick={() => {}} key={model.id || model.name} className="">
+                    <TableCell className="px-2 py-1 text-center">
                       <Checkbox
                         disabled={isLoading}
                         checked={model.selected}
                         onCheckedChange={() => handleSelectModel(model)}
                       />
                     </TableCell>
-                    <TableCell className="truncate">{model.name}</TableCell>
-                    <TableCell className="line-clamp-4">{model.description}</TableCell>
-                    <TableCell className="truncate">
+                    <TableCell className="truncate px-2 py-1">
+                      <div className="flex items-center gap-2">
+                        <ModelIcon
+                          icon={model.icon}
+                          name={model.name}
+                          className="h-4 w-4"
+                          providerName={model.creator}
+                        />
+                        {model.name}
+                      </div>
+                    </TableCell>
+                    <TableCell className="line-clamp-4 px-2 py-1">{model.description}</TableCell>
+                    <TableCell className="px-2 py-1 text-right">
                       <span>{model.contextWindow || t('N/A')}</span>
                     </TableCell>
                   </TableRow>

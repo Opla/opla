@@ -35,25 +35,7 @@ const openAIProviderTemplate: Partial<Provider> = {
   description: DESCRIPTION,
   url: 'https://api.openai.com/v1',
   docUrl: 'https://platform.openai.com/docs',
-  /* models: [
-    {
-      id: 'gpt-3.5-turbo',
-      name: 'GPT-3.5 Turbo',
-      icon: { url: 'https://opla.github.io/models/assets/gpt-35.webp' },
-      createdAt: 1677610602,
-      updatedAt: 1677610602,
-      creator: 'openai',
-      contextWindow: 4096,
-    },
-    {
-      id: 'gpt-3.5-turbo-16k',
-      name: 'GPT-3.5 Turbo 16k',
-      icon: { url: 'https://opla.github.io/models/assets/gpt-35.webp' },
-      createdAt: 1683758102,
-      updatedAt: 1683758102,
-      creator: 'openai',
-      contextWindow: 16384,
-    },
+  models: [
     {
       id: 'gpt-4o',
       name: 'GPT-4o',
@@ -61,7 +43,20 @@ const openAIProviderTemplate: Partial<Provider> = {
       createdAt: 1715367049,
       updatedAt: 1715367049,
       creator: 'openai',
-      contextWindow: 4096,
+      contextWindow: 128000,
+      description:
+        'GPT-4o (“o” for “omni”) is our most advanced model. It is multimodal (accepting text or image inputs and outputting text), and it has the same high intelligence as GPT-4 Turbo but is much more efficient—it generates text 2x faster and is 50% cheaper. Additionally, GPT-4o has the best vision and performance across non-English languages of any of our models.',
+    },
+    {
+      id: 'gpt-4-turbo',
+      name: 'GPT-4 Turbo',
+      icon: { url: 'https://opla.github.io/models/assets/gpt-4.webp' },
+      createdAt: 1706037777,
+      updatedAt: 1706037777,
+      creator: 'openai',
+      contextWindow: 128000,
+      description:
+        'GPT-4 Turbo with Vision. GPT-4 is a large multimodal model (accepting text or image inputs and outputting text) that can solve difficult problems with greater accuracy than any of our previous models, thanks to its broader general knowledge and advanced reasoning capabilities.',
     },
     {
       id: 'gpt-4',
@@ -71,17 +66,21 @@ const openAIProviderTemplate: Partial<Provider> = {
       updatedAt: 1687882411,
       creator: 'openai',
       contextWindow: 8192,
+      description:
+        'GPT-4 is a large multimodal model (accepting text or image inputs and outputting text) that can solve difficult problems with greater accuracy than any of our previous models, thanks to its broader general knowledge and advanced reasoning capabilities.',
     },
     {
-      id: 'gpt-4-turbo-preview',
-      name: 'GPT-4 Turbo preview',
-      icon: { url: 'https://opla.github.io/models/assets/gpt-4.webp' },
-      createdAt: 1706037777,
-      updatedAt: 1706037777,
+      id: 'gpt-3.5-turbo',
+      name: 'GPT-3.5 Turbo',
+      icon: { url: 'https://opla.github.io/models/assets/gpt-35.webp' },
+      createdAt: 1677610602,
+      updatedAt: 1677610602,
       creator: 'openai',
-      contextWindow: 4096,
+      contextWindow: 16384,
+      description:
+        'GPT-3.5 Turbo models can understand and generate natural language or code and have been optimized for chat using the Chat Completions API but work well for non-chat tasks as well.',
     },
-  ], */
+  ],
 };
 
 // https://platform.openai.com/docs/api-reference/chat/create

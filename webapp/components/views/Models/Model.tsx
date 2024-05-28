@@ -311,7 +311,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
 
   const handleRemoveCloudModel = (selectedModel?: Model) => {
     // TODO
-    console.log('selectedModel', selectedModel);
+    logger.info('TODO remove selectedModel', selectedModel);
   };
 
   if (!model) {

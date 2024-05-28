@@ -26,6 +26,7 @@ import OpenAIDialog from './openai';
 import NewLocalModelDialog from './models';
 import NewPresetDialog from './presets';
 import DownloadsDialog from './downloads';
+import CloudModelDialog from './models/cloud';
 
 const Modals: ModalRef[] = [
   {
@@ -111,6 +112,20 @@ const Modals: ModalRef[] = [
         <OpenAIDialog
           key={ModalIds.OpenAI}
           id={ModalIds.OpenAI}
+          open={visible}
+          data={data as ModalData}
+          onClose={onClose}
+        />
+      );
+    },
+  },
+  {
+    id: ModalIds.CloudModels,
+    Component: function CMDialog({ visible, onClose, data }) {
+      return (
+        <CloudModelDialog
+          key={ModalIds.CloudModels}
+          id={ModalIds.CloudModels}
           open={visible}
           data={data as ModalData}
           onClose={onClose}

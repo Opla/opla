@@ -80,6 +80,10 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
     showModal(ModalIds.NewLocalModel);
   };
 
+  const handleSelectCloudModel = () => {
+    showModal(ModalIds.CloudModels);
+  };
+
   const handleModelRename = async (name: string, id: string) => {
     const updatedModel = models.find((m) => m.id === id);
     logger.info(`change model name ${id} ${name}`, updatedModel, models);
@@ -160,7 +164,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
             title={`${t('Add cloud model')} ${shortcutAsText(ShortcutIds.INSTALL_MODEL)}`}
             variant="ghost"
             size="icon"
-            onClick={handleNewLocalModel}
+            onClick={handleSelectCloudModel}
           >
             <Plus className="h-4 w-4" strokeWidth={1.5} />
           </Button>

@@ -89,6 +89,7 @@ export enum ModalIds {
   NewLocalModel = 'newlocalmodel',
   Welcome = 'welcome',
   OpenAI = 'openai',
+  CloudModels = 'cloudmodels',
   DeleteItem = 'deleteitem',
   DownloadItem = 'downloaditem',
   Downloads = 'downloads',
