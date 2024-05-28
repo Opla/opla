@@ -1,3 +1,10 @@
+# [1.0.0-alpha.160](https://github.com/Opla/opla/compare/v1.0.0-alpha.159...v1.0.0-alpha.160) (2024-05-28)
+
+
+### Features
+
+* **providers:** openAI choose models [#933](https://github.com/Opla/opla/issues/933) ([#934](https://github.com/Opla/opla/issues/934)) ([0ac21f6](https://github.com/Opla/opla/commit/0ac21f622b4ed36153a737529d145a704a96698d))
+
 # [1.0.0-alpha.159](https://github.com/Opla/opla/compare/v1.0.0-alpha.158...v1.0.0-alpha.159) (2024-05-27)
 
 
