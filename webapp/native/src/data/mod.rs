@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 use chrono::{ DateTime, Utc };
 use serde::{ self, Deserialize, Deserializer, Serialize };
 use serde_with::{ serde_as, OneOrMany, formats::PreferOne };
-use std::{collections::HashMap, fmt};
+use std::{ collections::HashMap, fmt };
 use std::marker::PhantomData;
 use std::str::FromStr;
 use serde::de::{ self, Visitor, MapAccess };

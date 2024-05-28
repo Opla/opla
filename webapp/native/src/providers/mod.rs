@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ use self::{
         LlmError,
         LlmImageGenerationResponse,
         LlmInferenceInterface,
+        LlmModelsResponse,
         LlmQuery,
         LlmQueryCompletion,
         LlmResponseImpl,
@@ -553,10 +554,39 @@ impl ProvidersManager {
                     ' '.to_string()
                 }
             };
-            let result = openai::call_image_generation(&api, &secret_key, &prompt, model).await.map_err(|err| err.to_string());
+            let result = openai
+                ::call_image_generation(&api, &secret_key, &prompt, model).await
+                .map_err(|err| err.to_string());
 
             return result;
         }
-        return Err(format!("LLM provider image generation not implemented: {:?}", llm_provider_type));
+        return Err(
+            format!("LLM provider image generation not implemented: {:?}", llm_provider_type)
+        );
+    }
+
+    pub async fn llm_call_models<R: Runtime>(
+        &mut self,
+        provider: Provider
+    ) -> Result<LlmModelsResponse, String> {
+        let llm_provider_type = provider.r#type;
+        if llm_provider_type == "openai" {
+            let api = format!("{:}", provider.url);
+            let secret_key = match provider.key {
+                Some(k) => { k }
+                None => {
+                    if llm_provider_type == "openai" {
+                        return Err(format!("OpenAI provider key not set: {:?}", llm_provider_type));
+                    }
+                    ' '.to_string()
+                }
+            };
+            let result = openai
+                ::call_models(&api, &secret_key).await
+                .map_err(|err| err.to_string());
+
+            return result;
+        }
+        return Err(format!("LLM provider models not implemented: {:?}", llm_provider_type));
     }
 }

@@ -40,18 +40,21 @@ import { Label } from '@/components/ui/label';
 import useTranslation from '@/hooks/useTranslation';
 import { Provider } from '@/types';
 import { cn } from '@/lib/utils';
+import OpenAIModels from './Models';
 
-export default function OpenAI({
-  provider,
-  className,
-  onParameterChange,
-  onSave,
-}: {
+type ConfigureOpenAIProps = {
   provider: Provider;
   className?: string;
   onParameterChange: (name: string, value: string | number | boolean) => void;
   onSave?: () => void;
-}) {
+};
+
+export function ConfigureOpenAI({
+  provider,
+  className,
+  onParameterChange,
+  onSave,
+}: ConfigureOpenAIProps) {
   const { t } = useTranslation();
 
   const noKey = !provider?.key;
@@ -107,5 +110,24 @@ export default function OpenAI({
         </CardFooter>
       )}
     </Card>
+  );
+}
+
+export default function OpenAI({
+  provider,
+  className,
+  onParameterChange,
+  onSave,
+}: ConfigureOpenAIProps) {
+  return (
+    <div className="py-4">
+      <ConfigureOpenAI
+        provider={provider}
+        className={className}
+        onParameterChange={onParameterChange}
+        onSave={onSave}
+      />
+      <OpenAIModels provider={provider} />
+    </div>
   );
 }

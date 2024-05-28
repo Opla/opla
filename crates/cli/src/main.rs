@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ use std::env;
 use opla_core::gguf::GGUF;
 
 fn main() {
-        println!("Opla CLI WIP");
+    println!("Opla CLI WIP");
     let args: Vec<_> = env::args().collect();
     if args.len() > 1 {
         println!("The first argument is {}", args[1]);

@@ -584,6 +584,10 @@ export type LlmImageGenerationResponse = {
   images: string[];
 };
 
+export type LlmModelsResponse = {
+  models: Model[];
+};
+
 export type Cpu = {
   usage: number;
 };

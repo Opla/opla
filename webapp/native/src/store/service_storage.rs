@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,10 +18,7 @@ use crate::data::service::Service;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ServiceStorage {
-    #[serde(
-        skip_serializing_if = "Option::is_none",
-        default,
-    )]
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub active_service: Option<Service>,
 }
 

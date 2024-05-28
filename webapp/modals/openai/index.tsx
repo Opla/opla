@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 import React from 'react';
 import Dialog from '@/components/common/Modal';
-import OpenAI from '@/components/views/Providers/openai';
+import { ConfigureOpenAI } from '@/components/views/Providers/openai';
 import useBackend from '@/hooks/useBackendContext';
 import useProviderState from '@/hooks/useProviderState';
 import { Provider } from '@/types';
@@ -55,7 +55,7 @@ function OpenAIDialog({
   return (
     <Dialog id={id} size="md" open={open} onClose={handleClose}>
       {provider && (
-        <OpenAI
+        <ConfigureOpenAI
           provider={provider}
           className="w-full"
           onParameterChange={onParameterChange}

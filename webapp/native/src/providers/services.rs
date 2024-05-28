@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ impl<R, E> HttpService<R, E>
         &mut self,
         response: Response,
         // sender: Sender<Result<R, E>>
-        mut send: impl FnMut(Result<R, E>) -> (),
+        mut send: impl FnMut(Result<R, E>) -> ()
     )
         -> Result<R, E>
         where
@@ -148,7 +148,7 @@ impl<R, E> HttpService<R, E>
     async fn request(
         response: Response,
         adapter: &mut ProviderAdapter,
-        mut send: impl FnMut(Result<R, E>) -> (),
+        mut send: impl FnMut(Result<R, E>) -> ()
         // sender: Sender<Result<R, E>>
     ) -> Result<R, E>
         where R: std::marker::Send
@@ -201,7 +201,11 @@ impl<R, E> HttpService<R, E>
         Ok(response)
     }
 
-    pub async fn run(&mut self, is_stream: bool, /* sender: Sender<Result<R, E>> */ mut send: impl FnMut(Result<R, E>) -> ()) {
+    pub async fn run(
+        &mut self,
+        is_stream: bool,
+        /* sender: Sender<Result<R, E>> */ mut send: impl FnMut(Result<R, E>) -> ()
+    ) {
         let body = match &self.body {
             Ok(body) => body.clone(),
             Err(err) => {

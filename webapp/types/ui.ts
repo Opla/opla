@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -89,6 +89,7 @@ export enum ModalIds {
   NewLocalModel = 'newlocalmodel',
   Welcome = 'welcome',
   OpenAI = 'openai',
+  CloudModels = 'cloudmodels',
   DeleteItem = 'deleteitem',
   DownloadItem = 'downloaditem',
   Downloads = 'downloads',

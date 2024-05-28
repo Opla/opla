@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 
 import {
@@ -17,6 +17,7 @@ import {
   ImplProvider,
   LlmQueryCompletion,
   LlmImageGenerationResponse,
+  LlmModelsResponse,
 } from '@/types';
 import OpenAI from './openai';
 import Opla from './opla';
@@ -26,7 +27,7 @@ import { ParsedPrompt } from '../parsers';
 import { CommandManager } from '../commands/types';
 import { invokeTauri } from '../backend/tauri';
 import { mapKeys } from '../data';
-import { /* toCamelCase, */ toSnakeCase } from '../string';
+import { /* toCamelCase, */ toCamelCase, toSnakeCase } from '../string';
 // import logger from '../logger';
 
 export const tokenize = async (
@@ -214,4 +215,12 @@ export const imageGeneration = async (
     prompt,
   })) as LlmImageGenerationResponse;
   return response;
+};
+
+export const listModels = async (_provider: Provider): Promise<LlmModelsResponse> => {
+  const provider = mapKeys({ ..._provider }, toSnakeCase);
+  const response: LlmModelsResponse = (await invokeTauri('llm_call_models', {
+    provider,
+  })) as LlmModelsResponse;
+  return mapKeys(response, toCamelCase);
 };

@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ use std::fs::create_dir_all;
 use std::path::{ Path, PathBuf };
 use serde::{ self, Deserialize, Serialize };
 use uuid::Uuid;
-use crate::data::model::{Model, ModelEntity};
+use crate::data::model::{ Model, ModelEntity };
 use crate::utils::{ get_home_directory, get_data_directory };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -100,7 +100,6 @@ impl ModelStorage {
         Ok(model_path.to_string())
     }
 
-
     pub fn get_model_path(&self, id_or_name: String) -> Result<String, String> {
         let (file_name, path) = match self.get_model_entity(&id_or_name) {
             Some(model) => (model.file_name.clone(), model.path.clone()),
@@ -122,17 +121,20 @@ impl ModelStorage {
         };
         let model_path = match self.get_model_path_filename(path, file_name) {
             Ok(p) => p,
-            Err(err) => return Err(err),
+            Err(err) => {
+                return Err(err);
+            }
         };
 
         let mut gguf = opla_core::gguf::GGUF::new();
         match gguf.read(&model_path) {
-            Ok(_) => {},
-            Err(err) => return Err(err),
+            Ok(_) => {}
+            Err(err) => {
+                return Err(err);
+            }
         }
 
         Ok(model_path)
-
     }
 
     pub fn validate_model(&self, model: &Model) -> Result<(), String> {
@@ -231,7 +233,9 @@ impl ModelStorage {
     pub fn set_model_state(&mut self, model_id: &str, state: &str) {
         let mut model_entity = match self.get_model_entity(model_id) {
             Some(model_entity) => model_entity,
-            None => return,
+            None => {
+                return;
+            }
         };
         model_entity.state = Some(state.to_string());
         self.update_model_entity(&model_entity);

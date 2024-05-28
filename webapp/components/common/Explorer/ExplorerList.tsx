@@ -1,4 +1,4 @@
-// Copyright 2024 mik
+// Copyright 2024 Mik Bry
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -70,17 +70,17 @@ export default function ExplorerList<T>({
         e.preventDefault();
         onSelectItem?.(item.id);
       }}
-      className="flex w-full cursor-pointer flex-row items-center justify-between gap-2"
+      className="flex w-full cursor-pointer flex-row items-center justify-between"
       tabIndex={0}
     >
-      <div className="flex grow flex-row items-center gap-2">
+      <div className="flex grow flex-row items-center gap-0">
         {renderLeftSide?.(item as T)}
         {editable ? (
           editableItemRendering(item)
         ) : (
           <div className={cn(itemClassName, className)}>
             {renderItem?.(item as T) ?? getItemTitle?.(item as T) ?? (
-              <span className="px-3 capitalize">{item.name}</span>
+              <span className="px-0 capitalize">{item.name}</span>
             )}
           </div>
         )}
