@@ -1,0 +1,188 @@
+name: "fix-pre-release"
+on:
+    workflow_dispatch:
+
+jobs:
+  create-pre-release:
+    runs-on: ubuntu-latest
+    outputs:
+      latest_release_id: ${{ steps.latest_release_id.outputs.result }}
+      latest_release_version: ${{ steps.release.outputs.version }}
+    permissions:
+      contents: write # to be able to publish a GitHub release
+      issues: write # to be able to comment on released issues
+      pull-requests: write # to be able to comment on released pull requests
+      id-token: write # to enable use of OIDC for npm provenance
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Release
+        id: release
+        run: |
+            echo "version=1.0.0-alpha.162"
+
+      - run: |
+          echo "ref_name= ${{ github.ref_name }}"
+          echo "version= ${{ steps.release.outputs.version }}"
+
+      # Get generated release id
+      - name: Get Latest Release id
+        if: steps.release.outputs.version && steps.release.outputs.version != ''
+        id: latest_release_id
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data } = await github.rest.repos.getReleaseByTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: "v${{ steps.release.outputs.version }}"
+            })
+            return data.id
+
+      - name: Set latest release to draft
+        if: steps.release.outputs.version != ''
+        uses: actions/github-script@v7
+        env:
+          release_id: ${{ steps.latest_release_id.outputs.result }}
+        with:
+          script: |
+            github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: process.env.release_id,
+              draft: true,
+              prerelease: false
+            })
+      
+      - uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        with:
+          environment: 'production'
+          version: "v${{ steps.release.outputs.version }}"
+            
+  build-pre-release:
+    needs: create-pre-release
+    if: needs.create-pre-release.outputs.latest_release_id
+    strategy:
+      fail-fast: false
+      matrix:
+        settings:
+          - platform: "macos-latest"
+            target: "x86_64-apple-darwin"
+            args: "--target x86_64-apple-darwin"
+          - platform: "macos-latest"
+            target: "aarch64-apple-darwin"
+            args: "--target aarch64-apple-darwin"
+          - platform: "ubuntu-20.04"
+            target: "x86_64-unknown-linux-gnu"
+            args: "--target x86_64-unknown-linux-gnu"
+          - platform: "windows-latest"
+            target: "x86_64-pc-windows-msvc"
+            args: "--target x86_64-pc-windows-msvc"
+
+    runs-on: ${{ matrix.settings.platform }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - name: install dependencies (ubuntu only)
+        if: matrix.settings.platform == 'ubuntu-20.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Rustup add target # Do it for all ?
+        if: matrix.settings.target == 'x86_64-apple-darwin'
+        run: rustup target add ${{ matrix.settings.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+
+      - name: install frontend dependencies
+        run: npm instal
+
+      #- name: import windows certificate
+      #  if: matrix.settings.platform == 'windows-latest'
+      #  env:
+      #    WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+      #    WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+      #  run: |
+      #    New-Item -ItemType directory -Path certificate
+      #    Set-Content -Path certificate/tempCert.txt -Value $env:WINDOWS_CERTIFICATE
+      #    certutil -decode certificate/tempCert.txt certificate/certificate.pfx
+      #    Remove-Item -path certificate -include tempCert.txt
+      #    Import-PfxCertificate -FilePath certificate/certificate.pfx -CertStoreLocation Cert:\CurrentUser\My -Password (ConvertTo-SecureString -String $env:WINDOWS_CERTIFICATE_PASSWORD -Force -AsPlainText)
+      
+      # If tagName and releaseId are omitted tauri-action will only build the app and won't try to upload any assets.
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_PATH: ${{ secrets.APPLE_API_KEY_PATH }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          SENTRY_RELEASE: "v${{ needs.create-pre-release.outputs.latest_release_version }}"        
+          NEXT_PUBLIC_SENTRY_RELEASE: "v${{ needs.create-pre-release.outputs.latest_release_version }}"
+        with:
+          #tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
+          #releaseName: "App v__VERSION__"
+          #releaseBody: "See the assets to download this version and install."
+          #releaseDraft: true
+          #prerelease: false
+          releaseId: ${{ needs.create-pre-release.outputs.latest_release_id }}
+          args: ${{ matrix.settings.args}}
+      
+  undraft-pre-release:
+    needs: [create-pre-release,build-pre-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish latest release
+        uses: actions/github-script@v7
+        env:
+          release_id: ${{ needs.create-pre-release.outputs.latest_release_id }}
+        with:
+          script: |
+            github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: process.env.release_id,
+              draft: false,
+              prerelease: false
+            })
+
+  modify-updater-gist:
+    needs: [create-pre-release,build-pre-release,undraft-pre-release]
+    uses: Opla/opla/.github/workflows/modify-updater-with-latest-release.yml@main
+    secrets: inherit
