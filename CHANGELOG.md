@@ -1,3 +1,10 @@
+# [1.0.0-alpha.162](https://github.com/Opla/opla/compare/v1.0.0-alpha.161...v1.0.0-alpha.162) (2024-05-29)
+
+
+### Bug Fixes
+
+* save/load Project [#929](https://github.com/Opla/opla/issues/929) ([#943](https://github.com/Opla/opla/issues/943)) ([b5fa019](https://github.com/Opla/opla/commit/b5fa0193fdd79a79fb4f1eb567c878dc6a76458a))
+
 # [1.0.0-alpha.161](https://github.com/Opla/opla/compare/v1.0.0-alpha.160...v1.0.0-alpha.161) (2024-05-29)
 
 
