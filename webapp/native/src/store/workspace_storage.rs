@@ -13,8 +13,10 @@
 // limitations under the License.
 
 use std::collections::HashMap;
-use std::default;
-use serde::{ self, Deserialize, Serialize };
+use std::fs::create_dir_all;
+use std::fs::{ read_to_string, write };
+use std::path::PathBuf;
+use serde::{ Deserialize, Serialize };
 use tauri::Manager;
 use tauri::AppHandle;
 use tokio::spawn;
@@ -22,7 +24,18 @@ use uuid::Uuid;
 
 use crate::data::workspace::project::Project;
 use crate::data::workspace::Workspace;
+use crate::utils::get_data_directory;
 use crate::OplaContext;
+
+pub const DEFAULT_PROJECT_NAME: &str = "project";
+pub const DEFAULT_PROJECT_PATH: &str = "workspace/project";
+
+pub fn get_project_path(project_path: Option<String>) -> String {
+    match project_path {
+        Some(path) => path,
+        None => DEFAULT_PROJECT_PATH.to_string(),
+    }
+}
 
 pub const STATE_CHANGE_EVENT: &str = "state_change_event";
 pub const STATE_SYNC_EVENT: &str = "state_sync_event";
@@ -84,7 +97,7 @@ pub struct WorkspaceStorage {
     pub active_workspace_id: Option<String>,
     #[serde(default = "default_workspace")]
     pub workspaces: HashMap<String, Workspace>,
-    #[serde(default = "default_project")]
+    #[serde(skip_serializing, default = "default_project")]
     pub projects: HashMap<String, Project>,
 }
 
@@ -112,7 +125,96 @@ impl WorkspaceStorage {
         workspace
     }
 
-    pub fn load_active_workspace() {}
+    pub fn load_active_workspace(&mut self) -> Workspace {
+        let active_workspace = match &self.active_workspace_id {
+            Some(id) => { self.workspaces.get(id) }
+            None => None,
+        };
+        match active_workspace {
+            Some(w) => w.clone(),
+            None => self.create_workspace(),
+        }
+    }
+
+    pub fn create_project_directory(
+        &mut self,
+        project_path: Option<String>
+    ) -> Result<String, String> {
+        let project_path = match project_path {
+            Some(path) => path,
+            None => DEFAULT_PROJECT_PATH.to_string(),
+        };
+        let project_path = project_path.as_str();
+        // Check if directory is existing / create one if not
+        let mut path = PathBuf::new().join(project_path);
+        if !path.is_absolute() {
+            path = get_data_directory()?.join(project_path);
+        }
+        // println!("project dir={:?}", path);
+        if !path.exists() {
+            create_dir_all(path).map_err(|e| e.to_string())?;
+        } else if !path.is_dir() {
+            return Err(format!("Not a directory: {:?}", project_path));
+        }
+        Ok(project_path.to_string())
+    }
+
+    pub fn get_project_directory(
+        &mut self,
+        project_path: Option<String>
+    ) -> Result<PathBuf, String> {
+        let project_path = match project_path {
+            Some(path) => path,
+            None => DEFAULT_PROJECT_PATH.to_string(),
+        };
+        let project_path = project_path.as_str();
+        // Check if directory is existing / create one if not
+        let mut path = PathBuf::new().join(project_path);
+        if !path.is_absolute() {
+            path = get_data_directory()?.join(project_path);
+        }
+        println!("project path={:?}", path);
+        if !path.exists() {
+            create_dir_all(&path).map_err(|e| e.to_string())?;
+        } else if !path.is_dir() {
+            return Err(format!("Not a directory: {:?}", project_path));
+        }
+        Ok(PathBuf::new().join(&path))
+    }
+    pub fn load_project(
+        &mut self,
+        name: String,
+        project_path: Option<String>,
+        workspace_id: String
+    ) -> Result<Project, String> {
+        let path = self.get_project_directory(project_path.clone())?;
+        let path = &PathBuf::new().join(path.clone()).join(".opla/settings.json");
+        let project: Project;
+
+        if path.exists() {
+            // println!("load project path={:?}", path);
+            let default_config_data = read_to_string(path).map_err(|e| e.to_string())?;
+            project = serde_json::from_str(&default_config_data).map_err(|e| e.to_string())?;
+        } else {
+            let prefix = path.parent().unwrap();
+            // println!("create project prefix path={:?}", prefix);
+            create_dir_all(prefix).map_err(|e| e.to_string())?;
+            project = Project::new(name, get_project_path(project_path), workspace_id.to_string());
+        }
+        Ok(project)
+    }
+
+    pub fn save_project(&mut self, project: &Project) -> Result<(), String> {
+        let path = self.get_project_directory(Some(project.path.clone()))?;
+        let project_path = &PathBuf::new().join(path.clone()).join(".opla/settings.json");
+        let prefix = project_path.parent().unwrap();
+        create_dir_all(prefix).map_err(|e| e.to_string())?;
+        println!("save project {:?} {:?}", project_path, prefix);
+        let json = serde_json::to_string_pretty(project).map_err(|e| e.to_string())?;
+        write(project_path, json).map_err(|e| e.to_string())?;
+
+        Ok(())
+    }
 
     async fn emit_state_async(payload: Payload, app_handle: AppHandle) {
         let context = app_handle.state::<OplaContext>();
@@ -161,6 +263,7 @@ impl WorkspaceStorage {
 
                     let id = data.id.clone();
                     store.workspaces.workspaces.insert(id, data.clone());
+                    let _ = store.save().map_err(|err| err.to_string());
                     app_handle
                         .emit_all(STATE_SYNC_EVENT, Payload {
                             key: payload.key,
@@ -172,7 +275,72 @@ impl WorkspaceStorage {
                 }
             }
             GlobalAppStateWorkspace::PROJECT => {
-                println!("TODO project state");
+                let project: Project;
+                let mut store = context.store.lock().await;
+                let active_workspace = store.workspaces.load_active_workspace();
+                if let Value::Project(data) = value {
+                    project = data.clone();
+                } else {
+                    let id = active_workspace.id;
+                    let path = store.workspaces.create_project_directory(None);
+                    match path {
+                        Ok(path) => {
+                            project = match
+                                store.workspaces.load_project(
+                                    DEFAULT_PROJECT_NAME.to_string(),
+                                    Some(path),
+                                    id.to_string()
+                                )
+                            {
+                                Ok(p) => p,
+                                Err(error) => {
+                                    println!("project load error: {:?}", error);
+                                    app_handle
+                                        .emit_all(STATE_SYNC_EVENT, Payload {
+                                            key: GlobalAppStateWorkspace::ERROR.into(),
+                                            value: Some(Value::String(error)),
+                                        })
+                                        .unwrap();
+                                    return;
+                                }
+                            };
+                            store.workspaces.active_workspace_id = Some(id);
+                        }
+                        Err(error) => {
+                            println!("project dir error: {:?}", error);
+                            app_handle
+                                .emit_all(STATE_SYNC_EVENT, Payload {
+                                    key: GlobalAppStateWorkspace::ERROR.into(),
+                                    value: Some(Value::String(error)),
+                                })
+                                .unwrap();
+                            return;
+                        }
+                    }
+                }
+                println!("project {:?}", project);
+                let id = project.id.clone();
+                store.workspaces.projects.insert(id, project.clone());
+                match store.workspaces.save_project(&project) {
+                    Ok(_) => (),
+                    Err(error) => {
+                        println!("project save error: {:?}", error);
+                        app_handle
+                            .emit_all(STATE_SYNC_EVENT, Payload {
+                                key: GlobalAppStateWorkspace::ERROR.into(),
+                                value: Some(Value::String(error)),
+                            })
+                            .unwrap();
+                        return;
+                    }
+                }
+                let _ = store.save().map_err(|err| err.to_string());
+                app_handle
+                    .emit_all(STATE_SYNC_EVENT, Payload {
+                        key: payload.key,
+                        value: Some(Value::Project(project)),
+                    })
+                    .unwrap();
             }
             GlobalAppStateWorkspace::ERROR => {
                 println!("Not a valid state");

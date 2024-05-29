@@ -15,24 +15,36 @@
 use chrono::{ DateTime, Utc };
 use serde::{ self, Deserialize, Serialize };
 use serde_with::serde_as;
+use uuid::Uuid;
 
-use crate::data::option_date_format;
+use crate::data::date_format;
 
 #[serde_as]
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Project {
-    pub id: Option<String>,
-    pub name: Option<String>,
+    pub id: String,
+    pub name: String,
     pub description: Option<String>,
-    #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
-    pub created_at: Option<DateTime<Utc>>,
-    #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
-    pub updated_at: Option<DateTime<Utc>>,
-    pub path: Option<String>,
-    pub projects: Option<String>,
+    #[serde(with = "date_format", default)]
+    pub created_at: DateTime<Utc>,
+    #[serde(with = "date_format", default)]
+    pub updated_at: DateTime<Utc>,
+    pub path: String,
+    pub workspace_id: String,
 }
 
 impl Project {
+    pub fn new(name: String, path: String, workspace_id: String) -> Self {
+        Self {
+            id: Uuid::new_v4().to_string(),
+            name: name,
+            description: None,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+            path: path,
+            workspace_id,
+        }
+    }
     pub fn open() {}
 }

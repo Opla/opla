@@ -15,7 +15,7 @@
 // import { emit as emitStateEvent, listen } from "@tauri-apps/api/event";
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Assistant } from '@/types';
+import { Assistant, Project, Workspace } from '@/types';
 import logger from '@/utils/logger';
 import createAssistantSlice, { AssistantSlice } from './assistant';
 import Storage, { createJSONSliceStorage } from './storage';
@@ -63,8 +63,20 @@ const getKey = (key: number) => {
 export const subscribeStateSync = async () => {
   const { listen } = await import('@tauri-apps/api/event');
   const unsubscribeStateSyncListener = await listen(EVENTS.STATE_SYNC_EVENT, (event) => {
-    const { key, value } = event.payload as any;
+    let { key, value } = event.payload as any;
     logger.info(`State event: ${event} ${key} ${value}`);
+    if (key === GlobalAppStateWorkspace.WORKSPACE) {
+      const { workspaces } = useWorkspaceStore.getState();
+      workspaces[key] = value as Workspace;
+      key = 'workspaces';
+      value = workspaces;
+    }
+    if (key === GlobalAppStateWorkspace.PROJECT) {
+      const { projects } = useWorkspaceStore.getState();
+      projects[key] = value as Project;
+      key = 'projects';
+      value = projects;
+    } 
     useWorkspaceStore.setState({ [getKey(key) as string]: value });
   });
 
