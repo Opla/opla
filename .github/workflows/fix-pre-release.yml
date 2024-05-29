@@ -6,7 +6,7 @@ jobs:
   create-pre-release:
     runs-on: ubuntu-latest
     env:
-      release_version: "version=1.0.0-alpha.162"
+      release_version: "1.0.0-alpha.162"
     outputs:
       latest_release_id: ${{ steps.latest_release_id.outputs.result }}
       latest_release_version: ${{ env.release_version }}
