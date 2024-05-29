@@ -77,7 +77,13 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
   } = useContext(AppContext);
   const { config, setSettings, updateBackendStore } = useBackend();
 
-  const { loadWorkspace, loadProject, activeWorkspaceId: activeWorkspace, workspaces, projects } = useWorkspaceStore();
+  const {
+    loadWorkspace,
+    loadProject,
+    activeWorkspaceId: activeWorkspace,
+    workspaces,
+    projects,
+  } = useWorkspaceStore();
 
   useEffect(() => {
     if (!workspaces || !activeWorkspace) {

@@ -76,7 +76,7 @@ export const subscribeStateSync = async () => {
       projects[key] = value as Project;
       key = 'projects';
       value = projects;
-    } 
+    }
     useWorkspaceStore.setState({ [getKey(key) as string]: value });
   });
 
