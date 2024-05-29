@@ -54,6 +54,9 @@ const getKey = (key: number) => {
   if (key === GlobalAppStateWorkspace.WORKSPACE) {
     return 'workspace';
   }
+  if (key === GlobalAppStateWorkspace.PROJECT) {
+    return 'project';
+  }
   return 'error';
 };
 

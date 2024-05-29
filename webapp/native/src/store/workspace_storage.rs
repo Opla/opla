@@ -13,12 +13,14 @@
 // limitations under the License.
 
 use std::collections::HashMap;
+use std::default;
 use serde::{ self, Deserialize, Serialize };
 use tauri::Manager;
 use tauri::AppHandle;
 use tokio::spawn;
 use uuid::Uuid;
 
+use crate::data::workspace::project::Project;
 use crate::data::workspace::Workspace;
 use crate::OplaContext;
 
@@ -28,6 +30,7 @@ pub enum GlobalAppStateWorkspace {
     ACTIVE = 0,
     WORKSPACE = 1,
     ERROR = 2,
+    PROJECT = 3,
 }
 
 impl From<u32> for GlobalAppStateWorkspace {
@@ -35,6 +38,7 @@ impl From<u32> for GlobalAppStateWorkspace {
         match item {
             0 => GlobalAppStateWorkspace::ACTIVE,
             1 => GlobalAppStateWorkspace::WORKSPACE,
+            3 => GlobalAppStateWorkspace::PROJECT,
             _ => {
                 println!("Not a valid value for the enum GlobalAppStateWorkspace");
                 GlobalAppStateWorkspace::ERROR
@@ -49,6 +53,7 @@ impl Into<u32> for GlobalAppStateWorkspace {
             GlobalAppStateWorkspace::ERROR => 2,
             GlobalAppStateWorkspace::ACTIVE => 0,
             GlobalAppStateWorkspace::WORKSPACE => 1,
+            GlobalAppStateWorkspace::PROJECT => 3,
         }
     }
 }
@@ -62,6 +67,7 @@ enum Value {
     String(String),
     Number(i32),
     Workspace(Workspace),
+    Project(Project),
     Empty(Empty),
 }
 
@@ -76,14 +82,26 @@ struct Payload {
 pub struct WorkspaceStorage {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub active_workspace_id: Option<String>,
+    #[serde(default = "default_workspace")]
     pub workspaces: HashMap<String, Workspace>,
+    #[serde(default = "default_project")]
+    pub projects: HashMap<String, Project>,
+}
+
+fn default_workspace() -> HashMap<String, Workspace> {
+    HashMap::new()
+}
+
+fn default_project() -> HashMap<String, Project> {
+    HashMap::new()
 }
 
 impl WorkspaceStorage {
     pub fn new() -> Self {
         Self {
             active_workspace_id: None,
-            workspaces: HashMap::new(),
+            workspaces: default_workspace(),
+            projects: default_project(),
         }
     }
 
@@ -152,6 +170,9 @@ impl WorkspaceStorage {
                 } else {
                     println!("TODO create a workspace");
                 }
+            }
+            GlobalAppStateWorkspace::PROJECT => {
+                println!("TODO project state");
             }
             GlobalAppStateWorkspace::ERROR => {
                 println!("Not a valid state");

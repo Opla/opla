@@ -13,12 +13,13 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { Workspace } from '@/types';
+import { Project, Workspace } from '@/types';
 import { Emitter, GlobalAppStateWorkspace } from './constants';
 
 interface WorkspaceProps {
   activeWorkspaceId?: string;
   workspaces: Record<string, Workspace>;
+  projects: Record<string, Project>;
 }
 
 export interface WorkspaceSlice extends WorkspaceProps {
@@ -31,6 +32,7 @@ export type WorkspaceStore = ReturnType<typeof createWorkspaceSlice>;
 
 const DEFAULT_PROPS: WorkspaceProps = {
   workspaces: {},
+  projects: {},
 };
 
 const createWorkspaceSlice =

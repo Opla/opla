@@ -24,6 +24,7 @@ use crate::data::option_date_format;
 pub struct Project {
     pub id: Option<String>,
     pub name: Option<String>,
+    pub description: Option<String>,
     #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
     pub created_at: Option<DateTime<Utc>>,
     #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
