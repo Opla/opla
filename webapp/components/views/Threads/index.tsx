@@ -77,15 +77,22 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
   } = useContext(AppContext);
   const { config, setSettings, updateBackendStore } = useBackend();
 
-  const { loadWorkspace, activeWorkspaceId: activeWorkspace, workspaces } = useWorkspaceStore();
+  const {
+    loadWorkspace,
+    loadProject,
+    activeWorkspaceId: activeWorkspace,
+    workspaces,
+    projects,
+  } = useWorkspaceStore();
 
   useEffect(() => {
     if (!workspaces || !activeWorkspace) {
       logger.info('loadWorkspace', workspaces, activeWorkspace);
       loadWorkspace(activeWorkspace);
+      loadProject();
     }
-  }, [loadWorkspace, activeWorkspace, workspaces]);
-  logger.info('activeWorkspace', activeWorkspace);
+  }, [loadWorkspace, activeWorkspace, workspaces, loadProject]);
+  logger.info('activeWorkspace', activeWorkspace, projects);
   const searchParams = useSearchParams();
   const selectedConversation = conversations.find((c) => c.id === selectedThreadId);
   const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);

@@ -22,7 +22,7 @@ pub fn get_home_directory() -> Result<PathBuf, String> {
 }
 
 pub fn get_data_directory() -> Result<PathBuf, String> {
-    let data_dir = dirs::data_dir().ok_or("Failed to get home directory")?;
+    let data_dir = dirs::data_dir().ok_or("Failed to get data directory")?;
     let home_dir = data_dir.join("Opla");
     if !Path::exists(&home_dir) {
         fs::create_dir(&home_dir).map_err(|_| "Failed to create data directory")?;

@@ -26,6 +26,7 @@ export interface WorkspaceSlice extends WorkspaceProps {
   getAllWorkspaces: () => Workspace[];
   getWorkspace: (id?: string) => Workspace | undefined;
   loadWorkspace: (id?: string) => Workspace | undefined;
+  loadProject: (id?: string) => Project | undefined;
 }
 
 export type WorkspaceStore = ReturnType<typeof createWorkspaceSlice>;
@@ -46,6 +47,11 @@ const createWorkspaceSlice =
       const w = id ? get().workspaces[id] : undefined;
       emit(GlobalAppStateWorkspace.ACTIVE, id);
       return w;
+    },
+    loadProject: (id) => {
+      const p = id ? get().projects[id] : undefined;
+      emit(GlobalAppStateWorkspace.PROJECT, p);
+      return p;
     },
   });
 
