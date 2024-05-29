@@ -1,3 +1,10 @@
+# [1.0.0-alpha.163](https://github.com/Opla/opla/compare/v1.0.0-alpha.162...v1.0.0-alpha.163) (2024-05-29)
+
+
+### Bug Fixes
+
+* pre-release output ([e77d26b](https://github.com/Opla/opla/commit/e77d26b53aa98ddf26ab4d44abc56e6a61de680c))
+
 # [1.0.0-alpha.162](https://github.com/Opla/opla/compare/v1.0.0-alpha.161...v1.0.0-alpha.162) (2024-05-29)
 
 
