@@ -29,7 +29,7 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { DownloadIcon } from '@radix-ui/react-icons';
 import useTranslation from '@/hooks/useTranslation';
-import { AIService, AIServiceType, Model, ModelState } from '@/types';
+import { AIService, AIServiceType, Model, ModelState, Provider, ProviderType } from '@/types';
 import { deepCopy, deepMerge, getEntityName, getResourceUrl } from '@/utils/data';
 import useParameters from '@/hooks/useParameters';
 import ContentView from '@/components/common/ContentView';
@@ -62,6 +62,7 @@ import { AppContext } from '@/context';
 import { useAssistantStore } from '@/stores';
 import { OrangePill } from '@/components/ui/Pills';
 import { getLocalProvider } from '@/utils/data/providers';
+import OpenAI from '@/utils/providers/openai';
 import ModelIcon from '@/components/common/ModelIcon';
 import Parameter, { ParametersRecord } from '../../common/Parameter';
 import { Button } from '../../ui/button';
@@ -77,7 +78,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
 
   const [fullPathModel, setFullPathModel] = useState<string | undefined>();
   const { config, downloads, updateBackendStore } = useBackend();
-  const { conversations, updateConversations, providers } = useContext(AppContext);
+  const { conversations, updateConversations, providers, setProviders } = useContext(AppContext);
   const { isModelUsedInAssistants } = useAssistantStore();
   const [collection, setCollection] = useState<Model[]>([]);
   const { showModal } = useContext(ModalsContext);
@@ -305,13 +306,18 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       handleInstall(item);
     } else {
       logger.info(`No valid format ${item?.name} ${item?.library}`);
-      // TODO: display toaster
     }
   };
 
   const handleRemoveCloudModel = (selectedModel?: Model) => {
-    // TODO
-    logger.info('TODO remove selectedModel', selectedModel);
+    const chatGPT = providers.find(
+      (p: Provider) => p.type === ProviderType.openai && p.name === OpenAI.template.name,
+    );
+    const updatedModels = chatGPT?.models?.filter((m) => m.id !== selectedModel?.id);
+    const updatedProviders = providers.map((p) =>
+      p.id === chatGPT?.id ? { ...chatGPT, models: updatedModels } : p,
+    );
+    setProviders(updatedProviders);
   };
 
   if (!model) {
