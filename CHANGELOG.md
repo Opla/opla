@@ -1,3 +1,10 @@
+# [1.0.0-alpha.164](https://github.com/Opla/opla/compare/v1.0.0-alpha.163...v1.0.0-alpha.164) (2024-05-30)
+
+
+### Bug Fixes
+
+* get_assistants_collection context error [#944](https://github.com/Opla/opla/issues/944) ([#945](https://github.com/Opla/opla/issues/945)) ([e37e822](https://github.com/Opla/opla/commit/e37e822cd760a26eb490b1ba5fdbc3e5f2678cea))
+
 # [1.0.0-alpha.163](https://github.com/Opla/opla/compare/v1.0.0-alpha.162...v1.0.0-alpha.163) (2024-05-29)
 
 
