@@ -1,3 +1,10 @@
+# [1.0.0-alpha.165](https://github.com/Opla/opla/compare/v1.0.0-alpha.164...v1.0.0-alpha.165) (2024-05-30)
+
+
+### Features
+
+* remove installed cloud model [#946](https://github.com/Opla/opla/issues/946) ([#947](https://github.com/Opla/opla/issues/947)) ([dd7696c](https://github.com/Opla/opla/commit/dd7696ca045df6433714bf6aae20797f1f7ab423))
+
 # [1.0.0-alpha.164](https://github.com/Opla/opla/compare/v1.0.0-alpha.163...v1.0.0-alpha.164) (2024-05-30)
 
 
