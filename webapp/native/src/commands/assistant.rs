@@ -21,8 +21,6 @@ use serde::Serialize;
 use crate::store::Store;
 use crate::local_server::*;
 use crate::sys::Sys;
-use tauri::{ Runtime, State };
-
 
 pub struct OplaContext {
     pub server: Arc<Mutex<LocalServer>>,
@@ -33,10 +31,7 @@ pub struct OplaContext {
 }
 
 #[tauri::command]
-pub async fn get_assistants_collection<R: Runtime>(
-    _app: tauri::AppHandle<R>,
-    _window: tauri::Window<R>,
-    _context: State<'_, OplaContext>
+pub async fn get_assistants_collection(
 ) -> Result<AssistantsCollection, String>
     where Result<AssistantsCollection, String>: Serialize
 {
