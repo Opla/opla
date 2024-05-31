@@ -48,6 +48,8 @@ import { cn } from '@/lib/utils';
 type OpenAIModelsProps = {
   provider: Provider;
   className?: string;
+  containerClassName?: string;
+  formClassName?: string;
   title?: string;
 };
 
@@ -56,6 +58,8 @@ type SelectedModel = Model & { selected?: boolean };
 export default function OpenAIModels({
   provider,
   className,
+  containerClassName,
+  formClassName,
   title = 'Available models',
 }: OpenAIModelsProps) {
   const { t } = useTranslation();
@@ -105,10 +109,10 @@ export default function OpenAIModels({
   };
 
   return (
-    <div className="pb-16 pt-4">
+    <div className={cn('h-full pb-16 pt-4', containerClassName)}>
       {models.length > 0 && (
-        <form className="w-full items-start gap-6 overflow-auto pt-8">
-          <fieldset className="grid gap-6 rounded-lg border p-4">
+        <form className={cn('h-full w-full items-start gap-6 pt-8', formClassName)}>
+          <fieldset className="grid h-full gap-6 rounded-lg border p-4">
             <legend className="-ml-1 px-1 text-sm font-medium">{t(title)}</legend>
             <Table
               className=""
@@ -122,7 +126,7 @@ export default function OpenAIModels({
                   <TableHead className="w-1/7 px-2 py-1">{t('Context window')}</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody className="">
+              <TableBody className="h-full">
                 {models.map((model) => (
                   <TableRow onClick={() => {}} key={model.id || model.name} className="">
                     <TableCell className="px-2 py-1 text-center">

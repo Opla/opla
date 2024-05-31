@@ -48,13 +48,19 @@ function CloudModelDialog({
   return (
     <Dialog id={id} size="lg" open={open} onClose={handleClose}>
       {provider && provider.name === 'OpenAI' && (
-        <Card className="flex h-full w-full flex-col bg-transparent">
+        <Card className="flex h-full w-full flex-col overflow-hidden bg-transparent">
           <CardHeader className="flex-none">
             <CardTitle>{t('Choose Cloud Models')}</CardTitle>
             <CardDescription className="">{t('Models to chat with.')}</CardDescription>
           </CardHeader>
-          <CardContent className="flex-1">
-            <OpenAIModels provider={provider} className="h-[400px]" title="OpenAI" />
+          <CardContent className="h-[72%] px-4 py-0" style={{ height: '72%' }}>
+            <OpenAIModels
+              provider={provider}
+              className="h-[100%]"
+              containerClassName="px-4 py-0"
+              formClassName="p-0"
+              title="OpenAI"
+            />
           </CardContent>
         </Card>
       )}
