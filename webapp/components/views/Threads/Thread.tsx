@@ -40,7 +40,7 @@ import {
   removeConversationService,
 } from '@/utils/data/conversations';
 import useBackend from '@/hooks/useBackendContext';
-import { findModel, findModelInAll, getModelsAsItems } from '@/utils/data/models';
+import { findModel, findModelInAll, getAnyFirstModel, getModelsAsItems } from '@/utils/data/models';
 import { getAssistantId } from '@/utils/services';
 import { toast } from '@/components/ui/Toast';
 import { ModalData, ModalsContext } from '@/context/modals';
@@ -182,6 +182,12 @@ function Thread({
       }
 
       const download = downloads?.find((d) => d.id === activeModel?.id);
+
+      if (!activeModel && !download) {
+        activeModel = getAnyFirstModel(providers, config);
+        modelId = activeModel?.id;
+      }
+
       if (activeModel && download) {
         activeModel.state = ModelState.Downloading;
       } else if (activeModel && activeModel.state === ModelState.Downloading) {

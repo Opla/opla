@@ -22,6 +22,7 @@ import { findProvider, updateProvider } from '@/utils/data/providers';
 import { useAssistantStore } from '@/stores';
 import useTranslation from '@/hooks/useTranslation';
 import { getActiveService } from '@/utils/services';
+import { getAnyFirstModel } from '@/utils/data/models';
 import HeaderMenu from './Menu';
 import AssistantTitle from './AssistantTitle';
 import SelectModel from '../../../common/SelectModel';
@@ -53,7 +54,10 @@ export default function ThreadHeader({
 
   const assistant = getAssistant(selectedAssistantId);
   const service = getActiveService(conversation, assistant, providers, config, selectedModelId);
-  const selectedModel = service.model;
+  let selectedModel = service.model;
+  if (!selectedModel && modelItems.length > 0) {
+    selectedModel = getAnyFirstModel(providers, config);
+  }
   const modelId = selectedModel?.id || selectedModelId;
 
   const selectedItem = modelItems.find((item) => item.key === modelId);
