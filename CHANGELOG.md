@@ -1,3 +1,10 @@
+# [1.0.0-alpha.167](https://github.com/Opla/opla/compare/v1.0.0-alpha.166...v1.0.0-alpha.167) (2024-06-03)
+
+
+### Bug Fixes
+
+* hide scrollTo for no scroll conversation [#951](https://github.com/Opla/opla/issues/951) ([#952](https://github.com/Opla/opla/issues/952)) ([75f4444](https://github.com/Opla/opla/commit/75f44448899e4d466f05b875ac74b660992dc793))
+
 # [1.0.0-alpha.166](https://github.com/Opla/opla/compare/v1.0.0-alpha.165...v1.0.0-alpha.166) (2024-05-31)
 
 
