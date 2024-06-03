@@ -84,17 +84,17 @@ export const matchProvider = (p: Preset, provider: Provider) =>
 
 export const findCompatiblePreset = (
   presetId: string | undefined,
-  presets: Preset[],
+  presets: Preset[] | undefined,
   model?: string,
   provider?: Provider,
 ) => {
-  let compatiblePreset = presets.find((p) => p.id === presetId);
+  let compatiblePreset = presets?.find((p) => p.id === presetId);
   if (!compatiblePreset) {
     if (model && !compatiblePreset) {
-      compatiblePreset = presets.find((p) => matchModel(p, model));
+      compatiblePreset = presets?.find((p) => matchModel(p, model));
     }
     if (provider && !compatiblePreset) {
-      compatiblePreset = presets.find((p) => matchProvider(p, provider));
+      compatiblePreset = presets?.find((p) => matchProvider(p, provider));
     }
   }
   return compatiblePreset;

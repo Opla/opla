@@ -38,6 +38,18 @@ export const getAllModels = (providers: Provider[], config: Store, full?: boolea
   return [...localModels, ...providerModels];
 };
 
+export const getAnyFirstModel = (providers: Provider[], config: Store) => {
+  const localModels = getLocalModels(config);
+  if (localModels.length > 0) {
+    return localModels[0];
+  }
+  const providerModels = getProviderModels(providers);
+  if (providerModels.length > 0) {
+    return providerModels[0];
+  }
+  return undefined;
+};
+
 export const getDownloadables = (model: Model, downloads = [] as Array<Model>, parent?: Model) => {
   if (model?.download) {
     if (parent?.publisher && !model?.publisher) {
