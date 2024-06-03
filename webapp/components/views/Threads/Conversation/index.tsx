@@ -127,13 +127,12 @@ export function ConversationPanel({
     // TODO debug
     const { scrollPosition } = update;
     const py = +position.y.toFixed(2);
-    // logger.info('handleScrollPosition', update, name, scrollPosition, position.y);
+    logger.info('handleScrollPosition', update, name, scrollPosition, position.y, py);
     if (update.name !== name || update.scrollPosition !== py) {
       logger.info('setUpdate', scrollPosition, py);
       setUpdate({ scrollPosition: py, name });
     }
   };
-
   const handlePromptTemplateSelected = (prompt: PromptTemplate) => {
     selectTemplate(prompt);
   };
@@ -158,8 +157,10 @@ export function ConversationPanel({
           conversation={selectedConversation}
           selectedMessageId={selectedMessageId}
           scrollPosition={
-            conversationSettings && conversationSettings.scrollPosition !== undefined
-              ? conversationSettings.scrollPosition / 1000
+            conversationSettings &&
+            conversationSettings.scrollPosition !== undefined &&
+            conversationSettings.scrollPosition !== null
+              ? +(conversationSettings.scrollPosition / 1000).toFixed(2)
               : undefined
           }
           messages={messages || []}

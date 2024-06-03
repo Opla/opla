@@ -63,9 +63,10 @@ function ConversationList({
   };
 
   const position = {
-    x: scrollPosition === -1 ? -1 : 0,
+    x: scrollPosition === undefined || scrollPosition === null || scrollPosition === -1 ? -1 : 0,
     y: scrollPosition === undefined || scrollPosition === null ? -1 : scrollPosition,
   };
+
   const [ref, onScroll] = useScroll(conversation.id, position, onScrollPosition);
   const assets = useMemo(
     () => (conversation ? getConversationAssets(conversation) : []),
