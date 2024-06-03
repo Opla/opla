@@ -24,6 +24,6 @@
         "lint-staged": "^15.2.5"
     },
     "dependencies": {
-        "@npmcli/package-json": "^5.1.0"
+        "@npmcli/package-json": "^5.2.0"
     }
 }
