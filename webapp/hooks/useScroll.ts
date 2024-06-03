@@ -146,7 +146,7 @@ export default function useScroll(
       if (!currentRect || width !== currentRect.width || height !== currentRect.height) {
         // const rect = percentagePositionToContainerRect(contentRect, parent, position);
         if (rect.height < 1 && rect.width < 1) {
-          if (position.x !== -1 || position.y !== -1 ) {
+          if (position.x !== -1 || position.y !== -1) {
             onUpdatePosition({
               key,
               position: { x: -1, y: -1 },
