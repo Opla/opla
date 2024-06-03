@@ -1,3 +1,10 @@
+# [1.0.0-alpha.168](https://github.com/Opla/opla/compare/v1.0.0-alpha.167...v1.0.0-alpha.168) (2024-06-03)
+
+
+### Bug Fixes
+
+* when only OpenAI models can't type msg [#953](https://github.com/Opla/opla/issues/953) ([#954](https://github.com/Opla/opla/issues/954)) ([616db60](https://github.com/Opla/opla/commit/616db600b1cd08a3143b2d04363942edbd1ed247))
+
 # [1.0.0-alpha.167](https://github.com/Opla/opla/compare/v1.0.0-alpha.166...v1.0.0-alpha.167) (2024-06-03)
 
 
