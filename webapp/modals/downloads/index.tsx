@@ -16,7 +16,7 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import useTranslation from '@/hooks/useTranslation';
 import useBackend from '@/hooks/useBackendContext';
-import { DownloadModel } from '@/components/views/Models';
+import { DownloadModel } from '@/features/Models';
 import AlertDialog from '@/components/common/AlertDialog';
 import { Model } from '@/types';
 import logger from '@/utils/logger';

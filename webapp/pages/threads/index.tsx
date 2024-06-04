@@ -17,7 +17,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import useBackend from '@/hooks/useBackendContext';
-import MainThreads from '@/components/views/Threads';
+import MainThreads from '@/features/Threads';
 import { Page } from '@/types/ui';
 
 export default function DefaultThreads() {

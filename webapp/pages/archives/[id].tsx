@@ -15,7 +15,7 @@
 'use client';
 
 import { useRouter } from 'next/router';
-import MainThreads from '@/components/views/Threads';
+import MainThreads from '@/features/Threads';
 import { ViewName } from '@/types/ui';
 
 export default function ArchiveSelected() {

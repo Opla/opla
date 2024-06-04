@@ -14,7 +14,7 @@
 
 import React from 'react';
 import Dialog from '@/components/common/Modal';
-import { ConfigureOpenAI } from '@/components/views/Providers/openai';
+import { ConfigureOpenAI } from '@/features/Providers/openai';
 import useBackend from '@/hooks/useBackendContext';
 import useProviderState from '@/hooks/useProviderState';
 import { Provider } from '@/types';

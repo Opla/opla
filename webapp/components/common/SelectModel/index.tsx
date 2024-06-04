@@ -31,7 +31,7 @@ import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import ModelInfos from '../ModelInfos';
-import ServiceBadge from '../../views/Threads/Header/ServiceBadge';
+import ServiceBadge from '../../../features/Threads/Header/ServiceBadge';
 
 type SelectModelProps = {
   selectedModel?: Model;

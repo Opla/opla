@@ -13,7 +13,7 @@
 // limitations under the License.
 import React from 'react';
 import Dialog from '@/components/common/Modal';
-import { NewLocalModel } from '@/components/views/Models';
+import { NewLocalModel } from '@/features/Models';
 
 function NewLocalModelDialog({
   id,

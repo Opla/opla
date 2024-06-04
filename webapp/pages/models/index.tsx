@@ -14,7 +14,7 @@
 
 'use client';
 
-import Models from '@/components/views/Models';
+import Models from '@/features/Models';
 
 export default function DefaultModels() {
   return <Models />;

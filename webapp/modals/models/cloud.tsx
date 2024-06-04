@@ -16,7 +16,7 @@ import React, { useContext } from 'react';
 import { AppContext } from '@/context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Dialog from '@/components/common/Modal';
-import OpenAIModels from '@/components/views/Providers/openai/Models';
+import OpenAIModels from '@/features/Providers/openai/Models';
 import useProviderState from '@/hooks/useProviderState';
 import useTranslation from '@/hooks/useTranslation';
 import { Provider } from '@/types';
