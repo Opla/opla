@@ -53,7 +53,10 @@ export default function SelectModel({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   return modelItems.length > 0 ? (
-    <Popover open={(modelItems.length > 1 || !selectedModel) && open && !disabled} onOpenChange={setOpen}>
+    <Popover
+      open={(modelItems.length > 1 || !selectedModel) && open && !disabled}
+      onOpenChange={setOpen}
+    >
       <PopoverTrigger asChild>
         <Button
           variant="outline"
