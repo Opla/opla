@@ -29,7 +29,7 @@
 'use client';
 
 import { useRouter } from 'next/router';
-import MainThreads from '@/components/views/Threads';
+import MainThreads from '@/features/Threads';
 
 export default function ThreadSelected() {
   const router = useRouter();

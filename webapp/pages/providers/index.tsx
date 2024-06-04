@@ -17,7 +17,7 @@
 import { useContext, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AppContext } from '@/context';
-import Providers from '@/components/views/Providers';
+import Providers from '@/features/Providers';
 import { ProviderType } from '@/types';
 import { Page } from '@/types/ui';
 

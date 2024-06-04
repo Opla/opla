@@ -14,7 +14,7 @@
 
 'use client';
 
-import AssistantsStore from '@/components/views/AssistantsStore';
+import AssistantsStore from '@/features/AssistantsStore';
 
 export default function ThreadSelected() {
   return <AssistantsStore />;

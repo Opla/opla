@@ -14,7 +14,7 @@
 
 'use client';
 
-import Assistants from '@/components/views/Assistants';
+import Assistants from '@/features/Assistants';
 
 export default function DefaultAssistants() {
   return <Assistants />;
