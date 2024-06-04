@@ -14,18 +14,27 @@
 
 'use client';
 
-import { HelpCircle } from 'lucide-react';
+import { ChangeEvent, HTMLInputTypeAttribute, useRef } from 'react';
+import { File, Folder, HelpCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { BaseNamedRecord } from '@/types';
+import { BaseNamedRecord, ParameterDefinitionType } from '@/types';
+import { Button } from '@/components/ui/button';
+import { t } from 'i18next';
 
-export type ParameterValue = string | number | boolean | BaseNamedRecord[] | string[];
-export type ParametersRecord = Record<string, ParameterValue | undefined>;
+export type ParameterValue = string | number | boolean | BaseNamedRecord[] | string[] | undefined;
+export type ParametersRecord = Record<string, ParameterValue>;
 
+const getAttribute = (type: ParameterDefinitionType): HTMLInputTypeAttribute | undefined => {
+  if (type === 'path') {
+    return 'file';
+  }
+  return type;
+};
 type ParameterProps = {
   label?: string;
   placeholder?: string;
@@ -36,16 +45,7 @@ type ParameterProps = {
   min?: number;
   max?: number;
   value?: ParameterValue;
-  type?:
-    | 'text'
-    | 'password'
-    | 'large-text'
-    | 'number'
-    | 'file'
-    | 'url'
-    | 'select'
-    | 'boolean'
-    | 'array';
+  type?: ParameterDefinitionType;
   disabled?: boolean;
   children?: React.ReactNode;
   onChange?: (name: string, value: ParameterValue) => void;
@@ -66,11 +66,21 @@ export default function Parameter({
   children,
   onChange = () => {},
 }: ParameterProps) {
+  const hiddenFileInput = useRef<HTMLInputElement>(null);
   const textCss = 'pr-2 w-sm';
   const boxCss =
     type === 'large-text' ? 'flex w-full flex-col px-0 py-2' : 'flex w-full flex-row px-0 py-2';
 
   let component = null;
+
+  const handleClick = () => {
+    hiddenFileInput.current?.click();
+  };
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>, n: string) => {
+    const fileUploaded = event.target.files?.[0];
+    onChange(n, fileUploaded?.name);
+  };
 
   let flex = 'flex-row items-center justify-between';
   if (type === 'array') {
@@ -114,7 +124,12 @@ export default function Parameter({
             {value as string}
           </a>
         )}
-        {disabled && type === 'file' && <div className={textCss}>{value as string}</div>}
+        {disabled && (type === 'file' || type === 'path') && (
+          <div className="flex items-center gap-4">
+            {(value as string) || t('None')}
+            <File strokeWidth={1.5} className="h-4 w-4" />
+          </div>
+        )}
         {type === 'boolean' && (
           <Switch
             checked={value as boolean}
@@ -126,13 +141,12 @@ export default function Parameter({
         {(type === 'text' ||
           type === 'number' ||
           type === 'password' ||
-          (type === 'url' && !disabled) ||
-          (type === 'file' && !disabled)) && (
+          (type === 'url' && !disabled)) && (
           <Input
             value={(value as string) || ''}
             placeholder={placeholder}
             className="w-full min-w-[60px]"
-            type={type}
+            type={getAttribute(type)}
             disabled={disabled}
             min={min}
             max={max}
@@ -145,6 +159,29 @@ export default function Parameter({
             }}
           />
         )}
+        {((type === 'path' && !disabled) || (type === 'file' && !disabled)) && (
+          <div className="flex items-center gap-4">
+            <span>{(value as string) || t('None')}</span>
+            <Button variant="ghost" size="icon" onClick={handleClick}>
+              {type === 'path' ? (
+                <Folder strokeWidth={1.5} className="h-4 w-4" />
+              ) : (
+                <File strokeWidth={1.5} className="h-4 w-4" />
+              )}
+            </Button>
+            <Input
+              value={(value as string) || ''}
+              placeholder={placeholder}
+              className="hidden"
+              type={getAttribute(type)}
+              disabled={disabled}
+              ref={hiddenFileInput}
+              onChange={(e) => {
+                handleFileChange(e, name);
+              }}
+            />
+          </div>
+        )}
         {children}
       </div>
     );
@@ -155,7 +192,7 @@ export default function Parameter({
       <div className="flex w-full flex-grow flex-col justify-center">
         <div className="flex w-full flex-row items-center justify-between">
           <div className={`flex grow flex-row ${flex}`}>
-            {label && <Label>{label} </Label>}
+            {label && <Label className="capitalize">{label} </Label>}
             {component}
           </div>
           {description && (

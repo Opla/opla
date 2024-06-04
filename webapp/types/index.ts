@@ -241,21 +241,35 @@ export enum LlmEngine {
   unknown = 'unknown',
 }
 
+export type ParameterDefinitionType =
+  | 'text'
+  | 'password'
+  | 'large-text'
+  | 'number'
+  | 'url'
+  | 'file'
+  | 'path'
+  | 'select'
+  | 'boolean'
+  | 'array';
+
 export type ParameterDefinition = {
   z: ZodSchema;
-  type?: 'text' | 'password' | 'large-text' | 'number' | 'url' | 'select' | 'boolean';
+  type?: ParameterDefinitionType;
   defaultValue?: string | number | boolean | undefined;
   min?: number;
   max?: number;
   name: string;
-  description: string;
+  label?: string;
+  description?: string;
+  disabled?: boolean;
 };
 
-export type ParametersDefinition = Record<string, ParameterDefinition>;
+export type ParameterDefinitions = Record<string, ParameterDefinition>;
 
 export type CompletionParameterDefinition = ParameterDefinition;
 
-export type CompletionParametersDefinition = Record<string, CompletionParameterDefinition>;
+export type CompletionParameterDefinitions = Record<string, CompletionParameterDefinition>;
 
 export type CompletionOptions = {
   contextWindowPolicy?: ContextWindowPolicy;
@@ -270,7 +284,7 @@ export type ImplProvider = {
   defaultParameters: LlmParameters[];
   template: Partial<Provider>;
   completion: {
-    parameters: CompletionParametersDefinition;
+    parameters: CompletionParameterDefinitions;
   };
   tokenize?: (text: string) => Promise<number[]>;
 };

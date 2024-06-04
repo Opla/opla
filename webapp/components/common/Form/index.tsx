@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ParametersDefinition } from '@/types';
+import { ParameterDefinitions } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import useParameters, { ParametersCallback } from '@/hooks/useParameters';
 import Parameter, { ParameterValue } from '../Parameter';
@@ -20,7 +20,7 @@ import Parameter, { ParameterValue } from '../Parameter';
 export type FormProps<T> = {
   id: string | undefined;
   parameters: Record<string, T> | undefined;
-  parametersDefinition: ParametersDefinition;
+  parametersDefinition: ParameterDefinitions;
   debounceDelay?: number;
   onParametersChange: ParametersCallback;
 };
@@ -52,7 +52,7 @@ export default function Form<T>({
             (parameters?.[key] as ParameterValue) ||
             parametersDefinition[key].defaultValue
           }
-          description={t(parametersDefinition[key].description)}
+          description={parametersDefinition[key].description}
           inputCss="max-w-20 pl-2"
           onChange={setUpdatedParameters}
         />

@@ -28,7 +28,7 @@ import {
   startLLamaCppServer,
   stopLLamaCppServer,
 } from '../providers/llama.cpp';
-import { LlamaCppArguments } from '../providers/llama.cpp/schema';
+import { LlamaCppParameters } from '../providers/llama.cpp/constants';
 import { getOplaConfig, getOplaServerStatus } from './commands';
 
 export type BackendResult =
@@ -105,7 +105,7 @@ class Backend {
       server = { ...server, status: ServerStatus.ERROR, message: error as string };
     }
 
-    this.start = async (parameters: LlamaCppArguments, model = activeModel) => {
+    this.start = async (parameters: LlamaCppParameters, model = activeModel) => {
       logger.info('start server', model, parameters);
       try {
         await startLLamaCppServer(model, parameters);
@@ -127,7 +127,7 @@ class Backend {
       return { status: 'ok' };
     };
 
-    this.restart = async (parameters: LlamaCppArguments, model = activeModel) => {
+    this.restart = async (parameters: LlamaCppParameters, model = activeModel) => {
       logger.info('restart server', parameters);
       try {
         await restartLLamaCppServer(model, parameters);
@@ -145,11 +145,11 @@ class Backend {
 
   static listeners: Record<string, () => void> = {};
 
-  start?: (parameters: LlamaCppArguments, model?: string) => Promise<BackendResult>;
+  start?: (parameters: LlamaCppParameters, model?: string) => Promise<BackendResult>;
 
   stop?: () => Promise<BackendResult>;
 
-  restart?: (parameters: LlamaCppArguments, model?: string) => Promise<BackendResult>;
+  restart?: (parameters: LlamaCppParameters, model?: string) => Promise<BackendResult>;
 }
 
 export default Backend;

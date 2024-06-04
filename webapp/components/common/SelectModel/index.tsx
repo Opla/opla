@@ -120,6 +120,6 @@ export default function SelectModel({
       </PopoverContent>
     </Popover>
   ) : (
-    <span>{t('Select a model')}</span>
+    <span>{modelItems.length > 0 ? t('Select a model') : t('No model installed')}</span>
   );
 }

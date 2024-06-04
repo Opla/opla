@@ -3,7 +3,7 @@
 
 import {
   AIImplService,
-  CompletionParametersDefinition,
+  CompletionParameterDefinitions,
   Conversation,
   LlmMessage,
   LlmParameters,
@@ -84,7 +84,7 @@ export const createLlmMessages = (
 
 export const getCompletionParametersDefinition = (
   provider?: Provider,
-): CompletionParametersDefinition => {
+): CompletionParameterDefinitions => {
   if (provider?.type === ProviderType.openai) {
     return OpenAI.completion.parameters;
   }

@@ -60,7 +60,12 @@ const deepMerge = <T>(_target: T, source: Partial<T>, copy = false): T => {
   return target as T;
 };
 
-const deepSet = <V, T>(obj: V, path: string, _value: T, root = path): Record<string, T> => {
+const deepSet = <V, T>(
+  obj: V,
+  path: string,
+  _value: T | undefined,
+  root = path,
+): Record<string, T | undefined> => {
   const [property, ...properties] = path.split('.');
   let value = _value;
   if (typeof obj === 'object' && properties.length) {

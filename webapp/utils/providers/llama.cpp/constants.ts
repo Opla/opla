@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { z } from 'zod';
+import { ParameterDefinition, ParameterDefinitionType } from '@/types';
+import { ZodBigInt, ZodBoolean, ZodEnum, ZodNumber, ZodSchema, ZodString, z } from 'zod';
 
 /**
  * LLama.cpp server arguments
@@ -61,28 +62,81 @@ import { z } from 'zod';
   --mmproj MMPROJ_FILE  path to a multimodal projector file for LLaVA.
  */
 
-const LlamaCppArgumentsSchema = z.object({
-  verbose: z.boolean().optional().default(false).describe('verbose output (default: disabled)'),
+const LlamaCppArgumentPartialDefinitions: Record<string, Partial<ParameterDefinition>> = {
+  model: { label: 'Model path', type: 'file', disabled: true },
+  host: { label: 'Host', defaultValue: '127.0.0.1' },
+  port: { label: 'Port', type: 'number' },
+  contextSize: { label: 'Context size', defaultValue: 512, type: 'number' },
+  threads: { label: 'Threads', defaultValue: 6, type: 'number' },
+  threadsBatch: { label: 'Threads Batch', defaultValue: 6, type: 'number' },
+  nGpuLayers: { label: 'Number of GPU layers', type: 'number' },
+  ropeScaling: { label: 'Rope Scaling', defaultValue: 'linear' },
+  batchSize: { label: 'Batch Size', defaultValue: 512, type: 'number' },
+  timeout: { label: 'Timeout', defaultValue: 600, type: 'number' },
+  verbose: { type: 'boolean' },
+  path: { type: 'path' },
+  ropeFreqBase: { type: 'number' },
+  ropeFreqScale: { type: 'number' },
+  yarnExtFactor: { type: 'number' },
+  yarnAttnFactor: { type: 'number' },
+  yarnBetaSlow: { type: 'number' },
+  yarnBetaFast: { type: 'number' },
+  memoryF32: { type: 'boolean' },
+  mlock: { type: 'boolean' },
+  noMmap: { type: 'boolean' },
+  numa: { type: 'boolean' },
+  tensorSplit: { type: 'text' },
+  mainGpu: { type: 'number' },
+  noMulMatQ: { type: 'boolean' },
+  alias: { type: 'text' },
+  lora: { type: 'text' },
+  loraBase: { type: 'file' },
+  embedding: { type: 'boolean' },
+  parallel: { type: 'number', defaultValue: 1 },
+  contBatching: { type: 'boolean' },
+  systemPromptFile: { type: 'file' },
+  mmproj: { type: 'path' },
+};
+
+const LlamaCppArguments: Record<string, ZodSchema> = {
+  model: z
+    .string()
+    .nullable()
+    .optional()
+    .describe('model path (default: models/7B/ggml-model-f16.gguf)'),
+  host: z
+    .string()
+    .optional()
+    .default(LlamaCppArgumentPartialDefinitions.host.defaultValue as string)
+    .describe('ip address to listen (default  (default:127.0.0.1)'),
+  port: z.number().optional().default(8080).describe('port to listen (default  (default:8080)'),
+  contextSize: z
+    .number()
+    .int()
+    .optional()
+    .default(LlamaCppArgumentPartialDefinitions.contextSize.defaultValue as number)
+    .describe('size of the prompt context (default: 512)'),
   threads: z
     .number()
     .int()
     .optional()
-    .default(6)
+    .default(LlamaCppArgumentPartialDefinitions.threads.defaultValue as number)
     .describe('number of threads to use during computation (default: 6)'),
   threadsBatch: z
     .number()
     .int()
     .optional()
-    .default(() => 6)
+    .default(LlamaCppArgumentPartialDefinitions.threadsBatch.defaultValue as number)
     .describe(
       'number of threads to use during batch and prompt processing (default: same as --threads)',
     ),
-  contextSize: z
-    .number()
-    .int()
+  nGpuLayers: z.number().int().optional().describe('number of layers to store in VRAM'),
+  path: z
+    .string()
     .optional()
-    .default(512)
-    .describe('size of the prompt context (default: 512)'),
+    .default('examples/server/public')
+    .describe('path from which to serve static files (default examples/server/public)'),
+  verbose: z.boolean().optional().default(false).describe('verbose output (default: disabled)'),
   ropeScaling: z
     .enum(['none', 'linear', 'yarn'])
     .optional()
@@ -129,7 +183,6 @@ const LlamaCppArgumentsSchema = z.object({
     .optional()
     .default(false)
     .describe('attempt optimizations that help on some NUMA systems'),
-  nGpuLayers: z.number().int().optional().describe('number of layers to store in VRAM'),
   tensorSplit: z
     .string()
     .optional()
@@ -144,11 +197,7 @@ const LlamaCppArgumentsSchema = z.object({
     .describe(
       'use cuBLAS instead of custom mul_mat_q CUDA kernels. Not recommended since this is both slower and uses more VRAM.',
     ),
-  model: z
-    .string()
-    .nullable()
-    .optional()
-    .describe('model path (default: models/7B/ggml-model-f16.gguf)'),
+
   alias: z
     .string()
     .optional()
@@ -158,17 +207,7 @@ const LlamaCppArgumentsSchema = z.object({
     .string()
     .optional()
     .describe('optional model to use as a base for the layers modified by the LoRA adapter'),
-  host: z
-    .string()
-    .optional()
-    .default('127.0.0.1')
-    .describe('ip address to listen (default  (default:127.0.0.1)'),
-  port: z.number().optional().default(8080).describe('port to listen (default  (default:8080)'),
-  path: z
-    .string()
-    .optional()
-    .default('examples/server/public')
-    .describe('path from which to serve static files (default examples/server/public)'),
+
   timeout: z
     .number()
     .optional()
@@ -197,7 +236,40 @@ const LlamaCppArgumentsSchema = z.object({
       'Set a file to load a system prompt (initial prompt of all slots), this is useful for chat applications.',
     ),
   mmproj: z.string().optional().describe('path to a multimodal projector file for LLaVA.'),
-});
+};
+
+const LlamaCppArgumentsSchema = z.object(LlamaCppArguments);
+
+const getZodType = (zodSchema: ZodSchema): ParameterDefinitionType | undefined => {
+  if (zodSchema instanceof ZodString) {
+    return 'text';
+  }
+  if (zodSchema instanceof ZodNumber) {
+    return 'number';
+  }
+  if (zodSchema instanceof ZodBigInt) {
+    return 'number';
+  }
+  if (zodSchema instanceof ZodBoolean) {
+    return 'boolean';
+  }
+  if (zodSchema instanceof ZodEnum) {
+    return 'select';
+  }
+  return undefined;
+};
+
+const LllamaCppParameterDefinitions: ParameterDefinition[] = Object.keys(LlamaCppArguments).map(
+  (name) => ({
+    z: LlamaCppArguments[name],
+    type: LlamaCppArgumentPartialDefinitions[name]?.type || getZodType(LlamaCppArguments[name]),
+    defaultValue: LlamaCppArgumentPartialDefinitions[name]?.defaultValue,
+    name: LlamaCppArgumentPartialDefinitions[name]?.name || name,
+    label: LlamaCppArgumentPartialDefinitions[name]?.label,
+    description: LlamaCppArguments[name].description,
+    disabled: LlamaCppArgumentPartialDefinitions[name]?.disabled,
+  }),
+);
 
 const LlamaCppOptions = {
   verbose: ['-v', '--verbose'],
@@ -235,6 +307,6 @@ const LlamaCppOptions = {
   mmproj: ['--mmproj'],
 };
 
-export type LlamaCppArguments = z.infer<typeof LlamaCppArgumentsSchema>;
+export type LlamaCppParameters = z.infer<typeof LlamaCppArgumentsSchema>;
 
-export { LlamaCppArgumentsSchema, LlamaCppOptions };
+export { LllamaCppParameterDefinitions, LlamaCppArgumentsSchema, LlamaCppOptions };

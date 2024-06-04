@@ -34,6 +34,7 @@ import { deepGet } from '@/utils/data';
 import SelectModel from '@/components/common/SelectModel';
 import { getLocalModels, getLocalModelsAsItems } from '@/utils/data/models';
 import { setActiveModel } from '@/utils/backend/commands';
+import { LllamaCppParameterDefinitions } from '@/utils/providers/llama.cpp/constants';
 
 export default function Opla({
   provider,
@@ -97,51 +98,22 @@ export default function Opla({
       <form className="grid w-full items-start gap-6 overflow-auto pb-20 pt-8">
         <fieldset className="grid gap-6 rounded-lg border p-4">
           <legend className="-ml-1 px-1 text-sm font-medium">{t('Parameters')}</legend>
-          <Parameter
-            label={t('Model path')}
-            name="metadata.server.parameters.model"
-            value={
-              modelPath || deepGet(provider, 'metadata.server.parameters.modelPath', t('None'))
-            }
-            disabled
-            type="file"
-            onChange={onParameterChange}
-          />
-          <Parameter
-            label={t('Host')}
-            name="metadata.server.parameters.host"
-            value={deepGet(provider, 'metadata.server.parameters.host', '')}
-            type="text"
-            onChange={onParameterChange}
-          />
-          <Parameter
-            label={t('Port')}
-            name="metadata.server.parameters.port"
-            value={deepGet(provider, 'metadata.server.parameters.port', '')}
-            type="number"
-            onChange={onParameterChange}
-          />
-          <Parameter
-            label={t('Context size')}
-            name="metadata.server.parameters.contextSize"
-            value={deepGet(provider, 'metadata.server.parameters.contextSize', '')}
-            type="number"
-            onChange={onParameterChange}
-          />
-          <Parameter
-            label={t('Threads')}
-            name="metadata.server.parameters.threads"
-            value={deepGet(provider, 'metadata.server.parameters.threads', '')}
-            type="number"
-            onChange={onParameterChange}
-          />
-          <Parameter
-            label={t('Number of GPU layers')}
-            name="metadata.server.parameters.nGpuLayers"
-            value={deepGet(provider, 'metadata.server.parameters.nGpuLayers', '')}
-            type="number"
-            onChange={onParameterChange}
-          />
+          {LllamaCppParameterDefinitions.map((def) => (
+            <Parameter
+              key={`llama_${def.name}`}
+              label={t(def.label || def.name)}
+              name={`metadata.server.parameters.${def.name}`}
+              value={
+                def.name === 'model'
+                  ? modelPath
+                  : deepGet(provider, `metadata.server.parameters.${def.name}`, def.defaultValue)
+              }
+              type={def.type}
+              disabled={def.disabled}
+              onChange={onParameterChange}
+              description={def.description}
+            />
+          ))}
         </fieldset>
       </form>
     </div>
