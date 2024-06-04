@@ -44,18 +44,20 @@ export default function Opla({
   onParameterChange: (name: string, value: ParameterValue) => void;
 }) {
   const { t } = useTranslation();
-  const { server, restart, config } = useBackend();
+  const { server, restart, config, updateBackendStore } = useBackend();
   const models = getLocalModels(config);
   const modelId = config.server.parameters.modelId as string;
   const selectedModel = models.find((m) => m.id === modelId || m.fileName === modelId);
   const modelPath = config.server.parameters.modelPath as string;
   const items = getLocalModelsAsItems(config, selectedModel?.id);
-
+  console.log('model', modelId, selectedModel, models, config);
   const changeActiveModel = async (modelIdOrName: string) => {
     await setActiveModel(modelIdOrName);
     if (server.status === ServerStatus.STARTED || server.status === ServerStatus.STARTING) {
       const { parameters } = config.server;
       await restart(parameters);
+    } else {
+      await updateBackendStore();
     }
   };
 

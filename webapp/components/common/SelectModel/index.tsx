@@ -52,15 +52,18 @@ export default function SelectModel({
 }: SelectModelProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-
-  return selectedModel ? (
-    <Popover open={modelItems.length > 1 && open && !disabled} onOpenChange={setOpen}>
+  return modelItems.length > 0 ? (
+    <Popover
+      open={(modelItems.length > 1 || !selectedModel) && open && !disabled}
+      onOpenChange={setOpen}
+    >
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          disabled={modelItems.length < 2 || disabled}
+          disabled={(selectedModel && modelItems.length < 2) || disabled}
           className="flex gap-4 px-2 capitalize text-foreground"
         >
+          {!selectedModel && <span>{t('Select a model')}</span>}
           {selectedModel && <ModelInfos model={selectedModel} displayIcon />}
           {selectedItem && (
             <ServiceBadge
@@ -92,7 +95,7 @@ export default function SelectModel({
                     <Check
                       className={cn(
                         'mr-2 h-4 w-4',
-                        item.key === selectedModel.id ? 'opacity-100' : 'opacity-0',
+                        item.key === selectedModel?.id ? 'opacity-100' : 'opacity-0',
                       )}
                     />
                     <div className="flex w-full items-center gap-2">
@@ -120,6 +123,6 @@ export default function SelectModel({
       </PopoverContent>
     </Popover>
   ) : (
-    <span>{modelItems.length > 0 ? t('Select a model') : t('No model installed')}</span>
+    <span>{t('No model installed')}</span>
   );
 }

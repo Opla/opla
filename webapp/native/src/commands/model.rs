@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use crate::ServerStatus;
 use crate::{api::hf::search_hf_models, start_server, OplaContext};
 use crate::data::model::{ Model, ModelEntity };
 use crate::models::{ fetch_models_collection, ModelsCollection };
@@ -263,12 +264,29 @@ pub async fn set_active_model<R: Runtime>(
 ) -> Result<(), String> {
     let mut store = context.store.lock().await;
     let result = store.models.get_model(model_id.as_str());
+    let provider_name: String;
     if result.is_none() && (provider.is_none() || provider.as_deref() == Some("Opla")) {
         return Err(format!("Model not found: {:?}", model_id));
     } else if provider.is_some() {
-        store.set_active_service(&model_id, &provider.unwrap_or("Opla".to_string()));
+        provider_name = provider.unwrap_or("Opla".to_string());
+        store.set_active_service(&model_id, &provider_name);
     } else {
+        provider_name = "Opla".to_string();
         store.set_local_active_model_id(&model_id);
+    }
+    if provider_name == "Opla" {
+        let server = context.server.lock().await;
+        let status = match server.status.try_lock() {
+            Ok(status) => status,
+            Err(_) => {
+                println!("Opla server error try to read status");
+                return Err("Opla server can't read status".to_string());
+            }
+        };
+        if status.to_owned() != ServerStatus::Started || status.to_owned() != ServerStatus::Starting {
+            store.server.parameters.model_id = Some(model_id);
+            store.server.parameters.model_path = None;
+        }
     }
     store.save().map_err(|err| err.to_string())?;
     Ok(())
