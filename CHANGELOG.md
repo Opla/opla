@@ -1,3 +1,10 @@
+# [1.0.0-alpha.171](https://github.com/Opla/opla/compare/v1.0.0-alpha.170...v1.0.0-alpha.171) (2024-06-04)
+
+
+### Bug Fixes
+
+* opla provider select first active model [#972](https://github.com/Opla/opla/issues/972) ([#973](https://github.com/Opla/opla/issues/973)) ([495a5ef](https://github.com/Opla/opla/commit/495a5efc9363351165989d6f2cecf7e0923289ad))
+
 # [1.0.0-alpha.170](https://github.com/Opla/opla/compare/v1.0.0-alpha.169...v1.0.0-alpha.170) (2024-06-04)
 
 
