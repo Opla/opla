@@ -179,7 +179,7 @@ const validateModelsFile = async (file: string): Promise<SafeParseReturnType<unk
 };
 
 const importModel = (model: Model): ModelType => {
-  const now = new Date().getMilliseconds();
+  const now = Date.now();
   const download = model.download || model.include?.[0]?.download || '';
   return {
     id: model.id,
