@@ -84,7 +84,9 @@ export const installModel = async (
   fileName: string,
 ): Promise<string> => {
   try {
-    const model = mapKeys(_model, toSnakeCase);
+    const model: { created_at: string; updated_at: string } = mapKeys(_model, toSnakeCase);
+    model.created_at = new Date(_model.createdAt).toISOString();
+    model.updated_at = new Date(_model.updatedAt).toISOString();
     const id = await invokeTauri<string>('install_model', { model, url, path, fileName });
     return id;
   } catch (error) {
@@ -105,9 +107,12 @@ export const uninstallModel = async (modelId: string, inUse: boolean) => {
   await invokeTauri<string>('uninstall_model', { modelId, inUse });
 };
 
-export const updateModel = async (model: Model) => {
+export const updateModel = async (_model: Model) => {
   try {
-    const args = mapKeys({ model }, toSnakeCase);
+    const model: { created_at: string; updated_at: string } = mapKeys(_model, toSnakeCase);
+    model.created_at = new Date(_model.createdAt).toISOString();
+    model.updated_at = new Date(_model.updatedAt).toISOString();
+    const args = { model };
     await invokeTauri<void>('update_model', args);
   } catch (error) {
     logger.error(error);
@@ -115,9 +120,12 @@ export const updateModel = async (model: Model) => {
   }
 };
 
-export const updateModelEntity = async (model: Model) => {
+export const updateModelEntity = async (_model: Model) => {
   try {
-    const args = mapKeys({ model, entity: model }, toSnakeCase);
+    const model: { created_at: string; updated_at: string } = mapKeys(_model, toSnakeCase);
+    model.created_at = new Date(_model.createdAt).toISOString();
+    model.updated_at = new Date(_model.updatedAt).toISOString();
+    const args = { model, entity: model };
     await invokeTauri<void>('update_model_entity', args);
   } catch (error) {
     logger.error(error);
