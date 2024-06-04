@@ -1,3 +1,10 @@
+# [1.0.0-alpha.170](https://github.com/Opla/opla/compare/v1.0.0-alpha.169...v1.0.0-alpha.170) (2024-06-04)
+
+
+### Bug Fixes
+
+* can't uninstall a local model [#968](https://github.com/Opla/opla/issues/968) ([#970](https://github.com/Opla/opla/issues/970)) ([2377dea](https://github.com/Opla/opla/commit/2377dead53d9ef9d8ba8d2f23528768e2719fec8))
+
 # [1.0.0-alpha.169](https://github.com/Opla/opla/compare/v1.0.0-alpha.168...v1.0.0-alpha.169) (2024-06-04)
 
 
