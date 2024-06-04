@@ -281,6 +281,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       await updateConversations(updatedConversations);
     }
     await updateBackendStore();
+    toast.success(`${model.name} ${t('model uninstalled')} `);
     router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
   };
 
@@ -299,7 +300,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       return;
     }
 
-    if (local && !selectedModel) {
+    if (local && selectedModel?.state !== ModelState.Removed) {
       handleUninstall();
       return;
     }
@@ -377,25 +378,6 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
                 {t('Remove')}
               </Button>
             )}
-            {/* local && (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <PiDotsThreeVerticalBold className="h-4 w-4"  strokeWidth={1.5} />
-          <span className="sr-only">{t('More')}</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <>
-          <DropdownMenuItem onSelect={() => onChange()}>
-            {t('Uninstall & Remove')}
-          </DropdownMenuItem>
-          <DropdownMenuItem>{t('Open in Finder')}</DropdownMenuItem>
-          <DropdownMenuItem>{t('Change version')}</DropdownMenuItem>
-        </>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  ) */}
           </div>
         )
       }
