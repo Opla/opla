@@ -1,3 +1,10 @@
+# [1.0.0-alpha.169](https://github.com/Opla/opla/compare/v1.0.0-alpha.168...v1.0.0-alpha.169) (2024-06-04)
+
+
+### Features
+
+* edit all llama.cpp server parameters [#950](https://github.com/Opla/opla/issues/950) ([#967](https://github.com/Opla/opla/issues/967)) ([17ef388](https://github.com/Opla/opla/commit/17ef38805075592334a0154ba754a6811fca912e))
+
 # [1.0.0-alpha.168](https://github.com/Opla/opla/compare/v1.0.0-alpha.167...v1.0.0-alpha.168) (2024-06-03)
 
 
