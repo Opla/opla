@@ -14,7 +14,7 @@
 
 import { z } from 'zod';
 import {
-  CompletionParametersDefinition,
+  CompletionParameterDefinitions,
   LlmParameters,
   Provider,
   ImplProvider,
@@ -85,7 +85,7 @@ const openAIProviderTemplate: Partial<Provider> = {
 
 // https://platform.openai.com/docs/api-reference/chat/create
 // TODO tools, tool_choice, user,
-const CompletionParameters: CompletionParametersDefinition = {
+const CompletionParameters: CompletionParameterDefinitions = {
   stream: {
     z: z.boolean().nullable().optional().default(false),
     name: 'Stream',

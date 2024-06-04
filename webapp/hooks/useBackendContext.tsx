@@ -52,11 +52,11 @@ import { AppContext } from '@/context';
 import Backend, { BackendResult } from '@/utils/backend/Backend';
 import { deepCopy, mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
-import { LlamaCppArgumentsSchema } from '@/utils/providers/llama.cpp/schema';
 import OplaProvider from '@/utils/providers/opla';
 import { getConversation } from '@/utils/data/conversations';
 import { changeMessageContent } from '@/utils/data/messages';
 import { ParsedPrompt } from '@/utils/parsers';
+import { parseLLamaCppServerParameters } from '@/utils/providers/llama.cpp';
 
 const initialBackendContext: OplaContext = {
   server: {
@@ -413,7 +413,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
 
   const restart = useCallback(
     async (params: ServerParameters | undefined = {}): Promise<BackendResult> => {
-      const llmParameters = LlamaCppArgumentsSchema.parse(params);
+      const llmParameters = parseLLamaCppServerParameters(params);
       let result: BackendResult;
       try {
         result = await (backendRef.current?.restart?.(llmParameters) ||
@@ -434,7 +434,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
 
   const start = useCallback(
     async (params: ServerParameters | undefined = {}): Promise<BackendResult> => {
-      const llmParameters = LlamaCppArgumentsSchema.parse(params);
+      const llmParameters = parseLLamaCppServerParameters(params);
       let result: BackendResult;
       try {
         result = await (backendRef.current?.start?.(llmParameters) || defaultContext.start(params));

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CompletionParametersDefinition, LlmParameters, ImplProvider, ProviderType } from '@/types';
+import { CompletionParameterDefinitions, LlmParameters, ImplProvider, ProviderType } from '@/types';
 import { z } from 'zod';
 
 const NAME = 'Opla';
@@ -26,7 +26,7 @@ const DEFAULT_PARAMETERS: LlmParameters[] = [
 
 // https://github.com/ggerganov/llama.cpp/blob/master/examples/server/README.md
 // TODO: logit_bias, n_probs, image_data, slot_id, cache_prompt, system_prompt
-export const CompletionParameters: CompletionParametersDefinition = {
+export const CompletionParameters: CompletionParameterDefinitions = {
   stream: {
     z: z.coerce.boolean().nullable().optional().default(false),
     type: 'boolean',

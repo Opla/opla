@@ -62,8 +62,7 @@ import { ZodBigInt, ZodBoolean, ZodEnum, ZodNumber, ZodSchema, ZodString, z } fr
   --mmproj MMPROJ_FILE  path to a multimodal projector file for LLaVA.
  */
 
-
-const LlamaCppArgumentPartialDefinitions: Record<string,Partial<ParameterDefinition>> = {
+const LlamaCppArgumentPartialDefinitions: Record<string, Partial<ParameterDefinition>> = {
   model: { label: 'Model path', type: 'file', disabled: true },
   host: { label: 'Host', defaultValue: '127.0.0.1' },
   port: { label: 'Port', type: 'number' },
@@ -74,6 +73,29 @@ const LlamaCppArgumentPartialDefinitions: Record<string,Partial<ParameterDefinit
   ropeScaling: { label: 'Rope Scaling', defaultValue: 'linear' },
   batchSize: { label: 'Batch Size', defaultValue: 512, type: 'number' },
   timeout: { label: 'Timeout', defaultValue: 600, type: 'number' },
+  verbose: { type: 'boolean' },
+  path: { type: 'path' },
+  ropeFreqBase: { type: 'number' },
+  ropeFreqScale: { type: 'number' },
+  yarnExtFactor: { type: 'number' },
+  yarnAttnFactor: { type: 'number' },
+  yarnBetaSlow: { type: 'number' },
+  yarnBetaFast: { type: 'number' },
+  memoryF32: { type: 'boolean' },
+  mlock: { type: 'boolean' },
+  noMmap: { type: 'boolean' },
+  numa: { type: 'boolean' },
+  tensorSplit: { type: 'text' },
+  mainGpu: { type: 'number' },
+  noMulMatQ: { type: 'boolean' },
+  alias: { type: 'text' },
+  lora: { type: 'text' },
+  loraBase: { type: 'file' },
+  embedding: { type: 'boolean' },
+  parallel: { type: 'number', defaultValue: 1 },
+  contBatching: { type: 'boolean' },
+  systemPromptFile: { type: 'file' },
+  mmproj: { type: 'path' },
 };
 
 const LlamaCppArguments: Record<string, ZodSchema> = {
@@ -88,11 +110,6 @@ const LlamaCppArguments: Record<string, ZodSchema> = {
     .default(LlamaCppArgumentPartialDefinitions.host.defaultValue as string)
     .describe('ip address to listen (default  (default:127.0.0.1)'),
   port: z.number().optional().default(8080).describe('port to listen (default  (default:8080)'),
-  path: z
-    .string()
-    .optional()
-    .default('examples/server/public')
-    .describe('path from which to serve static files (default examples/server/public)'),
   contextSize: z
     .number()
     .int()
@@ -114,6 +131,11 @@ const LlamaCppArguments: Record<string, ZodSchema> = {
       'number of threads to use during batch and prompt processing (default: same as --threads)',
     ),
   nGpuLayers: z.number().int().optional().describe('number of layers to store in VRAM'),
+  path: z
+    .string()
+    .optional()
+    .default('examples/server/public')
+    .describe('path from which to serve static files (default examples/server/public)'),
   verbose: z.boolean().optional().default(false).describe('verbose output (default: disabled)'),
   ropeScaling: z
     .enum(['none', 'linear', 'yarn'])
@@ -220,24 +242,25 @@ const LlamaCppArgumentsSchema = z.object(LlamaCppArguments);
 
 const getZodType = (zodSchema: ZodSchema): ParameterDefinitionType | undefined => {
   if (zodSchema instanceof ZodString) {
-    return "text";
+    return 'text';
   }
   if (zodSchema instanceof ZodNumber) {
-    return "number";
+    return 'number';
   }
   if (zodSchema instanceof ZodBigInt) {
-    return "number";
+    return 'number';
   }
   if (zodSchema instanceof ZodBoolean) {
-    return "boolean";
+    return 'boolean';
   }
   if (zodSchema instanceof ZodEnum) {
-    return "select";
+    return 'select';
   }
-  return undefined
+  return undefined;
 };
 
-const LllamaCppParameterDefinitions: ParameterDefinition[] = Object.keys(LlamaCppArguments).map((name) => ({
+const LllamaCppParameterDefinitions: ParameterDefinition[] = Object.keys(LlamaCppArguments).map(
+  (name) => ({
     z: LlamaCppArguments[name],
     type: LlamaCppArgumentPartialDefinitions[name]?.type || getZodType(LlamaCppArguments[name]),
     defaultValue: LlamaCppArgumentPartialDefinitions[name]?.defaultValue,
@@ -245,7 +268,8 @@ const LllamaCppParameterDefinitions: ParameterDefinition[] = Object.keys(LlamaCp
     label: LlamaCppArgumentPartialDefinitions[name]?.label,
     description: LlamaCppArguments[name].description,
     disabled: LlamaCppArgumentPartialDefinitions[name]?.disabled,
-  }));
+  }),
+);
 
 const LlamaCppOptions = {
   verbose: ['-v', '--verbose'],
