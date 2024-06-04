@@ -24,7 +24,7 @@ export default function SettingItem({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bb-1 flex w-full flex-row items-center border-b pb-4 pt-3 ">
+    <div className="bb-1 flex w-full flex-row items-center border-b pb-4 pt-3">
       <div className="flex flex-1 flex-col justify-center">
         <p className=" ">{title}</p>
         <p className="text-sm text-muted-foreground">{subtitle}</p>

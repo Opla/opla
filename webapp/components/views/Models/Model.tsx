@@ -343,7 +343,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
             {`${model.creator || getEntityName(model.author) || t('Local')}`}
           </span>
           <span className="pl-2">/</span>
-          <div className="flex grow items-center gap-2 truncate px-2 ">
+          <div className="flex grow items-center gap-2 truncate px-2">
             <span>{model.name}</span>
             {local &&
               (inUse ? <OrangePill label={t('In use')} /> : <OrangePill label={t('Not in use')} />)}
@@ -397,7 +397,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
         <div className="flex w-full flex-col p-4 text-sm">
           <form className="grid w-full items-start gap-6 overflow-auto">
             <fieldset className="grid gap-6 rounded-lg border p-4">
-              <div className="flex w-full flex-row items-center gap-2 ">
+              <div className="flex w-full flex-row items-center gap-2">
                 <ModelIcon
                   icon={model.icon}
                   name={model.name}

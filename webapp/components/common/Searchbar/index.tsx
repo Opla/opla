@@ -41,7 +41,7 @@ export default function Searchbar({
 
   return (
     <div className="w-full">
-      <div className="flex gap-2 p-1 ">
+      <div className="flex gap-2 p-1">
         <Button size="icon" variant="ghost" onClick={onCancel}>
           <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
         </Button>

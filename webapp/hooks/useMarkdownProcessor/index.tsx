@@ -120,7 +120,7 @@ const production = {
     code: CodeBlock,
     pre: ({ children }: JSX.IntrinsicElements['pre']) => (
       <div className="relative">
-        <pre className="font-code flex items-start overflow-x-auto rounded-sm border-neutral-200  bg-neutral-100 text-sm dark:border-neutral-800 dark:bg-neutral-900 [&>code.hljs]:bg-transparent [&>code.hljs]:p-0">
+        <pre className="font-code flex items-start overflow-x-auto rounded-sm border-neutral-200 bg-neutral-100 text-sm dark:border-neutral-800 dark:bg-neutral-900 [&>code.hljs]:bg-transparent [&>code.hljs]:p-0">
           {children}
         </pre>
       </div>
@@ -161,20 +161,20 @@ const production = {
       </div>
     ),
     thead: ({ children }: JSX.IntrinsicElements['thead']) => (
-      <thead className="bg-neutral-100  dark:bg-neutral-700">{children}</thead>
+      <thead className="bg-neutral-100 dark:bg-neutral-700">{children}</thead>
     ),
     th: ({ children }: JSX.IntrinsicElements['th']) => (
-      <th className="border-2 border-neutral-200 p-2 font-sans text-sm font-semibold text-neutral-950  dark:text-neutral-100">
+      <th className="border-2 border-neutral-200 p-2 font-sans text-sm font-semibold text-neutral-950 dark:text-neutral-100">
         {children}
       </th>
     ),
     td: ({ children }: JSX.IntrinsicElements['td']) => (
-      <td className="border-2 border-neutral-200 p-2 font-sans text-sm text-neutral-900  dark:text-neutral-100">
+      <td className="border-2 border-neutral-200 p-2 font-sans text-sm text-neutral-900 dark:text-neutral-100">
         {children}
       </td>
     ),
     blockquote: ({ children }: JSX.IntrinsicElements['blockquote']) => (
-      <blockquote className="border-l-4 border-neutral-200 pl-2 italic text-neutral-900  dark:text-neutral-100">
+      <blockquote className="border-l-4 border-neutral-200 pl-2 italic text-neutral-900 dark:text-neutral-100">
         {children}
       </blockquote>
     ),

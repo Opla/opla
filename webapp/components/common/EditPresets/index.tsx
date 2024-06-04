@@ -168,7 +168,7 @@ export default function EditPreset<T>({
             <Textarea
               value={system}
               onChange={handleSystemChange}
-              className="min-h-[240px] resize-none  overflow-y-hidden"
+              className="min-h-[240px] resize-none overflow-y-hidden"
             />
           </AccordionContent>
         </AccordionItem>
@@ -185,7 +185,7 @@ export default function EditPreset<T>({
         </AccordionItem>
         <AccordionItem value="contextwindow-parameters">
           <AccordionTrigger>{t('Context window')}</AccordionTrigger>
-          <AccordionContent className=" my-2 px-2 pb-8">
+          <AccordionContent className="my-2 px-2 pb-8">
             <div className="flex w-full flex-row py-2">
               <Select defaultValue={selectedPolicy} onValueChange={handlePolicyChange}>
                 <SelectTrigger className="grow capitalize">

@@ -8,7 +8,7 @@ const CardButton = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
     <div
       ref={ref}
       className={cn(
-        'flex flex-col rounded-xl border bg-card text-card-foreground shadow ',
+        'flex flex-col rounded-xl border bg-card text-card-foreground shadow',
         className,
         onClick
           ? 'cursor-pointer hover:bg-accent hover:text-accent-foreground'

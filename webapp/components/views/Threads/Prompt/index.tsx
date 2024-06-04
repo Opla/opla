@@ -194,7 +194,7 @@ export default function Prompt({
   }
 
   return (
-    <div className="w-full grow-0 !bg-transparent ">
+    <div className="w-full grow-0 !bg-transparent">
       <form className="mx-2 flex flex-col gap-2 last:mb-2">
         {(errorMessage || usage) && (
           <div className="m-1 flex w-full items-center justify-between gap-2">
@@ -214,7 +214,7 @@ export default function Prompt({
             )}
           </div>
         )}
-        <div className="flex w-full flex-row items-center  rounded-md border border-input p-3 focus-within:border-transparent focus-within:ring-1 focus-within:ring-ring ">
+        <div className="flex w-full flex-row items-center rounded-md border border-input p-3 focus-within:border-transparent focus-within:ring-1 focus-within:ring-ring">
           <Button
             disabled={disabled || isLoading}
             type="button"

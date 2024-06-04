@@ -71,7 +71,7 @@ function Archive({
         </span>
       }
       toolbar={
-        <div className="flex w-full flex-row items-center justify-end gap-4 text-xs ">
+        <div className="flex w-full flex-row items-center justify-end gap-4 text-xs">
           <Button
             variant="ghost"
             size="sm"

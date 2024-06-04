@@ -146,7 +146,7 @@ export default function Settings({
               value={selectedConversation?.note ?? ''}
               disabled={!!selectedConversation?.temp}
               placeholder={t('Write a note...')}
-              className="min-h-[240px] resize-none  overflow-y-hidden"
+              className="min-h-[240px] resize-none overflow-y-hidden"
               onChange={handleNoteChange}
             />
           </div>

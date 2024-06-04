@@ -43,7 +43,7 @@ export default function ServiceBadge({
             : '',
         )}
       >
-        <span className={`mr-2  ${getStateColor(state, 'text', true)}`}>
+        <span className={`mr-2 ${getStateColor(state, 'text', true)}`}>
           {providerName && providerName !== 'Opla' ? providerName : 'local'}
         </span>
         <Pastille state={state} />

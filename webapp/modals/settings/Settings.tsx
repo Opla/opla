@@ -83,7 +83,7 @@ export default function Settings({
             </ul>
           </NavContainer>
         </div>
-        <div className="contentSettings h-full flex-grow p-6  pt-16">
+        <div className="contentSettings h-full flex-grow p-6 pt-16">
           <div className="flex h-full flex-col pt-8">{children}</div>
         </div>
       </div>

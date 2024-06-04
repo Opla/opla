@@ -49,7 +49,7 @@ export default function Dashboard() {
         </div>
       </header>
       <main className="h-full w-full flex-col overflow-y-auto p-4 pb-10">
-        <div className="m-4 flex min-h-[320px] flex-row rounded-lg p-3 ">
+        <div className="m-4 flex min-h-[320px] flex-row rounded-lg p-3">
           <div className="flex flex-grow flex-col justify-center p-3">
             <h1 className="w-full text-center text-xl">
               {t('The ultimate Open-source generative AI App')}
@@ -62,11 +62,11 @@ export default function Dashboard() {
                 href={Ui.Page.Threads}
                 className="mx-3 flex h-7 flex-row items-center rounded-md border px-2"
               >
-                <span className="items-center truncate px-3 ">{t('Ready to Prompt!')}</span>
+                <span className="items-center truncate px-3">{t('Ready to Prompt!')}</span>
               </Link>
             </p>
           </div>
-          <div className="flex aspect-[4/3] flex-1 flex-col justify-center rounded-lg  p-3">
+          <div className="flex aspect-[4/3] flex-1 flex-col justify-center rounded-lg p-3">
             <div className="m-4 flex w-full justify-center">
               <div className="aspect-[4/3]">
                 <Image width={96} height={96} className="" src="/logo.png" alt="logo" />

@@ -50,8 +50,8 @@ export default function Dropdown({
             toggleModal();
           }}
         />
-        <div className="flex cursor-pointer flex-row rounded-md border px-2 py-1  peer-checked:[&>*:nth-child(2)]:-rotate-180">
-          <div className="flex flex-1 flex-row items-center pr-4 ">
+        <div className="flex cursor-pointer flex-row rounded-md border px-2 py-1 peer-checked:[&>*:nth-child(2)]:-rotate-180">
+          <div className="flex flex-1 flex-row items-center pr-4">
             {I && <I className="mr-2 h-4 w-4" strokeWidth={1.5} />}
             <p className="mr-4 flex-1 truncate text-left">{selectedItem?.label || ' '}</p>
           </div>
