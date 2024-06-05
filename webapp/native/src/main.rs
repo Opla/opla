@@ -25,6 +25,7 @@ pub mod providers;
 pub mod error;
 pub mod hash;
 pub mod commands;
+pub mod engines;
 
 use tokio::{ spawn, sync::Mutex };
 use std::sync::Arc;
@@ -65,10 +66,7 @@ async fn start_server<R: Runtime>(
             return Err(format!("Opla server not started model path not found: {:?}", err));
         }
     };
-    // let mut parameters = store.server.parameters.clone();
     let mut server = context.server.lock().await;
-    // parameters.insert("model_id".to_string(), Some(ServerParameter::String(active_model.clone())));
-    // parameters.insert("model_path".to_string(), Some(ServerParameter::String(model_path.clone())));
     store.server.configuration.set_parameter_string("model_id", active_model);
     store.server.configuration.set_parameter_string("model_path", model_path);
     let response = server.start(app, &store.server.configuration).await;
@@ -76,7 +74,6 @@ async fn start_server<R: Runtime>(
         return Err(format!("Opla server not started: {:?}", response));
     }
 
-    // store.server.parameters = parameters;
     store.save().map_err(|err| err.to_string())?;
     println!("Opla server started: {:?}", response);
     Ok(())
@@ -100,12 +97,6 @@ async fn model_download_event<R: Runtime>(
             drop(store);
             // println!("model_download {} {}", state, model_id);
             let server = context.server.lock().await;
-            /* let parameters = match &server.parameters {
-                Some(p) => p,
-                None => {
-                    return Err(format!("Model download no parameters found"));
-                }
-            }; */
             if state == "ok" && (model_id.is_none() || m.reference.is_some_id_or_name(model_id)) {
                 drop(server);
                 let res = start_server(handle, context).await;
