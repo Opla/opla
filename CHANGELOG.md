@@ -1,3 +1,10 @@
+# [1.0.0-alpha.172](https://github.com/Opla/opla/compare/v1.0.0-alpha.171...v1.0.0-alpha.172) (2024-06-05)
+
+
+### Features
+
+* use all LLamaCpp server arguments [#974](https://github.com/Opla/opla/issues/974) ([#975](https://github.com/Opla/opla/issues/975)) ([ad2ee58](https://github.com/Opla/opla/commit/ad2ee5852459a38e973a13018c153ca348067439))
+
 # [1.0.0-alpha.171](https://github.com/Opla/opla/compare/v1.0.0-alpha.170...v1.0.0-alpha.171) (2024-06-04)
 
 
