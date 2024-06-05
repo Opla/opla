@@ -14,7 +14,6 @@
 
 use crate::{
     providers::llm::LlmQueryCompletion,
-    store::ServerParameters,
     utils::http_client::{ HttpError, HttpResponse },
 };
 
@@ -32,7 +31,7 @@ use super::{
         LlmTokenizeResponse,
     },
     services::HttpService,
-    ProviderAdapter,
+    ProviderAdapter, ServerParameters,
 };
 
 #[serde_with::skip_serializing_none]
@@ -242,7 +241,7 @@ impl LlamaCppTokenize {
         }
     }
 }
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug)]
 pub struct LlamaCppInferenceClient {
     pub server_parameters: Option<ServerParameters>,
 }

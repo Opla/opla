@@ -24,61 +24,12 @@ use crate::{
 use self::model_storage::ModelStorage;
 use self::service_storage::ServiceStorage;
 use self::workspace_storage::WorkspaceStorage;
+use self::server_storage::ServerStorage;
 
 pub mod model_storage;
 pub mod service_storage;
 pub mod workspace_storage;
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ServerParameters {
-    pub port: i32,
-    pub host: String,
-    pub model_id: Option<String>,
-    pub model_path: Option<String>,
-    pub context_size: i32,
-    pub threads: i32,
-    pub n_gpu_layers: i32,
-}
-
-impl ServerParameters {
-    pub fn has_same_model(&self, other: &Option<ServerParameters>) -> bool {
-        match other {
-            Some(p) => {
-                if p.model_id == self.model_id {
-                    return true;
-                }
-                return false;
-            }
-            None => {
-                return false;
-            }
-        }
-    }
-
-    pub fn to_args(&self, model_path: &str) -> Vec<String> {
-        let mut parameters: Vec<String> = Vec::with_capacity(12);
-        parameters.push(format!("-m"));
-        parameters.push(format!("{}", model_path.to_string()));
-        parameters.push(format!("--port"));
-        parameters.push(format!("{}", self.port));
-        parameters.push(format!("--host"));
-        parameters.push(format!("{}", self.host));
-        parameters.push(format!("-c"));
-        parameters.push(format!("{}", self.context_size));
-        parameters.push(format!("-t"));
-        parameters.push(format!("{}", self.threads));
-        parameters.push(format!("-ngl"));
-        parameters.push(format!("{}", self.n_gpu_layers));
-        parameters
-    }
-}
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ServerConfiguration {
-    pub name: String,
-    pub launch_at_startup: bool,
-    pub binary: String,
-    pub parameters: ServerParameters,
-}
+pub mod server_storage;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum ProviderType {
@@ -105,7 +56,7 @@ impl fmt::Display for ProviderType {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ProviderMetadata {
-    pub server: Option<ServerConfiguration>,
+    pub server: Option<ServerStorage>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -158,7 +109,7 @@ pub struct Settings {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Store {
     pub settings: Settings,
-    pub server: ServerConfiguration,
+    pub server: ServerStorage,
     pub models: ModelStorage,
     pub downloads: Vec<Download>,
     #[serde(default = "service_default")]
@@ -185,20 +136,7 @@ impl Store {
                 selected_page: None,
                 pages: None,
             },
-            server: ServerConfiguration {
-                name: String::from("llama.cpp"),
-                launch_at_startup: true,
-                binary: String::from("binaries/llama.cpp/llama.cpp.server"),
-                parameters: ServerParameters {
-                    port: 8081,
-                    host: String::from("127.0.0.1"),
-                    model_id: None,
-                    model_path: None,
-                    context_size: 512,
-                    threads: 6,
-                    n_gpu_layers: 0,
-                },
-            },
+            server: ServerStorage::default(),
             models: ModelStorage {
                 path: None,
                 items: vec![],
