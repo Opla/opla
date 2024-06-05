@@ -239,16 +239,6 @@ pub async fn uninstall_model<R: Runtime>(
         Some(model) => {
             store.clear_active_service_if_model_equal(model.reference.id.clone());
             let mut server = context.server.lock().await;
-            // let mut server_config = &store.server.configuration;
-            /* match server_config.get_parameter_string("model_id") {
-                Some(model_id) => {
-                    if model.reference.is_some_id_or_name(model_id) {
-                        let _res = server.stop(&app).await;
-                        server.remove_model();
-                    }
-                }
-                None => {}
-            }; */
             if
                 model.reference.is_some_id_or_name(
                     &store.server.configuration.get_optional_parameter_string("model_id")
@@ -301,8 +291,6 @@ pub async fn set_active_model<R: Runtime>(
             status.to_owned() != ServerStatus::Started ||
             status.to_owned() != ServerStatus::Starting
         {
-            /* store.server.parameters.model_id = Some(model_id);
-            store.server.parameters.model_path = None; */
             store.server.configuration.set_parameter_string("model_id", model_id);
             store.server.configuration.remove_parameter("model_path");
         }

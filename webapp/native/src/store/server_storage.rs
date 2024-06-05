@@ -42,51 +42,6 @@ impl ServerParameter {
     }
 }
 
-/*
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ServerParameters {
-    pub port: i32,
-    pub host: String,
-    pub model_id: Option<String>,
-    pub model_path: Option<String>,
-    pub context_size: i32,
-    pub threads: i32,
-    pub n_gpu_layers: i32,
-}
-
-impl ServerParameters {
-    pub fn has_same_model(&self, other: &Option<ServerParameters>) -> bool {
-        match other {
-            Some(p) => {
-                if p.model_id == self.model_id {
-                    return true;
-                }
-                return false;
-            }
-            None => {
-                return false;
-            }
-        }
-    }
-
-    pub fn to_args(&self, model_path: &str) -> Vec<String> {
-        let mut parameters: Vec<String> = Vec::with_capacity(12);
-        parameters.push(format!("-m"));
-        parameters.push(format!("{}", model_path.to_string()));
-        parameters.push(format!("--port"));
-        parameters.push(format!("{}", self.port));
-        parameters.push(format!("--host"));
-        parameters.push(format!("{}", self.host));
-        parameters.push(format!("-c"));
-        parameters.push(format!("{}", self.context_size));
-        parameters.push(format!("-t"));
-        parameters.push(format!("{}", self.threads));
-        parameters.push(format!("-ngl"));
-        parameters.push(format!("{}", self.n_gpu_layers));
-        parameters
-    }
-} */
-
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ServerConfiguration {
     pub name: String,
@@ -180,15 +135,7 @@ impl ServerStorage {
             binary: String::from("binaries/llama.cpp/llama.cpp.server"),
             configuration: ServerConfiguration {
                 name: String::from("llama.cpp"),
-                parameters: server_parameters /* ServerParameters {
-                    port: 8081,
-                    host: String::from("127.0.0.1"),
-                    model_id: None,
-                    model_path: None,
-                    context_size: 512,
-                    threads: 6,
-                    n_gpu_layers: 0,
-                }, */,
+                parameters: server_parameters,
             },
         }
     }

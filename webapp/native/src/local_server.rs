@@ -15,24 +15,21 @@
 use tokio::sync::Mutex;
 use std::collections::HashMap;
 use std::sync::Arc;
+use crate::engines::llama_cpp::LLamaCppEngine;
 use crate::store::server_storage::{ ServerConfiguration, ServerStorage };
 use crate::error::Error;
 use sysinfo::System;
 use tauri::{ api::process::CommandChild, async_runtime::JoinHandle };
-use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
+use tauri::{ Runtime, Manager };
 use std::time::Duration;
 use std::thread;
 
 pub struct LocalServer {
     pub pid: Arc<Mutex<usize>>,
-    // pub name: String,
     pub status: Arc<Mutex<ServerStatus>>,
-    // pub parameters: HashMap<String, Option<ServerParameter>>, // Option<ServerParameters>,
-    // inference_client: LlamaCppInferenceClient,
     handle: Option<JoinHandle<()>>,
     command_child: Arc<Mutex<Option<CommandChild>>>,
     pub configuration: ServerConfiguration,
-    // completion_handles: HashMap<String, Arc<tokio::task::AbortHandle>>,
 }
 
 #[derive(Clone, serde::Serialize, Copy, PartialEq, Debug)]
@@ -74,13 +71,9 @@ impl LocalServer {
     pub fn new() -> Self {
         LocalServer {
             pid: Arc::new(Mutex::new(0)),
-            // name: "llama.cpp.server".to_string(),
             status: Arc::new(Mutex::new(ServerStatus::Init)),
-            // parameters: HashMap::new(),
-            // inference_client: LlamaCppInferenceClient::new(None),
             handle: None,
             command_child: Arc::new(Mutex::new(None)),
-            // completion_handles: HashMap::new(),
             configuration: ServerConfiguration {
                 name: "".to_string(),
                 parameters: HashMap::new(),
@@ -106,166 +99,6 @@ impl LocalServer {
         println!("NB CPUs: {}", sys.cpus().len());
     }
 
-    pub async fn start_llama_cpp_server<EventLoopMessage: Runtime + 'static>(
-        self: &mut Self,
-        app: tauri::AppHandle<EventLoopMessage>,
-        model: &str,
-        arguments: Vec<String>,
-        wpid: Arc<Mutex<usize>>,
-        wstatus: Arc<Mutex<ServerStatus>>,
-        command_child: Arc<Mutex<Option<CommandChild>>>
-    ) -> Result<(), String> {
-        let command = Command::new_sidecar("llama.cpp.server").map_err(
-            |_| "failed to init llama.cpp.server"
-        )?;
-        let model = model.to_string();
-        let handle = tauri::async_runtime::spawn(async move {
-            let (mut rx, child) = match command.args(arguments).spawn() {
-                Ok((rx, child)) => (rx, child),
-                Err(err) => {
-                    println!("Opla server error: {}", err);
-                    if
-                        app
-                            .emit_all("opla-server", Payload {
-                                message: format!("Opla server error: {}", err),
-                                status: ServerStatus::Error.as_str().to_string(),
-                            })
-                            .is_err()
-                    {
-                        println!("Opla server error: {}", "failed to emit error");
-                    }
-                    let mut st = wstatus.lock().await;
-                    *st = ServerStatus::Error;
-                    return;
-                }
-            };
-            println!("Opla server started:{}", model);
-            if
-                app
-                    .emit_all("opla-server", Payload {
-                        message: format!("{}", model),
-                        status: ServerStatus::Starting.as_str().to_string(),
-                    })
-                    .is_err()
-            {
-                println!("Opla server error: {}", "failed to emit started");
-            }
-            let p: usize = match child.pid().try_into() {
-                Ok(pid) => pid,
-                Err(_) => {
-                    println!("Opla server error: {}", "failed to get pid");
-                    if
-                        app
-                            .emit_all("opla-server", Payload {
-                                message: format!("Opla server error: {}", "failed to get pid"),
-                                status: ServerStatus::Error.as_str().to_string(),
-                            })
-                            .is_err()
-                    {
-                        println!("Opla server error: {}", "failed to emit error");
-                    }
-                    let mut st = wstatus.lock().await;
-                    *st = ServerStatus::Error;
-                    return;
-                }
-            };
-            let mut wp = wpid.lock().await;
-            *wp = p;
-            drop(wp);
-            let mut cchild = command_child.lock().await;
-            *cchild = Some(child);
-            drop(cchild);
-
-            while let Some(event) = rx.recv().await {
-                if let CommandEvent::Stdout(line) = event {
-                    println!("json={}", line);
-                    if line.contains("HTTP server listening") {
-                        println!("{}", model);
-                        if
-                            app
-                                .emit_all("opla-server", Payload {
-                                    message: format!("{}", model),
-                                    status: ServerStatus::Started.as_str().to_string(),
-                                })
-                                .is_err()
-                        {
-                            println!("Opla server error: {}", "failed to emit started");
-                        }
-
-                        let mut st = wstatus.lock().await;
-                        *st = ServerStatus::Started;
-                    } else if
-                        app
-                            .emit_all("opla-server", Payload {
-                                message: line.clone(),
-                                status: ServerStatus::Stdout.as_str().to_string(),
-                            })
-                            .is_err()
-                    {
-                        println!("Opla server error: {}", "failed to emit stdout");
-                    }
-                } else if let CommandEvent::Stderr(line) = event {
-                    println!("\x1b[93m{}\x1b[0m", line);
-
-                    if line.starts_with("llama server listening") {
-                        println!("{}", model);
-                        if
-                            app
-                                .emit_all("opla-server", Payload {
-                                    message: format!("{}", model),
-                                    status: ServerStatus::Started.as_str().to_string(),
-                                })
-                                .is_err()
-                        {
-                            println!("Opla server error: {}", "failed to emit started");
-                        }
-
-                        let mut st = wstatus.lock().await;
-                        *st = ServerStatus::Started;
-                    }
-
-                    if line.starts_with("error") {
-                        println!("Opla server error: {}", line);
-                        if
-                            app
-                                .emit_all("opla-server", Payload {
-                                    message: format!("Opla server error: {}", line),
-                                    status: ServerStatus::Error.as_str().to_string(),
-                                })
-                                .is_err()
-                        {
-                            println!("Opla server error: {}", "failed to emit error");
-                        }
-
-                        let mut st = wstatus.lock().await;
-                        *st = ServerStatus::Error;
-                    }
-
-                    if
-                        app
-                            .emit_all("opla-server-stderr", Payload {
-                                message: line.clone(),
-                                status: ServerStatus::Stderr.as_str().to_string(),
-                            })
-                            .is_err()
-                    {
-                        println!("Opla server error: {}", "failed to emit stderr");
-                    }
-                }
-            }
-        });
-        self.handle = Some(handle);
-        Ok(())
-    }
-
-    /* pub fn remove_model(&mut self) {
-
-        if self.parameters.contains_key("model_id") {
-            self.parameters.remove("model_id");
-            self.parameters.remove("model_path");
-        }
-    } */
-
     pub fn get_status(&self) -> Result<Payload, String> {
         let status = match self.status.try_lock() {
             Ok(status) => status.as_str(),
@@ -275,16 +108,6 @@ impl LocalServer {
             }
         };
         let mut message = "None".to_string();
-        /* match &self.parameters {
-            Some(parameters) =>
-                match &parameters.model_id {
-                    Some(model) => {
-                        message = model.to_string();
-                    }
-                    None => (),
-                }
-            None => (),
-        } */
         match self.configuration.get_optional_parameter_string("model_id") {
             Some(model) => {
                 message = model;
@@ -314,14 +137,9 @@ impl LocalServer {
         })
     }
 
-    /* pub fn set_parameters(&mut self, parameters: HashMap<String, Option<ServerParameter>>) {
-        self.parameters = parameters;
-    } */
-
     pub async fn start<R: Runtime>(
         &mut self,
         app: tauri::AppHandle<R>,
-        // parameters: HashMap<String, Option<ServerParameter>> // &ServerParameters
         configuration: &ServerConfiguration
     ) -> Result<Payload, String> {
         let status = match self.status.try_lock() {
@@ -331,12 +149,10 @@ impl LocalServer {
                 return Err("Opla server can't read status".to_string());
             }
         };
-        // self.parameters = parameters; // Some(parameters.clone());
         let name = configuration.name.to_string();
         self.configuration = configuration.clone();
         let configuration = configuration.clone();
         let model_path = match configuration.get_optional_parameter_string("model_path") {
-            // &parameters.model_path {
             Some(s) => s,
             None => {
                 println!("Opla server error try to read parameters: model_path");
@@ -344,7 +160,6 @@ impl LocalServer {
             }
         };
         let model_id = match configuration.get_optional_parameter_string("model_id") {
-            // &parameters.model_id {
             Some(s) => s,
             None => {
                 println!("Opla server error try to read parameters: model_id");
@@ -389,8 +204,8 @@ impl LocalServer {
         let wpid = Arc::clone(&self.pid);
         let wstatus = Arc::clone(&self.status);
         let command_child = Arc::clone(&self.command_child);
-        self.start_llama_cpp_server(app, &model_id, arguments, wpid, wstatus, command_child).await?;
-
+        let handle = LLamaCppEngine::start_llama_cpp_server(app, &model_id, arguments, wpid, wstatus, command_child).await?;
+        self.handle = Some(handle);
         Ok(Payload { status: status_response, message: name })
     }
 
@@ -512,7 +327,6 @@ impl LocalServer {
     pub async fn bind<R: Runtime>(
         &mut self,
         app: tauri::AppHandle<R>,
-        // parameters: &ServerParameters
         configuration: &ServerConfiguration
     ) -> Result<(), Box<dyn std::error::Error>> {
         if !configuration.has_same_model(&self.configuration) {

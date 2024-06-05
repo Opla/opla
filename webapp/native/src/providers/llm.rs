@@ -290,7 +290,6 @@ pub trait LlmInferenceInterface: DynClone {
         query: &LlmQuery<LlmQueryCompletion>,
         completion_options: Option<LlmCompletionOptions>,
         adapter: &mut ProviderAdapter
-        /* sender: Sender<Result<LlmCompletionResponse, LlmError>> */
     ) -> Result<HttpService<LlmCompletionResponse, LlmError>, LlmError>;
 
     async fn call_tokenize(

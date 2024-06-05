@@ -60,13 +60,6 @@ pub async fn start_opla_server<R: Runtime>(
         }
     };
     store.server.launch_at_startup = true;
-    /* store.server.parameters.port = port;
-    store.server.parameters.host = host.clone();
-    store.server.parameters.model_id = Some(model_id.clone());
-    store.server.parameters.model_path = Some(model_path.clone());
-    store.server.parameters.context_size = context_size;
-    store.server.parameters.threads = threads;
-    store.server.parameters.n_gpu_layers = n_gpu_layers; */
     store.server.configuration.set_parameter_int("port", port);
     store.server.configuration.set_parameter_string("host", host);
     store.server.configuration.set_parameter_string("model_id", model_id);
@@ -75,10 +68,8 @@ pub async fn start_opla_server<R: Runtime>(
     store.server.configuration.set_parameter_int("threads", threads);
     store.server.configuration.set_parameter_int("n_gpu_layers", n_gpu_layers);
     store.save().map_err(|err| err.to_string())?;
-
-    // let parameters = store.server.parameters.clone();
     let mut server = context.server.lock().await;
-    server.start(app, &store.server.configuration /* parameters */).await
+    server.start(app, &store.server.configuration).await
 }
 
 #[tauri::command]
