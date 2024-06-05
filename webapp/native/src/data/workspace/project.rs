@@ -17,7 +17,7 @@ use serde::{ self, Deserialize, Serialize };
 use serde_with::serde_as;
 use uuid::Uuid;
 
-use crate::data::date_format;
+use crate::{data::date_format, utils::image::download_image};
 
 #[serde_as]
 #[serde_with::skip_serializing_none]
@@ -32,6 +32,12 @@ pub struct Project {
     pub updated_at: DateTime<Utc>,
     pub path: String,
     pub workspace_id: String,
+    #[serde(default = "default_files")]
+    pub files: Vec<String>,
+}
+
+fn default_files() -> Vec<String> {
+    Vec::new()
 }
 
 impl Project {
@@ -44,7 +50,23 @@ impl Project {
             updated_at: Utc::now(),
             path: path,
             workspace_id,
+            files: Vec::new(),
         }
     }
-    pub fn open() {}
+    
+    pub fn open() {
+
+    }
+
+    pub async fn save_images(&mut self, images: Vec<String>) -> Result<Vec<String>, String> {
+        let mut files = Vec::new();
+        let path = &self.path;
+        for url in images {
+            let filename = download_image(url, path.clone()).await?;
+            self.files.push(filename.clone());
+            files.push(filename);
+        }
+
+        Ok(files)
+    }
 }

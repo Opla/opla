@@ -13,6 +13,7 @@
 // limitations under the License.
 
 pub mod http_client;
+pub mod image;
 
 use std::{ path::{ Path, PathBuf }, fs };
 

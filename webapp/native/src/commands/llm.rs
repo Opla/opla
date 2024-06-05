@@ -66,7 +66,17 @@ pub async fn llm_call_image_generation<R: Runtime>(
     prompt: String
 ) -> Result<LlmImageGenerationResponse, String> {
     let mut manager = context.providers_manager.lock().await;
-    manager.llm_call_image_generation::<R>(model, provider, prompt).await
+    let response = manager.llm_call_image_generation::<R>(model, provider, prompt).await?;
+    let images = response.images;
+    let mut store = context.store.lock().await;
+    println!("images url {:?}", images);
+    let mut project = store.workspaces.get_selected_project()?;
+    let project_path = project.path.clone();
+    let path = store.workspaces.get_project_directory(Some(project_path))?.clone();
+    let files = project.save_images(images).await?.iter().map(|f| path.join(f).to_str().unwrap_or(f).to_string()).collect();
+    Ok(LlmImageGenerationResponse {
+        images: files,
+    })
 }
 
 #[tauri::command]
