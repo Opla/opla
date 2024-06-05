@@ -25,6 +25,6 @@ pub async fn get_provider_template<R: Runtime>(
 ) -> Result<Provider, String> {
     let store = context.store.lock().await;
     let server = store.server.clone();
-    let template = ProvidersManager::get_opla_provider(server);
+    let template = ProvidersManager::get_opla_provider(&server);
     Ok(template.clone())
 }

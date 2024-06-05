@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use crate::ServerStatus;
-use crate::{api::hf::search_hf_models, start_server, OplaContext};
+use crate::{ api::hf::search_hf_models, start_server, OplaContext };
 use crate::data::model::{ Model, ModelEntity };
 use crate::models::{ fetch_models_collection, ModelsCollection };
 use serde::Serialize;
@@ -162,20 +162,25 @@ pub async fn cancel_download_model<R: Runtime>(
     println!("Cancel download model: {:?}", model);
     match model {
         Some(m) => {
+            let model_id = store.server.configuration.get_optional_parameter_string("model_id");
             store.models.remove_model(model_name_or_id.as_str(), false);
             store.clear_active_service_if_model_equal(m.id.clone());
             store.save().map_err(|err| err.to_string())?;
             drop(store);
 
             let mut server = context.server.lock().await;
-            match &server.parameters {
+            /* match &server.parameters {
                 Some(p) => {
                     if m.is_some_id_or_name(&p.model_id) {
                         let _res = server.stop(&app).await;
                     }
                 }
                 None => {}
-            };
+            }; */
+
+            if m.is_some_id_or_name(&model_id) {
+                let _res = server.stop(&app).await;
+            }
         }
         None => {
             return Err(format!("Model not found: {:?}", model_name_or_id));
@@ -234,15 +239,24 @@ pub async fn uninstall_model<R: Runtime>(
         Some(model) => {
             store.clear_active_service_if_model_equal(model.reference.id.clone());
             let mut server = context.server.lock().await;
-            match &server.parameters {
-                Some(p) => {
-                    if model.reference.is_some_id_or_name(&p.model_id) {
+            // let mut server_config = &store.server.configuration;
+            /* match server_config.get_parameter_string("model_id") {
+                Some(model_id) => {
+                    if model.reference.is_some_id_or_name(model_id) {
                         let _res = server.stop(&app).await;
                         server.remove_model();
                     }
                 }
                 None => {}
-            };
+            }; */
+            if
+                model.reference.is_some_id_or_name(
+                    &store.server.configuration.get_optional_parameter_string("model_id")
+                )
+            {
+                let _res = server.stop(&app).await;
+                store.server.configuration.remove_model();
+            }
         }
         None => {
             return Err(format!("Model not found: {:?}", model_id));
@@ -283,12 +297,16 @@ pub async fn set_active_model<R: Runtime>(
                 return Err("Opla server can't read status".to_string());
             }
         };
-        if status.to_owned() != ServerStatus::Started || status.to_owned() != ServerStatus::Starting {
-            store.server.parameters.model_id = Some(model_id);
-            store.server.parameters.model_path = None;
+        if
+            status.to_owned() != ServerStatus::Started ||
+            status.to_owned() != ServerStatus::Starting
+        {
+            /* store.server.parameters.model_id = Some(model_id);
+            store.server.parameters.model_path = None; */
+            store.server.configuration.set_parameter_string("model_id", model_id);
+            store.server.configuration.remove_parameter("model_path");
         }
     }
     store.save().map_err(|err| err.to_string())?;
     Ok(())
 }
-

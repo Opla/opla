@@ -37,8 +37,6 @@ use local_server::*;
 use sys::Sys;
 use tauri::{ EventLoopMessage, Manager, Runtime, State };
 
-
-
 pub struct OplaContext {
     pub server: Arc<Mutex<LocalServer>>,
     pub providers_manager: Arc<Mutex<ProvidersManager>>,
@@ -67,16 +65,18 @@ async fn start_server<R: Runtime>(
             return Err(format!("Opla server not started model path not found: {:?}", err));
         }
     };
-    let mut parameters = store.server.parameters.clone();
+    // let mut parameters = store.server.parameters.clone();
     let mut server = context.server.lock().await;
-    parameters.model_id = Some(active_model.clone());
-    parameters.model_path = Some(model_path.clone());
-    let response = server.start(app, &parameters).await;
+    // parameters.insert("model_id".to_string(), Some(ServerParameter::String(active_model.clone())));
+    // parameters.insert("model_path".to_string(), Some(ServerParameter::String(model_path.clone())));
+    store.server.configuration.set_parameter_string("model_id", active_model);
+    store.server.configuration.set_parameter_string("model_path", model_path);
+    let response = server.start(app, &store.server.configuration).await;
     if response.is_err() {
         return Err(format!("Opla server not started: {:?}", response));
     }
 
-    store.server.parameters = parameters;
+    // store.server.parameters = parameters;
     store.save().map_err(|err| err.to_string())?;
     println!("Opla server started: {:?}", response);
     Ok(())
@@ -94,23 +94,19 @@ async fn model_download_event<R: Runtime>(
     match model {
         Some(mut m) => {
             m.state = Some(state.clone());
+            let model_id = &store.server.configuration.get_optional_parameter_string("model_id");
             store.models.update_model_entity(&m);
             store.save().map_err(|err| err.to_string())?;
             drop(store);
             // println!("model_download {} {}", state, model_id);
             let server = context.server.lock().await;
-            let parameters = match &server.parameters {
+            /* let parameters = match &server.parameters {
                 Some(p) => p,
                 None => {
                     return Err(format!("Model download no parameters found"));
                 }
-            };
-
-            if
-                state == "ok" &&
-                (m.reference.is_some_id_or_name(&parameters.model_id) ||
-                    parameters.model_id.is_none())
-            {
+            }; */
+            if state == "ok" && (model_id.is_none() || m.reference.is_some_id_or_name(model_id)) {
                 drop(server);
                 let res = start_server(handle, context).await;
                 match res {
@@ -234,6 +230,7 @@ async fn opla_setup(app: &mut tauri::AppHandle) -> Result<(), String> {
         println!("Opla server model not found: {:?}", active_model);
         // Remove default model from server
         server.remove_model();
+        store.server.configuration.remove_model();
         store.services.active_service = None;
         store.save().map_err(|err| err.to_string())?;
     }

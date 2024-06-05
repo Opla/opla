@@ -13,11 +13,10 @@
 // limitations under the License.
 
 use tokio::sync::Mutex;
+use std::collections::HashMap;
 use std::sync::Arc;
-use crate::{
-    error::Error,
-    store::{ ServerConfiguration, ServerParameters },
-};
+use crate::store::server_storage::{ ServerConfiguration, ServerStorage };
+use crate::error::Error;
 use sysinfo::System;
 use tauri::{ api::process::CommandChild, async_runtime::JoinHandle };
 use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
@@ -26,12 +25,13 @@ use std::thread;
 
 pub struct LocalServer {
     pub pid: Arc<Mutex<usize>>,
-    pub name: String,
+    // pub name: String,
     pub status: Arc<Mutex<ServerStatus>>,
-    pub parameters: Option<ServerParameters>,
+    // pub parameters: HashMap<String, Option<ServerParameter>>, // Option<ServerParameters>,
     // inference_client: LlamaCppInferenceClient,
     handle: Option<JoinHandle<()>>,
     command_child: Arc<Mutex<Option<CommandChild>>>,
+    pub configuration: ServerConfiguration,
     // completion_handles: HashMap<String, Arc<tokio::task::AbortHandle>>,
 }
 
@@ -74,13 +74,17 @@ impl LocalServer {
     pub fn new() -> Self {
         LocalServer {
             pid: Arc::new(Mutex::new(0)),
-            name: "llama.cpp.server".to_string(),
+            // name: "llama.cpp.server".to_string(),
             status: Arc::new(Mutex::new(ServerStatus::Init)),
-            parameters: None,
+            // parameters: HashMap::new(),
             // inference_client: LlamaCppInferenceClient::new(None),
             handle: None,
             command_child: Arc::new(Mutex::new(None)),
             // completion_handles: HashMap::new(),
+            configuration: ServerConfiguration {
+                name: "".to_string(),
+                parameters: HashMap::new(),
+            },
         }
     }
 
@@ -254,20 +258,13 @@ impl LocalServer {
         Ok(())
     }
 
-    pub fn remove_model(&mut self) {
-        let parameters = match &self.parameters {
-            Some(p) => p,
-            None => {
-                return;
-            }
-        };
-        if parameters.model_id.is_some() {
-            let mut parameters = parameters.clone();
-            parameters.model_id = None;
-            parameters.model_path = None;
-            self.parameters = Some(parameters);
+    /* pub fn remove_model(&mut self) {
+
+        if self.parameters.contains_key("model_id") {
+            self.parameters.remove("model_id");
+            self.parameters.remove("model_path");
         }
-    }
+    } */
 
     pub fn get_status(&self) -> Result<Payload, String> {
         let status = match self.status.try_lock() {
@@ -278,7 +275,7 @@ impl LocalServer {
             }
         };
         let mut message = "None".to_string();
-        match &self.parameters {
+        /* match &self.parameters {
             Some(parameters) =>
                 match &parameters.model_id {
                     Some(model) => {
@@ -287,7 +284,14 @@ impl LocalServer {
                     None => (),
                 }
             None => (),
+        } */
+        match self.configuration.get_optional_parameter_string("model_id") {
+            Some(model) => {
+                message = model;
+            }
+            None => (),
         }
+
         Ok(Payload {
             status: status.to_string(),
             message,
@@ -303,20 +307,22 @@ impl LocalServer {
             }
         };
         *wstatus = status;
+        let message = self.configuration.name.clone();
         Ok(Payload {
             status: wstatus.as_str().to_string(),
-            message: self.name.to_string(),
+            message,
         })
     }
 
-    pub fn set_parameters(&mut self, parameters: Option<ServerParameters>) {
+    /* pub fn set_parameters(&mut self, parameters: HashMap<String, Option<ServerParameter>>) {
         self.parameters = parameters;
-    }
+    } */
 
     pub async fn start<R: Runtime>(
         &mut self,
         app: tauri::AppHandle<R>,
-        parameters: &ServerParameters
+        // parameters: HashMap<String, Option<ServerParameter>> // &ServerParameters
+        configuration: &ServerConfiguration
     ) -> Result<Payload, String> {
         let status = match self.status.try_lock() {
             Ok(status) => status.as_str(),
@@ -325,22 +331,27 @@ impl LocalServer {
                 return Err("Opla server can't read status".to_string());
             }
         };
-        self.parameters = Some(parameters.clone());
-        let model_path = match &parameters.model_path {
+        // self.parameters = parameters; // Some(parameters.clone());
+        let name = configuration.name.to_string();
+        self.configuration = configuration.clone();
+        let configuration = configuration.clone();
+        let model_path = match configuration.get_optional_parameter_string("model_path") {
+            // &parameters.model_path {
             Some(s) => s,
             None => {
                 println!("Opla server error try to read parameters: model_path");
                 return Err("Opla server can't read parameters: model_path".to_string());
             }
         };
-        let model_id = match &parameters.model_id {
+        let model_id = match configuration.get_optional_parameter_string("model_id") {
+            // &parameters.model_id {
             Some(s) => s,
             None => {
                 println!("Opla server error try to read parameters: model_id");
                 return Err("Opla server can't read parameters: model_id".to_string());
             }
         };
-        let arguments = parameters.to_args(&model_path);
+        let arguments = configuration.to_args(&model_path);
         println!("Opla server arguments: {}", arguments.join(" "));
         if status == ServerStatus::Starting.as_str().to_string() {
             println!("Opla server is starting: stop it");
@@ -357,7 +368,7 @@ impl LocalServer {
                 message: "llama.cpp.server".to_string(),
             });
         }
-        println!("Opla try to start {:?}", parameters.model_id);
+        println!("Opla try to start {:?}", configuration.get_optional_parameter_string("model_id"));
         let mut wstatus = match self.status.try_lock() {
             Ok(status) => status,
             Err(_) => {
@@ -369,7 +380,7 @@ impl LocalServer {
         let status_response = wstatus.as_str().to_string();
         app
             .emit_all("opla-server", Payload {
-                message: format!("{:?}", parameters.model_id),
+                message: format!("{:?}", configuration.get_optional_parameter_string("model_id")),
                 status: "waiting".to_string(),
             })
             .map_err(|err| err.to_string())?;
@@ -380,7 +391,7 @@ impl LocalServer {
         let command_child = Arc::clone(&self.command_child);
         self.start_llama_cpp_server(app, &model_id, arguments, wpid, wstatus, command_child).await?;
 
-        Ok(Payload { status: status_response, message: self.name.to_string() })
+        Ok(Payload { status: status_response, message: name })
     }
 
     pub async fn stop<R: Runtime>(&mut self, app: &tauri::AppHandle<R>) -> Result<Payload, String> {
@@ -393,6 +404,7 @@ impl LocalServer {
                 return Err("Opla server can't read status".to_string());
             }
         };
+        let message = self.configuration.name.clone();
         if (status == "started" || status == "starting") && pid.to_owned() != 0 {
             let mut wstatus = match self.status.try_lock() {
                 Ok(status) => status,
@@ -464,12 +476,13 @@ impl LocalServer {
                 }
             };
             *wstatus = ServerStatus::Stopped;
+
             return Ok(Payload {
                 status: wstatus.as_str().to_string(),
-                message: self.name.to_string(),
+                message,
             });
         }
-        Ok(Payload { status: status.to_string(), message: self.name.to_string() })
+        Ok(Payload { status: status.to_string(), message })
     }
 
     fn kill_previous_processes(&mut self) {
@@ -490,22 +503,23 @@ impl LocalServer {
         }
     }
 
-    pub fn init(&mut self, store_server: ServerConfiguration) {
+    pub fn init(&mut self, store_server: ServerStorage) {
         Self::sysinfo_test();
         self.kill_previous_processes();
-        self.parameters = Some(store_server.parameters);
+        self.configuration = store_server.configuration.clone();
     }
 
     pub async fn bind<R: Runtime>(
         &mut self,
         app: tauri::AppHandle<R>,
-        parameters: &ServerParameters
+        // parameters: &ServerParameters
+        configuration: &ServerConfiguration
     ) -> Result<(), Box<dyn std::error::Error>> {
-        if !parameters.has_same_model(&self.parameters) {
+        if !configuration.has_same_model(&self.configuration) {
             self.stop(&app).await?;
             let self_status = Arc::clone(&self.status);
             let mut wouldblock = true;
-            let _ = self.start(app, &parameters).await?;
+            let _ = self.start(app, configuration).await?;
 
             // Wait for server to start
             let result = tauri::async_runtime::spawn(async move {
@@ -548,94 +562,7 @@ impl LocalServer {
         Ok(())
     }
 
-    /* pub async fn cancel_completion(&mut self, conversation_id: &str) -> Result<(), String> {
-        let handle = self.completion_handles.remove(conversation_id);
-        println!("Cancel completion {}", conversation_id);
-        match handle {
-            Some(h) => {
-                h.abort();
-            }
-            None => {
-                let err = format!("cancel_completion Handle not found {}", conversation_id);
-                println!("{}", err);
-                return Err(err);
-            }
-        }
-
-        Ok(())
-    } */
-
-    /* pub async fn call_completion<R: Runtime>(
-        &mut self,
-        app: tauri::AppHandle<R>,
-        // model: String,
-        // model_path: String,
-        query: LlmQuery<LlmQueryCompletion>,
-        completion_options: Option<LlmCompletionOptions>
-    ) -> Result<LlmCompletionResponse, String> {
-        println!("{}", format!("Opla llm call: {:?}", query.command));
-        let query = query.clone();
-        let conversation_id = query.options.conversation_id.clone();
-
-        let is_stream = query.options.get_parameter_as_boolean("stream").unwrap_or(false);
-        let (sender, mut receiver) = channel::<Result<LlmCompletionResponse, LlmError>>(1);
-
-        let query = query.clone();
-        let mut client_instance = self.inference_client.create(&self.parameters);
-
-        let handle = spawn(async move {
-            client_instance.call_completion(&query, completion_options.clone(), sender).await
-        });
-
-        self.completion_handles.insert(
-            conversation_id.clone().unwrap_or(String::from("default")),
-            Arc::new(handle.abort_handle())
-        );
-
-        let mut result: Result<LlmCompletionResponse, String> = Err(
-            String::from("Not initialized")
-        );
-        let mut finished = false;
-        while let Some(response) = receiver.recv().await {
-            result = match response {
-                Ok(response) => {
-                    let mut response = response.clone();
-                    response.conversation_id = conversation_id.clone();
-                    if is_stream && !finished {
-                        let _ = app
-                            .emit_all("opla-sse", response.clone())
-                            .map_err(|err| err.to_string());
-                    }
-                    if response.status == Some(String::from("finished")) {
-                        finished = true;
-                    }
-                    Ok(response.clone())
-                }
-                Err(err) => {
-                    if is_stream {
-                        let _ = app
-                            .emit_all("opla-sse", Payload {
-                                message: err.to_string(),
-                                status: ServerStatus::Error.as_str().to_string(),
-                            })
-                            .map_err(|err| err.to_string());
-                    }
-                    Err(err.to_string())
-                }
-            };
-        }
-        self.completion_handles.remove(&conversation_id.clone().unwrap_or(String::from("default")));
-        println!("call completion result {:?}", result);
-        result
-    } */
-
-    /* pub async fn call_tokenize<R: Runtime>(
-        &mut self,
-        model: &str,
-        text: String
-    ) -> Result<LlmTokenizeResponse, Box<dyn std::error::Error>> {
-        println!("{}", format!("Opla llm call tokenize: {:?}", &model));
-        let mut client_instance = self.inference_client.create(&self.parameters);
-        client_instance.call_tokenize::<R>(text).await
-    } */
+    pub fn remove_model(&mut self) {
+        self.configuration.remove_model();
+    }
 }

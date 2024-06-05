@@ -21,7 +21,12 @@ use tokio::{ spawn, sync::Mutex };
 use bytes::Bytes;
 
 use crate::{
-    store::{ Provider, ProviderMetadata, ProviderType, ServerConfiguration, ServerParameters },
+    store::{
+        server_storage::{ ServerConfiguration, ServerStorage },
+        Provider,
+        ProviderMetadata,
+        ProviderType,
+    },
     utils::http_client::{ HttpChunk, NewHttpError },
     OplaContext,
     Payload,
@@ -48,6 +53,18 @@ pub mod openai;
 pub mod llama_cpp;
 pub mod llm;
 pub mod services;
+
+#[derive(Clone, Debug)]
+pub struct ServerParameters {
+    pub port: i32,
+    pub host: String,
+    /* pub model_id: Option<String>,
+    pub model_path: Option<String>,
+    pub context_size: i32,
+    pub threads: i32,
+    pub n_gpu_layers: i32, */
+}
+
 #[derive(Clone)]
 pub struct ProviderAdapter {
     pub id: String,
@@ -163,12 +180,17 @@ impl ProvidersManager {
         }
     }
 
-    pub fn get_opla_provider(server: ServerConfiguration) -> Provider {
+    pub fn get_opla_provider(server: &ServerStorage) -> Provider {
+        let config = &server.configuration;
         Provider {
             name: "Opla".to_string(),
             r#type: ProviderType::Opla.to_string(),
             description: Some("Opla is a free and open source AI assistant.".to_string()),
-            url: format!("{:}:{:}", server.parameters.host.clone(), server.parameters.port.clone()),
+            url: format!(
+                "{:}:{:}",
+                config.get_parameter_string("host", "127.0.0.1".to_string()),
+                config.get_parameter_int("port", 8081)
+            ),
             disabled: Some(false),
             key: None,
             doc_url: Some("https://opla.ai/docs".to_string()),
@@ -182,7 +204,7 @@ impl ProvidersManager {
         &self,
         app: AppHandle<R>,
         model: String
-    ) -> Result<ServerParameters, String> {
+    ) -> Result<ServerConfiguration, String> {
         let context = app.state::<OplaContext>();
         let context_server = Arc::clone(&context.server);
 
@@ -207,26 +229,14 @@ impl ProvidersManager {
             model_path
         };
         let mut server = context_server.lock().await;
-        // let query = query.clone();
-        // let conversation_id = query.options.conversation_id.clone();
-        let parameters = match server.parameters.clone() {
-            Some(mut p) => {
-                p.model_id = Some(model.clone());
-                p.model_path = Some(model_path);
-                p
-            }
-            None => {
-                return Err(
-                    LlmError::new(
-                        "Opla server not started no parameters found",
-                        "server_error"
-                    ).to_string()
-                );
-            }
-        };
 
-        server.bind::<R>(app.app_handle(), &parameters).await.map_err(|err| err.to_string())?;
-        Ok(parameters)
+        let mut config = server.configuration.clone();
+        config.set_parameter_string("model_id", model);
+        config.set_parameter_string("model_path", model_path);
+        server
+            .bind::<R>(app.app_handle(), &config).await
+            .map_err(|err| err.to_string())?;
+        Ok(config.clone())
     }
 
     async fn create_interface<R: Runtime>(
@@ -243,14 +253,17 @@ impl ProvidersManager {
         };
         // TODO if local inference client
         let app_handle = app.app_handle();
-        let parameters = self.bind_local_server(app, model).await?;
+        let config = self.bind_local_server(app, model).await?;
         let context = app_handle.state::<OplaContext>();
         let mut store = context.store.lock().await;
         store.server.launch_at_startup = true;
-        store.server.parameters = parameters.clone();
+        store.server.configuration = config.clone();
         store.save().map_err(|err| err.to_string())?;
-        // let mut client_instance = client.create(server.parameters);
         let mut interface = interface.clone();
+        let parameters: ServerParameters = ServerParameters {
+            host: config.get_parameter_string("host", "127.0.0.1".to_string()),
+            port: config.get_parameter_int("port", 8081)
+        };
         interface.set_parameters(parameters);
         Ok(interface)
     }
@@ -268,7 +281,7 @@ impl ProvidersManager {
             None => {
                 let store = context.store.lock().await;
                 let server = store.server.clone();
-                (ProvidersManager::get_opla_provider(server), "opla".to_string())
+                (ProvidersManager::get_opla_provider(&server), "opla".to_string())
             }
         };
         println!("llm_cancel_completion {} {}", llm_provider_type, conversation_id);
@@ -399,7 +412,7 @@ impl ProvidersManager {
             None => {
                 let store = context.store.lock().await;
                 let server = store.server.clone();
-                (ProvidersManager::get_opla_provider(server), "opla".to_string())
+                (ProvidersManager::get_opla_provider(&server), "opla".to_string())
             }
         };
         let conversation_id = match query.options.conversation_id.clone() {

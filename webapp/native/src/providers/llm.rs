@@ -19,11 +19,10 @@ use serde::{ Deserialize, Serialize };
 
 use crate::{
     data::model::Model,
-    store::ServerParameters,
     utils::http_client::{ HttpChunk, HttpError, NewHttpError },
 };
 
-use super::{ services::HttpService, ProviderAdapter };
+use super::{ services::HttpService, ProviderAdapter, ServerParameters };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmError {
