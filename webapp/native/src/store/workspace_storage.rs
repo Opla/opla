@@ -97,6 +97,8 @@ pub struct WorkspaceStorage {
     pub active_workspace_id: Option<String>,
     #[serde(default = "default_workspace")]
     pub workspaces: HashMap<String, Workspace>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub selected_project_id: Option<String>,
     #[serde(skip_serializing, default = "default_project")]
     pub projects: HashMap<String, Project>,
 }
@@ -114,6 +116,7 @@ impl WorkspaceStorage {
         Self {
             active_workspace_id: None,
             workspaces: default_workspace(),
+            selected_project_id: None,
             projects: default_project(),
         }
     }
@@ -181,6 +184,7 @@ impl WorkspaceStorage {
         }
         Ok(PathBuf::new().join(&path))
     }
+
     pub fn load_project(
         &mut self,
         name: String,
@@ -215,6 +219,35 @@ impl WorkspaceStorage {
 
         Ok(())
     }
+
+
+    fn create_project(&mut self) -> Result<Project, String> {
+        let active_workspace = self.load_active_workspace();
+        let id = active_workspace.id;
+        let path = self.create_project_directory(None)?;
+        let project = self.load_project(
+            DEFAULT_PROJECT_NAME.to_string(),
+            Some(path),
+            id.to_string()
+        )?;
+        self.active_workspace_id = Some(id);
+        Ok(project)
+    }
+
+    pub fn get_selected_project(&mut self) -> Result<Project, String> {
+        let selected_project_id = self.selected_project_id.clone().unwrap_or(
+            DEFAULT_PROJECT_NAME.to_string()
+        );
+        let project = match self.projects.get(&selected_project_id) {
+            Some(p) => p.clone(),
+            None => {
+                let binding = self.create_project()?;
+                binding.clone()
+            },
+        };
+        Ok(project)
+    }
+
 
     async fn emit_state_async(payload: Payload, app_handle: AppHandle) {
         let context = app_handle.state::<OplaContext>();
@@ -277,10 +310,24 @@ impl WorkspaceStorage {
             GlobalAppStateWorkspace::PROJECT => {
                 let project: Project;
                 let mut store = context.store.lock().await;
-                let active_workspace = store.workspaces.load_active_workspace();
+
                 if let Value::Project(data) = value {
                     project = data.clone();
                 } else {
+                    project = match store.workspaces.create_project() {
+                        Ok(p) => p,
+                        Err(error) => {
+                            println!("project get error: {:?}", error);
+                                    app_handle
+                                        .emit_all(STATE_SYNC_EVENT, Payload {
+                                            key: GlobalAppStateWorkspace::ERROR.into(),
+                                            value: Some(Value::String(error)),
+                                        })
+                                        .unwrap();
+                                    return;
+                        }
+                    };
+                    /* let active_workspace = store.workspaces.load_active_workspace();
                     let id = active_workspace.id;
                     let path = store.workspaces.create_project_directory(None);
                     match path {
@@ -316,7 +363,7 @@ impl WorkspaceStorage {
                                 .unwrap();
                             return;
                         }
-                    }
+                    } */
                 }
                 println!("project {:?}", project);
                 let id = project.id.clone();
