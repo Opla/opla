@@ -1,3 +1,10 @@
+# [1.0.0-alpha.173](https://github.com/Opla/opla/compare/v1.0.0-alpha.172...v1.0.0-alpha.173) (2024-06-06)
+
+
+### Features
+
+* **Imagine:** save image in project folder [#978](https://github.com/Opla/opla/issues/978) ([#979](https://github.com/Opla/opla/issues/979)) ([ab38752](https://github.com/Opla/opla/commit/ab387523342becdbbc90dcb0447184f8571ab377))
+
 # [1.0.0-alpha.172](https://github.com/Opla/opla/compare/v1.0.0-alpha.171...v1.0.0-alpha.172) (2024-06-05)
 
 
