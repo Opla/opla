@@ -177,7 +177,7 @@ export const getPathComponents = async (resourcePath: string) => {
   return { filename, path, ext, name };
 };
 
-export const convertAssetFile = async  (file: string) => {
+export const convertAssetFile = async (file: string) => {
   const { convertFileSrc } = await import('@tauri-apps/api/tauri');
   return convertFileSrc(file);
-}
+};
