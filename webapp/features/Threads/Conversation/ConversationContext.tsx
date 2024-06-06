@@ -43,6 +43,7 @@ import { CommandManager } from '@/utils/commands/types';
 import { cancelSending, sendMessage, updateMessageContent } from '@/utils/messages';
 import { useAssistantStore } from '@/stores';
 import { imageGeneration } from '@/utils/providers';
+import { convertAssetFile } from '@/utils/backend/tauri';
 import { PromptContext } from '../Prompt/PromptContext';
 
 type Context = {
@@ -221,7 +222,8 @@ function ConversationProvider({
         const response = await imageGeneration(openai, text);
 
         if (response?.images[0]) {
-          content = `![${text}](${response.images[0]} "${text}")`;
+          const assetUrl = await convertAssetFile(response.images[0]);
+          content = `![${text}](${assetUrl} "${text}")`;
         }
       }
       await updateMessages(

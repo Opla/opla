@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::path::PathBuf;
+
 use chrono::{ DateTime, Utc };
 use serde::{ self, Deserialize, Serialize };
 use serde_with::serde_as;
@@ -58,9 +60,9 @@ impl Project {
 
     }
 
-    pub async fn save_images(&mut self, images: Vec<String>) -> Result<Vec<String>, String> {
+    pub async fn save_images(&mut self, images: Vec<String>, path: PathBuf) -> Result<Vec<String>, String> {
         let mut files = Vec::new();
-        let path = &self.path;
+        // let path = &self.path;
         for url in images {
             let filename = download_image(url, path.clone()).await?;
             self.files.push(filename.clone());

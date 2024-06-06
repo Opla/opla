@@ -50,7 +50,6 @@ export default function Opla({
   const selectedModel = models.find((m) => m.id === modelId || m.fileName === modelId);
   const modelPath = config.server.parameters.modelPath as string;
   const items = getLocalModelsAsItems(config, selectedModel?.id);
-  console.log('model', modelId, selectedModel, models, config);
   const changeActiveModel = async (modelIdOrName: string) => {
     await setActiveModel(modelIdOrName);
     if (server.status === ServerStatus.STARTED || server.status === ServerStatus.STARTING) {

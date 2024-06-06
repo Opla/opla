@@ -29,10 +29,10 @@ pub fn get_filename_from_url(url: &str) -> Result<String,String> {
     Ok(caps[1].to_string())
 }
 
-pub async fn download_image(url: String, path: String) -> Result<String, String> {
+pub async fn download_image(url: String, path: PathBuf) -> Result<String, String> {
     let response = reqwest::get(url.clone()).await.map_err(|e| e.to_string())?;
     let bytes = response.bytes().await.map_err(|e| e.to_string())?;
-    let mut filepath = PathBuf::new().join(path);
+    let mut filepath = path.clone();
     let filename = match get_filename_from_url(&url) {
         Ok(f) => f,
         Err(error) => {
@@ -42,6 +42,6 @@ pub async fn download_image(url: String, path: String) -> Result<String, String>
     };
     filepath = filepath.join(filename.to_string());
     println!("image {:?} download to {:?}", url, filepath.to_str());
-    write(filepath, bytes).await.map_err(|e| e.to_string())?;
-    Ok(filename.to_string())
+    write(filepath.clone(), bytes).await.map_err(|e| e.to_string())?;
+    Ok(filepath.to_str().unwrap_or(&filename).to_string())
 }

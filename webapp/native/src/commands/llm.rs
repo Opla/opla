@@ -73,7 +73,7 @@ pub async fn llm_call_image_generation<R: Runtime>(
     let mut project = store.workspaces.get_selected_project()?;
     let project_path = project.path.clone();
     let path = store.workspaces.get_project_directory(Some(project_path))?.clone();
-    let files = project.save_images(images).await?.iter().map(|f| path.join(f).to_str().unwrap_or(f).to_string()).collect();
+    let files = project.save_images(images, path).await?;
     Ok(LlmImageGenerationResponse {
         images: files,
     })
