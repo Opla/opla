@@ -12,21 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useState } from 'react';
-// import EmptyView from '@/components/common/EmptyView';
-// import useTranslation from '@/hooks/useTranslation';
-import { KeyedScrollPosition } from '@/hooks/useScroll';
-// import Opla from '@/components/icons/Opla';
-import { AvatarRef, Conversation, Message, MessageImpl, PromptTemplate, Ui } from '@/types';
-// import logger from '@/utils/logger';
+import {
+  AvatarRef,
+  Conversation,
+  Message,
+  MessageImpl,
+  PromptTemplate,
+  Ui,
+  ViewSettings,
+} from '@/types';
 import useBackend from '@/hooks/useBackendContext';
 import { MenuAction, Page, ViewName } from '@/types/ui';
-import logger from '@/utils/logger';
+import { DefaultPageSettings } from '@/utils/constants';
 import ConversationList from './ConversationList';
-// import PromptsGrid from './PromptsGrid';
-import { useConversationContext } from './ConversationContext';
 import { usePromptContext } from '../Prompt/PromptContext';
 import Onboarding from './Onboarding';
+import { ConversationView } from './ConversationView';
 
 export type ConversationPanelProps = {
   selectedConversation: Conversation | undefined;
@@ -56,19 +57,9 @@ export function ConversationPanel({
   onCopyMessage,
 }: ConversationPanelProps) {
   // const { t } = useTranslation();
-  const { config, setSettings } = useBackend();
-  const {
-    selectedMessageId,
-    handleResendMessage,
-    handleChangeMessageContent,
-    handleStartMessageEdit,
-    handleCancelSending,
-  } = useConversationContext();
+  const { config } = useBackend();
+
   const { selectTemplate } = usePromptContext();
-  const [update, setUpdate] = useState<{
-    name?: string | undefined;
-    scrollPosition?: number | undefined;
-  }>({});
 
   const getSelectedViewName = (selectedThreadId: string | undefined, view = ViewName.Recent) =>
     `${view === ViewName.Recent ? Page.Threads : Page.Archives}${selectedThreadId ? `/${selectedThreadId}` : ''}`;
@@ -77,62 +68,11 @@ export function ConversationPanel({
   const conversationId = selectedConversation?.id;
   const conversationViewName = getSelectedViewName(conversationId);
   const conversationSettings = pagesSettings?.[conversationViewName];
-  useEffect(() => {
-    const afunc = async () => {
-      const prevScrollPosition =
-        conversationSettings?.scrollPosition === undefined ||
-        conversationSettings?.scrollPosition === null ||
-        conversationSettings.scrollPosition === -1
-          ? undefined
-          : +conversationSettings.scrollPosition;
-      const scrollPosition =
-        update.scrollPosition === undefined ||
-        update.scrollPosition === null ||
-        update.scrollPosition === -1
-          ? undefined
-          : +(update.scrollPosition * 1000).toFixed(0);
-      if (
-        conversationSettings &&
-        conversationViewName === update.name &&
-        scrollPosition !== prevScrollPosition
-      ) {
-        logger.info(
-          'save ScrollPosition',
-          update,
-          conversationViewName,
-          scrollPosition,
-          conversationSettings?.scrollPosition,
-        );
-        setSettings({
-          ...config.settings,
-          pages: {
-            ...pagesSettings,
-            [conversationViewName]: { ...conversationSettings, scrollPosition },
-          },
-        });
-      }
-    };
-    afunc();
-  }, [
-    conversationViewName,
-    conversationSettings,
-    pagesSettings,
-    setSettings,
-    update,
-    config.settings,
-  ]);
+  const viewSettings: ViewSettings[] = [
+    conversationSettings || DefaultPageSettings,
+    ...(conversationSettings?.views || []),
+  ];
 
-  const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {
-    const name = getSelectedViewName(key);
-    // TODO debug
-    const { scrollPosition } = update;
-    const py = +position.y.toFixed(2);
-    logger.info('handleScrollPosition', update, name, scrollPosition, position.y, py);
-    if (update.name !== name || update.scrollPosition !== py) {
-      logger.info('setUpdate', scrollPosition, py);
-      setUpdate({ scrollPosition: py, name });
-    }
-  };
   const handlePromptTemplateSelected = (prompt: PromptTemplate) => {
     selectTemplate(prompt);
   };
@@ -152,29 +92,27 @@ export function ConversationPanel({
   }
   return (
     <>
-      {messages && messages[0]?.conversationId === conversationId && (
-        <ConversationList
-          conversation={selectedConversation}
-          selectedMessageId={selectedMessageId}
-          scrollPosition={
-            conversationSettings &&
-            conversationSettings.scrollPosition !== undefined &&
-            conversationSettings.scrollPosition !== null
-              ? +(conversationSettings.scrollPosition / 1000).toFixed(2)
-              : undefined
-          }
-          messages={messages || []}
-          avatars={avatars}
-          onScrollPosition={handleScrollPosition}
-          onResendMessage={handleResendMessage}
-          onDeleteMessage={onDeleteMessage}
-          onDeleteAssets={onDeleteAssets}
-          onChangeMessageContent={handleChangeMessageContent}
-          onStartMessageEdit={handleStartMessageEdit}
-          onCopyMessage={onCopyMessage}
-          onCancelSending={handleCancelSending}
-        />
-      )}
+      <div className="flex h-full grow overflow-hidden">
+        {viewSettings.map(
+          (settings, index) =>
+            messages &&
+            messages[0]?.conversationId === conversationId &&
+            selectedConversation && (
+              <ConversationView
+                key={`${selectedConversation}-`}
+                conversationSettings={settings}
+                viewIndex={index}
+                selectedConversation={selectedConversation}
+                messages={messages || []}
+                avatars={avatars}
+                onDeleteMessage={onDeleteMessage}
+                onDeleteAssets={onDeleteAssets}
+                onCopyMessage={onCopyMessage}
+              />
+            ),
+        )}
+      </div>
+
       <div className="flex flex-col items-center text-sm" />
     </>
   );
