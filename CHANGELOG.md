@@ -1,3 +1,10 @@
+# [1.0.0-alpha.174](https://github.com/Opla/opla/compare/v1.0.0-alpha.173...v1.0.0-alpha.174) (2024-06-08)
+
+
+### Features
+
+* **Threads:** add split/close views [#980](https://github.com/Opla/opla/issues/980) ([#981](https://github.com/Opla/opla/issues/981)) ([4553deb](https://github.com/Opla/opla/commit/4553deb0d5626a45fb7d4a18f0076a931bb3c519))
+
 # [1.0.0-alpha.173](https://github.com/Opla/opla/compare/v1.0.0-alpha.172...v1.0.0-alpha.173) (2024-06-06)
 
 
