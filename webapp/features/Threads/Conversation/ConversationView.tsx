@@ -63,9 +63,6 @@ export function ConversationView({
   const pagesSettings = config.settings.pages;
   const conversationId = selectedConversation?.id;
   const conversationViewName = getSelectedViewName(conversationId);
-  /* const conversationSettings = pagesSettings?.[conversationViewName];
-  /* const viewSettings: ViewSettings[] =
-    conversationSettings?.views || conversationSettings ? [conversationSettings] : []; */
 
   useEffect(() => {
     const afunc = async () => {
@@ -98,7 +95,7 @@ export function ConversationView({
         if (viewIndex === 0) {
           updatedPageSettings = { ...conversationSettings, scrollPosition };
         } else if (updatedPageSettings.views) {
-          updatedPageSettings.views[viewIndex] = { ...conversationSettings, scrollPosition };
+          updatedPageSettings.views[viewIndex - 1] = { ...conversationSettings, scrollPosition };
         }
         setSettings({
           ...config.settings,

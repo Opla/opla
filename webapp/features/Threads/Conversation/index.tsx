@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Fragment, PropsWithChildren } from 'react';
+
 import {
   AvatarRef,
   Conversation,
@@ -22,12 +24,38 @@ import {
   ViewSettings,
 } from '@/types';
 import useBackend from '@/hooks/useBackendContext';
-import { MenuAction, Page, ViewName } from '@/types/ui';
+import { MenuAction } from '@/types/ui';
 import { DefaultPageSettings } from '@/utils/constants';
+import { getSelectedViewName } from '@/utils/views';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import ConversationList from './ConversationList';
 import { usePromptContext } from '../Prompt/PromptContext';
 import Onboarding from './Onboarding';
 import { ConversationView } from './ConversationView';
+
+function Group({ viewSettings, children }: PropsWithChildren<{ viewSettings: ViewSettings[] }>) {
+  return viewSettings.length < 2 ? (
+    <div className="flex h-full grow overflow-hidden">{children}</div>
+  ) : (
+    <ResizablePanelGroup direction="horizontal" className="flex h-full grow overflow-hidden">
+      {children}
+    </ResizablePanelGroup>
+  );
+}
+function Panel({
+  viewSettings,
+  id,
+  children,
+}: PropsWithChildren<{ viewSettings: ViewSettings[]; id: string }>) {
+  return viewSettings.length < 2 ? (
+    children
+  ) : (
+    <ResizablePanel id={id} minSize={10} className="flex grow overflow-hidden">
+      {children}
+      <ResizableHandle />
+    </ResizablePanel>
+  );
+}
 
 export type ConversationPanelProps = {
   selectedConversation: Conversation | undefined;
@@ -61,16 +89,14 @@ export function ConversationPanel({
 
   const { selectTemplate } = usePromptContext();
 
-  const getSelectedViewName = (selectedThreadId: string | undefined, view = ViewName.Recent) =>
-    `${view === ViewName.Recent ? Page.Threads : Page.Archives}${selectedThreadId ? `/${selectedThreadId}` : ''}`;
-
   const pagesSettings = config.settings.pages;
   const conversationId = selectedConversation?.id;
   const conversationViewName = getSelectedViewName(conversationId);
   const conversationSettings = pagesSettings?.[conversationViewName];
   const viewSettings: ViewSettings[] = [
-    conversationSettings || DefaultPageSettings,
-    ...(conversationSettings?.views || []),
+    { ...(conversationSettings || DefaultPageSettings), id: '0' },
+    ...(conversationSettings?.views?.map((v, index) => ({ id: v.id || `${index + 1}`, ...v })) ||
+      []),
   ];
 
   const handlePromptTemplateSelected = (prompt: PromptTemplate) => {
@@ -90,29 +116,35 @@ export function ConversationPanel({
       />
     );
   }
+
   return (
     <>
-      <div className="flex h-full grow overflow-hidden">
+      <Group viewSettings={viewSettings}>
         {viewSettings.map(
           (settings, index) =>
             messages &&
             messages[0]?.conversationId === conversationId &&
             selectedConversation && (
-              <ConversationView
-                key={`${selectedConversation}-`}
-                conversationSettings={settings}
-                viewIndex={index}
-                selectedConversation={selectedConversation}
-                messages={messages || []}
-                avatars={avatars}
-                onDeleteMessage={onDeleteMessage}
-                onDeleteAssets={onDeleteAssets}
-                onCopyMessage={onCopyMessage}
-              />
+              <Panel
+                key={`${selectedConversation}-${settings.id}`}
+                viewSettings={viewSettings}
+                id={`${selectedConversation}-${settings.id}`}
+              >
+                <ConversationView
+                  key={`${selectedConversation}-${settings.id}`}
+                  conversationSettings={settings}
+                  viewIndex={index}
+                  selectedConversation={selectedConversation}
+                  messages={messages || []}
+                  avatars={avatars}
+                  onDeleteMessage={onDeleteMessage}
+                  onDeleteAssets={onDeleteAssets}
+                  onCopyMessage={onCopyMessage}
+                />
+              </Panel>
             ),
         )}
-      </div>
-
+      </Group>
       <div className="flex flex-col items-center text-sm" />
     </>
   );

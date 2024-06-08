@@ -13,27 +13,31 @@
 // limitations under the License.
 
 import { useContext } from 'react';
-import { AlertTriangle, ArrowRight } from 'lucide-react';
+import { AlertTriangle, ArrowRight, SplitSquareHorizontal, X } from 'lucide-react';
 import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackendContext';
-import { AIServiceType, Conversation, Provider, ProviderType, Ui } from '@/types';
+import { AIServiceType, Conversation, Provider, ProviderType, Ui, ViewSettings } from '@/types';
 import { MenuAction } from '@/types/ui';
 import { findProvider, updateProvider } from '@/utils/data/providers';
 import { useAssistantStore } from '@/stores';
 import useTranslation from '@/hooks/useTranslation';
 import { getActiveService } from '@/utils/services';
 import { getAnyFirstModel } from '@/utils/data/models';
+import { Button } from '@/components/ui/button';
+import SelectModel from '@/components/common/SelectModel';
 import HeaderMenu from './Menu';
 import AssistantTitle from './AssistantTitle';
-import SelectModel from '../../../components/common/SelectModel';
 
 export type ThreadMenuProps = {
   selectedAssistantId: string | undefined;
   selectedModelId: string | undefined;
   selectedConversationId?: string;
   modelItems: Ui.MenuItem[];
+  views: ViewSettings[];
   onSelectModel: (model: string, provider: ProviderType) => void;
   onSelectMenu: (menu: MenuAction, data: string) => void;
+  onCloseView: () => void;
+  onSplitView: () => void;
 };
 
 export default function ThreadHeader({
@@ -41,8 +45,11 @@ export default function ThreadHeader({
   selectedModelId,
   selectedConversationId,
   modelItems,
+  views,
   onSelectModel,
   onSelectMenu,
+  onCloseView,
+  onSplitView,
 }: ThreadMenuProps) {
   const { getAssistant } = useAssistantStore();
   const { conversations, providers, setProviders } = useContext(AppContext);
@@ -122,22 +129,29 @@ export default function ThreadHeader({
     );
   }
 
-  /* const menu = selectedAssistantId ? (
-    <AssistantMenu
-      assistant={assistant}
-      target={target}
-      conversation={conversation}
-      onSelectMenu={() => {
-        throw new Error('Function not implemented.');
-      }}
-    />
-  ) : (
-    <HeaderMenu selectedConversationId={selectedConversationId} onSelectMenu={onSelectMenu} />
-  ); */
-
   return (
     <div className="flex w-full flex-col items-start px-4 py-0 sm:flex-row sm:items-center">
       {title}
+      {views?.length > 1 && (
+        <Button
+          variant="ghost"
+          title={t('Close view')}
+          aria-label={t('Close view')}
+          size="icon"
+          onClick={() => onCloseView()}
+        >
+          <X className="h-4 w-4" strokeWidth={1.5} />
+        </Button>
+      )}
+      <Button
+        variant="ghost"
+        title={t('Split view')}
+        aria-label={t('Split view')}
+        size="icon"
+        onClick={() => onSplitView()}
+      >
+        <SplitSquareHorizontal className="h-4 w-4" strokeWidth={1.5} />
+      </Button>
       <HeaderMenu selectedConversationId={selectedConversationId} onSelectMenu={onSelectMenu} />
     </div>
   );

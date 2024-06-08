@@ -416,6 +416,7 @@ export type ExplorerGroup = {
 
 export type ViewSettings = {
   selectedId?: string;
+  id?: string;
   explorerHidden: boolean;
   settingsHidden: boolean;
   explorerWidth: number;
@@ -425,13 +426,6 @@ export type ViewSettings = {
 };
 
 export type PageSettings = ViewSettings & {
-  selectedId?: string;
-  explorerHidden: boolean;
-  settingsHidden: boolean;
-  explorerWidth: number;
-  settingsWidth: number;
-  explorerGroups?: ExplorerGroup[];
-  scrollPosition?: number;
   views?: ViewSettings[];
 };
 
