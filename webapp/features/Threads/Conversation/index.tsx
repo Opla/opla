@@ -12,21 +12,50 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useState } from 'react';
-// import EmptyView from '@/components/common/EmptyView';
-// import useTranslation from '@/hooks/useTranslation';
-import { KeyedScrollPosition } from '@/hooks/useScroll';
-// import Opla from '@/components/icons/Opla';
-import { AvatarRef, Conversation, Message, MessageImpl, PromptTemplate, Ui } from '@/types';
-// import logger from '@/utils/logger';
+import { Fragment, PropsWithChildren } from 'react';
+
+import {
+  AvatarRef,
+  Conversation,
+  Message,
+  MessageImpl,
+  PromptTemplate,
+  Ui,
+  ViewSettings,
+} from '@/types';
 import useBackend from '@/hooks/useBackendContext';
-import { MenuAction, Page, ViewName } from '@/types/ui';
-import logger from '@/utils/logger';
+import { MenuAction } from '@/types/ui';
+import { DefaultPageSettings } from '@/utils/constants';
+import { getSelectedViewName } from '@/utils/views';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import ConversationList from './ConversationList';
-// import PromptsGrid from './PromptsGrid';
-import { useConversationContext } from './ConversationContext';
 import { usePromptContext } from '../Prompt/PromptContext';
 import Onboarding from './Onboarding';
+import { ConversationView } from './ConversationView';
+
+function Group({ viewSettings, children }: PropsWithChildren<{ viewSettings: ViewSettings[] }>) {
+  return viewSettings.length < 2 ? (
+    <div className="flex h-full grow overflow-hidden">{children}</div>
+  ) : (
+    <ResizablePanelGroup direction="horizontal" className="flex h-full grow overflow-hidden">
+      {children}
+    </ResizablePanelGroup>
+  );
+}
+function Panel({
+  viewSettings,
+  id,
+  children,
+}: PropsWithChildren<{ viewSettings: ViewSettings[]; id: string }>) {
+  return viewSettings.length < 2 ? (
+    children
+  ) : (
+    <ResizablePanel id={id} minSize={10} className="flex grow overflow-hidden">
+      {children}
+      <ResizableHandle />
+    </ResizablePanel>
+  );
+}
 
 export type ConversationPanelProps = {
   selectedConversation: Conversation | undefined;
@@ -56,83 +85,20 @@ export function ConversationPanel({
   onCopyMessage,
 }: ConversationPanelProps) {
   // const { t } = useTranslation();
-  const { config, setSettings } = useBackend();
-  const {
-    selectedMessageId,
-    handleResendMessage,
-    handleChangeMessageContent,
-    handleStartMessageEdit,
-    handleCancelSending,
-  } = useConversationContext();
-  const { selectTemplate } = usePromptContext();
-  const [update, setUpdate] = useState<{
-    name?: string | undefined;
-    scrollPosition?: number | undefined;
-  }>({});
+  const { config } = useBackend();
 
-  const getSelectedViewName = (selectedThreadId: string | undefined, view = ViewName.Recent) =>
-    `${view === ViewName.Recent ? Page.Threads : Page.Archives}${selectedThreadId ? `/${selectedThreadId}` : ''}`;
+  const { selectTemplate } = usePromptContext();
 
   const pagesSettings = config.settings.pages;
   const conversationId = selectedConversation?.id;
   const conversationViewName = getSelectedViewName(conversationId);
   const conversationSettings = pagesSettings?.[conversationViewName];
-  useEffect(() => {
-    const afunc = async () => {
-      const prevScrollPosition =
-        conversationSettings?.scrollPosition === undefined ||
-        conversationSettings?.scrollPosition === null ||
-        conversationSettings.scrollPosition === -1
-          ? undefined
-          : +conversationSettings.scrollPosition;
-      const scrollPosition =
-        update.scrollPosition === undefined ||
-        update.scrollPosition === null ||
-        update.scrollPosition === -1
-          ? undefined
-          : +(update.scrollPosition * 1000).toFixed(0);
-      if (
-        conversationSettings &&
-        conversationViewName === update.name &&
-        scrollPosition !== prevScrollPosition
-      ) {
-        logger.info(
-          'save ScrollPosition',
-          update,
-          conversationViewName,
-          scrollPosition,
-          conversationSettings?.scrollPosition,
-        );
-        setSettings({
-          ...config.settings,
-          pages: {
-            ...pagesSettings,
-            [conversationViewName]: { ...conversationSettings, scrollPosition },
-          },
-        });
-      }
-    };
-    afunc();
-  }, [
-    conversationViewName,
-    conversationSettings,
-    pagesSettings,
-    setSettings,
-    update,
-    config.settings,
-  ]);
+  const viewSettings: ViewSettings[] = [
+    { ...(conversationSettings || DefaultPageSettings), id: '0' },
+    ...(conversationSettings?.views?.map((v, index) => ({ id: v.id || `${index + 1}`, ...v })) ||
+      []),
+  ];
 
-  const handleScrollPosition = ({ key, position }: KeyedScrollPosition) => {
-    const name = getSelectedViewName(key);
-    // TODO debug
-    const { scrollPosition } = update;
-    const py = +position.y.toFixed(2);
-    logger.info('handleScrollPosition', update, name, scrollPosition, position.y, py);
-    if (update.name !== name || update.scrollPosition !== py) {
-      logger.info('setUpdate', scrollPosition, py);
-      setUpdate({ scrollPosition: py, name });
-    }
-  };
   const handlePromptTemplateSelected = (prompt: PromptTemplate) => {
     selectTemplate(prompt);
   };
@@ -150,31 +116,35 @@ export function ConversationPanel({
       />
     );
   }
+
   return (
     <>
-      {messages && messages[0]?.conversationId === conversationId && (
-        <ConversationList
-          conversation={selectedConversation}
-          selectedMessageId={selectedMessageId}
-          scrollPosition={
-            conversationSettings &&
-            conversationSettings.scrollPosition !== undefined &&
-            conversationSettings.scrollPosition !== null
-              ? +(conversationSettings.scrollPosition / 1000).toFixed(2)
-              : undefined
-          }
-          messages={messages || []}
-          avatars={avatars}
-          onScrollPosition={handleScrollPosition}
-          onResendMessage={handleResendMessage}
-          onDeleteMessage={onDeleteMessage}
-          onDeleteAssets={onDeleteAssets}
-          onChangeMessageContent={handleChangeMessageContent}
-          onStartMessageEdit={handleStartMessageEdit}
-          onCopyMessage={onCopyMessage}
-          onCancelSending={handleCancelSending}
-        />
-      )}
+      <Group viewSettings={viewSettings}>
+        {viewSettings.map(
+          (settings, index) =>
+            messages &&
+            messages[0]?.conversationId === conversationId &&
+            selectedConversation && (
+              <Panel
+                key={`${selectedConversation}-${settings.id}`}
+                viewSettings={viewSettings}
+                id={`${selectedConversation}-${settings.id}`}
+              >
+                <ConversationView
+                  key={`${selectedConversation}-${settings.id}`}
+                  conversationSettings={settings}
+                  viewIndex={index}
+                  selectedConversation={selectedConversation}
+                  messages={messages || []}
+                  avatars={avatars}
+                  onDeleteMessage={onDeleteMessage}
+                  onDeleteAssets={onDeleteAssets}
+                  onCopyMessage={onCopyMessage}
+                />
+              </Panel>
+            ),
+        )}
+      </Group>
       <div className="flex flex-col items-center text-sm" />
     </>
   );

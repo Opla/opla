@@ -414,14 +414,19 @@ export type ExplorerGroup = {
   closed: boolean;
 };
 
-export type PageSettings = {
+export type ViewSettings = {
   selectedId?: string;
+  id?: string;
   explorerHidden: boolean;
   settingsHidden: boolean;
   explorerWidth: number;
   settingsWidth: number;
   explorerGroups?: ExplorerGroup[];
   scrollPosition?: number;
+};
+
+export type PageSettings = ViewSettings & {
+  views?: ViewSettings[];
 };
 
 export type Settings = {

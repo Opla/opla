@@ -26,6 +26,8 @@ import {
   ModelState,
   Model,
   Avatar,
+  ViewSettings,
+  PageSettings,
 } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
@@ -52,6 +54,8 @@ import ContentView from '@/components/common/ContentView';
 import { useAssistantStore } from '@/stores';
 import { getLocalProvider } from '@/utils/data/providers';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
+import { getSelectedViewName } from '@/utils/views';
+import { DefaultPageSettings } from '@/utils/constants';
 import ThreadHeader from './Header';
 import { PromptProvider } from './Prompt/PromptContext';
 import { ConversationProvider } from './Conversation/ConversationContext';
@@ -78,7 +82,7 @@ function Thread({
     updateConversationMessages,
   } = useContext(AppContext);
 
-  const { config, downloads, streams, getActiveModel, setActiveModel } = useBackend();
+  const { config, downloads, streams, getActiveModel, setActiveModel, setSettings } = useBackend();
   const searchParams = useSearchParams();
   const [service, setService] = useState<AIService | undefined>(undefined);
   const { assistants, getAssistant } = useAssistantStore();
@@ -136,7 +140,7 @@ function Thread({
   }, [conversationId, readConversationMessages, isMessageUpdating, copied, selectedConversation]);
 
   const defaultConversationName = getDefaultConversationName(t);
-  const { messages, tempConversationName } = useMemo(() => {
+  const { messages, tempConversationName, views } = useMemo(() => {
     const stream = streams?.[conversationId as string];
     let newMessages: MessageImpl[] = conversationMessages;
     if (stream) {
@@ -159,8 +163,23 @@ function Thread({
     const conversationName: string = newMessages?.[0]
       ? getMessageContentAsString(newMessages?.[0])
       : defaultConversationName;
-    return { messages: newMessages, tempConversationName: conversationName };
-  }, [conversationMessages, streams, conversationId, defaultConversationName]);
+
+    const pagesSettings = config.settings.pages;
+    const conversationViewName = getSelectedViewName(conversationId);
+    const conversationSettings = pagesSettings?.[conversationViewName];
+    const viewSettings: ViewSettings[] = [
+      { ...(conversationSettings || DefaultPageSettings) },
+      ...(conversationSettings?.views || []),
+    ];
+
+    return { messages: newMessages, tempConversationName: conversationName, views: viewSettings };
+  }, [
+    streams,
+    conversationId,
+    conversationMessages,
+    defaultConversationName,
+    config.settings.pages,
+  ]);
 
   const { modelItems, commandManager, assistant, selectedModelId, disabled, model } =
     useMemo(() => {
@@ -368,6 +387,43 @@ function Thread({
     setCopied(newCopied);
   };
 
+  const handleSplitView = () => {
+    const pagesSettings = config.settings.pages;
+    const conversationViewName = getSelectedViewName(conversationId);
+    if (views.length < 4 && pagesSettings?.[conversationViewName]) {
+      const updatedPageSettings: PageSettings = pagesSettings[conversationViewName];
+      const updatedViews = [...(updatedPageSettings.views || [])];
+      updatedViews.push({ ...views[views.length - 1] });
+      updatedPageSettings.views = updatedViews;
+      setSettings({
+        ...config.settings,
+        pages: {
+          ...pagesSettings,
+          [conversationViewName]: updatedPageSettings,
+        },
+      });
+      // await updateBackendStore();
+    }
+  };
+
+  const handleCloseView = () => {
+    const pagesSettings = config.settings.pages;
+    const conversationViewName = getSelectedViewName(conversationId);
+    if (views.length > 1 && pagesSettings?.[conversationViewName]) {
+      const updatedPageSettings: PageSettings = pagesSettings[conversationViewName];
+      const updatedViews = [...(updatedPageSettings.views || [])];
+      updatedViews.pop();
+      updatedPageSettings.views = updatedViews.length === 0 ? undefined : updatedViews;
+      setSettings({
+        ...config.settings,
+        pages: {
+          ...pagesSettings,
+          [conversationViewName]: updatedPageSettings,
+        },
+      });
+      // await updateBackendStore();
+    }
+  };
   useShortcuts(ShortcutIds.DELETE_MESSAGE, (e) => {
     e.preventDefault();
     const lastMessage = messages?.findLast((m) => m.author.role === 'user');
@@ -400,8 +456,11 @@ function Thread({
           selectedModelId={selectedModelId}
           selectedConversationId={conversationId}
           modelItems={modelItems}
+          views={views}
           onSelectModel={changeService}
           onSelectMenu={onSelectMenu}
+          onCloseView={handleCloseView}
+          onSplitView={handleSplitView}
         />
       }
       toolbar={rightToolbar}
