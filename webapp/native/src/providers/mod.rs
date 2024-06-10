@@ -58,11 +58,6 @@ pub mod services;
 pub struct ServerParameters {
     pub port: i32,
     pub host: String,
-    /* pub model_id: Option<String>,
-    pub model_path: Option<String>,
-    pub context_size: i32,
-    pub threads: i32,
-    pub n_gpu_layers: i32, */
 }
 
 #[derive(Clone)]
