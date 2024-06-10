@@ -1,3 +1,10 @@
+# [1.0.0-alpha.175](https://github.com/Opla/opla/compare/v1.0.0-alpha.174...v1.0.0-alpha.175) (2024-06-10)
+
+
+### Features
+
+* handles messages in Rust [#982](https://github.com/Opla/opla/issues/982) ([#983](https://github.com/Opla/opla/issues/983)) ([8674536](https://github.com/Opla/opla/commit/86745365572640059d515392b1db815cc330d7d3))
+
 # [1.0.0-alpha.174](https://github.com/Opla/opla/compare/v1.0.0-alpha.173...v1.0.0-alpha.174) (2024-06-08)
 
 

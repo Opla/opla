@@ -1,6 +1,6 @@
 {
   "name": "opla",
-  "version": "1.0.0-alpha.174",
+  "version": "1.0.0-alpha.175",
   "private": true,
   "scripts": {
     "dev": "next dev",
