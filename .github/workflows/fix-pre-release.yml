@@ -16,6 +16,22 @@ jobs:
       pull-requests: write # to be able to comment on released pull requests
       id-token: write # to enable use of OIDC for npm provenance
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
+      - run: cargo install cargo-edit
+    
+      - name: Install dependencies
+        run: npm clean-install
+
       # Get generated release id
       - name: Get Latest Release id
         if: env.release_version && env.release_version != ''
