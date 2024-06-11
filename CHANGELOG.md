@@ -1,3 +1,10 @@
+# [1.0.0-alpha.176](https://github.com/Opla/opla/compare/v1.0.0-alpha.175...v1.0.0-alpha.176) (2024-06-11)
+
+
+### Bug Fixes
+
+* Rust messages deserialize from js [#982](https://github.com/Opla/opla/issues/982) ([#994](https://github.com/Opla/opla/issues/994)) ([2ccf75d](https://github.com/Opla/opla/commit/2ccf75d9d0cce4bd5439bf6c53ef22c7f3d29058))
+
 # [1.0.0-alpha.175](https://github.com/Opla/opla/compare/v1.0.0-alpha.174...v1.0.0-alpha.175) (2024-06-10)
 
 
