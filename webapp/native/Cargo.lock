@@ -82,7 +82,7 @@ checksum = "0952808a6c2afd1aa8947271f3a60f1a6763c7b912d210184c5149b5cf147247"
 
 [[package]]
 name = "app"
-version = "1.0.0-alpha.168"
+version = "1.0.0-alpha.175"
 dependencies = [
  "async-trait",
  "bytes",
@@ -92,6 +92,7 @@ dependencies = [
  "eventsource-stream",
  "futures-util",
  "opla_core",
+ "regex",
  "reqwest 0.12.4",
  "rusqlite",
  "serde",
@@ -2182,7 +2183,7 @@ dependencies = [
 
 [[package]]
 name = "opla_core"
-version = "1.0.0-alpha.168"
+version = "1.0.0-alpha.175"
 dependencies = [
  "anyhow",
 ]
@@ -2682,9 +2683,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.10.3"
+version = "1.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b62dbe01f0b06f9d8dc7d49e05a0785f153b00b2c227856282f671e0318c9b15"
+checksum = "b91213439dad192326a0d7c6ee3955910425f441d7038e0d6933b0aec5c4517f"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -3561,7 +3562,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-window-state"
 version = "0.1.1"
-source = "git+https://github.com/tauri-apps/plugins-workspace?branch=v1#10a4d76fb3e76dc0fe240dcb4530886985c45135"
+source = "git+https://github.com/tauri-apps/plugins-workspace?branch=v1#bd3d9ca152ee8b55e3e669dac68476ce6150c57f"
 dependencies = [
  "bincode",
  "bitflags 2.4.2",
@@ -3760,7 +3761,7 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokenizer"
-version = "1.0.0-alpha.168"
+version = "1.0.0-alpha.175"
 dependencies = [
  "anyhow",
  "base64 0.21.7",
