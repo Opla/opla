@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
 use chrono::{ DateTime, Utc };
 use serde::{ Deserialize, Serialize };
+use void::Void;
 
-use crate::data::date_format;
+use crate::data::{date_format_extended, option_string_or_struct};
 
 #[derive(PartialEq, Clone, Debug, Serialize, Deserialize)]
 pub enum MessageStatus {
@@ -55,6 +56,7 @@ pub type Metadata = HashMap<String, MetadataValue>;
 pub struct Author {
     role: Role, // 'user' | 'system' | 'assistant';
     name: String,
+    #[serde(alias = "avatarUrl")]
     avatar_url: Option<String>,
     metadata: Option<Metadata>,
 }
@@ -77,22 +79,36 @@ pub struct Content {
     author: Option<Author>,
 }
 
+impl FromStr for Content {
+    type Err = Void;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+            Ok(Self {
+                r#type: ContentType::Text,
+                parts: [s.to_string()].to_vec(),
+                raw: Some([s.to_string()].to_vec()),
+                metadata: None,
+                author: None,
+            })
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Message {
     pub id: String,
-    pub name: String,
-    #[serde(with = "date_format", default)]
+    #[serde(with = "date_format_extended", alias = "createdAt", default)]
     pub created_at: DateTime<Utc>,
-    #[serde(with = "date_format", default)]
+    #[serde(with = "date_format_extended", alias = "updatedAt", default)]
     pub updated_at: DateTime<Utc>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    metadata: Option<Metadata>,
 
     #[serde(
         skip_serializing_if = "Option::is_none",
         default,
-        // deserialize_with = "option_string_or_struct"
+        deserialize_with = "option_string_or_struct"
     )]
     pub content: Option<Content>,
-    #[serde(skip_serializing_if = "Option::is_none", default)]
+    #[serde(skip_serializing_if = "Option::is_none", alias = "contentHistory", default)]
     pub content_history: Option<Vec<Content>>,
     pub status: MessageStatus,
     #[serde(skip_serializing_if = "Option::is_none", default)]
