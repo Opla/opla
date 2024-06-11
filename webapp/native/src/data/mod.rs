@@ -136,6 +136,42 @@ impl FromStr for Resource {
     }
 }
 
+pub mod date_format_extended {
+    use chrono::{ DateTime, Utc };
+    use serde::{ de, Deserialize, Deserializer };
+    use serde_json::Value;
+
+    const FORMAT: &str = "%Y-%m-%dT%H:%M:%S%.fZ";
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
+        where D: Deserializer<'de>
+    {
+        let v = Value::deserialize(deserializer)?;
+        let date = match v.as_str() {
+            Some(s) => DateTime::parse_from_rfc3339(s).map_err(de::Error::custom)?.with_timezone(&Utc),
+            None => match DateTime::from_timestamp_millis(v.as_i64().unwrap_or(-1)) {
+                Some(d) => d,
+                None => return Err(de::Error::custom("Invalid timestamp millis")),
+            },
+        };
+        Ok(date)
+        // let s = String::deserialize(deserializer)?;
+        /* println!("Parsing date: {}", s);
+        let datetime = NaiveDateTime::parse_from_str(&s, FORMAT).expect("Failed to parse date");
+        println!("Parsed date: {:?}", datetime);
+        let datetime = DateTime::parse_from_rfc3339(&s).expect("Failed to parse date");
+        println!("Parsed date: {:?}", datetime); */
+        // Ok(DateTime::parse_from_rfc3339(&s).map_err(serde::de::Error::custom)?.with_timezone(&Utc))
+    }
+
+    pub fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
+        where S: serde::Serializer
+    {
+        let s = date.format(FORMAT).to_string();
+        serializer.serialize_str(&s)
+    }
+}
+
 pub mod date_format {
     use chrono::{ DateTime, Utc };
     use serde::{ Deserializer, Deserialize };
