@@ -40,6 +40,85 @@ impl ServerParameter {
             _ => default_value,
         }
     }
+
+    pub fn to_float(&self, default_value: f32) -> f32 {
+        match self {
+            Self::Integer(i) => *i as f32,
+            Self::Number(f) => *f,
+            _ => default_value,
+        }
+    }
+
+    pub fn to_bool(&self, default_value: bool) -> bool {
+        match self {
+            Self::Boolean(v) => *v,
+            _ => default_value,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+pub enum ServerParameterType {
+    #[serde(rename = "string")]
+    String,
+    #[serde(rename = "number")]
+    Number,
+    #[serde(rename = "integer")]
+    Integer,
+    #[serde(rename = "boolean")]
+    Boolean,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum ServerParameterValue<'a> {
+    String(&'a str),
+    Number(f32),
+    Integer(i32),
+    Boolean(bool),
+    None(()),
+}
+
+impl<'a> ServerParameterValue<'a> {
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::String(i) => i.to_string(),
+            _ => format!("{:?}", &self),
+        }
+    }
+
+    pub fn to_int(&self, default_value: i32) -> i32 {
+        match self {
+            Self::Integer(i) => *i,
+            Self::Number(f) => *f as i32,
+            _ => default_value,
+        }
+    }
+
+    pub fn to_float(&self, default_value: f32) -> f32 {
+        match self {
+            Self::Integer(i) => *i as f32,
+            Self::Number(f) => *f,
+            _ => default_value,
+        }
+    }
+
+    pub fn to_bool(&self, default_value: bool) -> bool {
+        match self {
+            Self::Boolean(v) => *v,
+            _ => default_value,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct ServerParameterDefinition<'a> {
+    pub key: &'a str,
+    pub optional: bool,
+    pub r#type: ServerParameterType,
+    pub default_value: ServerParameterValue<'a>,
+    pub option: &'a str,
+    pub long_option: &'a str,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -79,6 +158,10 @@ impl ServerConfiguration {
             .unwrap_or(default_value)
     }
 
+    pub fn contains_parameter(&self, key: &str) -> bool {
+        self.parameters.contains_key(key)
+    }
+
     pub fn remove_model(&mut self) {
         self.remove_parameter("model_id");
         self.remove_parameter("model_path");
@@ -92,20 +175,57 @@ impl ServerConfiguration {
         return false;
     }
 
-    pub fn to_args(&self, model_path: &str) -> Vec<String> {
-        let mut parameters: Vec<String> = Vec::with_capacity(12);
-        parameters.push(format!("-m"));
-        parameters.push(format!("{}", model_path.to_string()));
-        parameters.push(format!("--port"));
-        parameters.push(format!("{}", self.get_parameter_int("port", 8081)));
-        parameters.push(format!("--host"));
-        parameters.push(format!("{}", self.get_parameter_string("host", "127.0.0.1".to_string())));
-        parameters.push(format!("-c"));
-        parameters.push(format!("{}", self.get_parameter_int("context_size", 512)));
-        parameters.push(format!("-t"));
-        parameters.push(format!("{}", self.get_parameter_int("threads", 6)));
-        parameters.push(format!("-ngl"));
-        parameters.push(format!("{}", self.get_parameter_int("n_gpu_layers", 0)));
+    pub fn to_args(
+        &self,
+        model_path: &str,
+        definitions: &phf::Map<&str, ServerParameterDefinition>
+    ) -> Vec<String> {
+        println!("parameters = {:?}", self.parameters);
+        let mut parameters: Vec<String> = Vec::new();
+
+        for (key, value) in self.parameters.iter() {
+            let definition = match definitions.get(&key) {
+                Some(d) => d,
+                None => {
+                    if !(key == "model_path" || key == "model_id") {
+                        println!("Error definition not found: {:?}", key);
+                    }
+                    continue;
+                }
+            };
+            let mut option = definition.option;
+            if option == "" {
+                option = definition.long_option;
+            }
+            parameters.push(option.to_string());
+            let mut validate = true;
+            let mut string_value = value.to_string();
+            if definition.key == "model" {
+                string_value = model_path.to_string();
+            } else if definition.r#type == ServerParameterType::String {
+                let default_value = definition.default_value.to_string();
+                validate = string_value != default_value;
+            } else if definition.r#type == ServerParameterType::Number {
+                let default_value = definition.default_value.to_float(0.0);
+                let value = value.to_float(default_value);
+                validate = value != default_value;
+                string_value = value.to_string();
+            } else if definition.r#type == ServerParameterType::Integer {
+                let default_value = definition.default_value.to_int(0);
+                let value = value.to_int(default_value);
+                validate = value != default_value;
+                string_value = value.to_string();
+            } else if definition.r#type == ServerParameterType::Boolean {
+                let default_value = definition.default_value.to_bool(false);
+                validate = value.to_bool(default_value);
+            }
+            println!("key={:?} validate={:?} sting_value={:?} {:?}", key, validate, string_value, definition.r#type);
+            if !validate {
+                parameters.pop();
+            } else if definition.r#type != ServerParameterType::Boolean {
+                parameters.push(string_value);
+            }
+        }
         parameters
     }
 }

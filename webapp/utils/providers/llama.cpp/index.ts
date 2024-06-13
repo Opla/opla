@@ -15,9 +15,13 @@
 // import { invoke } from '@tauri-apps/api/tauri';
 import logger from '@/utils/logger';
 import { invokeTauri } from '@/utils/backend/tauri';
+import { mapKeys } from '@/utils/data';
+import { toSnakeCase } from '@/utils/string';
+import { ServerParameters } from '@/types';
 import { LlamaCppParameters, LlamaCppArgumentsSchema } from './constants';
 
-const parseLLamaCppServerParameters = (params: unknown) => LlamaCppArgumentsSchema.parse(params);
+const parseLLamaCppServerParameters = (params: ServerParameters) =>
+  LlamaCppArgumentsSchema.parse(params);
 
 const stopLLamaCppServer = async () => {
   logger.info('stop LLama.cpp server');
@@ -26,13 +30,14 @@ const stopLLamaCppServer = async () => {
 
 const startLLamaCppServer = async (
   model: string | undefined,
-  metadata: LlamaCppParameters,
+  _parameters: LlamaCppParameters,
   command = 'start_opla_server',
 ): Promise<unknown> => {
   logger.info(
     command === 'start_opla_server' ? 'start LLama.cpp server' : 'restart LLama.cpp server',
   );
-  const args = parseLLamaCppServerParameters({ ...metadata, model });
+  const parameters = parseLLamaCppServerParameters({ ..._parameters, model });
+  const args = mapKeys({ parameters }, toSnakeCase);
   const response = await invokeTauri(command, args);
   logger.info(`opla server starting: ${response}`, response);
   return response;
@@ -40,10 +45,10 @@ const startLLamaCppServer = async (
 
 const restartLLamaCppServer = async (
   model: string | undefined,
-  metadata: LlamaCppParameters,
+  parameters: LlamaCppParameters,
 ): Promise<unknown> => {
   await stopLLamaCppServer();
-  return startLLamaCppServer(model, metadata, 'start_opla_server');
+  return startLLamaCppServer(model, parameters, 'start_opla_server');
 };
 
 export {
