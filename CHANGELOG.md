@@ -1,3 +1,10 @@
+# [1.0.0-alpha.177](https://github.com/Opla/opla/compare/v1.0.0-alpha.176...v1.0.0-alpha.177) (2024-06-13)
+
+
+### Bug Fixes
+
+* start LLamaCpp server using arguments [#974](https://github.com/Opla/opla/issues/974) ([#995](https://github.com/Opla/opla/issues/995)) ([1cfc59f](https://github.com/Opla/opla/commit/1cfc59f60ca34b284ff88dc5e8ddbca849663762))
+
 # [1.0.0-alpha.176](https://github.com/Opla/opla/compare/v1.0.0-alpha.175...v1.0.0-alpha.176) (2024-06-11)
 
 
