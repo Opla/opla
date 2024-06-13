@@ -212,8 +212,6 @@ export type Conversation = BaseNamedRecord &
 
     usage?: ConversationUsage;
 
-    // scrollPosition?: number;
-
     assets?: Asset | Asset[];
   };
 

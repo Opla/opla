@@ -15,6 +15,7 @@
 use chrono::{ DateTime, Utc };
 use serde::{ self, Deserialize, Deserializer, Serialize };
 use serde_with::{ serde_as, OneOrMany, formats::PreferOne };
+use service::Service;
 use std::{ collections::HashMap, fmt };
 use std::marker::PhantomData;
 use std::str::FromStr;
@@ -27,6 +28,17 @@ pub mod assistant;
 pub mod service;
 pub mod workspace;
 pub mod message;
+pub mod conversation;
+
+#[derive(PartialEq, Clone, Debug, Serialize, Deserialize)]
+pub enum MetadataValue {
+    String(String),
+    Number(f32),
+    Boolean(bool),
+    Metadata(HashMap<String, MetadataValue>),
+}
+
+pub type Metadata = HashMap<String, MetadataValue>;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(untagged)]
@@ -37,21 +49,49 @@ pub enum PresetParameter {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
+pub enum ContextWindowPolicy {
+    None,
+    Rolling,
+    Stop,
+    Last,
+}
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Preset {
+    // BaseNamedRecord
     pub id: Option<String>,
     pub name: String,
+    #[serde(with = "date_format_extended", alias = "createdAt", default)]
+    pub created_at: DateTime<Utc>,
+    #[serde(with = "date_format_extended", alias = "updatedAt", default)]
+    pub updated_at: DateTime<Utc>,
+
+    // Preset
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub parent_id: Option<String>,
-    #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
-    pub created_at: Option<DateTime<Utc>>,
-    #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
-    pub updated_at: Option<DateTime<Utc>>,
-
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub readonly: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub disabled: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub selected: Option<bool>,
 
+    // Inline Preset
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub models: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub provider: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub system: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub parameters: Option<HashMap<String, Option<PresetParameter>>>,
+    #[serde(alias = "contextWindowPolicy", skip_serializing_if = "Option::is_none", default)]
+    pub context_window_policy: Option<ContextWindowPolicy>,
+    #[serde(alias = "keepSystem", skip_serializing_if = "Option::is_none", default)]
+    pub keep_system: Option<bool>,
+
+    // ConversationPreset
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub services: Option<Vec<Service>>,
 }
 
 #[serde_as]
@@ -65,6 +105,7 @@ pub struct PromptTemplates {
     pub created_at: Option<DateTime<Utc>>,
     #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
     pub updated_at: Option<DateTime<Utc>>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub value: Option<String>,
     #[serde_as(deserialize_as = "Option<OneOrMany<_, PreferOne>>")]
     pub tags: Option<Vec<String>>,
@@ -75,6 +116,7 @@ pub struct PromptTemplates {
 pub struct Avatar {
     pub url: String,
     pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub color: Option<String>,
 }
 
@@ -148,11 +190,15 @@ pub mod date_format_extended {
     {
         let v = Value::deserialize(deserializer)?;
         let date = match v.as_str() {
-            Some(s) => DateTime::parse_from_rfc3339(s).map_err(de::Error::custom)?.with_timezone(&Utc),
-            None => match DateTime::from_timestamp_millis(v.as_i64().unwrap_or(-1)) {
-                Some(d) => d,
-                None => return Err(de::Error::custom("Invalid timestamp millis")),
-            },
+            Some(s) =>
+                DateTime::parse_from_rfc3339(s).map_err(de::Error::custom)?.with_timezone(&Utc),
+            None =>
+                match DateTime::from_timestamp_millis(v.as_i64().unwrap_or(-1)) {
+                    Some(d) => d,
+                    None => {
+                        return Err(de::Error::custom("Invalid timestamp millis"));
+                    }
+                }
         };
         Ok(date)
         // let s = String::deserialize(deserializer)?;
