@@ -1,3 +1,10 @@
+# [1.0.0-alpha.178](https://github.com/Opla/opla/compare/v1.0.0-alpha.177...v1.0.0-alpha.178) (2024-06-13)
+
+
+### Features
+
+* add conversations in Rust [#996](https://github.com/Opla/opla/issues/996) ([#997](https://github.com/Opla/opla/issues/997)) ([5b5128f](https://github.com/Opla/opla/commit/5b5128fbb5662aa472b928a8ae0e6a1d294a5b09))
+
 # [1.0.0-alpha.177](https://github.com/Opla/opla/compare/v1.0.0-alpha.176...v1.0.0-alpha.177) (2024-06-13)
 
 
