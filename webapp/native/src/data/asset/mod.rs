@@ -14,8 +14,11 @@
 
 use std::{ fs, path::Path };
 
+use chrono::{DateTime, Utc};
 use serde::{ Deserialize, Serialize };
 use serde_with::serde_as;
+
+use crate::data::date_format_extended;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum AssetState {
@@ -43,12 +46,21 @@ pub enum AssetType {
 pub struct Asset {
     pub id: String,
     // #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
-    pub created_at: i64, // Option<DateTime<Utc>>,
+    // pub created_at: i64, // Option<DateTime<Utc>>,
     // #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
-    pub updated_at: i64, // Option<DateTime<Utc>>,
-    pub r#type: AssetType,
+    // pub updated_at: i64, // Option<DateTime<Utc>>,
+
+    #[serde(with = "date_format_extended", alias = "createdAt", default)]
+    pub created_at: DateTime<Utc>,
+    #[serde(with = "date_format_extended", alias = "updatedAt", default)]
+    pub updated_at: DateTime<Utc>,
+
     pub state: AssetState,
+    #[serde(alias = "tokensCount", default)]
     pub tokens_count: Option<u32>,
+
+    pub r#type: AssetType,
+    pub url: Option<String>,
     pub file: Option<String>,
     pub size: Option<u64>,
 }

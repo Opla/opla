@@ -182,7 +182,7 @@ impl ServerConfiguration {
     ) -> Vec<String> {
         println!("parameters = {:?}", self.parameters);
         let mut parameters: Vec<String> = Vec::new();
-
+        let mut is_model = false;
         for (key, value) in self.parameters.iter() {
             let definition = match definitions.get(&key) {
                 Some(d) => d,
@@ -202,6 +202,7 @@ impl ServerConfiguration {
             let mut string_value = value.to_string();
             if definition.key == "model" {
                 string_value = model_path.to_string();
+                is_model = true;
             } else if definition.r#type == ServerParameterType::String {
                 let default_value = definition.default_value.to_string();
                 validate = string_value != default_value;
@@ -219,12 +220,38 @@ impl ServerConfiguration {
                 let default_value = definition.default_value.to_bool(false);
                 validate = value.to_bool(default_value);
             }
-            println!("key={:?} validate={:?} sting_value={:?} {:?}", key, validate, string_value, definition.r#type);
+            println!(
+                "key={:?} validate={:?} sting_value={:?} {:?}",
+                key,
+                validate,
+                string_value,
+                definition.r#type
+            );
             if !validate {
                 parameters.pop();
             } else if definition.r#type != ServerParameterType::Boolean {
                 parameters.push(string_value);
             }
+        }
+        if !is_model {
+            let model = match self.parameters.get("model_path") {
+                Some(m) => m,
+                None => {
+                    println!("Error model argument not found");
+                    parameters.clear();
+                    return parameters;
+                }
+            };
+            let definition = match definitions.get("model") {
+                Some(d) => d,
+                None => {
+                    println!("Error model definition not found");
+                    parameters.clear();
+                    return parameters;
+                }
+            };
+            parameters.push(definition.option.to_string());
+            parameters.push(model.to_string());
         }
         parameters
     }

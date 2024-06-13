@@ -29,11 +29,17 @@ pub enum ServiceType {
 pub struct Service {
     pub r#type: ServiceType,
 
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub model_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub provider_id_or_name: Option<String>,
 
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub assistant_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub target_id: Option<String>,
+
+    pub disabled: bool,
 }
 
 impl Service {
@@ -44,6 +50,7 @@ impl Service {
             provider_id_or_name: None,
             assistant_id: None,
             target_id: None,
+            disabled: false,
         }
     }
     pub fn get_model_id(&self) -> Option<String> {

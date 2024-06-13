@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::HashMap, str::FromStr};
+use std::str::FromStr;
 
 use chrono::{ DateTime, Utc };
 use serde::{ Deserialize, Serialize };
 use void::Void;
 
 use crate::data::{date_format_extended, option_string_or_struct};
+
+use super::Metadata;
 
 #[derive(PartialEq, Clone, Debug, Serialize, Deserialize)]
 pub enum MessageStatus {
@@ -41,16 +43,6 @@ pub enum Role {
     #[serde(rename = "Assistant")]
     Assistant,
 }
-
-#[derive(PartialEq, Clone, Debug, Serialize, Deserialize)]
-pub enum MetadataValue {
-    String(String),
-    Number(f32),
-    Boolean(bool),
-    Metadata(HashMap<String, MetadataValue>),
-}
-
-pub type Metadata = HashMap<String, MetadataValue>;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Author {
