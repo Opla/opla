@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::collections::HashMap;
+
 use tauri::{ Runtime, State };
-use crate::{OplaContext, Payload};
+use crate::{store::server_storage::ServerParameter, OplaContext, Payload};
 
 #[tauri::command]
 pub async fn get_opla_server_status<R: Runtime>(
@@ -30,17 +32,17 @@ pub async fn start_opla_server<R: Runtime>(
     app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
-    model: Option<String>,
-    port: i32,
+    parameters: HashMap<String, ServerParameter>,
+    /* port: i32,
     host: String,
     context_size: i32,
     threads: i32,
-    n_gpu_layers: i32
+    n_gpu_layers: i32 */
 ) -> Result<Payload, String> {
     println!("Opla try to start ");
     let mut store = context.store.lock().await;
-    let model_id = match model {
-        Some(m) => { m }
+    let model_id = match parameters.get("model") {
+        Some(m) => { m.to_string() }
         None => {
             match &store.get_local_active_model_id() {
                 Some(m) => { m.clone() }
@@ -60,13 +62,16 @@ pub async fn start_opla_server<R: Runtime>(
         }
     };
     store.server.launch_at_startup = true;
-    store.server.configuration.set_parameter_int("port", port);
+    /* store.server.configuration.set_parameter_int("port", port);
     store.server.configuration.set_parameter_string("host", host);
     store.server.configuration.set_parameter_string("model_id", model_id);
     store.server.configuration.set_parameter_string("model_path", model_path);
     store.server.configuration.set_parameter_int("context_size", context_size);
     store.server.configuration.set_parameter_int("threads", threads);
-    store.server.configuration.set_parameter_int("n_gpu_layers", n_gpu_layers);
+    store.server.configuration.set_parameter_int("n_gpu_layers", n_gpu_layers); */
+    store.server.configuration.parameters = parameters.clone();
+    store.server.configuration.set_parameter_string("model_id", model_id);
+    store.server.configuration.set_parameter_string("model_path", model_path);
     store.save().map_err(|err| err.to_string())?;
     let mut server = context.server.lock().await;
     server.start(app, &store.server.configuration).await

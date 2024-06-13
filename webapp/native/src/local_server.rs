@@ -15,7 +15,7 @@
 use tokio::sync::Mutex;
 use std::collections::HashMap;
 use std::sync::Arc;
-use crate::engines::llama_cpp::LLamaCppEngine;
+use crate::engines::llama_cpp::{LLamaCppEngine, LLAMACPP_PARAMETERS_DEFINITIONS};
 use crate::store::server_storage::{ ServerConfiguration, ServerStorage };
 use crate::error::Error;
 use sysinfo::System;
@@ -166,7 +166,7 @@ impl LocalServer {
                 return Err("Opla server can't read parameters: model_id".to_string());
             }
         };
-        let arguments = configuration.to_args(&model_path);
+        let arguments = configuration.to_args(&model_path, &LLAMACPP_PARAMETERS_DEFINITIONS);
         println!("Opla server arguments: {}", arguments.join(" "));
         if status == ServerStatus::Starting.as_str().to_string() {
             println!("Opla server is starting: stop it");

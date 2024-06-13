@@ -114,19 +114,19 @@ const LlamaCppArguments: Record<string, ZodSchema> = {
     .number()
     .int()
     .optional()
-    .default(LlamaCppArgumentPartialDefinitions.contextSize.defaultValue as number)
+    // .default(LlamaCppArgumentPartialDefinitions.contextSize.defaultValue as number)
     .describe('size of the prompt context (default: 512)'),
   threads: z
     .number()
     .int()
     .optional()
-    .default(LlamaCppArgumentPartialDefinitions.threads.defaultValue as number)
+    // .default(LlamaCppArgumentPartialDefinitions.threads.defaultValue as number)
     .describe('number of threads to use during computation (default: 6)'),
   threadsBatch: z
     .number()
     .int()
     .optional()
-    .default(LlamaCppArgumentPartialDefinitions.threadsBatch.defaultValue as number)
+    // .default(LlamaCppArgumentPartialDefinitions.threadsBatch.defaultValue as number)
     .describe(
       'number of threads to use during batch and prompt processing (default: same as --threads)',
     ),
@@ -134,13 +134,13 @@ const LlamaCppArguments: Record<string, ZodSchema> = {
   path: z
     .string()
     .optional()
-    .default('examples/server/public')
+    // .default('examples/server/public')
     .describe('path from which to serve static files (default examples/server/public)'),
-  verbose: z.boolean().optional().default(false).describe('verbose output (default: disabled)'),
+  verbose: z.boolean().optional().describe('verbose output (default: disabled)'),
   ropeScaling: z
     .enum(['none', 'linear', 'yarn'])
     .optional()
-    .default('linear')
+    // .default('linear')
     .describe('RoPE frequency scaling method, defaults to linear unless specified by the model'),
   ropeFreqBase: z.number().optional().describe('RoPE base frequency (default: loaded from model)'),
   ropeFreqScale: z
@@ -161,27 +161,27 @@ const LlamaCppArguments: Record<string, ZodSchema> = {
     .number()
     .int()
     .optional()
-    .default(512)
+    // .default(512)
     .describe('batch size for prompt processing (default: 512)'),
   memoryF32: z
     .boolean()
     .optional()
-    .default(false)
+    // .default(false)
     .describe('use f32 instead of f16 for memory key+value (default: disabled)'),
   mlock: z
     .boolean()
     .optional()
-    .default(false)
+    // .default(false)
     .describe('force system to keep model in RAM rather than swapping or compressing'),
   noMmap: z
     .boolean()
     .optional()
-    .default(false)
+    // .default(false)
     .describe('do not memory-map model (slower load but may reduce pageouts if not using mlock)'),
   numa: z
     .boolean()
     .optional()
-    .default(false)
+    // .default(false)
     .describe('attempt optimizations that help on some NUMA systems'),
   tensorSplit: z
     .string()
@@ -193,7 +193,7 @@ const LlamaCppArguments: Record<string, ZodSchema> = {
   noMulMatQ: z
     .boolean()
     .optional()
-    .default(false)
+    // .default(false)
     .describe(
       'use cuBLAS instead of custom mul_mat_q CUDA kernels. Not recommended since this is both slower and uses more VRAM.',
     ),
@@ -211,23 +211,23 @@ const LlamaCppArguments: Record<string, ZodSchema> = {
   timeout: z
     .number()
     .optional()
-    .default(600)
+    // .default(600)
     .describe('server read/write timeout in seconds (default: 600)'),
   embedding: z
     .boolean()
     .optional()
-    .default(false)
+    // .default(false)
     .describe('enable embedding vector output (default: disabled)'),
   parallel: z
     .number()
     .int()
     .optional()
-    .default(1)
+    // .default(1)
     .describe('number of slots for process requests (default: 1)'),
   contBatching: z
     .boolean()
     .optional()
-    .default(false)
+    // .default(false)
     .describe('enable continuous batching (a.k.a dynamic batching) (default: disabled)'),
   systemPromptFile: z
     .string()
@@ -272,34 +272,34 @@ const LllamaCppParameterDefinitions: ParameterDefinition[] = Object.keys(LlamaCp
 );
 
 const LlamaCppOptions = {
-  verbose: ['-v', '--verbose'],
+  model: ['-m', '--model'],
+  host: ['--host'],
+  port: ['--port'],
+  contextSize: ['-c', '--ctx-size'],
   threads: ['-t', '--threads'],
   threadsBatch: ['-tb', '--threads-batch'],
-  contextSize: ['-c', '--ctx-size'],
+  nGpuLayers: ['-ngl', '--n-gpu-layers'],
   ropeScaling: ['--rope-scaling'],
+  batchSize: ['-b', '--batch-size'],
+  timeout: ['-to', '--timeout'],
+  verbose: ['-v', '--verbose'],
+  path: ['--path'],
   ropeFreqBase: ['--rope-freq-base'],
   ropeFreqScale: ['--rope-freq-scale'],
   yarnExtFactor: ['--yarn-ext-factor'],
   yarnAttnFactor: ['--yarn-attn-factor'],
   yarnBetaSlow: ['--yarn-beta-slow'],
   yarnBetaFast: ['--yarn-beta-fast'],
-  batchSize: ['-b', '--batch-size'],
   memoryF32: ['--memory-f32'],
   mlock: ['--mlock'],
   noMmap: ['--no-mmap'],
   numa: ['--numa'],
-  nGpuLayers: ['-ngl', '--n-gpu-layers'],
   tensorSplit: ['-ts', '--tensor-split'],
   mainGpu: ['-mg', '--main-gpu'],
   noMulMatQ: ['--no-mul-mat-q'],
-  model: ['-m', '--model'],
   alias: ['-a', '--alias'],
   lora: ['--lora'],
   loraBase: ['--lora-base'],
-  host: ['--host'],
-  port: ['--port'],
-  path: ['--path'],
-  timeout: ['-to', '--timeout'],
   embedding: ['--embedding'],
   parallel: ['-np', '--parallel'],
   contBatching: ['-cb', '--cont-batching'],

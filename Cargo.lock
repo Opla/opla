@@ -92,6 +92,7 @@ dependencies = [
  "eventsource-stream",
  "futures-util",
  "opla_core",
+ "phf 0.11.2",
  "regex",
  "reqwest 0.12.4",
  "rusqlite",

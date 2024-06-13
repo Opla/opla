@@ -442,7 +442,7 @@ export type Settings = {
 };
 
 export type ServerParameters = {
-  [key: string]: string | number | boolean;
+  [key: string]: string | number | boolean | undefined;
 };
 
 export type ServerConfiguration = {
