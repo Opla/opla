@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ fs::File, io::{ BufReader, Read } };
+use std::{ fmt::{self, Display, Formatter}, fs::File, io::{ BufReader, Read } };
 
 #[derive(Debug)]
 pub enum GGUfMetadataValueType {
@@ -90,6 +90,29 @@ pub enum GGUFMetadataValue {
     Array(GGUFMetadataArrayValue),
 }
 
+impl Display for GGUFMetadataValue {
+    fn fmt(&self, fmt: &mut Formatter) -> fmt::Result {
+        let str: String = match self {
+            /* GGUFMetadataValue::Uint8(v) => v.to_string(),
+            GGUFMetadataValue::Int8(v) => v.to_string(),
+            GGUFMetadataValue::Uint16(v) => v.to_string(),
+            GGUFMetadataValue::Int16(v) => v.to_string(),
+            GGUFMetadataValue::Uint32(v) => v.to_string(),
+            GGUFMetadataValue::Int32(v) => v.to_string(),
+            GGUFMetadataValue::Float32(v) => v.to_string(),
+            GGUFMetadataValue::Uint64(v) => v.to_string(),
+            GGUFMetadataValue::Int64(v) => v.to_string(),
+            GGUFMetadataValue::Float64(v) => v.to_string(),
+            GGUFMetadataValue::Bool(v) => v.to_string(), */
+            GGUFMetadataValue::String(v) => v.to_string(),
+            GGUFMetadataValue::Array(v) => format!("[:{:?}]", v.len),
+            _ => format!("{:?}", self),
+        };
+        fmt.write_str(&str)?;
+        Ok(())
+    }
+}
+
 #[derive(Debug)]
 pub struct GGUFMetadataArrayValue {
     pub value_type: GGUfMetadataValueType,
@@ -103,21 +126,27 @@ pub struct GGUFMetadata {
     pub value: GGUFMetadataValue,
 }
 
-pub struct GGUF {
+pub struct GGUFHeader {
     pub version: u32,
     pub tensor_count: u64,
     pub metadata_kv_count: u64,
     pub metadata_kv: Vec<GGUFMetadata>,
 }
 
+pub struct GGUF {
+    pub header: GGUFHeader,
+}
+
 impl GGUF {
     pub fn new() -> GGUF {
         GGUF {
+            header: GGUFHeader {
             version: 0,
             tensor_count: 0,
             metadata_kv_count: 0,
             metadata_kv: Vec::new(),
         }
+    }
     }
 
     fn parse_metadata_value(
@@ -223,7 +252,7 @@ impl GGUF {
     fn parse_metadata_kv(&mut self, reader: &mut BufReader<File>) -> Result<(), anyhow::Error> {
         let mut key_length = [0; 8];
         let mut value_type = [0; 4];
-        for _ in 0..self.metadata_kv_count {
+        for _ in 0..self.header.metadata_kv_count {
             reader.read_exact(&mut key_length)?;
             let length = u64::from_le_bytes(key_length) as usize;
 
@@ -239,9 +268,9 @@ impl GGUF {
 
             let value = self.parse_metadata_value(reader, &value_type)?;
 
-            // println!("key: {}, value_type: {:?}, value: {:?}", key, value_type, value);
+            println!("{}={}", key, value);
 
-            self.metadata_kv.push(GGUFMetadata {
+            self.header.metadata_kv.push(GGUFMetadata {
                 key,
                 value,
                 value_type,
@@ -264,18 +293,18 @@ impl GGUF {
         }
 
         // Models are little-endian by default.
-        self.version = u32::from_le_bytes([header[4], header[5], header[6], header[7]]);
-        println!("Version: {}", self.version);
+        self.header.version = u32::from_le_bytes([header[4], header[5], header[6], header[7]]);
+        println!("Version: {}", self.header.version);
 
         reader.read_exact(&mut header).map_err(|err| err.to_string())?;
 
-        self.tensor_count = u64::from_le_bytes(header);
-        println!("Tensor_count: {}", self.tensor_count);
+        self.header.tensor_count = u64::from_le_bytes(header);
+        println!("Tensor_count: {}", self.header.tensor_count);
 
         reader.read_exact(&mut header).map_err(|err| err.to_string())?;
 
-        self.metadata_kv_count = u64::from_le_bytes(header);
-        println!("Metadata_kv_count: {}", self.metadata_kv_count);
+        self.header.metadata_kv_count = u64::from_le_bytes(header);
+        println!("Metadata_kv_count: {}", self.header.metadata_kv_count);
 
         self.parse_metadata_kv(&mut reader).map_err(|err| err.to_string())?;
 

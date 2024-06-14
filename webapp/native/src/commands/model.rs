@@ -16,6 +16,7 @@ use crate::ServerStatus;
 use crate::{ api::hf::search_hf_models, start_server, OplaContext };
 use crate::data::model::{ Model, ModelEntity };
 use crate::models::{ fetch_models_collection, ModelsCollection };
+use opla_core::gguf::GGUFHeader;
 use serde::Serialize;
 use tauri::{ Runtime, State };
 
@@ -59,7 +60,7 @@ pub async fn get_model_full_path<R: Runtime>(
 {
     let store = context.store.lock().await;
     let error = format!("Model path not valid: {:?}", filename.clone());
-    let result = store.models.get_path(path, Some(filename));
+    let result = store.models.get_full_path(path, Some(filename));
     let path = match result {
         Ok(m) => { m }
         Err(err) => {
@@ -297,4 +298,16 @@ pub async fn set_active_model<R: Runtime>(
     }
     store.save().map_err(|err| err.to_string())?;
     Ok(())
+}
+
+#[tauri::command]
+pub async fn get_model_file_header<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>,
+    model_id: String,
+) -> Result<GGUFHeader, String> {
+    let store = context.store.lock().await;
+    let gguf = store.models.get_model_file(model_id)?;
+    Ok(gguf.header)
 }
