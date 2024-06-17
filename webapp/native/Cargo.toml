@@ -20,7 +20,7 @@ tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-works
 sysinfo = { version = "0.30.12", features = ["apple-app-store"] }
 dirs = "5.0.1"
 rusqlite = "0.31.0"
-reqwest = { version = "0.12.4", features = ["json", "stream"] }
+reqwest = { version = "0.12.5", features = ["json", "stream"] }
 chrono = "0.4.38"
 serde_with = { version = "3.8.1", features = ["json"] }
 uuid = { version = "1.8.0", features = ["v4"] }
