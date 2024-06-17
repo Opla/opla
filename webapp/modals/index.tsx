@@ -26,7 +26,8 @@ import OpenAIDialog from './openai';
 import NewLocalModelDialog from './models';
 import NewPresetDialog from './presets';
 import DownloadsDialog from './downloads';
-import CloudModelDialog from './models/cloud';
+import CloudModelDialog from './models/CloudDialog';
+import InspectorModelDialog from './models/InspectorDialog';
 
 const Modals: ModalRef[] = [
   {
@@ -126,6 +127,20 @@ const Modals: ModalRef[] = [
         <CloudModelDialog
           key={ModalIds.CloudModels}
           id={ModalIds.CloudModels}
+          open={visible}
+          data={data as ModalData}
+          onClose={onClose}
+        />
+      );
+    },
+  },
+  {
+    id: ModalIds.InspectModel,
+    Component: function IMDialog({ visible, onClose, data }) {
+      return (
+        <InspectorModelDialog
+          key={ModalIds.InspectModel}
+          id={ModalIds.InspectModel}
           open={visible}
           data={data as ModalData}
           onClose={onClose}

@@ -25,6 +25,7 @@ import {
   Sys,
 } from '@/types';
 import { toast } from '@/components/ui/Toast';
+import { GGUF } from '@/types/gguf';
 import { mapKeys } from '../data';
 import { toCamelCase, toSnakeCase } from '../string';
 import logger from '../logger';
@@ -72,7 +73,7 @@ export const getModelsCollection = async (): Promise<{ models: [] }> => {
     return await mapKeys(collection, toCamelCase);
   } catch (error) {
     logger.error(error);
-    toast.error(`Error fetching models ${error}`);
+    toast.error(`Error fetching models: ${error}`);
   }
   return { models: [] };
 };
@@ -91,7 +92,7 @@ export const installModel = async (
     return id;
   } catch (error) {
     logger.error(error);
-    toast.error(`Error installing model ${error}`);
+    toast.error(`Error installing model: ${error}`);
   }
   return '';
 };
@@ -116,7 +117,7 @@ export const updateModel = async (_model: Model) => {
     await invokeTauri<void>('update_model', args);
   } catch (error) {
     logger.error(error);
-    toast.error(`Error updating model ${error}`);
+    toast.error(`Error updating model: ${error}`);
   }
 };
 
@@ -129,7 +130,7 @@ export const updateModelEntity = async (_model: Model) => {
     await invokeTauri<void>('update_model_entity', args);
   } catch (error) {
     logger.error(error);
-    toast.error(`Error updating model ${error}`);
+    toast.error(`Error updating model: ${error}`);
   }
 };
 
@@ -140,7 +141,7 @@ export const getAssistantsCollection = async (): Promise<{ assistants: []; tags:
     return await mapKeys(collection, toCamelCase);
   } catch (error) {
     logger.error(error);
-    toast.error(`Error fetching assistants ${error}`);
+    toast.error(`Error fetching assistants: ${error}`);
   }
   return { assistants: [], tags: [] };
 };
@@ -148,11 +149,11 @@ export const getAssistantsCollection = async (): Promise<{ assistants: []; tags:
 export const getConfigPath = async (): Promise<string | undefined> => {
   try {
     const configDir = await invokeTauri<string>('get_config_path');
-    logger.info('getConfigPath', configDir);
+    logger.info('getConfigPath:', configDir);
     return configDir;
   } catch (error) {
     logger.error(error);
-    toast.error(`Error getting config path ${error}`);
+    toast.error(`Error getting config path: ${error}`);
   }
   return undefined;
 };
@@ -160,11 +161,11 @@ export const getConfigPath = async (): Promise<string | undefined> => {
 export const getModelsPath = async (): Promise<string | undefined> => {
   try {
     const path = await invokeTauri<string>('get_models_path');
-    logger.info('getModelsPath', path);
+    logger.info('getModelsPath:', path);
     return path;
   } catch (error) {
     logger.error(error);
-    toast.error(`Error getting data path ${error}`);
+    toast.error(`Error getting data path: ${error}`);
   }
   return undefined;
 };
@@ -174,11 +175,11 @@ export const validateAssets = async (toValidate: Asset[]): Promise<Asset[] | und
     const args = mapKeys({ assets: toValidate }, toSnakeCase);
     let assets = await invokeTauri<Asset[]>('validate_assets', args);
     assets = await mapKeys(assets, toCamelCase);
-    logger.info('validateAssets', assets);
+    logger.info('validateAssets:', assets);
     return assets;
   } catch (error) {
     logger.error(error);
-    toast.error(`Error validating assets ${error}`);
+    toast.error(`Error validating assets: ${error}`);
   }
   return undefined;
 };
@@ -186,11 +187,24 @@ export const validateAssets = async (toValidate: Asset[]): Promise<Asset[] | und
 export const getFileAssetExtensions = async (): Promise<string[]> => {
   try {
     const extensions = await invokeTauri<string[]>('get_file_asset_extensions');
-    logger.info('getFileAssetExtensions', extensions);
+    logger.info('getFileAssetExtensions:', extensions);
     return extensions;
   } catch (error) {
     logger.error(error);
-    toast.error(`Error getFileAssetExtensions ${error}`);
+    toast.error(`Error getFileAssetExtensions: ${error}`);
   }
   return [];
+};
+
+export const getModelFileHeader = async (modelId: string): Promise<Partial<GGUF>> => {
+  try {
+    let gguf = await invokeTauri<Partial<GGUF>>('get_model_file', { modelId });
+    gguf = await mapKeys(gguf, toCamelCase);
+    logger.info('getModelFileHeader:', gguf);
+    return gguf;
+  } catch (error) {
+    logger.error(error);
+    toast.error(`Error getModelFileHeader: ${error}`);
+  }
+  return {};
 };

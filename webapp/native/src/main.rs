@@ -347,6 +347,7 @@ fn main() {
                 crate::commands::server::start_opla_server,
                 crate::commands::server::stop_opla_server,
                 crate::commands::model::get_models_collection,
+                crate::commands::model::get_model_file,
                 crate::commands::model::search_hfhub_models,
                 crate::commands::model::get_model_full_path,
                 crate::commands::model::install_model,

@@ -137,7 +137,7 @@ impl ModelStorage {
     pub fn get_model_path(&self, id_or_name: String) -> Result<String, String> {
         let model_path = self.get_path(id_or_name)?;
 
-        let mut gguf = opla_core::gguf::GGUF::new();
+        let mut gguf = opla_core::gguf::GGUF::new(&model_path);
         match gguf.read(&model_path) {
             Ok(_) => {}
             Err(err) => {
@@ -151,7 +151,7 @@ impl ModelStorage {
     pub fn get_model_file(&self, id_or_name: String) -> Result<GGUF, String> {
         let model_path = self.get_path(id_or_name)?;
 
-        let mut gguf = GGUF::new();
+        let mut gguf = GGUF::new(&model_path);
         match gguf.read(&model_path) {
             Ok(_) => {}
             Err(err) => {
