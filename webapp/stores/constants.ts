@@ -19,6 +19,13 @@ export enum GlobalAppStateWorkspace {
   PROJECT = 3,
 }
 
+export enum GlobalAppStateConversation {
+  CONVERSATIONS = 0,
+  DELETE_CONVERSATION = 1,
+  ERROR = 2,
+  PROJECT = 3,
+}
+
 export const EVENTS: {
   STATE_CHANGE_EVENT: string;
   STATE_SYNC_EVENT: string;
