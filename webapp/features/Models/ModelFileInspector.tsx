@@ -29,12 +29,29 @@ import { useEffect, useState } from 'react';
 import Parameter, { ParameterValue } from '@/components/common/Parameter';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import useTranslation from '@/hooks/useTranslation';
-import { GGUF } from '@/types/gguf';
+import {
+  GGUF,
+  GGUFFileType,
+  GGUFMetadata,
+  GGUFMetadataArrayValue,
+  GGUFMetadataValueType,
+} from '@/types/gguf';
 import { getModelFileHeader } from '@/utils/backend/commands';
 import logger from '@/utils/logger';
 
 export type ModelFileInspectorProps = {
   modelId: string;
+};
+
+const convertMetadataToParameter = (metadata: GGUFMetadata): ParameterValue => {
+  if (metadata.valueType === GGUFMetadataValueType.Array) {
+    const value = metadata.value as GGUFMetadataArrayValue;
+    return `[:${value.len}]`;
+  }
+  if (metadata.key.toLowerCase() === 'general.file_type') {
+    return GGUFFileType[metadata.value as GGUFFileType];
+  }
+  return metadata.value as ParameterValue;
 };
 
 function ModelFileInspector({ modelId }: ModelFileInspectorProps) {
@@ -73,7 +90,7 @@ function ModelFileInspector({ modelId }: ModelFileInspectorProps) {
             key={data.key}
             label={t(data.key)}
             name={data.key}
-            value={data.value as ParameterValue}
+            value={convertMetadataToParameter(data)}
             disabled
           />
         ))}
