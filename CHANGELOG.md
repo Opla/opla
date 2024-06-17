@@ -1,3 +1,10 @@
+# [1.0.0-alpha.179](https://github.com/Opla/opla/compare/v1.0.0-alpha.178...v1.0.0-alpha.179) (2024-06-17)
+
+
+### Bug Fixes
+
+* gguf display array and file_type [#998](https://github.com/Opla/opla/issues/998) ([#1000](https://github.com/Opla/opla/issues/1000)) ([ceddc79](https://github.com/Opla/opla/commit/ceddc790de7115055d0f1b3b8e33804301c44eb7))
+
 # [1.0.0-alpha.178](https://github.com/Opla/opla/compare/v1.0.0-alpha.177...v1.0.0-alpha.178) (2024-06-13)
 
 
