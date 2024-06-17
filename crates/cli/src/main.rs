@@ -22,6 +22,6 @@ fn main() {
     if args.len() > 1 {
         println!("The first argument is {}", args[1]);
     }
-    let mut gguf = GGUF::new();
+    let mut gguf = GGUF::new(&args[1]);
     gguf.read(&args[1]).unwrap();
 }

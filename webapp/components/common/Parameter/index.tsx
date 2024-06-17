@@ -49,6 +49,7 @@ type ParameterProps = {
   disabled?: boolean;
   children?: React.ReactNode;
   onChange?: (name: string, value: ParameterValue) => void;
+  onAction?: () => void;
 };
 
 export default function Parameter({
@@ -65,6 +66,7 @@ export default function Parameter({
   disabled = false,
   children,
   onChange = () => {},
+  onAction,
 }: ParameterProps) {
   const hiddenFileInput = useRef<HTMLInputElement>(null);
   const textCss = 'pr-2 w-sm';
@@ -124,10 +126,14 @@ export default function Parameter({
             {value as string}
           </a>
         )}
-        {disabled && (type === 'file' || type === 'path') && (
+        {disabled && !onAction && (type === 'file' || type === 'path') && (
           <div className="flex items-center gap-4">
             {(value as string) || t('None')}
-            <File strokeWidth={1.5} className="h-4 w-4" />
+            {type === 'path' ? (
+              <Folder strokeWidth={1.5} className="h-4 w-4" />
+            ) : (
+              <File strokeWidth={1.5} className="h-4 w-4" />
+            )}
           </div>
         )}
         {type === 'boolean' && (
@@ -143,7 +149,7 @@ export default function Parameter({
           type === 'password' ||
           (type === 'url' && !disabled)) && (
           <Input
-            value={(value as string) || ''}
+            value={value === undefined || Array.isArray(value) ? '' : (value as string)}
             placeholder={placeholder}
             className="w-full min-w-[60px]"
             type={getAttribute(type)}
@@ -159,27 +165,40 @@ export default function Parameter({
             }}
           />
         )}
-        {((type === 'path' && !disabled) || (type === 'file' && !disabled)) && (
+        {(type === 'path' || type === 'file') && (onAction || !disabled) && (
           <div className="flex items-center gap-4">
             <span>{(value as string) || t('None')}</span>
-            <Button variant="ghost" size="icon" onClick={handleClick}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.preventDefault();
+                if (onAction) {
+                  onAction();
+                } else {
+                  handleClick();
+                }
+              }}
+            >
               {type === 'path' ? (
                 <Folder strokeWidth={1.5} className="h-4 w-4" />
               ) : (
                 <File strokeWidth={1.5} className="h-4 w-4" />
               )}
             </Button>
-            <Input
-              value={(value as string) || ''}
-              placeholder={placeholder}
-              className="hidden"
-              type={getAttribute(type)}
-              disabled={disabled}
-              ref={hiddenFileInput}
-              onChange={(e) => {
-                handleFileChange(e, name);
-              }}
-            />
+            {!disabled && (
+              <Input
+                value={(value as string) || ''}
+                placeholder={placeholder}
+                className="hidden"
+                type={getAttribute(type)}
+                disabled={disabled}
+                ref={hiddenFileInput}
+                onChange={(e) => {
+                  handleFileChange(e, name);
+                }}
+              />
+            )}
           </div>
         )}
         {children}

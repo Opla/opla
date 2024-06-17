@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ fs::File, io::{ BufReader, Read } };
+use std::{ fmt::{ self, Display, Formatter }, fs::File, io::{ BufReader, Read } };
+use serde::{ Deserialize, Serialize };
 
-#[derive(Debug)]
-pub enum GGUfMetadataValueType {
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum GGUFMetadataValueType {
     // The value is a 8-bit unsigned integer.
     UInt8 = 0,
     // The value is a 8-bit signed integer.
@@ -48,24 +49,24 @@ pub enum GGUfMetadataValueType {
     Float64 = 12,
 }
 
-impl TryFrom<u32> for GGUfMetadataValueType {
+impl TryFrom<u32> for GGUFMetadataValueType {
     type Error = String;
 
     fn try_from(item: u32) -> Result<Self, Self::Error> {
         Ok(match item {
-            0 => GGUfMetadataValueType::UInt8,
-            1 => GGUfMetadataValueType::Int8,
-            2 => GGUfMetadataValueType::UInt16,
-            3 => GGUfMetadataValueType::Int16,
-            4 => GGUfMetadataValueType::UInt32,
-            5 => GGUfMetadataValueType::Int32,
-            6 => GGUfMetadataValueType::Float32,
-            7 => GGUfMetadataValueType::Bool,
-            8 => GGUfMetadataValueType::String,
-            9 => GGUfMetadataValueType::Array,
-            10 => GGUfMetadataValueType::UInt64,
-            11 => GGUfMetadataValueType::Int64,
-            12 => GGUfMetadataValueType::Float64,
+            0 => GGUFMetadataValueType::UInt8,
+            1 => GGUFMetadataValueType::Int8,
+            2 => GGUFMetadataValueType::UInt16,
+            3 => GGUFMetadataValueType::Int16,
+            4 => GGUFMetadataValueType::UInt32,
+            5 => GGUFMetadataValueType::Int32,
+            6 => GGUFMetadataValueType::Float32,
+            7 => GGUFMetadataValueType::Bool,
+            8 => GGUFMetadataValueType::String,
+            9 => GGUFMetadataValueType::Array,
+            10 => GGUFMetadataValueType::UInt64,
+            11 => GGUFMetadataValueType::Int64,
+            12 => GGUFMetadataValueType::Float64,
             _ => {
                 return Err(format!("invalid gguf metadata type 0x{:x}", item));
             }
@@ -73,7 +74,8 @@ impl TryFrom<u32> for GGUfMetadataValueType {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum GGUFMetadataValue {
     Uint8(u8),
     Int8(i8),
@@ -90,83 +92,117 @@ pub enum GGUFMetadataValue {
     Array(GGUFMetadataArrayValue),
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GGUFMetadataArrayValue {
-    pub value_type: GGUfMetadataValueType,
+    pub value_type: GGUFMetadataValueType,
     pub len: u64,
     pub value: Vec<GGUFMetadataValue>,
 }
 
+impl Display for GGUFMetadataValue {
+    fn fmt(&self, fmt: &mut Formatter) -> fmt::Result {
+        let str: String = match self {
+            /* GGUFMetadataValue::Uint8(v) => v.to_string(),
+            GGUFMetadataValue::Int8(v) => v.to_string(),
+            GGUFMetadataValue::Uint16(v) => v.to_string(),
+            GGUFMetadataValue::Int16(v) => v.to_string(),
+            GGUFMetadataValue::Uint32(v) => v.to_string(),
+            GGUFMetadataValue::Int32(v) => v.to_string(),
+            GGUFMetadataValue::Float32(v) => v.to_string(),
+            GGUFMetadataValue::Uint64(v) => v.to_string(),
+            GGUFMetadataValue::Int64(v) => v.to_string(),
+            GGUFMetadataValue::Float64(v) => v.to_string(),
+            GGUFMetadataValue::Bool(v) => v.to_string(), */
+            GGUFMetadataValue::String(v) => v.to_string(),
+            GGUFMetadataValue::Array(v) => format!("[:{:?}]", v.len),
+            _ => format!("{:?}", self),
+        };
+        fmt.write_str(&str)?;
+        Ok(())
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct GGUFMetadata {
     pub key: String,
-    pub value_type: GGUfMetadataValueType,
+    pub value_type: GGUFMetadataValueType,
     pub value: GGUFMetadataValue,
 }
 
-pub struct GGUF {
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct GGUFHeader {
     pub version: u32,
     pub tensor_count: u64,
     pub metadata_kv_count: u64,
     pub metadata_kv: Vec<GGUFMetadata>,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct GGUF {
+    pub file_name: String,
+    pub header: GGUFHeader,
+}
+
 impl GGUF {
-    pub fn new() -> GGUF {
+    pub fn new(file_name: &str) -> GGUF {
         GGUF {
-            version: 0,
-            tensor_count: 0,
-            metadata_kv_count: 0,
-            metadata_kv: Vec::new(),
+            file_name: file_name.to_string(),
+            header: GGUFHeader {
+                version: 0,
+                tensor_count: 0,
+                metadata_kv_count: 0,
+                metadata_kv: Vec::new(),
+            },
         }
     }
 
     fn parse_metadata_value(
         &mut self,
         reader: &mut BufReader<File>,
-        value_type: &GGUfMetadataValueType
+        value_type: &GGUFMetadataValueType
     ) -> Result<GGUFMetadataValue, anyhow::Error> {
         match value_type {
-            GGUfMetadataValueType::UInt8 => {
+            GGUFMetadataValueType::UInt8 => {
                 let mut value = [0; 1];
                 reader.read_exact(&mut value)?;
                 Ok(GGUFMetadataValue::Uint8(value[0]))
             }
-            GGUfMetadataValueType::Int8 => {
+            GGUFMetadataValueType::Int8 => {
                 let mut value = [0; 1];
                 reader.read_exact(&mut value)?;
                 Ok(GGUFMetadataValue::Int8(value[0] as i8))
             }
-            GGUfMetadataValueType::UInt16 => {
+            GGUFMetadataValueType::UInt16 => {
                 let mut value = [0; 2];
                 reader.read_exact(&mut value)?;
                 Ok(GGUFMetadataValue::Uint16(u16::from_le_bytes(value)))
             }
-            GGUfMetadataValueType::Int16 => {
+            GGUFMetadataValueType::Int16 => {
                 let mut value = [0; 2];
                 reader.read_exact(&mut value)?;
                 Ok(GGUFMetadataValue::Int16(i16::from_le_bytes(value)))
             }
-            GGUfMetadataValueType::UInt32 => {
+            GGUFMetadataValueType::UInt32 => {
                 let mut value = [0; 4];
                 reader.read_exact(&mut value)?;
                 Ok(GGUFMetadataValue::Uint32(u32::from_le_bytes(value)))
             }
-            GGUfMetadataValueType::Int32 => {
+            GGUFMetadataValueType::Int32 => {
                 let mut value = [0; 4];
                 reader.read_exact(&mut value)?;
                 Ok(GGUFMetadataValue::Int32(i32::from_le_bytes(value)))
             }
-            GGUfMetadataValueType::Float32 => {
+            GGUFMetadataValueType::Float32 => {
                 let mut value = [0; 4];
                 reader.read_exact(&mut value)?;
                 Ok(GGUFMetadataValue::Float32(f32::from_le_bytes(value)))
             }
-            GGUfMetadataValueType::Bool => {
+            GGUFMetadataValueType::Bool => {
                 let mut value = [0; 1];
                 reader.read_exact(&mut value)?;
                 Ok(GGUFMetadataValue::Bool(value[0] != 0))
             }
-            GGUfMetadataValueType::String => {
+            GGUFMetadataValueType::String => {
                 let mut value_length = [0; 8];
                 reader.read_exact(&mut value_length)?;
                 let length = u64::from_le_bytes(value_length) as usize;
@@ -177,11 +213,11 @@ impl GGUF {
                 // println!("String length: {} value: {}", length, value);
                 Ok(GGUFMetadataValue::String(value))
             }
-            GGUfMetadataValueType::Array => {
+            GGUFMetadataValueType::Array => {
                 let mut value_type = [0; 4];
                 reader.read_exact(&mut value_type)?;
                 let value_type = u32::from_le_bytes(value_type);
-                let value_type = GGUfMetadataValueType::try_from(value_type).map_err(|err|
+                let value_type = GGUFMetadataValueType::try_from(value_type).map_err(|err|
                     anyhow::Error::msg(err.to_string())
                 )?;
 
@@ -202,17 +238,17 @@ impl GGUF {
                     })
                 )
             }
-            GGUfMetadataValueType::UInt64 => {
+            GGUFMetadataValueType::UInt64 => {
                 let mut value = [0; 8];
                 reader.read_exact(&mut value)?;
                 Ok(GGUFMetadataValue::Uint64(u64::from_le_bytes(value)))
             }
-            GGUfMetadataValueType::Int64 => {
+            GGUFMetadataValueType::Int64 => {
                 let mut value = [0; 8];
                 reader.read_exact(&mut value)?;
                 Ok(GGUFMetadataValue::Int64(i64::from_le_bytes(value)))
             }
-            GGUfMetadataValueType::Float64 => {
+            GGUFMetadataValueType::Float64 => {
                 let mut value = [0; 8];
                 reader.read_exact(&mut value)?;
                 Ok(GGUFMetadataValue::Float64(f64::from_le_bytes(value)))
@@ -223,7 +259,7 @@ impl GGUF {
     fn parse_metadata_kv(&mut self, reader: &mut BufReader<File>) -> Result<(), anyhow::Error> {
         let mut key_length = [0; 8];
         let mut value_type = [0; 4];
-        for _ in 0..self.metadata_kv_count {
+        for _ in 0..self.header.metadata_kv_count {
             reader.read_exact(&mut key_length)?;
             let length = u64::from_le_bytes(key_length) as usize;
 
@@ -233,15 +269,15 @@ impl GGUF {
 
             reader.read_exact(&mut value_type)?;
             let value_type = u32::from_le_bytes(value_type);
-            let value_type = GGUfMetadataValueType::try_from(value_type).map_err(|err|
+            let value_type = GGUFMetadataValueType::try_from(value_type).map_err(|err|
                 anyhow::Error::msg(err.to_string())
             )?;
 
             let value = self.parse_metadata_value(reader, &value_type)?;
 
-            // println!("key: {}, value_type: {:?}, value: {:?}", key, value_type, value);
+            println!("{}={}", key, value);
 
-            self.metadata_kv.push(GGUFMetadata {
+            self.header.metadata_kv.push(GGUFMetadata {
                 key,
                 value,
                 value_type,
@@ -264,18 +300,18 @@ impl GGUF {
         }
 
         // Models are little-endian by default.
-        self.version = u32::from_le_bytes([header[4], header[5], header[6], header[7]]);
-        println!("Version: {}", self.version);
+        self.header.version = u32::from_le_bytes([header[4], header[5], header[6], header[7]]);
+        println!("Version: {}", self.header.version);
 
         reader.read_exact(&mut header).map_err(|err| err.to_string())?;
 
-        self.tensor_count = u64::from_le_bytes(header);
-        println!("Tensor_count: {}", self.tensor_count);
+        self.header.tensor_count = u64::from_le_bytes(header);
+        println!("Tensor_count: {}", self.header.tensor_count);
 
         reader.read_exact(&mut header).map_err(|err| err.to_string())?;
 
-        self.metadata_kv_count = u64::from_le_bytes(header);
-        println!("Metadata_kv_count: {}", self.metadata_kv_count);
+        self.header.metadata_kv_count = u64::from_le_bytes(header);
+        println!("Metadata_kv_count: {}", self.header.metadata_kv_count);
 
         self.parse_metadata_kv(&mut reader).map_err(|err| err.to_string())?;
 

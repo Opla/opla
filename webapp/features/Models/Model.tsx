@@ -328,6 +328,11 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     setProviders(updatedProviders);
   };
 
+  const handleInspectModelFile = () => {
+    logger.info('handleInspectModelFile', model);
+    showModal(ModalIds.InspectModel, { item: { id: model.id } });
+  };
+
   if (!model) {
     return (
       <ContentView className="pb-8">
@@ -445,11 +450,12 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
                 {model.fileName && (
                   <Parameter
                     label={t('File')}
-                    name="file"
+                    name="fileName"
                     value={fullPathModel}
                     disabled
                     type="file"
                     inputCss={model.state === ModelState.NotFound ? 'text-error' : ''}
+                    onAction={handleInspectModelFile}
                   />
                 )}
                 {model.author && (

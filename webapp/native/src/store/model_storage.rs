@@ -14,6 +14,7 @@
 
 use std::fs::create_dir_all;
 use std::path::{ Path, PathBuf };
+use opla_core::gguf::GGUF;
 use serde::{ self, Deserialize, Serialize };
 use uuid::Uuid;
 use crate::data::model::{ Model, ModelEntity };
@@ -37,7 +38,11 @@ impl ModelStorage {
         Ok(get_data_directory()?.join("models"))
     }
 
-    pub fn get_path(&self, filepath: String, filename: Option<String>) -> Result<PathBuf, String> {
+    pub fn get_full_path(
+        &self,
+        filepath: String,
+        filename: Option<String>
+    ) -> Result<PathBuf, String> {
         let path_filename = Path::new(&filepath).join(&filename.unwrap_or("".to_string()));
         if path_filename.is_absolute() {
             return Ok(path_filename.to_path_buf());
@@ -62,7 +67,7 @@ impl ModelStorage {
         path: String,
         file_name: String
     ) -> Result<String, String> {
-        let models_path = self.get_path(path, None)?;
+        let models_path = self.get_full_path(path, None)?;
         let result = create_dir_all(models_path.clone());
         if result.is_err() {
             return Err(format!("Failed to create model directory: {:?}", result));
@@ -86,7 +91,7 @@ impl ModelStorage {
         path: String,
         file_name: String
     ) -> Result<String, String> {
-        let models_path = self.get_path(path, None)?;
+        let models_path = self.get_full_path(path, None)?;
         let file_name = file_name.as_str();
         let binding = models_path.join(file_name);
         let model_path = match binding.to_str() {
@@ -100,11 +105,11 @@ impl ModelStorage {
         Ok(model_path.to_string())
     }
 
-    pub fn get_model_path(&self, id_or_name: String) -> Result<String, String> {
+    fn get_path(&self, id_or_name: String) -> Result<String, String> {
         let (file_name, path) = match self.get_model_entity(&id_or_name) {
             Some(model) => (model.file_name.clone(), model.path.clone()),
             None => {
-                return Err(format!("get_model_path Model not found: {:?}", id_or_name));
+                return Err(format!("get_path Model not found: {:?}", id_or_name));
             }
         };
         let path = match path {
@@ -126,7 +131,13 @@ impl ModelStorage {
             }
         };
 
-        let mut gguf = opla_core::gguf::GGUF::new();
+        Ok(model_path)
+    }
+
+    pub fn get_model_path(&self, id_or_name: String) -> Result<String, String> {
+        let model_path = self.get_path(id_or_name)?;
+
+        let mut gguf = opla_core::gguf::GGUF::new(&model_path);
         match gguf.read(&model_path) {
             Ok(_) => {}
             Err(err) => {
@@ -135,6 +146,20 @@ impl ModelStorage {
         }
 
         Ok(model_path)
+    }
+
+    pub fn get_model_file(&self, id_or_name: String) -> Result<GGUF, String> {
+        let model_path = self.get_path(id_or_name)?;
+
+        let mut gguf = GGUF::new(&model_path);
+        match gguf.read(&model_path) {
+            Ok(_) => {}
+            Err(err) => {
+                return Err(err);
+            }
+        }
+
+        Ok(gguf)
     }
 
     pub fn validate_model(&self, model: &Model) -> Result<(), String> {

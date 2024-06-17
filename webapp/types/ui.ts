@@ -90,6 +90,7 @@ export enum ModalIds {
   Welcome = 'welcome',
   OpenAI = 'openai',
   CloudModels = 'cloudmodels',
+  InspectModel = 'inspectmodel',
   DeleteItem = 'deleteitem',
   DownloadItem = 'downloaditem',
   Downloads = 'downloads',

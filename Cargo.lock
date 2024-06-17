@@ -2230,6 +2230,8 @@ name = "opla_core"
 version = "1.0.0-alpha.178"
 dependencies = [
  "anyhow",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
