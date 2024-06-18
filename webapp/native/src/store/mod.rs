@@ -13,8 +13,9 @@
 // limitations under the License.
 
 use std::{ fs, path::PathBuf, fmt, collections::HashMap };
+use conversation_storage::ConversationStorage;
 use serde::{ Deserialize, Serialize };
-use tauri::AppHandle;
+use tauri::{ AppHandle, Manager };
 use crate::{
     data::service::{ Service, ServiceType },
     downloader::Download,
@@ -26,10 +27,12 @@ use self::service_storage::ServiceStorage;
 use self::workspace_storage::WorkspaceStorage;
 use self::server_storage::ServerStorage;
 
+pub mod conversation_storage;
 pub mod model_storage;
 pub mod service_storage;
 pub mod workspace_storage;
 pub mod server_storage;
+pub mod app_state;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum ProviderType {
@@ -124,6 +127,8 @@ pub struct Store {
     pub services: ServiceStorage,
     #[serde(default = "workspace_default")]
     pub workspaces: WorkspaceStorage,
+    #[serde(skip_serializing, default = "conversation_default")]
+    pub conversations: ConversationStorage,
 }
 
 fn service_default() -> ServiceStorage {
@@ -132,6 +137,10 @@ fn service_default() -> ServiceStorage {
 
 fn workspace_default() -> WorkspaceStorage {
     WorkspaceStorage::new()
+}
+
+fn conversation_default() -> ConversationStorage {
+    ConversationStorage::new()
 }
 
 impl Store {
@@ -150,13 +159,29 @@ impl Store {
                 items: vec![],
             },
             downloads: vec![],
-            services: ServiceStorage::new(),
-            workspaces: WorkspaceStorage::new(),
+            services: service_default(),
+            workspaces: workspace_default(),
+            conversations: conversation_default(),
         }
     }
 
-    pub fn init(&mut self, app_handle: AppHandle) {
-        self.workspaces.init(app_handle);
+    pub async fn init(&mut self, app_handle: AppHandle) {
+        self.workspaces.init(app_handle.app_handle());
+        let project = match self.workspaces.get_selected_project() {
+            Ok(p) => p,
+            Err(error) => {
+                println!("Error getting project: {:?}", error);
+                return;
+            }
+        };
+        let project_path = match self.workspaces.get_project_directory(Some(project.path)) {
+            Ok(p) => p,
+            Err(error) => {
+                println!("Error getting project path: {:?}", error);
+                return;
+            }
+        };
+        self.conversations.init(app_handle, project_path).await;
     }
 
     pub fn set(&mut self, new_config: Store) {
@@ -165,6 +190,7 @@ impl Store {
         self.models = new_config.models.clone();
         self.services = new_config.services.clone();
         self.workspaces = new_config.workspaces.clone();
+        self.conversations = new_config.conversations.clone();
     }
 
     pub fn load(&mut self, asset_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {

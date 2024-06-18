@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export enum GlobalAppStateWorkspace {
+export enum GlobalAppState {
   ACTIVE = 0,
   WORKSPACE = 1,
   ERROR = 2,
   PROJECT = 3,
+
+  CONVERSATIONS = 4,
+  DELETECONVERSATION = 5,
 }
 
 export const EVENTS: {

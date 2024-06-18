@@ -14,7 +14,7 @@
 
 import { StateCreator } from 'zustand';
 import { Project, Workspace } from '@/types';
-import { Emitter, GlobalAppStateWorkspace } from './constants';
+import { Emitter, GlobalAppState } from './constants';
 
 interface WorkspaceProps {
   activeWorkspaceId?: string;
@@ -45,12 +45,12 @@ const createWorkspaceSlice =
     getWorkspace: (id = get().activeWorkspaceId) => (id ? get().workspaces[id] : undefined),
     loadWorkspace: (id = get().activeWorkspaceId) => {
       const w = id ? get().workspaces[id] : undefined;
-      emit(GlobalAppStateWorkspace.ACTIVE, id);
+      emit(GlobalAppState.ACTIVE, id);
       return w;
     },
     loadProject: (id) => {
       const p = id ? get().projects[id] : undefined;
-      emit(GlobalAppStateWorkspace.PROJECT, p);
+      emit(GlobalAppState.PROJECT, p);
       return p;
     },
   });

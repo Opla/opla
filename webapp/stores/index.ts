@@ -20,7 +20,7 @@ import logger from '@/utils/logger';
 import createAssistantSlice, { AssistantSlice } from './assistant';
 import Storage, { createJSONSliceStorage } from './storage';
 import createWorkspaceSlice, { WorkspaceSlice } from './workspace';
-import { EVENTS, Emitter, GlobalAppStateWorkspace } from './constants';
+import { EVENTS, Emitter, GlobalAppState } from './constants';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const emit: Emitter = async (key: number, value: any) => {
@@ -48,13 +48,13 @@ export const useWorkspaceStore = create<WorkspaceSlice>()((...a) => ({
 }));
 
 const getKey = (key: number) => {
-  if (key === GlobalAppStateWorkspace.ACTIVE) {
+  if (key === GlobalAppState.ACTIVE) {
     return 'activeWorkspaceId';
   }
-  if (key === GlobalAppStateWorkspace.WORKSPACE) {
+  if (key === GlobalAppState.WORKSPACE) {
     return 'workspace';
   }
-  if (key === GlobalAppStateWorkspace.PROJECT) {
+  if (key === GlobalAppState.PROJECT) {
     return 'project';
   }
   return 'error';
@@ -65,13 +65,13 @@ export const subscribeStateSync = async () => {
   const unsubscribeStateSyncListener = await listen(EVENTS.STATE_SYNC_EVENT, (event) => {
     let { key, value } = event.payload as any;
     logger.info(`State event: ${event} ${key} ${value}`);
-    if (key === GlobalAppStateWorkspace.WORKSPACE) {
+    if (key === GlobalAppState.WORKSPACE) {
       const { workspaces } = useWorkspaceStore.getState();
       workspaces[key] = value as Workspace;
       key = 'workspaces';
       value = workspaces;
     }
-    if (key === GlobalAppStateWorkspace.PROJECT) {
+    if (key === GlobalAppState.PROJECT) {
       const { projects } = useWorkspaceStore.getState();
       projects[key] = value as Project;
       key = 'projects';
