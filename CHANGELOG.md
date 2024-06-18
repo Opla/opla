@@ -1,3 +1,15 @@
+# [1.0.0-alpha.180](https://github.com/Opla/opla/compare/v1.0.0-alpha.179...v1.0.0-alpha.180) (2024-06-18)
+
+
+### Bug Fixes
+
+* package lock ([cb7096c](https://github.com/Opla/opla/commit/cb7096cf99cf3ff1cd5fed2fb3fb70177d9e97b2))
+
+
+### Features
+
+* rewrite Conversations using Zustand [#1001](https://github.com/Opla/opla/issues/1001) ([#1002](https://github.com/Opla/opla/issues/1002)) ([35a5740](https://github.com/Opla/opla/commit/35a5740679677f1fb78fc031633f0ad335d2581d))
+
 # [1.0.0-alpha.179](https://github.com/Opla/opla/compare/v1.0.0-alpha.178...v1.0.0-alpha.179) (2024-06-17)
 
 
