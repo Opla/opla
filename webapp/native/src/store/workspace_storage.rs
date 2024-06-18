@@ -27,6 +27,8 @@ use crate::data::workspace::Workspace;
 use crate::utils::get_data_directory;
 use crate::OplaContext;
 
+use super::app_state::{ GlobalAppState, Payload, Empty, Value, STATE_CHANGE_EVENT, STATE_SYNC_EVENT };
+
 pub const DEFAULT_PROJECT_NAME: &str = "project";
 pub const DEFAULT_PROJECT_PATH: &str = "workspace/project";
 
@@ -35,60 +37,6 @@ pub fn get_project_path(project_path: Option<String>) -> String {
         Some(path) => path,
         None => DEFAULT_PROJECT_PATH.to_string(),
     }
-}
-
-pub const STATE_CHANGE_EVENT: &str = "state_change_event";
-pub const STATE_SYNC_EVENT: &str = "state_sync_event";
-pub enum GlobalAppStateWorkspace {
-    ACTIVE = 0,
-    WORKSPACE = 1,
-    ERROR = 2,
-    PROJECT = 3,
-}
-
-impl From<u32> for GlobalAppStateWorkspace {
-    fn from(item: u32) -> Self {
-        match item {
-            0 => GlobalAppStateWorkspace::ACTIVE,
-            1 => GlobalAppStateWorkspace::WORKSPACE,
-            3 => GlobalAppStateWorkspace::PROJECT,
-            _ => {
-                println!("Not a valid value for the enum GlobalAppStateWorkspace");
-                GlobalAppStateWorkspace::ERROR
-            }
-        }
-    }
-}
-
-impl Into<u32> for GlobalAppStateWorkspace {
-    fn into(self) -> u32 {
-        match self {
-            GlobalAppStateWorkspace::ERROR => 2,
-            GlobalAppStateWorkspace::ACTIVE => 0,
-            GlobalAppStateWorkspace::WORKSPACE => 1,
-            GlobalAppStateWorkspace::PROJECT => 3,
-        }
-    }
-}
-#[derive(Clone, Debug, Serialize, Deserialize)]
-struct Empty {}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(untagged)]
-enum Value {
-    Bool(bool),
-    String(String),
-    Number(i32),
-    Workspace(Workspace),
-    Project(Project),
-    Empty(Empty),
-}
-
-// the payload type must implement `Serialize` and `Clone`.
-#[derive(Clone, Serialize, Deserialize)]
-struct Payload {
-    key: u32,
-    value: Option<Value>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -220,7 +168,6 @@ impl WorkspaceStorage {
         Ok(())
     }
 
-
     fn create_project(&mut self) -> Result<Project, String> {
         let active_workspace = self.load_active_workspace();
         let id = active_workspace.id;
@@ -235,19 +182,18 @@ impl WorkspaceStorage {
     }
 
     pub fn get_selected_project(&mut self) -> Result<Project, String> {
-        let selected_project_id = self.selected_project_id.clone().unwrap_or(
-            DEFAULT_PROJECT_NAME.to_string()
-        );
+        let selected_project_id = self.selected_project_id
+            .clone()
+            .unwrap_or(DEFAULT_PROJECT_NAME.to_string());
         let project = match self.projects.get(&selected_project_id) {
             Some(p) => p.clone(),
             None => {
-                let binding = self.create_project()?;
-                binding.clone()
-            },
+                let project = self.create_project()?;
+                project.clone()
+            }
         };
         Ok(project)
     }
-
 
     async fn emit_state_async(payload: Payload, app_handle: AppHandle) {
         let context = app_handle.state::<OplaContext>();
@@ -256,8 +202,8 @@ impl WorkspaceStorage {
             None => Value::Empty(Empty {}),
         };
         println!("Emit state sync: {} {:?}", payload.key, value);
-        match GlobalAppStateWorkspace::from(payload.key) {
-            GlobalAppStateWorkspace::ACTIVE => {
+        match GlobalAppState::from(payload.key) {
+            GlobalAppState::ACTIVE => {
                 if let Value::String(data) = value {
                     let mut store = context.store.lock().await;
                     println!("Set active workspace {:?}", data);
@@ -281,7 +227,6 @@ impl WorkspaceStorage {
                             workspace.id.to_string()
                         }
                     };
-
                     app_handle
                         .emit_all(STATE_SYNC_EVENT, Payload {
                             key: payload.key,
@@ -290,7 +235,7 @@ impl WorkspaceStorage {
                         .unwrap();
                 }
             }
-            GlobalAppStateWorkspace::WORKSPACE => {
+            GlobalAppState::WORKSPACE => {
                 if let Value::Workspace(data) = value {
                     let mut store = context.store.lock().await;
 
@@ -307,7 +252,7 @@ impl WorkspaceStorage {
                     println!("TODO create a workspace");
                 }
             }
-            GlobalAppStateWorkspace::PROJECT => {
+            GlobalAppState::PROJECT => {
                 let project: Project;
                 let mut store = context.store.lock().await;
 
@@ -318,13 +263,13 @@ impl WorkspaceStorage {
                         Ok(p) => p,
                         Err(error) => {
                             println!("project get error: {:?}", error);
-                                    app_handle
-                                        .emit_all(STATE_SYNC_EVENT, Payload {
-                                            key: GlobalAppStateWorkspace::ERROR.into(),
-                                            value: Some(Value::String(error)),
-                                        })
-                                        .unwrap();
-                                    return;
+                            app_handle
+                                .emit_all(STATE_SYNC_EVENT, Payload {
+                                    key: GlobalAppState::ERROR.into(),
+                                    value: Some(Value::String(error)),
+                                })
+                                .unwrap();
+                            return;
                         }
                     };
                     /* let active_workspace = store.workspaces.load_active_workspace();
@@ -374,7 +319,7 @@ impl WorkspaceStorage {
                         println!("project save error: {:?}", error);
                         app_handle
                             .emit_all(STATE_SYNC_EVENT, Payload {
-                                key: GlobalAppStateWorkspace::ERROR.into(),
+                                key: GlobalAppState::ERROR.into(),
                                 value: Some(Value::String(error)),
                             })
                             .unwrap();
@@ -389,8 +334,11 @@ impl WorkspaceStorage {
                     })
                     .unwrap();
             }
-            GlobalAppStateWorkspace::ERROR => {
+            GlobalAppState::ERROR => {
                 println!("Not a valid state");
+            }
+            _ => {
+                // Others do nothing
             }
         }
     }

@@ -110,7 +110,8 @@ pub struct Conversation {
     #[serde(flatten)]
     preset: Option<Preset>,
 
-    messages: Vec<Message>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    messages: Option<Vec<Message>>,
 
     #[serde(skip_serializing_if = "Option::is_none", alias = "currentPrompt", default)]
     current_prompt: Option<ParsedPrompt>,

@@ -200,7 +200,7 @@ async fn opla_setup(app: &mut tauri::AppHandle) -> Result<(), String> {
     };
 
     store.load(resource_path).map_err(|err| err.to_string())?;
-    store.init(app.app_handle());
+    store.init(app.app_handle()).await;
 
     app
         .emit_all("opla-server", Payload {

@@ -16,7 +16,7 @@ import { StateCreator } from 'zustand';
 import { Conversation, Message, QueryResponse } from '@/types';
 import { deleteUnusedConversationsDir } from '@/utils/backend/tauri';
 import logger from '@/utils/logger';
-import { Emitter, GlobalAppStateConversation } from './constants';
+import { Emitter, GlobalAppState } from './constants';
 
 interface ConversationProps {
   conversations: Array<Conversation>;
@@ -74,7 +74,7 @@ const createConversationSlice =
     getConversation: (id) =>
       id ? get().conversations.find((conversation) => conversation.id === id) : undefined,
     updateConversations: (newConversations) => {
-      emit(GlobalAppStateConversation.CONVERSATIONS, newConversations);
+      emit(GlobalAppState.CONVERSATIONS, newConversations);
     },
     deleteConversation: async (
       id: string,
@@ -85,7 +85,7 @@ const createConversationSlice =
       if (!conversation) {
         logger.info(`deleteConversation conversation doesn't exist : ${id}`);
       } else {
-        await emit(GlobalAppStateConversation.DELETE_CONVERSATION, id);
+        await emit(GlobalAppState.DELETECONVERSATION, id);
         // Delete any orphans messages
         // await deleteConversationMessages(id);
         await cleanup?.(
