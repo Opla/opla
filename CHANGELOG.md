@@ -1,3 +1,10 @@
+# [1.0.0-alpha.181](https://github.com/Opla/opla/compare/v1.0.0-alpha.180...v1.0.0-alpha.181) (2024-06-19)
+
+
+### Bug Fixes
+
+* use project's dir for conversations [#1001](https://github.com/Opla/opla/issues/1001) ([#1015](https://github.com/Opla/opla/issues/1015)) ([096fada](https://github.com/Opla/opla/commit/096fadae1c8a4c90d7f3a211ead5782788a7995d))
+
 # [1.0.0-alpha.180](https://github.com/Opla/opla/compare/v1.0.0-alpha.179...v1.0.0-alpha.180) (2024-06-18)
 
 
