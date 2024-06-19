@@ -1,3 +1,10 @@
+# [1.0.0-alpha.183](https://github.com/Opla/opla/compare/v1.0.0-alpha.182...v1.0.0-alpha.183) (2024-06-19)
+
+
+### Features
+
+* same json using created_at/updated_at [#867](https://github.com/Opla/opla/issues/867) ([#1019](https://github.com/Opla/opla/issues/1019)) ([eefddbc](https://github.com/Opla/opla/commit/eefddbc0544e0208975f6283d981f0cb88e6103d))
+
 # [1.0.0-alpha.182](https://github.com/Opla/opla/compare/v1.0.0-alpha.181...v1.0.0-alpha.182) (2024-06-19)
 
 
