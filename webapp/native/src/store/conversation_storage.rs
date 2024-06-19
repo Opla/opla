@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::collections::HashMap;
-use std::fs::{ create_dir_all, read_to_string, write };
+use std::fs::{ create_dir_all, read_to_string, remove_file, write };
 use std::path::PathBuf;
 use serde::{ Deserialize, Serialize };
 use tauri::{ AppHandle, Manager };
@@ -152,24 +152,35 @@ impl ConversationStorage {
             }
             return;
         }
-        // Otherwise load previous format
+        // Otherwise import previous format
         let conversations_path = match get_data_directory() {
             Ok(path) => path.join("conversations.json"),
             Err(_) => {
                 return;
             }
         };
+        if !conversations_path.exists() {
+            return;
+        }
         match self.load_conversations(&conversations_path) {
             Ok(conversations) => {
                 println!("Loaded conversations: {:?}", conversations);
                 self.conversations = conversations;
                 if let Err(error) = self.save_conversations(&project_path) {
                     println!("Error Exporting conversations: {:?}", error);
+                    return;
                 }
             }
             Err(error) => {
                 println!("Error Loading conversations: {:?} {:?}", error, conversations_path);
+                return;
             }
         };
+        // TODO remove previous format conversations.json
+        if let Err(error) = remove_file(conversations_path) {
+            println!("Error Removing previous conversations: {:?}", error);
+        }
+        // TODO import previous messages.json
+        
     }
 }
