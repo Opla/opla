@@ -99,7 +99,6 @@ function Thread({
 
   const { t } = useTranslation();
 
-  console.log('selectedConversation', selectedConversation, conversations);
   useEffect(() => {
     const getNewMessages = async () => {
       let newMessages: MessageImpl[] = [];

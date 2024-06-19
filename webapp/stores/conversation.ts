@@ -112,7 +112,7 @@ const createConversationSlice =
       updatedMessages: [],
     }),
     deleteConversationMessages: async (conversationId: string) => {
-      console.log('TODO deleteConversationMessages', conversationId);
+      logger.info('TODO deleteConversationMessages', conversationId);
     },
     setArchives: () => {},
     deleteArchive: async () => {},

@@ -18,9 +18,9 @@ use crate::data::{ date_format, model::Model };
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct ModelsCollection {
-    #[serde(with = "date_format")]
+    #[serde(with = "date_format", alias = "createdAt")]
     pub created_at: DateTime<Utc>,
-    #[serde(with = "date_format")]
+    #[serde(with = "date_format", alias = "updatedAt")]
     pub updated_at: DateTime<Utc>,
     pub models: Vec<Model>,
 }

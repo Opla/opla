@@ -56,9 +56,9 @@ pub struct Model {
     pub id: Option<String>,
     pub name: String,
     pub base_model: Option<String>,
-    #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
+    #[serde(with = "option_date_format", alias = "updatedAt", skip_serializing_if = "Option::is_none", default)]
     pub created_at: Option<DateTime<Utc>>,
-    #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
+    #[serde(with = "option_date_format", alias = "createdAt", skip_serializing_if = "Option::is_none", default)]
     pub updated_at: Option<DateTime<Utc>>,
     pub title: Option<String>,
     pub description: Option<String>,
