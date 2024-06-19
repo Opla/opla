@@ -16,18 +16,20 @@ import { StateCreator } from 'zustand';
 import { Conversation, Message, QueryResponse } from '@/types';
 import { deleteUnusedConversationsDir } from '@/utils/backend/tauri';
 import logger from '@/utils/logger';
+import { mapKeys } from '@/utils/data';
+import { toSnakeCase } from '@/utils/string';
 import { Emitter, GlobalAppState } from './constants';
 
 interface ConversationProps {
-  conversations: Array<Conversation>;
+  conversations: Conversation[];
   messages: Record<string, Message[]>;
-  archives: Array<Conversation>;
+  archives: Conversation[];
 }
 
 export interface ConversationSlice extends ConversationProps {
-  getAllConversations: () => Conversation[];
+  getAllConversations: () => void;
   getConversation: (id?: string) => Conversation | undefined;
-  updateConversations: (newConversations: Conversation[]) => void;
+  setConversations: (newConversations: Conversation[]) => void;
   deleteConversation: (
     id: string,
     deleteFiles: boolean,
@@ -70,11 +72,12 @@ const createConversationSlice =
   (set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
-    getAllConversations: () => Object.values(get().conversations),
+    getAllConversations: () => {},
     getConversation: (id) =>
       id ? get().conversations.find((conversation) => conversation.id === id) : undefined,
-    updateConversations: (newConversations) => {
-      emit(GlobalAppState.CONVERSATIONS, newConversations);
+    setConversations: (newConversations) => {
+      const data = mapKeys(newConversations, toSnakeCase);
+      emit(GlobalAppState.CONVERSATIONS, data);
     },
     deleteConversation: async (
       id: string,

@@ -14,7 +14,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::data::workspace::{project::Project, Workspace};
+use crate::data::{conversation::Conversation, workspace::{project::Project, Workspace}};
 
 pub const STATE_CHANGE_EVENT: &str = "state_change_event";
 pub const STATE_SYNC_EVENT: &str = "state_sync_event";
@@ -71,6 +71,7 @@ pub enum Value {
     Workspace(Workspace),
     Project(Project),
     Empty(Empty),
+    Conversations(Vec<Conversation>),
 }
 
 // the payload type must implement `Serialize` and `Clone`.
