@@ -16,7 +16,7 @@ use crate::ServerStatus;
 use crate::{ api::hf::search_hf_models, start_server, OplaContext };
 use crate::data::model::{ Model, ModelEntity };
 use crate::models::{ fetch_models_collection, ModelsCollection };
-use opla_core::gguf::{ GGUFHeader, GGUF };
+use opla_core::gguf::GGUF;
 use serde::Serialize;
 use tauri::{ Runtime, State };
 

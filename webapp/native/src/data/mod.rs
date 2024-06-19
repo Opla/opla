@@ -34,7 +34,6 @@ pub fn is_false(b: &bool) -> bool {
     *b == false
 }
 
-
 #[derive(PartialEq, Clone, Debug, Serialize, Deserialize)]
 pub enum MetadataValue {
     String(String),
@@ -65,9 +64,9 @@ pub struct Preset {
     // BaseNamedRecord
     pub id: Option<String>,
     pub name: String,
-    #[serde(with = "date_format_extended", alias = "createdAt", default)]
+    #[serde(with = "date_format", alias = "createdAt", default)]
     pub created_at: DateTime<Utc>,
-    #[serde(with = "date_format_extended", alias = "updatedAt", default)]
+    #[serde(with = "date_format", alias = "updatedAt", default)]
     pub updated_at: DateTime<Utc>,
 
     // Preset
@@ -106,9 +105,9 @@ pub struct PromptTemplates {
     pub id: Option<String>,
     pub title: String,
     pub icon: Option<Avatar>,
-    #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
+    #[serde(with = "option_date_format", alias = "createdAt", skip_serializing_if = "Option::is_none", default)]
     pub created_at: Option<DateTime<Utc>>,
-    #[serde(with = "option_date_format", skip_serializing_if = "Option::is_none", default)]
+    #[serde(with = "option_date_format", alias = "updatedAt", skip_serializing_if = "Option::is_none", default)]
     pub updated_at: Option<DateTime<Utc>>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub value: Option<String>,
@@ -183,7 +182,7 @@ impl FromStr for Resource {
     }
 }
 
-pub mod date_format_extended {
+pub mod date_format {
     use chrono::{ DateTime, Utc };
     use serde::{ de, Deserialize, Deserializer };
     use serde_json::Value;
@@ -223,48 +222,44 @@ pub mod date_format_extended {
     }
 }
 
-pub mod date_format {
-    use chrono::{ DateTime, Utc };
-    use serde::{ Deserializer, Deserialize };
-
-    const FORMAT: &str = "%Y-%m-%dT%H:%M:%S%.fZ";
-
-    pub fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
-        where D: Deserializer<'de>
-    {
-        let s = String::deserialize(deserializer)?;
-        /* println!("Parsing date: {}", s);
-        let datetime = NaiveDateTime::parse_from_str(&s, FORMAT).expect("Failed to parse date");
-        println!("Parsed date: {:?}", datetime);
-        let datetime = DateTime::parse_from_rfc3339(&s).expect("Failed to parse date");
-        println!("Parsed date: {:?}", datetime); */
-        Ok(DateTime::parse_from_rfc3339(&s).map_err(serde::de::Error::custom)?.with_timezone(&Utc))
-    }
-
-    pub fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
-        where S: serde::Serializer
-    {
-        let s = date.format(FORMAT).to_string();
-        serializer.serialize_str(&s)
-    }
-}
-
 pub mod option_date_format {
     use chrono::{ DateTime, Utc };
-    use serde::{ Deserializer, Deserialize };
+    use serde::{ de, Deserializer, Deserialize };
+    use serde_json::Value;
 
     // const FORMAT: &str = "%Y-%m-%dT%H:%M:%S%.%f%z";
 
     pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<DateTime<Utc>>, D::Error>
         where D: Deserializer<'de>
     {
-        let s = Option::<String>::deserialize(deserializer)?;
+        /* let s = Option::<String>::deserialize(deserializer)?;
         // println!("Parsing date: {:?}", s);
         let datetime = match s {
             Some(s) =>
                 DateTime::parse_from_rfc3339(&s)
                     .map_err(serde::de::Error::custom)?
                     .with_timezone(&Utc),
+            None => {
+                return Ok(None);
+            }
+        }; */
+        let value = Option::<Value>::deserialize(deserializer)?;
+        // println!("Parsing date: {:?}", s);
+        let datetime = match value {
+            Some(v) =>
+                match v.as_str() {
+                    Some(s) =>
+                        DateTime::parse_from_rfc3339(s)
+                            .map_err(de::Error::custom)?
+                            .with_timezone(&Utc),
+                    None =>
+                        match DateTime::from_timestamp_millis(v.as_i64().unwrap_or(-1)) {
+                            Some(d) => d,
+                            None => {
+                                return Err(de::Error::custom("Invalid timestamp millis"));
+                            }
+                        }
+                }
             None => {
                 return Ok(None);
             }

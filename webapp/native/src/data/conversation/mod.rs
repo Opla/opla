@@ -16,7 +16,7 @@ use chrono::{ DateTime, Utc };
 use serde::{ Deserialize, Serialize };
 
 use super::{
-    date_format_extended,
+    date_format,
     is_false,
     asset::Asset,
     message::Message,
@@ -108,9 +108,9 @@ pub struct ConversationUsage {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Conversation {
     pub id: String,
-    #[serde(with = "date_format_extended", alias = "createdAt", default)]
+    #[serde(with = "date_format", alias = "createdAt", default)]
     pub created_at: DateTime<Utc>,
-    #[serde(with = "date_format_extended", alias = "updatedAt", default)]
+    #[serde(with = "date_format", alias = "updatedAt", default)]
     pub updated_at: DateTime<Utc>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     metadata: Option<Metadata>,
