@@ -15,6 +15,8 @@
 use serde::{ self, Deserialize, Serialize };
 use serde_with::serde_as;
 
+use super::is_false;
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum ServiceType {
     #[serde(rename = "model")]
@@ -29,16 +31,16 @@ pub enum ServiceType {
 pub struct Service {
     pub r#type: ServiceType,
 
-    #[serde(skip_serializing_if = "Option::is_none", default)]
+    #[serde(skip_serializing_if = "Option::is_none", alias="modelId", default)]
     pub model_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none", default)]
+    #[serde(skip_serializing_if = "Option::is_none", alias="providerIdOrName", default)]
     pub provider_id_or_name: Option<String>,
 
-    #[serde(skip_serializing_if = "Option::is_none", default)]
+    #[serde(skip_serializing_if = "Option::is_none", alias="assistantId", default)]
     pub assistant_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none", default)]
+    #[serde(skip_serializing_if = "Option::is_none", alias="targetId", default)]
     pub target_id: Option<String>,
-
+    #[serde(skip_serializing_if = "is_false", default)]
     pub disabled: bool,
 }
 

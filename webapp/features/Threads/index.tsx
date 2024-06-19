@@ -85,11 +85,15 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     projects,
   } = useWorkspaceStore();
 
+  /* const {
+    getAllConversations,
+  } = useConversationStore(); */
   useEffect(() => {
     if (!workspaces || !activeWorkspace) {
       logger.info('loadWorkspace', workspaces, activeWorkspace);
       loadWorkspace(activeWorkspace);
       loadProject();
+      // getAllConversations();
     }
   }, [loadWorkspace, activeWorkspace, workspaces, loadProject]);
   logger.info('activeWorkspace', activeWorkspace, projects);

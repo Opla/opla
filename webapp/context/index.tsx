@@ -37,6 +37,7 @@ import { defaultPresets, mergePresets } from '@/utils/data/presets';
 import { getMessageContentAsString, mergeMessages } from '@/utils/data/messages';
 import { deleteUnusedConversationsDir } from '@/utils/backend/tauri';
 import logger from '@/utils/logger';
+import { useConversationStore } from '@/stores';
 
 export type Context = {
   conversations: Array<Conversation>;
@@ -105,10 +106,12 @@ const AppContext = createContext(initialContext);
 
 function AppContextProvider({ children }: { children: React.ReactNode }) {
   const [usage, setUsage] = useState<LlmUsage>();
-  const [conversations, setConversations] = useDataStorage(
+  /* const [conversations, setConversations] = useDataStorage(
     'conversations',
     initialContext.conversations,
-  );
+  ); */
+  const { conversations, setConversations } = useConversationStore();
+
   const [archives, setArchives] = useDataStorage('archives', initialContext.archives);
 
   const [providers, setProviders] = useDataStorage('providers', initialContext.providers);

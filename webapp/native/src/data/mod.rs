@@ -30,6 +30,11 @@ pub mod workspace;
 pub mod message;
 pub mod conversation;
 
+pub fn is_false(b: &bool) -> bool {
+    *b == false
+}
+
+
 #[derive(PartialEq, Clone, Debug, Serialize, Deserialize)]
 pub enum MetadataValue {
     String(String),

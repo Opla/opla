@@ -15,9 +15,15 @@
 use chrono::{ DateTime, Utc };
 use serde::{ Deserialize, Serialize };
 
-use crate::data::date_format_extended;
-
-use super::{ asset::Asset, message::Message, Metadata, Preset };
+use super::{
+    date_format_extended,
+    is_false,
+    asset::Asset,
+    message::Message,
+    service::Service,
+    Metadata,
+    Preset,
+};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum PromptTokenType {
@@ -54,9 +60,10 @@ pub struct PromptToken {
     r#type: PromptTokenType,
     value: String,
     index: u32,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     state: Option<PromptTokenState>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "blockOtherCommands", default)]
-    block_other_commands: Option<bool>,
+    #[serde(skip_serializing_if = "is_false", alias = "blockOtherCommands", default)]
+    block_other_commands: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -68,7 +75,8 @@ pub struct ParsedPrompt {
     #[serde(alias = "currentTokenIndex", default)]
     pub current_token_index: u32,
     pub tokens: Vec<PromptToken>,
-    pub locked: Option<bool>,
+    #[serde(skip_serializing_if = "is_false", default)]
+    pub locked: bool,
     #[serde(skip_serializing_if = "Option::is_none", alias = "tokenCount", default)]
     pub token_count: Option<u32>,
 }
@@ -106,6 +114,8 @@ pub struct Conversation {
     pub updated_at: DateTime<Utc>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     metadata: Option<Metadata>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub name: Option<String>,
 
     #[serde(flatten)]
     preset: Option<Preset>,
@@ -119,12 +129,15 @@ pub struct Conversation {
     #[serde(skip_serializing_if = "Option::is_none", alias = "importedFrom", default)]
     imported_from: Option<String>,
 
-    #[serde(skip_serializing_if = "Option::is_none", default)]
-    temp: Option<bool>,
+    #[serde(skip_serializing_if = "is_false", default)]
+    temp: bool,
 
     #[serde(skip_serializing_if = "Option::is_none", default)]
     usage: Option<ConversationUsage>,
 
     #[serde(skip_serializing_if = "Option::is_none", default)]
     assets: Option<Vec<Asset>>,
+
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    services: Option<Vec<Service>>,
 }

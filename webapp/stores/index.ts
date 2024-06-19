@@ -15,12 +15,15 @@
 // import { emit as emitStateEvent, listen } from "@tauri-apps/api/event";
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Assistant, Project, Workspace } from '@/types';
+import { Assistant, Conversation, Project, Workspace } from '@/types';
 import logger from '@/utils/logger';
+import { mapKeys } from '@/utils/data';
+import { toCamelCase } from '@/utils/string';
 import createAssistantSlice, { AssistantSlice } from './assistant';
 import Storage, { createJSONSliceStorage } from './storage';
 import createWorkspaceSlice, { WorkspaceSlice } from './workspace';
 import { EVENTS, Emitter, GlobalAppState } from './constants';
+import createConversationSlice, { ConversationSlice } from './conversation';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const emit: Emitter = async (key: number, value: any) => {
@@ -47,37 +50,29 @@ export const useWorkspaceStore = create<WorkspaceSlice>()((...a) => ({
   ...createWorkspaceSlice(emit)(...a),
 }));
 
-const getKey = (key: number) => {
-  if (key === GlobalAppState.ACTIVE) {
-    return 'activeWorkspaceId';
-  }
-  if (key === GlobalAppState.WORKSPACE) {
-    return 'workspace';
-  }
-  if (key === GlobalAppState.PROJECT) {
-    return 'project';
-  }
-  return 'error';
-};
+export const useConversationStore = create<ConversationSlice>()((...a) => ({
+  ...createConversationSlice(emit)(...a),
+}));
 
 export const subscribeStateSync = async () => {
   const { listen } = await import('@tauri-apps/api/event');
-  const unsubscribeStateSyncListener = await listen(EVENTS.STATE_SYNC_EVENT, (event) => {
-    let { key, value } = event.payload as any;
+  const unsubscribeStateSyncListener = await listen(EVENTS.STATE_SYNC_EVENT, async (event) => {
+    const { key, value } = event.payload as any;
     logger.info(`State event: ${event} ${key} ${value}`);
     if (key === GlobalAppState.WORKSPACE) {
       const { workspaces } = useWorkspaceStore.getState();
-      workspaces[key] = value as Workspace;
-      key = 'workspaces';
-      value = workspaces;
+      workspaces[key] = (await mapKeys(value, toCamelCase)) as Workspace;
+      useWorkspaceStore.setState({ workspaces });
     }
     if (key === GlobalAppState.PROJECT) {
       const { projects } = useWorkspaceStore.getState();
-      projects[key] = value as Project;
-      key = 'projects';
-      value = projects;
+      projects[key] = (await mapKeys(value, toCamelCase)) as Project;
+      useWorkspaceStore.setState({ projects });
     }
-    useWorkspaceStore.setState({ [getKey(key) as string]: value });
+    if (key === GlobalAppState.CONVERSATIONS) {
+      const conversations = (await mapKeys(value, toCamelCase)) as Conversation[];
+      useConversationStore.setState({ conversations });
+    }
   });
 
   return async () => {

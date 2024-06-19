@@ -165,19 +165,29 @@ impl Store {
         }
     }
 
-    pub async fn init(&mut self, app_handle: AppHandle) {
-        self.workspaces.init(app_handle.app_handle());
+    pub fn get_selected_project_path(&mut self) -> Result<PathBuf, String> {
         let project = match self.workspaces.get_selected_project() {
             Ok(p) => p,
             Err(error) => {
                 println!("Error getting project: {:?}", error);
-                return;
+                return Err(error);
             }
         };
         let project_path = match self.workspaces.get_project_directory(Some(project.path)) {
             Ok(p) => p,
             Err(error) => {
                 println!("Error getting project path: {:?}", error);
+                return Err(error);
+            }
+        };
+        Ok(project_path)
+    }
+
+    pub async fn init(&mut self, app_handle: AppHandle) {
+        self.workspaces.init(app_handle.app_handle());
+        let project_path = match self.get_selected_project_path() {
+            Ok(p) => p,
+            Err(_) => {
                 return;
             }
         };
@@ -285,6 +295,14 @@ impl Store {
         let local_model_id = self.services.get_active_model_id();
         if model_id == local_model_id {
             self.services.active_service = None;
+        }
+    }
+
+    pub fn save_conversations(&mut self) {
+        if let Ok(project_path) = self.get_selected_project_path() {
+            if let Err(error) = self.conversations.save_conversations(&project_path) {
+                println!("Error saving conversations: {}", error);
+            }
         }
     }
 }

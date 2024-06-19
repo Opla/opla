@@ -13,8 +13,7 @@
 // limitations under the License.
 
 use std::collections::HashMap;
-use std::fs::create_dir_all;
-use std::fs::{ read_to_string, write };
+use std::fs::{ create_dir_all, read_to_string, write };
 use std::path::PathBuf;
 use serde::{ Deserialize, Serialize };
 use tauri::Manager;
@@ -27,7 +26,14 @@ use crate::data::workspace::Workspace;
 use crate::utils::get_data_directory;
 use crate::OplaContext;
 
-use super::app_state::{ GlobalAppState, Payload, Empty, Value, STATE_CHANGE_EVENT, STATE_SYNC_EVENT };
+use super::app_state::{
+    GlobalAppState,
+    Payload,
+    Empty,
+    Value,
+    STATE_CHANGE_EVENT,
+    STATE_SYNC_EVENT,
+};
 
 pub const DEFAULT_PROJECT_NAME: &str = "project";
 pub const DEFAULT_PROJECT_PATH: &str = "workspace/project";
@@ -352,9 +358,7 @@ impl WorkspaceStorage {
                     Ok(data) => {
                         println!("before spawn");
                         let app_handle = app_handle_copy.app_handle();
-                        spawn(async move {
-                            WorkspaceStorage::emit_state_async(data, app_handle).await
-                        });
+                        spawn(async move { Self::emit_state_async(data, app_handle).await });
                     }
                     Err(e) => {
                         println!("Failed to deserialize payload: {}", e);
