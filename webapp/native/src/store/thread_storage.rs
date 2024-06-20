@@ -26,13 +26,13 @@ use crate::{ data::{ conversation::Conversation, message::Message }, utils::get_
 use super::app_state::{ Empty, Payload, GlobalAppState, Value, STATE_CHANGE_EVENT };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ConversationStorage {
+pub struct ThreadStorage {
     pub conversations: Vec<Conversation>,
     pub messages: HashMap<String, Vec<Message>>,
     pub archives: Vec<Conversation>,
 }
 
-impl ConversationStorage {
+impl ThreadStorage {
     pub fn new() -> Self {
         Self {
             conversations: Vec::new(),
@@ -48,42 +48,59 @@ impl ConversationStorage {
             None => Value::Empty(Empty {}),
         };
         println!("Emit state sync: {} {:?}", payload.key, value);
+        let mut need_emit = false;
+        let mut emit_value: Option<Value> = None;
         match GlobalAppState::from(payload.key) {
             GlobalAppState::CONVERSATIONS => {
                 let mut store = context.store.lock().await;
-                let mut emit = false;
                 if let Value::Conversations(data) = value {
-                    store.conversations.conversations = data.clone();
+                    store.threads.conversations = data.clone();
                     store.save_conversations();
-                    emit = true;
+                    need_emit = true;
                 } else if let Value::Empty(_) = value {
-                    emit = true;
+                    need_emit = true;
                 } else {
                     println!("Error wrong type of value: {} {:?}", payload.key, value);
                 }
-                if emit {
-                    app_handle
-                        .emit_all(STATE_SYNC_EVENT, Payload {
-                            key: payload.key,
-                            value: Some(
-                                Value::Conversations(store.conversations.conversations.clone())
-                            ),
-                        })
-                        .unwrap();
+                if need_emit {
+                    emit_value = Some(Value::Conversations(store.threads.conversations.clone()));
                 }
             }
             GlobalAppState::DELETECONVERSATION => {
                 if let Value::String(data) = value {
                     let mut store = context.store.lock().await;
-                    store.conversations.remove_conversation(data);
+                    store.threads.remove_conversation(data);
                     store.save_conversations();
                 } else {
                     println!("Error wrong type of value: {} {:?}", payload.key, value);
                 }
             }
+            GlobalAppState::ARCHIVES => {
+                let mut store = context.store.lock().await;
+                if let Value::Conversations(data) = value {
+                    store.threads.archives = data.clone();
+                    store.save_archives();
+                    need_emit = true;
+                } else if let Value::Empty(_) = value {
+                    need_emit = true;
+                } else {
+                    println!("Error wrong type of value: {} {:?}", payload.key, value);
+                }
+                if need_emit {
+                    emit_value = Some(Value::Conversations(store.threads.archives.clone()));
+                }
+            }
             _ => {
                 // Others do nothing
             }
+        }
+        if need_emit {
+            app_handle
+                .emit_all(STATE_SYNC_EVENT, Payload {
+                    key: payload.key,
+                    value: emit_value,
+                })
+                .unwrap();
         }
     }
 
@@ -111,7 +128,11 @@ impl ConversationStorage {
         }
     }
 
-    pub fn load_conversations(&mut self, path: &PathBuf) -> Result<Vec<Conversation>, String> {
+    pub fn create_threads_path(name: &str, path: &PathBuf) -> PathBuf {
+        path.join(format!(".opla/{}.json", name))
+    }
+
+    pub fn load_threads(&mut self, path: &PathBuf) -> Result<Vec<Conversation>, String> {
         let default_config_data = read_to_string(path).map_err(|e| e.to_string())?;
         let conversations: Vec<Conversation> = serde_json
             ::from_str(&default_config_data)
@@ -119,32 +140,34 @@ impl ConversationStorage {
         Ok(conversations)
     }
 
-    pub fn save_conversations(&mut self, path: &PathBuf) -> Result<(), String> {
-        let conversations_path = &PathBuf::new()
-            .join(path.clone())
-            .join(".opla/conversations.json");
+    pub fn save_threads(&mut self, name: &str, path: &PathBuf) -> Result<(), String> {
+        let conversations_path = &Self::create_threads_path(name, path);
         let prefix = conversations_path.parent().unwrap();
         create_dir_all(prefix).map_err(|e| e.to_string())?;
-        println!("save conversations {:?} {:?}", conversations_path, prefix);
-        let json = serde_json::to_string_pretty(&self.conversations).map_err(|e| e.to_string())?;
+        println!("save {}: {:?} {:?}", name, conversations_path, prefix);
+        let threads = if name == "archives" { &self.archives } else { &self.conversations };
+        let json = serde_json::to_string_pretty(threads).map_err(|e| e.to_string())?;
         write(conversations_path, json).map_err(|e| e.to_string())?;
 
         Ok(())
     }
 
-    pub async fn init(&mut self, app_handle: AppHandle, project_path: PathBuf) {
-        self.subscribe_state_events(app_handle.app_handle());
-        let conversations_path = project_path.join(".opla/conversations.json");
+    pub async fn init_threads(&mut self, name: &str, project_path: PathBuf) {
+        let conversations_path = &Self::create_threads_path(name, &project_path);
         if conversations_path.exists() {
-            match self.load_conversations(&conversations_path) {
+            match self.load_threads(&conversations_path) {
                 Ok(conversations) => {
-                    println!("Loaded project's conversations: {:?}", conversations);
-                    self.conversations = conversations;
-                    return;
+                    println!("Loaded project's {}: {:?}", name, conversations);
+                    if name == "conversations" {
+                        self.conversations = conversations;
+                    } else if name == "archives" {
+                        self.archives = conversations;
+                    }
                 }
                 Err(error) => {
                     println!(
-                        "Error Loading project's conversations: {:?} {:?}",
+                        "Error Loading project's {}: {:?} {:?}",
+                        name,
                         error,
                         conversations_path
                     );
@@ -153,34 +176,45 @@ impl ConversationStorage {
             return;
         }
         // Otherwise import previous format
-        let conversations_path = match get_data_directory() {
-            Ok(path) => path.join("conversations.json"),
+        let previous_conversations_path = match get_data_directory() {
+            Ok(path) => path.join(format!("{}.json", name)),
             Err(_) => {
                 return;
             }
         };
-        if !conversations_path.exists() {
+        if !previous_conversations_path.exists() {
             return;
         }
-        match self.load_conversations(&conversations_path) {
+        match self.load_threads(&previous_conversations_path) {
             Ok(conversations) => {
-                println!("Loaded conversations: {:?}", conversations);
-                self.conversations = conversations;
-                if let Err(error) = self.save_conversations(&project_path) {
-                    println!("Error Exporting conversations: {:?}", error);
+                println!("Loaded {}: {:?}", name, conversations);
+                if name == "conversations" {
+                    self.conversations = conversations;
+                } else if name == "archives" {
+                    self.archives = conversations;
+                }
+                if let Err(error) = self.save_threads(name, &project_path) {
+                    println!("Error converting {}: {:?}", name, error);
                     return;
                 }
             }
             Err(error) => {
-                println!("Error Loading conversations: {:?} {:?}", error, conversations_path);
+                println!("Error Loading previous {}: {:?} {:?}", name, error, previous_conversations_path);
                 return;
             }
-        };
-        // TODO remove previous format conversations.json
-        if let Err(error) = remove_file(conversations_path) {
-            println!("Error Removing previous conversations: {:?}", error);
         }
+        // Remove previous format {name}.json
+        if let Err(error) = remove_file(previous_conversations_path) {
+            println!("Error Removing previous {}: {:?}", name, error);
+        }
+    }
+
+    pub async fn init(&mut self, app_handle: AppHandle, project_path: PathBuf) {
+        self.subscribe_state_events(app_handle.app_handle());
+
+        self.init_threads("conversations", project_path.clone()).await;
         // TODO import previous messages.json
-        
+
+        self.init_threads("archives", project_path).await;
     }
 }

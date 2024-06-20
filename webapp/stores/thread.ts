@@ -20,13 +20,13 @@ import { mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
 import { Emitter, GlobalAppState } from './constants';
 
-interface ConversationProps {
+interface ThreadProps {
   conversations: Conversation[];
   messages: Record<string, Message[]>;
   archives: Conversation[];
 }
 
-export interface ConversationSlice extends ConversationProps {
+export interface ThreadSlice extends ThreadProps {
   getAllConversations: () => void;
   getConversation: (id?: string) => Conversation | undefined;
   setConversations: (newConversations: Conversation[]) => void;
@@ -59,20 +59,23 @@ export interface ConversationSlice extends ConversationProps {
   deleteArchive: (id: string, cleanup?: (id: string) => Promise<void>) => Promise<void>;
 }
 
-export type ConversationStore = ReturnType<typeof createConversationSlice>;
+export type ThreadStore = ReturnType<typeof createThreadSlice>;
 
-const DEFAULT_PROPS: ConversationProps = {
+const DEFAULT_PROPS: ThreadProps = {
   conversations: [],
   messages: {},
   archives: [],
 };
 
-const createConversationSlice =
-  (emit: Emitter, initProps?: Partial<ConversationSlice>): StateCreator<ConversationSlice> =>
+const createThreadSlice =
+  (emit: Emitter, initProps?: Partial<ThreadSlice>): StateCreator<ThreadSlice> =>
   (set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
-    getAllConversations: () => {},
+    getAllConversations: () => {
+      emit(GlobalAppState.CONVERSATIONS, {});
+      emit(GlobalAppState.ARCHIVES, {});
+    },
     getConversation: (id) =>
       id ? get().conversations.find((conversation) => conversation.id === id) : undefined,
     setConversations: (newConversations) => {
@@ -114,8 +117,11 @@ const createConversationSlice =
     deleteConversationMessages: async (conversationId: string) => {
       logger.info('TODO deleteConversationMessages', conversationId);
     },
-    setArchives: () => {},
+    setArchives: (newArchives) => {
+      const data = mapKeys(newArchives, toSnakeCase);
+      emit(GlobalAppState.ARCHIVES, data);
+    },
     deleteArchive: async () => {},
   });
 
-export default createConversationSlice;
+export default createThreadSlice;

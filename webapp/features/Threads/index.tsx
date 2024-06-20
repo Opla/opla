@@ -36,7 +36,7 @@ import { getAssistantId } from '@/utils/services';
 import { deepEqual } from '@/utils/data';
 import { createProvider } from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';
-import { useAssistantStore, useWorkspaceStore } from '@/stores';
+import { useAssistantStore, useThreadStore, useWorkspaceStore } from '@/stores';
 import { findModelInAll } from '@/utils/data/models';
 import { uninstallModel } from '@/utils/backend/commands';
 import { ResizableHandle, ResizablePanel } from '../../components/ui/resizable';
@@ -85,17 +85,15 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     projects,
   } = useWorkspaceStore();
 
-  /* const {
-    getAllConversations,
-  } = useConversationStore(); */
+  const { getAllConversations } = useThreadStore();
   useEffect(() => {
     if (!workspaces || !activeWorkspace) {
       logger.info('loadWorkspace', workspaces, activeWorkspace);
       loadWorkspace(activeWorkspace);
       loadProject();
-      // getAllConversations();
+      getAllConversations();
     }
-  }, [loadWorkspace, activeWorkspace, workspaces, loadProject]);
+  }, [loadWorkspace, activeWorkspace, workspaces, loadProject, getAllConversations]);
   logger.info('activeWorkspace', activeWorkspace, projects);
   const searchParams = useSearchParams();
   const selectedConversation = conversations.find((c) => c.id === selectedThreadId);

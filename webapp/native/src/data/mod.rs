@@ -35,6 +35,7 @@ pub fn is_false(b: &bool) -> bool {
 }
 
 #[derive(PartialEq, Clone, Debug, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum MetadataValue {
     String(String),
     Number(f32),

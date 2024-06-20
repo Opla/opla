@@ -26,6 +26,8 @@ pub enum GlobalAppState {
 
     CONVERSATIONS = 4,
     DELETECONVERSATION = 5,
+
+    ARCHIVES = 6,
 }
 
 impl From<u32> for GlobalAppState {
@@ -36,6 +38,7 @@ impl From<u32> for GlobalAppState {
             3 => GlobalAppState::PROJECT,
             4 => GlobalAppState::CONVERSATIONS,
             5 => GlobalAppState::DELETECONVERSATION,
+            6 => GlobalAppState::ARCHIVES,
             _ => {
                 println!("Not a valid value for the enum GlobalAppState");
                 GlobalAppState::ERROR
@@ -54,6 +57,8 @@ impl Into<u32> for GlobalAppState {
 
             GlobalAppState::CONVERSATIONS => 4,
             GlobalAppState::DELETECONVERSATION => 5,
+
+            GlobalAppState::ARCHIVES => 6,
         }
     }
 }
