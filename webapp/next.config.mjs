@@ -1,18 +1,15 @@
 /** @type {import('next').NextConfig} */
+
+import { withSentryConfig } from '@sentry/nextjs';
+
 const nextConfig = {
   output: 'export',
   images: { unoptimized: true },
   reactStrictMode: true,
 };
 
-module.exports = nextConfig;
-
-// Injected content via Sentry wizard below
-
-const { withSentryConfig } = require('@sentry/nextjs');
-
-module.exports = withSentryConfig(
-  module.exports,
+export default withSentryConfig(
+  nextConfig,
   {
     org: process.env.SENTRY_ORG,
     project: process.env.SENTRY_PROJECT,
