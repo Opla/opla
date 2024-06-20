@@ -1,4 +1,4 @@
-module.exports = {
+const config = {
   // this will check Typescript files
   '**/*.(ts|tsx)': () => 'yarn tsc --noEmit',
 
@@ -11,3 +11,5 @@ module.exports = {
   // this will Format MarkDown and JSON
   '**/*.(md|json)': (filenames) => `yarn prettier --write ${filenames.join(' ')}`,
 };
+
+export default config;

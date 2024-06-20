@@ -2,6 +2,7 @@
   "name": "opla",
   "version": "1.0.0-alpha.184",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,7 +10,8 @@
     "lint": "next lint",
     "precommit-lint": "../node_modules/.bin/tsc --noEmit && ../node_modules/.bin/eslint --fix . && npx prettier --write .",
     "test": "",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "help": "next -v"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.1.2",
@@ -68,6 +70,9 @@
     "zustand": "^4.5.1"
   },
   "devDependencies": {
+    "@eslint/compat": "^1.1.0",
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.5.0",
     "@tauri-apps/cli": "1.5.14",
     "@types/node": "^20",
     "@types/react": "^18",
@@ -78,12 +83,13 @@
     "@typescript-eslint/eslint-plugin": "^7.13.1",
     "@typescript-eslint/parser": "^7.13.1",
     "autoprefixer": "^10.4.19",
-    "eslint": "^8",
+    "eslint": "^9.5.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-typescript": "^18.0.0",
     "eslint-config-next": "14.2.4",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
+    "globals": "^15.6.0",
     "postcss": "^8",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.6.2",
