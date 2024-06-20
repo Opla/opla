@@ -1,3 +1,10 @@
+# [1.0.0-alpha.184](https://github.com/Opla/opla/compare/v1.0.0-alpha.183...v1.0.0-alpha.184) (2024-06-20)
+
+
+### Features
+
+* archive messages using Rust [#1020](https://github.com/Opla/opla/issues/1020) ([#1021](https://github.com/Opla/opla/issues/1021)) ([19b875b](https://github.com/Opla/opla/commit/19b875b1961cab918d5f47e7be24c4758ff953f8))
+
 # [1.0.0-alpha.183](https://github.com/Opla/opla/compare/v1.0.0-alpha.182...v1.0.0-alpha.183) (2024-06-19)
 
 
