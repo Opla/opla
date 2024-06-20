@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::{ fs, path::PathBuf, fmt, collections::HashMap };
-use conversation_storage::ConversationStorage;
+use thread_storage::ThreadStorage;
 use serde::{ Deserialize, Serialize };
 use tauri::{ AppHandle, Manager };
 use crate::{
@@ -27,7 +27,7 @@ use self::service_storage::ServiceStorage;
 use self::workspace_storage::WorkspaceStorage;
 use self::server_storage::ServerStorage;
 
-pub mod conversation_storage;
+pub mod thread_storage;
 pub mod model_storage;
 pub mod service_storage;
 pub mod workspace_storage;
@@ -127,8 +127,8 @@ pub struct Store {
     pub services: ServiceStorage,
     #[serde(default = "workspace_default")]
     pub workspaces: WorkspaceStorage,
-    #[serde(skip_serializing, default = "conversation_default")]
-    pub conversations: ConversationStorage,
+    #[serde(skip_serializing, default = "thread_default")]
+    pub threads: ThreadStorage,
 }
 
 fn service_default() -> ServiceStorage {
@@ -139,8 +139,8 @@ fn workspace_default() -> WorkspaceStorage {
     WorkspaceStorage::new()
 }
 
-fn conversation_default() -> ConversationStorage {
-    ConversationStorage::new()
+fn thread_default() -> ThreadStorage {
+    ThreadStorage::new()
 }
 
 impl Store {
@@ -161,7 +161,7 @@ impl Store {
             downloads: vec![],
             services: service_default(),
             workspaces: workspace_default(),
-            conversations: conversation_default(),
+            threads: thread_default(),
         }
     }
 
@@ -191,7 +191,7 @@ impl Store {
                 return;
             }
         };
-        self.conversations.init(app_handle, project_path).await;
+        self.threads.init(app_handle, project_path).await;
     }
 
     pub fn set(&mut self, new_config: Store) {
@@ -200,7 +200,7 @@ impl Store {
         self.models = new_config.models.clone();
         self.services = new_config.services.clone();
         self.workspaces = new_config.workspaces.clone();
-        self.conversations = new_config.conversations.clone();
+        self.threads = new_config.threads.clone();
     }
 
     pub fn load(&mut self, asset_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
@@ -300,8 +300,16 @@ impl Store {
 
     pub fn save_conversations(&mut self) {
         if let Ok(project_path) = self.get_selected_project_path() {
-            if let Err(error) = self.conversations.save_conversations(&project_path) {
+            if let Err(error) = self.threads.save_threads("conversations", &project_path) {
                 println!("Error saving conversations: {}", error);
+            }
+        }
+    }
+
+    pub fn save_archives(&mut self) {
+        if let Ok(project_path) = self.get_selected_project_path() {
+            if let Err(error) = self.threads.save_threads("archives", &project_path) {
+                println!("Error saving archives: {}", error);
             }
         }
     }

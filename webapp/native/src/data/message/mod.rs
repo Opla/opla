@@ -40,7 +40,7 @@ pub enum Role {
     User,
     #[serde(rename = "system")]
     System,
-    #[serde(rename = "Assistant")]
+    #[serde(rename = "assistant")]
     Assistant,
 }
 
@@ -48,8 +48,9 @@ pub enum Role {
 pub struct Author {
     role: Role, // 'user' | 'system' | 'assistant';
     name: String,
-    #[serde(alias = "avatarUrl")]
+    #[serde(skip_serializing_if = "Option::is_none", alias = "avatarUrl")]
     avatar_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     metadata: Option<Metadata>,
 }
 
@@ -94,6 +95,8 @@ pub struct Message {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     metadata: Option<Metadata>,
 
+    pub author: Author,
+
     #[serde(
         skip_serializing_if = "Option::is_none",
         default,
@@ -102,7 +105,8 @@ pub struct Message {
     pub content: Option<Content>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "contentHistory", default)]
     pub content_history: Option<Vec<Content>>,
-    pub status: MessageStatus,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub status: Option<MessageStatus>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub sibling: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", default)]

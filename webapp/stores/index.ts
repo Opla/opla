@@ -23,7 +23,7 @@ import createAssistantSlice, { AssistantSlice } from './assistant';
 import Storage, { createJSONSliceStorage } from './storage';
 import createWorkspaceSlice, { WorkspaceSlice } from './workspace';
 import { EVENTS, Emitter, GlobalAppState } from './constants';
-import createConversationSlice, { ConversationSlice } from './conversation';
+import createThreadSlice, { ThreadSlice } from './thread';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const emit: Emitter = async (key: number, value: any) => {
@@ -50,8 +50,8 @@ export const useWorkspaceStore = create<WorkspaceSlice>()((...a) => ({
   ...createWorkspaceSlice(emit)(...a),
 }));
 
-export const useConversationStore = create<ConversationSlice>()((...a) => ({
-  ...createConversationSlice(emit)(...a),
+export const useThreadStore = create<ThreadSlice>()((...a) => ({
+  ...createThreadSlice(emit)(...a),
 }));
 
 export const subscribeStateSync = async () => {
@@ -63,15 +63,16 @@ export const subscribeStateSync = async () => {
       const { workspaces } = useWorkspaceStore.getState();
       workspaces[key] = (await mapKeys(value, toCamelCase)) as Workspace;
       useWorkspaceStore.setState({ workspaces });
-    }
-    if (key === GlobalAppState.PROJECT) {
+    } else if (key === GlobalAppState.PROJECT) {
       const { projects } = useWorkspaceStore.getState();
       projects[key] = (await mapKeys(value, toCamelCase)) as Project;
       useWorkspaceStore.setState({ projects });
-    }
-    if (key === GlobalAppState.CONVERSATIONS) {
+    } else if (key === GlobalAppState.CONVERSATIONS) {
       const conversations = (await mapKeys(value, toCamelCase)) as Conversation[];
-      useConversationStore.setState({ conversations });
+      useThreadStore.setState({ conversations });
+    } else if (key === GlobalAppState.ARCHIVES) {
+      const archives = (await mapKeys(value, toCamelCase)) as Conversation[];
+      useThreadStore.setState({ archives });
     }
   });
 
