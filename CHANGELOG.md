@@ -1,3 +1,10 @@
+# [1.0.0-alpha.185](https://github.com/Opla/opla/compare/v1.0.0-alpha.184...v1.0.0-alpha.185) (2024-06-21)
+
+
+### Features
+
+* put messages in project's folder [#1016](https://github.com/Opla/opla/issues/1016) ([#1029](https://github.com/Opla/opla/issues/1029)) ([c4aafb5](https://github.com/Opla/opla/commit/c4aafb57679cf3324de018bd7091442964899a15))
+
 # [1.0.0-alpha.184](https://github.com/Opla/opla/compare/v1.0.0-alpha.183...v1.0.0-alpha.184) (2024-06-20)
 
 
