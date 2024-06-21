@@ -17,7 +17,7 @@ use thread_storage::ThreadStorage;
 use serde::{ Deserialize, Serialize };
 use tauri::{ AppHandle, Manager };
 use crate::{
-    data::service::{ Service, ServiceType },
+    data::{ message::Message, service::{ Service, ServiceType } },
     downloader::Download,
     utils::get_config_directory,
 };
@@ -310,6 +310,20 @@ impl Store {
         if let Ok(project_path) = self.get_selected_project_path() {
             if let Err(error) = self.threads.save_threads("archives", &project_path) {
                 println!("Error saving archives: {}", error);
+            }
+        }
+    }
+
+    pub fn save_conversation_messages(&mut self, conversation_id: &str, messages: Vec<Message>) {
+        if let Ok(project_path) = self.get_selected_project_path() {
+            if
+                let Err(error) = self.threads.update_conversation_messages(
+                    conversation_id,
+                    &project_path,
+                    messages
+                )
+            {
+                println!("Error saving conversations: {}", error);
             }
         }
     }

@@ -12,9 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
-use crate::data::{conversation::Conversation, workspace::{project::Project, Workspace}};
+use serde::{ Deserialize, Serialize };
+
+use crate::data::{
+    conversation::Conversation,
+    message::{ ConversationMessages, Message },
+    workspace::{ project::Project, Workspace },
+};
 
 pub const STATE_CHANGE_EVENT: &str = "state_change_event";
 pub const STATE_SYNC_EVENT: &str = "state_sync_event";
@@ -28,6 +34,10 @@ pub enum GlobalAppState {
     DELETECONVERSATION = 5,
 
     ARCHIVES = 6,
+
+    CONVERSATIONMESSAGES = 7,
+
+    MESSAGES = 8,
 }
 
 impl From<u32> for GlobalAppState {
@@ -39,6 +49,8 @@ impl From<u32> for GlobalAppState {
             4 => GlobalAppState::CONVERSATIONS,
             5 => GlobalAppState::DELETECONVERSATION,
             6 => GlobalAppState::ARCHIVES,
+            7 => GlobalAppState::CONVERSATIONMESSAGES,
+            8 => GlobalAppState::MESSAGES,
             _ => {
                 println!("Not a valid value for the enum GlobalAppState");
                 GlobalAppState::ERROR
@@ -59,10 +71,13 @@ impl Into<u32> for GlobalAppState {
             GlobalAppState::DELETECONVERSATION => 5,
 
             GlobalAppState::ARCHIVES => 6,
+
+            GlobalAppState::CONVERSATIONMESSAGES => 7,
+
+            GlobalAppState::MESSAGES => 8,
         }
     }
 }
-
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Empty {}
@@ -77,6 +92,8 @@ pub enum Value {
     Project(Project),
     Empty(Empty),
     Conversations(Vec<Conversation>),
+    ConversationMessages(ConversationMessages),
+    Messages(HashMap<String, Vec<Message>>),
 }
 
 // the payload type must implement `Serialize` and `Clone`.
