@@ -54,6 +54,18 @@ pub struct Author {
     metadata: Option<Metadata>,
 }
 
+impl Author {
+    pub fn sanitize_metadata(&mut self) {
+        if let Some(mut metadata) = self.metadata.take() {
+            if let Some(model_id) = metadata.remove("modelId") {
+                metadata.insert("model_id".to_string(), model_id);
+            }
+            self.metadata = Some(metadata);
+            println!("metadata={:?}", self.metadata);
+        }
+    }
+}
+
 #[derive(PartialEq, Clone, Debug, Serialize, Deserialize)]
 pub enum ContentType {
     #[serde(rename = "text")]
@@ -111,4 +123,17 @@ pub struct Message {
     pub sibling: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub assets: Option<Vec<String>>,
+}
+
+impl Message {
+    pub fn sanitize_metadata(&mut self) {
+        // TODO generic conversion from CamelCase
+        self.author.sanitize_metadata();
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct ConversationMessages {
+    pub conversation_id: String,
+    pub messages: Vec<Message>,
 }

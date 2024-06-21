@@ -90,6 +90,32 @@ impl ThreadStorage {
                     emit_value = Some(Value::Conversations(store.threads.archives.clone()));
                 }
             }
+            GlobalAppState::CONVERSATIONMESSAGES => {
+                let mut store = context.store.lock().await;
+                if let Value::ConversationMessages(data) = &value {
+                    store.save_conversation_messages(&data.conversation_id, data.messages.clone());
+                    need_emit = true;
+                    emit_value = Some(value);
+                } else {
+                    println!("Error wrong type of value: {} {:?}", payload.key, value);
+                }
+            }
+            GlobalAppState::MESSAGES => {
+                let mut store = context.store.lock().await;
+                if let Value::Messages(data) = &value {
+                    store.threads.messages = data.clone();
+                    // store.save_archives();
+                    need_emit = true;
+                    emit_value = Some(value);
+                } else if let Value::Empty(_) = value {
+                    need_emit = true;
+                } else {
+                    println!("Error wrong type of value: {} {:?}", payload.key, value);
+                }
+                if need_emit {
+                    emit_value = Some(Value::Messages(store.threads.messages.clone()));
+                }
+            }
             _ => {
                 // Others do nothing
             }
@@ -128,11 +154,53 @@ impl ThreadStorage {
         }
     }
 
+    pub fn load_conversation_messages(path: &PathBuf) -> Result<Vec<Message>, String> {
+        let default_config_data = read_to_string(path).map_err(|e| e.to_string())?;
+        let messages: Vec<Message> = serde_json
+            ::from_str(&default_config_data)
+            .map_err(|e| e.to_string())?;
+        Ok(messages)
+    }
+
+    pub fn save_conversation_messages(
+        conversation_id: &str,
+        path: &PathBuf,
+        messages: Vec<Message>
+    ) -> Result<(), String> {
+        let conversations_path = &Self::create_conversation_path(conversation_id, path);
+        let conversations_file = conversations_path.join("messages.json");
+        create_dir_all(conversations_path).map_err(|e| e.to_string())?;
+        println!(
+            "save_conversation_messages {}: {:?} {:?}",
+            conversation_id,
+            conversations_file,
+            conversations_path
+        );
+        let json = serde_json::to_string_pretty(&messages).map_err(|e| e.to_string())?;
+        write(conversations_file, json).map_err(|e| e.to_string())?;
+
+        Ok(())
+    }
+
+    pub fn update_conversation_messages(
+        &mut self,
+        conversation_id: &str,
+        path: &PathBuf,
+        messages: Vec<Message>
+    ) -> Result<(), String> {
+        self.messages.insert(conversation_id.to_string(), messages.clone());
+        Self::save_conversation_messages(conversation_id, path, messages)
+    }
+
+    pub fn create_conversation_path(conversation_id: &str, path: &PathBuf) -> PathBuf {
+        path.join(format!(".opla/conversations_storage/{}", conversation_id))
+    }
+
     pub fn create_threads_path(name: &str, path: &PathBuf) -> PathBuf {
         path.join(format!(".opla/{}.json", name))
     }
 
-    pub fn load_threads(&mut self, path: &PathBuf) -> Result<Vec<Conversation>, String> {
+    pub fn load_threads(path: &PathBuf) -> Result<Vec<Conversation>, String> {
         let default_config_data = read_to_string(path).map_err(|e| e.to_string())?;
         let conversations: Vec<Conversation> = serde_json
             ::from_str(&default_config_data)
@@ -155,7 +223,7 @@ impl ThreadStorage {
     pub async fn init_threads(&mut self, name: &str, project_path: PathBuf) {
         let conversations_path = &Self::create_threads_path(name, &project_path);
         if conversations_path.exists() {
-            match self.load_threads(&conversations_path) {
+            match Self::load_threads(&conversations_path) {
                 Ok(conversations) => {
                     println!("Loaded project's {}: {:?}", name, conversations);
                     if name == "conversations" {
@@ -185,7 +253,7 @@ impl ThreadStorage {
         if !previous_conversations_path.exists() {
             return;
         }
-        match self.load_threads(&previous_conversations_path) {
+        match Self::load_threads(&previous_conversations_path) {
             Ok(conversations) => {
                 println!("Loaded {}: {:?}", name, conversations);
                 if name == "conversations" {
@@ -199,7 +267,12 @@ impl ThreadStorage {
                 }
             }
             Err(error) => {
-                println!("Error Loading previous {}: {:?} {:?}", name, error, previous_conversations_path);
+                println!(
+                    "Error Loading previous {}: {:?} {:?}",
+                    name,
+                    error,
+                    previous_conversations_path
+                );
                 return;
             }
         }
@@ -209,11 +282,61 @@ impl ThreadStorage {
         }
     }
 
+    pub async fn init_conversation(conversation_id: String, project_path: &PathBuf) {
+        println!("Init conversation {} {:?}", conversation_id, project_path);
+        let conversations_path = &Self::create_conversation_path(&conversation_id, &project_path);
+        if conversations_path.exists() {
+            return;
+        }
+
+        // Otherwise import previous format
+        let previous_conversations_path = match get_data_directory() {
+            Ok(path) => path.join(format!("{}/messages.json", conversation_id)),
+            Err(_) => {
+                return;
+            }
+        };
+        if !previous_conversations_path.exists() {
+            return;
+        }
+
+        match Self::load_conversation_messages(&previous_conversations_path) {
+            Ok(mut messages) => {
+                for message in messages.iter_mut() {
+                    message.sanitize_metadata();
+                }
+                println!("Loaded {} messages: ", conversation_id);
+                if let Err(error) = Self::save_conversation_messages(&conversation_id, &project_path, messages) {
+                    println!("Error converting messages {}: {:?}", conversation_id, error);
+                    return;
+                }
+            }
+            Err(error) => {
+                println!(
+                    "Error Loading previous messages {}: {:?} {:?}",
+                    conversation_id,
+                    error,
+                    previous_conversations_path
+                );
+                return;
+            }
+        }
+
+        // TODO Remove previous format conversation messages
+    }
+
+    pub async fn init_conversations(&mut self, project_path: &PathBuf) {
+        for conversation in &self.conversations {
+            Self::init_conversation(conversation.id.to_string(), project_path).await;
+        }
+    }
+
     pub async fn init(&mut self, app_handle: AppHandle, project_path: PathBuf) {
         self.subscribe_state_events(app_handle.app_handle());
 
         self.init_threads("conversations", project_path.clone()).await;
-        // TODO import previous messages.json
+        
+        self.init_conversations(&project_path).await;
 
         self.init_threads("archives", project_path).await;
     }
