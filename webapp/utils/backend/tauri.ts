@@ -104,7 +104,7 @@ export const readTextFile = async (filename: string, isDatadir = true) => {
   const { join } = await import('@tauri-apps/api/path');
   let dataDir = '';
   if (isDatadir) {
-    dataDir = (await invokeTauri('get_data_path')) as string;
+    dataDir = await invokeTauri('get_data_path');
   }
   return fsReadTextFile(await join(dataDir, filename));
 };
@@ -114,7 +114,7 @@ export const deleteFile = async (filename: string, isDatadir = true) => {
   const { join } = await import('@tauri-apps/api/path');
   let dataDir = '';
   if (isDatadir) {
-    dataDir = (await invokeTauri('get_data_path')) as string;
+    dataDir = await invokeTauri('get_data_path');
   }
   const path = await join(dataDir, filename);
   if (await exists(path)) {
@@ -127,7 +127,7 @@ export const deleteDir = async (dirname: string, isDatadir = true, recursive = f
   const { join } = await import('@tauri-apps/api/path');
   let dataDir = '';
   if (isDatadir) {
-    dataDir = (await invokeTauri('get_data_path')) as string;
+    dataDir = await invokeTauri('get_data_path');
   }
   return fsRemoveDir(await join(dataDir, dirname), { recursive });
 };

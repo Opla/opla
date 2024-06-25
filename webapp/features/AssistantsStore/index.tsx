@@ -78,7 +78,7 @@ function AssistantsStore() {
             await installModelFromApi(model);
             await updateBackendStore();
           } catch (e) {
-            const error = `Can't install ${model?.name} model`;
+            const error = `Can't install ${model?.name} model: ${e}`;
             logger.info(error);
             toast.error(error);
           }

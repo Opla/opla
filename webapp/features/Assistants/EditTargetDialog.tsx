@@ -97,8 +97,8 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
 
   const handleSelectModel = (value?: string, index?: number) => {
     if (value && index !== undefined) {
-      logger.info('handleSelectModel', value, index, modelItems[index as number]);
-      const item = modelItems[index as number];
+      logger.info('handleSelectModel', value, index, modelItems[index]);
+      const item = modelItems[index];
       setNewParameters({ ...newParameters, provider: item.group || 'None', models: [value] });
     }
   };

@@ -22,13 +22,13 @@ function Content({
   icon,
   renderIcon,
 }: {
-  icon: LucideIcon;
+  icon: LucideIcon | undefined;
   renderIcon?: () => React.ReactElement;
 }) {
-  const Icon = icon as LucideIcon;
+  const Icon = icon;
   return (
     <div className="hover:primary-foreground h-5 w-5">
-      {renderIcon ? renderIcon() : <Icon size="28px" strokeWidth={1.5} />}
+      {renderIcon ? renderIcon() : Icon && <Icon size="28px" strokeWidth={1.5} />}
     </div>
   );
 }
@@ -57,7 +57,7 @@ export default function SidebarItem({
   const className = `flex h-6 w-6 rounded-md ${
     selected ? 'text-primary' : 'text-muted-foreground hover:text-primary'
   } dark:transparent`;
-  const content = <Content icon={icon as LucideIcon} renderIcon={renderIcon} />;
+  const content = <Content icon={icon} renderIcon={renderIcon} />;
   return (
     <li className="p-2">
       <Tooltip>
@@ -72,20 +72,24 @@ export default function SidebarItem({
               }}
               onClick={(e) => {
                 e.preventDefault();
-                onModalClick(href as string);
+                if (href) {
+                  onModalClick(href);
+                }
               }}
             >
               {content}
             </div>
           ) : (
-            <Link
-              className={className}
-              href={href as string}
-              target={target ? '_blank' : undefined}
-              rel={target ? 'noopener noreferrer' : undefined}
-            >
-              {content}
-            </Link>
+            href && (
+              <Link
+                className={className}
+                href={href}
+                target={target ? '_blank' : undefined}
+                rel={target ? 'noopener noreferrer' : undefined}
+              >
+                {content}
+              </Link>
+            )
           )}
         </TooltipTrigger>
         <TooltipContent side="right" sideOffset={12} className="mt-1">

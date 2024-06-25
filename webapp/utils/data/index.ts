@@ -39,9 +39,7 @@ const createBaseNamedRecord = <T>(name: string, template?: Partial<T>): T => {
 };
 
 const deepCopy = <T>(obj: T): T =>
-  window?.structuredClone
-    ? (window.structuredClone(obj) as T)
-    : (JSON.parse(JSON.stringify(obj)) as T);
+  window?.structuredClone ? window.structuredClone(obj) : (JSON.parse(JSON.stringify(obj)) as T);
 
 const deepMerge = <T>(_target: T, source: Partial<T>, copy = false): T => {
   const target = (copy ? deepCopy<T>(_target) : _target) as Record<string, unknown>;
@@ -82,17 +80,17 @@ const deepSet = <V, T>(
   return { ...obj, [property]: value };
 };
 
-const deepGet = <T, V>(obj: T, path: string, defaultValue?: V, root = path): V => {
+const deepGet = <T, V>(obj: T, path: string, defaultValue?: V, root = path): V | undefined => {
   const [property, ...properties] = path.split('.');
   if (obj === undefined || obj === null) {
-    return defaultValue as V;
+    return defaultValue;
   }
   const prop = (obj as Record<string, V>)[property];
   if (properties.length) {
-    return deepGet(prop as Record<string, V>, properties.join('.'), defaultValue, root);
+    return deepGet(prop, properties.join('.'), defaultValue, root);
   }
   if (typeof obj !== 'object' || property in obj === false) {
-    return defaultValue as V;
+    return defaultValue;
   }
   return prop;
 };
@@ -127,7 +125,7 @@ export const mapKeys = <TValue>(
   }
   if (!value || typeof value !== 'object') return value as TValue;
   const record = value as Record<string, TValue>;
-  const keys = Object.keys(record) as string[];
+  const keys = Object.keys(record);
   return keys.reduce(
     (acc, key) => {
       let v = record[key];

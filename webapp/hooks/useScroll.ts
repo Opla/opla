@@ -244,11 +244,7 @@ export default function useScroll(
         return;
       }
 
-      const currentRect: Rect = containerToPercentage(
-        element as HTMLDivElement,
-        parent as HTMLDivElement,
-        'scrollTo',
-      );
+      const currentRect: Rect = containerToPercentage(element, parent, 'scrollTo');
       // logger.info('currentRect', currentRect, scrollPosition, position);
       if (currentRect.height < 1) {
         // logger.info('not scroll', scrollPosition, currentRect);

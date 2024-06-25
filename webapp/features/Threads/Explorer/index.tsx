@@ -168,7 +168,7 @@ export default function ThreadsExplorer({
         return c;
       });
       const content = JSON.stringify(exportedConversations);
-      await writeTextFile(filePath as string, content, false);
+      await writeTextFile(filePath, content, false);
     } catch (error) {
       logger.error(error);
       toast.error(`Unable to export : ${error}`);

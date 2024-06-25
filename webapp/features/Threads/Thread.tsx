@@ -104,7 +104,7 @@ function Thread({
       let newMessages: MessageImpl[] = [];
       if (conversationId) {
         let p = false;
-        newMessages = (await readConversationMessages(conversationId, [])) as Message[];
+        newMessages = await readConversationMessages(conversationId, []);
         newMessages = newMessages?.filter((m) => !(m.author.role === 'system')) || [];
         newMessages = newMessages.map((msg, index) => {
           const { author } = msg;
@@ -251,11 +251,11 @@ function Thread({
     if (messages) {
       newAvatars.push({ ref: 'you', name: 'you' } as AvatarRef);
       assistants.forEach((a) => {
-        const avatar = { ref: a.id as string, name: a.name } as AvatarRef;
+        const avatar = { ref: a.id, name: a.name } as AvatarRef;
         avatar.url = a.avatar?.url;
         avatar.color = a.avatar?.color;
         avatar.fallback = a.avatar?.name;
-        avatar.ref = a.id as string;
+        avatar.ref = a.id;
         newAvatars.push(avatar);
       });
 

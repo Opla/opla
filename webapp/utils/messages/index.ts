@@ -24,14 +24,14 @@ import { getConversation } from '../data/conversations';
 import { changeMessageContent } from '../data/messages';
 
 export const updateMessageContent = async (
-  message_or_id: Message | String,
-  content: ParsedPrompt | String,
+  message_or_id: Message | string,
+  content: ParsedPrompt | string,
   conversationId: string,
   tempConversationName: string | undefined,
   context: Context,
   status?: MessageStatus,
 ) => {
-  let message = typeof message_or_id !== 'string' ? (message_or_id as Message) : undefined;
+  let message = typeof message_or_id !== 'string' ? message_or_id : undefined;
   const { conversations, getConversationMessages, updateMessagesAndConversation } = context;
 
   const conversationMessages = getConversationMessages(conversationId);
@@ -45,8 +45,8 @@ export const updateMessageContent = async (
 
   const conversation = getConversation(conversationId, conversations);
   if (conversation && message?.content) {
-    const text = typeof content === 'string' ? content : (content as ParsedPrompt).text;
-    const raw = typeof content === 'string' ? content : (content as ParsedPrompt).raw;
+    const text = typeof content === 'string' ? content : content.text;
+    const raw = typeof content === 'string' ? content : content.raw;
     const newMessage = changeMessageContent(message, text, raw);
     if (status) {
       newMessage.status = status;

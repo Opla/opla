@@ -1,61 +1,50 @@
 /* eslint-disable import/no-extraneous-dependencies */
-// import react from "eslint-plugin-react";
-// import reactHooks from "eslint-plugin-react-hooks";
-import typescriptEslint from '@typescript-eslint/eslint-plugin';
-import prettier from 'eslint-plugin-prettier';
-// import { fixupPluginRules } from "@eslint/compat";
-import globals from 'globals';
-import tsParser from '@typescript-eslint/parser';
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import eslintConfigPrettier from 'eslint-config-prettier';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import js from '@eslint/js';
 import { FlatCompat } from '@eslint/eslintrc';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 const compat = new FlatCompat({
   baseDirectory: dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
 });
 
-const config = [
+const airbnbTypescript = compat.extends('airbnb-typescript');
+// Fix rules
+const rule1 = airbnbTypescript[0].rules['@typescript-eslint/lines-between-class-members'];
+airbnbTypescript[0].rules['@/lines-between-class-members'] = rule1;
+delete airbnbTypescript[0].rules['@typescript-eslint/lines-between-class-members'];
+delete airbnbTypescript[0].rules['@typescript-eslint/naming-convention'];
+delete airbnbTypescript[0].rules['@typescript-eslint/dot-notation'];
+delete airbnbTypescript[0].rules['@typescript-eslint/no-implied-eval'];
+delete airbnbTypescript[0].rules['@typescript-eslint/no-throw-literal'];
+delete airbnbTypescript[0].rules['@typescript-eslint/return-await'];
+
+const config = tseslint.config(
+  eslint.configs.recommended,
+  ...compat.extends('airbnb'),
+  ...airbnbTypescript,
+  ...compat.extends('airbnb/hooks'),
+  ...compat.extends('next/core-web-vitals'),
+  // ...tseslint.configs.recommendedTypeChecked,
+  eslintConfigPrettier,
   {
     ignores: ['./native/*', '.next', 'node_modules'],
   },
-  ...compat.extends(
-    'airbnb',
-    'airbnb-typescript',
-    'airbnb/hooks',
-    'next/core-web-vitals',
-    'prettier',
-  ),
   {
-    plugins: {
-      // react: fixupPluginRules(react),
-      // "react-hooks": fixupPluginRules(reactHooks),
-      '@typescript-eslint': typescriptEslint,
-      prettier,
-    },
-
     languageOptions: {
-      globals: {
-        ...globals.node,
-        ...globals.jest,
-      },
-
-      parser: tsParser,
-      ecmaVersion: 5,
-      sourceType: 'module',
-
       parserOptions: {
         project: 'tsconfig.json',
+        tsconfigRootDir: dirname,
       },
     },
 
     rules: {
       'react/require-default-props': 'off',
-
+      '@typescript-eslint/no-unused-vars': 'warn',
       'jsx-a11y/label-has-associated-control': [
         2,
         {
@@ -71,6 +60,6 @@ const config = [
       ],
     },
   },
-];
+);
 
 export default config;

@@ -26,7 +26,7 @@ import { BaseNamedRecord, ParameterDefinitionType } from '@/types';
 import { Button } from '@/components/ui/button';
 import { t } from 'i18next';
 
-export type ParameterValue = string | number | boolean | BaseNamedRecord[] | string[] | undefined;
+export type ParameterValue = string | number | boolean | string[] | BaseNamedRecord[] | undefined;
 export type ParametersRecord = Record<string, ParameterValue>;
 
 const getAttribute = (type: ParameterDefinitionType): HTMLInputTypeAttribute | undefined => {
@@ -97,7 +97,7 @@ export default function Parameter({
             onChange={(e) => {
               // e.preventDefault();
               // const v = type === 'number' ? parseInt(e.target.value, 10) : e.target.value;
-              const v = e.target.value as string;
+              const v = e.target.value;
               onChange(name, v.split(',').map((r) => ({ id: name, name: r })) as BaseNamedRecord[]);
             }}
           />

@@ -217,7 +217,7 @@ const useShortcuts = <T extends HTMLElement>(
 
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
-      const key = Array.isArray(keys) ? keys.join() : (keys as string);
+      const key = Array.isArray(keys) ? keys.join() : keys;
       if (key === 'info') {
         defaultShortcuts.find((shortcut) => {
           // logger.log('shortcut info', event, shortcut);

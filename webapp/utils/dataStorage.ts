@@ -34,7 +34,7 @@ const readFromLocalStorage = async <T>(key: string, path: string, json = true) =
   try {
     text = await readTextFile(createPathAndJsonFile(key, path));
   } catch (e) {
-    logger.error(`Failed to read item ${key} from fileStorage`);
+    logger.error(`Failed to read item ${key} from fileStorage: ${e}`);
     return null;
   }
 
@@ -44,7 +44,7 @@ const readFromLocalStorage = async <T>(key: string, path: string, json = true) =
   try {
     return JSON.parse(text) as T;
   } catch (e) {
-    logger.error(`Failed to parse item ${key} from fileStorage`);
+    logger.error(`Failed to parse item ${key} from fileStorage ${e}`);
     toast.error(`Failed to parse item ${key} from fileStorage`);
   }
   return null;
@@ -64,7 +64,7 @@ const deleteFromLocalStorage = async (key: string, path: string) => {
   try {
     await deleteDir(path);
   } catch (e) {
-    logger.error(`Failed to delete path ${path}`);
+    logger.error(`Failed to delete path ${path}: ${e}`);
   }
 };
 

@@ -76,7 +76,7 @@ export const getCommandType = (value: string | undefined): CommandType | undefin
 
 export const compareCommands = (
   command1: string | undefined,
-  command2: string | string,
+  command2: string,
   type?: CommandType,
   tag1?: string | undefined,
   tag2?: string | undefined,
@@ -193,7 +193,7 @@ export const preProcessingCommands = async (
 
   const action = prompt.tokens.find((to) => to.type === PromptTokenType.Action);
 
-  let updatedConversation = conversation as Conversation;
+  let updatedConversation = conversation;
   let updatedConversations = conversations;
   if (action) {
     const command = commandManager.getCommand(action.value, action.type as unknown as CommandType);
@@ -250,7 +250,7 @@ export const getMentionCommands = (
   const mentions = prompt?.tokens.filter((to) => to.type === PromptTokenType.Mention) ?? [];
   const modelCommands = mentions
     .map((m) => commandManager.getCommand(m.value, CommandType.Mention, tag))
-    .filter((m) => m !== undefined) as Command[];
+    .filter((m) => m !== undefined);
 
   return modelCommands;
 };

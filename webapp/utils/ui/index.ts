@@ -94,7 +94,7 @@ export const pxValueAsNumber = (px: string, defaultValue: number) => {
   if (px.indexOf('px') !== -1) {
     try {
       return parseInt(px.replace('px', ''), 10);
-    } catch (e) {
+    } catch (_e) {
       // ignore
     }
   }

@@ -50,7 +50,7 @@ export const AppVersion = '0.1.0';
 
 export const DefaultContextWindowPolicy: ContextWindowPolicy = ContextWindowPolicy.Rolling;
 
-export const ContextWindowPolicies: Record<ContextWindowPolicy, String> = {
+export const ContextWindowPolicies: Record<ContextWindowPolicy, string> = {
   [ContextWindowPolicy.None]: 'Send all messages as context even out of context window size.',
   [ContextWindowPolicy.Rolling]:
     'Use a rolling mechanism to maintain constant context window size.',

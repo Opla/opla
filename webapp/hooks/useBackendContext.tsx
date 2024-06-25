@@ -31,7 +31,6 @@ import {
   OplaContext,
   ServerStatus,
   Settings,
-  LlmCompletionResponse,
   LlmStreamResponse,
   Download,
   ServerParameters,
@@ -57,6 +56,12 @@ import { getConversation } from '@/utils/data/conversations';
 import { changeMessageContent } from '@/utils/data/messages';
 import { ParsedPrompt } from '@/utils/parsers';
 import { parseLLamaCppServerParameters } from '@/utils/providers/llama.cpp';
+
+type StreamPayload = {
+  status: 'error' | 'success';
+  content?: string;
+  conversationId?: string;
+};
 
 const initialBackendContext: OplaContext = {
   server: {
@@ -168,13 +173,13 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
 
   const updateMessageContent = useCallback(
     async (
-      message_or_id: Message | String,
-      content: ParsedPrompt | String,
+      message_or_id: Message | string,
+      content: ParsedPrompt | string,
       conversationId: string,
       tempConversationName: string | undefined,
       status?: MessageStatus,
     ) => {
-      let message = typeof message_or_id !== 'string' ? (message_or_id as Message) : undefined;
+      let message = typeof message_or_id !== 'string' ? message_or_id : undefined;
 
       const conversationMessages = getConversationMessages(conversationId);
       if (!message) {
@@ -187,8 +192,8 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
 
       const conversation = getConversation(conversationId, conversations);
       if (conversation && message?.content) {
-        const text = typeof content === 'string' ? content : (content as ParsedPrompt).text;
-        const raw = typeof content === 'string' ? content : (content as ParsedPrompt).raw;
+        const text = typeof content === 'string' ? content : content.text;
+        const raw = typeof content === 'string' ? content : content.raw;
         const newMessage = changeMessageContent(message, text, raw);
         if (status) {
           newMessage.status = status;
@@ -331,7 +336,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   );
 
   const streamListener = useCallback(async (event: any) => {
-    const response = (await mapKeys(event.payload, toCamelCase)) as LlmCompletionResponse;
+    const response = (await mapKeys(event.payload, toCamelCase)) as StreamPayload;
     if (response.status === 'error') {
       logger.error('stream error', response);
       return;
@@ -345,7 +350,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     const currentStreams: Streams = deepCopy(streamsRef.current || {});
     if (response.status === 'success') {
       const stream = currentStreams[conversationId] || ({} as LlmStreamResponse);
-      if (stream.prevContent !== response.content) {
+      if (stream.prevContent !== response.content && response.content) {
         const content = stream.content || [];
         content.push(response.content);
         currentStreams[conversationId] = {
@@ -377,6 +382,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       } else {
         stream = {
           ...response,
+          content: [response.content],
         } as LlmStreamResponse;
       }
       currentStreams[conversationId] = stream;
@@ -389,7 +395,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     let opla = providers.find((p) => p.type === ProviderType.opla) as Provider;
     if (!opla) {
       const oplaProviderConfig = await getProviderTemplate();
-      const provider = { ...oplaProviderConfig, type: oplaProviderConfig.type as ProviderType };
+      const provider = { ...oplaProviderConfig, type: oplaProviderConfig.type };
       opla = createProvider(OplaProvider.name, provider);
       providers.splice(0, 0, opla);
     }

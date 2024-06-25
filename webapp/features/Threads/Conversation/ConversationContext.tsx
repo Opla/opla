@@ -346,7 +346,7 @@ function ConversationProvider({
 
       const { selectedModel, selectedAssistant } = await preProcessingSendMessage(
         prompt,
-        selectedConversation as Conversation,
+        selectedConversation,
       );
       if (!selectedModel) {
         return;
@@ -398,7 +398,7 @@ function ConversationProvider({
         updatedConversation,
         updatedConversations,
         prompt,
-        selectedModel?.name as string,
+        selectedModel?.name,
         selectedAssistant || assistant,
         commandManager,
         context,
@@ -485,7 +485,7 @@ function ConversationProvider({
         updatedConversation,
         updatedConversations,
         prompt,
-        selectedModel?.name as string,
+        selectedModel?.name,
         selectedAssistant || assistant,
         commandManager,
         context,
