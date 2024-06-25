@@ -160,10 +160,10 @@ impl ThreadStorage {
         path: &PathBuf
     ) -> Result<(), String> {
         self.messages.remove(conversation_id);
-        remove_file(path).map_err(|e| e.to_string())?;
-        if let Some(path) = path.parent() {
-            remove_dir(path).map_err(|e| e.to_string())?;
-        }
+        let conversation_path = &Self::create_conversation_path(conversation_id, path);
+        let conversation_file = conversation_path.join("messages.json");
+        remove_file(conversation_file).map_err(|e| e.to_string())?;
+        remove_dir(conversation_path).map_err(|e| e.to_string())?;
 
         Ok(())
     }
@@ -171,17 +171,19 @@ impl ThreadStorage {
     pub fn load_conversation_messages(
         &mut self,
         conversation_id: &str,
-        project_path: &PathBuf,
-        cache: bool,
+        path: &PathBuf,
+        cache: bool
     ) -> Result<Vec<Message>, String> {
-        let conversations_path = &Self::create_conversation_path(conversation_id, &project_path);
-        let default_config_data = read_to_string(conversations_path).map_err(|e| e.to_string())?;
+        let conversation_path = &Self::create_conversation_path(conversation_id, path);
+        let conversation_file = conversation_path.join("messages.json");
+        let default_config_data = read_to_string(conversation_file).map_err(|e| e.to_string())?;
         let messages: Vec<Message> = serde_json
             ::from_str(&default_config_data)
             .map_err(|e| e.to_string())?;
         if cache {
             self.messages.insert(conversation_id.to_string(), messages.clone());
         }
+
         Ok(messages)
     }
 
@@ -198,17 +200,17 @@ impl ThreadStorage {
         path: &PathBuf,
         messages: Vec<Message>
     ) -> Result<(), String> {
-        let conversations_path = &Self::create_conversation_path(conversation_id, path);
-        let conversations_file = conversations_path.join("messages.json");
-        create_dir_all(conversations_path).map_err(|e| e.to_string())?;
+        let conversation_path = &Self::create_conversation_path(conversation_id, path);
+        let conversation_file = conversation_path.join("messages.json");
+        create_dir_all(conversation_path).map_err(|e| e.to_string())?;
         println!(
             "save_conversation_messages {}: {:?} {:?}",
             conversation_id,
-            conversations_file,
-            conversations_path
+            conversation_file,
+            conversation_path
         );
         let json = serde_json::to_string_pretty(&messages).map_err(|e| e.to_string())?;
-        write(conversations_file, json).map_err(|e| e.to_string())?;
+        write(conversation_file, json).map_err(|e| e.to_string())?;
 
         Ok(())
     }
