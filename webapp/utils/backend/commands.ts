@@ -51,7 +51,7 @@ export const getOplaConfig = async (): Promise<Store> => {
   return mapKeys(store, toCamelCase);
 };
 
-export const setActiveModel = async (modelId: String, provider?: String) => {
+export const setActiveModel = async (modelId: string, provider?: string) => {
   await invokeTauri('set_active_model', { modelId, provider });
 };
 

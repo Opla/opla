@@ -71,7 +71,7 @@ export default function Settings({
                     }}
                     onClick={(e) => {
                       e.preventDefault();
-                      onTabChanged(item.href as string);
+                      onTabChanged(item.href);
                     }}
                   >
                     <div className="relative flex-1 overflow-hidden text-ellipsis break-all">

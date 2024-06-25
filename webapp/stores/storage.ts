@@ -58,7 +58,7 @@ export function createJSONSliceStorage<S>(
   let storage: StateStorage | undefined;
   try {
     storage = getStorage();
-  } catch (e) {
+  } catch (_e) {
     // prevent error if the storage is not defined (e.g. when server side rendering a page)
     return undefined;
   }
@@ -74,20 +74,18 @@ export function createJSONSliceStorage<S>(
         }
         return value as StorageValue<S>;
       };
-      const str = (storage as StateStorage).getItem(name) ?? null;
+      const str = storage.getItem(name) ?? null;
       if (str instanceof Promise) {
         return str.then(parse);
       }
       return parse(str);
     },
     setItem: (name, newValue) => {
-      const slice = (newValue as any).state[name];
-      return (storage as StateStorage).setItem(
-        name,
-        JSON.stringify(slice, options?.replacer, options?.space),
-      );
+      const state = newValue.state as Record<string, any>;
+      const slice = state[name];
+      return storage.setItem(name, JSON.stringify(slice, options?.replacer, options?.space));
     },
-    removeItem: (name) => (storage as StateStorage).removeItem(name),
+    removeItem: (name) => storage.removeItem(name),
   };
 
   return persistStorage;

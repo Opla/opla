@@ -93,10 +93,7 @@ function ProvidersExplorer({ selectedId: selectedProviderId }: ProvidersExplorer
   const handleProviderToggle = (data: string) => {
     logger.info('onProviderToggle');
     const provider = findProvider(data, providers) as Provider;
-    const newProviders = updateProvider(
-      { ...(provider as Provider), disabled: !provider?.disabled },
-      providers,
-    );
+    const newProviders = updateProvider({ ...provider, disabled: !provider?.disabled }, providers);
     setProviders(newProviders);
   };
 

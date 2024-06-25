@@ -7,7 +7,6 @@ import {
   Conversation,
   LlmMessage,
   LlmParameters,
-  LlmCompletionResponse,
   Message,
   Preset,
   Provider,
@@ -169,12 +168,12 @@ export const completion = async (
   );
 
   const llmProvider = mapKeys({ ...provider, key }, toSnakeCase);
-  /* const response: LlmCompletionResponse = */ (await invokeTauri('llm_call_completion', {
+  /* const response: LlmCompletionResponse = */ await invokeTauri('llm_call_completion', {
     model: model.id,
     llmProvider,
     query: { command: 'completion', options },
     completionOptions: mapKeys(completionOptions, toSnakeCase),
-  })) as LlmCompletionResponse;
+  });
 
   /* if (response.status === 'error') {
     throw new Error(response.message);
@@ -209,18 +208,18 @@ export const imageGeneration = async (
   modelId?: string | undefined,
 ): Promise<LlmImageGenerationResponse> => {
   const provider = mapKeys({ ..._provider }, toSnakeCase);
-  const response: LlmImageGenerationResponse = (await invokeTauri('llm_call_image_generation', {
+  const response: LlmImageGenerationResponse = await invokeTauri('llm_call_image_generation', {
     model: modelId || 'dall-e-3',
     provider,
     prompt,
-  })) as LlmImageGenerationResponse;
+  });
   return response;
 };
 
 export const listModels = async (_provider: Provider): Promise<LlmModelsResponse> => {
   const provider = mapKeys({ ..._provider }, toSnakeCase);
-  const response: LlmModelsResponse = (await invokeTauri('llm_call_models', {
+  const response: LlmModelsResponse = await invokeTauri('llm_call_models', {
     provider,
-  })) as LlmModelsResponse;
+  });
   return mapKeys(response, toCamelCase);
 };

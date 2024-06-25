@@ -58,7 +58,7 @@ export const createContent = (
   if (typeof content === 'string' || Array.isArray(content)) {
     return createContentFull(content, rawContent, metadata);
   }
-  return content as ContentFull;
+  return content;
 };
 
 export const createMessage = (

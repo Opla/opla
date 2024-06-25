@@ -22,7 +22,7 @@ import Storage from './storage';
 export default function DefaultSettings() {
   const [tab, setTab] = useState<string>('appearance');
   return (
-    <Settings tab={tab as string} onTabChanged={setTab}>
+    <Settings tab={tab} onTabChanged={setTab}>
       {tab === 'appearance' && <Appearance />}
       {tab === 'storage' && <Storage />}
     </Settings>

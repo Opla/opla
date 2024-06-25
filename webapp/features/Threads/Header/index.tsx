@@ -16,7 +16,7 @@ import { useContext } from 'react';
 import { AlertTriangle, ArrowRight, SplitSquareHorizontal, X } from 'lucide-react';
 import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackendContext';
-import { AIServiceType, Conversation, Provider, ProviderType, Ui, ViewSettings } from '@/types';
+import { AIServiceType, Provider, ProviderType, Ui, ViewSettings } from '@/types';
 import { MenuAction } from '@/types/ui';
 import { findProvider, updateProvider } from '@/utils/data/providers';
 import { useAssistantStore } from '@/stores';
@@ -55,9 +55,7 @@ export default function ThreadHeader({
   const { conversations, providers, setProviders } = useContext(AppContext);
   const { config } = useBackend();
 
-  const conversation = conversations.find((c) => c.id === selectedConversationId) as
-    | Conversation
-    | undefined;
+  const conversation = conversations.find((c) => c.id === selectedConversationId);
 
   const assistant = getAssistant(selectedAssistantId);
   const service = getActiveService(conversation, assistant, providers, config, selectedModelId);
@@ -79,7 +77,7 @@ export default function ThreadHeader({
       const provider = findProvider(selectedItem?.group, providers) as Provider;
       if (provider && provider.disabled) {
         const newProviders = updateProvider(
-          { ...(provider as Provider), disabled: !provider?.disabled },
+          { ...provider, disabled: !provider?.disabled },
           providers,
         );
         setProviders(newProviders);
