@@ -316,11 +316,12 @@ impl Store {
 
     pub fn load_conversation_messages(
         &mut self,
-        conversation_id: &str
+        conversation_id: &str,
+        cache: bool,
     ) -> Result<Vec<Message>, String> {
         match self.get_selected_project_path() {
             Ok(project_path) => {
-                return self.threads.load_conversation_messages(conversation_id, &project_path);
+                return self.threads.load_conversation_messages(conversation_id, &project_path, cache);
             }
             Err(error) => Err(error),
         }

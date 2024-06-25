@@ -210,10 +210,16 @@ export const getModelFileHeader = async (modelId: string): Promise<Partial<GGUF>
   return {};
 };
 
-export const loadConversationMessages = async (conversationId: string): Promise<Message[]> => {
+export const loadConversationMessages = async (
+  conversationId: string,
+  cache = true,
+): Promise<Message[]> => {
   let messages: Message[];
   try {
-    messages = await invokeTauri<Message[]>('load_conversation_messages', { conversationId });
+    messages = await invokeTauri<Message[]>('load_conversation_messages', {
+      conversationId,
+      cache,
+    });
     messages = await mapKeys(messages, toCamelCase);
   } catch (error) {
     logger.error(error);

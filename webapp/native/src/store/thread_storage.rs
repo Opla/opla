@@ -171,14 +171,17 @@ impl ThreadStorage {
     pub fn load_conversation_messages(
         &mut self,
         conversation_id: &str,
-        project_path: &PathBuf
+        project_path: &PathBuf,
+        cache: bool,
     ) -> Result<Vec<Message>, String> {
         let conversations_path = &Self::create_conversation_path(conversation_id, &project_path);
         let default_config_data = read_to_string(conversations_path).map_err(|e| e.to_string())?;
         let messages: Vec<Message> = serde_json
             ::from_str(&default_config_data)
             .map_err(|e| e.to_string())?;
-        self.messages.insert(conversation_id.to_string(), messages.clone());
+        if cache {
+            self.messages.insert(conversation_id.to_string(), messages.clone());
+        }
         Ok(messages)
     }
 

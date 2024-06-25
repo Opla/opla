@@ -13,11 +13,17 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { Conversation, Message, QueryResponse } from '@/types';
+import { Conversation, Message, QueryResponse, QueryResult, QueryResultEntry } from '@/types';
 import { deleteUnusedConversationsDir } from '@/utils/backend/tauri';
 import logger from '@/utils/logger';
-import { mapKeys } from '@/utils/data';
+import { deepCopy, mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
+import {
+  loadConversationMessages,
+  removeConversationMessages,
+  saveConversationMessages,
+} from '@/utils/backend/commands';
+import { getMessageContentAsString } from '@/utils/data/messages';
 import { Emitter, GlobalAppState } from './constants';
 
 interface ThreadProps {
@@ -93,7 +99,7 @@ const createThreadSlice =
       } else {
         await emit(GlobalAppState.DELETECONVERSATION, id);
         // Delete any orphans messages
-        // await deleteConversationMessages(id);
+        await removeConversationMessages(id);
         await cleanup?.(
           conversation,
           get().conversations.filter((c) => c.id !== id),
@@ -104,18 +110,88 @@ const createThreadSlice =
         }
       }
     },
-    getConversationMessages: () => [],
-    readConversationMessages: async () => [],
-    filterConversationMessages: () => [],
-    updateConversationMessages: async () => {},
-    searchConversationMessages: async () => ({ count: 0, results: [] }),
+    getConversationMessages: (id: string | undefined): Message[] => {
+      const conversationMessages: Message[] = id ? get().messages[id] : [];
+      return conversationMessages || [];
+    },
+    readConversationMessages: async (id: string | undefined): Promise<Message[]> => {
+      const newMessages: Message[] = id ? await loadConversationMessages(id) : [];
+      return newMessages;
+    },
+    filterConversationMessages: (
+      id: string | undefined,
+      filter: (msg: Message) => boolean,
+    ): Message[] => {
+      const newMessages: Message[] = id ? get().messages[id].filter(filter) : [];
+      return newMessages;
+    },
+    updateConversationMessages: async (
+      id: string | undefined,
+      updatedMessages: Message[],
+    ): Promise<void> => {
+      if (id) {
+        await saveConversationMessages(id, deepCopy<Message[]>(updatedMessages));
+      }
+    },
+    searchConversationMessages: async (query: string): Promise<QueryResponse> => {
+      const result: QueryResponse = {
+        count: 0,
+        results: [],
+      };
+      const promises: Promise<void>[] = [];
+      const filteredQuery = query.toUpperCase();
+      get().conversations.forEach((c) => {
+        const search = async (conversation: Conversation) => {
+          const group: QueryResult = {
+            id: conversation.id,
+            name: conversation.name || 'Conversation',
+            entries: [],
+          };
+          let updatedMessages = get().messages[conversation.id];
+          if (!updatedMessages) {
+            updatedMessages = await loadConversationMessages(conversation.id, false);
+          }
+          updatedMessages.forEach((message) => {
+            const text = getMessageContentAsString(message);
+            const index = text.toUpperCase().indexOf(filteredQuery);
+            if (index !== -1) {
+              result.count += 1;
+              let length = 40;
+              if (filteredQuery.length > 40) {
+                length = 10;
+              }
+              const previousLength = index < length ? length - index : length;
+              const afterLength =
+                index + filteredQuery.length > text.length - length ? text.length - index : length;
+              const entry: QueryResultEntry = {
+                id: message.id,
+                index,
+                match: text.substring(index, index + filteredQuery.length),
+                previousText: text.substring(index - previousLength, index),
+                afterText: text.substring(
+                  index + filteredQuery.length,
+                  index + filteredQuery.length + afterLength,
+                ),
+              };
+              group.entries.push(entry);
+            }
+          });
+          if (group.entries.length > 0) {
+            result.results.push(group);
+          }
+        };
+        promises.push(search(c));
+      });
+      await Promise.all(promises);
+      return result;
+    },
     updateMessagesAndConversation: async () => ({
       updatedConversation: { id: '', createdAt: 0, updatedAt: 0 } as Conversation,
       updatedConversations: [],
       updatedMessages: [],
     }),
     deleteConversationMessages: async (conversationId: string) => {
-      logger.info('TODO deleteConversationMessages', conversationId);
+      await removeConversationMessages(conversationId);
     },
     setArchives: (newArchives) => {
       const data = mapKeys(newArchives, toSnakeCase);

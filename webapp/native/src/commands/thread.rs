@@ -21,10 +21,11 @@ pub async fn load_conversation_messages<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
-    conversation_id: String
+    conversation_id: String,
+    cache: bool,
 ) -> Result<Vec<Message>, String> {
     let mut store = context.store.lock().await;
-    store.load_conversation_messages(&conversation_id)
+    store.load_conversation_messages(&conversation_id, cache)
 }
 
 #[tauri::command]
