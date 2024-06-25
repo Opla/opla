@@ -361,7 +361,10 @@ fn main() {
                 crate::commands::llm::llm_cancel_completion,
                 crate::commands::llm::llm_call_tokenize,
                 crate::commands::llm::llm_call_image_generation,
-                crate::commands::llm::llm_call_models
+                crate::commands::llm::llm_call_models,
+                crate::commands::thread::load_conversation_messages,
+                crate::commands::thread::save_conversation_messages,
+                crate::commands::thread::remove_conversation_messages,
             ]
         )
         .run(tauri::generate_context!())

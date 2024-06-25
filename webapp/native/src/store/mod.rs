@@ -314,16 +314,38 @@ impl Store {
         }
     }
 
-    pub fn save_conversation_messages(&mut self, conversation_id: &str, messages: Vec<Message>) {
-        if let Ok(project_path) = self.get_selected_project_path() {
-            if
-                let Err(error) = self.threads.update_conversation_messages(
+    pub fn load_conversation_messages(
+        &mut self,
+        conversation_id: &str
+    ) -> Result<Vec<Message>, String> {
+        match self.get_selected_project_path() {
+            Ok(project_path) => {
+                return self.threads.load_conversation_messages(conversation_id, &project_path);
+            }
+            Err(error) => Err(error),
+        }
+    }
+
+    pub fn save_conversation_messages(&mut self, conversation_id: &str, messages: Vec<Message>) -> Result<(), String> {
+        match self.get_selected_project_path() {
+            Ok(project_path) => {
+                return self.threads.update_conversation_messages(
                     conversation_id,
                     &project_path,
                     messages
-                )
-            {
-                println!("Error saving conversations: {}", error);
+                );
+            }
+            Err(error) => Err(error),
+        }
+    }
+
+    pub fn remove_conversation_messages(&mut self, conversation_id: &str) -> Result<(), String> {
+        match self.get_selected_project_path() {
+            Ok(project_path) => {
+                return self.threads.remove_conversation_messages(conversation_id, &project_path);
+            }
+            Err(error) => {
+                return Err(error);
             }
         }
     }

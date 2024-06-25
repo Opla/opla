@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::collections::HashMap;
-use std::fs::{ create_dir_all, read_to_string, remove_file, write };
+use std::fs::{ create_dir_all, read_to_string, remove_dir, remove_file, write };
 use std::path::PathBuf;
 use serde::{ Deserialize, Serialize };
 use tauri::{ AppHandle, Manager };
@@ -154,7 +154,35 @@ impl ThreadStorage {
         }
     }
 
-    pub fn load_conversation_messages(path: &PathBuf) -> Result<Vec<Message>, String> {
+    pub fn remove_conversation_messages(
+        &mut self,
+        conversation_id: &str,
+        path: &PathBuf
+    ) -> Result<(), String> {
+        self.messages.remove(conversation_id);
+        remove_file(path).map_err(|e| e.to_string())?;
+        if let Some(path) = path.parent() {
+            remove_dir(path).map_err(|e| e.to_string())?;
+        }
+
+        Ok(())
+    }
+
+    pub fn load_conversation_messages(
+        &mut self,
+        conversation_id: &str,
+        project_path: &PathBuf
+    ) -> Result<Vec<Message>, String> {
+        let conversations_path = &Self::create_conversation_path(conversation_id, &project_path);
+        let default_config_data = read_to_string(conversations_path).map_err(|e| e.to_string())?;
+        let messages: Vec<Message> = serde_json
+            ::from_str(&default_config_data)
+            .map_err(|e| e.to_string())?;
+        self.messages.insert(conversation_id.to_string(), messages.clone());
+        Ok(messages)
+    }
+
+    pub fn import_conversation_messages(path: &PathBuf) -> Result<Vec<Message>, String> {
         let default_config_data = read_to_string(path).map_err(|e| e.to_string())?;
         let messages: Vec<Message> = serde_json
             ::from_str(&default_config_data)
@@ -205,6 +233,7 @@ impl ThreadStorage {
         let conversations: Vec<Conversation> = serde_json
             ::from_str(&default_config_data)
             .map_err(|e| e.to_string())?;
+
         Ok(conversations)
     }
 
@@ -300,13 +329,19 @@ impl ThreadStorage {
             return;
         }
 
-        match Self::load_conversation_messages(&previous_conversations_path) {
+        match Self::import_conversation_messages(&previous_conversations_path) {
             Ok(mut messages) => {
                 for message in messages.iter_mut() {
                     message.sanitize_metadata();
                 }
                 println!("Loaded {} messages: ", conversation_id);
-                if let Err(error) = Self::save_conversation_messages(&conversation_id, &project_path, messages) {
+                if
+                    let Err(error) = Self::save_conversation_messages(
+                        &conversation_id,
+                        &project_path,
+                        messages
+                    )
+                {
                     println!("Error converting messages {}: {:?}", conversation_id, error);
                     return;
                 }
@@ -335,7 +370,7 @@ impl ThreadStorage {
         self.subscribe_state_events(app_handle.app_handle());
 
         self.init_threads("conversations", project_path.clone()).await;
-        
+
         self.init_conversations(&project_path).await;
 
         self.init_threads("archives", project_path).await;

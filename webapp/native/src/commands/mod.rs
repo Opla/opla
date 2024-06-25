@@ -26,6 +26,7 @@ pub mod llm;
 pub mod model;
 pub mod provider;
 pub mod server;
+pub mod thread;
 
 #[tauri::command]
 pub async fn get_sys<R: Runtime>(

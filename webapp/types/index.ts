@@ -120,7 +120,7 @@ export type MessageImpl = Message & {
   last?: boolean;
 };
 
-export type Messages = {
+export type ConversationMessages = {
   conversationId: string;
   messages: Message[];
 };

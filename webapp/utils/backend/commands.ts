@@ -15,6 +15,7 @@
 // import { invoke } from '@tauri-apps/api';
 import {
   Asset,
+  Message,
   Model,
   ModelsCollection,
   OplaServer,
@@ -207,4 +208,39 @@ export const getModelFileHeader = async (modelId: string): Promise<Partial<GGUF>
     toast.error(`Error getModelFileHeader: ${error}`);
   }
   return {};
+};
+
+export const loadConversationMessages = async (conversationId: string): Promise<Message[]> => {
+  let messages: Message[];
+  try {
+    messages = await invokeTauri<Message[]>('load_conversation_messages', { conversationId });
+    messages = await mapKeys(messages, toCamelCase);
+  } catch (error) {
+    logger.error(error);
+    toast.error(`Error loadConversationMessages: ${error}`);
+    messages = [];
+  }
+  return messages;
+};
+
+export const saveConversationMessages = async (
+  conversationId: string,
+  messages: Message[],
+): Promise<void> => {
+  try {
+    const args = mapKeys({ conversationId, messages }, toSnakeCase);
+    await invokeTauri<void>('save_conversation_messages', args);
+  } catch (error) {
+    logger.error(error);
+    toast.error(`Error saveConversationMessages: ${error}`);
+  }
+};
+
+export const removeConversationMessages = async (conversationId: string): Promise<void> => {
+  try {
+    await invokeTauri<void>('remove_conversation_messages', { conversationId });
+  } catch (error) {
+    logger.error(error);
+    toast.error(`Error removeConversationMessages: ${error}`);
+  }
 };
