@@ -517,14 +517,35 @@ function ConversationProvider({
   const handleCancelSending = useCallback(
     async (messageId: string) => {
       if (selectedConversation && selectedModelId) {
-        await cancelSending(
-          messageId,
-          selectedConversation,
-          selectedModelId,
-          assistant,
-          context,
-          config,
-        );
+        try {
+          await cancelSending(
+            messageId,
+            selectedConversation,
+            selectedModelId,
+            assistant,
+            context,
+            config,
+          );
+        } catch (e) {
+          logger.error(e);
+          const conversationMessages = getConversationMessages(selectedConversation.id);
+          const previousMessage = conversationMessages.find((m) => m.id === messageId);
+          if (!previousMessage) {
+            logger.error(
+              "Can't find previous message",
+              messageId,
+              selectedConversation,
+              conversationMessages,
+            );
+            return;
+          }
+          const message: Message = changeMessageContent(
+            previousMessage,
+            t('Cancelled'),
+            t('Cancelled'),
+            MessageStatus.Delivered,
+          );
+        }
       }
     },
     [assistant, config, context, selectedConversation, selectedModelId],

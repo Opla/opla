@@ -15,7 +15,7 @@
 // import { emit as emitStateEvent, listen } from "@tauri-apps/api/event";
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Assistant, Conversation, Message, Messages } from '@/types';
+import { Assistant, Conversation, Message, ConversationMessages } from '@/types';
 import logger from '@/utils/logger';
 import { mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
@@ -84,9 +84,11 @@ export const subscribeStateSync = async () => {
       const { conversationId, messages: conversationMessages } = (await mapKeys(
         value,
         toCamelCase,
-      )) as Messages;
+      )) as ConversationMessages;
       const { messages } = useThreadStore.getState();
-      useThreadStore.setState({ ...messages, [conversationId]: conversationMessages });
+      useThreadStore.setState({
+        messages: { ...messages, [conversationId]: conversationMessages },
+      });
     } else if (key === GlobalAppState.MESSAGES) {
       const messages = (await mapKeys(value, toCamelCase)) as Record<string, Message[]>;
       useThreadStore.setState({ messages });

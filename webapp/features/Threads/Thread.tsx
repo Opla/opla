@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { AppContext } from '@/context';
 import {
@@ -76,6 +76,8 @@ function Thread({
   const {
     providers,
     conversations,
+    isConversationMessagesLoaded,
+    getConversationMessages,
     readConversationMessages,
     updateConversations,
     filterConversationMessages,
@@ -99,12 +101,46 @@ function Thread({
 
   const { t } = useTranslation();
 
+  const readMessages = useCallback(async () => {
+    let newMessages: MessageImpl[] = [];
+    if (conversationId) {
+      let p = false;
+      newMessages = await readConversationMessages(conversationId, []);
+      newMessages = newMessages?.filter((m) => !(m.author.role === 'system')) || [];
+      newMessages = newMessages.map((msg, index) => {
+        const { author } = msg;
+        let last;
+        if (
+          index === newMessages.length - 1 ||
+          (index === newMessages.length - 2 && author.role === 'user')
+        ) {
+          last = true;
+        }
+        const m: MessageImpl = { ...msg, author, conversationId, copied: copied[msg.id], last };
+        if (
+          msg.status &&
+          msg.status !== MessageStatus.Delivered &&
+          msg.status !== MessageStatus.Error
+        ) {
+          p = true;
+        }
+        return m;
+      });
+      setProcessing(p);
+    }
+    return newMessages;
+  }, []);
+
   useEffect(() => {
     const getNewMessages = async () => {
       let newMessages: MessageImpl[] = [];
       if (conversationId) {
         let p = false;
-        newMessages = await readConversationMessages(conversationId, []);
+        if (isConversationMessagesLoaded(conversationId)) {
+          newMessages = getConversationMessages(conversationId);
+        } else {
+          newMessages = await readConversationMessages(conversationId, []);
+        }
         newMessages = newMessages?.filter((m) => !(m.author.role === 'system')) || [];
         newMessages = newMessages.map((msg, index) => {
           const { author } = msg;
@@ -137,7 +173,15 @@ function Thread({
 
     setIsMessageUpdating(true);
     getNewMessages();
-  }, [conversationId, readConversationMessages, isMessageUpdating, copied, selectedConversation]);
+  }, [
+    conversationId,
+    isConversationMessagesLoaded,
+    getConversationMessages,
+    readConversationMessages,
+    isMessageUpdating,
+    copied,
+    selectedConversation,
+  ]);
 
   const defaultConversationName = getDefaultConversationName(t);
   const { messages, tempConversationName, views } = useMemo(() => {
