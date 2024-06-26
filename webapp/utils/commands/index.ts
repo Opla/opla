@@ -249,13 +249,12 @@ export const getMentionCommands = (
 ): Command[] => {
   const mentions = prompt?.tokens.filter((to) => to.type === PromptTokenType.Mention) ?? [];
   const modelCommands: Command[] = [];
-  mentions
-    .forEach((m) => {
-      const command = commandManager.getCommand(m.value, CommandType.Mention, tag);
-      if (command) {
-        modelCommands.push(command);
-      }
-    });
+  mentions.forEach((m) => {
+    const command = commandManager.getCommand(m.value, CommandType.Mention, tag);
+    if (command) {
+      modelCommands.push(command);
+    }
+  });
 
   return modelCommands;
 };

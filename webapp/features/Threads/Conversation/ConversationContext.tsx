@@ -531,7 +531,12 @@ function ConversationProvider({
           const conversationMessages = getConversationMessages(selectedConversation.id);
           const previousMessage = conversationMessages.find((m) => m.id === messageId);
           if (!previousMessage) {
-            logger.error("Can't find previous message", messageId, selectedConversation, conversationMessages);
+            logger.error(
+              "Can't find previous message",
+              messageId,
+              selectedConversation,
+              conversationMessages,
+            );
             return;
           }
           const message: Message = changeMessageContent(
@@ -539,9 +544,8 @@ function ConversationProvider({
             t('Cancelled'),
             t('Cancelled'),
             MessageStatus.Delivered,
-          )
+          );
         }
-
       }
     },
     [assistant, config, context, selectedConversation, selectedModelId],

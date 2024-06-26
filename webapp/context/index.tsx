@@ -148,7 +148,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
   ] = useCollectionStorage<Message[]>('messages'); */
 
   const getConversationMessages = useCallback(
-    (id: string | undefined): Message[] =>  {
+    (id: string | undefined): Message[] => {
       let conversationMessages: Message[] | undefined;
       if (id) {
         conversationMessages = messages[id];

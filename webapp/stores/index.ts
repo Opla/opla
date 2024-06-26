@@ -86,7 +86,9 @@ export const subscribeStateSync = async () => {
         toCamelCase,
       )) as ConversationMessages;
       const { messages } = useThreadStore.getState();
-      useThreadStore.setState({ messages: { ...messages, [conversationId]: conversationMessages } });
+      useThreadStore.setState({
+        messages: { ...messages, [conversationId]: conversationMessages },
+      });
     } else if (key === GlobalAppState.MESSAGES) {
       const messages = (await mapKeys(value, toCamelCase)) as Record<string, Message[]>;
       useThreadStore.setState({ messages });
