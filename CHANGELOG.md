@@ -1,3 +1,10 @@
+# [1.0.0-alpha.187](https://github.com/Opla/opla/compare/v1.0.0-alpha.186...v1.0.0-alpha.187) (2024-06-26)
+
+
+### Features
+
+* use Messages cache from Rust [#1028](https://github.com/Opla/opla/issues/1028) ([#1043](https://github.com/Opla/opla/issues/1043)) ([da1f233](https://github.com/Opla/opla/commit/da1f233fc80ef67335046bbd25c1e492ffb0d772))
+
 # [1.0.0-alpha.186](https://github.com/Opla/opla/compare/v1.0.0-alpha.185...v1.0.0-alpha.186) (2024-06-21)
 
 
