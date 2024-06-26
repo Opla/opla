@@ -12,41 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use tauri::{ Runtime, State };
+use tauri::{ Manager, State };
 
 use crate::{data::message::Message, OplaContext};
 
 #[tauri::command]
-pub async fn load_conversation_messages<R: Runtime>(
-    _app: tauri::AppHandle<R>,
-    _window: tauri::Window<R>,
+pub async fn load_conversation_messages(
+    app: tauri::AppHandle,
+    _window: tauri::Window,
     context: State<'_, OplaContext>,
     conversation_id: String,
     cache: bool,
 ) -> Result<Vec<Message>, String> {
     let mut store = context.store.lock().await;
-    store.load_conversation_messages(&conversation_id, cache)
+    store.load_conversation_messages(&conversation_id, cache, app.app_handle())
 }
 
 #[tauri::command]
-pub async fn save_conversation_messages<R: Runtime>(
-    _app: tauri::AppHandle<R>,
-    _window: tauri::Window<R>,
+pub async fn save_conversation_messages(
+    app: tauri::AppHandle,
+    _window: tauri::Window,
     context: State<'_, OplaContext>,
     conversation_id: String,
     messages: Vec<Message>
 ) -> Result<(), String> {
     let mut store = context.store.lock().await;
-    store.save_conversation_messages(&conversation_id, messages)
+    store.save_conversation_messages(&conversation_id, messages, app.app_handle())
 }
 
 #[tauri::command]
-pub async fn remove_conversation_messages<R: Runtime>(
-    _app: tauri::AppHandle<R>,
-    _window: tauri::Window<R>,
+pub async fn remove_conversation_messages(
+    app: tauri::AppHandle,
+    _window: tauri::Window,
     context: State<'_, OplaContext>,
     conversation_id: String
 ) -> Result<(), String> {
     let mut store = context.store.lock().await;
-    store.remove_conversation_messages(&conversation_id)
+    store.remove_conversation_messages(&conversation_id, app.app_handle())
 }

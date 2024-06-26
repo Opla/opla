@@ -54,6 +54,7 @@ export type Context = {
     deleteFiles: boolean,
     cleanup?: (conversation: Conversation, conversations: Conversation[]) => Promise<void>,
   ) => Promise<void>;
+  isConversationMessagesLoaded: (id: string) => boolean;
   readConversationMessages: (key: string, defaultValue: Message[]) => Promise<Message[]>;
   getConversationMessages: (id: string | undefined) => Message[];
   filterConversationMessages: (
@@ -85,6 +86,7 @@ const initialContext: Context = {
   conversations: [],
   updateConversations: async () => {},
   deleteConversation: async () => {},
+  isConversationMessagesLoaded: () => true,
   getConversationMessages: () => [],
   readConversationMessages: async () => [],
   filterConversationMessages: () => [],
@@ -120,7 +122,6 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
     archives,
     setArchives,
     messages,
-    getConversationMessages,
     readConversationMessages,
     filterConversationMessages,
     updateConversationMessages,
@@ -146,15 +147,20 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
     deleteConversationMessages,
   ] = useCollectionStorage<Message[]>('messages'); */
 
-  /* const getConversationMessages = useCallback(
-    (id: string | undefined): Message[] => {
-      const conversationMessages: Message[] = id ? messages[id] : [];
+  const getConversationMessages = useCallback(
+    (id: string | undefined): Message[] =>  {
+      let conversationMessages: Message[] | undefined;
+      if (id) {
+        conversationMessages = messages[id];
+      }
       return conversationMessages || [];
     },
     [messages],
   );
 
-  const readConversationMessages = useCallback(
+  const isConversationMessagesLoaded = useCallback((id: string) => !!messages[id], [messages]);
+
+  /* const readConversationMessages = useCallback(
     async (id: string | undefined): Promise<Message[]> => {
       const newMessages: Message[] = id ? await loadConversationMessages(id) : [];
       return newMessages;
@@ -320,6 +326,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       conversations,
       updateConversations,
       deleteConversation,
+      isConversationMessagesLoaded,
       getConversationMessages,
       readConversationMessages,
       filterConversationMessages,
@@ -340,6 +347,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       conversations,
       updateConversations,
       deleteConversation,
+      isConversationMessagesLoaded,
       getConversationMessages,
       readConversationMessages,
       filterConversationMessages,

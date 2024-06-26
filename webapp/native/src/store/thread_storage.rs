@@ -93,9 +93,17 @@ impl ThreadStorage {
             GlobalAppState::CONVERSATIONMESSAGES => {
                 let mut store = context.store.lock().await;
                 if let Value::ConversationMessages(data) = &value {
-                    store.save_conversation_messages(&data.conversation_id, data.messages.clone());
-                    need_emit = true;
-                    emit_value = Some(value);
+                    if
+                        let Err(error) = store.save_conversation_messages(
+                            &data.conversation_id,
+                            data.messages.clone(),
+                            app_handle.app_handle()
+                        )
+                    {
+                        println!("Error saving conversation messages: {} {:?}", payload.key, error);
+                    }
+                    // need_emit = true;
+                    // emit_value = Some(value);
                 } else {
                     println!("Error wrong type of value: {} {:?}", payload.key, value);
                 }
@@ -130,6 +138,15 @@ impl ThreadStorage {
         }
     }
 
+    fn emit_event(app_handle: AppHandle, key: GlobalAppState, value: Value) {
+        app_handle
+            .emit_all(STATE_SYNC_EVENT, Payload {
+                key: key.into(),
+                value: Some(value),
+            })
+            .unwrap();
+    }
+
     pub fn subscribe_state_events(&mut self, app_handle: AppHandle) {
         let app_handle_copy = app_handle.app_handle();
         let _id = app_handle.listen_global(STATE_CHANGE_EVENT, move |event| {
@@ -157,14 +174,19 @@ impl ThreadStorage {
     pub fn remove_conversation_messages(
         &mut self,
         conversation_id: &str,
-        path: &PathBuf
+        path: &PathBuf,
+        app_handle: AppHandle
     ) -> Result<(), String> {
         self.messages.remove(conversation_id);
         let conversation_path = &Self::create_conversation_path(conversation_id, path);
         let conversation_file = conversation_path.join("messages.json");
         remove_file(conversation_file).map_err(|e| e.to_string())?;
         remove_dir(conversation_path).map_err(|e| e.to_string())?;
-
+        Self::emit_event(
+            app_handle,
+            GlobalAppState::MESSAGES,
+            Value::Messages(self.messages.clone())
+        );
         Ok(())
     }
 
@@ -172,16 +194,28 @@ impl ThreadStorage {
         &mut self,
         conversation_id: &str,
         path: &PathBuf,
-        cache: bool
+        cache: bool,
+        app_handle: AppHandle
     ) -> Result<Vec<Message>, String> {
         let conversation_path = &Self::create_conversation_path(conversation_id, path);
         let conversation_file = conversation_path.join("messages.json");
+        if !conversation_file.exists() {
+            return Ok(Vec::new());
+        }
         let default_config_data = read_to_string(conversation_file).map_err(|e| e.to_string())?;
         let messages: Vec<Message> = serde_json
             ::from_str(&default_config_data)
             .map_err(|e| e.to_string())?;
         if cache {
             self.messages.insert(conversation_id.to_string(), messages.clone());
+            Self::emit_event(
+                app_handle,
+                GlobalAppState::CONVERSATIONMESSAGES,
+                Value::ConversationMessages(crate::data::message::ConversationMessages {
+                    conversation_id: conversation_id.to_string(),
+                    messages: messages.clone(),
+                })
+            );
         }
 
         Ok(messages)
@@ -219,9 +253,18 @@ impl ThreadStorage {
         &mut self,
         conversation_id: &str,
         path: &PathBuf,
-        messages: Vec<Message>
+        messages: Vec<Message>,
+        app_handle: AppHandle
     ) -> Result<(), String> {
         self.messages.insert(conversation_id.to_string(), messages.clone());
+        Self::emit_event(
+            app_handle,
+            GlobalAppState::CONVERSATIONMESSAGES,
+            Value::ConversationMessages(crate::data::message::ConversationMessages {
+                conversation_id: conversation_id.to_string(),
+                messages: messages.clone(),
+            })
+        );
         Self::save_conversation_messages(conversation_id, path, messages)
     }
 

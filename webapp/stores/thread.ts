@@ -111,7 +111,10 @@ const createThreadSlice =
       }
     },
     getConversationMessages: (id: string | undefined): Message[] => {
-      const conversationMessages: Message[] = id ? get().messages[id] : [];
+      let conversationMessages: Message[] | undefined;
+      if (id) {
+        conversationMessages = get().messages[id];
+      }
       return conversationMessages || [];
     },
     readConversationMessages: async (id: string | undefined): Promise<Message[]> => {

@@ -248,9 +248,14 @@ export const getMentionCommands = (
   tag?: string,
 ): Command[] => {
   const mentions = prompt?.tokens.filter((to) => to.type === PromptTokenType.Mention) ?? [];
-  const modelCommands = mentions
-    .map((m) => commandManager.getCommand(m.value, CommandType.Mention, tag))
-    .filter((m) => m !== undefined);
+  const modelCommands: Command[] = [];
+  mentions
+    .forEach((m) => {
+      const command = commandManager.getCommand(m.value, CommandType.Mention, tag);
+      if (command) {
+        modelCommands.push(command);
+      }
+    });
 
   return modelCommands;
 };

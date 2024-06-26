@@ -231,11 +231,11 @@ export const loadConversationMessages = async (
 
 export const saveConversationMessages = async (
   conversationId: string,
-  messages: Message[],
+  conversationMessages: Message[],
 ): Promise<void> => {
   try {
-    const args = mapKeys({ conversationId, messages }, toSnakeCase);
-    await invokeTauri<void>('save_conversation_messages', args);
+    const messages = mapKeys(conversationMessages, toSnakeCase);
+    await invokeTauri<void>('save_conversation_messages', { conversationId, messages });
   } catch (error) {
     logger.error(error);
     toast.error(`Error saveConversationMessages: ${error}`);

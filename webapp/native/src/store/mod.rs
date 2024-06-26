@@ -318,32 +318,52 @@ impl Store {
         &mut self,
         conversation_id: &str,
         cache: bool,
+        app_handle: AppHandle
     ) -> Result<Vec<Message>, String> {
         match self.get_selected_project_path() {
             Ok(project_path) => {
-                return self.threads.load_conversation_messages(conversation_id, &project_path, cache);
-            }
-            Err(error) => Err(error),
-        }
-    }
-
-    pub fn save_conversation_messages(&mut self, conversation_id: &str, messages: Vec<Message>) -> Result<(), String> {
-        match self.get_selected_project_path() {
-            Ok(project_path) => {
-                return self.threads.update_conversation_messages(
+                return self.threads.load_conversation_messages(
                     conversation_id,
                     &project_path,
-                    messages
+                    cache,
+                    app_handle
                 );
             }
             Err(error) => Err(error),
         }
     }
 
-    pub fn remove_conversation_messages(&mut self, conversation_id: &str) -> Result<(), String> {
+    pub fn save_conversation_messages(
+        &mut self,
+        conversation_id: &str,
+        messages: Vec<Message>,
+        app_handle: AppHandle
+    ) -> Result<(), String> {
         match self.get_selected_project_path() {
             Ok(project_path) => {
-                return self.threads.remove_conversation_messages(conversation_id, &project_path);
+                return self.threads.update_conversation_messages(
+                    conversation_id,
+                    &project_path,
+                    messages,
+                    app_handle,
+                );
+            }
+            Err(error) => Err(error),
+        }
+    }
+
+    pub fn remove_conversation_messages(
+        &mut self,
+        conversation_id: &str,
+        app_handle: AppHandle
+    ) -> Result<(), String> {
+        match self.get_selected_project_path() {
+            Ok(project_path) => {
+                return self.threads.remove_conversation_messages(
+                    conversation_id,
+                    &project_path,
+                    app_handle
+                );
             }
             Err(error) => {
                 return Err(error);
