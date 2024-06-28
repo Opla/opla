@@ -15,7 +15,7 @@
 // import { emit as emitStateEvent, listen } from "@tauri-apps/api/event";
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Assistant, Conversation, Message, ConversationMessages } from '@/types';
+import { Assistant, Conversation, Message, ConversationMessages, Preset } from '@/types';
 import logger from '@/utils/logger';
 import { mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
@@ -24,6 +24,7 @@ import Storage, { createJSONSliceStorage } from './storage';
 import createWorkspaceSlice, { WorkspaceSlice } from './workspace';
 import { EVENTS, Emitter, GlobalAppState } from './constants';
 import createThreadSlice, { ThreadSlice } from './thread';
+import createPresetSlice, { PresetSlice } from './preset';
 
 type PaylLoadValue = string | number | undefined;
 
@@ -61,6 +62,10 @@ export const useThreadStore = create<ThreadSlice>()((...a) => ({
   ...createThreadSlice(emit)(...a),
 }));
 
+export const usePresetStore = create<PresetSlice>()((...a) => ({
+  ...createPresetSlice(emit)(...a),
+}));
+
 export const subscribeStateSync = async () => {
   const { listen } = await import('@tauri-apps/api/event');
   const unsubscribeStateSyncListener = await listen(EVENTS.STATE_SYNC_EVENT, async (event) => {
@@ -92,6 +97,9 @@ export const subscribeStateSync = async () => {
     } else if (key === GlobalAppState.MESSAGES) {
       const messages = (await mapKeys(value, toCamelCase)) as Record<string, Message[]>;
       useThreadStore.setState({ messages });
+    } else if (key === GlobalAppState.PRESETS) {
+      const { presets } = (await mapKeys(value, toCamelCase)) as { presets: Preset[] };
+      usePresetStore.setState({ presets });
     }
   });
 

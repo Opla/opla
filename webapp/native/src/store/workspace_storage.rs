@@ -356,7 +356,6 @@ impl WorkspaceStorage {
                 let data: Result<Payload, _> = serde_json::from_str(payload);
                 match data {
                     Ok(data) => {
-                        println!("before spawn");
                         let app_handle = app_handle_copy.app_handle();
                         spawn(async move { Self::emit_state_async(data, app_handle).await });
                     }

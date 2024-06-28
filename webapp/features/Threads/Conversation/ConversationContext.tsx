@@ -539,7 +539,7 @@ function ConversationProvider({
             );
             return;
           }
-          const message: Message = changeMessageContent(
+          changeMessageContent(
             previousMessage,
             t('Cancelled'),
             t('Cancelled'),
@@ -548,7 +548,7 @@ function ConversationProvider({
         }
       }
     },
-    [assistant, config, context, selectedConversation, selectedModelId],
+    [assistant, config, context, selectedConversation, selectedModelId, t, getConversationMessages],
   );
 
   const handleChangeMessageContent = useCallback(

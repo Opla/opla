@@ -19,7 +19,7 @@ use serde::{ Deserialize, Serialize };
 use crate::data::{
     conversation::Conversation,
     message::{ ConversationMessages, Message },
-    workspace::{ project::Project, Workspace },
+    workspace::{ project::Project, Workspace }, Preset,
 };
 
 pub const STATE_CHANGE_EVENT: &str = "state_change_event";
@@ -38,6 +38,8 @@ pub enum GlobalAppState {
     CONVERSATIONMESSAGES = 7,
 
     MESSAGES = 8,
+
+    PRESETS = 9,
 }
 
 impl From<u32> for GlobalAppState {
@@ -51,6 +53,7 @@ impl From<u32> for GlobalAppState {
             6 => GlobalAppState::ARCHIVES,
             7 => GlobalAppState::CONVERSATIONMESSAGES,
             8 => GlobalAppState::MESSAGES,
+            9 => GlobalAppState::PRESETS,
             _ => {
                 println!("Not a valid value for the enum GlobalAppState");
                 GlobalAppState::ERROR
@@ -75,12 +78,19 @@ impl Into<u32> for GlobalAppState {
             GlobalAppState::CONVERSATIONMESSAGES => 7,
 
             GlobalAppState::MESSAGES => 8,
+
+            GlobalAppState::PRESETS => 9,
         }
     }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Empty {}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ValuePresets {
+    pub presets: Vec<Preset>,
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -90,6 +100,7 @@ pub enum Value {
     Number(i32),
     Workspace(Workspace),
     Project(Project),
+    Presets(ValuePresets),
     Empty(Empty),
     Conversations(Vec<Conversation>),
     ConversationMessages(ConversationMessages),
