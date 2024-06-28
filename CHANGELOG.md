@@ -1,3 +1,10 @@
+# [1.0.0-alpha.188](https://github.com/Opla/opla/compare/v1.0.0-alpha.187...v1.0.0-alpha.188) (2024-06-28)
+
+
+### Features
+
+* handle presets in Rust [#1044](https://github.com/Opla/opla/issues/1044) ([#1045](https://github.com/Opla/opla/issues/1045)) ([a4a8b23](https://github.com/Opla/opla/commit/a4a8b23394240082d9a32752cd08154fe6da9bee))
+
 # [1.0.0-alpha.187](https://github.com/Opla/opla/compare/v1.0.0-alpha.186...v1.0.0-alpha.187) (2024-06-26)
 
 
