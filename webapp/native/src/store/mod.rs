@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::{ fs, path::PathBuf, fmt, collections::HashMap };
+use preset_storage::PresetStorage;
 use thread_storage::ThreadStorage;
 use serde::{ Deserialize, Serialize };
 use tauri::{ AppHandle, Manager };
@@ -32,6 +33,7 @@ pub mod model_storage;
 pub mod service_storage;
 pub mod workspace_storage;
 pub mod server_storage;
+pub mod preset_storage;
 pub mod app_state;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -129,6 +131,8 @@ pub struct Store {
     pub workspaces: WorkspaceStorage,
     #[serde(skip_serializing, default = "thread_default")]
     pub threads: ThreadStorage,
+    #[serde(skip_serializing, default = "preset_default")]
+    pub presets: PresetStorage,
 }
 
 fn service_default() -> ServiceStorage {
@@ -141,6 +145,10 @@ fn workspace_default() -> WorkspaceStorage {
 
 fn thread_default() -> ThreadStorage {
     ThreadStorage::new()
+}
+
+fn preset_default() -> PresetStorage {
+    PresetStorage::new()
 }
 
 impl Store {
@@ -162,6 +170,7 @@ impl Store {
             services: service_default(),
             workspaces: workspace_default(),
             threads: thread_default(),
+            presets: preset_default(),
         }
     }
 
@@ -191,7 +200,8 @@ impl Store {
                 return;
             }
         };
-        self.threads.init(app_handle, project_path).await;
+        self.threads.init(app_handle.app_handle(), project_path).await;
+        self.presets.init(app_handle.app_handle());
     }
 
     pub fn set(&mut self, new_config: Store) {
@@ -201,6 +211,7 @@ impl Store {
         self.services = new_config.services.clone();
         self.workspaces = new_config.workspaces.clone();
         self.threads = new_config.threads.clone();
+        self.presets = new_config.presets.clone();
     }
 
     pub fn load(&mut self, asset_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
@@ -369,5 +380,11 @@ impl Store {
                 return Err(error);
             }
         }
+    }
+
+    pub fn save_presets(&mut self) {
+        if let Err(error) = self.presets.save() {
+            println!("Error saving presets: {:?}", error.to_string());
+        };
     }
 }

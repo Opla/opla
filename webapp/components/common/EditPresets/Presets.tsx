@@ -34,14 +34,14 @@ import {
 import { useContext } from 'react';
 import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
-import { Preset, Provider } from '@/types';
+import { Conversation, ConversationPreset, Preset, Provider } from '@/types';
 import { createPreset, getCompatiblePresets } from '@/utils/data/presets';
 import { deepMerge } from '@/utils/data';
 import { ModalData, ModalsContext, ModalIds } from '@/context/modals';
 
 type PresetsProps = {
   preset: Preset | undefined;
-  presetProperties: Partial<Preset>;
+  presetProperties: Partial<Preset & ConversationPreset>;
   model: string | undefined;
   provider: Provider | undefined;
   portal?: boolean;
@@ -65,7 +65,9 @@ export default function Presets({
 
   const duplicatePreset = (p: Preset, newName?: string) => {
     const { id, name, readonly, ...rest } = p;
-    const template = deepMerge(rest, presetProperties);
+    const template = deepMerge<Partial<Conversation>>(rest, presetProperties);
+    delete template.currentPrompt;
+    delete template.services;
     const newPreset = createPreset(newName || `${p.id}-copy`, p.parentId || id, template);
     setPresets([...presets, newPreset]);
     onChangePreset(newPreset.id);

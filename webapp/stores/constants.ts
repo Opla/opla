@@ -23,6 +23,8 @@ export enum GlobalAppState {
   ARCHIVES = 6,
   CONVERSATIONMESSAGES = 7,
   MESSAGES = 8,
+
+  PRESETS = 9,
 }
 
 export const EVENTS: {

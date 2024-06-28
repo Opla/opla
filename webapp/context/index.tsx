@@ -36,7 +36,7 @@ import { defaultPresets, mergePresets } from '@/utils/data/presets';
 import { getMessageContentAsString, mergeMessages } from '@/utils/data/messages';
 import { deleteUnusedConversationsDir } from '@/utils/backend/tauri';
 import logger from '@/utils/logger';
-import { useThreadStore } from '@/stores';
+import { usePresetStore, useThreadStore } from '@/stores';
 import {
   // loadConversationMessages,
   removeConversationMessages,
@@ -131,14 +131,20 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
   // const [archives, setArchives] = useDataStorage('archives', initialContext.archives);
 
   const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
-  const [presets, setPresets] = useDataStorage('presets', initialContext.presets);
+
+  const { presets, setPresets, loadPresets } = usePresetStore();
+  // const [presets, setPresets] = useDataStorage('presets', initialContext.presets);
 
   useEffect(() => {
     if (presets && !presets?.find((p) => p.id === 'opla')) {
-      const updatedPresets = mergePresets(presets, defaultPresets);
-      setPresets(updatedPresets);
+      if (presets.length === 0) {
+        loadPresets();
+      } else {
+        const updatedPresets = mergePresets(presets, defaultPresets);
+        setPresets(updatedPresets);
+      }
     }
-  });
+  }, [presets, loadPresets, setPresets]);
 
   /* const [
     getStoredConversationMessages,

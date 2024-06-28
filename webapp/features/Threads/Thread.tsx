@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { AppContext } from '@/context';
 import {
@@ -101,7 +101,7 @@ function Thread({
 
   const { t } = useTranslation();
 
-  const readMessages = useCallback(async () => {
+  /* const readMessages = useCallback(async () => {
     let newMessages: MessageImpl[] = [];
     if (conversationId) {
       let p = false;
@@ -129,7 +129,7 @@ function Thread({
       setProcessing(p);
     }
     return newMessages;
-  }, []);
+  }, []); */
 
   useEffect(() => {
     const getNewMessages = async () => {

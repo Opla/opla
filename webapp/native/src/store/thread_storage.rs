@@ -153,7 +153,6 @@ impl ThreadStorage {
             if let Some(payload) = event.payload() {
                 match serde_json::from_str(payload) {
                     Ok(data) => {
-                        println!("before spawn");
                         let app_handle = app_handle_copy.app_handle();
                         spawn(async move { Self::emit_state_async(data, app_handle).await });
                     }

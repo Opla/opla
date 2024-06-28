@@ -197,13 +197,17 @@ pub mod date_format {
         let date = match v.as_str() {
             Some(s) =>
                 DateTime::parse_from_rfc3339(s).map_err(de::Error::custom)?.with_timezone(&Utc),
-            None =>
-                match DateTime::from_timestamp_millis(v.as_i64().unwrap_or(-1)) {
+            None =>{
+                let mut v = v.as_i64().unwrap_or(0);
+                if v == 0 {
+                    v = Utc::now().timestamp_millis();
+                }
+                match DateTime::from_timestamp_millis(v) {
                     Some(d) => d,
                     None => {
                         return Err(de::Error::custom("Invalid timestamp millis"));
                     }
-                }
+                }}
         };
         Ok(date)
         // let s = String::deserialize(deserializer)?;

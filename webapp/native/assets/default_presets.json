@@ -1,0 +1,30 @@
+[
+  {
+    "id": "opla",
+    "name": "Opla",
+    "created_at": "2024-06-28T15:17:34.295Z",
+    "updated_at": "2024-06-28T15:17:34.295Z",
+    "readonly": true
+  },
+  {
+    "id": "openai",
+    "name": "OpenAI",
+    "created_at": "2024-06-28T15:17:34.295Z",
+    "updated_at": "2024-06-28T15:17:34.295Z",
+    "readonly": true
+  },
+  {
+    "id": "gpt-3.5",
+    "name": "ChatGPT-3.5",
+    "created_at": "2024-06-28T15:17:34.295Z",
+    "updated_at": "2024-06-28T15:17:34.295Z",
+    "readonly": true
+  },
+  {
+    "id": "gpt-4",
+    "name": "ChatGPT-4",
+    "created_at": "2024-06-28T15:17:34.295Z",
+    "updated_at": "2024-06-28T15:17:34.295Z",
+    "readonly": true
+  }
+]
