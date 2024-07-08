@@ -1,3 +1,10 @@
+# [1.0.0-alpha.189](https://github.com/Opla/opla/compare/v1.0.0-alpha.188...v1.0.0-alpha.189) (2024-07-08)
+
+
+### Features
+
+* refactor Provider in Rust [#1051](https://github.com/Opla/opla/issues/1051) ([#1052](https://github.com/Opla/opla/issues/1052)) ([b975bb1](https://github.com/Opla/opla/commit/b975bb1627a6d881d9231c7b4d01349b6bb83686))
+
 # [1.0.0-alpha.188](https://github.com/Opla/opla/compare/v1.0.0-alpha.187...v1.0.0-alpha.188) (2024-06-28)
 
 
