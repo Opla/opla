@@ -17,9 +17,7 @@ use std::collections::HashMap;
 use serde::{ Deserialize, Serialize };
 
 use crate::data::{
-    conversation::Conversation,
-    message::{ ConversationMessages, Message },
-    workspace::{ project::Project, Workspace }, Preset,
+    conversation::Conversation, message::{ ConversationMessages, Message }, provider::Provider, workspace::{ project::Project, Workspace }, Preset
 };
 
 pub const STATE_CHANGE_EVENT: &str = "state_change_event";
@@ -93,6 +91,11 @@ pub struct ValuePresets {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ValueProviders {
+    pub providers: Vec<Provider>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Value {
     Bool(bool),
@@ -101,6 +104,7 @@ pub enum Value {
     Workspace(Workspace),
     Project(Project),
     Presets(ValuePresets),
+    Providers(ValueProviders),
     Empty(Empty),
     Conversations(Vec<Conversation>),
     ConversationMessages(ConversationMessages),

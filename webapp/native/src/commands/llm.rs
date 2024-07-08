@@ -14,7 +14,18 @@
 
 use tauri::{ Runtime, State };
 
-use crate::{providers::llm::{LlmCompletionOptions, LlmImageGenerationResponse, LlmModelsResponse, LlmQuery, LlmQueryCompletion, LlmTokenizeResponse}, store::Provider, OplaContext};
+use crate::{
+    data::provider::Provider,
+    providers::llm::{
+        LlmCompletionOptions,
+        LlmImageGenerationResponse,
+        LlmModelsResponse,
+        LlmQuery,
+        LlmQueryCompletion,
+        LlmTokenizeResponse,
+    },
+    OplaContext,
+};
 
 #[tauri::command]
 pub async fn llm_call_completion<R: Runtime>(
@@ -84,7 +95,7 @@ pub async fn llm_call_models<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
-    provider: Provider,
+    provider: Provider
 ) -> Result<LlmModelsResponse, String> {
     let mut manager = context.providers_manager.lock().await;
     manager.llm_call_models::<R>(provider).await

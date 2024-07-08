@@ -13,24 +13,15 @@
 // limitations under the License.
 
 use std::{ collections::HashMap, sync::Arc };
-// use futures_util::FutureExt;
 use serde::Serialize;
 use tauri::{ AppHandle, Manager, Runtime };
 use tokenizer::encode;
 use tokio::{ spawn, sync::Mutex };
 use bytes::Bytes;
+use uuid::Uuid;
 
 use crate::{
-    store::{
-        server_storage::{ ServerConfiguration, ServerStorage },
-        Provider,
-        ProviderMetadata,
-        ProviderType,
-    },
-    utils::http_client::{ HttpChunk, NewHttpError },
-    OplaContext,
-    Payload,
-    ServerStatus,
+    data::provider::{Provider, ProviderMetadata, ProviderType}, store::server_storage::{ ServerConfiguration, ServerStorage }, utils::http_client::{ HttpChunk, NewHttpError }, OplaContext, Payload, ServerStatus
 };
 
 use self::{
@@ -178,7 +169,10 @@ impl ProvidersManager {
     pub fn get_opla_provider(server: &ServerStorage) -> Provider {
         let config = &server.configuration;
         Provider {
+            id: Uuid::new_v4().to_string(),
             name: "Opla".to_string(),
+            created_at: None,
+            updated_at: None,
             r#type: ProviderType::Opla.to_string(),
             description: Some("Opla is a free and open source AI assistant.".to_string()),
             url: format!(

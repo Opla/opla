@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ fs, path::PathBuf, fmt, collections::HashMap };
+use std::{ fs, path::PathBuf, collections::HashMap };
 use preset_storage::PresetStorage;
+use provider_storage::ProviderStorage;
 use thread_storage::ThreadStorage;
 use serde::{ Deserialize, Serialize };
 use tauri::{ AppHandle, Manager };
@@ -34,8 +35,10 @@ pub mod service_storage;
 pub mod workspace_storage;
 pub mod server_storage;
 pub mod preset_storage;
+pub mod provider_storage;
 pub mod app_state;
 
+/*
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum ProviderType {
     #[serde(rename = "opla")]
@@ -74,7 +77,7 @@ pub struct Provider {
     pub key: Option<String>,
     pub disabled: Option<bool>,
     pub metadata: Option<ProviderMetadata>,
-}
+} */
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WindowSettings {
@@ -133,6 +136,8 @@ pub struct Store {
     pub threads: ThreadStorage,
     #[serde(skip_serializing, default = "preset_default")]
     pub presets: PresetStorage,
+    #[serde(skip_serializing, default = "provider_default")]
+    pub providers: ProviderStorage,
 }
 
 fn service_default() -> ServiceStorage {
@@ -149,6 +154,10 @@ fn thread_default() -> ThreadStorage {
 
 fn preset_default() -> PresetStorage {
     PresetStorage::new()
+}
+
+fn provider_default() -> ProviderStorage {
+    ProviderStorage::new()
 }
 
 impl Store {
@@ -171,6 +180,7 @@ impl Store {
             workspaces: workspace_default(),
             threads: thread_default(),
             presets: preset_default(),
+            providers: provider_default(),
         }
     }
 
@@ -202,6 +212,7 @@ impl Store {
         };
         self.threads.init(app_handle.app_handle(), project_path).await;
         self.presets.init(app_handle.app_handle());
+        self.providers.init(app_handle.app_handle());
     }
 
     pub fn set(&mut self, new_config: Store) {
@@ -212,6 +223,7 @@ impl Store {
         self.workspaces = new_config.workspaces.clone();
         self.threads = new_config.threads.clone();
         self.presets = new_config.presets.clone();
+        self.providers = new_config.providers.clone();
     }
 
     pub fn load(&mut self, asset_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
@@ -356,7 +368,7 @@ impl Store {
                     conversation_id,
                     &project_path,
                     messages,
-                    app_handle,
+                    app_handle
                 );
             }
             Err(error) => Err(error),
@@ -385,6 +397,12 @@ impl Store {
     pub fn save_presets(&mut self) {
         if let Err(error) = self.presets.save() {
             println!("Error saving presets: {:?}", error.to_string());
+        };
+    }
+
+    pub fn save_providers(&mut self) {
+        if let Err(error) = self.providers.save() {
+            println!("Error saving providers: {:?}", error.to_string());
         };
     }
 }
