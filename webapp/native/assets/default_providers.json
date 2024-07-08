@@ -1,0 +1,17 @@
+[
+    {
+      "id": "cd51968f-d14a-4993-81f9-5690e941e3e9",
+      "name": "Opla",
+      "created_at": "2024-07-08T13:21:13.922+00:00",
+      "updated_at": "2024-07-08T13:21:13.922+00:00",
+      "type": "opla",
+      "url": "127.0.0.1:8081",
+      "description": "Opla is a free and open source AI assistant.",
+      "doc_url": "https://opla.ai/docs",
+      "key": null,
+      "disabled": false,
+      "models": null,
+      "errors": null,
+      "metadata": {}
+    }
+  ]

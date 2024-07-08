@@ -25,7 +25,7 @@ import {
   // QueryResultEntry,
   // QueryResult,
 } from '@/types';
-import useDataStorage from '@/hooks/useDataStorage';
+// import useDataStorage from '@/hooks/useDataStorage';
 import {
   getConversation,
   removeConversation,
@@ -36,7 +36,7 @@ import { defaultPresets, mergePresets } from '@/utils/data/presets';
 import { getMessageContentAsString, mergeMessages } from '@/utils/data/messages';
 import { deleteUnusedConversationsDir } from '@/utils/backend/tauri';
 import logger from '@/utils/logger';
-import { usePresetStore, useThreadStore } from '@/stores';
+import { usePresetStore, useProviderStore, useThreadStore } from '@/stores';
 import {
   // loadConversationMessages,
   removeConversationMessages,
@@ -130,10 +130,19 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
 
   // const [archives, setArchives] = useDataStorage('archives', initialContext.archives);
 
-  const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
+  // const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
+  const { providers, setProviders, loadProviders } = useProviderStore();
 
   const { presets, setPresets, loadPresets } = usePresetStore();
   // const [presets, setPresets] = useDataStorage('presets', initialContext.presets);
+
+  useEffect(() => {
+    if (!providers.find((p) => p.type === 'opla')) {
+      if (providers.length === 0) {
+        loadProviders();
+      }
+    }
+  }, [providers, loadProviders]);
 
   useEffect(() => {
     if (presets && !presets?.find((p) => p.id === 'opla')) {
@@ -145,13 +154,6 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       }
     }
   }, [presets, loadPresets, setPresets]);
-
-  /* const [
-    getStoredConversationMessages,
-    readStoredConversationMessages,
-    storeConversationMessages,
-    deleteConversationMessages,
-  ] = useCollectionStorage<Message[]>('messages'); */
 
   const getConversationMessages = useCallback(
     (id: string | undefined): Message[] => {
@@ -165,87 +167,6 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
   );
 
   const isConversationMessagesLoaded = useCallback((id: string) => !!messages[id], [messages]);
-
-  /* const readConversationMessages = useCallback(
-    async (id: string | undefined): Promise<Message[]> => {
-      const newMessages: Message[] = id ? await loadConversationMessages(id) : [];
-      return newMessages;
-    },
-    [],
-  );
-
-  const filterConversationMessages = useCallback(
-    (id: string | undefined, filter: (msg: Message) => boolean): Message[] => {
-      const newMessages: Message[] = id ? getConversationMessages(id).filter(filter) : [];
-      return newMessages;
-    },
-    [getConversationMessages],
-  );
-
-  const updateConversationMessages = useCallback(
-    async (id: string | undefined, updatedMessages: Message[]): Promise<void> => {
-      if (id) {
-        await saveConversationMessages(id, deepCopy<Message[]>(updatedMessages));
-      }
-    },
-    [],
-  );
-
-  const searchConversationMessages = useCallback(
-    async (query: string): Promise<QueryResponse> => {
-      const result: QueryResponse = {
-        count: 0,
-        results: [],
-      };
-      const promises: Promise<void>[] = [];
-      const filteredQuery = query.toUpperCase();
-      conversations.forEach((c) => {
-        const search = async (conversation: Conversation) => {
-          const group: QueryResult = {
-            id: conversation.id,
-            name: conversation.name || 'Conversation',
-            entries: [],
-          };
-          let updatedMessages = getConversationMessages(conversation.id);
-          if (!updatedMessages) {
-            updatedMessages = await loadConversationMessages(conversation.id, false);
-          }
-          updatedMessages.forEach((message) => {
-            const text = getMessageContentAsString(message);
-            const index = text.toUpperCase().indexOf(filteredQuery);
-            if (index !== -1) {
-              result.count += 1;
-              let length = 40;
-              if (filteredQuery.length > 40) {
-                length = 10;
-              }
-              const previousLength = index < length ? length - index : length;
-              const afterLength =
-                index + filteredQuery.length > text.length - length ? text.length - index : length;
-              const entry: QueryResultEntry = {
-                id: message.id,
-                index,
-                match: text.substring(index, index + filteredQuery.length),
-                previousText: text.substring(index - previousLength, index),
-                afterText: text.substring(
-                  index + filteredQuery.length,
-                  index + filteredQuery.length + afterLength,
-                ),
-              };
-              group.entries.push(entry);
-            }
-          });
-          if (group.entries.length > 0) {
-            result.results.push(group);
-          }
-        };
-        promises.push(search(c));
-      });
-      await Promise.all(promises);
-      return result;
-    },
-    [conversations, getConversationMessages],
-  ); */
 
   const updateConversations = useCallback(
     async (updatedConversations: Conversation[], needToUpdateMessages = true) => {

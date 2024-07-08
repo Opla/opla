@@ -13,8 +13,8 @@
 // limitations under the License.
 
 use tauri::{ Runtime, State };
+use crate::data::provider::Provider;
 use crate::providers::ProvidersManager;
-use crate::store::Provider;
 use crate::OplaContext;
 
 #[tauri::command]

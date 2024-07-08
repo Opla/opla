@@ -29,6 +29,7 @@ pub mod service;
 pub mod workspace;
 pub mod message;
 pub mod conversation;
+pub mod provider;
 
 pub fn is_false(b: &bool) -> bool {
     *b == false
