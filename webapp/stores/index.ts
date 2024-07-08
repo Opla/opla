@@ -15,7 +15,7 @@
 // import { emit as emitStateEvent, listen } from "@tauri-apps/api/event";
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Assistant, Conversation, Message, ConversationMessages, Preset } from '@/types';
+import { Assistant, Conversation, Message, ConversationMessages, Preset, Provider } from '@/types';
 import logger from '@/utils/logger';
 import { mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
@@ -25,6 +25,7 @@ import createWorkspaceSlice, { WorkspaceSlice } from './workspace';
 import { EVENTS, Emitter, GlobalAppState } from './constants';
 import createThreadSlice, { ThreadSlice } from './thread';
 import createPresetSlice, { PresetSlice } from './preset';
+import createProviderSlice, { ProviderSlice } from './provider';
 
 type PaylLoadValue = string | number | undefined;
 
@@ -66,11 +67,15 @@ export const usePresetStore = create<PresetSlice>()((...a) => ({
   ...createPresetSlice(emit)(...a),
 }));
 
+export const useProviderStore = create<ProviderSlice>()((...a) => ({
+  ...createProviderSlice(emit)(...a),
+}));
+
 export const subscribeStateSync = async () => {
   const { listen } = await import('@tauri-apps/api/event');
   const unsubscribeStateSyncListener = await listen(EVENTS.STATE_SYNC_EVENT, async (event) => {
     const { key, value } = event.payload as PayloadEmitter;
-    logger.info(`State event: ${event} ${key} ${value}`);
+    logger.info(`State event: ${event}`, key, value);
     if (key === GlobalAppState.WORKSPACE) {
       const { workspaces } = useWorkspaceStore.getState();
       workspaces[key] = await mapKeys(value, toCamelCase);
@@ -100,6 +105,9 @@ export const subscribeStateSync = async () => {
     } else if (key === GlobalAppState.PRESETS) {
       const { presets } = (await mapKeys(value, toCamelCase)) as { presets: Preset[] };
       usePresetStore.setState({ presets });
+    } else if (key === GlobalAppState.PROVIDERS) {
+      const { providers } = (await mapKeys(value, toCamelCase)) as { providers: Provider[] };
+      useProviderStore.setState({ providers });
     }
   });
 

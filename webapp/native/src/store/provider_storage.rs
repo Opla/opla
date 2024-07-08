@@ -44,7 +44,7 @@ impl ProviderStorage {
         };
         println!("Preset emit state sync: {} {:?}", payload.key, value);
         match GlobalAppState::from(payload.key) {
-            GlobalAppState::PRESETS => {
+            GlobalAppState::PROVIDERS => {
                 let mut store = context.store.lock().await;
                 if let Value::Providers(data) = value {
                     store.providers.providers = data.providers.clone();
@@ -106,7 +106,7 @@ impl ProviderStorage {
             let providers: Vec<Provider> = serde_json::from_str(&data)?;
             self.providers = providers;
         }
-        /* if self.providers.len() == 0 {
+        if self.providers.len() == 0 {
             // Load default providers
             let default_providers_path = asset_dir.join("default_providers.json");
             if default_providers_path.exists() {
@@ -120,7 +120,7 @@ impl ProviderStorage {
             if let Err(error) = self.save() {
                 println!("Can't save default providers: {:?}", error.to_string());
             };
-        } */
+        }
         Ok(())
     }
 

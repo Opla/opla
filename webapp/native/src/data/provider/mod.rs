@@ -19,6 +19,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{data::option_date_format, store::server_storage::ServerStorage};
 
+use super::model::Model;
+
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum ProviderType {
@@ -63,5 +65,7 @@ pub struct Provider {
     pub doc_url: Option<String>,
     pub key: Option<String>,
     pub disabled: Option<bool>,
+    pub models: Option<Vec<Model>>,
+    pub errors: Option<Vec<String>>,
     pub metadata: Option<ProviderMetadata>,
 }

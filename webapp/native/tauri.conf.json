@@ -108,7 +108,7 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": ["assets/opla_default_config.json", "assets/default_presets.json"],
+      "resources": ["assets/opla_default_config.json", "assets/default_presets.json", "assets/default_providers.json"],
       "shortDescription": "",
       "targets": "all"
     },

@@ -186,6 +186,8 @@ impl ProvidersManager {
             metadata: Option::Some(ProviderMetadata {
                 server: Some(server.clone()),
             }),
+            models: None,
+            errors: None,
         }
     }
 

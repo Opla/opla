@@ -22,12 +22,12 @@ import {
   useState,
 } from 'react';
 import logger from '@/utils/logger';
-import { createProvider } from '@/utils/data/providers';
+// import { createProvider } from '@/utils/data/providers';
 import getBackend from '@/utils/backend';
 import {
-  Metadata,
+  /* Metadata,
   Provider,
-  ProviderType,
+  ProviderType, */
   OplaContext,
   ServerStatus,
   Settings,
@@ -43,7 +43,7 @@ import {
 } from '@/types';
 import {
   getOplaConfig,
-  getProviderTemplate,
+  // getProviderTemplate,
   setActiveModel as setBackendActiveModel,
   saveSettings,
 } from '@/utils/backend/commands';
@@ -51,7 +51,7 @@ import { AppContext } from '@/context';
 import Backend, { BackendResult } from '@/utils/backend/Backend';
 import { deepCopy, mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
-import OplaProvider from '@/utils/providers/opla';
+// import OplaProvider from '@/utils/providers/opla';
 import { getConversation } from '@/utils/data/conversations';
 import { changeMessageContent } from '@/utils/data/messages';
 import { ParsedPrompt } from '@/utils/parsers';
@@ -133,8 +133,8 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     conversations,
     getConversationMessages,
     updateMessagesAndConversation,
-    providers,
-    setProviders,
+    // providers,
+    // setProviders,
   } = useContext(AppContext);
 
   const backendRef = useRef<Backend>();
@@ -392,13 +392,13 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const startBackend = useCallback(async () => {
-    let opla = providers.find((p) => p.type === ProviderType.opla) as Provider;
+    /* let opla = providers.find((p) => p.type === ProviderType.opla) as Provider;
     if (!opla) {
       const oplaProviderConfig = await getProviderTemplate();
       const provider = { ...oplaProviderConfig, type: oplaProviderConfig.type };
       opla = createProvider(OplaProvider.name, provider);
       providers.splice(0, 0, opla);
-    }
+    } */
     const backendImpl = await getBackend();
     backendRef.current = backendImpl as Backend;
     const listeners = {
@@ -411,11 +411,11 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     updateServer(backendImplContext.server);
     updateConfig(backendImplContext.config);
 
-    logger.info('start backend', opla.metadata, backendImplContext.config.server.parameters);
-    const metadata = opla.metadata as Metadata;
-    metadata.server = backendImplContext.config.server as Metadata;
-    setProviders(providers);
-  }, [backendListener, downloadListener, providers, setProviders, streamListener]);
+    logger.info('start backend', /* opla.metadata, */ backendImplContext.config.server.parameters);
+    // const metadata = opla.metadata as Metadata;
+    // metadata.server = backendImplContext.config.server as Metadata;
+    // setProviders(providers);
+  }, [backendListener, downloadListener, streamListener]);
 
   const restart = useCallback(
     async (params: ServerParameters | undefined = {}): Promise<BackendResult> => {
