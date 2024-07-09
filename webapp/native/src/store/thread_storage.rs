@@ -47,7 +47,7 @@ impl ThreadStorage {
             Some(v) => v,
             None => Value::Empty(Empty {}),
         };
-        println!("Emit state sync: {} {:?}", payload.key, value);
+        println!("Thread emit state sync: {} {:?}", payload.key, value);
         let mut need_emit = false;
         let mut emit_value: Option<Value> = None;
         match GlobalAppState::from(payload.key) {

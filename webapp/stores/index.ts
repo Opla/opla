@@ -14,13 +14,13 @@
 
 // import { emit as emitStateEvent, listen } from "@tauri-apps/api/event";
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+// import { persist } from 'zustand/middleware';
 import { Assistant, Conversation, Message, ConversationMessages, Preset, Provider } from '@/types';
 import logger from '@/utils/logger';
 import { mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
 import createAssistantSlice, { AssistantSlice } from './assistant';
-import Storage, { createJSONSliceStorage } from './storage';
+// import Storage, { createJSONSliceStorage } from './storage';
 import createWorkspaceSlice, { WorkspaceSlice } from './workspace';
 import { EVENTS, Emitter, GlobalAppState } from './constants';
 import createThreadSlice, { ThreadSlice } from './thread';
@@ -43,7 +43,7 @@ const emit: Emitter = async (key: number, value: PaylLoadValue) => {
   });
 };
 
-export const useAssistantStore = create<AssistantSlice>()(
+/* export const useAssistantStore = create<AssistantSlice>()(
   persist(
     (...a) => ({
       ...createAssistantSlice()(...a),
@@ -53,7 +53,11 @@ export const useAssistantStore = create<AssistantSlice>()(
       storage: createJSONSliceStorage<Assistant>(() => Storage, { space: 2 }),
     },
   ),
-);
+); */
+
+export const useAssistantStore = create<AssistantSlice>()((...a) => ({
+  ...createAssistantSlice(emit)(...a),
+}));
 
 export const useWorkspaceStore = create<WorkspaceSlice>()((...a) => ({
   ...createWorkspaceSlice(emit)(...a),
@@ -108,6 +112,9 @@ export const subscribeStateSync = async () => {
     } else if (key === GlobalAppState.PROVIDERS) {
       const { providers } = (await mapKeys(value, toCamelCase)) as { providers: Provider[] };
       useProviderStore.setState({ providers });
+    } else if (key === GlobalAppState.ASSISTANTS) {
+      const { assistants } = (await mapKeys(value, toCamelCase)) as { assistants: Assistant[] };
+      useAssistantStore.setState({ assistants });
     }
   });
 

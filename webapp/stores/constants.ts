@@ -27,6 +27,8 @@ export enum GlobalAppState {
   PRESETS = 9,
 
   PROVIDERS = 10,
+
+  ASSISTANTS = 11,
 }
 
 export const EVENTS: {

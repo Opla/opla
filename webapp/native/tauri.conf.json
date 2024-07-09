@@ -28,11 +28,25 @@
         "removeDir": true,
         "createDir": true,
         "removeFile": true,
-        "scope": ["$LOCALDATA/Opla/**/*", "$HOME/**", "$TEMP/*", "$DESKTOP/*", "$DOWNLOADS/*", "$DOCUMENTS/*"]
+        "scope": [
+          "$LOCALDATA/Opla/**/*",
+          "$HOME/**",
+          "$TEMP/*",
+          "$DESKTOP/*",
+          "$DOWNLOADS/*",
+          "$DOCUMENTS/*"
+        ]
       },
       "protocol": {
         "asset": true,
-        "assetScope": ["$LOCALDATA/Opla/**/*", "$HOME/**", "$TEMP/*", "$DESKTOP/*", "$DOWNLOADS/*", "$DOCUMENTS/*"]
+        "assetScope": [
+          "$LOCALDATA/Opla/**/*",
+          "$HOME/**",
+          "$TEMP/*",
+          "$DESKTOP/*",
+          "$DOWNLOADS/*",
+          "$DOCUMENTS/*"
+        ]
       },
       "window": {
         "all": true
@@ -91,7 +105,9 @@
       "deb": {
         "depends": []
       },
-      "externalBin": ["binaries/llama.cpp/llama.cpp.server"],
+      "externalBin": [
+        "binaries/llama.cpp/llama.cpp.server"
+      ],
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -108,7 +124,12 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": ["assets/opla_default_config.json", "assets/default_presets.json", "assets/default_providers.json"],
+      "resources": [
+        "assets/opla_default_config.json",
+        "assets/default_presets.json",
+        "assets/default_providers.json",
+        "assets/default_assistants.json"
+      ],
       "shortDescription": "",
       "targets": "all"
     },

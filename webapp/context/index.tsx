@@ -36,7 +36,7 @@ import { defaultPresets, mergePresets } from '@/utils/data/presets';
 import { getMessageContentAsString, mergeMessages } from '@/utils/data/messages';
 import { deleteUnusedConversationsDir } from '@/utils/backend/tauri';
 import logger from '@/utils/logger';
-import { usePresetStore, useProviderStore, useThreadStore } from '@/stores';
+import { useAssistantStore, usePresetStore, useProviderStore, useThreadStore } from '@/stores';
 import {
   // loadConversationMessages,
   removeConversationMessages,
@@ -132,6 +132,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
 
   // const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
   const { providers, setProviders, loadProviders } = useProviderStore();
+  const { loadAssistants } = useAssistantStore();
 
   const { presets, setPresets, loadPresets } = usePresetStore();
   // const [presets, setPresets] = useDataStorage('presets', initialContext.presets);
@@ -140,9 +141,10 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
     if (!providers.find((p) => p.type === 'opla')) {
       if (providers.length === 0) {
         loadProviders();
+        loadAssistants();
       }
     }
-  }, [providers, loadProviders]);
+  }, [providers, loadProviders, loadAssistants]);
 
   useEffect(() => {
     if (presets && !presets?.find((p) => p.id === 'opla')) {
