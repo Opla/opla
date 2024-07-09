@@ -1,3 +1,10 @@
+# [1.0.0-alpha.190](https://github.com/Opla/opla/compare/v1.0.0-alpha.189...v1.0.0-alpha.190) (2024-07-09)
+
+
+### Features
+
+* refactor handle Assistants using Rust [#1066](https://github.com/Opla/opla/issues/1066) ([#1067](https://github.com/Opla/opla/issues/1067)) ([2fe4f9c](https://github.com/Opla/opla/commit/2fe4f9c0fd3af2321432588de6e4a8c79dabf2de))
+
 # [1.0.0-alpha.189](https://github.com/Opla/opla/compare/v1.0.0-alpha.188...v1.0.0-alpha.189) (2024-07-08)
 
 
