@@ -17,7 +17,7 @@ use std::collections::HashMap;
 use serde::{ Deserialize, Serialize };
 
 use crate::data::{
-    conversation::Conversation, message::{ ConversationMessages, Message }, provider::Provider, workspace::{ project::Project, Workspace }, Preset
+    assistant::Assistant, conversation::Conversation, message::{ ConversationMessages, Message }, provider::Provider, workspace::{ project::Project, Workspace }, Preset
 };
 
 pub const STATE_CHANGE_EVENT: &str = "state_change_event";
@@ -40,6 +40,8 @@ pub enum GlobalAppState {
     PRESETS = 9,
 
     PROVIDERS = 10,
+
+    ASSISTANTS = 11,
 }
 
 impl From<u32> for GlobalAppState {
@@ -55,6 +57,7 @@ impl From<u32> for GlobalAppState {
             8 => GlobalAppState::MESSAGES,
             9 => GlobalAppState::PRESETS,
             10 => GlobalAppState::PROVIDERS,
+            11 => GlobalAppState::ASSISTANTS,
             _ => {
                 println!("Not a valid value for the enum GlobalAppState");
                 GlobalAppState::ERROR
@@ -83,6 +86,8 @@ impl Into<u32> for GlobalAppState {
             GlobalAppState::PRESETS => 9,
 
             GlobalAppState::PROVIDERS => 10,
+
+            GlobalAppState::ASSISTANTS => 11,
         }
     }
 }
@@ -101,6 +106,11 @@ pub struct ValueProviders {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ValueAssistants {
+    pub assistants: Vec<Assistant>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Value {
     Bool(bool),
@@ -110,6 +120,7 @@ pub enum Value {
     Project(Project),
     Presets(ValuePresets),
     Providers(ValueProviders),
+    Assistants(ValueAssistants),
     Empty(Empty),
     Conversations(Vec<Conversation>),
     ConversationMessages(ConversationMessages),

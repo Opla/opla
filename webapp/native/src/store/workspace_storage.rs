@@ -207,7 +207,7 @@ impl WorkspaceStorage {
             Some(v) => v,
             None => Value::Empty(Empty {}),
         };
-        println!("Emit state sync: {} {:?}", payload.key, value);
+        println!("Workspace emit state sync: {} {:?}", payload.key, value);
         match GlobalAppState::from(payload.key) {
             GlobalAppState::ACTIVE => {
                 if let Value::String(data) = value {

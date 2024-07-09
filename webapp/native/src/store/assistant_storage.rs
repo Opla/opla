@@ -17,7 +17,7 @@ use serde::{ Deserialize, Serialize };
 use tauri::{ AppHandle, Manager };
 use tokio::spawn;
 
-use crate::data::provider::Provider;
+use crate::data::assistant::Assistant;
 use crate::store::app_state::STATE_SYNC_EVENT;
 use crate::utils::get_config_directory;
 use crate::OplaContext;
@@ -25,14 +25,14 @@ use crate::OplaContext;
 use super::app_state::{ Empty, Payload, GlobalAppState, Value, STATE_CHANGE_EVENT };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ProviderStorage {
-    pub providers: Vec<Provider>,
+pub struct AssistantStorage {
+    pub assistants: Vec<Assistant>,
 }
 
-impl ProviderStorage {
+impl AssistantStorage {
     pub fn new() -> Self {
         Self {
-            providers: Vec::new(),
+            assistants: Vec::new(),
         }
     }
 
@@ -42,13 +42,13 @@ impl ProviderStorage {
             Some(v) => v,
             None => Value::Empty(Empty {}),
         };
-        println!("Provider emit state sync: {} {:?}", payload.key, value);
+        println!("Assistant emit state sync: {} {:?}", payload.key, value);
         match GlobalAppState::from(payload.key) {
-            GlobalAppState::PROVIDERS => {
+            GlobalAppState::ASSISTANTS => {
                 let mut store = context.store.lock().await;
-                if let Value::Providers(data) = value {
-                    store.providers.providers = data.providers.clone();
-                    store.save_providers();
+                if let Value::Assistants(data) = value {
+                    store.assistants.assistants = data.assistants.clone();
+                    store.save_assistants();
                 } else if let Value::Empty(_) = value {
                 } else {
                     println!("Error wrong type of value: {} {:?}", payload.key, value);
@@ -59,8 +59,8 @@ impl ProviderStorage {
                     .emit_all(STATE_SYNC_EVENT, Payload {
                         key: payload.key,
                         value: Some(
-                            Value::Providers(crate::store::app_state::ValueProviders {
-                                providers: store.providers.providers.clone(),
+                            Value::Assistants(crate::store::app_state::ValueAssistants {
+                                assistants: store.assistants.assistants.clone(),
                             })
                         ),
                     })
@@ -89,36 +89,36 @@ impl ProviderStorage {
 
     pub fn save(&self) -> Result<(), Box<dyn std::error::Error>> {
         let home_dir = get_config_directory()?;
-        let providers_path = home_dir.join("providers.json");
+        let assistants_path = home_dir.join("assistants.json");
 
-        let data = serde_json::to_string_pretty(&self.providers)?;
-        write(providers_path, data)?;
+        let data = serde_json::to_string_pretty(&self.assistants)?;
+        write(assistants_path, data)?;
 
         Ok(())
     }
 
     pub fn load(&mut self, asset_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         let home_dir = get_config_directory()?;
-        let config_path = home_dir.join("providers.json");
+        let config_path = home_dir.join("assistants.json");
 
         if config_path.exists() {
             let data = read_to_string(config_path)?;
-            let providers: Vec<Provider> = serde_json::from_str(&data)?;
-            self.providers = providers;
+            let assistants: Vec<Assistant> = serde_json::from_str(&data)?;
+            self.assistants = assistants;
         }
-        if self.providers.len() == 0 {
-            // Load default providers
-            let default_providers_path = asset_dir.join("default_providers.json");
-            if default_providers_path.exists() {
-                let data = read_to_string(default_providers_path)?;
-                let providers: Vec<Provider> = serde_json::from_str(&data)?;
-                println!("default_providers: {:?}", providers);
-                self.providers = providers;
+        if self.assistants.len() == 0 {
+            // Load default assistants
+            let default_assistants_path = asset_dir.join("default_assistants.json");
+            if default_assistants_path.exists() {
+                let data = read_to_string(default_assistants_path)?;
+                let assistants: Vec<Assistant> = serde_json::from_str(&data)?;
+                println!("default_assistants: {:?}", assistants);
+                self.assistants = assistants;
             } else {
-                panic!("Default providers not found: {:?}", default_providers_path);
+                panic!("Default assistants not found: {:?}", default_assistants_path);
             }
             if let Err(error) = self.save() {
-                println!("Can't save default providers: {:?}", error.to_string());
+                println!("Can't save default assistants: {:?}", error.to_string());
             };
         }
         Ok(())
@@ -135,7 +135,7 @@ impl ProviderStorage {
             }
         };
         if let Err(error) = self.load(resource_path) {
-            println!("Can't load providers: {:?}", error.to_string());
+            println!("Can't load assistants: {:?}", error.to_string());
         };
     }
 }

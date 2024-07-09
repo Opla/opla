@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::{ fs, path::PathBuf, collections::HashMap };
+use assistant_storage::AssistantStorage;
 use preset_storage::PresetStorage;
 use provider_storage::ProviderStorage;
 use thread_storage::ThreadStorage;
@@ -36,48 +37,8 @@ pub mod workspace_storage;
 pub mod server_storage;
 pub mod preset_storage;
 pub mod provider_storage;
+pub mod assistant_storage;
 pub mod app_state;
-
-/*
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum ProviderType {
-    #[serde(rename = "opla")]
-    Opla,
-    #[serde(rename = "server")]
-    Server,
-    #[serde(rename = "api")]
-    Api,
-    #[serde(rename = "proxy")]
-    Proxy,
-}
-
-impl fmt::Display for ProviderType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            ProviderType::Opla => write!(f, "opla"),
-            ProviderType::Server => write!(f, "server"),
-            ProviderType::Api => write!(f, "api"),
-            ProviderType::Proxy => write!(f, "proxy"),
-        }
-    }
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ProviderMetadata {
-    pub server: Option<ServerStorage>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Provider {
-    pub name: String,
-    pub r#type: String,
-    pub url: String,
-    pub description: Option<String>,
-    pub doc_url: Option<String>,
-    pub key: Option<String>,
-    pub disabled: Option<bool>,
-    pub metadata: Option<ProviderMetadata>,
-} */
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WindowSettings {
@@ -138,6 +99,8 @@ pub struct Store {
     pub presets: PresetStorage,
     #[serde(skip_serializing, default = "provider_default")]
     pub providers: ProviderStorage,
+    #[serde(skip_serializing, default = "assistant_default")]
+    pub assistants: AssistantStorage,
 }
 
 fn service_default() -> ServiceStorage {
@@ -158,6 +121,10 @@ fn preset_default() -> PresetStorage {
 
 fn provider_default() -> ProviderStorage {
     ProviderStorage::new()
+}
+
+fn assistant_default() -> AssistantStorage {
+    AssistantStorage::new()
 }
 
 impl Store {
@@ -181,6 +148,7 @@ impl Store {
             threads: thread_default(),
             presets: preset_default(),
             providers: provider_default(),
+            assistants: assistant_default(),
         }
     }
 
@@ -213,6 +181,7 @@ impl Store {
         self.threads.init(app_handle.app_handle(), project_path).await;
         self.presets.init(app_handle.app_handle());
         self.providers.init(app_handle.app_handle());
+        self.assistants.init(app_handle.app_handle());
     }
 
     pub fn set(&mut self, new_config: Store) {
@@ -224,6 +193,7 @@ impl Store {
         self.threads = new_config.threads.clone();
         self.presets = new_config.presets.clone();
         self.providers = new_config.providers.clone();
+        self.assistants = new_config.assistants.clone();
     }
 
     pub fn load(&mut self, asset_dir: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
@@ -403,6 +373,12 @@ impl Store {
     pub fn save_providers(&mut self) {
         if let Err(error) = self.providers.save() {
             println!("Error saving providers: {:?}", error.to_string());
+        };
+    }
+
+    pub fn save_assistants(&mut self) {
+        if let Err(error) = self.assistants.save() {
+            println!("Error saving assistants: {:?}", error.to_string());
         };
     }
 }
