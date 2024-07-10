@@ -44,7 +44,7 @@ export type Metadata = {
 };
 
 export type Author = {
-  role: 'user' | 'system' | 'assistant';
+  role: 'user' | 'system' | 'assistant' | 'note';
   name: string;
   avatarUrl?: string;
   metadata?: Metadata;
@@ -517,8 +517,10 @@ export type OplaContext = Readonly<{
   streams?: Streams;
 }>;
 
+export type LlmMessageRole = 'system' | 'user' | 'assistant' | 'tool';
+
 export type LlmMessage = {
-  role: 'system' | 'user' | 'assistant' | 'tool';
+  role: LlmMessageRole;
   content: string;
   name?: string;
 };

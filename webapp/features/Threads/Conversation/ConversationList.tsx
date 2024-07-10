@@ -20,7 +20,7 @@ import { AvatarRef, Conversation, Message, MessageImpl } from '@/types';
 import { getConversationAssets } from '@/utils/data/conversations';
 import { getMessageFirstAsset } from '@/utils/data/messages';
 import { Button } from '../../../components/ui/button';
-import MessageView from './MessageView';
+import MessageView from './Message';
 
 type ConversationListProps = {
   conversation: Conversation;

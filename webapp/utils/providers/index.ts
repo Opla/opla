@@ -6,6 +6,7 @@ import {
   CompletionParameterDefinitions,
   Conversation,
   LlmMessage,
+  LlmMessageRole,
   LlmParameters,
   Message,
   Preset,
@@ -73,11 +74,13 @@ export const createLlmMessages = (
 
   const sanitizedName = providerName === 'OpenAI' ? undefined : modelName;
 
-  const llmMessages: LlmMessage[] = context.map((m) => ({
-    content: getMessageContentAsString(m),
-    role: m.author?.role,
-    name: m.author?.role !== 'assistant' ? m.author?.name : sanitizedName,
-  }));
+  const llmMessages: LlmMessage[] = context
+    .filter((m) => m.author.role !== 'note')
+    .map((m) => ({
+      content: getMessageContentAsString(m),
+      role: m.author?.role as LlmMessageRole,
+      name: m.author?.role !== 'assistant' ? m.author?.name : sanitizedName,
+    }));
   return llmMessages;
 };
 
