@@ -42,11 +42,13 @@ pub enum Role {
     System,
     #[serde(rename = "assistant")]
     Assistant,
+    #[serde(rename = "note")]
+    Note,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Author {
-    role: Role, // 'user' | 'system' | 'assistant';
+    role: Role,
     name: String,
     #[serde(skip_serializing_if = "Option::is_none", alias = "avatarUrl")]
     avatar_url: Option<String>,

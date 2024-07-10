@@ -148,7 +148,7 @@ function ConversationProvider({
       conversationMessages: Message[],
       conversation: Conversation,
       previousMessage: Message | undefined,
-      modelName: string,
+      authorName: string,
     ) => {
       let updatedConversation = conversation;
       let updatedMessages: Message[] | undefined;
@@ -162,9 +162,18 @@ function ConversationProvider({
           updatedConversation,
           conversation.id,
         ));
+      } else if (authorName === 'Note') {
+        message = createMessage({ role: 'note', name: authorName }, content);
+        message.status = status;
+        ({ updatedConversation, updatedMessages } = await updateMessagesAndConversation(
+          [message],
+          getConversationMessages(conversation.id),
+          conversation,
+          conversation.id,
+        ));
       } else {
         const userMessage = createMessage({ role: 'user', name: 'You' }, raw, raw);
-        message = createMessage({ role: 'assistant', name: modelName || 'Assistant' }, content);
+        message = createMessage({ role: 'assistant', name: authorName || 'Assistant' }, content);
         message.status = status;
         userMessage.sibling = message.id;
         message.sibling = userMessage.id;
@@ -252,6 +261,50 @@ function ConversationProvider({
     ],
   );
 
+  const handleNote = useCallback(
+    async (
+      prompt: ParsedPrompt,
+      conversation: Conversation,
+      previousMessage?: Message | undefined,
+    ) => {
+      let updatedConversation = conversation;
+
+      if (!previousMessage) {
+        updatedConversation =
+          (await clearPrompt?.(conversation, conversations))?.find(
+            (c) => c.id === conversation.id,
+          ) || conversation;
+      }
+      if (updatedConversation.temp) {
+        updatedConversation.name = getConversationTitle(updatedConversation, t);
+      }
+
+      const updatedMessages = getConversationMessages(conversation.id);
+      const message = previousMessage;
+      await updateMessages(
+        prompt.raw,
+        prompt.text,
+        MessageStatus.Delivered,
+        updatedMessages,
+        updatedConversation,
+        message,
+        'Note',
+      );
+      if (tempConversationId) {
+        router.replace(`${Page.Threads}/${tempConversationId}`, undefined, { shallow: true });
+      }
+    },
+    [
+      clearPrompt,
+      conversations,
+      getConversationMessages,
+      router,
+      t,
+      tempConversationId,
+      updateMessages,
+    ],
+  );
+
   const preProcessingSendMessage = useCallback(
     async (
       prompt: ParsedPrompt,
@@ -285,6 +338,17 @@ function ConversationProvider({
         setIsProcessing({ ...isProcessing, [conversation.id]: true });
         try {
           await handleImageGeneration(prompt, conversation, previousMessage);
+        } catch (error) {
+          setErrorMessage({ ...errorMessages, [conversation.id]: `${error}` });
+        }
+        setIsProcessing({ ...isProcessing, [conversation.id]: false });
+
+        return {};
+      }
+      if (result.type === 'note') {
+        setIsProcessing({ ...isProcessing, [conversation.id]: true });
+        try {
+          await handleNote(prompt, conversation, previousMessage);
         } catch (error) {
           setErrorMessage({ ...errorMessages, [conversation.id]: `${error}` });
         }
@@ -328,6 +392,7 @@ function ConversationProvider({
       getAssistant,
       getConversationMessages,
       handleImageGeneration,
+      handleNote,
       isProcessing,
       providers,
       selectedConversation,
