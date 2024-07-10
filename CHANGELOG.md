@@ -1,3 +1,10 @@
+# [1.0.0-alpha.191](https://github.com/Opla/opla/compare/v1.0.0-alpha.190...v1.0.0-alpha.191) (2024-07-10)
+
+
+### Features
+
+* prompt command /note [#1068](https://github.com/Opla/opla/issues/1068) ([#1069](https://github.com/Opla/opla/issues/1069)) ([5f1dc20](https://github.com/Opla/opla/commit/5f1dc20009028904e5ccd106459eea0f1290daaf))
+
 # [1.0.0-alpha.190](https://github.com/Opla/opla/compare/v1.0.0-alpha.189...v1.0.0-alpha.190) (2024-07-09)
 
 
