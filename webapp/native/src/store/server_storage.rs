@@ -258,6 +258,7 @@ impl ServerConfiguration {
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ServerStorage {
+    #[serde(default)]
     pub launch_at_startup: bool,
     pub binary: String,
     #[serde(flatten)]
