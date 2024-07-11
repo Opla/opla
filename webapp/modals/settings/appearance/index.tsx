@@ -16,11 +16,11 @@
 
 import useTheme from '@/hooks/useTheme';
 import useTranslation from '@/hooks/useTranslation';
-import SettingItem from '@/components/common/SettingItem';
 import Dropdown from '@/components/common/Dropdown';
 import logger from '@/utils/logger';
 import { Laptop, Moon, Sun } from 'lucide-react';
 import { Pill } from '@/components/ui/Pills';
+import Parameter from '@/components/common/Parameter';
 
 export default function Appearance() {
   const { t } = useTranslation();
@@ -39,15 +39,23 @@ export default function Appearance() {
 
   return (
     <>
-      <SettingItem title={t('Color scheme')} subtitle={t("Choose Opla's color scheme")}>
-        <Dropdown items={colorSchemes} onSelect={handleSelectColorScheme} />
-      </SettingItem>
-      <SettingItem title={t('Accent color')} subtitle={t('Choose the accent color used in app')}>
+      <Parameter
+        name="colorScheme"
+        label={t('Color scheme')}
+        sublabel={t("Choose Opla's color scheme")}
+      >
+        <Dropdown items={colorSchemes} onSelect={handleSelectColorScheme} className="w-auto" />
+      </Parameter>
+      <Parameter
+        name="accentColor"
+        label={t('Accent color')}
+        sublabel={t('Choose the accent color used in app')}
+      >
         <Pill label="--" className="border-2 bg-primary leading-10 text-primary" />
-      </SettingItem>
-      <SettingItem title={t('Theme')} subtitle={t('Change the theme')}>
+      </Parameter>
+      <Parameter name="theme" label={t('Theme')} sublabel={t('Change the theme')}>
         Default
-      </SettingItem>
+      </Parameter>
     </>
   );
 }

@@ -16,13 +16,16 @@ import { useRef } from 'react';
 import { ChevronDown, LucideIcon } from 'lucide-react';
 import useClickOutside from '@/hooks/useClickOutside';
 import { Ui } from '@/types';
+import { cn } from '@/lib/utils';
 import Menu from '../Menu';
 
 export default function Dropdown({
   items,
+  className,
   onSelect,
 }: {
   items: Ui.MenuItem[];
+  className?: string;
   onSelect: (value?: string, data?: string) => void;
 }) {
   const target = useRef<HTMLDivElement>(null);
@@ -40,7 +43,7 @@ export default function Dropdown({
   }));
   const I = selectedItem?.icon as LucideIcon;
   return (
-    <div ref={target} className="relative w-full">
+    <div ref={target} className={cn('relative w-full', className)}>
       <label className="w-full" aria-label={selectedItem?.label}>
         <input
           ref={peer}

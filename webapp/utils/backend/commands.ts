@@ -250,3 +250,12 @@ export const removeConversationMessages = async (conversationId: string): Promis
     toast.error(`Error removeConversationMessages: ${error}`);
   }
 };
+
+export const showInFolder = async (path: string) => {
+  try {
+    await invokeTauri<void>('show_in_folder', { path });
+  } catch (error) {
+    logger.error(error);
+    toast.error(`Error showInFolder: ${error}`);
+  }
+};

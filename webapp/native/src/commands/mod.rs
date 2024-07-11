@@ -94,6 +94,16 @@ pub async fn get_data_path<R: Runtime>(
 }
 
 #[tauri::command]
+pub async fn show_in_folder<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    path: String,
+) -> Result<(), String> {
+    showfile::show_path_in_file_manager(path);
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn get_models_path<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
