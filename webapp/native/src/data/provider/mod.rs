@@ -60,6 +60,7 @@ pub struct Provider {
     pub updated_at: Option<DateTime<Utc>>,
 
     pub r#type: String,
+    #[serde(default = "default_url")]
     pub url: String,
     pub description: Option<String>,
     pub doc_url: Option<String>,
@@ -68,4 +69,8 @@ pub struct Provider {
     pub models: Option<Vec<Model>>,
     pub errors: Option<Vec<String>>,
     pub metadata: Option<ProviderMetadata>,
+}
+
+fn default_url() -> String {
+    "http://localhost/".to_string()
 }
