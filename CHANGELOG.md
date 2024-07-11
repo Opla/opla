@@ -1,3 +1,10 @@
+# [1.0.0-alpha.194](https://github.com/Opla/opla/compare/v1.0.0-alpha.193...v1.0.0-alpha.194) (2024-07-11)
+
+
+### Bug Fixes
+
+* older data can't be imported [#1075](https://github.com/Opla/opla/issues/1075) ([#1076](https://github.com/Opla/opla/issues/1076)) ([5f87dd5](https://github.com/Opla/opla/commit/5f87dd5ce15dc2beaaa3e0fffe4fee8929195f45))
+
 # [1.0.0-alpha.193](https://github.com/Opla/opla/compare/v1.0.0-alpha.192...v1.0.0-alpha.193) (2024-07-11)
 
 
