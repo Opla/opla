@@ -56,9 +56,13 @@ pub enum PresetParameter {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum ContextWindowPolicy {
+    #[serde(rename = "none", alias = "None")]
     None,
+    #[serde(rename = "rolling", alias = "Rolling")]
     Rolling,
+    #[serde(rename = "stop", alias = "Stop")]
     Stop,
+    #[serde(rename = "last", alias = "Last")]
     Last,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]

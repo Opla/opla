@@ -12,11 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::str::FromStr;
+
 use chrono::{ DateTime, Utc };
 use serde::{ Deserialize, Serialize };
+use void::Void;
 
 use super::{
     date_format,
+    option_string_or_struct,
     is_false,
     asset::Asset,
     message::Message,
@@ -81,6 +85,21 @@ pub struct ParsedPrompt {
     pub token_count: Option<u32>,
 }
 
+impl FromStr for ParsedPrompt {
+    type Err = Void;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self {
+            raw: s.to_string(),
+            text: s.to_string(),
+            caret_position: 0,
+            current_token_index: 0,
+            tokens: Vec::new(),
+            locked: false,
+            token_count: None,
+        })
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct ConversationUsage {
     #[serde(skip_serializing_if = "Option::is_none", alias = "promptTokens", default)]
@@ -123,7 +142,7 @@ pub struct Conversation {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     messages: Option<Vec<Message>>,
 
-    #[serde(skip_serializing_if = "Option::is_none", alias = "currentPrompt", default)]
+    #[serde(deserialize_with = "option_string_or_struct", skip_serializing_if = "Option::is_none", alias = "currentPrompt", default)]
     current_prompt: Option<ParsedPrompt>,
 
     #[serde(skip_serializing_if = "Option::is_none", alias = "importedFrom", default)]

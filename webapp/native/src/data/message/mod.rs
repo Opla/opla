@@ -20,7 +20,7 @@ use void::Void;
 
 use crate::data::date_format;
 
-use super::{ string_or_struct, Metadata };
+use super::Metadata;
 
 #[derive(PartialEq, Clone, Debug, Serialize, Deserialize)]
 pub enum MessageStatus {
