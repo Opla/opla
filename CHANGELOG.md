@@ -1,3 +1,10 @@
+# [1.0.0-alpha.192](https://github.com/Opla/opla/compare/v1.0.0-alpha.191...v1.0.0-alpha.192) (2024-07-11)
+
+
+### Features
+
+* show in finder/explorer [#1071](https://github.com/Opla/opla/issues/1071) ([#1072](https://github.com/Opla/opla/issues/1072)) ([0a408a8](https://github.com/Opla/opla/commit/0a408a82098e5654a92e59aff91d272c522cd906))
+
 # [1.0.0-alpha.191](https://github.com/Opla/opla/compare/v1.0.0-alpha.190...v1.0.0-alpha.191) (2024-07-10)
 
 
