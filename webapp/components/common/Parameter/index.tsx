@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 import { BaseNamedRecord, ParameterDefinitionType } from '@/types';
 import { Button } from '@/components/ui/button';
 import { t } from 'i18next';
+import { showInFolder } from '@/utils/backend/commands';
 
 export type ParameterValue = string | number | boolean | string[] | BaseNamedRecord[] | undefined;
 export type ParametersRecord = Record<string, ParameterValue>;
@@ -37,9 +38,9 @@ const getAttribute = (type: ParameterDefinitionType): HTMLInputTypeAttribute | u
 };
 type ParameterProps = {
   label?: string;
+  sublabel?: string;
   placeholder?: string;
   name: string;
-  sublabel?: string;
   description?: string;
   inputCss?: string;
   min?: number;
@@ -47,6 +48,7 @@ type ParameterProps = {
   value?: ParameterValue;
   type?: ParameterDefinitionType;
   disabled?: boolean;
+  className?: string;
   children?: React.ReactNode;
   onChange?: (name: string, value: ParameterValue) => void;
   onAction?: () => void;
@@ -64,6 +66,7 @@ export default function Parameter({
   max,
   type = 'text',
   disabled = false,
+  className,
   children,
   onChange = () => {},
   onAction,
@@ -82,6 +85,10 @@ export default function Parameter({
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>, n: string) => {
     const fileUploaded = event.target.files?.[0];
     onChange(n, fileUploaded?.name);
+  };
+
+  const handleShowfile = () => {
+    showInFolder(value as string);
   };
 
   let flex = 'flex-row items-center justify-between';
@@ -118,7 +125,7 @@ export default function Parameter({
         }}
       />
     );
-  } else {
+  } else if (!(children && type === 'text')) {
     component = (
       <div className={cn('flex flex-row', inputCss)}>
         {disabled && type === 'url' && (
@@ -128,11 +135,13 @@ export default function Parameter({
         )}
         {disabled && !onAction && (type === 'file' || type === 'path') && (
           <div className="flex items-center gap-4">
-            {(value as string) || t('None')}
+            <Button variant="link" className="text-muted-foreground" onClick={handleShowfile}>
+              {(value as string) || t('None')}
+            </Button>
             {type === 'path' ? (
-              <Folder strokeWidth={1.5} className="h-4 w-4" />
+              <Folder strokeWidth={1.5} className="h-4 w-4 text-muted" />
             ) : (
-              <File strokeWidth={1.5} className="h-4 w-4" />
+              <File strokeWidth={1.5} className="h-4 w-4 text-muted" />
             )}
           </div>
         )}
@@ -167,7 +176,9 @@ export default function Parameter({
         )}
         {(type === 'path' || type === 'file') && (onAction || !disabled) && (
           <div className="flex items-center gap-4">
-            <span>{(value as string) || t('None')}</span>
+            <Button variant="link" className="text-muted-foreground" onClick={handleShowfile}>
+              {(value as string) || t('None')}
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -204,14 +215,21 @@ export default function Parameter({
         {children}
       </div>
     );
+  } else {
+    component = children;
   }
 
   return (
-    <div className={boxCss}>
+    <div className={cn(boxCss, className)}>
       <div className="flex w-full flex-grow flex-col justify-center">
         <div className="flex w-full flex-row items-center justify-between">
           <div className={`flex grow flex-row ${flex}`}>
-            {label && <Label className="capitalize">{label} </Label>}
+            {label && (
+              <Label className="flex flex-1 flex-col justify-center capitalize">
+                <p>{label}</p>
+                <p className="pt-2 text-sm text-muted-foreground">{sublabel}</p>
+              </Label>
+            )}
             {component}
           </div>
           {description && (
@@ -225,7 +243,6 @@ export default function Parameter({
             </Tooltip>
           )}
         </div>
-        <p className="text-sm">{sublabel}</p>
       </div>
     </div>
   );

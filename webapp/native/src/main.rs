@@ -340,6 +340,7 @@ fn main() {
                 crate::commands::get_models_path,
                 crate::commands::create_dir,
                 crate::commands::file_exists,
+                crate::commands::show_in_folder,
                 crate::commands::asset::get_file_asset_extensions,
                 crate::commands::asset::validate_assets,
                 crate::commands::provider::get_provider_template,
