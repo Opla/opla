@@ -15,12 +15,12 @@
 use std::str::FromStr;
 
 use chrono::{ DateTime, Utc };
-use serde::{ Deserialize, Serialize };
+use serde::{ de, Deserialize, Deserializer, Serialize };
 use void::Void;
 
-use crate::data::{ date_format, option_string_or_struct };
+use crate::data::date_format;
 
-use super::Metadata;
+use super::{ string_or_struct, Metadata };
 
 #[derive(PartialEq, Clone, Debug, Serialize, Deserialize)]
 pub enum MessageStatus {
@@ -75,7 +75,7 @@ pub enum ContentType {
 }
 
 #[serde_with::skip_serializing_none]
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Content {
     r#type: ContentType,
     parts: Vec<String>,
@@ -99,6 +99,41 @@ impl FromStr for Content {
     }
 }
 
+impl<'de> Deserialize<'de> for Content {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: Deserializer<'de> {
+        #[derive(Deserialize)]
+        #[serde(remote = "Content")]
+        struct This {
+            r#type: ContentType,
+            parts: Vec<String>,
+            #[serde(skip_serializing_if = "Option::is_none", default)]
+            raw: Option<Vec<String>>,
+            #[serde(skip_serializing_if = "Option::is_none", default)]
+            metadata: Option<Metadata>,
+            author: Option<Author>,
+        }
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum Helper {
+            Short(String),
+            #[serde(with = "This")] Full(Content),
+        }
+
+        Ok(match Helper::deserialize(deserializer)? {
+            Helper::Short(value) => {
+                match FromStr::from_str(&value) {
+                    Ok(v) => v,
+                    Err(_) => {
+                        return Err(de::Error::custom("invalid string"));
+                    }
+                }
+            }
+            Helper::Full(this) => this,
+        })
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Message {
     pub id: String,
@@ -111,13 +146,9 @@ pub struct Message {
 
     pub author: Author,
 
-    #[serde(
-        skip_serializing_if = "Option::is_none",
-        default,
-        deserialize_with = "option_string_or_struct"
-    )]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<Content>,
-    #[serde(skip_serializing_if = "Option::is_none", alias = "contentHistory", default)]
+    #[serde(skip_serializing_if = "Option::is_none", alias = "contentHistory")]
     pub content_history: Option<Vec<Content>>,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub status: Option<MessageStatus>,
