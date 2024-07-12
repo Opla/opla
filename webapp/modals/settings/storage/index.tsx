@@ -16,23 +16,48 @@
 
 import useTranslation from '@/hooks/useTranslation';
 import { Button } from '@/components/ui/button';
-import { getConfigPath, getModelsPath } from '@/utils/backend/commands';
+import {
+  chooseDirectory,
+  getConfigPath,
+  getModelsPath,
+  setModelsPath,
+} from '@/utils/backend/commands';
 import { useEffect, useState } from 'react';
 import Parameter from '@/components/common/Parameter';
+import { ResetIcon } from '@radix-ui/react-icons';
+import logger from '@/utils/logger';
+import useBackendContext from '@/hooks/useBackendContext';
 
 export default function Storage() {
   const { t } = useTranslation();
+  const { updateBackendStore } = useBackendContext();
   const [configDir, setConfigDir] = useState<string>();
   const [dataDir, setDataDir] = useState<string>();
+
+  const updateDirs = async () => {
+    let dir = await getConfigPath();
+    setConfigDir(dir);
+    dir = await getModelsPath();
+    setDataDir(dir);
+  };
+
   useEffect(() => {
-    const afunc = async () => {
-      let dir = await getConfigPath();
-      setConfigDir(dir);
-      dir = await getModelsPath();
-      setDataDir(dir);
-    };
-    afunc();
+    updateDirs();
   }, []);
+
+  const handleChangeModelsPath = async (newPath?: string | undefined) => {
+    logger.info('New model path', newPath);
+    await setModelsPath(newPath);
+    await updateBackendStore();
+    await updateDirs();
+  };
+
+  const handleChooseModelsPath = async () => {
+    const newPath = await chooseDirectory();
+    if (newPath) {
+      handleChangeModelsPath(newPath);
+    }
+  };
 
   return (
     <>
@@ -45,17 +70,32 @@ export default function Storage() {
         disabled
         onChange={() => {}}
         className="border-b"
-      />
+      >
+        <Button variant="ghost" size="sm" className="text-muted-foreground" disabled>
+          <ResetIcon strokeWidth={1.5} className="h-4 w-4" />
+        </Button>
+      </Parameter>
       <Parameter
         label={t('Models path')}
         sublabel={t('Where your models are saved')}
         name="modelPath"
         value={dataDir}
         type="path"
-        disabled
-        onChange={() => {}}
+        onAction={() => handleChooseModelsPath()}
         className="border-b"
-      />
+      >
+        <Button
+          variant="ghost"
+          size="sm"
+          className=""
+          onClick={(e) => {
+            e.preventDefault();
+            handleChangeModelsPath();
+          }}
+        >
+          <ResetIcon strokeWidth={1.5} className="h-4 w-4" />
+        </Button>
+      </Parameter>
       <Parameter
         name="backup"
         label={t('Backup data')}

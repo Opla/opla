@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::path::{Path, PathBuf};
+use std::path::{ Path, PathBuf };
 
 use crate::store::{ Store, Settings };
 use crate::OplaContext;
@@ -97,7 +97,7 @@ pub async fn get_data_path<R: Runtime>(
 pub async fn show_in_folder<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
-    path: String,
+    path: String
 ) -> Result<(), String> {
     showfile::show_path_in_file_manager(path);
     Ok(())
@@ -126,6 +126,21 @@ pub async fn get_models_path<R: Runtime>(
 }
 
 #[tauri::command]
+pub async fn set_models_path<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>,
+    models_path: Option<String>,
+) -> Result<String, String> {
+    let mut store = context.store.lock().await;
+    let result = store.models.set_models_path(models_path);
+
+     store.save().map_err(|err| err.to_string())?;
+
+    result
+}
+
+#[tauri::command]
 pub async fn create_dir<R: Runtime>(
     _app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
@@ -141,7 +156,6 @@ pub async fn create_dir<R: Runtime>(
     }
     Ok(())
 }
-
 
 #[tauri::command]
 pub async fn file_exists<R: Runtime>(
@@ -160,4 +174,19 @@ pub async fn file_exists<R: Runtime>(
     let result = dir.is_file();
 
     Ok(result)
+}
+
+#[tauri::command]
+pub async fn choose_directory() -> Result<Option<String>, String> {
+    use tauri::api::dialog::blocking::FileDialogBuilder;
+
+    let directory_or_none: Option<String> = match FileDialogBuilder::new().pick_folder() {
+        Some(path) => match path.to_str() {
+            Some(path) => Some(path.to_string()),
+            None => None,
+        },
+        None => None,
+    };
+
+    Ok(directory_or_none)
 }

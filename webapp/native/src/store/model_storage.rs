@@ -34,8 +34,30 @@ impl ModelStorage {
         }
     }
 
+    pub fn set_models_path(&mut self, models_path: Option<String>) -> Result<String,String> {
+        // TODO validate models_path, current models and truncate from home/data directory
+        println!("Set models path {:?}", models_path);
+        self.path = models_path.clone();
+        let models_path:  String = match self.get_models_path()?.to_str() {
+            Some(value) => value.to_string(),
+            None => return Err(format!("Can't get models path")),
+        };
+        Ok(models_path)
+    }
+
     pub fn get_models_path(&self) -> Result<PathBuf, String> {
-        Ok(get_data_directory()?.join("models"))
+        let models_path = match self.path {
+            Some(ref path) => {
+                let p = PathBuf::from(path);
+                if p.is_absolute() {
+                    p
+                } else {
+                    get_home_directory()?.join(path)
+                }
+            }
+            None => get_data_directory()?.join("models"),
+        };
+        Ok(models_path)
     }
 
     pub fn get_full_path(
@@ -47,7 +69,7 @@ impl ModelStorage {
         if path_filename.is_absolute() {
             return Ok(path_filename.to_path_buf());
         }
-        let models_path = match self.path {
+        /* let models_path = match self.path {
             Some(ref path) => {
                 let p = PathBuf::from(path);
                 if p.is_absolute() {
@@ -57,7 +79,8 @@ impl ModelStorage {
                 }
             }
             None => self.get_models_path()?,
-        };
+        }; */
+        let models_path = self.get_models_path()?;
         let model_path = models_path.join(path_filename);
         Ok(model_path)
     }
