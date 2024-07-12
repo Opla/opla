@@ -16,7 +16,7 @@
 
 import useTheme from '@/hooks/useTheme';
 import useTranslation from '@/hooks/useTranslation';
-import Dropdown from '@/components/common/Dropdown';
+import SelectBox from '@/components/common/SelectBox';
 import logger from '@/utils/logger';
 import { Laptop, Moon, Sun } from 'lucide-react';
 import { Pill } from '@/components/ui/Pills';
@@ -27,9 +27,21 @@ export default function Appearance() {
   const { theme, setTheme, isSystem } = useTheme();
 
   const colorSchemes = [
-    { label: 'System', value: 'system', icon: Laptop, selected: isSystem },
-    { label: 'Light', value: 'light', icon: Sun, selected: !isSystem && theme === 'light' },
-    { label: 'Dark', value: 'dark', icon: Moon, selected: !isSystem && theme === 'dark' },
+    { key: 'system', label: 'System', value: 'system', icon: Laptop, selected: isSystem },
+    {
+      key: 'light',
+      label: 'Light',
+      value: 'light',
+      icon: Sun,
+      selected: !isSystem && theme === 'light',
+    },
+    {
+      key: 'dark',
+      label: 'Dark',
+      value: 'dark',
+      icon: Moon,
+      selected: !isSystem && theme === 'dark',
+    },
   ];
 
   const handleSelectColorScheme = (value?: string, data?: string) => {
@@ -44,7 +56,7 @@ export default function Appearance() {
         label={t('Color scheme')}
         sublabel={t("Choose Opla's color scheme")}
       >
-        <Dropdown items={colorSchemes} onSelect={handleSelectColorScheme} className="w-auto" />
+        <SelectBox items={colorSchemes} onSelect={handleSelectColorScheme} className="w-auto" />
       </Parameter>
       <Parameter
         name="accentColor"

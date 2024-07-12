@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export default function Card({
+export default function ButtonCard({
   title,
   description,
   selected,

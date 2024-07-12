@@ -87,7 +87,15 @@ function Dialog({
   const handleDialogClick = useCallback(
     (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      if (!document.body.classList.contains('modalbox-open') && target.nodeName === 'DIALOG') {
+      const buttons = target.querySelectorAll('button');
+      let isSubContentOpen = document.body.classList.contains('modalbox-open');
+      buttons.forEach((button) => {
+        if (button.getAttribute('data-state') === 'open') {
+          isSubContentOpen = true;
+        }
+      });
+
+      if (!isSubContentOpen && target.nodeName === 'DIALOG') {
         event.stopPropagation();
         onClose();
       }

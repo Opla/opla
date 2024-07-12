@@ -14,7 +14,7 @@
 
 import { useContext, useState } from 'react';
 import { useRouter } from 'next/router';
-import Card from '@/components/common/Card';
+import ButtonCard from '@/components/common/ButtonCard';
 import Dialog from '@/components/common/Modal';
 import useTranslation from '@/hooks/useTranslation';
 import { Provider, ProviderType } from '@/types';
@@ -89,21 +89,21 @@ export default function NewProvider({
         {step === 1 && (
           <Panel title={t('Choose a provider')}>
             <>
-              <Card
+              <ButtonCard
                 title="Opla"
                 disabled={isOpla}
                 selected={provider?.type === ProviderType.opla}
                 description={t('Easy to run on your machine')}
                 onClick={() => handleChoose(ProviderType.opla, 'Opla')}
               />
-              <Card
+              <ButtonCard
                 title="OpenAI"
                 disabled={providers.find((p) => p.type === ProviderType.openai) !== undefined}
                 selected={provider?.type === ProviderType.openai}
                 description={t('Using your OpenAI account')}
                 onClick={() => handleChoose(ProviderType.openai, 'OpenAI')}
               />
-              <Card
+              <ButtonCard
                 title={t('Server')}
                 description={t('For experts, it needs to be compatible with OpenAI API')}
                 selected={provider?.type === ProviderType.server}
