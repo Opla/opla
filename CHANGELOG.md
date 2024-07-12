@@ -1,3 +1,10 @@
+# [1.0.0-alpha.195](https://github.com/Opla/opla/compare/v1.0.0-alpha.194...v1.0.0-alpha.195) (2024-07-12)
+
+
+### Bug Fixes
+
+* **assistant:** target dialog is not working [#1077](https://github.com/Opla/opla/issues/1077) ([#1078](https://github.com/Opla/opla/issues/1078)) ([162fe28](https://github.com/Opla/opla/commit/162fe28131b2d79d11340fe253798bb566000f6c))
+
 # [1.0.0-alpha.194](https://github.com/Opla/opla/compare/v1.0.0-alpha.193...v1.0.0-alpha.194) (2024-07-11)
 
 
