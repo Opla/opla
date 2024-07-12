@@ -1,3 +1,10 @@
+# [1.0.0-alpha.196](https://github.com/Opla/opla/compare/v1.0.0-alpha.195...v1.0.0-alpha.196) (2024-07-12)
+
+
+### Features
+
+* **Settings:** change models folder [#1070](https://github.com/Opla/opla/issues/1070) ([#1079](https://github.com/Opla/opla/issues/1079)) ([82d0030](https://github.com/Opla/opla/commit/82d003092d32c7b18b8201452735acc17c10fd5c))
+
 # [1.0.0-alpha.195](https://github.com/Opla/opla/compare/v1.0.0-alpha.194...v1.0.0-alpha.195) (2024-07-12)
 
 
