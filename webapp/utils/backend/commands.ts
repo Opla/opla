@@ -166,7 +166,21 @@ export const getModelsPath = async (): Promise<string | undefined> => {
     return path;
   } catch (error) {
     logger.error(error);
-    toast.error(`Error getting data path: ${error}`);
+    toast.error(`Error getting models path: ${error}`);
+  }
+  return undefined;
+};
+
+export const setModelsPath = async (
+  modelsPath: string | undefined,
+): Promise<string | undefined> => {
+  try {
+    const path = await invokeTauri<string>('set_models_path', { modelsPath });
+    logger.info('setModelsPath:', path);
+    return path;
+  } catch (error) {
+    logger.error(error);
+    toast.error(`Error setting models path: ${error}`);
   }
   return undefined;
 };
@@ -258,4 +272,15 @@ export const showInFolder = async (path: string) => {
     logger.error(error);
     toast.error(`Error showInFolder: ${error}`);
   }
+};
+
+export const chooseDirectory = async (): Promise<string | undefined> => {
+  try {
+    const dir = await invokeTauri<string | undefined>('choose_directory');
+    return dir;
+  } catch (error) {
+    logger.error(error);
+    toast.error(`Error showInFolder: ${error}`);
+  }
+  return undefined;
 };

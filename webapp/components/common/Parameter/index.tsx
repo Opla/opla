@@ -27,6 +27,14 @@ import { Button } from '@/components/ui/button';
 import { t } from 'i18next';
 import { showInFolder } from '@/utils/backend/commands';
 
+declare module 'react' {
+  interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
+    // extends React's HTMLAttributes
+    directory?: string;
+    webkitdirectory?: string;
+  }
+}
+
 export type ParameterValue = string | number | boolean | string[] | BaseNamedRecord[] | undefined;
 export type ParametersRecord = Record<string, ParameterValue>;
 
@@ -139,7 +147,7 @@ export default function Parameter({
               {(value as string) || t('None')}
             </Button>
             {type === 'path' ? (
-              <Folder strokeWidth={1.5} className="h-4 w-4 text-muted" />
+              <Folder strokeWidth={1.5} className="m-2.5 h-4 w-4 text-muted" />
             ) : (
               <File strokeWidth={1.5} className="h-4 w-4 text-muted" />
             )}
@@ -197,13 +205,12 @@ export default function Parameter({
                 <File strokeWidth={1.5} className="h-4 w-4" />
               )}
             </Button>
-            {!disabled && (
+            {!disabled && type === 'file' && (
               <Input
-                value={(value as string) || ''}
+                value=""
                 placeholder={placeholder}
                 className="hidden"
                 type={getAttribute(type)}
-                disabled={disabled}
                 ref={hiddenFileInput}
                 onChange={(e) => {
                   handleFileChange(e, name);
