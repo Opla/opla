@@ -1,3 +1,10 @@
+# [1.0.0-alpha.197](https://github.com/Opla/opla/compare/v1.0.0-alpha.196...v1.0.0-alpha.197) (2024-07-12)
+
+
+### Features
+
+* **ui:** refactor Dropdown using Select [#1080](https://github.com/Opla/opla/issues/1080) ([#1081](https://github.com/Opla/opla/issues/1081)) ([80963a0](https://github.com/Opla/opla/commit/80963a0e6a16f3375e8d5c67208b584c9644a848))
+
 # [1.0.0-alpha.196](https://github.com/Opla/opla/compare/v1.0.0-alpha.195...v1.0.0-alpha.196) (2024-07-12)
 
 
