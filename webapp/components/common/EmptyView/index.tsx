@@ -41,7 +41,6 @@ function EmptyView({
     const Actionbutton = (
       <Button
         key={action.label}
-        type="button"
         variant={action.variant || 'default'}
         disabled={action.disabled}
         onClick={(e) => {

@@ -229,7 +229,7 @@ export default function AssistantView({ selectedId: assistantId }: AssistantProp
                       </div>
                     </fieldset>
                   </form>
-                  <form className="grid min-h-[400px] w-full items-start gap-6 overflow-auto pt-8">
+                  <div className="grid min-h-[400px] w-full items-start gap-6 overflow-auto pt-8">
                     <fieldset className="grid gap-6 rounded-lg border p-4">
                       <legend className="-ml-1 px-1 text-sm font-medium">{t('Targets')}</legend>
 
@@ -239,7 +239,14 @@ export default function AssistantView({ selectedId: assistantId }: AssistantProp
                             {t('Deploy your assistant to.')}
                           </div>
                         </div>
-                        <Button variant="ghost" size="sm" onClick={handleCreateTarget}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleCreateTarget();
+                          }}
+                        >
                           <Plus className="h-4 w-4" strokeWidth={1.5} />
                         </Button>
                       </div>
@@ -263,7 +270,7 @@ export default function AssistantView({ selectedId: assistantId }: AssistantProp
                         )}
                       </div>
                     </fieldset>
-                  </form>
+                  </div>
                 </div>
               </ScrollArea>
             </TabsContent>
