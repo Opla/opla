@@ -1,3 +1,10 @@
+# [1.0.0-alpha.201](https://github.com/Opla/opla/compare/v1.0.0-alpha.200...v1.0.0-alpha.201) (2024-07-15)
+
+
+### Features
+
+* **store:**  add StorageProps state/error [#1088](https://github.com/Opla/opla/issues/1088) ([#1089](https://github.com/Opla/opla/issues/1089)) ([fad4148](https://github.com/Opla/opla/commit/fad4148e5b50c7f330ebb95f19025306b125e2f1))
+
 # [1.0.0-alpha.200](https://github.com/Opla/opla/compare/v1.0.0-alpha.199...v1.0.0-alpha.200) (2024-07-15)
 
 
