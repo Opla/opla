@@ -1,3 +1,10 @@
+# [1.0.0-alpha.200](https://github.com/Opla/opla/compare/v1.0.0-alpha.199...v1.0.0-alpha.200) (2024-07-15)
+
+
+### Features
+
+* use zustand for config.settings [#1086](https://github.com/Opla/opla/issues/1086) ([#1087](https://github.com/Opla/opla/issues/1087)) ([7de93d7](https://github.com/Opla/opla/commit/7de93d757bc8529adac7b3ed1457bec4d6282c0f))
+
 # [1.0.0-alpha.199](https://github.com/Opla/opla/compare/v1.0.0-alpha.198...v1.0.0-alpha.199) (2024-07-15)
 
 
