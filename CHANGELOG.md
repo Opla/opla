@@ -1,3 +1,10 @@
+# [1.0.0-alpha.202](https://github.com/Opla/opla/compare/v1.0.0-alpha.201...v1.0.0-alpha.202) (2024-07-15)
+
+
+### Features
+
+* check for update [#1090](https://github.com/Opla/opla/issues/1090) ([#1091](https://github.com/Opla/opla/issues/1091)) ([e6ebc9d](https://github.com/Opla/opla/commit/e6ebc9db73f70752582f5d44a728ad9ee77b5b5d))
+
 # [1.0.0-alpha.201](https://github.com/Opla/opla/compare/v1.0.0-alpha.200...v1.0.0-alpha.201) (2024-07-15)
 
 
