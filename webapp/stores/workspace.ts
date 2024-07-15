@@ -14,9 +14,9 @@
 
 import { StateCreator } from 'zustand';
 import { Project, Workspace } from '@/types';
-import { Emitter, GlobalAppState } from './constants';
+import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 
-interface WorkspaceProps {
+interface WorkspaceProps extends StorageProps {
   activeWorkspaceId?: string;
   workspaces: Record<string, Workspace>;
   projects: Record<string, Project>;
@@ -32,6 +32,7 @@ export interface WorkspaceSlice extends WorkspaceProps {
 export type WorkspaceStore = ReturnType<typeof createWorkspaceSlice>;
 
 const DEFAULT_PROPS: WorkspaceProps = {
+  state: StorageState.INIT,
   workspaces: {},
   projects: {},
 };

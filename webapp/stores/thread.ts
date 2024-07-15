@@ -24,9 +24,9 @@ import {
   saveConversationMessages,
 } from '@/utils/backend/commands';
 import { getMessageContentAsString } from '@/utils/data/messages';
-import { Emitter, GlobalAppState } from './constants';
+import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 
-interface ThreadProps {
+interface ThreadProps extends StorageProps {
   conversations: Conversation[];
   messages: Record<string, Message[]>;
   archives: Conversation[];
@@ -68,6 +68,7 @@ export interface ThreadSlice extends ThreadProps {
 export type ThreadStore = ReturnType<typeof createThreadSlice>;
 
 const DEFAULT_PROPS: ThreadProps = {
+  state: StorageState.INIT,
   conversations: [],
   messages: {},
   archives: [],

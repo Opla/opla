@@ -16,9 +16,9 @@ import { StateCreator } from 'zustand';
 import { Preset } from '@/types';
 import { mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
-import { Emitter, GlobalAppState } from './constants';
+import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 
-interface PresetProps {
+interface PresetProps extends StorageProps {
   presets: Preset[];
 }
 
@@ -30,6 +30,7 @@ export interface PresetSlice extends PresetProps {
 export type PresetStore = ReturnType<typeof createPresetSlice>;
 
 const DEFAULT_PROPS: PresetProps = {
+  state: StorageState.INIT,
   presets: [],
 };
 

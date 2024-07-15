@@ -27,7 +27,7 @@ import { mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
 import createAssistantSlice, { AssistantSlice } from './assistant';
 import createWorkspaceSlice, { WorkspaceSlice } from './workspace';
-import { EVENTS, Emitter, GlobalAppState } from './constants';
+import { EVENTS, Emitter, GlobalAppState, StorageState } from './types';
 import createThreadSlice, { ThreadSlice } from './thread';
 import createPresetSlice, { PresetSlice } from './preset';
 import createProviderSlice, { ProviderSlice } from './provider';
@@ -80,17 +80,17 @@ export const subscribeStateSync = async () => {
     if (key === GlobalAppState.WORKSPACE) {
       const { workspaces } = useWorkspaceStore.getState();
       workspaces[key] = await mapKeys(value, toCamelCase);
-      useWorkspaceStore.setState({ workspaces });
+      useWorkspaceStore.setState({ workspaces, state: StorageState.OK, error: undefined });
     } else if (key === GlobalAppState.PROJECT) {
       const { projects } = useWorkspaceStore.getState();
       projects[key] = await mapKeys(value, toCamelCase);
-      useWorkspaceStore.setState({ projects });
+      useWorkspaceStore.setState({ projects, state: StorageState.OK, error: undefined });
     } else if (key === GlobalAppState.CONVERSATIONS) {
       const conversations = (await mapKeys(value, toCamelCase)) as Conversation[];
-      useThreadStore.setState({ conversations });
+      useThreadStore.setState({ conversations, state: StorageState.OK, error: undefined });
     } else if (key === GlobalAppState.ARCHIVES) {
       const archives = (await mapKeys(value, toCamelCase)) as Conversation[];
-      useThreadStore.setState({ archives });
+      useThreadStore.setState({ archives, state: StorageState.OK, error: undefined });
     } else if (key === GlobalAppState.CONVERSATIONMESSAGES) {
       const { conversationId, messages: conversationMessages } = (await mapKeys(
         value,
@@ -99,22 +99,24 @@ export const subscribeStateSync = async () => {
       const { messages } = useThreadStore.getState();
       useThreadStore.setState({
         messages: { ...messages, [conversationId]: conversationMessages },
+        state: StorageState.OK,
+        error: undefined,
       });
     } else if (key === GlobalAppState.MESSAGES) {
       const messages = (await mapKeys(value, toCamelCase)) as Record<string, Message[]>;
-      useThreadStore.setState({ messages });
+      useThreadStore.setState({ messages, state: StorageState.OK, error: undefined });
     } else if (key === GlobalAppState.PRESETS) {
       const { presets } = (await mapKeys(value, toCamelCase)) as { presets: Preset[] };
-      usePresetStore.setState({ presets });
+      usePresetStore.setState({ presets, state: StorageState.OK, error: undefined });
     } else if (key === GlobalAppState.PROVIDERS) {
       const { providers } = (await mapKeys(value, toCamelCase)) as { providers: Provider[] };
-      useProviderStore.setState({ providers });
+      useProviderStore.setState({ providers, state: StorageState.OK, error: undefined });
     } else if (key === GlobalAppState.ASSISTANTS) {
       const { assistants } = (await mapKeys(value, toCamelCase)) as { assistants: Assistant[] };
-      useAssistantStore.setState({ assistants });
-    } else if (key === GlobalAppState.CONFIGURATION) {
+      useAssistantStore.setState({ assistants, state: StorageState.OK, error: undefined });
+    } else if (key === GlobalAppState.SETTINGS) {
       const { settings } = (await mapKeys(value, toCamelCase)) as { settings: Settings };
-      useSettingsStore.setState({ settings });
+      useSettingsStore.setState({ settings, state: StorageState.OK, error: undefined });
     }
   });
 
