@@ -1,3 +1,10 @@
+# [1.0.0-alpha.199](https://github.com/Opla/opla/compare/v1.0.0-alpha.198...v1.0.0-alpha.199) (2024-07-15)
+
+
+### Features
+
+* **settings:** change language [#1084](https://github.com/Opla/opla/issues/1084) ([#1085](https://github.com/Opla/opla/issues/1085)) ([0fe4665](https://github.com/Opla/opla/commit/0fe46656c1505b0c11481f908bef7e44b1086737))
+
 # [1.0.0-alpha.198](https://github.com/Opla/opla/compare/v1.0.0-alpha.197...v1.0.0-alpha.198) (2024-07-15)
 
 
