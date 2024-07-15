@@ -1,3 +1,10 @@
+# [1.0.0-alpha.198](https://github.com/Opla/opla/compare/v1.0.0-alpha.197...v1.0.0-alpha.198) (2024-07-15)
+
+
+### Features
+
+* **ui:** no capitalize in Parameter subLabel [#1082](https://github.com/Opla/opla/issues/1082) ([#1083](https://github.com/Opla/opla/issues/1083)) ([724fdc6](https://github.com/Opla/opla/commit/724fdc64756a85313b0b5e9c7ec8b050f1c0a72f))
+
 # [1.0.0-alpha.197](https://github.com/Opla/opla/compare/v1.0.0-alpha.196...v1.0.0-alpha.197) (2024-07-12)
 
 
