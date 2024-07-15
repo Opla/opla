@@ -20,6 +20,8 @@ use crate::data::{
     assistant::Assistant, conversation::Conversation, message::{ ConversationMessages, Message }, provider::Provider, workspace::{ project::Project, Workspace }, Preset
 };
 
+use super::settings::Settings;
+
 pub const STATE_CHANGE_EVENT: &str = "state_change_event";
 pub const STATE_SYNC_EVENT: &str = "state_sync_event";
 pub enum GlobalAppState {
@@ -42,6 +44,8 @@ pub enum GlobalAppState {
     PROVIDERS = 10,
 
     ASSISTANTS = 11,
+
+    SETTINGS = 12,
 }
 
 impl From<u32> for GlobalAppState {
@@ -58,6 +62,7 @@ impl From<u32> for GlobalAppState {
             9 => GlobalAppState::PRESETS,
             10 => GlobalAppState::PROVIDERS,
             11 => GlobalAppState::ASSISTANTS,
+            12 => GlobalAppState::SETTINGS,
             _ => {
                 println!("Not a valid value for the enum GlobalAppState");
                 GlobalAppState::ERROR
@@ -88,6 +93,8 @@ impl Into<u32> for GlobalAppState {
             GlobalAppState::PROVIDERS => 10,
 
             GlobalAppState::ASSISTANTS => 11,
+
+            GlobalAppState::SETTINGS => 12,
         }
     }
 }
@@ -111,6 +118,11 @@ pub struct ValueAssistants {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ValueSettings {
+    pub settings: Settings,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Value {
     Bool(bool),
@@ -121,6 +133,7 @@ pub enum Value {
     Presets(ValuePresets),
     Providers(ValueProviders),
     Assistants(ValueAssistants),
+    Settings(ValueSettings),
     Empty(Empty),
     Conversations(Vec<Conversation>),
     ConversationMessages(ConversationMessages),

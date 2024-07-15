@@ -43,8 +43,7 @@ export function ConversationView({
   onDeleteAssets,
   onCopyMessage,
 }: ConversationViewProps) {
-  // const { t } = useTranslation();
-  const { config, setSettings } = useBackend();
+  const { settings, setSettings } = useBackend();
   const {
     selectedMessageId,
     handleResendMessage,
@@ -60,7 +59,7 @@ export function ConversationView({
   const getSelectedViewName = (selectedThreadId: string | undefined, view = ViewName.Recent) =>
     `${view === ViewName.Recent ? Page.Threads : Page.Archives}${selectedThreadId ? `/${selectedThreadId}` : ''}`;
 
-  const pagesSettings = config.settings.pages;
+  const pagesSettings = settings.pages;
   const conversationId = selectedConversation?.id;
   const conversationViewName = getSelectedViewName(conversationId);
 
@@ -98,7 +97,7 @@ export function ConversationView({
           updatedPageSettings.views[viewIndex - 1] = { ...conversationSettings, scrollPosition };
         }
         setSettings({
-          ...config.settings,
+          ...settings,
           pages: {
             ...pagesSettings,
             [conversationViewName]: updatedPageSettings,
@@ -113,7 +112,7 @@ export function ConversationView({
     pagesSettings,
     setSettings,
     update,
-    config.settings,
+    settings,
     viewIndex,
   ]);
 

@@ -17,10 +17,6 @@ import logger from '../logger';
 
 const context: OplaContext = {
   config: {
-    settings: {
-      startApp: false,
-      welcomeSplash: false,
-    },
     server: {
       name: 'None',
       parameters: {},

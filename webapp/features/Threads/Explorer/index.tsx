@@ -90,8 +90,7 @@ export default function ThreadsExplorer({
 }: ExplorerProps) {
   const router = useRouter();
   const { getConversationMessages } = useContext(AppContext);
-  const { config } = useBackend();
-  const { settings } = config;
+  const { settings } = useBackend();
   const threadsSettings = settings.pages?.[Page.Threads] || {
     ...DefaultPageSettings,
     explorerGroups: DefaultThreadsExplorerGroups,

@@ -41,20 +41,21 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
   const { t } = useTranslation();
   const { providers } = useContext(AppContext);
   const { config } = useBackend();
-  const modelItems = useMemo(() => getModelsAsItems(providers, config), [providers, config]).map(
-    (m) => ({
-      ...m,
-      icon: undefined,
-      renderIcon: () => (
-        <ModelIcon
-          icon={m.icon as unknown as Logo}
-          name={m.label}
-          className="h-4 w-4"
-          providerName={m.group?.toLowerCase()}
-        />
-      ),
-    }),
-  );
+  const modelItems = useMemo(
+    () => getModelsAsItems(providers, config.models),
+    [providers, config],
+  ).map((m) => ({
+    ...m,
+    icon: undefined,
+    renderIcon: () => (
+      <ModelIcon
+        icon={m.icon as unknown as Logo}
+        name={m.label}
+        className="h-4 w-4"
+        providerName={m.group?.toLowerCase()}
+      />
+    ),
+  }));
   const [newParameters, setNewParameters] = useState<Record<string, ParameterValue>>({});
   const target = data?.item as Preset;
   const { title, isNew, targetName } = useMemo(() => {
@@ -79,7 +80,7 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
   let provider: Provider | undefined;
   const modelName = (newParameters?.models as string[] | undefined)?.[0] || target.models?.[0];
   if (modelName) {
-    model = findModelInAll(modelName, providers, config);
+    model = findModelInAll(modelName, providers, config.models);
     provider = target.provider
       ? findProvider(target?.provider, providers)
       : getLocalProvider(providers);

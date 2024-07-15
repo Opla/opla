@@ -123,7 +123,7 @@ function NewLocalModel({
         model.editable = true;
         let { id } = model;
         let success;
-        const sameModel = findSameModel(model, config);
+        const sameModel = findSameModel(model, config.models);
         if (sameModel?.state === ModelState.Removed) {
           sameModel.state = ModelState.Ok;
           ({ id } = sameModel);
@@ -166,7 +166,7 @@ function NewLocalModel({
       delete selectedModel.include;
     }
     const path = getEntityName(selectedModel.creator || selectedModel.author);
-    const sameModel = findSameModel(selectedModel, config);
+    const sameModel = findSameModel(selectedModel, config.models);
 
     if (sameModel && sameModel.state !== ModelState.Removed) {
       toast.error(`${t('Model already exists')} ${selectedModel.name}`);

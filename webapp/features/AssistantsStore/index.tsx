@@ -44,16 +44,16 @@ const search = (query: string, assistant: Assistant) => {
 
 function AssistantsStore() {
   const router = useRouter();
-  const { config, updateBackendStore, setSettings } = useBackend();
+  const { config, settings, updateBackendStore, setSettings } = useBackend();
   const [collection, setCollection] = useState<Assistant[]>([]);
   const [query, setQuery] = useState<string>('');
   const { t } = useTranslation();
 
-  const defaultSettings = config.settings;
+  const defaultSettings = settings;
   const pageSettings = defaultSettings.pages?.[`${Ui.Page.Threads}/store`] || DefaultPageSettings;
 
   const handleExplorerHidden = (hidden: boolean) => {
-    const { settings } = config;
+    // const { settings } = config;
     const { pages = {} } = settings;
     pages[`${Ui.Page.Threads}/store`] = { ...pageSettings, explorerHidden: !hidden };
     setSettings({ ...settings, pages });

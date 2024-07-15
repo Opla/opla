@@ -75,7 +75,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     deleteArchive,
     providers,
   } = useContext(AppContext);
-  const { config, setSettings, updateBackendStore } = useBackend();
+  const { config, settings, setSettings, updateBackendStore } = useBackend();
 
   const {
     loadWorkspace,
@@ -110,7 +110,6 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
 
   const { showModal } = useContext(ModalsContext);
 
-  const { settings } = config;
   const selectedPage = getSelectedPage(selectedThreadId, view);
   const threadsSettings = settings.pages?.[Page.Threads] || {
     ...DefaultPageSettings,
@@ -118,7 +117,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
   };
 
   const saveSettings = (currentPage = selectedPage, partialSettings?: Partial<PageSettings>) => {
-    logger.info('saveSettings', currentPage, partialSettings, config);
+    logger.info('saveSettings', currentPage, partialSettings, settings);
     if (settings.selectedPage) {
       const pages = settings.pages || {};
       const page = pages[currentPage] || DefaultPageSettings;
@@ -175,7 +174,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
           }
         }
         const modelId = getConversationModelId(removedConversation, assistant);
-        const model = findModelInAll(modelId, providers, config, true);
+        const model = findModelInAll(modelId, providers, config.models, true);
         if (modelId && model?.state === ModelState.Removed) {
           let some = updatedConversations.some(
             (conversation) => getConversationModelId(conversation, assistant) === modelId,
@@ -286,7 +285,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     }
   };
 
-  const defaultSettings = config.settings;
+  const defaultSettings = settings;
   const pageSettings =
     defaultSettings.pages?.[selectedPage] ||
     defaultSettings.pages?.[Page.Threads] ||

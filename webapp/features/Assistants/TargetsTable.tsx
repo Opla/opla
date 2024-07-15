@@ -49,7 +49,7 @@ function TargetsTable({ targets, onEdit, onDuplicate, onDelete }: TargetsTablePr
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const { config } = useBackend();
   const { providers } = useContext(AppContext);
-  const models = getAllModels(providers, config);
+  const models = getAllModels(providers, config.models);
   const renderModel = (targetModels: string[] | undefined) => {
     const model = targetModels ? models.find((m) => m.name === targetModels[0]) : undefined;
     if (!model) return <div>{t('Model not found')}</div>;

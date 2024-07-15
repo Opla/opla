@@ -20,10 +20,7 @@ import useBackendContext from './useBackendContext';
 const useTranslation = () => {
   const availableLanguages = initI18n();
   const { t, i18n } = useNextTranslation('translation');
-  const {
-    config: { settings },
-    setSettings,
-  } = useBackendContext();
+  const { settings, setSettings } = useBackendContext();
 
   useEffect(() => {
     if (settings.language) {

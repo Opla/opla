@@ -84,7 +84,8 @@ function Thread({
     updateConversationMessages,
   } = useContext(AppContext);
 
-  const { config, downloads, streams, getActiveModel, setActiveModel, setSettings } = useBackend();
+  const { config, settings, downloads, streams, getActiveModel, setActiveModel, setSettings } =
+    useBackend();
   const searchParams = useSearchParams();
   const [service, setService] = useState<AIService | undefined>(undefined);
   const { assistants, getAssistant } = useAssistantStore();
@@ -208,7 +209,7 @@ function Thread({
       ? getMessageContentAsString(newMessages?.[0])
       : defaultConversationName;
 
-    const pagesSettings = config.settings.pages;
+    const pagesSettings = settings.pages;
     const conversationViewName = getSelectedViewName(conversationId);
     const conversationSettings = pagesSettings?.[conversationViewName];
     const viewSettings: ViewSettings[] = [
@@ -217,13 +218,7 @@ function Thread({
     ];
 
     return { messages: newMessages, tempConversationName: conversationName, views: viewSettings };
-  }, [
-    streams,
-    conversationId,
-    conversationMessages,
-    defaultConversationName,
-    config.settings.pages,
-  ]);
+  }, [streams, conversationId, conversationMessages, defaultConversationName, settings.pages]);
 
   const { modelItems, commandManager, assistant, selectedModelId, disabled, model } =
     useMemo(() => {
@@ -241,13 +236,13 @@ function Thread({
         }
         activeModel = findModel(modelId, config.models.items);
       } else {
-        activeModel = findModelInAll(modelId, providers, config, true);
+        activeModel = findModelInAll(modelId, providers, config.models, true);
       }
 
       const download = downloads?.find((d) => d.id === activeModel?.id);
 
       if (!activeModel && !download) {
-        activeModel = getAnyFirstModel(providers, config);
+        activeModel = getAnyFirstModel(providers, config.models);
         modelId = activeModel?.id;
       }
 
@@ -257,7 +252,7 @@ function Thread({
         activeModel.state = ModelState.Ok;
       }
 
-      const items = getModelsAsItems(providers, config, modelId);
+      const items = getModelsAsItems(providers, config.models, modelId);
       let d = false;
       if (!activeModel) {
         modelId = undefined;
@@ -359,7 +354,7 @@ function Thread({
       `ChangeService ${modelIdOrName} ${providerIdOrName} activeModel=${selectedModelId}`,
       selectedConversation,
     );
-    const activeModel = findModelInAll(modelIdOrName, providers, config, true);
+    const activeModel = findModelInAll(modelIdOrName, providers, config.models, true);
     if (!activeModel) {
       logger.error('changeService Model not found', modelIdOrName);
       return;
@@ -432,7 +427,7 @@ function Thread({
   };
 
   const handleSplitView = () => {
-    const pagesSettings = config.settings.pages;
+    const pagesSettings = settings.pages;
     const conversationViewName = getSelectedViewName(conversationId);
     if (views.length < 4 && pagesSettings?.[conversationViewName]) {
       const updatedPageSettings: PageSettings = pagesSettings[conversationViewName];
@@ -440,7 +435,7 @@ function Thread({
       updatedViews.push({ ...views[views.length - 1] });
       updatedPageSettings.views = updatedViews;
       setSettings({
-        ...config.settings,
+        ...settings,
         pages: {
           ...pagesSettings,
           [conversationViewName]: updatedPageSettings,
@@ -451,7 +446,7 @@ function Thread({
   };
 
   const handleCloseView = () => {
-    const pagesSettings = config.settings.pages;
+    const pagesSettings = settings.pages;
     const conversationViewName = getSelectedViewName(conversationId);
     if (views.length > 1 && pagesSettings?.[conversationViewName]) {
       const updatedPageSettings: PageSettings = pagesSettings[conversationViewName];
@@ -459,7 +454,7 @@ function Thread({
       updatedViews.pop();
       updatedPageSettings.views = updatedViews.length === 0 ? undefined : updatedViews;
       setSettings({
-        ...config.settings,
+        ...settings,
         pages: {
           ...pagesSettings,
           [conversationViewName]: updatedPageSettings,

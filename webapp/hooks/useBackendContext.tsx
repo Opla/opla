@@ -40,7 +40,7 @@ import {
 import {
   getOplaConfig,
   setActiveModel as setBackendActiveModel,
-  saveSettings,
+  // saveSettings,
 } from '@/utils/backend/commands';
 import { AppContext } from '@/context';
 import Backend, { BackendResult } from '@/utils/backend/Backend';
@@ -50,6 +50,7 @@ import { getConversation } from '@/utils/data/conversations';
 import { changeMessageContent } from '@/utils/data/messages';
 import { ParsedPrompt } from '@/utils/parsers';
 import { parseLLamaCppServerParameters } from '@/utils/providers/llama.cpp';
+import { useSettingsStore } from '@/stores';
 
 type StreamPayload = {
   status: 'error' | 'success';
@@ -64,10 +65,10 @@ const initialBackendContext: OplaContext = {
     stderr: [],
   },
   config: {
-    settings: {
+    /* settings: {
       startApp: false,
       welcomeSplash: false,
-    },
+    }, */
     server: {
       name: '',
       binary: '',
@@ -84,7 +85,8 @@ const initialBackendContext: OplaContext = {
 type Context = OplaContext & {
   startBackend: () => Promise<void>;
   disconnectBackend: () => Promise<void>;
-  setSettings: (settings: Settings) => Promise<void>;
+  settings: Settings;
+  setSettings: (settings: Settings) => void;
   updateBackendStore: () => Promise<void>;
   updateBackendServer: (partials: Partial<OplaServer>) => Promise<void>;
   start: (params: ServerParameters | undefined) => Promise<BackendResult>;
@@ -97,9 +99,13 @@ type Context = OplaContext & {
 const defaultContext: Context = {
   server: initialBackendContext.server,
   config: initialBackendContext.config,
+  settings: {
+    startApp: false,
+    welcomeSplash: false,
+  },
   startBackend: async () => {},
   disconnectBackend: async () => {},
-  setSettings: async () => {},
+  setSettings: () => {},
   updateBackendStore: async () => {},
   updateBackendServer: async () => {},
   start: async () => ({ status: 'error', error: 'not implemented' }),
@@ -123,13 +129,10 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   const [streams, saveStreams] = useState<Streams>();
   const streamsRef = useRef<Streams | undefined>(streams);
 
-  const {
-    conversations,
-    getConversationMessages,
-    updateMessagesAndConversation,
-    // providers,
-    // setProviders,
-  } = useContext(AppContext);
+  const { conversations, getConversationMessages, updateMessagesAndConversation } =
+    useContext(AppContext);
+
+  const { settings, loadSettings, setSettings } = useSettingsStore();
 
   const backendRef = useRef<Backend>();
 
@@ -409,7 +412,9 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     // const metadata = opla.metadata as Metadata;
     // metadata.server = backendImplContext.config.server as Metadata;
     // setProviders(providers);
-  }, [backendListener, downloadListener, streamListener]);
+
+    loadSettings();
+  }, [backendListener, downloadListener, streamListener, loadSettings]);
 
   const restart = useCallback(
     async (params: ServerParameters | undefined = {}): Promise<BackendResult> => {
@@ -463,10 +468,10 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     return result;
   }, []);
 
-  const setSettings = useCallback(async (settings: Settings) => {
+  /* const setSettings = useCallback(async (settings: Settings) => {
     const store = await saveSettings(settings);
     updateConfig(store);
-  }, []);
+  }, []); */
 
   const getActiveModel = useCallback(() => {
     const { services = {} } = configRef.current;
@@ -505,6 +510,8 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       downloads,
       streams,
 
+      settings,
+
       startBackend,
       disconnectBackend,
       setSettings,
@@ -521,7 +528,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       config,
       downloads,
       streams,
-
+      settings,
       disconnectBackend,
       restart,
       setActiveModel,

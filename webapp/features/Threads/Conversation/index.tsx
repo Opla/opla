@@ -84,12 +84,11 @@ export function ConversationPanel({
   onSelectMenu,
   onCopyMessage,
 }: ConversationPanelProps) {
-  // const { t } = useTranslation();
-  const { config } = useBackend();
+  const { settings } = useBackend();
 
   const { selectTemplate } = usePromptContext();
 
-  const pagesSettings = config.settings.pages;
+  const pagesSettings = settings.pages;
   const conversationId = selectedConversation?.id;
   const conversationViewName = getSelectedViewName(conversationId);
   const conversationSettings = pagesSettings?.[conversationViewName];
@@ -121,18 +120,18 @@ export function ConversationPanel({
     <>
       <Group viewSettings={viewSettings}>
         {viewSettings.map(
-          (settings, index) =>
+          (vsettings, index) =>
             messages &&
             messages[0]?.conversationId === conversationId &&
             selectedConversation && (
               <Panel
-                key={`${selectedConversation}-${settings.id}`}
+                key={`${selectedConversation}-${vsettings.id}`}
                 viewSettings={viewSettings}
-                id={`${selectedConversation}-${settings.id}`}
+                id={`${selectedConversation}-${vsettings.id}`}
               >
                 <ConversationView
-                  key={`${selectedConversation}-${settings.id}`}
-                  conversationSettings={settings}
+                  key={`${selectedConversation}-${vsettings.id}`}
+                  conversationSettings={vsettings}
                   viewIndex={index}
                   selectedConversation={selectedConversation}
                   messages={messages || []}

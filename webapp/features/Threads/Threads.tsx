@@ -69,7 +69,7 @@ export default function Threads({
   const { pathname } = router;
 
   const { conversations, updateConversations, archives, setArchives } = useContext(AppContext);
-  const { config } = useBackend();
+  const { settings } = useBackend();
 
   const searchParams = useSearchParams();
   const selectedConversation = conversations.find((c) => c.id === selectedThreadId);
@@ -90,7 +90,7 @@ export default function Threads({
     }
   };
 
-  const defaultSettings = config.settings;
+  const defaultSettings = settings;
   let pageSettings: PageSettings;
 
   if (pathname.startsWith(Page.Archives)) {

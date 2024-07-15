@@ -72,7 +72,7 @@ export const getActiveService = (
     provider = findProvider(providerIdOrName, providers);
     model = findModel(modelId, provider?.models || []);
     if (!model && modelId) {
-      model = findModelInAll(modelId, providers, config, true);
+      model = findModelInAll(modelId, providers, config.models, true);
     }
     if (
       !provider ||
@@ -87,7 +87,7 @@ export const getActiveService = (
       activeService.providerIdOrName = providerIdOrName;
     }
     if (provider && !model) {
-      model = getFirstModel(provider.id, providers, config);
+      model = getFirstModel(provider.id, providers, config.models);
       modelId = model?.id;
     }
   } else if (activeService.type === AIServiceType.Assistant) {
@@ -108,7 +108,7 @@ export const getActiveService = (
       }
     }
 
-    model = findModelInAll(modelId, providers, config, true);
+    model = findModelInAll(modelId, providers, config.models, true);
     provider = findProvider(model?.provider || providerIdOrName, providers);
     if (provider?.models?.find((m) => m.id === model?.id) === undefined) {
       provider = undefined;
