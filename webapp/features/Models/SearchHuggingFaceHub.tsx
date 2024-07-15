@@ -65,7 +65,7 @@ function SearchHuggingFaceHub({
       heading={
         <div className="flex w-full justify-between">
           <div>
-            <span className="mr-2">🤗</span>HuggingFace Hub
+            <span className="mr-2">🤗</span>HuggingFace&apos;s Hub
           </div>
           <div className="flex flex-row gap-2">
             {t('Search')}

@@ -21,10 +21,29 @@ import logger from '@/utils/logger';
 import { Laptop, Moon, Sun } from 'lucide-react';
 import { Pill } from '@/components/ui/Pills';
 import Parameter from '@/components/common/Parameter';
+import { useMemo } from 'react';
+import { MenuItem } from '@/types/ui';
 
 export default function Appearance() {
-  const { t } = useTranslation();
+  const { t, changeLanguage, getStoredLanguage, matchLanguage, getAvailableLanguages } =
+    useTranslation();
   const { theme, setTheme, isSystem } = useTheme();
+
+  const languages = useMemo(() => {
+    const storedLanguage = getStoredLanguage();
+    return [
+      { key: 'system', label: 'System', value: 'system', selected: !storedLanguage },
+      ...getAvailableLanguages().map(
+        (language) =>
+          ({
+            key: language,
+            label: language,
+            value: language,
+            selected: storedLanguage && matchLanguage(storedLanguage, language),
+          }) as MenuItem,
+      ),
+    ];
+  }, [getAvailableLanguages, getStoredLanguage, matchLanguage]);
 
   const colorSchemes = [
     { key: 'system', label: 'System', value: 'system', icon: Laptop, selected: isSystem },
@@ -49,6 +68,11 @@ export default function Appearance() {
     setTheme(value as string);
   };
 
+  const handleSelectLanguage = (value?: string, data?: string) => {
+    logger.info(`onSelectLanguage ${value} ${data}`);
+    changeLanguage(value !== 'system' ? value : undefined);
+  };
+
   return (
     <>
       <Parameter
@@ -67,6 +91,13 @@ export default function Appearance() {
       </Parameter>
       <Parameter name="theme" label={t('Theme')} sublabel={t('Change the theme')}>
         Default
+      </Parameter>
+      <Parameter
+        name="language"
+        label={t('Language')}
+        sublabel={t("Choose application's language")}
+      >
+        <SelectBox items={languages} onSelect={handleSelectLanguage} className="w-auto" />
       </Parameter>
     </>
   );

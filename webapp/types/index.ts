@@ -430,6 +430,7 @@ export type PageSettings = ViewSettings & {
 export type Settings = {
   startApp: boolean;
   welcomeSplash: boolean;
+  language?: string;
   window?: {
     width: number;
     height: number;

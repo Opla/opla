@@ -28,6 +28,7 @@ const initI18n = () => {
     i18n.addResourceBundle('fr-FR', 'translation', fr);
     (global as any).initI18n = true;
   }
+  return ['en', 'fr'];
 };
 
 export default initI18n;
