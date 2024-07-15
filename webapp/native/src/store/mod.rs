@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ fs, path::PathBuf, collections::HashMap };
+use std::{ fs, path::PathBuf };
 use assistant_storage::AssistantStorage;
 use preset_storage::PresetStorage;
 use provider_storage::ProviderStorage;
+use settings::Settings;
 use thread_storage::ThreadStorage;
 use serde::{ Deserialize, Serialize };
 use tauri::{ AppHandle, Manager };
@@ -30,6 +31,7 @@ use self::service_storage::ServiceStorage;
 use self::workspace_storage::WorkspaceStorage;
 use self::server_storage::ServerStorage;
 
+pub mod settings;
 pub mod thread_storage;
 pub mod model_storage;
 pub mod service_storage;
@@ -40,7 +42,7 @@ pub mod provider_storage;
 pub mod assistant_storage;
 pub mod app_state;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+/* #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WindowSettings {
     pub width: u32,
     pub height: u32,
@@ -82,7 +84,7 @@ pub struct Settings {
     pub window: Option<WindowSettings>,
     pub selected_page: Option<String>,
     pub pages: Option<HashMap<String, PageSettings>>,
-}
+} */
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Store {
@@ -180,6 +182,7 @@ impl Store {
                 return;
             }
         };
+        self.settings.init(app_handle.app_handle());
         self.threads.init(app_handle.app_handle(), project_path).await;
         self.presets.init(app_handle.app_handle());
         self.providers.init(app_handle.app_handle());

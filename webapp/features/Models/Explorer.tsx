@@ -67,7 +67,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
     getCollection();
   }, []);
 
-  const models = useMemo(() => getLocalModels(config), [config]);
+  const models = useMemo(() => getLocalModels(config.models), [config.models]);
   const cloudModels = useMemo(() => getProviderModels(providers), [providers]);
 
   const handleSelectModel = (id: string) => {

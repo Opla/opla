@@ -12,17 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Ui, Model, Provider, ProviderType, ModelState, Store } from '@/types';
+import { Ui, Model, Provider, ProviderType, ModelState, ModelsConfiguration } from '@/types';
 import { deepMerge, getEntityName, getResourceUrl } from '.';
 import { getLocalProvider, getProviderState } from './providers';
 import OplaProvider from '../providers/opla';
 import logger from '../logger';
 import { installModel } from '../backend/commands';
 
-export const getLocalModels = (config: Store, full = false) =>
-  full
-    ? config.models.items
-    : config.models.items.filter((model) => model.state !== ModelState.Removed);
+export const getLocalModels = (models: ModelsConfiguration, full = false) =>
+  full ? models.items : models.items.filter((model) => model.state !== ModelState.Removed);
 
 export const getProviderModels = (providers: Provider[]) => {
   const providerModels = providers.reduce((acc, provider) => {
@@ -32,14 +30,18 @@ export const getProviderModels = (providers: Provider[]) => {
   return providerModels;
 };
 
-export const getAllModels = (providers: Provider[], config: Store, full?: boolean) => {
-  const localModels = getLocalModels(config, full);
+export const getAllModels = (
+  providers: Provider[],
+  models: ModelsConfiguration,
+  full?: boolean,
+) => {
+  const localModels = getLocalModels(models, full);
   const providerModels = getProviderModels(providers);
   return [...localModels, ...providerModels];
 };
 
-export const getAnyFirstModel = (providers: Provider[], config: Store) => {
-  const localModels = getLocalModels(config);
+export const getAnyFirstModel = (providers: Provider[], models: ModelsConfiguration) => {
+  const localModels = getLocalModels(models);
   if (localModels.length > 0) {
     return localModels[0];
   }
@@ -75,18 +77,22 @@ export const findModel = (modelIdOrName: string | undefined, models: Model[]): M
 export const findModelInAll = (
   modelIdOrName: string | undefined,
   providers: Provider[],
-  config: Store,
+  models: ModelsConfiguration,
   full?: boolean,
 ) => {
-  const allModels = getAllModels(providers, config, full);
+  const allModels = getAllModels(providers, models, full);
   return findModel(modelIdOrName, allModels);
 };
 
-export const getFirstModel = (providerId: string, providers: Provider[], config: Store) => {
+export const getFirstModel = (
+  providerId: string,
+  providers: Provider[],
+  models: ModelsConfiguration,
+) => {
   const provider = providers.find((p) => p.id === providerId);
   if (provider?.models && provider.models.length > 0) return provider.models[0];
   if (provider?.type === ProviderType.opla) {
-    return getLocalModels(config)[0];
+    return getLocalModels(models)[0];
   }
   return undefined;
 };
@@ -102,8 +108,14 @@ export const isEquivalentModel = (model: Model, other: Model) => {
     download === otherDownload
   );
 };
-export const findSameModel = (model: Model, config: Store, providers?: Provider[]) => {
-  const models = providers ? getAllModels(providers, config, true) : getLocalModels(config, true);
+export const findSameModel = (
+  model: Model,
+  modelsConfig: ModelsConfiguration,
+  providers?: Provider[],
+) => {
+  const models = providers
+    ? getAllModels(providers, modelsConfig, true)
+    : getLocalModels(modelsConfig, true);
   return models.find((m) => isEquivalentModel(model, m));
 };
 
@@ -139,12 +151,12 @@ export const installModelFromApi = async (modelSource: Model) => {
 };
 
 export const getLocalModelsAsItems = (
-  config: Store,
+  models: ModelsConfiguration,
   selectedModelname?: string,
   localProvider?: Provider,
 ): Ui.MenuItem[] => {
   const state = getProviderState(localProvider);
-  return getLocalModels(config).map(
+  return getLocalModels(models).map(
     (model) =>
       ({
         key: model.id,
@@ -186,11 +198,11 @@ export const getProviderModelsAsItems = (
 
 export const getModelsAsItems = (
   providers: Provider[],
-  config: Store,
+  models: ModelsConfiguration,
   selectedModelname?: string,
 ) => {
   const localProvider = getLocalProvider(providers);
-  const localItems = getLocalModelsAsItems(config, selectedModelname, localProvider);
+  const localItems = getLocalModelsAsItems(models, selectedModelname, localProvider);
   const providerItems = getProviderModelsAsItems(providers, selectedModelname);
   return [...localItems, ...providerItems];
 };

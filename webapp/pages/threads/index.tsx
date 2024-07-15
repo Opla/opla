@@ -22,12 +22,11 @@ import { Page } from '@/types/ui';
 
 export default function DefaultThreads() {
   const router = useRouter();
-  const { config } = useBackend();
+  const { settings } = useBackend();
   useEffect(() => {
-    const { settings } = config;
     if (settings.pages?.[Page.Threads]?.selectedId) {
       router.replace(`${Page.Threads}/${settings.pages?.[Page.Threads].selectedId}`);
     }
-  }, [router, config]);
+  }, [router, settings]);
   return <MainThreads />;
 }

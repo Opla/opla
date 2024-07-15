@@ -12,20 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// import { emit as emitStateEvent, listen } from "@tauri-apps/api/event";
 import { create } from 'zustand';
-// import { persist } from 'zustand/middleware';
-import { Assistant, Conversation, Message, ConversationMessages, Preset, Provider } from '@/types';
+import {
+  Assistant,
+  Conversation,
+  Message,
+  ConversationMessages,
+  Preset,
+  Provider,
+  Settings,
+} from '@/types';
 import logger from '@/utils/logger';
 import { mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
 import createAssistantSlice, { AssistantSlice } from './assistant';
-// import Storage, { createJSONSliceStorage } from './storage';
 import createWorkspaceSlice, { WorkspaceSlice } from './workspace';
 import { EVENTS, Emitter, GlobalAppState } from './constants';
 import createThreadSlice, { ThreadSlice } from './thread';
 import createPresetSlice, { PresetSlice } from './preset';
 import createProviderSlice, { ProviderSlice } from './provider';
+import createSettingsSlice, { SettingsSlice } from './settings';
 
 type PaylLoadValue = string | number | undefined;
 
@@ -34,7 +40,6 @@ type PayloadEmitter = {
   value: PaylLoadValue;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const emit: Emitter = async (key: number, value: PaylLoadValue) => {
   const { emit: emitStateEvent } = await import('@tauri-apps/api/event');
   emitStateEvent(EVENTS.STATE_CHANGE_EVENT, {
@@ -43,17 +48,9 @@ const emit: Emitter = async (key: number, value: PaylLoadValue) => {
   });
 };
 
-/* export const useAssistantStore = create<AssistantSlice>()(
-  persist(
-    (...a) => ({
-      ...createAssistantSlice()(...a),
-    }),
-    {
-      name: 'assistants',
-      storage: createJSONSliceStorage<Assistant>(() => Storage, { space: 2 }),
-    },
-  ),
-); */
+export const useSettingsStore = create<SettingsSlice>()((...a) => ({
+  ...createSettingsSlice(emit)(...a),
+}));
 
 export const useAssistantStore = create<AssistantSlice>()((...a) => ({
   ...createAssistantSlice(emit)(...a),
@@ -115,6 +112,9 @@ export const subscribeStateSync = async () => {
     } else if (key === GlobalAppState.ASSISTANTS) {
       const { assistants } = (await mapKeys(value, toCamelCase)) as { assistants: Assistant[] };
       useAssistantStore.setState({ assistants });
+    } else if (key === GlobalAppState.CONFIGURATION) {
+      const { settings } = (await mapKeys(value, toCamelCase)) as { settings: Settings };
+      useSettingsStore.setState({ settings });
     }
   });
 
@@ -122,5 +122,3 @@ export const subscribeStateSync = async () => {
     unsubscribeStateSyncListener();
   };
 };
-
-export default useAssistantStore;

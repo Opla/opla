@@ -229,7 +229,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       delete selectedModel.include;
     }
     const path = getEntityName(selectedModel.creator || selectedModel.author);
-    const sameModel = findSameModel(selectedModel, config);
+    const sameModel = findSameModel(selectedModel, config.models);
 
     if (sameModel && sameModel.state !== ModelState.Removed) {
       toast.error(`${t('Model already installed ')} ${selectedModel.name}`);

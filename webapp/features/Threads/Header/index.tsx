@@ -61,7 +61,7 @@ export default function ThreadHeader({
   const service = getActiveService(conversation, assistant, providers, config, selectedModelId);
   let selectedModel = service.model;
   if (!selectedModel && modelItems.length > 0) {
-    selectedModel = getAnyFirstModel(providers, config);
+    selectedModel = getAnyFirstModel(providers, config.models);
   }
   const modelId = selectedModel?.id || selectedModelId;
 

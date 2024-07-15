@@ -363,12 +363,12 @@ function ConversationProvider({
       }
       let selectedModel;
       if (result.modelName) {
-        selectedModel = findModelInAll(result.modelName, providers, config, true);
+        selectedModel = findModelInAll(result.modelName, providers, config.models, true);
       } else {
         selectedModel = findModelInAll(
           getConversationModelId(selectedConversation) || selectedModelId,
           providers,
-          config,
+          config.models,
           true,
         );
       }

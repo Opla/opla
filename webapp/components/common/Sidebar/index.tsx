@@ -131,11 +131,9 @@ const sidebarItems: Array<Ui.Item> = [
 function Sidebar() {
   const router = useRouter();
   const { pathname } = router;
-  // logger.info('pathname', pathname);
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
-  const { config } = useBackend();
-  const { settings } = config;
+  const { settings } = useBackend();
 
   sidebarItems[0].items = (sidebarItems[0].items as Ui.Item[]).map((item) => {
     let { href } = item;

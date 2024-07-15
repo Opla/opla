@@ -493,7 +493,7 @@ export type Assistant = Agent & {
 };
 
 export type Store = {
-  settings: Settings;
+  // settings: Settings;
   server: ServerConfiguration;
   models: ModelsConfiguration;
   services: ServicesConfiguration;

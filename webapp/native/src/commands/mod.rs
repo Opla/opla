@@ -14,7 +14,7 @@
 
 use std::path::{ Path, PathBuf };
 
-use crate::store::{ Store, Settings };
+use crate::store::{settings::Settings, Store};
 use crate::OplaContext;
 use crate::sys::SysInfos;
 use tauri::{ Runtime, State };

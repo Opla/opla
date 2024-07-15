@@ -255,6 +255,7 @@
   "Activate HugginFace Hub Search to get more results": "Activer HugginFace Hub Search pour obtenir plus de résultats",
   "Loading please wait...": "Chargement veuillez patienter...",
   "Others": "Autres",
+  "Other": "Other",
   "Load a model from your computer": "Charger un modèle depuis votre ordinateur",
   "Search a model to install": "Rechercher un modèle à installer",
   "Configure OpenAI ChatGPT": "Configurer ChatGPT avec OpenAI",
@@ -288,5 +289,7 @@
   "Select a preset...": "Sélectionner un préréglage...",
   "No models": "Pas de modèles",
   "Let's add one!": "Il faut en ajouter un!",
-  "Manage models": "Gérer les modèles"
+  "Manage models": "Gérer les modèles",
+  "You don't have any models": "Vous n'avez aucun modèle",
+  "Remove": "Supprimer"
 }
