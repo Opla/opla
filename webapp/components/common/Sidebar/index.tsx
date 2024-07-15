@@ -38,6 +38,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import useBackend from '@/hooks/useBackendContext';
 import { Ui } from '@/types';
 import { ShortcutIds } from '@/hooks/useShortcuts';
+import { checkForNewUpdate } from '@/utils/backend/tauri';
 import SidebarItems from './SidebarItems';
 
 const sidebarItems: Array<Ui.Item> = [
@@ -155,6 +156,8 @@ function Sidebar() {
       showModal(ModalIds.Settings);
     } else if (href === '/shortcuts') {
       showModal(ModalIds.Shortcuts);
+    } else if (href === '/updates') {
+      checkForNewUpdate(t);
     }
   };
 

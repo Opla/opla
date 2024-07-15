@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { FileEntry } from '@tauri-apps/api/fs';
+import { toast } from '@/components/ui/Toast';
 import logger from '../logger';
 
 type InvokeArgs = Record<string, unknown>;
@@ -180,4 +181,42 @@ export const getPathComponents = async (resourcePath: string) => {
 export const convertAssetFile = async (file: string) => {
   const { convertFileSrc } = await import('@tauri-apps/api/tauri');
   return convertFileSrc(file);
+};
+
+export const checkForNewUpdate = async (
+  translate = (text: string) => text,
+  silentUpdate = false,
+) => {
+  const {
+    checkUpdate,
+    installUpdate,
+    // onUpdaterEvent,
+  } = await import('@tauri-apps/api/updater');
+
+  try {
+    const { shouldUpdate, manifest } = await checkUpdate();
+    if (shouldUpdate) {
+      // You could show a dialog asking the user if they want to install the update here.
+      logger.info(`New update: ${manifest?.version}, ${manifest?.date}, ${manifest?.body}`);
+      toast.info(
+        `${translate('New update')}: ${manifest?.version}, ${manifest?.date}, ${manifest?.body}`,
+      );
+      if (silentUpdate) {
+        // Install the update. This will also restart the app on Windows!
+        await installUpdate();
+
+        // On macOS and Linux you will need to restart the app manually.
+        // You could use this step to display another confirmation dialog.
+        const { relaunch } = await import('@tauri-apps/api/process');
+        await relaunch();
+      }
+      return true;
+    }
+    logger.info('There are currently no updates available.');
+    toast.info(translate('There are currently no updates available.'));
+  } catch (error) {
+    logger.error(error);
+    toast.error(error as string);
+  }
+  return false;
 };

@@ -291,5 +291,7 @@
   "Let's add one!": "Il faut en ajouter un!",
   "Manage models": "Gérer les modèles",
   "You don't have any models": "Vous n'avez aucun modèle",
-  "Remove": "Supprimer"
+  "Remove": "Supprimer",
+  "New update": "Nouvelle mise à jour",
+  "There are currently no updates available.": "Il n'y a pas actuellement de mise à jour disponible."
 }

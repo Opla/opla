@@ -291,5 +291,7 @@
   "Let's add one!": "Let's add one!",
   "Manage models": "Manage models",
   "You don't have any models": "You don't have any models",
-  "Remove": "Remove"
+  "Remove": "Remove",
+  "New update": "New update",
+  "There are currently no updates available.": "There are currently no updates available."
 }
