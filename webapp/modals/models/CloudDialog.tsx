@@ -50,7 +50,7 @@ function CloudModelDialog({
       {provider && provider.name === 'OpenAI' && (
         <Card className="flex h-full w-full flex-col overflow-hidden bg-transparent">
           <CardHeader className="flex-none">
-            <CardTitle>{t('Choose Cloud Models')}</CardTitle>
+            <CardTitle>{t('Choose cloud models')}</CardTitle>
             <CardDescription className="">{t('Models to chat with.')}</CardDescription>
           </CardHeader>
           <CardContent className="h-[72%] px-4 py-0" style={{ height: '72%' }}>
