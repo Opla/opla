@@ -232,8 +232,8 @@ export default function Parameter({
         <div className="flex w-full flex-row items-center justify-between">
           <div className={`flex grow flex-row ${flex}`}>
             {label && (
-              <Label className="flex flex-1 flex-col justify-center capitalize">
-                <p>{label}</p>
+              <Label className="flex flex-1 flex-col justify-center">
+                <p className="capitalize">{label}</p>
                 <p className="pt-2 text-sm text-muted-foreground">{sublabel}</p>
               </Label>
             )}
