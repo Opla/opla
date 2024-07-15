@@ -16,9 +16,9 @@ import { StateCreator } from 'zustand';
 import { Settings } from '@/types';
 import { mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
-import { Emitter, GlobalAppState } from './constants';
+import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 
-interface SettingsProps {
+interface SettingsProps extends StorageProps {
   settings: Settings;
 }
 
@@ -30,6 +30,7 @@ export interface SettingsSlice extends SettingsProps {
 export type SettingsStore = ReturnType<typeof createSettingsSlice>;
 
 const DEFAULT_PROPS: SettingsProps = {
+  state: StorageState.INIT,
   settings: {
     startApp: false,
     welcomeSplash: false,
@@ -42,12 +43,12 @@ const createSettingsSlice =
     ...DEFAULT_PROPS,
     ...initProps,
     loadSettings: () => {
-      emit(GlobalAppState.CONFIGURATION, undefined);
+      emit(GlobalAppState.SETTINGS, undefined);
     },
     setSettings: (updatedSettings: Settings) => {
       set({ settings: updatedSettings });
       const value = mapKeys({ settings: updatedSettings }, toSnakeCase);
-      emit(GlobalAppState.CONFIGURATION, value);
+      emit(GlobalAppState.SETTINGS, value);
     },
   });
 

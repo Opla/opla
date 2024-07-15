@@ -30,7 +30,7 @@ export enum GlobalAppState {
 
   ASSISTANTS = 11,
 
-  CONFIGURATION = 12,
+  SETTINGS = 12,
 }
 
 export const EVENTS: {
@@ -42,3 +42,14 @@ export const EVENTS: {
 };
 
 export type Emitter = (key: number, value: any) => Promise<void>;
+
+export enum StorageState {
+  INIT = 0,
+  ERROR = 1,
+  OK = 2,
+  LOADING = 3,
+}
+export type StorageProps = {
+  state?: StorageState;
+  error?: string;
+};

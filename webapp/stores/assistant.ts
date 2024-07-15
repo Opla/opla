@@ -16,9 +16,9 @@ import { StateCreator } from 'zustand';
 import { Assistant, Model, Preset } from '@/types';
 import { createBaseNamedRecord, createBaseRecord, mapKeys, updateRecord } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
-import { Emitter, GlobalAppState } from './constants';
+import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 
-interface AssistantProps {
+interface AssistantProps extends StorageProps {
   assistants: Assistant[];
 }
 
@@ -48,6 +48,7 @@ export interface AssistantSlice extends AssistantProps {
 export type AssistantStore = ReturnType<typeof createAssistantSlice>;
 
 const DEFAULT_PROPS: AssistantProps = {
+  state: StorageState.INIT,
   assistants: [],
 };
 

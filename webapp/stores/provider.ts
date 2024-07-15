@@ -16,9 +16,9 @@ import { StateCreator } from 'zustand';
 import { Provider } from '@/types';
 import { mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
-import { Emitter, GlobalAppState } from './constants';
+import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 
-interface ProviderProps {
+interface ProviderProps extends StorageProps {
   providers: Provider[];
 }
 
@@ -30,6 +30,7 @@ export interface ProviderSlice extends ProviderProps {
 export type ProviderStore = ReturnType<typeof createProviderSlice>;
 
 const DEFAULT_PROPS: ProviderProps = {
+  state: StorageState.INIT,
   providers: [],
 };
 
