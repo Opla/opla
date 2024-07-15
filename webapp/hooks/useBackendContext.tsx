@@ -22,12 +22,8 @@ import {
   useState,
 } from 'react';
 import logger from '@/utils/logger';
-// import { createProvider } from '@/utils/data/providers';
 import getBackend from '@/utils/backend';
 import {
-  /* Metadata,
-  Provider,
-  ProviderType, */
   OplaContext,
   ServerStatus,
   Settings,
@@ -43,7 +39,6 @@ import {
 } from '@/types';
 import {
   getOplaConfig,
-  // getProviderTemplate,
   setActiveModel as setBackendActiveModel,
   saveSettings,
 } from '@/utils/backend/commands';
@@ -51,7 +46,6 @@ import { AppContext } from '@/context';
 import Backend, { BackendResult } from '@/utils/backend/Backend';
 import { deepCopy, mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
-// import OplaProvider from '@/utils/providers/opla';
 import { getConversation } from '@/utils/data/conversations';
 import { changeMessageContent } from '@/utils/data/messages';
 import { ParsedPrompt } from '@/utils/parsers';

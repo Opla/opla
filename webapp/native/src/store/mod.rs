@@ -78,6 +78,7 @@ pub struct PageSettings {
 pub struct Settings {
     pub start_app: bool,
     pub welcome_splash: bool,
+    pub language: Option<String>,
     pub window: Option<WindowSettings>,
     pub selected_page: Option<String>,
     pub pages: Option<HashMap<String, PageSettings>>,
@@ -133,6 +134,7 @@ impl Store {
             settings: Settings {
                 start_app: true,
                 welcome_splash: true,
+                language: None,
                 window: None,
                 selected_page: None,
                 pages: None,
