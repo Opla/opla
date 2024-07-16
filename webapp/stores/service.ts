@@ -45,7 +45,7 @@ const createServiceSlice =
     },
     setActiveService: (activeService: AIService) => {
       set({ activeService, state: StorageState.OK, error: undefined });
-      emit(GlobalAppState.SERVICES, { services: { activeService }});
+      emit(GlobalAppState.SERVICES, { services: { activeService } });
     },
     getActiveModel: () => {
       const { activeService } = get();
@@ -65,7 +65,7 @@ const createServiceSlice =
         providerIdOrName: provider,
       };
       set({ activeService, state: StorageState.OK, error: undefined });
-      emit(GlobalAppState.SERVICES, { services: { activeService }});
+      emit(GlobalAppState.SERVICES, { services: { activeService } });
     },
   });
 
