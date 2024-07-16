@@ -24,7 +24,7 @@ const context: OplaContext = {
     models: {
       items: [],
     },
-    services: {},
+    // services: {},
   },
   server: {
     status: ServerStatus.ERROR,

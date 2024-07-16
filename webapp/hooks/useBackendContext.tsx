@@ -36,12 +36,9 @@ import {
   OplaServer,
   MessageStatus,
   Message,
+  AIService,
 } from '@/types';
-import {
-  getOplaConfig,
-  setActiveModel as setBackendActiveModel,
-  // saveSettings,
-} from '@/utils/backend/commands';
+import { getOplaConfig } from '@/utils/backend/commands';
 import { AppContext } from '@/context';
 import Backend, { BackendResult } from '@/utils/backend/Backend';
 import { deepCopy, mapKeys } from '@/utils/data';
@@ -50,7 +47,7 @@ import { getConversation } from '@/utils/data/conversations';
 import { changeMessageContent } from '@/utils/data/messages';
 import { ParsedPrompt } from '@/utils/parsers';
 import { parseLLamaCppServerParameters } from '@/utils/providers/llama.cpp';
-import { useSettingsStore } from '@/stores';
+import { useServiceStore, useSettingsStore } from '@/stores';
 
 type StreamPayload = {
   status: 'error' | 'success';
@@ -78,7 +75,7 @@ const initialBackendContext: OplaContext = {
       items: [],
       path: '',
     },
-    services: {},
+    // services: {},
   },
 };
 
@@ -86,6 +83,7 @@ type Context = OplaContext & {
   startBackend: () => Promise<void>;
   disconnectBackend: () => Promise<void>;
   settings: Settings;
+  activeService?: AIService;
   setSettings: (settings: Settings) => void;
   updateBackendStore: () => Promise<void>;
   updateBackendServer: (partials: Partial<OplaServer>) => Promise<void>;
@@ -133,6 +131,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     useContext(AppContext);
 
   const { settings, loadSettings, setSettings } = useSettingsStore();
+  const { activeService, getActiveModel, setActiveModel, setActiveService } = useServiceStore();
 
   const backendRef = useRef<Backend>();
 
@@ -280,19 +279,20 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
           updateServer({
             stderr,
           });
-        } else if (configRef.current) {
-          const { services } = configRef.current; // context.config;
+        } else {
           if (
             event.payload.status === ServerStatus.STARTING &&
-            services.activeService?.type !== AIServiceType.Assistant
+            activeService?.type !== AIServiceType.Assistant
           ) {
-            services.activeService = {
+            const service: AIService = {
               type: AIServiceType.Model,
               modelId: event.payload.message,
             };
+            setActiveService(service);
           }
-          await updateBackendStore();
-          updateConfig({ services });
+          // await updateBackendStore();
+          // useServiceStore.setState({ activeService, state: StorageState.OK, error: undefined });
+
           updateServer({
             status: event.payload.status,
             message: event.payload.message,
@@ -300,7 +300,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
         }
       }
     },
-    [updateBackendStore],
+    [updateBackendStore, activeService],
   );
 
   const downloadListener = useCallback(
@@ -473,7 +473,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     updateConfig(store);
   }, []); */
 
-  const getActiveModel = useCallback(() => {
+  /* const getActiveModel = useCallback(() => {
     const { services = {} } = configRef.current;
     const { activeService } = services;
     return activeService?.type === AIServiceType.Model ? activeService.modelId : undefined;
@@ -497,7 +497,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       updateConfig({ services });
     },
     [config, updateBackendStore],
-  );
+  ); */
 
   const disconnectBackend = useCallback(async () => {
     // logger.info('unmountBackendProvider');
@@ -506,6 +506,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   const contextValue = useMemo<Context>(
     () => ({
       server,
+      activeService,
       config,
       downloads,
       streams,
@@ -529,6 +530,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       downloads,
       streams,
       settings,
+      activeService,
       disconnectBackend,
       restart,
       setActiveModel,

@@ -14,14 +14,7 @@
 // import { appWindow } from '@tauri-apps/api/window';
 // import { confirm } from '@tauri-apps/api/dialog';
 // import { listen } from '@tauri-apps/api/event';
-import {
-  AIService,
-  AIServiceType,
-  LlmStreamResponse,
-  OplaContext,
-  OplaServer,
-  ServerStatus,
-} from '@/types';
+import { LlmStreamResponse, OplaContext, OplaServer, ServerStatus } from '@/types';
 import logger from '../logger';
 import {
   restartLLamaCppServer,
@@ -44,7 +37,7 @@ class Backend {
   private static instance: Backend;
 
   // private activeModel?: string;
-  private activeService?: AIService;
+  // private activeService?: AIService;
 
   private static streams: Record<string, LlmStreamResponse> = {};
 
@@ -85,12 +78,11 @@ class Backend {
 
     logger.info('connected backend oplaConfig=', config);
     // const { activeModel } = config.models;
-    const { services } = config;
-    let activeModel: string | undefined;
-    if (services.activeService?.type === AIServiceType.Model) {
-      activeModel = services.activeService.modelId;
+    // let activeModel: string | undefined;
+    /* if (activeService?.type === AIServiceType.Model) {
+      activeModel = activeService.modelId;
     }
-    this.activeService = services.activeService;
+    this.activeService = activeService; */
     let server: OplaServer = {
       status: ServerStatus.IDLE,
       stdout: [],
@@ -105,7 +97,7 @@ class Backend {
       server = { ...server, status: ServerStatus.ERROR, message: error as string };
     }
 
-    this.start = async (parameters: LlamaCppParameters, model = activeModel) => {
+    this.start = async (parameters: LlamaCppParameters, model) => {
       logger.info('start server', model, parameters);
       try {
         await startLLamaCppServer(model, parameters);
@@ -127,7 +119,7 @@ class Backend {
       return { status: 'ok' };
     };
 
-    this.restart = async (parameters: LlamaCppParameters, model = activeModel) => {
+    this.restart = async (parameters: LlamaCppParameters, model) => {
       logger.info('restart server', parameters);
       try {
         await restartLLamaCppServer(model, parameters);

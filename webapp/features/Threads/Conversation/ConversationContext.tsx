@@ -109,7 +109,7 @@ function ConversationProvider({
     setUsage,
   } = context;
   const { parseAndValidatePrompt, clearPrompt } = useContext(PromptContext) || {};
-  const { config, updateBackendStore } = useBackend();
+  const { activeService, config, updateBackendStore } = useBackend();
   const { getAssistant } = useAssistantStore();
   const [selectedMessageId, setSelectedMessageId] = useState<string | undefined>(undefined);
   const [isProcessing, setIsProcessing] = useState<{ [key: string]: boolean }>({});
@@ -468,6 +468,7 @@ function ConversationProvider({
         commandManager,
         context,
         config,
+        activeService,
         setUsage,
         handleError,
       );
@@ -481,6 +482,7 @@ function ConversationProvider({
       assistant,
       clearPrompt,
       commandManager,
+      activeService,
       config,
       context,
       conversationId,
@@ -555,6 +557,7 @@ function ConversationProvider({
         commandManager,
         context,
         config,
+        activeService,
         setUsage,
         handleError,
       );
@@ -564,6 +567,7 @@ function ConversationProvider({
     [
       assistant,
       commandManager,
+      activeService,
       config,
       context,
       conversationId,
@@ -590,6 +594,7 @@ function ConversationProvider({
             assistant,
             context,
             config,
+            activeService,
           );
         } catch (e) {
           logger.error(e);
@@ -613,7 +618,16 @@ function ConversationProvider({
         }
       }
     },
-    [assistant, config, context, selectedConversation, selectedModelId, t, getConversationMessages],
+    [
+      assistant,
+      activeService,
+      config,
+      context,
+      selectedConversation,
+      selectedModelId,
+      t,
+      getConversationMessages,
+    ],
   );
 
   const handleChangeMessageContent = useCallback(

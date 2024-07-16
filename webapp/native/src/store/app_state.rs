@@ -17,10 +17,10 @@ use std::collections::HashMap;
 use serde::{ Deserialize, Serialize };
 
 use crate::data::{
-    assistant::Assistant, conversation::Conversation, message::{ ConversationMessages, Message }, provider::Provider, workspace::{ project::Project, Workspace }, Preset
+    assistant::Assistant, conversation::Conversation, message::{ ConversationMessages, Message }, provider::Provider, service::Service, workspace::{ project::Project, Workspace }, Preset
 };
 
-use super::settings::Settings;
+use super::{service_storage::ServiceStorage, settings::Settings};
 
 pub const STATE_CHANGE_EVENT: &str = "state_change_event";
 pub const STATE_SYNC_EVENT: &str = "state_sync_event";
@@ -46,6 +46,8 @@ pub enum GlobalAppState {
     ASSISTANTS = 11,
 
     SETTINGS = 12,
+
+    SERVICES = 13,
 }
 
 impl From<u32> for GlobalAppState {
@@ -63,6 +65,7 @@ impl From<u32> for GlobalAppState {
             10 => GlobalAppState::PROVIDERS,
             11 => GlobalAppState::ASSISTANTS,
             12 => GlobalAppState::SETTINGS,
+            13 => GlobalAppState::SERVICES,
             _ => {
                 println!("Not a valid value for the enum GlobalAppState");
                 GlobalAppState::ERROR
@@ -95,6 +98,8 @@ impl Into<u32> for GlobalAppState {
             GlobalAppState::ASSISTANTS => 11,
 
             GlobalAppState::SETTINGS => 12,
+
+            GlobalAppState::SERVICES => 13,
         }
     }
 }
@@ -123,6 +128,11 @@ pub struct ValueSettings {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ValueServices {
+    pub services: ServiceStorage,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Value {
     Bool(bool),
@@ -134,6 +144,7 @@ pub enum Value {
     Providers(ValueProviders),
     Assistants(ValueAssistants),
     Settings(ValueSettings),
+    Services(ValueServices),
     Empty(Empty),
     Conversations(Vec<Conversation>),
     ConversationMessages(ConversationMessages),

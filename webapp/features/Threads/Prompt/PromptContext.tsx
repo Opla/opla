@@ -95,7 +95,7 @@ function PromptProvider({
   const context = useContext(AppContext);
   const { getAssistant } = useAssistantStore();
   const { conversations, providers, updateConversations } = context;
-  const { config } = useBackend();
+  const { activeService: storedActiveService, config } = useBackend();
   const [usage, updateUsage] = useState<Usage | undefined>({ tokenCount: 0 });
   const [changedPrompt, setChangedPrompt] = useState<ParsedPrompt | undefined>(undefined);
 
@@ -147,6 +147,7 @@ function PromptProvider({
           selectedConversation,
           selectedAssistant,
           providers,
+          storedActiveService,
           config,
           selectedModelNameOrId,
         );
@@ -177,6 +178,7 @@ function PromptProvider({
     assistant,
     getAssistant,
     providers,
+    storedActiveService,
     config,
     selectedModelId,
     usage,

@@ -38,13 +38,14 @@ export const getActiveService = (
   conversation: Conversation | undefined,
   assistant: Assistant | undefined,
   providers: Provider[],
+  storedActiveService: AIService | undefined,
   config: Store,
   _modelId?: string | undefined,
 ): AIImplService => {
   const type = assistant ? AIServiceType.Assistant : AIServiceType.Model;
   let activeService: AIService | undefined = conversation
     ? getConversationService(conversation, type, assistant?.id)
-    : config.services.activeService;
+    : storedActiveService; // config.services.activeService;
   let modelId = _modelId;
   let model: Model | undefined;
   let provider: Provider | undefined;

@@ -42,50 +42,6 @@ pub mod provider_storage;
 pub mod assistant_storage;
 pub mod app_state;
 
-/* #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct WindowSettings {
-    pub width: u32,
-    pub height: u32,
-    pub fullscreen: bool,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ExplorerGroup {
-    pub title: String,
-    pub hidden: bool,
-    pub height: f64,
-    pub closed: bool,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ViewSettings {
-    pub selected_id: Option<String>,
-    pub explorer_hidden: bool,
-    pub settings_hidden: bool,
-    pub explorer_width: f64,
-    pub settings_width: f64,
-    pub explorer_groups: Option<Vec<ExplorerGroup>>,
-    pub scroll_position: Option<u32>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct PageSettings {
-    #[serde(flatten)]
-    pub settings: ViewSettings,
-    #[serde(skip_serializing_if = "Option::is_none", default)]
-    pub views: Option<Vec<ViewSettings>>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Settings {
-    pub start_app: bool,
-    pub welcome_splash: bool,
-    pub language: Option<String>,
-    pub window: Option<WindowSettings>,
-    pub selected_page: Option<String>,
-    pub pages: Option<HashMap<String, PageSettings>>,
-} */
-
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Store {
     pub settings: Settings,
@@ -183,6 +139,7 @@ impl Store {
             }
         };
         self.settings.init(app_handle.app_handle());
+        self.services.init(app_handle.app_handle());
         self.threads.init(app_handle.app_handle(), project_path).await;
         self.presets.init(app_handle.app_handle());
         self.providers.init(app_handle.app_handle());
