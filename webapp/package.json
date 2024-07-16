@@ -45,7 +45,7 @@
     "mermaid": "^10.9.1",
     "next": "14.2.5",
     "next-themes": "^0.3.0",
-    "pino": "^9.0.0",
+    "pino": "^9.3.1",
     "pino-pretty": "^11.1.0",
     "react": "^18",
     "react-dom": "^18",
