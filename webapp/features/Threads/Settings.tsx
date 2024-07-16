@@ -36,10 +36,16 @@ export default function Settings({
 }) {
   const { t } = useTranslation();
   const { conversations, updateConversations, providers } = useContext(AppContext);
-  const { config, server } = useBackend();
+  const { activeService, config, server } = useBackend();
 
   const selectedConversation = conversations.find((c) => c.id === conversationId);
-  const service = getActiveService(selectedConversation, undefined, providers, config);
+  const service = getActiveService(
+    selectedConversation,
+    undefined,
+    providers,
+    activeService,
+    config,
+  );
   const { model, provider } = service;
 
   const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

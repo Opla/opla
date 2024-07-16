@@ -50,7 +50,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
   const [closeCloud, toggleCloseCloud] = useState(false);
   const [closeFeatured, toggleCloseFeatured] = useState(false);
   const { isModelUsedInAssistants } = useAssistantStore();
-  const { config, updateBackendStore } = useBackend();
+  const { config, activeService, updateBackendStore } = useBackend();
   const router = useRouter();
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
@@ -102,7 +102,6 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
     logger.info(`Uninstall ${modelId}`);
     const model = models.find((m) => m.id === modelId);
     if (model) {
-      const { activeService } = config.services;
       const isUsed: boolean =
         (activeService?.type === AIServiceType.Model && activeService.modelId === model.id) ||
         isModelUsedInConversations(conversations, model) ||

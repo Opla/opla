@@ -84,7 +84,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
   const { t } = useTranslation();
 
   const [fullPathModel, setFullPathModel] = useState<string | undefined>();
-  const { config, downloads, updateBackendStore } = useBackend();
+  const { activeService, config, downloads, updateBackendStore } = useBackend();
   const { conversations, updateConversations, providers, setProviders } = useContext(AppContext);
   const { isModelUsedInAssistants } = useAssistantStore();
   const [collection, setCollection] = useState<Model[]>([]);
@@ -118,7 +118,6 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       ? []
       : getDownloadables(mdl).filter((d) => d.private !== true && isValidFormat(d));
 
-    const { activeService } = config.services;
     const isUsed: boolean =
       mdl &&
       ((activeService?.type === AIServiceType.Model && activeService.modelId === mdl.id) ||
@@ -128,7 +127,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     return [downloads || [], mdls, mdl, dls, l, isUsed];
   }, [
     config.models.items,
-    config.services,
+    activeService,
     selectedModelId,
     conversations,
     isModelUsedInAssistants,

@@ -496,7 +496,7 @@ export type Store = {
   // settings: Settings;
   server: ServerConfiguration;
   models: ModelsConfiguration;
-  services: ServicesConfiguration;
+  // services: ServicesConfiguration;
 };
 
 export type Download = {

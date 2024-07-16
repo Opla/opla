@@ -84,8 +84,16 @@ function Thread({
     updateConversationMessages,
   } = useContext(AppContext);
 
-  const { config, settings, downloads, streams, getActiveModel, setActiveModel, setSettings } =
-    useBackend();
+  const {
+    activeService,
+    config,
+    settings,
+    downloads,
+    streams,
+    getActiveModel,
+    setActiveModel,
+    setSettings,
+  } = useBackend();
   const searchParams = useSearchParams();
   const [service, setService] = useState<AIService | undefined>(undefined);
   const { assistants, getAssistant } = useAssistantStore();
@@ -101,36 +109,6 @@ function Thread({
   const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
 
   const { t } = useTranslation();
-
-  /* const readMessages = useCallback(async () => {
-    let newMessages: MessageImpl[] = [];
-    if (conversationId) {
-      let p = false;
-      newMessages = await readConversationMessages(conversationId, []);
-      newMessages = newMessages?.filter((m) => !(m.author.role === 'system')) || [];
-      newMessages = newMessages.map((msg, index) => {
-        const { author } = msg;
-        let last;
-        if (
-          index === newMessages.length - 1 ||
-          (index === newMessages.length - 2 && author.role === 'user')
-        ) {
-          last = true;
-        }
-        const m: MessageImpl = { ...msg, author, conversationId, copied: copied[msg.id], last };
-        if (
-          msg.status &&
-          msg.status !== MessageStatus.Delivered &&
-          msg.status !== MessageStatus.Error
-        ) {
-          p = true;
-        }
-        return m;
-      });
-      setProcessing(p);
-    }
-    return newMessages;
-  }, []); */
 
   useEffect(() => {
     const getNewMessages = async () => {
@@ -225,7 +203,7 @@ function Thread({
       let modelId: string | undefined =
         getConversationModelId(selectedConversation) ||
         getServiceModelId(service) ||
-        (getServiceModelId(config.services.activeService) as string);
+        (getServiceModelId(activeService) as string);
       const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);
       const newAssistant = getAssistant(assistantId);
       let activeModel: Model | undefined;
@@ -275,6 +253,7 @@ function Thread({
       };
     }, [
       assistants,
+      activeService,
       config,
       downloads,
       getActiveModel,

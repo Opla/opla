@@ -13,8 +13,16 @@
 // limitations under the License.
 
 use serde::{ self, Deserialize, Serialize };
+use tauri::{ AppHandle, Manager };
+use tokio::spawn;
 
-use crate::data::service::Service;
+use crate::{
+    data::service::Service,
+    store::app_state::{ Empty, GlobalAppState, Payload, Value, STATE_SYNC_EVENT },
+    OplaContext,
+};
+
+use super::app_state::STATE_CHANGE_EVENT;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ServiceStorage {
@@ -49,5 +57,58 @@ impl ServiceStorage {
 
     pub fn get_active_service(&self) -> Option<&Service> {
         self.active_service.as_ref()
+    }
+
+    async fn emit_state_async(payload: Payload, app_handle: AppHandle) {
+        let context = app_handle.state::<OplaContext>();
+        let value = match payload.value {
+            Some(v) => v,
+            None => Value::Empty(Empty {}),
+        };
+        println!("Services emit state sync: {} {:?}", payload.key, value);
+        match GlobalAppState::from(payload.key) {
+            GlobalAppState::SERVICES => {
+                let mut store = context.store.lock().await;
+                if let Value::Services(data) = value {
+                    store.services = data.services.clone();
+                    if let Err(error) = store.save() {
+                        println!("Error can't save services store: {:?}", error);
+                    }
+                } else if let Value::Empty(_) = value {
+                } else {
+                    println!("Error wrong type of value: {} {:?}", payload.key, value);
+                    return;
+                }
+
+                app_handle
+                    .emit_all(STATE_SYNC_EVENT, Payload {
+                        key: payload.key,
+                        value: Some(Value::Services(crate::store::app_state::ValueServices { services: store.services.clone() })),
+                    })
+                    .unwrap();
+            }
+            _ => {}
+        }
+    }
+
+    pub fn subscribe_state_events(&mut self, app_handle: AppHandle) {
+        let app_handle_copy = app_handle.app_handle();
+        let _id = app_handle.listen_global(STATE_CHANGE_EVENT, move |event| {
+            if let Some(payload) = event.payload() {
+                match serde_json::from_str(payload) {
+                    Ok(data) => {
+                        let app_handle = app_handle_copy.app_handle();
+                        spawn(async move { Self::emit_state_async(data, app_handle).await });
+                    }
+                    Err(e) => {
+                        println!("Failed to deserialize payload: {}", e);
+                    }
+                }
+            }
+        });
+    }
+
+    pub fn init(&mut self, app_handle: AppHandle) {
+        self.subscribe_state_events(app_handle.app_handle());
     }
 }

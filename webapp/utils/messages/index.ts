@@ -12,7 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Assistant, Conversation, LlmUsage, Message, MessageStatus, Store } from '@/types';
+import {
+  AIService,
+  Assistant,
+  Conversation,
+  LlmUsage,
+  Message,
+  MessageStatus,
+  Store,
+} from '@/types';
 import { toast } from '@/components/ui/Toast';
 import { Context } from '@/context';
 import { CommandManager } from '../commands/types';
@@ -80,6 +88,7 @@ export const sendMessage = async (
   commandManager: CommandManager,
   context: Context,
   config: Store,
+  storedActiveService: AIService | undefined,
   onSuccess: (usage: LlmUsage | undefined) => void,
   onError: (id: string, error: string) => void,
 ) => {
@@ -88,6 +97,7 @@ export const sendMessage = async (
     conversation,
     assistant,
     context.providers,
+    storedActiveService,
     config,
     modelName,
   );
@@ -156,11 +166,13 @@ export const cancelSending = async (
   assistant: Assistant | undefined,
   context: Context,
   config: Store,
+  storedActiveService: AIService | undefined,
 ) => {
   const activeService = getActiveService(
     conversation,
     assistant,
     context.providers,
+    storedActiveService,
     config,
     modelName,
   );
