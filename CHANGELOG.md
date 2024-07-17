@@ -1,3 +1,10 @@
+# [1.0.0-alpha.204](https://github.com/Opla/opla/compare/v1.0.0-alpha.203...v1.0.0-alpha.204) (2024-07-17)
+
+
+### Features
+
+* display Provider in Model [#1109](https://github.com/Opla/opla/issues/1109) ([#1110](https://github.com/Opla/opla/issues/1110)) ([77b0b6a](https://github.com/Opla/opla/commit/77b0b6a9e48f3f5b8feb6b5439dfd5bcb063943b))
+
 # [1.0.0-alpha.203](https://github.com/Opla/opla/compare/v1.0.0-alpha.202...v1.0.0-alpha.203) (2024-07-16)
 
 
