@@ -113,7 +113,10 @@ export default function Parameter({
               // e.preventDefault();
               // const v = type === 'number' ? parseInt(e.target.value, 10) : e.target.value;
               const v = e.target.value;
-              onChange(name, v.split(',').map((r) => ({ id: name, name: r })) as BaseNamedRecord[]);
+              onChange(
+                name,
+                v.split(',').map((r, i) => ({ id: `name-${i}`, name: r })) as BaseNamedRecord[],
+              );
             }}
           />
         </div>

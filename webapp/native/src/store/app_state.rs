@@ -17,10 +17,15 @@ use std::collections::HashMap;
 use serde::{ Deserialize, Serialize };
 
 use crate::data::{
-    assistant::Assistant, conversation::Conversation, message::{ ConversationMessages, Message }, provider::Provider, service::Service, workspace::{ project::Project, Workspace }, Preset
+    assistant::Assistant,
+    conversation::Conversation,
+    message::{ ConversationMessages, Message },
+    provider::Provider,
+    workspace::{ project::Project, Workspace },
+    Preset,
 };
 
-use super::{service_storage::ServiceStorage, settings::Settings};
+use super::{ service_storage::ServiceStorage, settings::Settings };
 
 pub const STATE_CHANGE_EVENT: &str = "state_change_event";
 pub const STATE_SYNC_EVENT: &str = "state_sync_event";

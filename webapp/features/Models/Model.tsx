@@ -446,6 +446,15 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
                     {(updatedParameters?.chatTemplate as string) || t(model.chatTemplate || '')}
                   </p>
                 )}
+                {model.provider && (
+                  <Parameter
+                    label={t('Provider')}
+                    name="provider"
+                    value={model.provider}
+                    disabled
+                    type="text"
+                  />
+                )}
                 {model.fileName && (
                   <Parameter
                     label={t('File')}
