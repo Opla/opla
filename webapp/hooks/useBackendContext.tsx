@@ -300,7 +300,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
         }
       }
     },
-    [updateBackendStore, activeService, setActiveService],
+    [activeService, setActiveService],
   );
 
   const downloadListener = useCallback(
