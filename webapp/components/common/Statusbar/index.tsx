@@ -25,12 +25,14 @@ import { Sys } from '@/types';
 import { ModalsContext } from '@/context/modals';
 import logger from '@/utils/logger';
 import { findModel } from '@/utils/data/models';
+import { useModelsStore } from '@/stores';
 
 export default function Statusbar() {
   const router = useRouter();
   const { pathname } = router;
   const { t } = useTranslation();
   const { server, config, downloads, updateBackendStore } = useBackend();
+  const models = useModelsStore();
   const { usage } = useContext(AppContext);
   const [sys, setSys] = useState<Sys>();
   const { showModal } = useContext(ModalsContext);
@@ -48,7 +50,7 @@ export default function Statusbar() {
   const error = server.status === 'error';
 
   const modelId = config.server.parameters.modelId as string;
-  const model = findModel(modelId, config.models.items);
+  const model = findModel(modelId, models.items);
   const download = (downloads ?? [undefined])[0];
 
   const displayServer = () => {

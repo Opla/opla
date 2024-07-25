@@ -14,7 +14,6 @@
 
 import { useContext, useMemo, useState } from 'react';
 import { BrainCircuit, Settings2 } from 'lucide-react';
-import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
 import { Preset, Model, Provider, Logo } from '@/types';
 import { AppContext } from '@/context';
@@ -25,6 +24,7 @@ import EditPreset from '@/components/common/EditPresets';
 import { findProvider, getLocalProvider } from '@/utils/data/providers';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import ModelIcon from '@/components/common/ModelIcon';
+import { useModelsStore } from '@/stores';
 import AlertDialog from '../../components/common/AlertDialog';
 import Parameter, { ParameterValue } from '../../components/common/Parameter';
 import Combobox from '../../components/common/Combobox';
@@ -40,10 +40,10 @@ type EditTargetDialogProps = {
 function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps) {
   const { t } = useTranslation();
   const { providers } = useContext(AppContext);
-  const { config } = useBackend();
+  const modelStorage = useModelsStore();
   const modelItems = useMemo(
-    () => getModelsAsItems(providers, config.models),
-    [providers, config],
+    () => getModelsAsItems(providers, modelStorage),
+    [providers, modelStorage],
   ).map((m) => ({
     ...m,
     icon: undefined,
@@ -80,7 +80,7 @@ function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps)
   let provider: Provider | undefined;
   const modelName = (newParameters?.models as string[] | undefined)?.[0] || target.models?.[0];
   if (modelName) {
-    model = findModelInAll(modelName, providers, config.models);
+    model = findModelInAll(modelName, providers, modelStorage);
     provider = target.provider
       ? findProvider(target?.provider, providers)
       : getLocalProvider(providers);

@@ -19,7 +19,7 @@ import {
   LlmUsage,
   Message,
   MessageStatus,
-  Store,
+  ModelsConfiguration,
 } from '@/types';
 import { toast } from '@/components/ui/Toast';
 import { Context } from '@/context';
@@ -87,7 +87,7 @@ export const sendMessage = async (
   assistant: Assistant | undefined,
   commandManager: CommandManager,
   context: Context,
-  config: Store,
+  modelStorage: ModelsConfiguration,
   storedActiveService: AIService | undefined,
   onSuccess: (usage: LlmUsage | undefined) => void,
   onError: (id: string, error: string) => void,
@@ -98,7 +98,7 @@ export const sendMessage = async (
     assistant,
     context.providers,
     storedActiveService,
-    config,
+    modelStorage,
     modelName,
   );
   logger.info('sendMessage', message, activeService, conversation, context.presets);
@@ -165,7 +165,7 @@ export const cancelSending = async (
   modelName: string,
   assistant: Assistant | undefined,
   context: Context,
-  config: Store,
+  modelStorage: ModelsConfiguration,
   storedActiveService: AIService | undefined,
 ) => {
   const activeService = getActiveService(
@@ -173,7 +173,7 @@ export const cancelSending = async (
     assistant,
     context.providers,
     storedActiveService,
-    config,
+    modelStorage,
     modelName,
   );
   logger.info('cancelSending', activeService, conversation, context.presets);

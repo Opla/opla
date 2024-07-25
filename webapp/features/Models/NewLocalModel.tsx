@@ -40,6 +40,7 @@ import { fileExists, getPathComponents, openFileDialog } from '@/utils/backend/t
 import { importModel, validateModelsFile } from '@/utils/models';
 import ModelInfos from '@/components/common/ModelInfos';
 import { ModalsContext } from '@/context/modals';
+import { useModelsStore } from '@/stores';
 import { ShortcutBadge } from '../../components/common/ShortCut';
 import { toast } from '../../components/ui/Toast';
 import SearchHuggingFaceHub from './SearchHuggingFaceHub';
@@ -58,7 +59,8 @@ function NewLocalModel({
   const gotoModels = !pathname.startsWith(Page.Models);
   const { showModal } = useContext(ModalsContext);
 
-  const { config, updateBackendStore } = useBackend();
+  const { updateBackendStore } = useBackend();
+  const modelStorage = useModelsStore();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [search, setValue] = useState('');
@@ -123,7 +125,7 @@ function NewLocalModel({
         model.editable = true;
         let { id } = model;
         let success;
-        const sameModel = findSameModel(model, config.models);
+        const sameModel = findSameModel(model, modelStorage);
         if (sameModel?.state === ModelState.Removed) {
           sameModel.state = ModelState.Ok;
           ({ id } = sameModel);
@@ -166,7 +168,7 @@ function NewLocalModel({
       delete selectedModel.include;
     }
     const path = getEntityName(selectedModel.creator || selectedModel.author);
-    const sameModel = findSameModel(selectedModel, config.models);
+    const sameModel = findSameModel(selectedModel, modelStorage);
 
     if (sameModel && sameModel.state !== ModelState.Removed) {
       toast.error(`${t('Model already exists')} ${selectedModel.name}`);

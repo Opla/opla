@@ -71,10 +71,10 @@ const initialBackendContext: OplaContext = {
       binary: '',
       parameters: {},
     },
-    models: {
+    /* models: {
       items: [],
       path: '',
-    },
+    }, */
     // services: {},
   },
 };

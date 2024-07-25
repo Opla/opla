@@ -31,7 +31,7 @@ import EmptyView from '@/components/common/EmptyView';
 import { cn } from '@/lib/utils';
 import { getLocalModels, getProviderModels } from '@/utils/data/models';
 import { AppContext } from '@/context';
-import { useAssistantStore } from '@/stores';
+import { useAssistantStore, useModelsStore } from '@/stores';
 import { addConversationService, isModelUsedInConversations } from '@/utils/data/conversations';
 import { getLocalProvider } from '@/utils/data/providers';
 import ModelIcon from '@/components/common/ModelIcon';
@@ -46,11 +46,12 @@ export type ModelsExplorerProps = {
 
 function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
   const { conversations, updateConversations, providers } = useContext(AppContext);
+  const modelStorage = useModelsStore();
   const [closeLocal, toggleCloseLocal] = useState(false);
   const [closeCloud, toggleCloseCloud] = useState(false);
   const [closeFeatured, toggleCloseFeatured] = useState(false);
   const { isModelUsedInAssistants } = useAssistantStore();
-  const { config, activeService, updateBackendStore } = useBackend();
+  const { activeService, updateBackendStore } = useBackend();
   const router = useRouter();
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
@@ -67,7 +68,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
     getCollection();
   }, []);
 
-  const models = useMemo(() => getLocalModels(config.models), [config.models]);
+  const models = useMemo(() => getLocalModels(modelStorage), [modelStorage]);
   const cloudModels = useMemo(() => getProviderModels(providers), [providers]);
 
   const handleSelectModel = (id: string) => {

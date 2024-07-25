@@ -20,7 +20,7 @@ import {
   Model,
   Provider,
   Assistant,
-  Store,
+  ModelsConfiguration,
 } from '../../types';
 
 import { getConversationService } from '../data/conversations';
@@ -39,7 +39,7 @@ export const getActiveService = (
   assistant: Assistant | undefined,
   providers: Provider[],
   storedActiveService: AIService | undefined,
-  config: Store,
+  modelStorage: ModelsConfiguration,
   _modelId?: string | undefined,
 ): AIImplService => {
   const type = assistant ? AIServiceType.Assistant : AIServiceType.Model;
@@ -73,7 +73,7 @@ export const getActiveService = (
     provider = findProvider(providerIdOrName, providers);
     model = findModel(modelId, provider?.models || []);
     if (!model && modelId) {
-      model = findModelInAll(modelId, providers, config.models, true);
+      model = findModelInAll(modelId, providers, modelStorage, true);
     }
     if (
       !provider ||
@@ -88,7 +88,7 @@ export const getActiveService = (
       activeService.providerIdOrName = providerIdOrName;
     }
     if (provider && !model) {
-      model = getFirstModel(provider.id, providers, config.models);
+      model = getFirstModel(provider.id, providers, modelStorage);
       modelId = model?.id;
     }
   } else if (activeService.type === AIServiceType.Assistant) {
@@ -109,7 +109,7 @@ export const getActiveService = (
       }
     }
 
-    model = findModelInAll(modelId, providers, config.models, true);
+    model = findModelInAll(modelId, providers, modelStorage, true);
     provider = findProvider(model?.provider || providerIdOrName, providers);
     if (provider?.models?.find((m) => m.id === model?.id) === undefined) {
       provider = undefined;

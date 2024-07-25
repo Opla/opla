@@ -19,7 +19,7 @@ import useBackend from '@/hooks/useBackendContext';
 import { AIServiceType, Provider, ProviderType, Ui, ViewSettings } from '@/types';
 import { MenuAction } from '@/types/ui';
 import { findProvider, updateProvider } from '@/utils/data/providers';
-import { useAssistantStore } from '@/stores';
+import { useAssistantStore, useModelsStore } from '@/stores';
 import useTranslation from '@/hooks/useTranslation';
 import { getActiveService } from '@/utils/services';
 import { getAnyFirstModel } from '@/utils/data/models';
@@ -53,8 +53,8 @@ export default function ThreadHeader({
 }: ThreadMenuProps) {
   const { getAssistant } = useAssistantStore();
   const { conversations, providers, setProviders } = useContext(AppContext);
-  const { activeService, config } = useBackend();
-
+  const { activeService } = useBackend();
+  const modelStorage = useModelsStore();
   const conversation = conversations.find((c) => c.id === selectedConversationId);
 
   const assistant = getAssistant(selectedAssistantId);
@@ -63,12 +63,12 @@ export default function ThreadHeader({
     assistant,
     providers,
     activeService,
-    config,
+    modelStorage,
     selectedModelId,
   );
   let selectedModel = service.model;
   if (!selectedModel && modelItems.length > 0) {
-    selectedModel = getAnyFirstModel(providers, config.models);
+    selectedModel = getAnyFirstModel(providers, modelStorage);
   }
   const modelId = selectedModel?.id || selectedModelId;
 

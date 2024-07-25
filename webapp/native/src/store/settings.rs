@@ -18,8 +18,10 @@ use serde::{ Deserialize, Serialize };
 use tauri::{ AppHandle, Manager };
 use tokio::spawn;
 
-use crate::{store::app_state::{Empty, GlobalAppState, Payload, Value, ValueSettings, STATE_SYNC_EVENT}, OplaContext};
-
+use crate::{
+    store::app_state::{ Empty, GlobalAppState, Payload, Value, ValueSettings, STATE_SYNC_EVENT },
+    OplaContext,
+};
 use super::app_state::STATE_CHANGE_EVENT;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -71,7 +73,7 @@ pub struct Settings {
 }
 
 impl Settings {
-        async fn emit_state_async(payload: Payload, app_handle: AppHandle) {
+    async fn emit_state_async(payload: Payload, app_handle: AppHandle) {
         let context = app_handle.state::<OplaContext>();
         let value = match payload.value {
             Some(v) => v,

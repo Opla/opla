@@ -495,7 +495,7 @@ export type Assistant = Agent & {
 export type Store = {
   // settings: Settings;
   server: ServerConfiguration;
-  models: ModelsConfiguration;
+  // models: ModelsConfiguration;
   // services: ServicesConfiguration;
 };
 

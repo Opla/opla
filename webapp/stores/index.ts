@@ -22,6 +22,7 @@ import {
   Provider,
   Settings,
   AIService,
+  ModelsConfiguration,
 } from '@/types';
 import logger from '@/utils/logger';
 import { mapKeys } from '@/utils/data';
@@ -34,6 +35,7 @@ import createPresetSlice, { PresetSlice } from './preset';
 import createProviderSlice, { ProviderSlice } from './provider';
 import createSettingsSlice, { SettingsSlice } from './settings';
 import createServiceSlice, { ServiceSlice } from './service';
+import createModelSlice, { ModelSlice } from './model';
 
 type PaylLoadValue = string | number | undefined;
 
@@ -52,6 +54,10 @@ const emit: Emitter = async (key: number, value: PaylLoadValue) => {
 
 export const useSettingsStore = create<SettingsSlice>()((...a) => ({
   ...createSettingsSlice(emit)(...a),
+}));
+
+export const useModelsStore = create<ModelSlice>()((...a) => ({
+  ...createModelSlice(emit)(...a),
 }));
 
 export const useServiceStore = create<ServiceSlice>()((...a) => ({
@@ -128,6 +134,9 @@ export const subscribeStateSync = async () => {
         activeService?: AIService;
       };
       useServiceStore.setState({ activeService, state: StorageState.OK, error: undefined });
+    } else if (key === GlobalAppState.MODELS) {
+      const { models } = (await mapKeys(value, toCamelCase)) as { models: ModelsConfiguration };
+      useModelsStore.setState({ ...models, state: StorageState.OK, error: undefined });
     }
   });
 

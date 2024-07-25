@@ -14,12 +14,12 @@
 
 import { useContext, useState } from 'react';
 import { Copy, Edit, MoreHorizontal, Trash } from 'lucide-react';
-import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
 import { Preset } from '@/types';
 import { getAllModels } from '@/utils/data/models';
 import { AppContext } from '@/context';
 import ModelInfos from '@/components/common/ModelInfos';
+import { useModelsStore } from '@/stores';
 import {
   Table,
   TableHeader,
@@ -47,9 +47,9 @@ type TargetsTableProps = {
 function TargetsTable({ targets, onEdit, onDuplicate, onDelete }: TargetsTableProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState<Record<string, boolean>>({});
-  const { config } = useBackend();
   const { providers } = useContext(AppContext);
-  const models = getAllModels(providers, config.models);
+  const modelsConfig = useModelsStore();
+  const models = getAllModels(providers, modelsConfig);
   const renderModel = (targetModels: string[] | undefined) => {
     const model = targetModels ? models.find((m) => m.name === targetModels[0]) : undefined;
     if (!model) return <div>{t('Model not found')}</div>;

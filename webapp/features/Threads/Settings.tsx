@@ -23,6 +23,7 @@ import EditPresets from '@/components/common/EditPresets';
 import { ConversationError } from '@/types/ui';
 import CopyToClipBoard from '@/components/common/CopyToClipBoard';
 import { getActiveService } from '@/utils/services';
+import { useModelsStore } from '@/stores';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Textarea } from '../../components/ui/textarea';
 import { Button } from '../../components/ui/button';
@@ -36,15 +37,15 @@ export default function Settings({
 }) {
   const { t } = useTranslation();
   const { conversations, updateConversations, providers } = useContext(AppContext);
-  const { activeService, config, server } = useBackend();
-
+  const { activeService, server } = useBackend();
+  const modelStorage = useModelsStore();
   const selectedConversation = conversations.find((c) => c.id === conversationId);
   const service = getActiveService(
     selectedConversation,
     undefined,
     providers,
     activeService,
-    config,
+    modelStorage,
   );
   const { model, provider } = service;
 

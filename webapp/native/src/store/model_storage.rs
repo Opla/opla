@@ -16,9 +16,18 @@ use std::fs::create_dir_all;
 use std::path::{ Path, PathBuf };
 use opla_core::gguf::GGUF;
 use serde::{ self, Deserialize, Serialize };
+use tauri::{ AppHandle, Manager };
+use tokio::spawn;
 use uuid::Uuid;
 use crate::data::model::{ Model, ModelEntity };
+use crate::store::app_state::ValueModels;
 use crate::utils::{ get_home_directory, get_data_directory };
+
+use crate::{
+    store::app_state::{ Empty, GlobalAppState, Payload, Value, ValueSettings, STATE_SYNC_EVENT },
+    OplaContext,
+};
+use super::app_state::STATE_CHANGE_EVENT;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ModelStorage {
@@ -34,13 +43,15 @@ impl ModelStorage {
         }
     }
 
-    pub fn set_models_path(&mut self, models_path: Option<String>) -> Result<String,String> {
+    pub fn set_models_path(&mut self, models_path: Option<String>) -> Result<String, String> {
         // TODO validate models_path, current models and truncate from home/data directory
         println!("Set models path {:?}", models_path);
         self.path = models_path.clone();
-        let models_path:  String = match self.get_models_path()?.to_str() {
+        let models_path: String = match self.get_models_path()?.to_str() {
             Some(value) => value.to_string(),
-            None => return Err(format!("Can't get models path")),
+            None => {
+                return Err(format!("Can't get models path"));
+            }
         };
         Ok(models_path)
     }
@@ -287,5 +298,62 @@ impl ModelStorage {
         };
         model_entity.state = Some(state.to_string());
         self.update_model_entity(&model_entity);
+    }
+
+    async fn emit_state_async(payload: Payload, app_handle: AppHandle) {
+        let context = app_handle.state::<OplaContext>();
+        let value = match payload.value {
+            Some(v) => v,
+            None => Value::Empty(Empty {}),
+        };
+        println!("Model emit state sync: {} {:?}", payload.key, value);
+        match GlobalAppState::from(payload.key) {
+            GlobalAppState::MODELS => {
+                let mut store = context.store.lock().await;
+                if let Value::Models(data) = value {
+                    store.models = data.models.clone();
+                    if let Err(error) = store.save() {
+                        println!("Error can't save models store: {:?}", error);
+                    }
+                } else if let Value::Empty(_) = value {
+                } else {
+                    println!("Error wrong type of value: {} {:?}", payload.key, value);
+                    return;
+                }
+
+                app_handle
+                    .emit_all(STATE_SYNC_EVENT, Payload {
+                        key: payload.key,
+                        value: Some(
+                            Value::Models(ValueModels {
+                                models: store.models.clone(),
+                            })
+                        ),
+                    })
+                    .unwrap();
+            }
+            _ => {}
+        }
+    }
+
+    pub fn subscribe_state_events(&mut self, app_handle: AppHandle) {
+        let app_handle_copy = app_handle.app_handle();
+        let _id = app_handle.listen_global(STATE_CHANGE_EVENT, move |event| {
+            if let Some(payload) = event.payload() {
+                match serde_json::from_str(payload) {
+                    Ok(data) => {
+                        let app_handle = app_handle_copy.app_handle();
+                        spawn(async move { Self::emit_state_async(data, app_handle).await });
+                    }
+                    Err(e) => {
+                        println!("Failed to deserialize payload: {}", e);
+                    }
+                }
+            }
+        });
+    }
+
+    pub fn init(&mut self, app_handle: AppHandle) {
+        self.subscribe_state_events(app_handle.app_handle());
     }
 }

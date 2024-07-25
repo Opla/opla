@@ -33,6 +33,8 @@ export enum GlobalAppState {
   SETTINGS = 12,
 
   SERVICES = 13,
+
+  MODELS = 14,
 }
 
 export const EVENTS: {

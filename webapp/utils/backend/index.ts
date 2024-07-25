@@ -21,9 +21,9 @@ const context: OplaContext = {
       name: 'None',
       parameters: {},
     },
-    models: {
+    /* models: {
       items: [],
-    },
+    }, */
     // services: {},
   },
   server: {

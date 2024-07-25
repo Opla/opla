@@ -35,6 +35,7 @@ import SelectModel from '@/components/common/SelectModel';
 import { getLocalModels, getLocalModelsAsItems } from '@/utils/data/models';
 import { setActiveModel } from '@/utils/backend/commands';
 import { LllamaCppParameterDefinitions } from '@/utils/providers/llama.cpp/constants';
+import { useModelsStore } from '@/stores';
 
 export default function Opla({
   provider,
@@ -45,11 +46,12 @@ export default function Opla({
 }) {
   const { t } = useTranslation();
   const { server, restart, config, updateBackendStore } = useBackend();
-  const models = getLocalModels(config.models);
+  const modelStorage = useModelsStore();
+  const models = getLocalModels(modelStorage);
   const modelId = config.server.parameters.modelId as string;
   const selectedModel = models.find((m) => m.id === modelId || m.fileName === modelId);
   const modelPath = config.server.parameters.modelPath as string;
-  const items = getLocalModelsAsItems(config.models, selectedModel?.id);
+  const items = getLocalModelsAsItems(modelStorage, selectedModel?.id);
   const changeActiveModel = async (modelIdOrName: string) => {
     await setActiveModel(modelIdOrName);
     if (server.status === ServerStatus.STARTED || server.status === ServerStatus.STARTING) {

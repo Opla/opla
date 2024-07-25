@@ -51,7 +51,7 @@ import { MenuAction } from '@/types/ui';
 import { getMessageContentAsString, getMessageContentHistoryAsString } from '@/utils/data/messages';
 import { getCommandManager } from '@/utils/commands';
 import ContentView from '@/components/common/ContentView';
-import { useAssistantStore } from '@/stores';
+import { useAssistantStore, useModelsStore } from '@/stores';
 import { getLocalProvider } from '@/utils/data/providers';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import { getSelectedViewName } from '@/utils/views';
@@ -86,7 +86,6 @@ function Thread({
 
   const {
     activeService,
-    config,
     settings,
     downloads,
     streams,
@@ -97,6 +96,7 @@ function Thread({
   const searchParams = useSearchParams();
   const [service, setService] = useState<AIService | undefined>(undefined);
   const { assistants, getAssistant } = useAssistantStore();
+  const modelStorage = useModelsStore();
 
   const [tempConversationId, setTempConversationId] = useState<string | undefined>(undefined);
   const conversationId = _conversationId || tempConversationId;
@@ -212,15 +212,15 @@ function Thread({
         if (!modelId && downloads && downloads.length > 0) {
           modelId = downloads[0].id;
         }
-        activeModel = findModel(modelId, config.models.items);
+        activeModel = findModel(modelId, modelStorage.items);
       } else {
-        activeModel = findModelInAll(modelId, providers, config.models, true);
+        activeModel = findModelInAll(modelId, providers, modelStorage, true);
       }
 
       const download = downloads?.find((d) => d.id === activeModel?.id);
 
       if (!activeModel && !download) {
-        activeModel = getAnyFirstModel(providers, config.models);
+        activeModel = getAnyFirstModel(providers, modelStorage);
         modelId = activeModel?.id;
       }
 
@@ -230,7 +230,7 @@ function Thread({
         activeModel.state = ModelState.Ok;
       }
 
-      const items = getModelsAsItems(providers, config.models, modelId);
+      const items = getModelsAsItems(providers, modelStorage, modelId);
       let d = false;
       if (!activeModel) {
         modelId = undefined;
@@ -254,7 +254,7 @@ function Thread({
     }, [
       assistants,
       activeService,
-      config,
+      modelStorage,
       downloads,
       getActiveModel,
       getAssistant,
@@ -333,7 +333,7 @@ function Thread({
       `ChangeService ${modelIdOrName} ${providerIdOrName} activeModel=${selectedModelId}`,
       selectedConversation,
     );
-    const activeModel = findModelInAll(modelIdOrName, providers, config.models, true);
+    const activeModel = findModelInAll(modelIdOrName, providers, modelStorage, true);
     if (!activeModel) {
       logger.error('changeService Model not found', modelIdOrName);
       return;

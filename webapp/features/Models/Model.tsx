@@ -59,7 +59,7 @@ import { fileExists } from '@/utils/backend/tauri';
 import { toast } from 'sonner';
 import { addConversationService, isModelUsedInConversations } from '@/utils/data/conversations';
 import { AppContext } from '@/context';
-import { useAssistantStore } from '@/stores';
+import { useAssistantStore, useModelsStore } from '@/stores';
 import { OrangePill } from '@/components/ui/Pills';
 import { getLocalProvider } from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';
@@ -84,8 +84,9 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
   const { t } = useTranslation();
 
   const [fullPathModel, setFullPathModel] = useState<string | undefined>();
-  const { activeService, config, downloads, updateBackendStore } = useBackend();
+  const { activeService, downloads, updateBackendStore } = useBackend();
   const { conversations, updateConversations, providers, setProviders } = useContext(AppContext);
+  const modelStorage = useModelsStore();
   const { isModelUsedInAssistants } = useAssistantStore();
   const [collection, setCollection] = useState<Model[]>([]);
   const { showModal } = useContext(ModalsContext);
@@ -104,7 +105,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
 
   const [downloadsModel, models, model, downloadables, local, inUse] = useMemo(() => {
     let l = true;
-    const mdls = config.models.items;
+    const mdls = modelStorage.items;
     let mdl = mdls.find((m) => m.id === selectedModelId) as Model;
     if (!mdl && selectedModelId) {
       mdl = collection.find((m) => m.id === selectedModelId) as Model;
@@ -126,7 +127,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
 
     return [downloads || [], mdls, mdl, dls, l, isUsed];
   }, [
-    config.models.items,
+    modelStorage.items,
     activeService,
     selectedModelId,
     conversations,
@@ -228,7 +229,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       delete selectedModel.include;
     }
     const path = getEntityName(selectedModel.creator || selectedModel.author);
-    const sameModel = findSameModel(selectedModel, config.models);
+    const sameModel = findSameModel(selectedModel, modelStorage);
 
     if (sameModel && sameModel.state !== ModelState.Removed) {
       toast.error(`${t('Model already installed ')} ${selectedModel.name}`);
