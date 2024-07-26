@@ -59,7 +59,7 @@ import { fileExists } from '@/utils/backend/tauri';
 import { toast } from 'sonner';
 import { addConversationService, isModelUsedInConversations } from '@/utils/data/conversations';
 import { AppContext } from '@/context';
-import { useAssistantStore } from '@/stores';
+import { useAssistantStore, useModelsStore } from '@/stores';
 import { OrangePill } from '@/components/ui/Pills';
 import { getLocalProvider } from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';
@@ -84,8 +84,9 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
   const { t } = useTranslation();
 
   const [fullPathModel, setFullPathModel] = useState<string | undefined>();
-  const { activeService, config, downloads, updateBackendStore } = useBackend();
+  const { activeService, downloads } = useBackend();
   const { conversations, updateConversations, providers, setProviders } = useContext(AppContext);
+  const modelStorage = useModelsStore();
   const { isModelUsedInAssistants } = useAssistantStore();
   const [collection, setCollection] = useState<Model[]>([]);
   const { showModal } = useContext(ModalsContext);
@@ -104,7 +105,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
 
   const [downloadsModel, models, model, downloadables, local, inUse] = useMemo(() => {
     let l = true;
-    const mdls = config.models.items;
+    const mdls = modelStorage.items;
     let mdl = mdls.find((m) => m.id === selectedModelId) as Model;
     if (!mdl && selectedModelId) {
       mdl = collection.find((m) => m.id === selectedModelId) as Model;
@@ -126,7 +127,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
 
     return [downloads || [], mdls, mdl, dls, l, isUsed];
   }, [
-    config.models.items,
+    modelStorage.items,
     activeService,
     selectedModelId,
     conversations,
@@ -176,7 +177,6 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       });
       if (needUpdate) {
         await updateModel(updatedModel);
-        await updateBackendStore();
       }
     }
     return undefined;
@@ -204,19 +204,17 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
           logger.error(`File not found ${modelPath} ${model.fileName} ${full}`);
           toast.error(`File not found ${full}`);
           await updateModelEntity({ ...model, state: ModelState.NotFound });
-          await updateBackendStore();
         } else if (exist && model.state === ModelState.NotFound) {
           logger.info(
             `File found path=${modelPath} model.path=${model.path} model.fileName=${model.fileName} full=${full}`,
           );
           await updateModelEntity({ ...model, state: ModelState.Ok });
-          await updateBackendStore();
         }
         setFullPathModel(full);
       }
     };
     getFullPath();
-  }, [fullPathModel, model, updateBackendStore]);
+  }, [fullPathModel, model]);
 
   const handleInstall = async (item?: Model) => {
     const selectedModel: Model = deepMerge<Model>(model, item || {}, true);
@@ -228,7 +226,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       delete selectedModel.include;
     }
     const path = getEntityName(selectedModel.creator || selectedModel.author);
-    const sameModel = findSameModel(selectedModel, config.models);
+    const sameModel = findSameModel(selectedModel, modelStorage);
 
     if (sameModel && sameModel.state !== ModelState.Removed) {
       toast.error(`${t('Model already installed ')} ${selectedModel.name}`);
@@ -250,7 +248,6 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
         selectedModel.name,
       );
     }
-    await updateBackendStore();
     logger.info(`installed ${id}`);
     router.push(`${Page.Models}/${id}`);
     if (restored) {
@@ -279,7 +276,6 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       });
       await updateConversations(updatedConversations);
     }
-    await updateBackendStore();
     toast.success(`${model.name} ${t('model uninstalled')} `);
     router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
   };
@@ -289,7 +285,6 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     logger.info(`Cancel download ${action} model.id=${modelId}`);
     const nextModelId = models.findLast((m) => m.id !== modelId)?.id || '';
     await cancelDownloadModel(modelId);
-    await updateBackendStore();
     router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
   };
 

@@ -50,7 +50,7 @@ import useBackend from '@/hooks/useBackendContext';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { getDefaultAssistantService } from '@/utils/data/assistants';
 import useTranslation from '@/hooks/useTranslation';
-import { useAssistantStore } from '@/stores';
+import { useAssistantStore, useModelsStore } from '@/stores';
 
 type Context = {
   conversationPrompt: ParsedPrompt;
@@ -96,6 +96,8 @@ function PromptProvider({
   const { getAssistant } = useAssistantStore();
   const { conversations, providers, updateConversations } = context;
   const { activeService: storedActiveService, config } = useBackend();
+  const modelStorage = useModelsStore();
+
   const [usage, updateUsage] = useState<Usage | undefined>({ tokenCount: 0 });
   const [changedPrompt, setChangedPrompt] = useState<ParsedPrompt | undefined>(undefined);
 
@@ -148,7 +150,7 @@ function PromptProvider({
           selectedAssistant,
           providers,
           storedActiveService,
-          config,
+          modelStorage,
           selectedModelNameOrId,
         );
         if (text && text.length > 0) {
@@ -180,6 +182,7 @@ function PromptProvider({
     providers,
     storedActiveService,
     config,
+    modelStorage,
     selectedModelId,
     usage,
   ]);

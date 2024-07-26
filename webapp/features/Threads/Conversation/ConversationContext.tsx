@@ -41,7 +41,7 @@ import { preProcessingCommands } from '@/utils/commands';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import { CommandManager } from '@/utils/commands/types';
 import { cancelSending, sendMessage, updateMessageContent } from '@/utils/messages';
-import { useAssistantStore } from '@/stores';
+import { useAssistantStore, useModelsStore } from '@/stores';
 import { imageGeneration } from '@/utils/providers';
 import { convertAssetFile } from '@/utils/backend/tauri';
 import { PromptContext } from '../Prompt/PromptContext';
@@ -109,8 +109,9 @@ function ConversationProvider({
     setUsage,
   } = context;
   const { parseAndValidatePrompt, clearPrompt } = useContext(PromptContext) || {};
-  const { activeService, config, updateBackendStore } = useBackend();
+  const { activeService } = useBackend();
   const { getAssistant } = useAssistantStore();
+  const modelStorage = useModelsStore();
   const [selectedMessageId, setSelectedMessageId] = useState<string | undefined>(undefined);
   const [isProcessing, setIsProcessing] = useState<{ [key: string]: boolean }>({});
   const [errorMessages, setErrorMessage] = useState<{ [key: string]: string }>({});
@@ -363,12 +364,12 @@ function ConversationProvider({
       }
       let selectedModel;
       if (result.modelName) {
-        selectedModel = findModelInAll(result.modelName, providers, config.models, true);
+        selectedModel = findModelInAll(result.modelName, providers, modelStorage, true);
       } else {
         selectedModel = findModelInAll(
           getConversationModelId(selectedConversation) || selectedModelId,
           providers,
-          config.models,
+          modelStorage,
           true,
         );
       }
@@ -386,7 +387,7 @@ function ConversationProvider({
       changeService,
       clearPrompt,
       commandManager,
-      config,
+      modelStorage,
       conversations,
       errorMessages,
       getAssistant,
@@ -467,12 +468,11 @@ function ConversationProvider({
         selectedAssistant || assistant,
         commandManager,
         context,
-        config,
+        modelStorage,
         activeService,
         setUsage,
         handleError,
       );
-      await updateBackendStore();
 
       if (tempConversationId) {
         router.replace(`${Page.Threads}/${tempConversationId}`, undefined, { shallow: true });
@@ -483,7 +483,7 @@ function ConversationProvider({
       clearPrompt,
       commandManager,
       activeService,
-      config,
+      modelStorage,
       context,
       conversationId,
       getConversationMessages,
@@ -496,7 +496,6 @@ function ConversationProvider({
       t,
       tempConversationId,
       tempConversationName,
-      updateBackendStore,
       updateMessagesAndConversation,
     ],
   );
@@ -556,19 +555,17 @@ function ConversationProvider({
         selectedAssistant || assistant,
         commandManager,
         context,
-        config,
+        modelStorage,
         activeService,
         setUsage,
         handleError,
       );
-
-      await updateBackendStore();
     },
     [
       assistant,
       commandManager,
       activeService,
-      config,
+      modelStorage,
       context,
       conversationId,
       getConversationMessages,
@@ -578,7 +575,6 @@ function ConversationProvider({
       selectedConversation,
       setUsage,
       tempConversationName,
-      updateBackendStore,
       updateMessagesAndConversation,
     ],
   );
@@ -593,7 +589,7 @@ function ConversationProvider({
             selectedModelId,
             assistant,
             context,
-            config,
+            modelStorage,
             activeService,
           );
         } catch (e) {
@@ -621,7 +617,7 @@ function ConversationProvider({
     [
       assistant,
       activeService,
-      config,
+      modelStorage,
       context,
       selectedConversation,
       selectedModelId,

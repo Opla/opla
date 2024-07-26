@@ -54,7 +54,6 @@ const createServiceSlice =
     setActiveModel: async (model: string, provider?: string) => {
       logger.info('setActiveModel', model);
       await setBackendActiveModel(model, provider);
-      // await updateBackendStore();
       let { activeService } = get();
       if (activeService?.type === AIServiceType.Model && activeService.modelId === model) {
         return;

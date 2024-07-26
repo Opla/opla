@@ -20,10 +20,10 @@ import { Progress } from '@/components/ui/progress';
 import { formatFileSize } from '@/utils/download';
 import { Separator } from '@/components/ui/separator';
 import useTranslation from '@/hooks/useTranslation';
-import useBackend from '@/hooks/useBackendContext';
 import { Button } from '@/components/ui/button';
 import { findModel, getModelStateAsString } from '@/utils/data/models';
 import EmptyView from '@/components/common/EmptyView';
+import { useModelsStore } from '@/stores';
 
 type DownloadModelProps = {
   className?: string;
@@ -33,23 +33,22 @@ type DownloadModelProps = {
 function DownloadModel({ className, download, onAction }: DownloadModelProps) {
   const { t } = useTranslation();
   const [downloading, setDownloading] = useState<boolean>(false);
-  const { config, updateBackendStore } = useBackend();
+  const modelStorage = useModelsStore();
 
   const model = useMemo(() => {
     let modelId = download?.id;
-    const models = config.models.items ?? [undefined];
+    const models = modelStorage.items ?? [undefined];
     if (!modelId) {
       modelId = models.find(
         (m) => m.state === ModelState.Pending || m.state === ModelState.Downloading,
       )?.id;
     }
     return findModel(modelId, models);
-  }, [config, download]);
+  }, [modelStorage, download]);
 
   useEffect(() => {
     const asyncFunc = async () => {
       if (downloading && !download && model?.state !== ModelState.Pending) {
-        await updateBackendStore();
         onAction('Close');
         setDownloading(false);
       } else if (download) {
@@ -57,7 +56,7 @@ function DownloadModel({ className, download, onAction }: DownloadModelProps) {
       }
     };
     asyncFunc();
-  }, [download, model, onAction, downloading, updateBackendStore]);
+  }, [download, model, onAction, downloading]);
 
   let state: 'downloading' | 'ok' | 'pending' | 'error';
   if (download && model?.state === ModelState.Downloading) {

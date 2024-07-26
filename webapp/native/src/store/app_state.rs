@@ -25,7 +25,7 @@ use crate::data::{
     Preset,
 };
 
-use super::{ service_storage::ServiceStorage, settings::Settings };
+use super::{ model_storage::ModelStorage, service_storage::ServiceStorage, settings::Settings };
 
 pub const STATE_CHANGE_EVENT: &str = "state_change_event";
 pub const STATE_SYNC_EVENT: &str = "state_sync_event";
@@ -53,6 +53,8 @@ pub enum GlobalAppState {
     SETTINGS = 12,
 
     SERVICES = 13,
+
+    MODELS = 14,
 }
 
 impl From<u32> for GlobalAppState {
@@ -71,6 +73,7 @@ impl From<u32> for GlobalAppState {
             11 => GlobalAppState::ASSISTANTS,
             12 => GlobalAppState::SETTINGS,
             13 => GlobalAppState::SERVICES,
+            14 => GlobalAppState::MODELS,
             _ => {
                 println!("Not a valid value for the enum GlobalAppState");
                 GlobalAppState::ERROR
@@ -105,6 +108,8 @@ impl Into<u32> for GlobalAppState {
             GlobalAppState::SETTINGS => 12,
 
             GlobalAppState::SERVICES => 13,
+
+            GlobalAppState::MODELS => 14,
         }
     }
 }
@@ -138,6 +143,11 @@ pub struct ValueServices {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ValueModels {
+    pub models: ModelStorage,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Value {
     Bool(bool),
@@ -150,6 +160,7 @@ pub enum Value {
     Assistants(ValueAssistants),
     Settings(ValueSettings),
     Services(ValueServices),
+    Models(ValueModels),
     Empty(Empty),
     Conversations(Vec<Conversation>),
     ConversationMessages(ConversationMessages),

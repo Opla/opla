@@ -71,10 +71,10 @@ const initialBackendContext: OplaContext = {
       binary: '',
       parameters: {},
     },
-    models: {
+    /* models: {
       items: [],
       path: '',
-    },
+    }, */
     // services: {},
   },
 };
@@ -85,7 +85,6 @@ type Context = OplaContext & {
   settings: Settings;
   activeService?: AIService;
   setSettings: (settings: Settings) => void;
-  updateBackendStore: () => Promise<void>;
   updateBackendServer: (partials: Partial<OplaServer>) => Promise<void>;
   start: (params: ServerParameters | undefined) => Promise<BackendResult>;
   stop: () => Promise<BackendResult>;
@@ -104,7 +103,6 @@ const defaultContext: Context = {
   startBackend: async () => {},
   disconnectBackend: async () => {},
   setSettings: () => {},
-  updateBackendStore: async () => {},
   updateBackendServer: async () => {},
   start: async () => ({ status: 'error', error: 'not implemented' }),
   stop: async () => ({ status: 'error', error: 'not implemented' }),
@@ -290,9 +288,6 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
             };
             setActiveService(service);
           }
-          // await updateBackendStore();
-          // useServiceStore.setState({ activeService, state: StorageState.OK, error: undefined });
-
           updateServer({
             status: event.payload.status,
             message: event.payload.message,
@@ -468,37 +463,6 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     return result;
   }, []);
 
-  /* const setSettings = useCallback(async (settings: Settings) => {
-    const store = await saveSettings(settings);
-    updateConfig(store);
-  }, []); */
-
-  /* const getActiveModel = useCallback(() => {
-    const { services = {} } = configRef.current;
-    const { activeService } = services;
-    return activeService?.type === AIServiceType.Model ? activeService.modelId : undefined;
-  }, [configRef]);
-
-  const setActiveModel = useCallback(
-    async (model: string, provider?: string) => {
-      logger.info('setActiveModel', model);
-      await setBackendActiveModel(model, provider);
-      await updateBackendStore();
-      const { services = {} } = config;
-      const { activeService } = services;
-      if (activeService?.type === AIServiceType.Model && activeService.modelId === model) {
-        return;
-      }
-      services.activeService = {
-        type: AIServiceType.Model,
-        modelId: model,
-        providerIdOrName: provider,
-      };
-      updateConfig({ services });
-    },
-    [config, updateBackendStore],
-  ); */
-
   const disconnectBackend = useCallback(async () => {
     // logger.info('unmountBackendProvider');
   }, []);
@@ -516,7 +480,6 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       startBackend,
       disconnectBackend,
       setSettings,
-      updateBackendStore,
       updateBackendServer,
       start,
       stop,
@@ -539,7 +502,6 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       start,
       startBackend,
       stop,
-      updateBackendStore,
       updateBackendServer,
     ],
   );

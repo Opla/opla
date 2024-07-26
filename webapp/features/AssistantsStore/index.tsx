@@ -21,7 +21,7 @@ import { Assistant, Model, Ui } from '@/types';
 import { getAssistantsCollection, getModelsCollection } from '@/utils/backend/commands';
 import useTranslation from '@/hooks/useTranslation';
 import { getEntityName } from '@/utils/data';
-import { useAssistantStore } from '@/stores';
+import { useAssistantStore, useModelsStore } from '@/stores';
 import { installModelFromApi } from '@/utils/data/models';
 import { toast } from '@/components/ui/Toast';
 import logger from '@/utils/logger';
@@ -44,7 +44,8 @@ const search = (query: string, assistant: Assistant) => {
 
 function AssistantsStore() {
   const router = useRouter();
-  const { config, settings, updateBackendStore, setSettings } = useBackend();
+  const { settings, setSettings } = useBackend();
+  const models = useModelsStore();
   const [collection, setCollection] = useState<Assistant[]>([]);
   const [query, setQuery] = useState<string>('');
   const { t } = useTranslation();
@@ -65,7 +66,7 @@ function AssistantsStore() {
     let newAssistant = getAssistant(assistant.id);
     if (!newAssistant) {
       const { targets = [] } = assistant;
-      const allModels = config.models.items;
+      const allModels = models.items;
       if (targets.length) {
         // TODO install first target model if not present
       }
@@ -76,7 +77,6 @@ function AssistantsStore() {
         if (model) {
           try {
             await installModelFromApi(model);
-            await updateBackendStore();
           } catch (e) {
             const error = `Can't install ${model?.name} model: ${e}`;
             logger.info(error);

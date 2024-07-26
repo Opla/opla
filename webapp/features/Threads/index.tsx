@@ -36,7 +36,7 @@ import { getAssistantId } from '@/utils/services';
 import { deepEqual } from '@/utils/data';
 import { createProvider } from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';
-import { useAssistantStore, useThreadStore, useWorkspaceStore } from '@/stores';
+import { useAssistantStore, useModelsStore, useThreadStore, useWorkspaceStore } from '@/stores';
 import { findModelInAll } from '@/utils/data/models';
 import { uninstallModel } from '@/utils/backend/commands';
 import { ResizableHandle, ResizablePanel } from '../../components/ui/resizable';
@@ -75,7 +75,8 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     deleteArchive,
     providers,
   } = useContext(AppContext);
-  const { config, settings, setSettings, updateBackendStore } = useBackend();
+  const { settings, setSettings } = useBackend();
+  const modelStorage = useModelsStore();
 
   const {
     loadWorkspace,
@@ -174,7 +175,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
           }
         }
         const modelId = getConversationModelId(removedConversation, assistant);
-        const model = findModelInAll(modelId, providers, config.models, true);
+        const model = findModelInAll(modelId, providers, modelStorage, true);
         if (modelId && model?.state === ModelState.Removed) {
           let some = updatedConversations.some(
             (conversation) => getConversationModelId(conversation, assistant) === modelId,
@@ -184,7 +185,6 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
             archives.some((archive) => getConversationModelId(archive, assistant) === modelId);
           if (!some) {
             await uninstallModel(modelId, false);
-            await updateBackendStore();
           }
         }
         // Delete associated settings
