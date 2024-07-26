@@ -18,7 +18,7 @@ use crate::data::model::{ Model, ModelEntity };
 use crate::models::{ fetch_models_collection, ModelsCollection };
 use opla_core::gguf::GGUF;
 use serde::Serialize;
-use tauri::{ EventLoopMessage, Manager, Runtime, State };
+use tauri::{ Manager, Runtime, State };
 
 #[tauri::command]
 pub async fn get_models_collection<R: Runtime>(

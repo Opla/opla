@@ -90,7 +90,6 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
     logger.info(`change model name ${id} ${name}`, updatedModel, models);
     if (updatedModel && updatedModel.name !== name) {
       await updateModel({ ...updatedModel, name });
-      // await updateBackendStore();
     }
   };
 
@@ -125,7 +124,6 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
       const nextModelId =
         models.findLast((m) => m.state !== ModelState.Removed && m.id !== modelId)?.id || '';
       await uninstallModel(modelId, isUsed);
-      // await updateBackendStore();
       router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
     }
   };

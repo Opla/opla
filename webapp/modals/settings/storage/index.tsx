@@ -26,11 +26,9 @@ import { useEffect, useState } from 'react';
 import Parameter from '@/components/common/Parameter';
 import { ResetIcon } from '@radix-ui/react-icons';
 import logger from '@/utils/logger';
-// import useBackendContext from '@/hooks/useBackendContext';
 
 export default function Storage() {
   const { t } = useTranslation();
-  // const { updateBackendStore } = useBackendContext();
   const [configDir, setConfigDir] = useState<string>();
   const [dataDir, setDataDir] = useState<string>();
 
@@ -48,7 +46,6 @@ export default function Storage() {
   const handleChangeModelsPath = async (newPath?: string | undefined) => {
     logger.info('New model path', newPath);
     await setModelsPath(newPath);
-    // await updateBackendStore();
     await updateDirs();
   };
 

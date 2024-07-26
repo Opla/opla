@@ -420,7 +420,6 @@ function Thread({
           [conversationViewName]: updatedPageSettings,
         },
       });
-      // await updateBackendStore();
     }
   };
 
@@ -439,7 +438,6 @@ function Thread({
           [conversationViewName]: updatedPageSettings,
         },
       });
-      // await updateBackendStore();
     }
   };
   useShortcuts(ShortcutIds.DELETE_MESSAGE, (e) => {

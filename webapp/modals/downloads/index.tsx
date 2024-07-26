@@ -47,7 +47,6 @@ function DownloadsDialog({
     if (action === 'Cancel') {
       logger.info(`Cancel download model.id=${model.id}`);
       await cancelDownloadModel(data.item.id);
-      // await updateBackendStore();
       if (pathname.startsWith(Page.Models)) {
         router.push(Page.Models);
       }

@@ -77,7 +77,6 @@ function AssistantsStore() {
         if (model) {
           try {
             await installModelFromApi(model);
-            // await updateBackendStore();
           } catch (e) {
             const error = `Can't install ${model?.name} model: ${e}`;
             logger.info(error);

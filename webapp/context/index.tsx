@@ -36,12 +36,19 @@ import { defaultPresets, mergePresets } from '@/utils/data/presets';
 import { getMessageContentAsString, mergeMessages } from '@/utils/data/messages';
 import { deleteUnusedConversationsDir } from '@/utils/backend/tauri';
 import logger from '@/utils/logger';
-import { useAssistantStore, usePresetStore, useProviderStore, useThreadStore } from '@/stores';
+import {
+  useAssistantStore,
+  useModelsStore,
+  usePresetStore,
+  useProviderStore,
+  useThreadStore,
+} from '@/stores';
 import {
   // loadConversationMessages,
   removeConversationMessages,
   // saveConversationMessages,
 } from '@/utils/backend/commands';
+import { StorageState } from '@/stores/types';
 
 export type Context = {
   conversations: Array<Conversation>;
@@ -133,18 +140,18 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
   // const [providers, setProviders] = useDataStorage('providers', initialContext.providers);
   const { providers, setProviders, loadProviders } = useProviderStore();
   const { loadAssistants } = useAssistantStore();
-
+  const { state: modelState, loadModels } = useModelsStore();
   const { presets, setPresets, loadPresets } = usePresetStore();
   // const [presets, setPresets] = useDataStorage('presets', initialContext.presets);
 
   useEffect(() => {
-    if (!providers.find((p) => p.type === 'opla')) {
-      if (providers.length === 0) {
-        loadProviders();
-        loadAssistants();
-      }
+    if (modelState === StorageState.INIT) {
+      logger.info('init storage');
+      loadProviders();
+      loadAssistants();
+      loadModels();
     }
-  }, [providers, loadProviders, loadAssistants]);
+  }, [modelState, providers, loadProviders, loadAssistants, loadModels]);
 
   useEffect(() => {
     if (presets && !presets?.find((p) => p.id === 'opla')) {

@@ -60,7 +60,6 @@ export default function Statusbar() {
   const handleCancelDownload = async (action: string, data: any) => {
     logger.info(`Cancel download ${action} model.id=${data} ${pathname}`);
     await cancelDownloadModel(data.item.id);
-    // await updateBackendStore();
     if (pathname.startsWith(Page.Models)) {
       router.push(Page.Models);
     }

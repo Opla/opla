@@ -59,7 +59,6 @@ function NewLocalModel({
   const gotoModels = !pathname.startsWith(Page.Models);
   const { showModal } = useContext(ModalsContext);
 
-  // const { updateBackendStore } = useBackend();
   const modelStorage = useModelsStore();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -140,7 +139,6 @@ function NewLocalModel({
           onClose();
           return;
         }
-        // await updateBackendStore();
 
         if (!gotoModels) {
           router.push(`${Page.Models}/${id}`);
@@ -191,7 +189,6 @@ function NewLocalModel({
       );
       logger.info(`installed ${id}`);
     }
-    // await updateBackendStore();
 
     if (!gotoModels) {
       router.push(`${Page.Models}/${id}`);

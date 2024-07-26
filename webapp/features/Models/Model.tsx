@@ -177,7 +177,6 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       });
       if (needUpdate) {
         await updateModel(updatedModel);
-        // await updateBackendStore();
       }
     }
     return undefined;
@@ -205,13 +204,11 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
           logger.error(`File not found ${modelPath} ${model.fileName} ${full}`);
           toast.error(`File not found ${full}`);
           await updateModelEntity({ ...model, state: ModelState.NotFound });
-          // await updateBackendStore();
         } else if (exist && model.state === ModelState.NotFound) {
           logger.info(
             `File found path=${modelPath} model.path=${model.path} model.fileName=${model.fileName} full=${full}`,
           );
           await updateModelEntity({ ...model, state: ModelState.Ok });
-          // await updateBackendStore();
         }
         setFullPathModel(full);
       }
@@ -251,7 +248,6 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
         selectedModel.name,
       );
     }
-    // await updateBackendStore();
     logger.info(`installed ${id}`);
     router.push(`${Page.Models}/${id}`);
     if (restored) {
@@ -280,7 +276,6 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
       });
       await updateConversations(updatedConversations);
     }
-    // await updateBackendStore();
     toast.success(`${model.name} ${t('model uninstalled')} `);
     router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
   };
@@ -290,7 +285,6 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     logger.info(`Cancel download ${action} model.id=${modelId}`);
     const nextModelId = models.findLast((m) => m.id !== modelId)?.id || '';
     await cancelDownloadModel(modelId);
-    // await updateBackendStore();
     router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
   };
 

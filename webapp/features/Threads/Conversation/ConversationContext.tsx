@@ -473,7 +473,6 @@ function ConversationProvider({
         setUsage,
         handleError,
       );
-      // await updateBackendStore();
 
       if (tempConversationId) {
         router.replace(`${Page.Threads}/${tempConversationId}`, undefined, { shallow: true });
@@ -497,7 +496,6 @@ function ConversationProvider({
       t,
       tempConversationId,
       tempConversationName,
-      // updateBackendStore,
       updateMessagesAndConversation,
     ],
   );
@@ -562,8 +560,6 @@ function ConversationProvider({
         setUsage,
         handleError,
       );
-
-      // await updateBackendStore();
     },
     [
       assistant,
@@ -579,7 +575,6 @@ function ConversationProvider({
       selectedConversation,
       setUsage,
       tempConversationName,
-      // updateBackendStore,
       updateMessagesAndConversation,
     ],
   );

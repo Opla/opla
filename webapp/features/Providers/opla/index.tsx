@@ -57,9 +57,7 @@ export default function Opla({
     if (server.status === ServerStatus.STARTED || server.status === ServerStatus.STARTING) {
       const { parameters } = config.server;
       await restart(parameters);
-    } /* else {
-      await updateBackendStore();
-    } */
+    }
   };
 
   const disabled = server.status === ServerStatus.STARTING;
