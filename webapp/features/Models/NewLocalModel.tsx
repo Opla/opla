@@ -28,7 +28,7 @@ import {
   CommandShortcut,
   CommandLoading,
 } from '@/components/ui/command';
-import useBackend from '@/hooks/useBackendContext';
+// import useBackend from '@/hooks/useBackendContext';
 import { getModelsCollection, installModel, updateModelEntity } from '@/utils/backend/commands';
 import { Model, ModelState } from '@/types';
 import logger from '@/utils/logger';
@@ -59,7 +59,7 @@ function NewLocalModel({
   const gotoModels = !pathname.startsWith(Page.Models);
   const { showModal } = useContext(ModalsContext);
 
-  const { updateBackendStore } = useBackend();
+  // const { updateBackendStore } = useBackend();
   const modelStorage = useModelsStore();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -140,7 +140,7 @@ function NewLocalModel({
           onClose();
           return;
         }
-        await updateBackendStore();
+        // await updateBackendStore();
 
         if (!gotoModels) {
           router.push(`${Page.Models}/${id}`);
@@ -191,7 +191,7 @@ function NewLocalModel({
       );
       logger.info(`installed ${id}`);
     }
-    await updateBackendStore();
+    // await updateBackendStore();
 
     if (!gotoModels) {
       router.push(`${Page.Models}/${id}`);

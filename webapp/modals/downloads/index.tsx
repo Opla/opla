@@ -37,7 +37,7 @@ function DownloadsDialog({
   const router = useRouter();
   const { pathname } = router;
   const { t } = useTranslation();
-  const { downloads, updateBackendStore } = useBackend();
+  const { downloads } = useBackend();
   const model: Model = data?.item as Model;
   const download = (downloads ?? [undefined])[0];
 
@@ -47,7 +47,7 @@ function DownloadsDialog({
     if (action === 'Cancel') {
       logger.info(`Cancel download model.id=${model.id}`);
       await cancelDownloadModel(data.item.id);
-      await updateBackendStore();
+      // await updateBackendStore();
       if (pathname.startsWith(Page.Models)) {
         router.push(Page.Models);
       }

@@ -85,7 +85,7 @@ type Context = OplaContext & {
   settings: Settings;
   activeService?: AIService;
   setSettings: (settings: Settings) => void;
-  updateBackendStore: () => Promise<void>;
+  // updateBackendStore: () => Promise<void>;
   updateBackendServer: (partials: Partial<OplaServer>) => Promise<void>;
   start: (params: ServerParameters | undefined) => Promise<BackendResult>;
   stop: () => Promise<BackendResult>;
@@ -104,7 +104,7 @@ const defaultContext: Context = {
   startBackend: async () => {},
   disconnectBackend: async () => {},
   setSettings: () => {},
-  updateBackendStore: async () => {},
+  // updateBackendStore: async () => {},
   updateBackendServer: async () => {},
   start: async () => ({ status: 'error', error: 'not implemented' }),
   stop: async () => ({ status: 'error', error: 'not implemented' }),
@@ -516,7 +516,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       startBackend,
       disconnectBackend,
       setSettings,
-      updateBackendStore,
+      // updateBackendStore,
       updateBackendServer,
       start,
       stop,
@@ -539,7 +539,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       start,
       startBackend,
       stop,
-      updateBackendStore,
+      // updateBackendStore,
       updateBackendServer,
     ],
   );

@@ -44,7 +44,7 @@ const search = (query: string, assistant: Assistant) => {
 
 function AssistantsStore() {
   const router = useRouter();
-  const { settings, updateBackendStore, setSettings } = useBackend();
+  const { settings, setSettings } = useBackend();
   const models = useModelsStore();
   const [collection, setCollection] = useState<Assistant[]>([]);
   const [query, setQuery] = useState<string>('');
@@ -77,7 +77,7 @@ function AssistantsStore() {
         if (model) {
           try {
             await installModelFromApi(model);
-            await updateBackendStore();
+            // await updateBackendStore();
           } catch (e) {
             const error = `Can't install ${model?.name} model: ${e}`;
             logger.info(error);

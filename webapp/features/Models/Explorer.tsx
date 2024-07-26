@@ -51,7 +51,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
   const [closeCloud, toggleCloseCloud] = useState(false);
   const [closeFeatured, toggleCloseFeatured] = useState(false);
   const { isModelUsedInAssistants } = useAssistantStore();
-  const { activeService, updateBackendStore } = useBackend();
+  const { activeService } = useBackend();
   const router = useRouter();
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
@@ -90,7 +90,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
     logger.info(`change model name ${id} ${name}`, updatedModel, models);
     if (updatedModel && updatedModel.name !== name) {
       await updateModel({ ...updatedModel, name });
-      await updateBackendStore();
+      // await updateBackendStore();
     }
   };
 
@@ -125,7 +125,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
       const nextModelId =
         models.findLast((m) => m.state !== ModelState.Removed && m.id !== modelId)?.id || '';
       await uninstallModel(modelId, isUsed);
-      await updateBackendStore();
+      // await updateBackendStore();
       router.replace(`/models${nextModelId ? `/${nextModelId}` : ''}`);
     }
   };

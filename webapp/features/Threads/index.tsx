@@ -75,7 +75,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     deleteArchive,
     providers,
   } = useContext(AppContext);
-  const { settings, setSettings, updateBackendStore } = useBackend();
+  const { settings, setSettings } = useBackend();
   const modelStorage = useModelsStore();
 
   const {
@@ -185,7 +185,6 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
             archives.some((archive) => getConversationModelId(archive, assistant) === modelId);
           if (!some) {
             await uninstallModel(modelId, false);
-            await updateBackendStore();
           }
         }
         // Delete associated settings

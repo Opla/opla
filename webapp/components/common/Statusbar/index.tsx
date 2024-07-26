@@ -31,7 +31,7 @@ export default function Statusbar() {
   const router = useRouter();
   const { pathname } = router;
   const { t } = useTranslation();
-  const { server, config, downloads, updateBackendStore } = useBackend();
+  const { server, config, downloads } = useBackend();
   const models = useModelsStore();
   const { usage } = useContext(AppContext);
   const [sys, setSys] = useState<Sys>();
@@ -60,7 +60,7 @@ export default function Statusbar() {
   const handleCancelDownload = async (action: string, data: any) => {
     logger.info(`Cancel download ${action} model.id=${data} ${pathname}`);
     await cancelDownloadModel(data.item.id);
-    await updateBackendStore();
+    // await updateBackendStore();
     if (pathname.startsWith(Page.Models)) {
       router.push(Page.Models);
     }

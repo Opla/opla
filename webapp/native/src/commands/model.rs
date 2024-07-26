@@ -18,7 +18,7 @@ use crate::data::model::{ Model, ModelEntity };
 use crate::models::{ fetch_models_collection, ModelsCollection };
 use opla_core::gguf::GGUF;
 use serde::Serialize;
-use tauri::{ Runtime, State };
+use tauri::{ EventLoopMessage, Manager, Runtime, State };
 
 #[tauri::command]
 pub async fn get_models_collection<R: Runtime>(
@@ -115,6 +115,7 @@ pub async fn install_model<R: Runtime>(
             model_entity.state = Some("downloading".to_string());
             store.models.add_model(model_entity);
             store.save().map_err(|err| err.to_string())?;
+            store.models.emit_update_all(app.app_handle());
             drop(store);
             let mut downloader = context.downloader.lock().await;
             downloader.download_file(
@@ -131,6 +132,7 @@ pub async fn install_model<R: Runtime>(
             model_entity.state = Some("ok".to_string());
             store.models.add_model(model_entity);
             store.save().map_err(|err| err.to_string())?;
+            store.models.emit_update_all(app.app_handle());
             drop(store);
             if was_empty && url.is_none() {
                 let res = start_server(app, context).await;
@@ -167,6 +169,7 @@ pub async fn cancel_download_model<R: Runtime>(
             store.models.remove_model(model_name_or_id.as_str(), false);
             store.clear_active_service_if_model_equal(m.id.clone());
             store.save().map_err(|err| err.to_string())?;
+            store.models.emit_update_all(app.app_handle());
             drop(store);
 
             let mut server = context.server.lock().await;
@@ -193,7 +196,7 @@ pub async fn cancel_download_model<R: Runtime>(
 
 #[tauri::command]
 pub async fn update_model<R: Runtime>(
-    _app: tauri::AppHandle<R>,
+    app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
     model: Model
@@ -203,13 +206,14 @@ pub async fn update_model<R: Runtime>(
     store.models.update_model(model);
 
     store.save().map_err(|err| err.to_string())?;
+    store.models.emit_update_all(app.app_handle());
 
     Ok(())
 }
 
 #[tauri::command]
 pub async fn update_model_entity<R: Runtime>(
-    _app: tauri::AppHandle<R>,
+    app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
     model: Model,
@@ -220,6 +224,7 @@ pub async fn update_model_entity<R: Runtime>(
     store.models.update_model_entity(&entity);
     store.models.update_model(model);
     store.save().map_err(|err| err.to_string())?;
+    store.models.emit_update_all(app.app_handle());
 
     Ok(())
 }
@@ -255,13 +260,14 @@ pub async fn uninstall_model<R: Runtime>(
     }
 
     store.save().map_err(|err| err.to_string())?;
+    store.models.emit_update_all(app.app_handle());
 
     Ok(())
 }
 
 #[tauri::command]
 pub async fn set_active_model<R: Runtime>(
-    _app: tauri::AppHandle<R>,
+    app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
     model_id: String,
@@ -297,6 +303,8 @@ pub async fn set_active_model<R: Runtime>(
         }
     }
     store.save().map_err(|err| err.to_string())?;
+    store.models.emit_update_all(app.app_handle());
+
     Ok(())
 }
 

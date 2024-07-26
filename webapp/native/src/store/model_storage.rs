@@ -16,7 +16,7 @@ use std::fs::create_dir_all;
 use std::path::{ Path, PathBuf };
 use opla_core::gguf::GGUF;
 use serde::{ self, Deserialize, Serialize };
-use tauri::{ AppHandle, Manager };
+use tauri::{ AppHandle, Manager, Runtime };
 use tokio::spawn;
 use uuid::Uuid;
 use crate::data::model::{ Model, ModelEntity };
@@ -24,7 +24,7 @@ use crate::store::app_state::ValueModels;
 use crate::utils::{ get_home_directory, get_data_directory };
 
 use crate::{
-    store::app_state::{ Empty, GlobalAppState, Payload, Value, ValueSettings, STATE_SYNC_EVENT },
+    store::app_state::{ Empty, GlobalAppState, Payload, Value, STATE_SYNC_EVENT },
     OplaContext,
 };
 use super::app_state::STATE_CHANGE_EVENT;
@@ -80,17 +80,6 @@ impl ModelStorage {
         if path_filename.is_absolute() {
             return Ok(path_filename.to_path_buf());
         }
-        /* let models_path = match self.path {
-            Some(ref path) => {
-                let p = PathBuf::from(path);
-                if p.is_absolute() {
-                    p
-                } else {
-                    get_home_directory()?.join(path)
-                }
-            }
-            None => self.get_models_path()?,
-        }; */
         let models_path = self.get_models_path()?;
         let model_path = models_path.join(path_filename);
         Ok(model_path)
@@ -298,6 +287,24 @@ impl ModelStorage {
         };
         model_entity.state = Some(state.to_string());
         self.update_model_entity(&model_entity);
+    }
+
+    pub fn emit_update_all<R: Runtime>(&mut self, app_handle: AppHandle<R>) {
+        let app_handle = app_handle.app_handle();
+        let models = self.clone();
+        spawn(async move { 
+            // Self::emit_state_async(data, app_handle).await 
+            app_handle
+                    .emit_all(STATE_SYNC_EVENT, Payload {
+                        key: GlobalAppState::MODELS.into(),
+                        value: Some(
+                            Value::Models(ValueModels {
+                                models,
+                            })
+                        ),
+                    })
+                    .unwrap();
+        });
     }
 
     async fn emit_state_async(payload: Payload, app_handle: AppHandle) {

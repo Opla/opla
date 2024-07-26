@@ -45,7 +45,7 @@ export default function Opla({
   onParameterChange: (name: string, value: ParameterValue) => void;
 }) {
   const { t } = useTranslation();
-  const { server, restart, config, updateBackendStore } = useBackend();
+  const { server, restart, config } = useBackend();
   const modelStorage = useModelsStore();
   const models = getLocalModels(modelStorage);
   const modelId = config.server.parameters.modelId as string;
@@ -57,9 +57,9 @@ export default function Opla({
     if (server.status === ServerStatus.STARTED || server.status === ServerStatus.STARTING) {
       const { parameters } = config.server;
       await restart(parameters);
-    } else {
+    } /* else {
       await updateBackendStore();
-    }
+    } */
   };
 
   const disabled = server.status === ServerStatus.STARTING;

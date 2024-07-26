@@ -20,7 +20,7 @@ import { Progress } from '@/components/ui/progress';
 import { formatFileSize } from '@/utils/download';
 import { Separator } from '@/components/ui/separator';
 import useTranslation from '@/hooks/useTranslation';
-import useBackend from '@/hooks/useBackendContext';
+// import useBackend from '@/hooks/useBackendContext';
 import { Button } from '@/components/ui/button';
 import { findModel, getModelStateAsString } from '@/utils/data/models';
 import EmptyView from '@/components/common/EmptyView';
@@ -34,7 +34,7 @@ type DownloadModelProps = {
 function DownloadModel({ className, download, onAction }: DownloadModelProps) {
   const { t } = useTranslation();
   const [downloading, setDownloading] = useState<boolean>(false);
-  const { updateBackendStore } = useBackend();
+  // const { updateBackendStore } = useBackend();
   const modelStorage = useModelsStore();
 
   const model = useMemo(() => {
@@ -51,7 +51,7 @@ function DownloadModel({ className, download, onAction }: DownloadModelProps) {
   useEffect(() => {
     const asyncFunc = async () => {
       if (downloading && !download && model?.state !== ModelState.Pending) {
-        await updateBackendStore();
+        // await updateBackendStore();
         onAction('Close');
         setDownloading(false);
       } else if (download) {
@@ -59,7 +59,7 @@ function DownloadModel({ className, download, onAction }: DownloadModelProps) {
       }
     };
     asyncFunc();
-  }, [download, model, onAction, downloading, updateBackendStore]);
+  }, [download, model, onAction, downloading]);
 
   let state: 'downloading' | 'ok' | 'pending' | 'error';
   if (download && model?.state === ModelState.Downloading) {
