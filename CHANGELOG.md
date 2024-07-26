@@ -1,3 +1,10 @@
+# [1.0.0-alpha.205](https://github.com/Opla/opla/compare/v1.0.0-alpha.204...v1.0.0-alpha.205) (2024-07-26)
+
+
+### Features
+
+* **store:** use zustand for Models [#1108](https://github.com/Opla/opla/issues/1108) ([#1126](https://github.com/Opla/opla/issues/1126)) ([131c5cf](https://github.com/Opla/opla/commit/131c5cf17edc3b387b272b28e1eedb2a80ec5efa))
+
 # [1.0.0-alpha.204](https://github.com/Opla/opla/compare/v1.0.0-alpha.203...v1.0.0-alpha.204) (2024-07-17)
 
 
