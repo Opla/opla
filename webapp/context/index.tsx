@@ -65,9 +65,7 @@ function AppContextProvider({ children }: { children: React.ReactNode }) {
       usage,
       setUsage,
     }),
-    [
-      usage,
-    ],
+    [usage],
   );
 
   return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
