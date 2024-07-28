@@ -25,11 +25,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext } from 'react';
 import { HelpCircle } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
-import { AppContext } from '@/context';
 import Opla from '@/utils/providers/opla';
 import { getCompletionParametersDefinition } from '@/utils/providers';
 import {
@@ -45,6 +43,7 @@ import { toast } from '@/components/ui/Toast';
 import { ContextWindowPolicies, DefaultContextWindowPolicy } from '@/utils/constants';
 import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
 import { cn } from '@/lib/utils';
+import { usePresetStore } from '@/stores';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../ui/accordion';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Textarea } from '../../ui/textarea';
@@ -72,7 +71,7 @@ export default function EditPreset<T>({
   onChange: (newpreset: Partial<T>) => void;
 }) {
   const { t } = useTranslation();
-  const { presets } = useContext(AppContext);
+  const { presets } = usePresetStore();
   const provider = service?.provider || _provider;
   const parametersDefinition = getCompletionParametersDefinition(provider);
   const modelName = service?.model?.id || presetProperties?.model || model?.name;

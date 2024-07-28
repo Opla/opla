@@ -39,7 +39,6 @@ import {
   AIService,
 } from '@/types';
 import { getOplaConfig } from '@/utils/backend/commands';
-import { AppContext } from '@/context';
 import Backend, { BackendResult } from '@/utils/backend/Backend';
 import { deepCopy, mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
@@ -47,7 +46,7 @@ import { getConversation } from '@/utils/data/conversations';
 import { changeMessageContent } from '@/utils/data/messages';
 import { ParsedPrompt } from '@/utils/parsers';
 import { parseLLamaCppServerParameters } from '@/utils/providers/llama.cpp';
-import { useServiceStore, useSettingsStore } from '@/stores';
+import { useServiceStore, useSettingsStore, useThreadStore } from '@/stores';
 
 type StreamPayload = {
   status: 'error' | 'success';
@@ -126,7 +125,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   const streamsRef = useRef<Streams | undefined>(streams);
 
   const { conversations, getConversationMessages, updateMessagesAndConversation } =
-    useContext(AppContext);
+    useThreadStore();
 
   const { settings, loadSettings, setSettings } = useSettingsStore();
   const { activeService, getActiveModel, setActiveModel, setActiveService } = useServiceStore();

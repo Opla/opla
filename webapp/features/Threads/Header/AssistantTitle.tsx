@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Bot } from 'lucide-react';
-import { AppContext } from '@/context';
 import { AIService, Assistant, Conversation, Ui } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import AvatarView from '@/components/common/AvatarView';
@@ -32,6 +31,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { getAssistantTargetsAsItems, getDefaultAssistantService } from '@/utils/data/assistants';
 import { getStateColor } from '@/utils/ui';
 import { addConversationService, updateConversation } from '@/utils/data/conversations';
+import { useThreadStore } from '@/stores';
 import ServiceBadge from './ServiceBadge';
 
 type AssistantTitleProps = {
@@ -51,7 +51,7 @@ export default function AssistantTitle({
 }: AssistantTitleProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const { conversations, updateConversations } = useContext(AppContext);
+  const { conversations, updateConversations } = useThreadStore();
   const service = conversation?.services?.[0] || getDefaultAssistantService(assistant);
   const target = assistant?.targets?.find((tg) => tg.id === selectedTargetId);
   const targetItems: Ui.MenuItem[] = useMemo(

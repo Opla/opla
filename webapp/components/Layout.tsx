@@ -14,11 +14,10 @@
 
 'use client';
 
-import { useContext, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import '@/app/globals.css';
 import Sidebar from '@/components/common/Sidebar';
-import { AppContext } from '@/context';
 import useBackendContext from '@/hooks/useBackendContext';
 import useRegisterModals from '@/hooks/useRegisterModals';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
@@ -27,6 +26,7 @@ import { Toaster } from '@/components/ui/Toast';
 import logger from '@/utils/logger';
 import { Page } from '@/types/ui';
 import useTheme from '@/hooks/useTheme';
+import { useProviderStore } from '@/stores';
 import Statusbar from './common/Statusbar';
 import { TooltipProvider } from './ui/tooltip';
 import Loading from './common/Loading';
@@ -34,7 +34,7 @@ import Loading from './common/Loading';
 export default function Layout({ children }: { children: React.ReactNode }) {
   const firstRender = useRef(true);
 
-  const { providers } = useContext(AppContext);
+  const { providers } = useProviderStore();
   const router = useRouter();
 
   const { startBackend, disconnectBackend, settings, config, setSettings } = useBackendContext();

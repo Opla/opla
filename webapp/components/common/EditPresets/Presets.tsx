@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as React from 'react';
+import { useContext, useState } from 'react';
 import { AlertTriangle, Check, ChevronsUpDown, Copy, Trash } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -31,13 +31,12 @@ import {
   PopoverContentExt,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useContext } from 'react';
-import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
 import { Conversation, ConversationPreset, Preset, Provider } from '@/types';
 import { createPreset, getCompatiblePresets } from '@/utils/data/presets';
 import { deepMerge } from '@/utils/data';
 import { ModalData, ModalsContext, ModalIds } from '@/context/modals';
+import { usePresetStore } from '@/stores';
 
 type PresetsProps = {
   preset: Preset | undefined;
@@ -56,10 +55,10 @@ export default function Presets({
   portal = true,
   onChangePreset,
 }: PresetsProps) {
-  const { presets, setPresets } = useContext(AppContext);
+  const { presets, setPresets } = usePresetStore();
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   const compatibles = getCompatiblePresets(presets, model, provider);
 

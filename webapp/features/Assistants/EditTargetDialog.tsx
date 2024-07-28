@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { BrainCircuit, Settings2 } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import { Preset, Model, Provider, Logo } from '@/types';
-import { AppContext } from '@/context';
 import { findModelInAll, getModelsAsItems } from '@/utils/data/models';
 import logger from '@/utils/logger';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -24,7 +23,7 @@ import EditPreset from '@/components/common/EditPresets';
 import { findProvider, getLocalProvider } from '@/utils/data/providers';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import ModelIcon from '@/components/common/ModelIcon';
-import { useModelsStore } from '@/stores';
+import { useModelsStore, useProviderStore } from '@/stores';
 import AlertDialog from '../../components/common/AlertDialog';
 import Parameter, { ParameterValue } from '../../components/common/Parameter';
 import Combobox from '../../components/common/Combobox';
@@ -39,7 +38,7 @@ type EditTargetDialogProps = {
 
 function EditTargetDialog({ id, visible, onClose, data }: EditTargetDialogProps) {
   const { t } = useTranslation();
-  const { providers } = useContext(AppContext);
+  const { providers } = useProviderStore();
   const modelStorage = useModelsStore();
   const modelItems = useMemo(
     () => getModelsAsItems(providers, modelStorage),

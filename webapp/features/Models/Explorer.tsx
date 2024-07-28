@@ -30,8 +30,7 @@ import { getModelsCollection, uninstallModel, updateModel } from '@/utils/backen
 import EmptyView from '@/components/common/EmptyView';
 import { cn } from '@/lib/utils';
 import { getLocalModels, getProviderModels } from '@/utils/data/models';
-import { AppContext } from '@/context';
-import { useAssistantStore, useModelsStore } from '@/stores';
+import { useAssistantStore, useModelsStore, useProviderStore, useThreadStore } from '@/stores';
 import { addConversationService, isModelUsedInConversations } from '@/utils/data/conversations';
 import { getLocalProvider } from '@/utils/data/providers';
 import ModelIcon from '@/components/common/ModelIcon';
@@ -45,7 +44,8 @@ export type ModelsExplorerProps = {
 };
 
 function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
-  const { conversations, updateConversations, providers } = useContext(AppContext);
+  const { providers } = useProviderStore();
+  const { conversations, updateConversations } = useThreadStore();
   const modelStorage = useModelsStore();
   const [closeLocal, toggleCloseLocal] = useState(false);
   const [closeCloud, toggleCloseCloud] = useState(false);

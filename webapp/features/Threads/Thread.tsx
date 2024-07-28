@@ -14,7 +14,6 @@
 
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { AppContext } from '@/context';
 import {
   Conversation,
   AIService,
@@ -51,7 +50,7 @@ import { MenuAction } from '@/types/ui';
 import { getMessageContentAsString, getMessageContentHistoryAsString } from '@/utils/data/messages';
 import { getCommandManager } from '@/utils/commands';
 import ContentView from '@/components/common/ContentView';
-import { useAssistantStore, useModelsStore } from '@/stores';
+import { useAssistantStore, useModelsStore, useProviderStore, useThreadStore } from '@/stores';
 import { getLocalProvider } from '@/utils/data/providers';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import { getSelectedViewName } from '@/utils/views';
@@ -74,7 +73,6 @@ function Thread({
   onError: (conversationId: string, error: string) => void;
 }) {
   const {
-    providers,
     conversations,
     isConversationMessagesLoaded,
     getConversationMessages,
@@ -82,7 +80,9 @@ function Thread({
     updateConversations,
     filterConversationMessages,
     updateConversationMessages,
-  } = useContext(AppContext);
+  } = useThreadStore();
+
+  const { providers } = useProviderStore();
 
   const {
     activeService,

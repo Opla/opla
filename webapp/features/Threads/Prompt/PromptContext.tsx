@@ -42,7 +42,6 @@ import {
   updateConversation,
 } from '@/utils/data/conversations';
 import { CommandManager } from '@/utils/commands/types';
-import { AppContext } from '@/context';
 import { getActiveService } from '@/utils/services';
 import { getMentionCommands } from '@/utils/commands';
 import { tokenize } from '@/utils/providers';
@@ -50,7 +49,7 @@ import useBackend from '@/hooks/useBackendContext';
 import useDebounceFunc from '@/hooks/useDebounceFunc';
 import { getDefaultAssistantService } from '@/utils/data/assistants';
 import useTranslation from '@/hooks/useTranslation';
-import { useAssistantStore, useModelsStore } from '@/stores';
+import { useAssistantStore, useModelsStore, useProviderStore, useThreadStore } from '@/stores';
 
 type Context = {
   conversationPrompt: ParsedPrompt;
@@ -92,9 +91,9 @@ function PromptProvider({
   children,
 }: PropsWithChildren<PromptProviderProps>) {
   const { t } = useTranslation();
-  const context = useContext(AppContext);
   const { getAssistant } = useAssistantStore();
-  const { conversations, providers, updateConversations } = context;
+  const { providers } = useProviderStore();
+  const { conversations, updateConversations } = useThreadStore();
   const { activeService: storedActiveService, config } = useBackend();
   const modelStorage = useModelsStore();
 

@@ -14,17 +14,8 @@
 
 'use client';
 
-import {
-  ChangeEvent,
-  MouseEvent,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { ChangeEvent, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { AlertTriangle, Loader2, Paperclip, SendHorizontal } from 'lucide-react';
-import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
@@ -40,6 +31,7 @@ import { openFileDialog } from '@/utils/backend/tauri';
 import { getFileAssetExtensions } from '@/utils/backend/commands';
 import { toast } from '@/components/ui/Toast';
 import { parsePrompt } from '@/utils/parsers';
+import { useThreadStore } from '@/stores';
 import { Button } from '../../../components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../../components/ui/tooltip';
 import { ShortcutBadge } from '../../../components/common/ShortCut';
@@ -77,7 +69,7 @@ export default function Prompt({
     updateConversations,
     getConversationMessages,
     updateConversationMessages,
-  } = useContext(AppContext);
+  } = useThreadStore();
 
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();

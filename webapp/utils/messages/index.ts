@@ -22,7 +22,7 @@ import {
   ModelsConfiguration,
 } from '@/types';
 import { toast } from '@/components/ui/Toast';
-import { Context } from '@/context';
+import { usePresetStore, useProviderStore, useThreadStore } from '@/stores';
 import { CommandManager } from '../commands/types';
 import logger from '../logger';
 import { ParsedPrompt } from '../parsers';
@@ -36,11 +36,11 @@ export const updateMessageContent = async (
   content: ParsedPrompt | string,
   conversationId: string,
   tempConversationName: string | undefined,
-  context: Context,
   status?: MessageStatus,
 ) => {
   let message = typeof message_or_id !== 'string' ? message_or_id : undefined;
-  const { conversations, getConversationMessages, updateMessagesAndConversation } = context;
+  const { conversations, getConversationMessages, updateMessagesAndConversation } =
+    useThreadStore.getState();
 
   const conversationMessages = getConversationMessages(conversationId);
   if (!message) {
@@ -86,22 +86,23 @@ export const sendMessage = async (
   modelName: string,
   assistant: Assistant | undefined,
   commandManager: CommandManager,
-  context: Context,
   modelStorage: ModelsConfiguration,
   storedActiveService: AIService | undefined,
   onSuccess: (usage: LlmUsage | undefined) => void,
   onError: (id: string, error: string) => void,
 ) => {
   const returnedMessage = { ...message };
+  const { providers, setProviders } = useProviderStore.getState();
+  const { presets } = usePresetStore.getState();
   const activeService = getActiveService(
     conversation,
     assistant,
-    context.providers,
+    providers,
     storedActiveService,
     modelStorage,
     modelName,
   );
-  logger.info('sendMessage', message, activeService, conversation, context.presets);
+  logger.info('sendMessage', message, activeService, conversation, presets);
 
   try {
     /* const response = */ await completion(
@@ -109,7 +110,7 @@ export const sendMessage = async (
       message,
       conversationMessages,
       conversation,
-      context.presets,
+      presets,
       prompt,
       commandManager,
     );
@@ -138,8 +139,8 @@ export const sendMessage = async (
         errors.pop();
       }
       provider.errors = errors;
-      const updatedProviders = context.providers.map((p) => (p.id === provider?.id ? provider : p));
-      context.setProviders(updatedProviders);
+      const updatedProviders = providers.map((p) => (p.id === provider?.id ? provider : p));
+      setProviders(updatedProviders);
     }
 
     toast.error(String(e));
@@ -149,13 +150,15 @@ export const sendMessage = async (
     return; // returnedMessage;
   }
 
-  await context.updateMessagesAndConversation(
-    [returnedMessage],
-    conversationMessages,
-    { name: conversation.name },
-    conversation.id,
-    updatedConversations,
-  );
+  await useThreadStore
+    .getState()
+    .updateMessagesAndConversation(
+      [returnedMessage],
+      conversationMessages,
+      { name: conversation.name },
+      conversation.id,
+      updatedConversations,
+    );
   // return returnedMessage;
 };
 
@@ -164,18 +167,19 @@ export const cancelSending = async (
   conversation: Conversation,
   modelName: string,
   assistant: Assistant | undefined,
-  context: Context,
   modelStorage: ModelsConfiguration,
   storedActiveService: AIService | undefined,
 ) => {
+  const { providers } = useProviderStore.getState();
+  const { presets } = usePresetStore.getState();
   const activeService = getActiveService(
     conversation,
     assistant,
-    context.providers,
+    providers,
     storedActiveService,
     modelStorage,
     modelName,
   );
-  logger.info('cancelSending', activeService, conversation, context.presets);
+  logger.info('cancelSending', activeService, conversation, presets);
   await cancelCompletion(activeService, conversation.id, messageId);
 };

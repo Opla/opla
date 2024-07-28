@@ -23,7 +23,12 @@ import {
   removeConversationMessages,
   saveConversationMessages,
 } from '@/utils/backend/commands';
-import { getMessageContentAsString } from '@/utils/data/messages';
+import { getMessageContentAsString, mergeMessages } from '@/utils/data/messages';
+import {
+  getConversation,
+  removeConversation,
+  updateOrCreateConversation,
+} from '@/utils/data/conversations';
 import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 
 interface ThreadProps extends StorageProps {
@@ -43,10 +48,15 @@ export interface ThreadSlice extends ThreadProps {
   ) => Promise<void>;
   readConversationMessages: (key: string, defaultValue: Message[]) => Promise<Message[]>;
   getConversationMessages: (id: string | undefined) => Message[];
+  isConversationMessagesLoaded: (id: string) => boolean;
   filterConversationMessages: (
     id: string | undefined,
     filter: (m: Message) => boolean,
   ) => Message[];
+  updateConversations: (
+    updatedConversations: Conversation[],
+    needToUpdateMessages?: boolean,
+  ) => Promise<void>;
   updateConversationMessages: (id: string | undefined, messages: Message[]) => Promise<void>;
   updateMessagesAndConversation: (
     changedMessages: Message[],
@@ -118,6 +128,8 @@ const createThreadSlice =
       }
       return conversationMessages || [];
     },
+    isConversationMessagesLoaded: (id: string) => !!get().messages[id],
+
     readConversationMessages: async (id: string | undefined): Promise<Message[]> => {
       const newMessages: Message[] = id ? await loadConversationMessages(id) : [];
       return newMessages;
@@ -189,11 +201,49 @@ const createThreadSlice =
       await Promise.all(promises);
       return result;
     },
-    updateMessagesAndConversation: async () => ({
-      updatedConversation: { id: '', createdAt: 0, updatedAt: 0 } as Conversation,
-      updatedConversations: [],
-      updatedMessages: [],
-    }),
+    updateConversations: async (
+      updatedConversations: Conversation[],
+      needToUpdateMessages = true,
+    ) => {
+      if (needToUpdateMessages) {
+        const promises: Promise<void>[] = [];
+        const conversationsWithoutMessages: Conversation[] = updatedConversations.map((c) => {
+          const { messages: updatedMessages, ...updatedConversation } = c;
+          if (updatedMessages) {
+            promises.push(get().updateConversationMessages(c.id, updatedMessages));
+          }
+          return updatedConversation as Conversation;
+        });
+        await Promise.all(promises);
+        get().setConversations(conversationsWithoutMessages);
+      } else {
+        get().setConversations(updatedConversations);
+      }
+    },
+    updateMessagesAndConversation: async (
+      changedMessages: Message[],
+      conversationMessages: Message[],
+      partialConversation: Partial<Conversation>,
+      selectedConversationId: string, // = conversationId,
+      selectedConversations = get().conversations,
+    ) => {
+      const updatedConversations = updateOrCreateConversation(
+        selectedConversationId,
+        selectedConversations,
+        partialConversation,
+        getMessageContentAsString(conversationMessages?.[0]),
+      );
+      const updatedMessages = mergeMessages(conversationMessages, changedMessages);
+      await get().updateConversations(updatedConversations);
+      await get().updateConversationMessages(selectedConversationId, updatedMessages);
+
+      const updatedConversationId = selectedConversationId;
+      const updatedConversation = getConversation(
+        updatedConversationId,
+        updatedConversations,
+      ) as Conversation;
+      return { updatedConversation, updatedConversations, updatedMessages };
+    },
     deleteConversationMessages: async (conversationId: string) => {
       await removeConversationMessages(conversationId);
     },
@@ -201,7 +251,12 @@ const createThreadSlice =
       const data = mapKeys(newArchives, toSnakeCase);
       emit(GlobalAppState.ARCHIVES, data);
     },
-    deleteArchive: async () => {},
+    deleteArchive: async (id: string, cleanup?: (id: string) => Promise<void>) => {
+      const updatedArchives = removeConversation(id, get().archives);
+      const data = mapKeys(updatedArchives, toSnakeCase);
+      emit(GlobalAppState.ARCHIVES, data);
+      return cleanup?.(id);
+    },
   });
 
 export default createThreadSlice;

@@ -30,13 +30,18 @@ import {
 } from '@/utils/data/conversations';
 import { ModalIds } from '@/modals';
 import { ModalsContext } from '@/context/modals';
-import { AppContext } from '@/context';
 import { ConversationError, MenuAction, Page, ViewName } from '@/types/ui';
 import { getAssistantId } from '@/utils/services';
 import { deepEqual } from '@/utils/data';
 import { createProvider } from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';
-import { useAssistantStore, useModelsStore, useThreadStore, useWorkspaceStore } from '@/stores';
+import {
+  useAssistantStore,
+  useModelsStore,
+  useProviderStore,
+  useThreadStore,
+  useWorkspaceStore,
+} from '@/stores';
 import { findModelInAll } from '@/utils/data/models';
 import { uninstallModel } from '@/utils/backend/commands';
 import { ResizableHandle, ResizablePanel } from '../../components/ui/resizable';
@@ -73,8 +78,8 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     archives,
     setArchives,
     deleteArchive,
-    providers,
-  } = useContext(AppContext);
+  } = useThreadStore();
+  const { providers } = useProviderStore();
   const { settings, setSettings } = useBackend();
   const modelStorage = useModelsStore();
 

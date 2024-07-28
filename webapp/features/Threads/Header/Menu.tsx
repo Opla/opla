@@ -29,13 +29,13 @@ import { Provider, ProviderType } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/context/modals';
 import { ModalIds } from '@/modals';
-import { AppContext } from '@/context';
 import { createProvider, getProviderState } from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
 import { MenuAction } from '@/types/ui';
 import { getStateColor } from '@/utils/ui';
+import { useProviderStore } from '@/stores';
 import { ShortcutBadge } from '../../../components/common/ShortCut';
 
 type HeaderMenuProps = {
@@ -44,7 +44,7 @@ type HeaderMenuProps = {
 };
 
 export default function HeaderMenu({ selectedConversationId, onSelectMenu }: HeaderMenuProps) {
-  const { providers } = useContext(AppContext);
+  const { providers } = useProviderStore();
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   const { showModal } = useContext(ModalsContext);

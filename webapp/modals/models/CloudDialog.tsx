@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useContext } from 'react';
-import { AppContext } from '@/context';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Dialog from '@/components/common/Modal';
 import OpenAIModels from '@/features/Providers/openai/Models';
@@ -21,6 +20,7 @@ import useProviderState from '@/hooks/useProviderState';
 import useTranslation from '@/hooks/useTranslation';
 import { Provider } from '@/types';
 import { ModalData } from '@/context/modals';
+import { useProviderStore } from '@/stores';
 
 function CloudModelDialog({
   id,
@@ -34,7 +34,7 @@ function CloudModelDialog({
   onClose: () => void | undefined;
 }) {
   const { t } = useTranslation();
-  const { providers } = useContext(AppContext);
+  const { providers } = useProviderStore();
   let selectedProvider: Provider | undefined = data?.item as Provider;
   if (!selectedProvider) {
     selectedProvider = providers.find((p) => p.name === 'OpenAI');

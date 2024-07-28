@@ -248,7 +248,7 @@
   "Creator": "Créateur",
   "License": "Licence",
   "Repository": "Répertoire",
-  "Downloadable implementations": "Implémentations disponibles",
+  "Variants": "Variantes",
   "You could add some local models by installing a featured model, or directly a gguf file from you machine.": "Vous pouvez ajouter des modèles locaux en installant un modèle sélectionné ou directement un fichier gguf depuis votre machine.",
   "Featured": "Mis en avant",
   "No model found.": "Pas de modèles trouvés.",

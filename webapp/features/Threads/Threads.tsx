@@ -27,16 +27,15 @@
 
 'use client';
 
-import { useContext } from 'react';
 import { useRouter } from 'next/router';
 import { useSearchParams } from 'next/navigation';
 import useBackend from '@/hooks/useBackendContext';
 import { Conversation, PageSettings } from '@/types';
 import { DefaultPageSettings } from '@/utils/constants';
 import logger from '@/utils/logger';
-import { AppContext } from '@/context';
 import { MenuAction, Page, ViewName } from '@/types/ui';
 import { getAssistantId } from '@/utils/services';
+import { useThreadStore } from '@/stores';
 import {
   ResizableHandle,
   ResizablePanel,
@@ -68,7 +67,7 @@ export default function Threads({
   const { id } = router.query;
   const { pathname } = router;
 
-  const { conversations, updateConversations, archives, setArchives } = useContext(AppContext);
+  const { conversations, updateConversations, archives, setArchives } = useThreadStore();
   const { settings } = useBackend();
 
   const searchParams = useSearchParams();

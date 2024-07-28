@@ -41,7 +41,7 @@ import { preProcessingCommands } from '@/utils/commands';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import { CommandManager } from '@/utils/commands/types';
 import { cancelSending, sendMessage, updateMessageContent } from '@/utils/messages';
-import { useAssistantStore, useModelsStore } from '@/stores';
+import { useAssistantStore, useModelsStore, useProviderStore, useThreadStore } from '@/stores';
 import { imageGeneration } from '@/utils/providers';
 import { convertAssetFile } from '@/utils/backend/tauri';
 import { PromptContext } from '../Prompt/PromptContext';
@@ -100,14 +100,10 @@ function ConversationProvider({
   children,
 }: PropsWithChildren<ConversationProviderProps>) {
   const router = useRouter();
-  const context = useContext(AppContext);
-  const {
-    providers,
-    conversations,
-    getConversationMessages,
-    updateMessagesAndConversation,
-    setUsage,
-  } = context;
+  const { setUsage } = useContext(AppContext);
+  const { providers } = useProviderStore();
+  const { conversations, getConversationMessages, updateMessagesAndConversation } =
+    useThreadStore();
   const { parseAndValidatePrompt, clearPrompt } = useContext(PromptContext) || {};
   const { activeService } = useBackend();
   const { getAssistant } = useAssistantStore();
@@ -214,7 +210,7 @@ function ConversationProvider({
 
       let updatedMessages = getConversationMessages(conversation.id);
       let message = previousMessage;
-      const openai = context.providers.find((p) => p.name.toLowerCase() === 'openai');
+      const openai = providers.find((p) => p.name.toLowerCase() === 'openai');
       let content: string | undefined;
       let modelName: string | undefined;
       if (openai) {
@@ -252,7 +248,7 @@ function ConversationProvider({
     },
     [
       clearPrompt,
-      context.providers,
+      providers,
       conversations,
       getConversationMessages,
       router,
@@ -467,7 +463,6 @@ function ConversationProvider({
         selectedModel?.name,
         selectedAssistant || assistant,
         commandManager,
-        context,
         modelStorage,
         activeService,
         setUsage,
@@ -484,7 +479,6 @@ function ConversationProvider({
       commandManager,
       activeService,
       modelStorage,
-      context,
       conversationId,
       getConversationMessages,
       handleError,
@@ -554,7 +548,6 @@ function ConversationProvider({
         selectedModel?.name,
         selectedAssistant || assistant,
         commandManager,
-        context,
         modelStorage,
         activeService,
         setUsage,
@@ -566,7 +559,6 @@ function ConversationProvider({
       commandManager,
       activeService,
       modelStorage,
-      context,
       conversationId,
       getConversationMessages,
       handleError,
@@ -588,7 +580,6 @@ function ConversationProvider({
             selectedConversation,
             selectedModelId,
             assistant,
-            context,
             modelStorage,
             activeService,
           );
@@ -618,7 +609,6 @@ function ConversationProvider({
       assistant,
       activeService,
       modelStorage,
-      context,
       selectedConversation,
       selectedModelId,
       t,
@@ -638,7 +628,6 @@ function ConversationProvider({
         parsedContent,
         conversationId,
         tempConversationName,
-        context,
       );
       if (updatedMessages && submit) {
         const sibling = updatedMessages.find((m) => m.id === message.sibling);
@@ -647,7 +636,7 @@ function ConversationProvider({
         }
       }
     },
-    [context, conversationId, handleResendMessage, parseAndValidatePrompt, tempConversationName],
+    [conversationId, handleResendMessage, parseAndValidatePrompt, tempConversationName],
   );
 
   const handleStartMessageEdit = useCallback(
