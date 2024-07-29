@@ -40,7 +40,7 @@ interface ThreadProps extends StorageProps {
 
 export interface ThreadSlice extends ThreadProps {
   isLoading: () => boolean;
-  loadAllConversations: () => void;
+  loadAllConversations: (force?: boolean) => void;
   getConversation: (id?: string) => Conversation | undefined;
   setConversations: (newConversations: Conversation[]) => void;
   deleteConversation: (
@@ -93,9 +93,11 @@ const createThreadSlice =
     ...DEFAULT_PROPS,
     ...initProps,
     isLoading: () => get().state === StorageState.INIT || get().state === StorageState.LOADING,
-    loadAllConversations: () => {
-      set({ ...get(), state: StorageState.LOADING });
-      emit(GlobalAppState.ALLCONVERSATIONS);
+    loadAllConversations: (force = false) => {
+      if (get().state === StorageState.INIT || force) {
+        set({ ...get(), state: StorageState.LOADING });
+        emit(GlobalAppState.ALLCONVERSATIONS);
+      }
     },
     getConversation: (id) =>
       id ? get().conversations.find((conversation) => conversation.id === id) : undefined,

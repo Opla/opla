@@ -47,9 +47,11 @@ const createWorkspaceSlice =
     getAllWorkspaces: () => Object.values(get().workspaces),
     getWorkspace: (id = get().activeWorkspaceId) => (id ? get().workspaces[id] : undefined),
     loadWorkspace: (id = get().activeWorkspaceId) => {
-      set({ ...get(), state: StorageState.LOADING });
+      if (get().state !== StorageState.LOADING) {
+        set({ ...get(), state: StorageState.LOADING });
+        emit(GlobalAppState.ACTIVE, id);
+      }
       const w = id ? get().workspaces[id] : undefined;
-      emit(GlobalAppState.ACTIVE, id);
       return w;
     },
     loadProject: (id) => {

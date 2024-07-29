@@ -33,7 +33,7 @@ export const OplaAssistant: Assistant = {
 
 export interface AssistantSlice extends AssistantProps {
   isLoading: () => boolean;
-  loadAssistants: () => void;
+  loadAssistants: (force?: boolean) => void;
   getAllAssistants: () => Assistant[];
   getAssistant: (id: string | undefined) => Assistant | undefined;
   createAssistant: (name: string, template?: Partial<Assistant>) => Assistant;
@@ -55,14 +55,15 @@ const DEFAULT_PROPS: AssistantProps = {
 
 const createAssistantSlice =
   (emit: Emitter, initProps?: Partial<AssistantSlice>): StateCreator<AssistantSlice> =>
-  // emit(GlobalAppState.ASSISTANTS, undefined);
   (set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
     isLoading: () => get().state === StorageState.INIT || get().state === StorageState.LOADING,
-    loadAssistants: () => {
-      set({ ...get(), state: StorageState.LOADING });
-      emit(GlobalAppState.ASSISTANTS, undefined);
+    loadAssistants: (force = false) => {
+      if (get().state === StorageState.INIT || force) {
+        set({ ...get(), state: StorageState.LOADING });
+        emit(GlobalAppState.ASSISTANTS);
+      }
     },
     getAllAssistants: () => [OplaAssistant, ...get().assistants.filter((a) => !a.hidden)],
     getAssistant: (id: string | undefined) =>

@@ -24,7 +24,7 @@ interface ServiceProps extends StorageProps {
 
 export interface ServiceSlice extends ServiceProps {
   isLoading: () => boolean;
-  loadServices: () => void;
+  loadServices: (force?: boolean) => void;
   setActiveModel: (modelName: string, provider?: string) => Promise<void>;
   getActiveModel: () => string | undefined;
   setActiveService: (service: AIService) => void;
@@ -42,9 +42,11 @@ const createServiceSlice =
     ...DEFAULT_PROPS,
     ...initProps,
     isLoading: () => get().state === StorageState.INIT || get().state === StorageState.LOADING,
-    loadServices: () => {
-      set({ ...get(), state: StorageState.LOADING });
-      emit(GlobalAppState.SERVICES, undefined);
+    loadServices: (force = false) => {
+      if (get().state === StorageState.INIT || force) {
+        set({ ...get(), state: StorageState.LOADING });
+        emit(GlobalAppState.SERVICES);
+      }
     },
     setActiveService: (activeService: AIService) => {
       set({ activeService, state: StorageState.OK, error: undefined });

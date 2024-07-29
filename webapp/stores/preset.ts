@@ -24,7 +24,7 @@ interface PresetProps extends StorageProps {
 
 export interface PresetSlice extends PresetProps {
   isLoading: () => boolean;
-  loadPresets: () => void;
+  loadPresets: (force?: boolean) => void;
   setPresets: (updatedPresets: Preset[]) => void;
 }
 
@@ -41,9 +41,11 @@ const createPresetSlice =
     ...DEFAULT_PROPS,
     ...initProps,
     isLoading: () => get().state === StorageState.INIT || get().state === StorageState.LOADING,
-    loadPresets: () => {
-      set({ ...get(), state: StorageState.LOADING });
-      emit(GlobalAppState.PRESETS, undefined);
+    loadPresets: (force = false) => {
+      if (get().state === StorageState.INIT || force) {
+        set({ ...get(), state: StorageState.LOADING });
+        emit(GlobalAppState.PRESETS);
+      }
     },
     setPresets: (updatedPresets: Preset[]) => {
       set({ presets: updatedPresets });
