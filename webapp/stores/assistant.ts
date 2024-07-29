@@ -32,6 +32,7 @@ export const OplaAssistant: Assistant = {
 };
 
 export interface AssistantSlice extends AssistantProps {
+  isLoading: () => boolean;
   loadAssistants: () => void;
   getAllAssistants: () => Assistant[];
   getAssistant: (id: string | undefined) => Assistant | undefined;
@@ -58,7 +59,9 @@ const createAssistantSlice =
   (set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
+    isLoading: () => get().state === StorageState.INIT || get().state === StorageState.LOADING,
     loadAssistants: () => {
+      set({ ...get(), state: StorageState.LOADING });
       emit(GlobalAppState.ASSISTANTS, undefined);
     },
     getAllAssistants: () => [OplaAssistant, ...get().assistants.filter((a) => !a.hidden)],

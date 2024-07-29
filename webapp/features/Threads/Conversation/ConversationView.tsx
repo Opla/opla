@@ -19,6 +19,7 @@ import useBackend from '@/hooks/useBackendContext';
 import { Page, ViewName } from '@/types/ui';
 import logger from '@/utils/logger';
 import { DefaultPageSettings } from '@/utils/constants';
+import { deepEqual } from '@/utils/data';
 import ConversationList from './ConversationList';
 import { useConversationContext } from './ConversationContext';
 
@@ -96,13 +97,15 @@ export function ConversationView({
         } else if (updatedPageSettings.views) {
           updatedPageSettings.views[viewIndex - 1] = { ...conversationSettings, scrollPosition };
         }
-        setSettings({
-          ...settings,
-          pages: {
-            ...pagesSettings,
-            [conversationViewName]: updatedPageSettings,
-          },
-        });
+        if (!deepEqual(updatedPageSettings, pagesSettings?.[conversationViewName])) {
+          setSettings({
+            ...settings,
+            pages: {
+              ...pagesSettings,
+              [conversationViewName]: updatedPageSettings,
+            },
+          });
+        }
       }
     };
     afunc();

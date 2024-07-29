@@ -35,6 +35,7 @@ pub enum GlobalAppState {
     ERROR = 2,
     PROJECT = 3,
 
+    ALLCONVERSATIONS = 15,
     CONVERSATIONS = 4,
     DELETECONVERSATION = 5,
 
@@ -74,6 +75,7 @@ impl From<u32> for GlobalAppState {
             12 => GlobalAppState::SETTINGS,
             13 => GlobalAppState::SERVICES,
             14 => GlobalAppState::MODELS,
+            15 => GlobalAppState::ALLCONVERSATIONS,
             _ => {
                 println!("Not a valid value for the enum GlobalAppState");
                 GlobalAppState::ERROR
@@ -90,6 +92,7 @@ impl Into<u32> for GlobalAppState {
             GlobalAppState::WORKSPACE => 1,
             GlobalAppState::PROJECT => 3,
 
+            GlobalAppState::ALLCONVERSATIONS => 15,
             GlobalAppState::CONVERSATIONS => 4,
             GlobalAppState::DELETECONVERSATION => 5,
 
@@ -148,6 +151,12 @@ pub struct ValueModels {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ValueConversations {
+    pub conversations: Vec<Conversation>,
+    pub archives: Vec<Conversation>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Value {
     Bool(bool),
@@ -161,6 +170,7 @@ pub enum Value {
     Settings(ValueSettings),
     Services(ValueServices),
     Models(ValueModels),
+    AllConversations(ValueConversations),
     Empty(Empty),
     Conversations(Vec<Conversation>),
     ConversationMessages(ConversationMessages),

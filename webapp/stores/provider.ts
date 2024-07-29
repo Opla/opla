@@ -23,6 +23,7 @@ interface ProviderProps extends StorageProps {
 }
 
 export interface ProviderSlice extends ProviderProps {
+  isLoading: () => boolean;
   loadProviders: () => void;
   setProviders: (updatedProviders: Provider[]) => void;
 }
@@ -36,11 +37,12 @@ const DEFAULT_PROPS: ProviderProps = {
 
 const createProviderSlice =
   (emit: Emitter, initProps?: Partial<ProviderSlice>): StateCreator<ProviderSlice> =>
-  // emit(GlobalAppState.PROVIDERS, undefined);
-  (set) => ({
+  (set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
+    isLoading: () => get().state === StorageState.INIT || get().state === StorageState.LOADING,
     loadProviders: () => {
+      set({ ...get(), state: StorageState.LOADING });
       emit(GlobalAppState.PROVIDERS, undefined);
     },
     setProviders: (updatedProviders: Provider[]) => {

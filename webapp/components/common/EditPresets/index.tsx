@@ -44,6 +44,8 @@ import { ContextWindowPolicies, DefaultContextWindowPolicy } from '@/utils/const
 import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
 import { cn } from '@/lib/utils';
 import { usePresetStore } from '@/stores';
+import { useEffect } from 'react';
+import { StorageState } from '@/stores/types';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../ui/accordion';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Textarea } from '../../ui/textarea';
@@ -71,7 +73,7 @@ export default function EditPreset<T>({
   onChange: (newpreset: Partial<T>) => void;
 }) {
   const { t } = useTranslation();
-  const { presets } = usePresetStore();
+  const { state, presets, loadPresets } = usePresetStore();
   const provider = service?.provider || _provider;
   const parametersDefinition = getCompletionParametersDefinition(provider);
   const modelName = service?.model?.id || presetProperties?.model || model?.name;
@@ -83,6 +85,11 @@ export default function EditPreset<T>({
     contextWindowPolicy: selectedPolicy = DefaultContextWindowPolicy,
   } = getCompletePresetProperties(preset, presetProperties, presets);
 
+  useEffect(() => {
+    if (state === StorageState.INIT) {
+      loadPresets();
+    }
+  }, [state, loadPresets]);
   const handleSystemChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value } = e.target;
     if (presetProperties) {

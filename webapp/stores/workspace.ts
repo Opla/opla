@@ -23,6 +23,7 @@ interface WorkspaceProps extends StorageProps {
 }
 
 export interface WorkspaceSlice extends WorkspaceProps {
+  isLoading: () => boolean;
   getAllWorkspaces: () => Workspace[];
   getWorkspace: (id?: string) => Workspace | undefined;
   loadWorkspace: (id?: string) => Workspace | undefined;
@@ -42,9 +43,11 @@ const createWorkspaceSlice =
   (set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
+    isLoading: () => get().state === StorageState.INIT || get().state === StorageState.LOADING,
     getAllWorkspaces: () => Object.values(get().workspaces),
     getWorkspace: (id = get().activeWorkspaceId) => (id ? get().workspaces[id] : undefined),
     loadWorkspace: (id = get().activeWorkspaceId) => {
+      set({ ...get(), state: StorageState.LOADING });
       const w = id ? get().workspaces[id] : undefined;
       emit(GlobalAppState.ACTIVE, id);
       return w;

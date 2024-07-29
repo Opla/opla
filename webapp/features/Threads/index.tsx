@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useSearchParams } from 'next/navigation';
 import { v4 as uuid } from 'uuid';
@@ -44,6 +44,8 @@ import {
 } from '@/stores';
 import { findModelInAll } from '@/utils/data/models';
 import { uninstallModel } from '@/utils/backend/commands';
+import { StorageState } from '@/stores/types';
+import Loading from '@/components/common/Loading';
 import { ResizableHandle, ResizablePanel } from '../../components/ui/resizable';
 import Settings from './Settings';
 import Threads from './Threads';
@@ -67,8 +69,10 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     setError([...errors, { id: uuid(), conversationId, message: error }]);
   };
 
-  const { getAssistant, deleteAssistant } = useAssistantStore();
+  const assistantStorage = useAssistantStore();
+  const { getAssistant, deleteAssistant } = assistantStorage;
 
+  const threadStorage = useThreadStore();
   const {
     conversations,
     updateConversations,
@@ -78,29 +82,49 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     archives,
     setArchives,
     deleteArchive,
-  } = useThreadStore();
-  const { providers } = useProviderStore();
+  } = threadStorage;
+  const providerStorage = useProviderStore();
+  const { providers, loadProviders } = providerStorage;
   const { settings, setSettings } = useBackend();
   const modelStorage = useModelsStore();
-
+  const workspaceStorage = useWorkspaceStore();
   const {
+    state: workspaceState,
     loadWorkspace,
     loadProject,
     activeWorkspaceId: activeWorkspace,
     workspaces,
-    projects,
-  } = useWorkspaceStore();
+  } = workspaceStorage;
 
   const { loadAllConversations: getAllConversations } = useThreadStore();
+
+  const initStorage = useRef<boolean>(true);
+
   useEffect(() => {
-    if (!workspaces || !activeWorkspace) {
-      logger.info('loadWorkspace', workspaces, activeWorkspace);
+    if (initStorage.current && workspaceState === StorageState.INIT) {
+      initStorage.current = false;
+      logger.info('loadWorkspace', workspaceState, workspaces, activeWorkspace);
       loadWorkspace(activeWorkspace);
+      // settingsStore.loadSettings();
       loadProject();
+      loadProviders();
+      modelStorage.loadModels();
+      assistantStorage.loadAssistants();
       getAllConversations();
     }
-  }, [loadWorkspace, activeWorkspace, workspaces, loadProject, getAllConversations]);
-  logger.info('activeWorkspace', activeWorkspace, projects);
+  }, [
+    workspaceState,
+    loadWorkspace,
+    activeWorkspace,
+    workspaces,
+    // settingsStore,
+    loadProject,
+    loadProviders,
+    getAllConversations,
+    modelStorage,
+    assistantStorage,
+  ]);
+  // logger.info('activeWorkspace', activeWorkspace, projects);
   const searchParams = useSearchParams();
   const selectedConversation = conversations.find((c) => c.id === selectedThreadId);
   const assistantId = searchParams?.get('assistant') || getAssistantId(selectedConversation);
@@ -126,16 +150,18 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     logger.info('saveSettings', currentPage, partialSettings, settings);
     if (settings.selectedPage) {
       const pages = settings.pages || {};
-      const page = pages[currentPage] || DefaultPageSettings;
+      const page = { ...DefaultPageSettings, ...pages[currentPage] };
       const newSettings = { ...page, ...partialSettings };
       if (partialSettings && !deepEqual(newSettings, DefaultPageSettings)) {
         if (!deepEqual(newSettings, page)) {
+          logger.info('setSettings', page, newSettings, settings);
           setSettings({
             ...settings,
             pages: { ...pages, [currentPage]: newSettings },
           });
         }
       } else if (pages[currentPage]) {
+        logger.info('setSettings delete Current page', currentPage, partialSettings, settings);
         delete pages[currentPage];
         setSettings({
           ...settings,
@@ -307,6 +333,12 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
       }
     />
   );
+
+  const isLoading = workspaceStorage.isLoading() || threadStorage.isLoading();
+
+  if (isLoading) {
+    return <Loading />;
+  }
   return (
     <Threads
       selectedThreadId={selectedThreadId}

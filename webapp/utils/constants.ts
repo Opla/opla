@@ -18,9 +18,12 @@ import { ViewName } from '@/types/ui';
 export const DefaultModelId = 'TinyLlama/TinyLlama-1.1B-Chat-v0.6';
 
 export const DefaultPageSettings: PageSettings = {
+  explorerGroups: undefined,
   explorerHidden: false,
-  settingsHidden: true,
   explorerWidth: 20,
+  scrollPosition: 0,
+  selectedId: undefined,
+  settingsHidden: true,
   settingsWidth: 20,
 };
 

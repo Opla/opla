@@ -128,11 +128,17 @@ export const subscribeStateSync = async () => {
       useThreadStore.setState({
         messages: { ...messages, [conversationId]: conversationMessages },
         state: StorageState.OK,
+        messagesState: {},
         error: undefined,
       });
     } else if (key === GlobalAppState.MESSAGES) {
+      const store = useThreadStore.getState();
       const messages = (await mapKeys(value, toCamelCase)) as Record<string, Message[]>;
-      useThreadStore.setState({ messages, state: StorageState.OK, error: undefined });
+      useThreadStore.setState({
+        messages,
+        messagesState: { ...store.messagesState, id: StorageState.OK },
+        error: undefined,
+      });
     } else if (key === GlobalAppState.PRESETS) {
       const { presets } = (await mapKeys(value, toCamelCase)) as { presets: Preset[] };
       usePresetStore.setState({ presets, state: StorageState.OK, error: undefined });

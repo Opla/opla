@@ -34,10 +34,12 @@ import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 interface ThreadProps extends StorageProps {
   conversations: Conversation[];
   messages: Record<string, Message[]>;
+  messagesState: Record<string, StorageState>;
   archives: Conversation[];
 }
 
 export interface ThreadSlice extends ThreadProps {
+  isLoading: () => boolean;
   loadAllConversations: () => void;
   getConversation: (id?: string) => Conversation | undefined;
   setConversations: (newConversations: Conversation[]) => void;
@@ -81,6 +83,7 @@ const DEFAULT_PROPS: ThreadProps = {
   state: StorageState.INIT,
   conversations: [],
   messages: {},
+  messagesState: {},
   archives: [],
 };
 
@@ -89,8 +92,9 @@ const createThreadSlice =
   (set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
+    isLoading: () => get().state === StorageState.INIT || get().state === StorageState.LOADING,
     loadAllConversations: () => {
-      set({ state: StorageState.LOADING });
+      set({ ...get(), state: StorageState.LOADING });
       emit(GlobalAppState.ALLCONVERSATIONS);
     },
     getConversation: (id) =>
@@ -130,8 +134,21 @@ const createThreadSlice =
     },
     isConversationMessagesLoaded: (id: string) => !!get().messages[id],
 
-    readConversationMessages: async (id: string | undefined): Promise<Message[]> => {
+    readConversationMessages: async (id: string): Promise<Message[]> => {
+      const store = get();
+      const { messages } = store;
+      delete messages[id];
+      set({
+        ...store,
+        messages,
+        messagesState: { ...store.messagesState, id: StorageState.LOADING },
+      });
       const newMessages: Message[] = id ? await loadConversationMessages(id) : [];
+      set({
+        ...store,
+        messages: { ...store.messages, [id]: newMessages },
+        messagesState: { ...store.messagesState, [id]: StorageState.OK },
+      });
       return newMessages;
     },
     filterConversationMessages: (

@@ -73,7 +73,7 @@ type Context = {
 type ConversationProviderProps = {
   selectedConversation: Conversation | undefined;
   conversationId: string | undefined;
-  messages: MessageImpl[];
+  messages: MessageImpl[] | undefined;
   commandManager: CommandManager;
   assistant: Assistant | undefined;
   selectedModelId: string | undefined;

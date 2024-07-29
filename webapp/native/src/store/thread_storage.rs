@@ -19,7 +19,7 @@ use serde::{ Deserialize, Serialize };
 use tauri::{ AppHandle, Manager };
 use tokio::spawn;
 
-use crate::store::app_state::STATE_SYNC_EVENT;
+use crate::store::app_state::{ ValueConversations, STATE_SYNC_EVENT };
 use crate::OplaContext;
 use crate::{ data::{ conversation::Conversation, message::Message }, utils::get_data_directory };
 
@@ -51,6 +51,28 @@ impl ThreadStorage {
         let mut need_emit = false;
         let mut emit_value: Option<Value> = None;
         match GlobalAppState::from(payload.key) {
+            GlobalAppState::ALLCONVERSATIONS => {
+                let mut store = context.store.lock().await;
+                if let Value::AllConversations(data) = value {
+                    store.threads.conversations = data.conversations.clone();
+                    store.save_conversations();
+                    store.threads.archives = data.archives.clone();
+                    store.save_archives();
+                    need_emit = true;
+                } else if let Value::Empty(_) = value {
+                    need_emit = true;
+                } else {
+                    println!("Error wrong type of value: {} {:?}", payload.key, value);
+                }
+                if need_emit {
+                    emit_value = Some(
+                        Value::AllConversations(ValueConversations {
+                            conversations: store.threads.conversations.clone(),
+                            archives: store.threads.archives.clone(),
+                        })
+                    );
+                }
+            }
             GlobalAppState::CONVERSATIONS => {
                 let mut store = context.store.lock().await;
                 if let Value::Conversations(data) = value {

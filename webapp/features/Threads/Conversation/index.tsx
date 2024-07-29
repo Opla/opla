@@ -103,6 +103,7 @@ export function ConversationPanel({
   };
 
   const showEmptyChat = !conversationId || !messages || messages.length === 0;
+  console.log('showEmptyChat', showEmptyChat, conversationId, messages);
   if (showEmptyChat) {
     return (
       <Onboarding

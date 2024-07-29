@@ -97,9 +97,11 @@ const deepGet = <T, V>(obj: T, path: string, defaultValue?: V, root = path): V |
 
 export const deepEqual = <T>(a: T, b: T): boolean => {
   if (a === b) return true;
+  if ((a === null || a === undefined) && (b === null || b === undefined)) return true;
   if (typeof a !== 'object' || typeof b !== 'object') return false;
   if (a === null || b === null) return false;
   if (a === undefined || b === undefined) return false;
+
   if (Array.isArray(a) && Array.isArray(b) && (a as unknown[]).length === (b as unknown[]).length) {
     return (a as unknown[]).every((v: unknown, i: number) => deepEqual(v, (b as unknown[])[i]));
   }
