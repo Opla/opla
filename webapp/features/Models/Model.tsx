@@ -52,7 +52,7 @@ import {
   isValidFormat,
 } from '@/utils/data/models';
 import { ModalIds, Page } from '@/types/ui';
-import { ModalsContext } from '@/context/modals';
+import { ModalsContext } from '@/modals/context';
 import EmptyView from '@/components/common/EmptyView';
 import { BrainCircuit } from 'lucide-react';
 import { fileExists } from '@/utils/backend/tauri';

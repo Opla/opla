@@ -18,7 +18,7 @@ import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
 import { useAssistantStore } from '@/stores';
 import { openFileDialog } from '@/utils/backend/tauri';
-import { ModalData, ModalsContext } from '@/context/modals';
+import { ModalData, ModalsContext } from '@/modals/context';
 import { ModalIds } from '@/modals';
 import { Preset } from '@/types';
 import ContentView from '../../components/common/ContentView';

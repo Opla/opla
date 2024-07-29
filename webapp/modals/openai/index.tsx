@@ -18,7 +18,7 @@ import { ConfigureOpenAI } from '@/features/Providers/openai';
 import useBackend from '@/hooks/useBackendContext';
 import useProviderState from '@/hooks/useProviderState';
 import { Provider } from '@/types';
-import { ModalData } from '@/context/modals';
+import { ModalData } from '@/modals/context';
 import OpenAIProvider from '@/utils/providers/openai';
 
 function OpenAIDialog({

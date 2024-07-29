@@ -35,7 +35,7 @@ import useTranslation from '@/hooks/useTranslation';
 import { Conversation, ConversationPreset, Preset, Provider } from '@/types';
 import { createPreset, getCompatiblePresets } from '@/utils/data/presets';
 import { deepMerge } from '@/utils/data';
-import { ModalData, ModalsContext, ModalIds } from '@/context/modals';
+import { ModalData, ModalsContext, ModalIds } from '@/modals/context';
 import { usePresetStore } from '@/stores';
 
 type PresetsProps = {

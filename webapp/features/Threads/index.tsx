@@ -29,7 +29,7 @@ import {
   getConversationModelId,
 } from '@/utils/data/conversations';
 import { ModalIds } from '@/modals';
-import { ModalsContext } from '@/context/modals';
+import { ModalsContext } from '@/modals/context';
 import { ConversationError, MenuAction, Page, ViewName } from '@/types/ui';
 import { getAssistantId } from '@/utils/services';
 import { deepEqual } from '@/utils/data';
@@ -91,7 +91,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     projects,
   } = useWorkspaceStore();
 
-  const { getAllConversations } = useThreadStore();
+  const { loadAllConversations: getAllConversations } = useThreadStore();
   useEffect(() => {
     if (!workspaces || !activeWorkspace) {
       logger.info('loadWorkspace', workspaces, activeWorkspace);

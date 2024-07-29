@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Provider, ProviderType } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
-import { ModalsContext } from '@/context/modals';
+import { ModalsContext } from '@/modals/context';
 import { ModalIds } from '@/modals';
 import { createProvider, getProviderState } from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';

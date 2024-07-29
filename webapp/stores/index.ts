@@ -36,6 +36,7 @@ import createProviderSlice, { ProviderSlice } from './provider';
 import createSettingsSlice, { SettingsSlice } from './settings';
 import createServiceSlice, { ServiceSlice } from './service';
 import createModelSlice, { ModelSlice } from './model';
+import createUsageSlice, { UsageSlice } from './usage';
 
 type PaylLoadValue = string | number | undefined;
 
@@ -84,6 +85,10 @@ export const useProviderStore = create<ProviderSlice>()((...a) => ({
   ...createProviderSlice(emit)(...a),
 }));
 
+export const useUsageStorage = create<UsageSlice>()((...a) => ({
+  ...createUsageSlice(emit)(...a),
+}));
+
 export const subscribeStateSync = async () => {
   const { listen } = await import('@tauri-apps/api/event');
   const unsubscribeStateSyncListener = await listen(EVENTS.STATE_SYNC_EVENT, async (event) => {
@@ -97,6 +102,17 @@ export const subscribeStateSync = async () => {
       const { projects } = useWorkspaceStore.getState();
       projects[key] = await mapKeys(value, toCamelCase);
       useWorkspaceStore.setState({ projects, state: StorageState.OK, error: undefined });
+    } else if (key === GlobalAppState.ALLCONVERSATIONS) {
+      const { conversations, archives } = (await mapKeys(value, toCamelCase)) as {
+        conversations: Conversation[];
+        archives: Conversation[];
+      };
+      useThreadStore.setState({
+        archives,
+        conversations,
+        state: StorageState.OK,
+        error: undefined,
+      });
     } else if (key === GlobalAppState.CONVERSATIONS) {
       const conversations = (await mapKeys(value, toCamelCase)) as Conversation[];
       useThreadStore.setState({ conversations, state: StorageState.OK, error: undefined });
@@ -140,7 +156,5 @@ export const subscribeStateSync = async () => {
     }
   });
 
-  return async () => {
-    unsubscribeStateSyncListener();
-  };
+  return unsubscribeStateSyncListener;
 };

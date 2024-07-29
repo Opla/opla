@@ -28,7 +28,7 @@ import React, { useState } from 'react';
 import AlertDialog from '@/components/common/AlertDialog';
 import useTranslation from '@/hooks/useTranslation';
 import { Input } from '@/components/ui/input';
-import { ModalData } from '@/context/modals';
+import { ModalData } from '@/modals/context';
 
 type NewPresetDialogProps = {
   id: string;

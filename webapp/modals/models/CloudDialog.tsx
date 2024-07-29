@@ -19,7 +19,7 @@ import OpenAIModels from '@/features/Providers/openai/Models';
 import useProviderState from '@/hooks/useProviderState';
 import useTranslation from '@/hooks/useTranslation';
 import { Provider } from '@/types';
-import { ModalData } from '@/context/modals';
+import { ModalData } from '@/modals/context';
 import { useProviderStore } from '@/stores';
 
 function CloudModelDialog({

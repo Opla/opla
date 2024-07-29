@@ -20,7 +20,7 @@ import { BrainCircuit, HardDriveDownload, Plus } from 'lucide-react';
 import { Ui, Model, ModelState, AIService, AIServiceType } from '@/types';
 import useBackend from '@/hooks/useBackendContext';
 import useTranslation from '@/hooks/useTranslation';
-import { ModalsContext } from '@/context/modals';
+import { ModalsContext } from '@/modals/context';
 import { ModalIds } from '@/types/ui';
 import logger from '@/utils/logger';
 import { shortcutAsText } from '@/utils/shortcuts';

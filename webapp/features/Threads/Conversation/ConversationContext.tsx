@@ -22,7 +22,6 @@ import {
   useEffect,
 } from 'react';
 import { useRouter } from 'next/router';
-import { AppContext } from '@/context';
 import { Conversation, Message, MessageStatus, MessageImpl, Assistant } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
@@ -41,7 +40,13 @@ import { preProcessingCommands } from '@/utils/commands';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import { CommandManager } from '@/utils/commands/types';
 import { cancelSending, sendMessage, updateMessageContent } from '@/utils/messages';
-import { useAssistantStore, useModelsStore, useProviderStore, useThreadStore } from '@/stores';
+import {
+  useAssistantStore,
+  useModelsStore,
+  useProviderStore,
+  useThreadStore,
+  useUsageStorage,
+} from '@/stores';
 import { imageGeneration } from '@/utils/providers';
 import { convertAssetFile } from '@/utils/backend/tauri';
 import { PromptContext } from '../Prompt/PromptContext';
@@ -100,7 +105,7 @@ function ConversationProvider({
   children,
 }: PropsWithChildren<ConversationProviderProps>) {
   const router = useRouter();
-  const { setUsage } = useContext(AppContext);
+  const { setUsage } = useUsageStorage();
   const { providers } = useProviderStore();
   const { conversations, getConversationMessages, updateMessagesAndConversation } =
     useThreadStore();

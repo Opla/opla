@@ -31,7 +31,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { DiscordLogoIcon, GitHubLogoIcon, UpdateIcon } from '@radix-ui/react-icons';
 import useTranslation from '@/hooks/useTranslation';
-import { ModalsContext } from '@/context/modals';
+import { ModalsContext } from '@/modals/context';
 // import logger from '@/utils/logger';
 import { ModalIds } from '@/modals';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';

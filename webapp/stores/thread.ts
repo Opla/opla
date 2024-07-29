@@ -38,7 +38,7 @@ interface ThreadProps extends StorageProps {
 }
 
 export interface ThreadSlice extends ThreadProps {
-  getAllConversations: () => void;
+  loadAllConversations: () => void;
   getConversation: (id?: string) => Conversation | undefined;
   setConversations: (newConversations: Conversation[]) => void;
   deleteConversation: (
@@ -89,9 +89,9 @@ const createThreadSlice =
   (set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
-    getAllConversations: () => {
-      emit(GlobalAppState.CONVERSATIONS, {});
-      emit(GlobalAppState.ARCHIVES, {});
+    loadAllConversations: () => {
+      set({ state: StorageState.LOADING });
+      emit(GlobalAppState.ALLCONVERSATIONS);
     },
     getConversation: (id) =>
       id ? get().conversations.find((conversation) => conversation.id === id) : undefined,

@@ -20,7 +20,7 @@ import { useAssistantStore } from '@/stores';
 import { Assistant, Ui } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalIds } from '@/modals';
-import { ModalData, ModalsContext } from '@/context/modals';
+import { ModalData, ModalsContext } from '@/modals/context';
 import { BasicState, Page } from '@/types/ui';
 import EmptyView from '@/components/common/EmptyView';
 import Explorer, { ExplorerList } from '../../components/common/Explorer';

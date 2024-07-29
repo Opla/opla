@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { useContext, useEffect, useRef } from 'react';
-import { ModalComponentRef, ModalRef, ModalsContext } from '@/context/modals';
+import { ModalComponentRef, ModalRef, ModalsContext } from '@/modals/context';
 
 const useRegisterModals = (Modals: ModalRef[]) => {
   const { registerModal, showModal } = useContext(ModalsContext);

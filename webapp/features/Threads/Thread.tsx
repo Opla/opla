@@ -44,7 +44,7 @@ import useBackend from '@/hooks/useBackendContext';
 import { findModel, findModelInAll, getAnyFirstModel, getModelsAsItems } from '@/utils/data/models';
 import { getAssistantId } from '@/utils/services';
 import { toast } from '@/components/ui/Toast';
-import { ModalData, ModalsContext } from '@/context/modals';
+import { ModalData, ModalsContext } from '@/modals/context';
 import { ModalIds } from '@/modals';
 import { MenuAction } from '@/types/ui';
 import { getMessageContentAsString, getMessageContentHistoryAsString } from '@/utils/data/messages';
