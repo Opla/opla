@@ -49,6 +49,7 @@ function TargetsTable({ targets, onEdit, onDuplicate, onDelete }: TargetsTablePr
   const { providers } = useProviderStore();
   const modelsConfig = useModelsStore();
   const models = getAllModels(providers, modelsConfig);
+
   const renderModel = (targetModels: string[] | undefined) => {
     const model = targetModels ? models.find((m) => m.name === targetModels[0]) : undefined;
     if (!model) return <div>{t('Model not found')}</div>;
@@ -58,6 +59,7 @@ function TargetsTable({ targets, onEdit, onDuplicate, onDelete }: TargetsTablePr
       </div>
     );
   };
+
   return (
     <Table>
       <TableHeader>

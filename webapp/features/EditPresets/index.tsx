@@ -46,13 +46,24 @@ import { cn } from '@/lib/utils';
 import { usePresetStore } from '@/stores';
 import { useEffect, useRef } from 'react';
 import { StorageState } from '@/stores/types';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../ui/accordion';
-import { ScrollArea } from '../../ui/scroll-area';
-import { Textarea } from '../../ui/textarea';
-import Parameter, { ParameterValue, ParametersRecord } from '../Parameter';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
-import { Tooltip, TooltipTrigger, TooltipContent } from '../../ui/tooltip';
-import Form from '../Form';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '../../components/ui/accordion';
+import { ScrollArea } from '../../components/ui/scroll-area';
+import { Textarea } from '../../components/ui/textarea';
+import Parameter, { ParameterValue, ParametersRecord } from '../../components/common/Parameter';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../components/ui/tooltip';
+import Form from '../../components/common/Form';
 import Presets from './Presets';
 
 export default function EditPreset<T>({

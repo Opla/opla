@@ -18,7 +18,7 @@ import useBackend from '@/hooks/useBackendContext';
 import { getConversationAssets, updateConversation } from '@/utils/data/conversations';
 import { Conversation, Preset } from '@/types';
 import { getFilename } from '@/utils/misc';
-import EditPresets from '@/components/common/EditPresets';
+import EditPresets from '@/features/EditPresets';
 import { ConversationError } from '@/types/ui';
 import CopyToClipBoard from '@/components/common/CopyToClipBoard';
 import { getActiveService } from '@/utils/services';

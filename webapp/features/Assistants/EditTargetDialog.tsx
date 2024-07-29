@@ -19,7 +19,7 @@ import { Preset, Model, Provider, Logo } from '@/types';
 import { findModelInAll, getModelsAsItems } from '@/utils/data/models';
 import logger from '@/utils/logger';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import EditPreset from '@/components/common/EditPresets';
+import EditPreset from '@/features/EditPresets';
 import { findProvider, getLocalProvider } from '@/utils/data/providers';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import ModelIcon from '@/components/common/ModelIcon';
