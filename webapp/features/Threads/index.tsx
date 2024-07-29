@@ -223,12 +223,22 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
       },
     );
 
+  const getPage = () => {
+    const pages = settings.pages || {};
+    return { ...DefaultPageSettings, ...pages[selectedPage] };
+  };
   const handleResizeSettings = (size: number) => {
-    saveSettings(selectedPage, { settingsWidth: size });
+    const page = getPage();
+    if (page.settingsWidth !== size) {
+      saveSettings(selectedPage, { settingsWidth: size });
+    }
   };
 
   const handleResizeExplorer = (size: number) => {
-    saveSettings(selectedPage, { explorerWidth: size });
+    const page = getPage();
+    if (page.explorerWidth !== size) {
+      saveSettings(selectedPage, { explorerWidth: size });
+    }
   };
 
   const handleChangeDisplayExplorer = (value: boolean) => {

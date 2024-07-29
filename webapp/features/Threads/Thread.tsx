@@ -486,7 +486,7 @@ function Thread({
         messagesState[conversationId] === StorageState.INIT ||
         messagesState[conversationId] === StorageState.LOADING));
 
-  console.log('isLoading', isLoading, threadState, messagesState, conversationMessages);
+  // logger.info('isLoading', isLoading, threadState, messagesState, conversationMessages);
   return (
     <ContentView
       header={
