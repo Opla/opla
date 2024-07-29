@@ -27,7 +27,7 @@ void = "1.0.2"
 thiserror = "1.0.63"
 eventsource-stream = "0.2.3"
 futures-util = "0.3.30"
-tokio = { version = "1.38.1", features = ["sync"] }
+tokio = { version = "1.39.2", features = ["sync"] }
 tokenizer = { path = "../../crates/tokenizer"}
 opla_core = { path = "../../crates/core"}
 sha2 = "0.10.8"
