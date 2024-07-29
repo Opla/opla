@@ -19,9 +19,6 @@ import { StorageState } from '@/stores/types';
 import Explorer from './Explorer';
 import ProviderView from './Provider';
 
-
-
-
 export default function Providers({ selectedProviderId }: { selectedProviderId?: string }) {
   const { state, loadProviders } = useProviderStore();
   const { loadModels } = useModelsStore();
