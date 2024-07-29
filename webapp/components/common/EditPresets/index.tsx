@@ -44,7 +44,7 @@ import { ContextWindowPolicies, DefaultContextWindowPolicy } from '@/utils/const
 import { findCompatiblePreset, getCompletePresetProperties } from '@/utils/data/presets';
 import { cn } from '@/lib/utils';
 import { usePresetStore } from '@/stores';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { StorageState } from '@/stores/types';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../ui/accordion';
 import { ScrollArea } from '../../ui/scroll-area';
@@ -85,9 +85,12 @@ export default function EditPreset<T>({
     contextWindowPolicy: selectedPolicy = DefaultContextWindowPolicy,
   } = getCompletePresetProperties(preset, presetProperties, presets);
 
+  const init = useRef<boolean>(true);
   useEffect(() => {
-    if (state === StorageState.INIT) {
+    if (init.current && state === StorageState.INIT) {
+      init.current = false;
       loadPresets();
+
     }
   }, [state, loadPresets]);
   const handleSystemChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
