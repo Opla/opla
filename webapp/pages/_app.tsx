@@ -20,9 +20,7 @@ import Layout from '@/components/Layout';
 import { ThemeProvider } from 'next-themes';
 import { ModalsProvider } from '@/modals/context';
 import { BackendProvider } from '@/hooks/useBackendContext';
-import {
-  subscribeStateSync,
-} from '@/stores';
+import { subscribeStateSync } from '@/stores';
 import logger from '@/utils/logger';
 
 export default function App({ Component }: AppProps) {

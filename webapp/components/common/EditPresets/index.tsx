@@ -90,7 +90,6 @@ export default function EditPreset<T>({
     if (init.current && state === StorageState.INIT) {
       init.current = false;
       loadPresets();
-
     }
   }, [state, loadPresets]);
   const handleSystemChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
