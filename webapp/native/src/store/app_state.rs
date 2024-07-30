@@ -25,7 +25,7 @@ use crate::data::{
     Preset,
 };
 
-use super::{ model_storage::ModelStorage, service_storage::ServiceStorage, settings::Settings };
+use super::{ model::ModelStorage, service::ServiceStorage, settings::Settings };
 
 pub const STATE_CHANGE_EVENT: &str = "state_change_event";
 pub const STATE_SYNC_EVENT: &str = "state_sync_event";
@@ -151,9 +151,14 @@ pub struct ValueModels {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ValueConversations {
+pub struct ValueAllConversations {
     pub conversations: Vec<Conversation>,
     pub archives: Vec<Conversation>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ValueConversations {
+    pub conversations: Vec<Conversation>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -177,10 +182,10 @@ pub enum Value {
     Settings(ValueSettings),
     Services(ValueServices),
     Models(ValueModels),
-    AllConversations(ValueConversations),
+    AllConversations(ValueAllConversations),
     ConversationMessages(ValueConversationMessages),
+    Conversations(ValueConversations),
     Empty(Empty),
-    Conversations(Vec<Conversation>),
     Messages(HashMap<String, Vec<Message>>),
 }
 

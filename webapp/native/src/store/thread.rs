@@ -19,11 +19,18 @@ use serde::{ Deserialize, Serialize };
 use tauri::{ AppHandle, Manager };
 use tokio::spawn;
 
-use crate::store::app_state::{ ValueConversations, STATE_SYNC_EVENT };
+use crate::store::app_state::{ ValueAllConversations, ValueConversations, STATE_SYNC_EVENT };
 use crate::OplaContext;
 use crate::{ data::{ conversation::Conversation, message::Message }, utils::get_data_directory };
 
-use super::app_state::{ Empty, GlobalAppState, Payload, Value, ValueConversationMessages, STATE_CHANGE_EVENT };
+use super::app_state::{
+    Empty,
+    GlobalAppState,
+    Payload,
+    Value,
+    ValueConversationMessages,
+    STATE_CHANGE_EVENT,
+};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ThreadStorage {
@@ -66,7 +73,7 @@ impl ThreadStorage {
                 }
                 if need_emit {
                     emit_value = Some(
-                        Value::AllConversations(ValueConversations {
+                        Value::AllConversations(ValueAllConversations {
                             conversations: store.threads.conversations.clone(),
                             archives: store.threads.archives.clone(),
                         })
@@ -76,7 +83,7 @@ impl ThreadStorage {
             GlobalAppState::CONVERSATIONS => {
                 let mut store = context.store.lock().await;
                 if let Value::Conversations(data) = value {
-                    store.threads.conversations = data.clone();
+                    store.threads.conversations = data.conversations.clone();
                     store.save_conversations();
                     need_emit = true;
                 } else if let Value::Empty(_) = value {
@@ -85,7 +92,11 @@ impl ThreadStorage {
                     println!("Error wrong type of value: {} {:?}", payload.key, value);
                 }
                 if need_emit {
-                    emit_value = Some(Value::Conversations(store.threads.conversations.clone()));
+                    emit_value = Some(
+                        Value::Conversations(ValueConversations {
+                            conversations: store.threads.conversations.clone(),
+                        })
+                    );
                 }
             }
             GlobalAppState::DELETECONVERSATION => {
@@ -100,7 +111,7 @@ impl ThreadStorage {
             GlobalAppState::ARCHIVES => {
                 let mut store = context.store.lock().await;
                 if let Value::Conversations(data) = value {
-                    store.threads.archives = data.clone();
+                    store.threads.archives = data.conversations.clone();
                     store.save_archives();
                     need_emit = true;
                 } else if let Value::Empty(_) = value {
@@ -109,7 +120,11 @@ impl ThreadStorage {
                     println!("Error wrong type of value: {} {:?}", payload.key, value);
                 }
                 if need_emit {
-                    emit_value = Some(Value::Conversations(store.threads.archives.clone()));
+                    emit_value = Some(
+                        Value::Conversations(ValueConversations {
+                            conversations: store.threads.archives.clone(),
+                        })
+                    );
                 }
             }
             GlobalAppState::CONVERSATIONMESSAGES => {
@@ -123,23 +138,49 @@ impl ThreadStorage {
                                 app_handle.app_handle()
                             )
                         {
-                            println!("Error saving conversation messages: {} {:?}", payload.key, error);
+                            println!(
+                                "Error saving conversation messages: {} {:?}",
+                                payload.key,
+                                error
+                            );
                         }
                     } else {
                         need_emit = true;
                         let conversation_id = data.conversation_id.clone();
-                        println!("Empty conversationMessages {:?} {:?}", store.threads.messages, conversation_id);
+                        println!(
+                            "Empty conversationMessages {:?} {:?}",
+                            store.threads.messages,
+                            conversation_id
+                        );
                         if !store.threads.messages.contains_key(&conversation_id) {
-                            if let Err(error) = store.load_conversation_messages(&conversation_id, true, None) {
-                                println!("Error loading conversation messages: {} {:?}", payload.key, error);
+                            if
+                                let Err(error) = store.load_conversation_messages(
+                                    &conversation_id,
+                                    true,
+                                    None
+                                )
+                            {
+                                println!(
+                                    "Error loading conversation messages: {} {:?}",
+                                    payload.key,
+                                    error
+                                );
                                 store.threads.messages.insert(conversation_id.clone(), Vec::new());
                             }
                         }
-                        println!("Loaded conversationMessages {:?} {:?}", store.threads.messages, conversation_id);
-                        emit_value = Some(Value::ConversationMessages( ValueConversationMessages {
-                            conversation_id,
-                            messages: store.threads.messages.get(&data.conversation_id).cloned()
-                        }));
+                        println!(
+                            "Loaded conversationMessages {:?} {:?}",
+                            store.threads.messages,
+                            conversation_id
+                        );
+                        emit_value = Some(
+                            Value::ConversationMessages(ValueConversationMessages {
+                                conversation_id,
+                                messages: store.threads.messages
+                                    .get(&data.conversation_id)
+                                    .cloned(),
+                            })
+                        );
                     }
                 } else {
                     println!("Error wrong type of value: {} {:?}", payload.key, value);
@@ -237,10 +278,8 @@ impl ThreadStorage {
         let conversation_file = conversation_path.join("messages.json");
         let messages: Vec<Message>;
         if conversation_file.exists() {
-        let default_config_data = read_to_string(conversation_file).map_err(|e| e.to_string())?;
-            messages = serde_json
-            ::from_str(&default_config_data)
-            .map_err(|e| e.to_string())?;        
+            let default_config_data = read_to_string(conversation_file).map_err(|e| e.to_string())?;
+            messages = serde_json::from_str(&default_config_data).map_err(|e| e.to_string())?;
         } else {
             messages = Vec::new();
         }
@@ -248,16 +287,15 @@ impl ThreadStorage {
         if cache {
             self.messages.insert(conversation_id.to_string(), messages.clone());
             if let Some(app_handle) = app_handle {
-            Self::emit_event(
-                app_handle,
-                GlobalAppState::CONVERSATIONMESSAGES,
-                Value::ConversationMessages(ValueConversationMessages {
-                    conversation_id: conversation_id.to_string(),
-                    messages: Some(messages.clone()),
-                })
-            );
+                Self::emit_event(
+                    app_handle,
+                    GlobalAppState::CONVERSATIONMESSAGES,
+                    Value::ConversationMessages(ValueConversationMessages {
+                        conversation_id: conversation_id.to_string(),
+                        messages: Some(messages.clone()),
+                    })
+                );
             }
-
         }
 
         Ok(messages)

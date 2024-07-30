@@ -13,11 +13,11 @@
 // limitations under the License.
 
 use std::{ fs, path::PathBuf };
-use assistant_storage::AssistantStorage;
-use preset_storage::PresetStorage;
-use provider_storage::ProviderStorage;
+use assistant::AssistantStorage;
+use preset::PresetStorage;
+use provider::ProviderStorage;
 use settings::Settings;
-use thread_storage::ThreadStorage;
+use thread::ThreadStorage;
 use serde::{ Deserialize, Serialize };
 use tauri::{ AppHandle, Manager };
 use crate::{
@@ -26,20 +26,20 @@ use crate::{
     utils::get_config_directory,
 };
 
-use self::model_storage::ModelStorage;
-use self::service_storage::ServiceStorage;
-use self::workspace_storage::WorkspaceStorage;
-use self::server_storage::ServerStorage;
+use self::model::ModelStorage;
+use self::service::ServiceStorage;
+use self::workspace::WorkspaceStorage;
+use self::server::ServerStorage;
 
 pub mod settings;
-pub mod thread_storage;
-pub mod model_storage;
-pub mod service_storage;
-pub mod workspace_storage;
-pub mod server_storage;
-pub mod preset_storage;
-pub mod provider_storage;
-pub mod assistant_storage;
+pub mod thread;
+pub mod model;
+pub mod service;
+pub mod workspace;
+pub mod server;
+pub mod preset;
+pub mod provider;
+pub mod assistant;
 pub mod app_state;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

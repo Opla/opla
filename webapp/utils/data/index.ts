@@ -14,6 +14,12 @@
 import { v4 as uuid } from 'uuid';
 import { BaseIdRecord, BaseNamedRecord, Entity, Resource } from '@/types';
 
+export const mapBaseRecord = <T>(key: string, value: T): T => {
+  if ((key === 'created_at' || key === 'updated_at') && typeof value === 'string') {
+    return Date.parse(value) as T;
+  }
+  return value;
+};
 const createBaseRecord = <T>(template?: Partial<T>) => {
   const item = {
     id: uuid(),
@@ -122,9 +128,10 @@ export const deepEqual = <T>(a: T, b: T): boolean => {
 export const mapKeys = <TValue>(
   value: TValue | any,
   mapFunc: (key: string, value: TValue) => string,
+  mapValue: (key: string, value: TValue) => TValue = (key, v) => v,
 ): TValue => {
   if (Array.isArray(value)) {
-    return value.map((item) => mapKeys(item, mapFunc)) as TValue;
+    return value.map((item) => mapKeys(item, mapFunc, mapValue)) as TValue;
   }
   if (!value || typeof value !== 'object') return value as TValue;
   const record = value as Record<string, TValue>;
@@ -133,9 +140,9 @@ export const mapKeys = <TValue>(
     (acc, key) => {
       let v = record[key];
       if (Array.isArray(value) || typeof v === 'object') {
-        v = mapKeys(v, mapFunc);
+        v = mapKeys(v, mapFunc, mapValue);
       }
-      acc[mapFunc(key, v)] = v;
+      acc[mapFunc(key, v)] = mapValue(key, v);
       return acc;
     },
     {} as Record<string, TValue>,

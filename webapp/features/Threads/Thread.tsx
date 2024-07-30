@@ -161,6 +161,7 @@ function Thread({
         p = true;
       }
       if (stream?.messageId === msg.id) {
+        m.status = MessageStatus.Stream;
         m.content = stream.content?.join?.('');
         m.contentHistory = undefined;
       }

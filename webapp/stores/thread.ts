@@ -16,7 +16,7 @@ import { StateCreator } from 'zustand';
 import { Conversation, Message, QueryResponse, QueryResult, QueryResultEntry } from '@/types';
 import { deleteUnusedConversationsDir } from '@/utils/backend/tauri';
 import logger from '@/utils/logger';
-import { deepCopy, mapKeys } from '@/utils/data';
+import { deepCopy, deepEqual, mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
 import {
   loadConversationMessages,
@@ -101,7 +101,10 @@ const createThreadSlice =
     getConversation: (id) =>
       id ? get().conversations.find((conversation) => conversation.id === id) : undefined,
     setConversations: (newConversations) => {
-      const data = mapKeys(newConversations, toSnakeCase);
+      if (deepEqual(newConversations, get().conversations)) {
+        return;
+      }
+      const data = mapKeys({ conversations: newConversations }, toSnakeCase);
       emit(GlobalAppState.CONVERSATIONS, data);
     },
     deleteConversation: async (
@@ -152,6 +155,9 @@ const createThreadSlice =
       id: string | undefined,
       updatedMessages: Message[],
     ): Promise<void> => {
+      if (id && deepEqual(updatedMessages, get().messages[id])) {
+        return;
+      }
       if (id) {
         await saveConversationMessages(id, deepCopy<Message[]>(updatedMessages));
       }
@@ -255,7 +261,7 @@ const createThreadSlice =
       await removeConversationMessages(conversationId);
     },
     setArchives: (newArchives) => {
-      const data = mapKeys(newArchives, toSnakeCase);
+      const data = mapKeys({ conversations: newArchives }, toSnakeCase);
       emit(GlobalAppState.ARCHIVES, data);
     },
     deleteArchive: async (id: string, cleanup?: (id: string) => Promise<void>) => {
