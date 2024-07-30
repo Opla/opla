@@ -22,7 +22,7 @@ import {
   MessageStatus,
   Metadata,
 } from '@/types';
-import { createBaseRecord } from '.';
+import { createBaseRecord, deepEqual } from '.';
 
 export const createStringArray = (content: string | string[]): string[] =>
   Array.isArray(content) ? content : [content];
@@ -77,11 +77,11 @@ export const createMessage = (
 };
 
 export const mergeMessages = (messages: Message[], newMessages: Message[]) => {
-  const newMessagesIds = newMessages.map((m) => m.id);
+  // const newMessagesIds = newMessages.map((m) => m.id);
   const freshNewMessages = newMessages.filter((m) => !messages.find((msg) => msg.id === m.id));
   const mergedMessages = messages.map((m) => {
-    if (newMessagesIds.includes(m.id)) {
-      const updatedMessage = newMessages.find((newMsg) => newMsg.id === m.id);
+    const updatedMessage = newMessages.find((newMsg) => newMsg.id === m.id);
+    if (updatedMessage && !deepEqual(m, updatedMessage)) {
       return { ...m, ...updatedMessage, updatedAt: Date.now() };
     }
     return m;

@@ -22,7 +22,6 @@ import {
   useEffect,
 } from 'react';
 import { useRouter } from 'next/router';
-import { AppContext } from '@/context';
 import { Conversation, Message, MessageStatus, MessageImpl, Assistant } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
@@ -41,7 +40,13 @@ import { preProcessingCommands } from '@/utils/commands';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import { CommandManager } from '@/utils/commands/types';
 import { cancelSending, sendMessage, updateMessageContent } from '@/utils/messages';
-import { useAssistantStore, useModelsStore } from '@/stores';
+import {
+  useAssistantStore,
+  useModelsStore,
+  useProviderStore,
+  useThreadStore,
+  useUsageStorage,
+} from '@/stores';
 import { imageGeneration } from '@/utils/providers';
 import { convertAssetFile } from '@/utils/backend/tauri';
 import { PromptContext } from '../Prompt/PromptContext';
@@ -68,7 +73,7 @@ type Context = {
 type ConversationProviderProps = {
   selectedConversation: Conversation | undefined;
   conversationId: string | undefined;
-  messages: MessageImpl[];
+  messages: MessageImpl[] | undefined;
   commandManager: CommandManager;
   assistant: Assistant | undefined;
   selectedModelId: string | undefined;
@@ -100,14 +105,13 @@ function ConversationProvider({
   children,
 }: PropsWithChildren<ConversationProviderProps>) {
   const router = useRouter();
-  const context = useContext(AppContext);
+  const { setUsage } = useUsageStorage();
+  const { providers } = useProviderStore();
   const {
-    providers,
     conversations,
-    getConversationMessages,
+    messages: messagesCache,
     updateMessagesAndConversation,
-    setUsage,
-  } = context;
+  } = useThreadStore();
   const { parseAndValidatePrompt, clearPrompt } = useContext(PromptContext) || {};
   const { activeService } = useBackend();
   const { getAssistant } = useAssistantStore();
@@ -168,7 +172,7 @@ function ConversationProvider({
         message.status = status;
         ({ updatedConversation, updatedMessages } = await updateMessagesAndConversation(
           [message],
-          getConversationMessages(conversation.id),
+          messagesCache[conversation.id],
           conversation,
           conversation.id,
         ));
@@ -180,7 +184,7 @@ function ConversationProvider({
         message.sibling = userMessage.id;
         ({ updatedConversation, updatedMessages } = await updateMessagesAndConversation(
           [userMessage, message],
-          getConversationMessages(conversation.id),
+          messagesCache[conversation.id],
           conversation,
           conversation.id,
         ));
@@ -191,7 +195,7 @@ function ConversationProvider({
         message,
       };
     },
-    [getConversationMessages, updateMessagesAndConversation],
+    [messagesCache, updateMessagesAndConversation],
   );
 
   const handleImageGeneration = useCallback(
@@ -212,9 +216,9 @@ function ConversationProvider({
         updatedConversation.name = getConversationTitle(updatedConversation, t);
       }
 
-      let updatedMessages = getConversationMessages(conversation.id);
+      let updatedMessages = messagesCache[conversation.id];
       let message = previousMessage;
-      const openai = context.providers.find((p) => p.name.toLowerCase() === 'openai');
+      const openai = providers.find((p) => p.name.toLowerCase() === 'openai');
       let content: string | undefined;
       let modelName: string | undefined;
       if (openai) {
@@ -252,9 +256,9 @@ function ConversationProvider({
     },
     [
       clearPrompt,
-      context.providers,
+      providers,
       conversations,
-      getConversationMessages,
+      messagesCache,
       router,
       t,
       tempConversationId,
@@ -280,7 +284,7 @@ function ConversationProvider({
         updatedConversation.name = getConversationTitle(updatedConversation, t);
       }
 
-      const updatedMessages = getConversationMessages(conversation.id);
+      const updatedMessages = messagesCache[conversation.id];
       const message = previousMessage;
       await updateMessages(
         prompt.raw,
@@ -295,15 +299,7 @@ function ConversationProvider({
         router.replace(`${Page.Threads}/${tempConversationId}`, undefined, { shallow: true });
       }
     },
-    [
-      clearPrompt,
-      conversations,
-      getConversationMessages,
-      router,
-      t,
-      tempConversationId,
-      updateMessages,
-    ],
+    [clearPrompt, conversations, messagesCache, router, t, tempConversationId, updateMessages],
   );
 
   const preProcessingSendMessage = useCallback(
@@ -325,7 +321,13 @@ function ConversationProvider({
         tempConversationName || '',
         selectedModelId,
         previousMessage,
-        { changeService, getConversationMessages, updateMessagesAndConversation, t, providers },
+        {
+          changeService,
+          getConversationMessages: (id: string) => messagesCache[id],
+          updateMessagesAndConversation,
+          t,
+          providers,
+        },
       );
       if (result.type === 'error') {
         setErrorMessage({ ...errorMessages, [conversation.id]: result.error });
@@ -391,7 +393,7 @@ function ConversationProvider({
       conversations,
       errorMessages,
       getAssistant,
-      getConversationMessages,
+      messagesCache,
       handleImageGeneration,
       handleNote,
       isProcessing,
@@ -436,7 +438,7 @@ function ConversationProvider({
         updatedMessages,
       } = await updateMessagesAndConversation(
         [userMessage, message],
-        getConversationMessages(conversationId),
+        messagesCache[conversationId],
         { name: tempConversationName },
         conversationId,
       );
@@ -467,7 +469,6 @@ function ConversationProvider({
         selectedModel?.name,
         selectedAssistant || assistant,
         commandManager,
-        context,
         modelStorage,
         activeService,
         setUsage,
@@ -484,9 +485,8 @@ function ConversationProvider({
       commandManager,
       activeService,
       modelStorage,
-      context,
       conversationId,
-      getConversationMessages,
+      messagesCache,
       handleError,
       preProcessingSendMessage,
       router,
@@ -503,14 +503,16 @@ function ConversationProvider({
   const handleResendMessage = useCallback(
     async (
       previousMessage: Message,
-      conversationMessages = getConversationMessages(conversationId),
+      conversationMessages = conversationId ? messagesCache[conversationId] : undefined,
     ) => {
       if (conversationId === undefined || !parseAndValidatePrompt) {
         return;
       }
-      const index = conversationMessages.findIndex((m) => m.id === previousMessage.id);
+      const index = conversationMessages?.findIndex((m) => m.id === previousMessage.id);
       const prompt = parseAndValidatePrompt(
-        getMessageRawContentAsString(conversationMessages[index - 1]) || '',
+        index !== undefined && index > -1
+          ? getMessageRawContentAsString(conversationMessages?.[index - 1]) || ''
+          : '',
       );
       const { selectedModel, selectedAssistant } = await preProcessingSendMessage(
         prompt,
@@ -540,7 +542,7 @@ function ConversationProvider({
       const { updatedConversation, updatedConversations, updatedMessages } =
         await updateMessagesAndConversation(
           [message],
-          conversationMessages,
+          messagesCache[conversationId],
           { name: tempConversationName },
           conversationId,
         );
@@ -554,7 +556,6 @@ function ConversationProvider({
         selectedModel?.name,
         selectedAssistant || assistant,
         commandManager,
-        context,
         modelStorage,
         activeService,
         setUsage,
@@ -566,9 +567,8 @@ function ConversationProvider({
       commandManager,
       activeService,
       modelStorage,
-      context,
       conversationId,
-      getConversationMessages,
+      messagesCache,
       handleError,
       parseAndValidatePrompt,
       preProcessingSendMessage,
@@ -588,13 +588,12 @@ function ConversationProvider({
             selectedConversation,
             selectedModelId,
             assistant,
-            context,
             modelStorage,
             activeService,
           );
         } catch (e) {
           logger.error(e);
-          const conversationMessages = getConversationMessages(selectedConversation.id);
+          const conversationMessages = messagesCache[selectedConversation.id];
           const previousMessage = conversationMessages.find((m) => m.id === messageId);
           if (!previousMessage) {
             logger.error(
@@ -618,11 +617,10 @@ function ConversationProvider({
       assistant,
       activeService,
       modelStorage,
-      context,
       selectedConversation,
       selectedModelId,
       t,
-      getConversationMessages,
+      messagesCache,
     ],
   );
 
@@ -638,7 +636,6 @@ function ConversationProvider({
         parsedContent,
         conversationId,
         tempConversationName,
-        context,
       );
       if (updatedMessages && submit) {
         const sibling = updatedMessages.find((m) => m.id === message.sibling);
@@ -647,7 +644,7 @@ function ConversationProvider({
         }
       }
     },
-    [context, conversationId, handleResendMessage, parseAndValidatePrompt, tempConversationName],
+    [conversationId, handleResendMessage, parseAndValidatePrompt, tempConversationName],
   );
 
   const handleStartMessageEdit = useCallback(

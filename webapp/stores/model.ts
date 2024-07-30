@@ -21,7 +21,8 @@ import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 type ModelProps = StorageProps & ModelsConfiguration;
 
 export interface ModelSlice extends ModelProps {
-  loadModels: () => void;
+  isLoading: () => boolean;
+  loadModels: (force?: boolean) => void;
   setModels: (updatedModels: Model[]) => void;
 }
 
@@ -37,8 +38,12 @@ const createModelSlice =
   (set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
-    loadModels: () => {
-      emit(GlobalAppState.MODELS, undefined);
+    isLoading: () => get().state === StorageState.INIT || get().state === StorageState.LOADING,
+    loadModels: (force = false) => {
+      if (get().state === StorageState.INIT || force) {
+        set({ ...get(), state: StorageState.LOADING });
+        emit(GlobalAppState.MODELS);
+      }
     },
     setModels: (updatedModels: Model[]) => {
       const models = { ...get(), models: updatedModels };

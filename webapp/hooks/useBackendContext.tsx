@@ -39,7 +39,6 @@ import {
   AIService,
 } from '@/types';
 import { getOplaConfig } from '@/utils/backend/commands';
-import { AppContext } from '@/context';
 import Backend, { BackendResult } from '@/utils/backend/Backend';
 import { deepCopy, mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
@@ -47,7 +46,7 @@ import { getConversation } from '@/utils/data/conversations';
 import { changeMessageContent } from '@/utils/data/messages';
 import { ParsedPrompt } from '@/utils/parsers';
 import { parseLLamaCppServerParameters } from '@/utils/providers/llama.cpp';
-import { useServiceStore, useSettingsStore } from '@/stores';
+import { useServiceStore, useSettingsStore, useThreadStore } from '@/stores';
 
 type StreamPayload = {
   status: 'error' | 'success';
@@ -125,8 +124,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   const [streams, saveStreams] = useState<Streams>();
   const streamsRef = useRef<Streams | undefined>(streams);
 
-  const { conversations, getConversationMessages, updateMessagesAndConversation } =
-    useContext(AppContext);
+  const { conversations, messages, updateMessagesAndConversation } = useThreadStore();
 
   const { settings, loadSettings, setSettings } = useSettingsStore();
   const { activeService, getActiveModel, setActiveModel, setActiveService } = useServiceStore();
@@ -175,7 +173,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     ) => {
       let message = typeof message_or_id !== 'string' ? message_or_id : undefined;
 
-      const conversationMessages = getConversationMessages(conversationId);
+      const conversationMessages = messages[conversationId];
       if (!message) {
         const id = message_or_id as string;
         message = conversationMessages.find((m) => m.id === id) as Message;
@@ -209,7 +207,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       }
       return undefined;
     },
-    [conversations, getConversationMessages, updateMessagesAndConversation],
+    [conversations, messages, updateMessagesAndConversation],
   );
 
   useEffect(() => {

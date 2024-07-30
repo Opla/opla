@@ -23,7 +23,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { ModalData } from '@/context/modals';
+import { ModalData } from '@/modals/context';
 
 export default function AlertDialog({
   id,

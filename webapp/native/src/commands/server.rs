@@ -15,7 +15,7 @@
 use std::collections::HashMap;
 
 use tauri::{ Runtime, State };
-use crate::{store::server_storage::ServerParameter, OplaContext, Payload};
+use crate::{store::server::ServerParameter, OplaContext, Payload};
 
 #[tauri::command]
 pub async fn get_opla_server_status<R: Runtime>(

@@ -165,8 +165,3 @@ impl Message {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct ConversationMessages {
-    pub conversation_id: String,
-    pub messages: Vec<Message>,
-}

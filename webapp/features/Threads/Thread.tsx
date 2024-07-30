@@ -14,7 +14,6 @@
 
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { AppContext } from '@/context';
 import {
   Conversation,
   AIService,
@@ -45,17 +44,19 @@ import useBackend from '@/hooks/useBackendContext';
 import { findModel, findModelInAll, getAnyFirstModel, getModelsAsItems } from '@/utils/data/models';
 import { getAssistantId } from '@/utils/services';
 import { toast } from '@/components/ui/Toast';
-import { ModalData, ModalsContext } from '@/context/modals';
+import { ModalData, ModalsContext } from '@/modals/context';
 import { ModalIds } from '@/modals';
 import { MenuAction } from '@/types/ui';
 import { getMessageContentAsString, getMessageContentHistoryAsString } from '@/utils/data/messages';
 import { getCommandManager } from '@/utils/commands';
 import ContentView from '@/components/common/ContentView';
-import { useAssistantStore, useModelsStore } from '@/stores';
+import { useAssistantStore, useModelsStore, useProviderStore, useThreadStore } from '@/stores';
 import { getLocalProvider } from '@/utils/data/providers';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';
 import { getSelectedViewName } from '@/utils/views';
 import { DefaultPageSettings } from '@/utils/constants';
+import { StorageState } from '@/stores/types';
+import Loading from '@/components/common/Loading';
 import ThreadHeader from './Header';
 import { PromptProvider } from './Prompt/PromptContext';
 import { ConversationProvider } from './Conversation/ConversationContext';
@@ -74,15 +75,18 @@ function Thread({
   onError: (conversationId: string, error: string) => void;
 }) {
   const {
-    providers,
+    state: threadState,
+    messagesState,
+    messages: conversationMessages,
     conversations,
     isConversationMessagesLoaded,
-    getConversationMessages,
-    readConversationMessages,
+    loadConversationMessages,
     updateConversations,
     filterConversationMessages,
     updateConversationMessages,
-  } = useContext(AppContext);
+  } = useThreadStore();
+
+  const { providers } = useProviderStore();
 
   const {
     activeService,
@@ -103,86 +107,67 @@ function Thread({
   const selectedConversation = conversations.find((c) => c.id === conversationId);
 
   const { showModal } = useContext(ModalsContext);
-  const [conversationMessages, setConversationMessages] = useState<Message[]>([]);
-  const [isMessageUpdating, setIsMessageUpdating] = useState<boolean>(false);
-  const [processing, setProcessing] = useState<boolean>(false);
+  // const [conversationMessages, setConversationMessages] = useState<Message[]>();
+
+  // const [processing, setProcessing] = useState<boolean>(false);
   const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
 
   const { t } = useTranslation();
 
+  const [messageUpdating, setMessageUpdating] = useState<boolean>(true);
   useEffect(() => {
-    const getNewMessages = async () => {
-      let newMessages: MessageImpl[] = [];
-      if (conversationId) {
-        let p = false;
-        if (isConversationMessagesLoaded(conversationId)) {
-          newMessages = getConversationMessages(conversationId);
-        } else {
-          newMessages = await readConversationMessages(conversationId, []);
+    if (conversationId && messagesState[conversationId] !== StorageState.OK) {
+      if (!isConversationMessagesLoaded(conversationId)) {
+        if (loadConversationMessages(conversationId, [])) {
+          setMessageUpdating(true);
         }
-        newMessages = newMessages?.filter((m) => !(m.author.role === 'system')) || [];
-        newMessages = newMessages.map((msg, index) => {
-          const { author } = msg;
-          let last;
-          if (
-            index === newMessages.length - 1 ||
-            (index === newMessages.length - 2 && author.role === 'user')
-          ) {
-            last = true;
-          }
-          const m: MessageImpl = { ...msg, author, conversationId, copied: copied[msg.id], last };
-          if (
-            msg.status &&
-            msg.status !== MessageStatus.Delivered &&
-            msg.status !== MessageStatus.Error
-          ) {
-            p = true;
-          }
-          return m;
-        });
-        setProcessing(p);
       }
-      setConversationMessages(newMessages);
-      setIsMessageUpdating(false);
-    };
-    if (isMessageUpdating) {
-      return;
+    } else if (conversationId && messagesState[conversationId] === StorageState.OK) {
+      setMessageUpdating(false);
     }
-    logger.info('getNewMessages', conversationId, isMessageUpdating, selectedConversation);
-
-    setIsMessageUpdating(true);
-    getNewMessages();
   }, [
     conversationId,
+    messagesState,
     isConversationMessagesLoaded,
-    getConversationMessages,
-    readConversationMessages,
-    isMessageUpdating,
+    loadConversationMessages,
     copied,
     selectedConversation,
   ]);
 
   const defaultConversationName = getDefaultConversationName(t);
-  const { messages, tempConversationName, views } = useMemo(() => {
-    const stream = streams?.[conversationId as string];
-    let newMessages: MessageImpl[] = conversationMessages;
-    if (stream) {
-      newMessages = newMessages.map((msg) => {
-        const { author } = msg;
-        if (stream.messageId === msg.id) {
-          const m: MessageImpl = {
-            ...msg,
-            author,
-            status: MessageStatus.Stream,
-            content: stream.content?.join?.(''),
-            contentHistory: undefined,
-            conversationId,
-          };
-          return m;
-        }
-        return msg;
-      });
-    }
+  const { messages, tempConversationName, views, processing } = useMemo(() => {
+    const stream = conversationId ? streams?.[conversationId] : undefined;
+    let newMessages: MessageImpl[] | undefined = conversationId
+      ? conversationMessages[conversationId]
+      : undefined;
+    let p = false;
+    newMessages = newMessages?.filter((m) => !(m.author.role === 'system')) || [];
+    newMessages = newMessages.map((msg, index) => {
+      const { author } = msg;
+      let last = false;
+      if (
+        newMessages &&
+        (index === newMessages.length - 1 ||
+          (index === newMessages.length - 2 && author.role === 'user'))
+      ) {
+        last = true;
+      }
+      const m: MessageImpl = { ...msg, author, conversationId, copied: copied[msg.id], last };
+      if (
+        msg.status &&
+        msg.status !== MessageStatus.Delivered &&
+        msg.status !== MessageStatus.Error
+      ) {
+        p = true;
+      }
+      if (stream?.messageId === msg.id) {
+        m.status = MessageStatus.Stream;
+        m.content = stream.content?.join?.('');
+        m.contentHistory = undefined;
+      }
+      return m;
+    });
+
     const conversationName: string = newMessages?.[0]
       ? getMessageContentAsString(newMessages?.[0])
       : defaultConversationName;
@@ -195,8 +180,20 @@ function Thread({
       ...(conversationSettings?.views || []),
     ];
 
-    return { messages: newMessages, tempConversationName: conversationName, views: viewSettings };
-  }, [streams, conversationId, conversationMessages, defaultConversationName, settings.pages]);
+    return {
+      messages: newMessages,
+      tempConversationName: conversationName,
+      views: viewSettings,
+      processing: p,
+    };
+  }, [
+    copied,
+    conversationMessages,
+    streams,
+    conversationId,
+    defaultConversationName,
+    settings.pages,
+  ]);
 
   const { modelItems, commandManager, assistant, selectedModelId, disabled, model } =
     useMemo(() => {
@@ -464,6 +461,16 @@ function Thread({
     }
   });
 
+  const isLoading =
+    messageUpdating ||
+    threadState === StorageState.INIT ||
+    threadState === StorageState.LOADING ||
+    (conversationId &&
+      (messagesState[conversationId] === undefined ||
+        messagesState[conversationId] === StorageState.INIT ||
+        messagesState[conversationId] === StorageState.LOADING));
+
+  // logger.info('isLoading', isLoading, threadState, messagesState, conversationMessages);
   return (
     <ContentView
       header={
@@ -505,26 +512,31 @@ function Thread({
           changeService={changeService}
           onError={onError}
         >
-          <ConversationPanel
-            selectedConversation={selectedConversation}
-            selectedAssistantId={assistant?.id}
-            selectedModelName={selectedModelId}
-            messages={messages}
-            avatars={avatars}
-            modelItems={modelItems}
-            disabled={disabled}
-            onDeleteMessage={handleShouldDeleteMessage}
-            onDeleteAssets={handleShouldDeleteAssets}
-            onSelectMenu={onSelectMenu}
-            onCopyMessage={handleCopyMessage}
-          />
-          <Prompt
-            conversationId={conversationId as string}
-            hasMessages={messages && messages[0]?.conversationId === conversationId}
-            disabled={disabled}
-            commandManager={commandManager}
-            isModelLoading={model ? model.state === ModelState.Downloading : undefined}
-          />
+          {!isLoading && (
+            <>
+              <ConversationPanel
+                selectedConversation={selectedConversation}
+                selectedAssistantId={assistant?.id}
+                selectedModelName={selectedModelId}
+                messages={messages}
+                avatars={avatars}
+                modelItems={modelItems}
+                disabled={disabled}
+                onDeleteMessage={handleShouldDeleteMessage}
+                onDeleteAssets={handleShouldDeleteAssets}
+                onSelectMenu={onSelectMenu}
+                onCopyMessage={handleCopyMessage}
+              />
+              <Prompt
+                conversationId={conversationId as string}
+                hasMessages={!!(messages && messages[0]?.conversationId === conversationId)}
+                disabled={disabled}
+                commandManager={commandManager}
+                isModelLoading={model ? model.state === ModelState.Downloading : undefined}
+              />
+            </>
+          )}
+          {isLoading && <Loading />}
         </ConversationProvider>
       </PromptProvider>
     </ContentView>

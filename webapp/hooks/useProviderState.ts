@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext, useEffect, useMemo, useState } from 'react';
-import { AppContext } from '@/context';
+import { useEffect, useMemo, useState } from 'react';
 import logger from '@/utils/logger';
 import { Provider, ProviderType, ServerStatus } from '@/types';
 import { deepMerge, deepSet } from '@/utils/data';
 import { updateProvider } from '@/utils/data/providers';
 import { ParameterValue } from '@/components/common/Parameter';
 import { toast } from '@/components/ui/Toast';
+import { useProviderStore } from '@/stores';
 import useBackend from './useBackendContext';
 
 const useProviderState = (providerId?: string, newProvider?: Provider) => {
   const [updatedProvider, setUpdatedProvider] = useState<Partial<Provider>>({ id: providerId });
-  const { providers, setProviders } = useContext(AppContext);
+  const { providers, setProviders } = useProviderStore();
 
   const { server, restart, start, stop } = useBackend();
 

@@ -17,11 +17,10 @@
 import { useContext } from 'react';
 import { useRouter } from 'next/router';
 import { Plus, Server } from 'lucide-react';
-import { AppContext } from '@/context';
 import { Ui, Provider, ProviderType } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import logger from '@/utils/logger';
-import { ModalsContext } from '@/context/modals';
+import { ModalsContext } from '@/modals/context';
 import {
   createProvider,
   deleteProvider,
@@ -37,6 +36,7 @@ import { shortcutAsText } from '@/utils/shortcuts';
 import { ShortcutIds } from '@/hooks/useShortcuts';
 import { getStateColor } from '@/utils/ui';
 import Explorer, { ExplorerGroup, ExplorerList } from '@/components/common/Explorer';
+import { useProviderStore } from '@/stores';
 import { Button } from '../../components/ui/button';
 import OpenAIIcon from '../../components/icons/OpenAI';
 
@@ -45,7 +45,7 @@ type ProvidersExplorerProps = {
 };
 
 function ProvidersExplorer({ selectedId: selectedProviderId }: ProvidersExplorerProps) {
-  const { providers, setProviders } = useContext(AppContext);
+  const { providers, setProviders } = useProviderStore();
   const { server } = useBackend();
 
   const { t } = useTranslation();

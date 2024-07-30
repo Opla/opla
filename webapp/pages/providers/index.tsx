@@ -14,15 +14,15 @@
 
 'use client';
 
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AppContext } from '@/context';
 import Providers from '@/features/Providers';
 import { ProviderType } from '@/types';
 import { Page } from '@/types/ui';
+import { useProviderStore } from '@/stores';
 
 export default function DefaultProviders() {
-  const { providers } = useContext(AppContext);
+  const { providers } = useProviderStore();
   const router = useRouter();
   useEffect(() => {
     const oplaProvider = providers.find((p) => p.type === ProviderType.opla);

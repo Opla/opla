@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import EmptyView from '@/components/common/EmptyView';
 import { QueryResult } from '@/types';
-import { AppContext } from '@/context';
 import Link from 'next/link';
 import { Page } from '@/types/ui';
 import { ExplorerGroup } from '@/components/common/Explorer';
 import { GrayPill } from '@/components/ui/Pills';
+import { useThreadStore } from '@/stores';
 
 type SearchPanelProps = {
   query?: string | undefined;
@@ -32,7 +32,7 @@ export default function SearchPanel({ query, onSelectResult = () => {} }: Search
   const { t } = useTranslation();
   const [results, setResults] = useState<QueryResult[]>();
   const [count, setCount] = useState(0);
-  const { searchConversationMessages } = useContext(AppContext);
+  const { searchConversationMessages } = useThreadStore();
   useEffect(() => {
     const search = async (q: string) => {
       const queryResponse = await searchConversationMessages(q);

@@ -39,7 +39,7 @@ import { ModalIds, Page } from '@/types/ui';
 import { fileExists, getPathComponents, openFileDialog } from '@/utils/backend/tauri';
 import { importModel, validateModelsFile } from '@/utils/models';
 import ModelInfos from '@/components/common/ModelInfos';
-import { ModalsContext } from '@/context/modals';
+import { ModalsContext } from '@/modals/context';
 import { useModelsStore } from '@/stores';
 import { ShortcutBadge } from '../../components/common/ShortCut';
 import { toast } from '../../components/ui/Toast';

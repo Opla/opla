@@ -21,7 +21,7 @@ use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::{
-    data::provider::{Provider, ProviderMetadata, ProviderType}, store::server_storage::{ ServerConfiguration, ServerStorage }, utils::http_client::{ HttpChunk, NewHttpError }, OplaContext, Payload, ServerStatus
+    data::provider::{Provider, ProviderMetadata, ProviderType}, store::server::{ ServerConfiguration, ServerStorage }, utils::http_client::{ HttpChunk, NewHttpError }, OplaContext, Payload, ServerStatus
 };
 
 use self::{

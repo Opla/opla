@@ -14,20 +14,38 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AppProps } from 'next/app';
 import Layout from '@/components/Layout';
 import { ThemeProvider } from 'next-themes';
-import { AppContextProvider } from '@/context';
-import { ModalsProvider } from '@/context/modals';
+import { ModalsProvider } from '@/modals/context';
 import { BackendProvider } from '@/hooks/useBackendContext';
 import { subscribeStateSync } from '@/stores';
+import logger from '@/utils/logger';
 
 export default function App({ Component }: AppProps) {
   // Dirty hack to fix hydration mismatch using i18n
   const [initialRenderComplete, setInitialRenderComplete] = useState<boolean>(false);
+
+  const stateSync = useRef<{ unsubscribe?: () => void; processing: boolean }>({
+    processing: false,
+  });
   useEffect(() => {
     setInitialRenderComplete(true);
+    const subscribe = async () => {
+      logger.info('subscribeStateSync prev', stateSync);
+      if (stateSync.current.processing) {
+        return;
+      }
+      const func = stateSync.current.unsubscribe;
+      stateSync.current = { processing: true };
+      func?.();
+      stateSync.current.unsubscribe = await subscribeStateSync();
+      logger.info('subscribeStateSync post', stateSync);
+      stateSync.current.processing = false;
+    };
+    subscribe();
+
     const listener = (e: Event) => {
       e.preventDefault();
     };
@@ -35,13 +53,9 @@ export default function App({ Component }: AppProps) {
 
     return () => {
       window.removeEventListener('contextmenu', listener);
-    };
-  }, []);
-
-  useEffect(() => {
-    const unsubscribeStateSync = subscribeStateSync();
-    return () => {
-      unsubscribeStateSync.then((unsubscribe) => unsubscribe());
+      logger.info('unSubscribeStateSync', stateSync);
+      stateSync.current.unsubscribe?.();
+      stateSync.current.unsubscribe = undefined;
     };
   }, []);
 
@@ -50,15 +64,13 @@ export default function App({ Component }: AppProps) {
 
   return (
     <ThemeProvider attribute="class">
-      <AppContextProvider>
-        <BackendProvider>
-          <ModalsProvider>
-            <Layout>
-              <Component />
-            </Layout>
-          </ModalsProvider>
-        </BackendProvider>
-      </AppContextProvider>
+      <BackendProvider>
+        <ModalsProvider>
+          <Layout>
+            <Component />
+          </Layout>
+        </ModalsProvider>
+      </BackendProvider>
     </ThemeProvider>
   );
 }

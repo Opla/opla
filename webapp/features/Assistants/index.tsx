@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useEffect, useRef } from 'react';
 import MainView from '@/components/common/MainView';
+import { StorageState } from '@/stores/types';
+import { useAssistantStore, useModelsStore, useProviderStore } from '@/stores';
 import Explorer from './Explorer';
 import Assistant from './Assistant';
 
@@ -21,5 +24,18 @@ export type AssistantProps = {
 };
 
 export default function Assistants({ selectedAssistantId }: AssistantProps) {
+  const { state, loadAssistants } = useAssistantStore();
+  const { loadProviders } = useProviderStore();
+  const { loadModels } = useModelsStore();
+  const init = useRef<boolean>(true);
+  useEffect(() => {
+    if (init.current && state === StorageState.INIT) {
+      init.current = false;
+      loadAssistants();
+      loadProviders();
+      loadModels();
+    }
+  }, [state, loadAssistants, loadModels, loadProviders]);
+
   return <MainView selectedId={selectedAssistantId} explorer={Explorer} contentView={Assistant} />;
 }

@@ -14,17 +14,8 @@
 
 'use client';
 
-import {
-  ChangeEvent,
-  MouseEvent,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { ChangeEvent, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { AlertTriangle, Loader2, Paperclip, SendHorizontal } from 'lucide-react';
-import { AppContext } from '@/context';
 import useTranslation from '@/hooks/useTranslation';
 import { KeyBinding, ShortcutIds, defaultShortcuts } from '@/hooks/useShortcuts';
 import logger from '@/utils/logger';
@@ -40,6 +31,7 @@ import { openFileDialog } from '@/utils/backend/tauri';
 import { getFileAssetExtensions } from '@/utils/backend/commands';
 import { toast } from '@/components/ui/Toast';
 import { parsePrompt } from '@/utils/parsers';
+import { useThreadStore } from '@/stores';
 import { Button } from '../../../components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../../../components/ui/tooltip';
 import { ShortcutBadge } from '../../../components/common/ShortCut';
@@ -72,12 +64,8 @@ export default function Prompt({
   const prompt = changedPrompt === undefined ? conversationPrompt : changedPrompt;
   const errorMessage = errorMessages[conversationId];
 
-  const {
-    conversations,
-    updateConversations,
-    getConversationMessages,
-    updateConversationMessages,
-  } = useContext(AppContext);
+  const { conversations, updateConversations, messages, updateConversationMessages } =
+    useThreadStore();
 
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
@@ -109,7 +97,7 @@ export default function Prompt({
             undefined,
             assets,
           );
-          const conversationMessages = getConversationMessages(updatedConversation.id);
+          const conversationMessages = messages[updatedConversation.id];
           const updatedMessages = mergeMessages(conversationMessages, [message]);
           await updateConversationMessages(updatedConversation.id, updatedMessages);
           const updatedConversations = updateConversation(updatedConversation, conversations);
