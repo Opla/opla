@@ -1,3 +1,15 @@
+# [1.0.0-alpha.206](https://github.com/Opla/opla/compare/v1.0.0-alpha.205...v1.0.0-alpha.206) (2024-07-30)
+
+
+### Bug Fixes
+
+* update locks ([b797043](https://github.com/Opla/opla/commit/b797043a7e0614d72d08806c1dbec07b2ee0bbf6))
+
+
+### Features
+
+* **refactoring:** remove AppContext [#1127](https://github.com/Opla/opla/issues/1127) ([#1128](https://github.com/Opla/opla/issues/1128)) ([d719e17](https://github.com/Opla/opla/commit/d719e176d4f432858e6df572f45ad601e09b780c))
+
 # [1.0.0-alpha.205](https://github.com/Opla/opla/compare/v1.0.0-alpha.204...v1.0.0-alpha.205) (2024-07-26)
 
 
