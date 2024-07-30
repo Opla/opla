@@ -14,6 +14,12 @@
 import { v4 as uuid } from 'uuid';
 import { BaseIdRecord, BaseNamedRecord, Entity, Resource } from '@/types';
 
+export const mapBaseRecord = <T>(key: string, value: T): T => {
+  if ((key === 'created_at' || key === 'updated_at') && typeof value === 'string') {
+    return Date.parse(value) as T;
+  }
+  return value;
+};
 const createBaseRecord = <T>(template?: Partial<T>) => {
   const item = {
     id: uuid(),
@@ -96,19 +102,22 @@ const deepGet = <T, V>(obj: T, path: string, defaultValue?: V, root = path): V |
 };
 
 export const deepEqual = <T>(a: T, b: T): boolean => {
-  if (a === b) return true;
+  if (a === b) {
+    return true;
+  }
+  if ((a === null || a === undefined) && (b === null || b === undefined)) return true;
   if (typeof a !== 'object' || typeof b !== 'object') return false;
   if (a === null || b === null) return false;
   if (a === undefined || b === undefined) return false;
+
   if (Array.isArray(a) && Array.isArray(b) && (a as unknown[]).length === (b as unknown[]).length) {
     return (a as unknown[]).every((v: unknown, i: number) => deepEqual(v, (b as unknown[])[i]));
   }
-  if (Object.keys(a).length === Object.keys(b).length) {
-    Object.keys(a).every((key: string) => {
+  const keys = Object.keys(a);
+  if (keys.length === Object.keys(b).length) {
+    return keys.every((key: string) => {
       if (!(key in b)) return false;
-      if (!deepEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]))
-        return false;
-      return true;
+      return deepEqual((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]);
     });
   }
   return false;
@@ -119,9 +128,10 @@ export const deepEqual = <T>(a: T, b: T): boolean => {
 export const mapKeys = <TValue>(
   value: TValue | any,
   mapFunc: (key: string, value: TValue) => string,
+  mapValue: (key: string, value: TValue) => TValue = (key, v) => v,
 ): TValue => {
   if (Array.isArray(value)) {
-    return value.map((item) => mapKeys(item, mapFunc)) as TValue;
+    return value.map((item) => mapKeys(item, mapFunc, mapValue)) as TValue;
   }
   if (!value || typeof value !== 'object') return value as TValue;
   const record = value as Record<string, TValue>;
@@ -130,9 +140,9 @@ export const mapKeys = <TValue>(
     (acc, key) => {
       let v = record[key];
       if (Array.isArray(value) || typeof v === 'object') {
-        v = mapKeys(v, mapFunc);
+        v = mapKeys(v, mapFunc, mapValue);
       }
-      acc[mapFunc(key, v)] = v;
+      acc[mapFunc(key, v)] = mapValue(key, v);
       return acc;
     },
     {} as Record<string, TValue>,

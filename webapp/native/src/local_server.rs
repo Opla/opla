@@ -16,7 +16,7 @@ use tokio::sync::Mutex;
 use std::collections::HashMap;
 use std::sync::Arc;
 use crate::engines::llama_cpp::{LLamaCppEngine, LLAMACPP_PARAMETERS_DEFINITIONS};
-use crate::store::server_storage::{ ServerConfiguration, ServerStorage };
+use crate::store::server::{ ServerConfiguration, ServerStorage };
 use crate::error::Error;
 use sysinfo::System;
 use tauri::{ api::process::CommandChild, async_runtime::JoinHandle };

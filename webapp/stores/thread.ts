@@ -16,24 +16,31 @@ import { StateCreator } from 'zustand';
 import { Conversation, Message, QueryResponse, QueryResult, QueryResultEntry } from '@/types';
 import { deleteUnusedConversationsDir } from '@/utils/backend/tauri';
 import logger from '@/utils/logger';
-import { deepCopy, mapKeys } from '@/utils/data';
+import { deepCopy, deepEqual, mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
 import {
   loadConversationMessages,
   removeConversationMessages,
   saveConversationMessages,
 } from '@/utils/backend/commands';
-import { getMessageContentAsString } from '@/utils/data/messages';
+import { getMessageContentAsString, mergeMessages } from '@/utils/data/messages';
+import {
+  getConversation,
+  removeConversation,
+  updateOrCreateConversation,
+} from '@/utils/data/conversations';
 import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 
 interface ThreadProps extends StorageProps {
   conversations: Conversation[];
   messages: Record<string, Message[]>;
+  messagesState: Record<string, StorageState>;
   archives: Conversation[];
 }
 
 export interface ThreadSlice extends ThreadProps {
-  getAllConversations: () => void;
+  isLoading: () => boolean;
+  loadAllConversations: (force?: boolean) => void;
   getConversation: (id?: string) => Conversation | undefined;
   setConversations: (newConversations: Conversation[]) => void;
   deleteConversation: (
@@ -41,12 +48,16 @@ export interface ThreadSlice extends ThreadProps {
     deleteFiles: boolean,
     cleanup?: (conversation: Conversation, conversations: Conversation[]) => Promise<void>,
   ) => Promise<void>;
-  readConversationMessages: (key: string, defaultValue: Message[]) => Promise<Message[]>;
-  getConversationMessages: (id: string | undefined) => Message[];
+  loadConversationMessages: (key: string, defaultValue: Message[]) => boolean;
+  isConversationMessagesLoaded: (id: string) => boolean;
   filterConversationMessages: (
     id: string | undefined,
     filter: (m: Message) => boolean,
   ) => Message[];
+  updateConversations: (
+    updatedConversations: Conversation[],
+    needToUpdateMessages?: boolean,
+  ) => Promise<void>;
   updateConversationMessages: (id: string | undefined, messages: Message[]) => Promise<void>;
   updateMessagesAndConversation: (
     changedMessages: Message[],
@@ -71,6 +82,7 @@ const DEFAULT_PROPS: ThreadProps = {
   state: StorageState.INIT,
   conversations: [],
   messages: {},
+  messagesState: {},
   archives: [],
 };
 
@@ -79,14 +91,20 @@ const createThreadSlice =
   (set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
-    getAllConversations: () => {
-      emit(GlobalAppState.CONVERSATIONS, {});
-      emit(GlobalAppState.ARCHIVES, {});
+    isLoading: () => get().state === StorageState.INIT || get().state === StorageState.LOADING,
+    loadAllConversations: (force = false) => {
+      if (get().state === StorageState.INIT || force) {
+        set({ ...get(), state: StorageState.LOADING });
+        emit(GlobalAppState.ALLCONVERSATIONS);
+      }
     },
     getConversation: (id) =>
       id ? get().conversations.find((conversation) => conversation.id === id) : undefined,
     setConversations: (newConversations) => {
-      const data = mapKeys(newConversations, toSnakeCase);
+      if (deepEqual(newConversations, get().conversations)) {
+        return;
+      }
+      const data = mapKeys({ conversations: newConversations }, toSnakeCase);
       emit(GlobalAppState.CONVERSATIONS, data);
     },
     deleteConversation: async (
@@ -111,16 +129,20 @@ const createThreadSlice =
         }
       }
     },
-    getConversationMessages: (id: string | undefined): Message[] => {
-      let conversationMessages: Message[] | undefined;
-      if (id) {
-        conversationMessages = get().messages[id];
+    isConversationMessagesLoaded: (id: string) => !!get().messages[id],
+    loadConversationMessages: (id: string) => {
+      const store = get();
+      if (store.messagesState[id] === StorageState.LOADING) {
+        return false;
       }
-      return conversationMessages || [];
-    },
-    readConversationMessages: async (id: string | undefined): Promise<Message[]> => {
-      const newMessages: Message[] = id ? await loadConversationMessages(id) : [];
-      return newMessages;
+      logger.info('loadConversationMessage', id, store.messagesState[id], store.messages[id]);
+      set({
+        ...store,
+        messagesState: { ...store.messagesState, [id]: StorageState.LOADING },
+      });
+      const value = mapKeys({ conversationId: id }, toSnakeCase);
+      emit(GlobalAppState.CONVERSATIONMESSAGES, value);
+      return true;
     },
     filterConversationMessages: (
       id: string | undefined,
@@ -133,6 +155,9 @@ const createThreadSlice =
       id: string | undefined,
       updatedMessages: Message[],
     ): Promise<void> => {
+      if (id && deepEqual(updatedMessages, get().messages[id])) {
+        return;
+      }
       if (id) {
         await saveConversationMessages(id, deepCopy<Message[]>(updatedMessages));
       }
@@ -189,19 +214,62 @@ const createThreadSlice =
       await Promise.all(promises);
       return result;
     },
-    updateMessagesAndConversation: async () => ({
-      updatedConversation: { id: '', createdAt: 0, updatedAt: 0 } as Conversation,
-      updatedConversations: [],
-      updatedMessages: [],
-    }),
+    updateConversations: async (
+      updatedConversations: Conversation[],
+      needToUpdateMessages = true,
+    ) => {
+      if (needToUpdateMessages) {
+        const promises: Promise<void>[] = [];
+        const conversationsWithoutMessages: Conversation[] = updatedConversations.map((c) => {
+          const { messages: updatedMessages, ...updatedConversation } = c;
+          if (updatedMessages) {
+            promises.push(get().updateConversationMessages(c.id, updatedMessages));
+          }
+          return updatedConversation as Conversation;
+        });
+        await Promise.all(promises);
+        get().setConversations(conversationsWithoutMessages);
+      } else {
+        get().setConversations(updatedConversations);
+      }
+    },
+    updateMessagesAndConversation: async (
+      changedMessages: Message[],
+      conversationMessages: Message[],
+      partialConversation: Partial<Conversation>,
+      selectedConversationId: string, // = conversationId,
+      selectedConversations = get().conversations,
+    ) => {
+      const updatedConversations = updateOrCreateConversation(
+        selectedConversationId,
+        selectedConversations,
+        partialConversation,
+        getMessageContentAsString(conversationMessages?.[0]),
+      );
+      const updatedMessages = mergeMessages(conversationMessages, changedMessages);
+      await get().updateConversations(updatedConversations);
+      await get().updateConversationMessages(selectedConversationId, updatedMessages);
+
+      const updatedConversationId = selectedConversationId;
+      const updatedConversation = getConversation(
+        updatedConversationId,
+        updatedConversations,
+      ) as Conversation;
+      return { updatedConversation, updatedConversations, updatedMessages };
+    },
     deleteConversationMessages: async (conversationId: string) => {
       await removeConversationMessages(conversationId);
     },
     setArchives: (newArchives) => {
-      const data = mapKeys(newArchives, toSnakeCase);
+      const data = mapKeys({ conversations: newArchives }, toSnakeCase);
       emit(GlobalAppState.ARCHIVES, data);
     },
-    deleteArchive: async () => {},
+    deleteArchive: async (id: string, cleanup?: (id: string) => Promise<void>) => {
+      const updatedArchives = removeConversation(id, get().archives);
+      const data = mapKeys(updatedArchives, toSnakeCase);
+      emit(GlobalAppState.ARCHIVES, data);
+      return cleanup?.(id);
+    },
   });
 
 export default createThreadSlice;

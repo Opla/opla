@@ -19,13 +19,13 @@ use serde::{ Deserialize, Serialize };
 use crate::data::{
     assistant::Assistant,
     conversation::Conversation,
-    message::{ ConversationMessages, Message },
+    message::Message,
     provider::Provider,
     workspace::{ project::Project, Workspace },
     Preset,
 };
 
-use super::{ model_storage::ModelStorage, service_storage::ServiceStorage, settings::Settings };
+use super::{ model::ModelStorage, service::ServiceStorage, settings::Settings };
 
 pub const STATE_CHANGE_EVENT: &str = "state_change_event";
 pub const STATE_SYNC_EVENT: &str = "state_sync_event";
@@ -35,6 +35,7 @@ pub enum GlobalAppState {
     ERROR = 2,
     PROJECT = 3,
 
+    ALLCONVERSATIONS = 15,
     CONVERSATIONS = 4,
     DELETECONVERSATION = 5,
 
@@ -74,6 +75,7 @@ impl From<u32> for GlobalAppState {
             12 => GlobalAppState::SETTINGS,
             13 => GlobalAppState::SERVICES,
             14 => GlobalAppState::MODELS,
+            15 => GlobalAppState::ALLCONVERSATIONS,
             _ => {
                 println!("Not a valid value for the enum GlobalAppState");
                 GlobalAppState::ERROR
@@ -90,6 +92,7 @@ impl Into<u32> for GlobalAppState {
             GlobalAppState::WORKSPACE => 1,
             GlobalAppState::PROJECT => 3,
 
+            GlobalAppState::ALLCONVERSATIONS => 15,
             GlobalAppState::CONVERSATIONS => 4,
             GlobalAppState::DELETECONVERSATION => 5,
 
@@ -148,6 +151,24 @@ pub struct ValueModels {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ValueAllConversations {
+    pub conversations: Vec<Conversation>,
+    pub archives: Vec<Conversation>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ValueConversations {
+    pub conversations: Vec<Conversation>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct ValueConversationMessages {
+    pub conversation_id: String,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub messages: Option<Vec<Message>>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Value {
     Bool(bool),
@@ -161,9 +182,10 @@ pub enum Value {
     Settings(ValueSettings),
     Services(ValueServices),
     Models(ValueModels),
+    AllConversations(ValueAllConversations),
+    ConversationMessages(ValueConversationMessages),
+    Conversations(ValueConversations),
     Empty(Empty),
-    Conversations(Vec<Conversation>),
-    ConversationMessages(ConversationMessages),
     Messages(HashMap<String, Vec<Message>>),
 }
 

@@ -20,7 +20,7 @@ import {
   Assistant,
   Model,
 } from '@/types';
-import { createBaseNamedRecord, deepCopy, updateRecord } from '.';
+import { createBaseNamedRecord, deepCopy, deepEqual, updateRecord } from '.';
 import { createFileAssets, getAssetsAsArray } from './assets';
 
 export const getDefaultConversationName = (t = (value: string) => value) => t('Conversation');
@@ -43,6 +43,11 @@ export const addAssetsToConversation = async (
   };
 };
 
+const compareConversations = (conversationA: Conversation, conversationB: Conversation) => {
+  const { updatedAt: uA, ...cA } = conversationA;
+  const { updatedAt: uB, ...cB } = conversationB;
+  return deepEqual(cA, cB);
+};
 export const createConversation = (name: string) => {
   const conversation: Conversation = {
     ...createBaseNamedRecord(name),
@@ -63,11 +68,11 @@ export const updateConversation = (
   conversations: Conversation[],
   noUpdate = false,
 ) => {
-  const i = conversations.findIndex((c) => c.id === conversation.id);
-  if (i === -1) {
+  const previousConversation = conversations.find((c) => c.id === conversation.id);
+  if (!previousConversation) {
     return conversations;
   }
-  if (noUpdate) {
+  if (noUpdate || !compareConversations(previousConversation, conversation)) {
     return conversations.map((c) => (c.id === conversation.id ? conversation : c));
   }
   const updatedConversation = updateRecord(conversation) as Conversation;
@@ -107,7 +112,11 @@ export const mergeConversations = (
   const conversationMap = new Map<string, Conversation>();
   mergedConversations.forEach((c) => {
     const existingConversation = conversationMap.get(c.id);
-    if (!existingConversation || c.updatedAt >= existingConversation.updatedAt) {
+    if (
+      !existingConversation ||
+      (c.updatedAt >= existingConversation.updatedAt &&
+        !compareConversations(c, existingConversation))
+    ) {
       conversationMap.set(c.id, c);
     }
   });

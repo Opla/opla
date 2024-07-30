@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import {
@@ -46,12 +46,12 @@ import {
 } from '@/utils/conversations/openai';
 import { getConversationTitle, validateConversations } from '@/utils/conversations';
 import { MenuAction, Page, ViewName } from '@/types/ui';
-import { AppContext } from '@/context';
 import Explorer, { ExplorerList, ExplorerGroup } from '@/components/common/Explorer';
 import { OplaAssistant } from '@/stores/assistant';
 import { DefaultPageSettings, DefaultThreadsExplorerGroups } from '@/utils/constants';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useThreadStore } from '@/stores';
 import { toast } from '../../../components/ui/Toast';
 import {
   DropdownMenu,
@@ -89,7 +89,7 @@ export default function ThreadsExplorer({
   onSelectMenu,
 }: ExplorerProps) {
   const router = useRouter();
-  const { getConversationMessages } = useContext(AppContext);
+  const { messages } = useThreadStore();
   const { settings } = useBackend();
   const threadsSettings = settings.pages?.[Page.Threads] || {
     ...DefaultPageSettings,
@@ -159,10 +159,8 @@ export default function ThreadsExplorer({
         return;
       }
       const exportedConversations = threads.map((c) => {
-        let { messages } = c;
-        if (!messages) {
-          messages = getConversationMessages(c.id);
-          return { c, messages };
+        if (!c.messages) {
+          return { ...c, messages: messages[c.id] };
         }
         return c;
       });

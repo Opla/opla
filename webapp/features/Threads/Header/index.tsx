@@ -12,14 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext } from 'react';
 import { AlertTriangle, ArrowRight, SplitSquareHorizontal, X } from 'lucide-react';
-import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackendContext';
 import { AIServiceType, Provider, ProviderType, Ui, ViewSettings } from '@/types';
 import { MenuAction } from '@/types/ui';
 import { findProvider, updateProvider } from '@/utils/data/providers';
-import { useAssistantStore, useModelsStore } from '@/stores';
+import { useAssistantStore, useModelsStore, useProviderStore, useThreadStore } from '@/stores';
 import useTranslation from '@/hooks/useTranslation';
 import { getActiveService } from '@/utils/services';
 import { getAnyFirstModel } from '@/utils/data/models';
@@ -52,7 +50,8 @@ export default function ThreadHeader({
   onSplitView,
 }: ThreadMenuProps) {
   const { getAssistant } = useAssistantStore();
-  const { conversations, providers, setProviders } = useContext(AppContext);
+  const { conversations } = useThreadStore();
+  const { providers, setProviders } = useProviderStore();
   const { activeService } = useBackend();
   const modelStorage = useModelsStore();
   const conversation = conversations.find((c) => c.id === selectedConversationId);

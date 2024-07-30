@@ -23,7 +23,8 @@ interface SettingsProps extends StorageProps {
 }
 
 export interface SettingsSlice extends SettingsProps {
-  loadSettings: () => void;
+  isLoading: () => boolean;
+  loadSettings: (force?: boolean) => void;
   setSettings: (updatedSettings: Settings) => void;
 }
 
@@ -39,11 +40,15 @@ const DEFAULT_PROPS: SettingsProps = {
 
 const createSettingsSlice =
   (emit: Emitter, initProps?: Partial<SettingsSlice>): StateCreator<SettingsSlice> =>
-  (set) => ({
+  (set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
-    loadSettings: () => {
-      emit(GlobalAppState.SETTINGS, undefined);
+    isLoading: () => get().state === StorageState.INIT || get().state === StorageState.LOADING,
+    loadSettings: (force = false) => {
+      if (get().state === StorageState.INIT || force) {
+        set({ ...get(), state: StorageState.LOADING });
+        emit(GlobalAppState.SETTINGS);
+      }
     },
     setSettings: (updatedSettings: Settings) => {
       set({ settings: updatedSettings });

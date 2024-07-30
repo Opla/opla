@@ -18,6 +18,7 @@ export enum GlobalAppState {
   ERROR = 2,
   PROJECT = 3,
 
+  ALLCONVERSATIONS = 15,
   CONVERSATIONS = 4,
   DELETECONVERSATION = 5,
   ARCHIVES = 6,
@@ -45,7 +46,7 @@ export const EVENTS: {
   STATE_SYNC_EVENT: 'state_sync_event',
 };
 
-export type Emitter = (key: number, value: any) => Promise<void>;
+export type Emitter = (key: number, value?: any) => Promise<void>;
 
 export enum StorageState {
   INIT = 0,

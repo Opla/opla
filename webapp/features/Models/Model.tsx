@@ -52,14 +52,13 @@ import {
   isValidFormat,
 } from '@/utils/data/models';
 import { ModalIds, Page } from '@/types/ui';
-import { ModalsContext } from '@/context/modals';
+import { ModalsContext } from '@/modals/context';
 import EmptyView from '@/components/common/EmptyView';
 import { BrainCircuit } from 'lucide-react';
 import { fileExists } from '@/utils/backend/tauri';
 import { toast } from 'sonner';
 import { addConversationService, isModelUsedInConversations } from '@/utils/data/conversations';
-import { AppContext } from '@/context';
-import { useAssistantStore, useModelsStore } from '@/stores';
+import { useAssistantStore, useModelsStore, useProviderStore, useThreadStore } from '@/stores';
 import { OrangePill } from '@/components/ui/Pills';
 import { getLocalProvider } from '@/utils/data/providers';
 import OpenAI from '@/utils/providers/openai';
@@ -85,7 +84,8 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
 
   const [fullPathModel, setFullPathModel] = useState<string | undefined>();
   const { activeService, downloads } = useBackend();
-  const { conversations, updateConversations, providers, setProviders } = useContext(AppContext);
+  const { conversations, updateConversations } = useThreadStore();
+  const { providers, setProviders } = useProviderStore();
   const modelStorage = useModelsStore();
   const { isModelUsedInAssistants } = useAssistantStore();
   const [collection, setCollection] = useState<Model[]>([]);
@@ -527,9 +527,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
           {downloadables.length > 0 && (
             <form className="grid w-full items-start gap-6 overflow-auto pt-8">
               <fieldset className="grid gap-6 rounded-lg border p-4">
-                <legend className="-ml-1 px-1 text-sm font-medium">
-                  {t('Downloadable implementations')}
-                </legend>
+                <legend className="-ml-1 px-1 text-sm font-medium">{t('Variants')}</legend>
                 <Table className="w-full">
                   <TableHeader>
                     <TableRow>

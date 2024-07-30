@@ -248,7 +248,7 @@
   "Creator": "Creator",
   "License": "License",
   "Repository": "Repository",
-  "Downloadable implementations": "Downloadable implementations",
+  "Variants": "Variants",
   "You could add some local models by installing a featured model, or directly a gguf file from you machine.": "You could add some local models by installing a featured model, or directly a gguf file from you machine.",
   "Featured": "Featured",
   "No model found.": "No model found.",

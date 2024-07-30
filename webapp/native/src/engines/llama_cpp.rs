@@ -15,7 +15,7 @@
 use phf::phf_map;
 use tokio::sync::Mutex;
 use std::sync::Arc;
-use crate::store::server_storage::{
+use crate::store::server::{
     ServerParameterDefinition,
     ServerParameterType,
     ServerParameterValue,

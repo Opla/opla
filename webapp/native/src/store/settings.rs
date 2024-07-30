@@ -41,12 +41,15 @@ pub struct ExplorerGroup {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ViewSettings {
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub selected_id: Option<String>,
     pub explorer_hidden: bool,
     pub settings_hidden: bool,
     pub explorer_width: f64,
     pub settings_width: f64,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub explorer_groups: Option<Vec<ExplorerGroup>>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
     pub scroll_position: Option<u32>,
 }
 

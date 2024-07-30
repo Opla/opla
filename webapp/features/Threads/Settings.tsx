@@ -11,19 +11,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { useContext } from 'react';
+
 import { AlertTriangle, Bug, File, Palette, Settings2, X } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
-import { AppContext } from '@/context';
 import useBackend from '@/hooks/useBackendContext';
 import { getConversationAssets, updateConversation } from '@/utils/data/conversations';
 import { Conversation, Preset } from '@/types';
 import { getFilename } from '@/utils/misc';
-import EditPresets from '@/components/common/EditPresets';
+import EditPresets from '@/features/EditPresets';
 import { ConversationError } from '@/types/ui';
 import CopyToClipBoard from '@/components/common/CopyToClipBoard';
 import { getActiveService } from '@/utils/services';
-import { useModelsStore } from '@/stores';
+import { useModelsStore, useProviderStore, useThreadStore } from '@/stores';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Textarea } from '../../components/ui/textarea';
 import { Button } from '../../components/ui/button';
@@ -36,7 +35,8 @@ export default function Settings({
   errors: ConversationError[];
 }) {
   const { t } = useTranslation();
-  const { conversations, updateConversations, providers } = useContext(AppContext);
+  const { conversations, updateConversations } = useThreadStore();
+  const { providers } = useProviderStore();
   const { activeService, server } = useBackend();
   const modelStorage = useModelsStore();
   const selectedConversation = conversations.find((c) => c.id === conversationId);

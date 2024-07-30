@@ -17,7 +17,7 @@ use std::fmt;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::{data::option_date_format, store::server_storage::ServerStorage};
+use crate::{data::option_date_format, store::server::ServerStorage};
 
 use super::model::Model;
 

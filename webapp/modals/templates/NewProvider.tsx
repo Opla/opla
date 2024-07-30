@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import ButtonCard from '@/components/common/ButtonCard';
 import Dialog from '@/components/common/Modal';
 import useTranslation from '@/hooks/useTranslation';
 import { Provider, ProviderType } from '@/types';
 import { createProvider } from '@/utils/data/providers';
-import { AppContext } from '@/context';
 import { Button } from '@/components/ui/button';
 import { Page } from '@/types/ui';
 import { ParameterValue } from '@/components/common/Parameter';
+import { useProviderStore } from '@/stores';
 import ProviderCreate from './providers';
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
@@ -46,7 +46,7 @@ export default function NewProvider({
   const [provider, setProvider] = useState<Partial<Provider>>({});
   const [step, setStep] = useState(1);
   const { t } = useTranslation();
-  const { providers, setProviders } = useContext(AppContext);
+  const { providers, setProviders } = useProviderStore();
   const router = useRouter();
 
   const isOpla = !!providers.find((p) => p.type === ProviderType.opla);

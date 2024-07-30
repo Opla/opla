@@ -18,14 +18,13 @@ import { DownloadCloud, AlertTriangle, Server, BarChart3, Cpu } from 'lucide-rea
 import useTranslation from '@/hooks/useTranslation';
 import useBackend from '@/hooks/useBackendContext';
 // import logger from '@/utils/logger';
-import { AppContext } from '@/context';
 import { ModalIds, Page } from '@/types/ui';
 import { cancelDownloadModel, getSys } from '@/utils/backend/commands';
 import { Sys } from '@/types';
-import { ModalsContext } from '@/context/modals';
+import { ModalsContext } from '@/modals/context';
 import logger from '@/utils/logger';
 import { findModel } from '@/utils/data/models';
-import { useModelsStore } from '@/stores';
+import { useModelsStore, useUsageStorage } from '@/stores';
 
 export default function Statusbar() {
   const router = useRouter();
@@ -33,7 +32,7 @@ export default function Statusbar() {
   const { t } = useTranslation();
   const { server, config, downloads } = useBackend();
   const models = useModelsStore();
-  const { usage } = useContext(AppContext);
+  const { usage } = useUsageStorage();
   const [sys, setSys] = useState<Sys>();
   const { showModal } = useContext(ModalsContext);
 

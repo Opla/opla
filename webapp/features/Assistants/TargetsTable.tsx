@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { Copy, Edit, MoreHorizontal, Trash } from 'lucide-react';
 import useTranslation from '@/hooks/useTranslation';
 import { Preset } from '@/types';
 import { getAllModels } from '@/utils/data/models';
-import { AppContext } from '@/context';
 import ModelInfos from '@/components/common/ModelInfos';
-import { useModelsStore } from '@/stores';
+import { useModelsStore, useProviderStore } from '@/stores';
 import {
   Table,
   TableHeader,
@@ -47,9 +46,10 @@ type TargetsTableProps = {
 function TargetsTable({ targets, onEdit, onDuplicate, onDelete }: TargetsTableProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState<Record<string, boolean>>({});
-  const { providers } = useContext(AppContext);
+  const { providers } = useProviderStore();
   const modelsConfig = useModelsStore();
   const models = getAllModels(providers, modelsConfig);
+
   const renderModel = (targetModels: string[] | undefined) => {
     const model = targetModels ? models.find((m) => m.name === targetModels[0]) : undefined;
     if (!model) return <div>{t('Model not found')}</div>;
@@ -59,6 +59,7 @@ function TargetsTable({ targets, onEdit, onDuplicate, onDelete }: TargetsTablePr
       </div>
     );
   };
+
   return (
     <Table>
       <TableHeader>

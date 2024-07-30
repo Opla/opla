@@ -16,7 +16,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Dialog from '@/components/common/Modal';
 import useTranslation from '@/hooks/useTranslation';
-import { ModalData } from '@/context/modals';
+import { ModalData } from '@/modals/context';
 import ModelFileInspector from '@/features/Models/ModelFileInspector';
 
 function InspectorModelDialog({

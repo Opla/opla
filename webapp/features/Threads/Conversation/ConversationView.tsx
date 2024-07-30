@@ -19,6 +19,7 @@ import useBackend from '@/hooks/useBackendContext';
 import { Page, ViewName } from '@/types/ui';
 import logger from '@/utils/logger';
 import { DefaultPageSettings } from '@/utils/constants';
+import { deepCopy, deepEqual } from '@/utils/data';
 import ConversationList from './ConversationList';
 import { useConversationContext } from './ConversationContext';
 
@@ -71,12 +72,15 @@ export function ConversationView({
         conversationSettings.scrollPosition === -1
           ? undefined
           : +conversationSettings.scrollPosition;
-      const scrollPosition =
+      let scrollPosition =
         update.scrollPosition === undefined ||
         update.scrollPosition === null ||
         update.scrollPosition === -1
           ? undefined
           : +(update.scrollPosition * 1000).toFixed(0);
+      if (scrollPosition !== undefined && scrollPosition < 0) {
+        scrollPosition = 0;
+      }
       if (
         conversationSettings &&
         conversationViewName === update.name &&
@@ -87,22 +91,25 @@ export function ConversationView({
           update,
           conversationViewName,
           scrollPosition,
+          viewIndex,
           conversationSettings?.scrollPosition,
         );
-        let updatedPageSettings: PageSettings =
-          pagesSettings?.[conversationViewName] || DefaultPageSettings;
+        const previousPageSettings = pagesSettings?.[conversationViewName] || DefaultPageSettings;
+        let updatedPageSettings: PageSettings = deepCopy(previousPageSettings);
         if (viewIndex === 0) {
           updatedPageSettings = { ...conversationSettings, scrollPosition };
         } else if (updatedPageSettings.views) {
           updatedPageSettings.views[viewIndex - 1] = { ...conversationSettings, scrollPosition };
         }
-        setSettings({
-          ...settings,
-          pages: {
-            ...pagesSettings,
-            [conversationViewName]: updatedPageSettings,
-          },
-        });
+        if (!deepEqual(updatedPageSettings, previousPageSettings)) {
+          setSettings({
+            ...settings,
+            pages: {
+              ...pagesSettings,
+              [conversationViewName]: updatedPageSettings,
+            },
+          });
+        }
       }
     };
     afunc();

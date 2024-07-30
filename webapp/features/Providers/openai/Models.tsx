@@ -25,8 +25,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext, useEffect, useState } from 'react';
-import { AppContext } from '@/context';
+import { useEffect, useState } from 'react';
 import useTranslation from '@/hooks/useTranslation';
 import { Model, Provider } from '@/types';
 import { listModels } from '@/utils/providers';
@@ -44,6 +43,7 @@ import { updateProvider } from '@/utils/data/providers';
 import { deepCopy } from '@/utils/data';
 import ModelIcon from '@/components/common/ModelIcon';
 import { cn } from '@/lib/utils';
+import { useProviderStore } from '@/stores';
 
 type OpenAIModelsProps = {
   provider: Provider;
@@ -63,7 +63,7 @@ export default function OpenAIModels({
   title = 'Available models',
 }: OpenAIModelsProps) {
   const { t } = useTranslation();
-  const { providers, setProviders } = useContext(AppContext);
+  const { providers, setProviders } = useProviderStore();
   const [isLoading, setIsLoading] = useState(false);
   const [models, setModels] = useState<SelectedModel[]>([]);
   useEffect(() => {

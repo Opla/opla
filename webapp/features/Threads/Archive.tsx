@@ -28,12 +28,12 @@
 
 'use client';
 
-import { useContext, useMemo } from 'react';
-import { AppContext } from '@/context';
+import { useMemo } from 'react';
 import useTranslation from '@/hooks/useTranslation';
 import { MenuAction } from '@/types/ui';
 import { AvatarRef } from '@/types';
 import ContentView from '@/components/common/ContentView';
+import { useThreadStore } from '@/stores';
 import { Button } from '../../components/ui/button';
 import { ConversationList } from './Conversation';
 
@@ -46,7 +46,7 @@ function Archive({
   rightToolbar: React.ReactNode;
   onSelectMenu: (menu: MenuAction, data: string) => void;
 }) {
-  const { archives } = useContext(AppContext);
+  const { archives } = useThreadStore();
   const archive = archives.find((c) => c.id === archiveId);
 
   const { t } = useTranslation();
