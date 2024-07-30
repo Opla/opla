@@ -77,7 +77,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     conversations,
     updateConversations,
     deleteConversation,
-    getConversationMessages,
+    messages,
     updateConversationMessages,
     archives,
     setArchives,
@@ -274,17 +274,20 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
       handleShouldDelete(data);
     } else if (menu === MenuAction.ArchiveConversation) {
       const conversationToArchive = getConversation(data, conversations) as Conversation;
-      const messages = getConversationMessages(conversationToArchive.id);
+      const conversationMessages = messages[conversationToArchive.id];
       await deleteAndCleanupConversation(conversationToArchive.id);
-      setArchives([...archives, { ...conversationToArchive, messages }]);
+      setArchives([...archives, { ...conversationToArchive, messages: conversationMessages }]);
     } else if (menu === MenuAction.UnarchiveConversation) {
-      const { messages, ...archive } = getConversation(data, archives) as Conversation;
+      const { messages: conversationMessages, ...archive } = getConversation(
+        data,
+        archives,
+      ) as Conversation;
       await deleteArchive(archive.id, async (aId) => {
         // Delete associated settings
         saveSettings(getSelectedPage(aId, ViewName.Archives));
       });
       updateConversations([...conversations, archive as Conversation]);
-      updateConversationMessages(archive.id, messages || []);
+      updateConversationMessages(archive.id, conversationMessages || []);
     } else if (menu === MenuAction.ChangeView) {
       let explorerGroups = threadsSettings.explorerGroups || DefaultThreadsExplorerGroups;
       explorerGroups =

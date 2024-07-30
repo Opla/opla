@@ -89,7 +89,7 @@ export default function ThreadsExplorer({
   onSelectMenu,
 }: ExplorerProps) {
   const router = useRouter();
-  const { getConversationMessages } = useThreadStore();
+  const { messages } = useThreadStore();
   const { settings } = useBackend();
   const threadsSettings = settings.pages?.[Page.Threads] || {
     ...DefaultPageSettings,
@@ -159,10 +159,8 @@ export default function ThreadsExplorer({
         return;
       }
       const exportedConversations = threads.map((c) => {
-        let { messages } = c;
-        if (!messages) {
-          messages = getConversationMessages(c.id);
-          return { c, messages };
+        if (!c.messages) {
+          return { ...c, messages: messages[c.id] };
         }
         return c;
       });

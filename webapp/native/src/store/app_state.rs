@@ -19,7 +19,7 @@ use serde::{ Deserialize, Serialize };
 use crate::data::{
     assistant::Assistant,
     conversation::Conversation,
-    message::{ ConversationMessages, Message },
+    message::Message,
     provider::Provider,
     workspace::{ project::Project, Workspace },
     Preset,
@@ -156,6 +156,13 @@ pub struct ValueConversations {
     pub archives: Vec<Conversation>,
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct ValueConversationMessages {
+    pub conversation_id: String,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub messages: Option<Vec<Message>>,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Value {
@@ -171,9 +178,9 @@ pub enum Value {
     Services(ValueServices),
     Models(ValueModels),
     AllConversations(ValueConversations),
+    ConversationMessages(ValueConversationMessages),
     Empty(Empty),
     Conversations(Vec<Conversation>),
-    ConversationMessages(ConversationMessages),
     Messages(HashMap<String, Vec<Message>>),
 }
 

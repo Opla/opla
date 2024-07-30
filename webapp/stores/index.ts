@@ -120,15 +120,15 @@ export const subscribeStateSync = async () => {
       const archives = (await mapKeys(value, toCamelCase)) as Conversation[];
       useThreadStore.setState({ archives, state: StorageState.OK, error: undefined });
     } else if (key === GlobalAppState.CONVERSATIONMESSAGES) {
-      const { conversationId, messages: conversationMessages } = (await mapKeys(
+      const { conversationId, messages: conversationMessages = [] } = (await mapKeys(
         value,
         toCamelCase,
       )) as ConversationMessages;
-      const { messages } = useThreadStore.getState();
+      const { messages, messagesState } = useThreadStore.getState();
       useThreadStore.setState({
         messages: { ...messages, [conversationId]: conversationMessages },
         state: StorageState.OK,
-        messagesState: {},
+        messagesState: { ...messagesState, [conversationId]: StorageState.OK },
         error: undefined,
       });
     } else if (key === GlobalAppState.MESSAGES) {

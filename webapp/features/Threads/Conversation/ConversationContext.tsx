@@ -107,8 +107,11 @@ function ConversationProvider({
   const router = useRouter();
   const { setUsage } = useUsageStorage();
   const { providers } = useProviderStore();
-  const { conversations, getConversationMessages, updateMessagesAndConversation } =
-    useThreadStore();
+  const {
+    conversations,
+    messages: messagesCache,
+    updateMessagesAndConversation,
+  } = useThreadStore();
   const { parseAndValidatePrompt, clearPrompt } = useContext(PromptContext) || {};
   const { activeService } = useBackend();
   const { getAssistant } = useAssistantStore();
@@ -169,7 +172,7 @@ function ConversationProvider({
         message.status = status;
         ({ updatedConversation, updatedMessages } = await updateMessagesAndConversation(
           [message],
-          getConversationMessages(conversation.id),
+          messagesCache[conversation.id],
           conversation,
           conversation.id,
         ));
@@ -181,7 +184,7 @@ function ConversationProvider({
         message.sibling = userMessage.id;
         ({ updatedConversation, updatedMessages } = await updateMessagesAndConversation(
           [userMessage, message],
-          getConversationMessages(conversation.id),
+          messagesCache[conversation.id],
           conversation,
           conversation.id,
         ));
@@ -192,7 +195,7 @@ function ConversationProvider({
         message,
       };
     },
-    [getConversationMessages, updateMessagesAndConversation],
+    [messagesCache, updateMessagesAndConversation],
   );
 
   const handleImageGeneration = useCallback(
@@ -213,7 +216,7 @@ function ConversationProvider({
         updatedConversation.name = getConversationTitle(updatedConversation, t);
       }
 
-      let updatedMessages = getConversationMessages(conversation.id);
+      let updatedMessages = messagesCache[conversation.id];
       let message = previousMessage;
       const openai = providers.find((p) => p.name.toLowerCase() === 'openai');
       let content: string | undefined;
@@ -255,7 +258,7 @@ function ConversationProvider({
       clearPrompt,
       providers,
       conversations,
-      getConversationMessages,
+      messagesCache,
       router,
       t,
       tempConversationId,
@@ -281,7 +284,7 @@ function ConversationProvider({
         updatedConversation.name = getConversationTitle(updatedConversation, t);
       }
 
-      const updatedMessages = getConversationMessages(conversation.id);
+      const updatedMessages = messagesCache[conversation.id];
       const message = previousMessage;
       await updateMessages(
         prompt.raw,
@@ -296,15 +299,7 @@ function ConversationProvider({
         router.replace(`${Page.Threads}/${tempConversationId}`, undefined, { shallow: true });
       }
     },
-    [
-      clearPrompt,
-      conversations,
-      getConversationMessages,
-      router,
-      t,
-      tempConversationId,
-      updateMessages,
-    ],
+    [clearPrompt, conversations, messagesCache, router, t, tempConversationId, updateMessages],
   );
 
   const preProcessingSendMessage = useCallback(
@@ -326,7 +321,13 @@ function ConversationProvider({
         tempConversationName || '',
         selectedModelId,
         previousMessage,
-        { changeService, getConversationMessages, updateMessagesAndConversation, t, providers },
+        {
+          changeService,
+          getConversationMessages: (id: string) => messagesCache[id],
+          updateMessagesAndConversation,
+          t,
+          providers,
+        },
       );
       if (result.type === 'error') {
         setErrorMessage({ ...errorMessages, [conversation.id]: result.error });
@@ -392,7 +393,7 @@ function ConversationProvider({
       conversations,
       errorMessages,
       getAssistant,
-      getConversationMessages,
+      messagesCache,
       handleImageGeneration,
       handleNote,
       isProcessing,
@@ -437,7 +438,7 @@ function ConversationProvider({
         updatedMessages,
       } = await updateMessagesAndConversation(
         [userMessage, message],
-        getConversationMessages(conversationId),
+        messagesCache[conversationId],
         { name: tempConversationName },
         conversationId,
       );
@@ -485,7 +486,7 @@ function ConversationProvider({
       activeService,
       modelStorage,
       conversationId,
-      getConversationMessages,
+      messagesCache,
       handleError,
       preProcessingSendMessage,
       router,
@@ -502,14 +503,16 @@ function ConversationProvider({
   const handleResendMessage = useCallback(
     async (
       previousMessage: Message,
-      conversationMessages = getConversationMessages(conversationId),
+      conversationMessages = conversationId ? messagesCache[conversationId] : undefined,
     ) => {
       if (conversationId === undefined || !parseAndValidatePrompt) {
         return;
       }
-      const index = conversationMessages.findIndex((m) => m.id === previousMessage.id);
+      const index = conversationMessages?.findIndex((m) => m.id === previousMessage.id);
       const prompt = parseAndValidatePrompt(
-        getMessageRawContentAsString(conversationMessages[index - 1]) || '',
+        index !== undefined && index > -1
+          ? getMessageRawContentAsString(conversationMessages?.[index - 1]) || ''
+          : '',
       );
       const { selectedModel, selectedAssistant } = await preProcessingSendMessage(
         prompt,
@@ -539,7 +542,7 @@ function ConversationProvider({
       const { updatedConversation, updatedConversations, updatedMessages } =
         await updateMessagesAndConversation(
           [message],
-          conversationMessages,
+          messagesCache[conversationId],
           { name: tempConversationName },
           conversationId,
         );
@@ -565,7 +568,7 @@ function ConversationProvider({
       activeService,
       modelStorage,
       conversationId,
-      getConversationMessages,
+      messagesCache,
       handleError,
       parseAndValidatePrompt,
       preProcessingSendMessage,
@@ -590,7 +593,7 @@ function ConversationProvider({
           );
         } catch (e) {
           logger.error(e);
-          const conversationMessages = getConversationMessages(selectedConversation.id);
+          const conversationMessages = messagesCache[selectedConversation.id];
           const previousMessage = conversationMessages.find((m) => m.id === messageId);
           if (!previousMessage) {
             logger.error(
@@ -617,7 +620,7 @@ function ConversationProvider({
       selectedConversation,
       selectedModelId,
       t,
-      getConversationMessages,
+      messagesCache,
     ],
   );
 

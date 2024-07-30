@@ -39,10 +39,9 @@ export const updateMessageContent = async (
   status?: MessageStatus,
 ) => {
   let message = typeof message_or_id !== 'string' ? message_or_id : undefined;
-  const { conversations, getConversationMessages, updateMessagesAndConversation } =
-    useThreadStore.getState();
+  const { conversations, messages, updateMessagesAndConversation } = useThreadStore.getState();
 
-  const conversationMessages = getConversationMessages(conversationId);
+  const conversationMessages = messages[conversationId];
   if (!message) {
     const id = message_or_id as string;
     message = conversationMessages.find((m) => m.id === id) as Message;

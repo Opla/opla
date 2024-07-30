@@ -274,7 +274,7 @@ impl Store {
         &mut self,
         conversation_id: &str,
         cache: bool,
-        app_handle: AppHandle
+        app_handle: Option<AppHandle>
     ) -> Result<Vec<Message>, String> {
         match self.get_selected_project_path() {
             Ok(project_path) => {

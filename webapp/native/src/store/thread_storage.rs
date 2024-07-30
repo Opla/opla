@@ -23,7 +23,7 @@ use crate::store::app_state::{ ValueConversations, STATE_SYNC_EVENT };
 use crate::OplaContext;
 use crate::{ data::{ conversation::Conversation, message::Message }, utils::get_data_directory };
 
-use super::app_state::{ Empty, Payload, GlobalAppState, Value, STATE_CHANGE_EVENT };
+use super::app_state::{ Empty, GlobalAppState, Payload, Value, ValueConversationMessages, STATE_CHANGE_EVENT };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ThreadStorage {
@@ -115,17 +115,32 @@ impl ThreadStorage {
             GlobalAppState::CONVERSATIONMESSAGES => {
                 let mut store = context.store.lock().await;
                 if let Value::ConversationMessages(data) = &value {
-                    if
-                        let Err(error) = store.save_conversation_messages(
-                            &data.conversation_id,
-                            data.messages.clone(),
-                            app_handle.app_handle()
-                        )
-                    {
-                        println!("Error saving conversation messages: {} {:?}", payload.key, error);
+                    if let Some(messages) = &data.messages {
+                        if
+                            let Err(error) = store.save_conversation_messages(
+                                &data.conversation_id,
+                                messages.clone(),
+                                app_handle.app_handle()
+                            )
+                        {
+                            println!("Error saving conversation messages: {} {:?}", payload.key, error);
+                        }
+                    } else {
+                        need_emit = true;
+                        let conversation_id = data.conversation_id.clone();
+                        println!("Empty conversationMessages {:?} {:?}", store.threads.messages, conversation_id);
+                        if !store.threads.messages.contains_key(&conversation_id) {
+                            if let Err(error) = store.load_conversation_messages(&conversation_id, true, None) {
+                                println!("Error loading conversation messages: {} {:?}", payload.key, error);
+                                store.threads.messages.insert(conversation_id.clone(), Vec::new());
+                            }
+                        }
+                        println!("Loaded conversationMessages {:?} {:?}", store.threads.messages, conversation_id);
+                        emit_value = Some(Value::ConversationMessages( ValueConversationMessages {
+                            conversation_id,
+                            messages: store.threads.messages.get(&data.conversation_id).cloned()
+                        }));
                     }
-                    // need_emit = true;
-                    // emit_value = Some(value);
                 } else {
                     println!("Error wrong type of value: {} {:?}", payload.key, value);
                 }
@@ -216,27 +231,33 @@ impl ThreadStorage {
         conversation_id: &str,
         path: &PathBuf,
         cache: bool,
-        app_handle: AppHandle
+        app_handle: Option<AppHandle>
     ) -> Result<Vec<Message>, String> {
         let conversation_path = &Self::create_conversation_path(conversation_id, path);
         let conversation_file = conversation_path.join("messages.json");
-        if !conversation_file.exists() {
-            return Ok(Vec::new());
-        }
+        let messages: Vec<Message>;
+        if conversation_file.exists() {
         let default_config_data = read_to_string(conversation_file).map_err(|e| e.to_string())?;
-        let messages: Vec<Message> = serde_json
+            messages = serde_json
             ::from_str(&default_config_data)
-            .map_err(|e| e.to_string())?;
+            .map_err(|e| e.to_string())?;        
+        } else {
+            messages = Vec::new();
+        }
+
         if cache {
             self.messages.insert(conversation_id.to_string(), messages.clone());
+            if let Some(app_handle) = app_handle {
             Self::emit_event(
                 app_handle,
                 GlobalAppState::CONVERSATIONMESSAGES,
-                Value::ConversationMessages(crate::data::message::ConversationMessages {
+                Value::ConversationMessages(ValueConversationMessages {
                     conversation_id: conversation_id.to_string(),
-                    messages: messages.clone(),
+                    messages: Some(messages.clone()),
                 })
             );
+            }
+
         }
 
         Ok(messages)
@@ -281,9 +302,9 @@ impl ThreadStorage {
         Self::emit_event(
             app_handle,
             GlobalAppState::CONVERSATIONMESSAGES,
-            Value::ConversationMessages(crate::data::message::ConversationMessages {
+            Value::ConversationMessages(ValueConversationMessages {
                 conversation_id: conversation_id.to_string(),
-                messages: messages.clone(),
+                messages: Some(messages.clone()),
             })
         );
         Self::save_conversation_messages(conversation_id, path, messages)

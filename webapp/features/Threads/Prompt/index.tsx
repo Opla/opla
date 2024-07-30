@@ -64,12 +64,8 @@ export default function Prompt({
   const prompt = changedPrompt === undefined ? conversationPrompt : changedPrompt;
   const errorMessage = errorMessages[conversationId];
 
-  const {
-    conversations,
-    updateConversations,
-    getConversationMessages,
-    updateConversationMessages,
-  } = useThreadStore();
+  const { conversations, updateConversations, messages, updateConversationMessages } =
+    useThreadStore();
 
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
@@ -101,7 +97,7 @@ export default function Prompt({
             undefined,
             assets,
           );
-          const conversationMessages = getConversationMessages(updatedConversation.id);
+          const conversationMessages = messages[updatedConversation.id];
           const updatedMessages = mergeMessages(conversationMessages, [message]);
           await updateConversationMessages(updatedConversation.id, updatedMessages);
           const updatedConversations = updateConversation(updatedConversation, conversations);

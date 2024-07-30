@@ -48,8 +48,7 @@ export interface ThreadSlice extends ThreadProps {
     deleteFiles: boolean,
     cleanup?: (conversation: Conversation, conversations: Conversation[]) => Promise<void>,
   ) => Promise<void>;
-  readConversationMessages: (key: string, defaultValue: Message[]) => Promise<Message[]>;
-  getConversationMessages: (id: string | undefined) => Message[];
+  loadConversationMessages: (key: string, defaultValue: Message[]) => boolean;
   isConversationMessagesLoaded: (id: string) => boolean;
   filterConversationMessages: (
     id: string | undefined,
@@ -127,31 +126,20 @@ const createThreadSlice =
         }
       }
     },
-    getConversationMessages: (id: string | undefined): Message[] => {
-      let conversationMessages: Message[] | undefined;
-      if (id) {
-        conversationMessages = get().messages[id];
-      }
-      return conversationMessages || [];
-    },
     isConversationMessagesLoaded: (id: string) => !!get().messages[id],
-
-    readConversationMessages: async (id: string): Promise<Message[]> => {
+    loadConversationMessages: (id: string) => {
       const store = get();
-      const { messages } = store;
-      delete messages[id];
+      if (store.messagesState[id] === StorageState.LOADING) {
+        return false;
+      }
+      logger.info('loadConversationMessage', id, store.messagesState[id], store.messages[id]);
       set({
         ...store,
-        messages,
-        messagesState: { ...store.messagesState, id: StorageState.LOADING },
+        messagesState: { ...store.messagesState, [id]: StorageState.LOADING },
       });
-      const newMessages: Message[] = id ? await loadConversationMessages(id) : [];
-      set({
-        ...store,
-        messages: { ...store.messages, [id]: newMessages },
-        messagesState: { ...store.messagesState, [id]: StorageState.OK },
-      });
-      return newMessages;
+      const value = mapKeys({ conversationId: id }, toSnakeCase);
+      emit(GlobalAppState.CONVERSATIONMESSAGES, value);
+      return true;
     },
     filterConversationMessages: (
       id: string | undefined,

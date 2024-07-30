@@ -25,7 +25,7 @@ pub async fn load_conversation_messages(
     cache: bool,
 ) -> Result<Vec<Message>, String> {
     let mut store = context.store.lock().await;
-    store.load_conversation_messages(&conversation_id, cache, app.app_handle())
+    store.load_conversation_messages(&conversation_id, cache, Some(app.app_handle()))
 }
 
 #[tauri::command]

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Conversation,
@@ -77,10 +77,10 @@ function Thread({
   const {
     state: threadState,
     messagesState,
+    messages: conversationMessages,
     conversations,
     isConversationMessagesLoaded,
-    getConversationMessages,
-    readConversationMessages,
+    loadConversationMessages,
     updateConversations,
     filterConversationMessages,
     updateConversationMessages,
@@ -107,95 +107,66 @@ function Thread({
   const selectedConversation = conversations.find((c) => c.id === conversationId);
 
   const { showModal } = useContext(ModalsContext);
-  const [conversationMessages, setConversationMessages] = useState<Message[]>();
+  // const [conversationMessages, setConversationMessages] = useState<Message[]>();
 
-  const [processing, setProcessing] = useState<boolean>(false);
+  // const [processing, setProcessing] = useState<boolean>(false);
   const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
 
   const { t } = useTranslation();
 
-  const messageUpdating = useRef<boolean>(false);
+  const [messageUpdating, setMessageUpdating] = useState<boolean>(true);
   useEffect(() => {
-    const getNewMessages = async (cid: string) => {
-      logger.info(
-        'getNewMessages',
-        conversationId,
-        messagesState[cid],
-        messageUpdating.current,
-        selectedConversation,
-      );
-      messageUpdating.current = true;
-      let newMessages: MessageImpl[] = [];
-      let p = false;
-      if (isConversationMessagesLoaded(cid)) {
-        newMessages = getConversationMessages(conversationId);
-      } else {
-        logger.info('Read messages', conversationId);
-        newMessages = await readConversationMessages(cid, []);
+    if (conversationId && messagesState[conversationId] !== StorageState.OK) {
+      if (!isConversationMessagesLoaded(conversationId)) {
+        if (loadConversationMessages(conversationId, [])) {
+          setMessageUpdating(true);
+        }
       }
-      newMessages = newMessages?.filter((m) => !(m.author.role === 'system')) || [];
-      newMessages = newMessages.map((msg, index) => {
-        const { author } = msg;
-        let last;
-        if (
-          index === newMessages.length - 1 ||
-          (index === newMessages.length - 2 && author.role === 'user')
-        ) {
-          last = true;
-        }
-        const m: MessageImpl = { ...msg, author, conversationId, copied: copied[msg.id], last };
-        if (
-          msg.status &&
-          msg.status !== MessageStatus.Delivered &&
-          msg.status !== MessageStatus.Error
-        ) {
-          p = true;
-        }
-        return m;
-      });
-      setProcessing(p);
-      setConversationMessages(newMessages);
-      messageUpdating.current = false;
-    };
-    if (
-      !conversationId ||
-      messageUpdating.current ||
-      messagesState[conversationId] === StorageState.LOADING
-    ) {
-      return;
+    } else if (conversationId && messagesState[conversationId] === StorageState.OK) {
+      setMessageUpdating(false);
     }
-    getNewMessages(conversationId);
   }, [
     conversationId,
     messagesState,
     isConversationMessagesLoaded,
-    getConversationMessages,
-    readConversationMessages,
+    loadConversationMessages,
     copied,
     selectedConversation,
   ]);
 
   const defaultConversationName = getDefaultConversationName(t);
-  const { messages, tempConversationName, views } = useMemo(() => {
-    const stream = streams?.[conversationId as string];
-    let newMessages: MessageImpl[] | undefined = conversationMessages;
-    if (stream) {
-      newMessages = newMessages?.map((msg) => {
-        const { author } = msg;
-        if (stream.messageId === msg.id) {
-          const m: MessageImpl = {
-            ...msg,
-            author,
-            status: MessageStatus.Stream,
-            content: stream.content?.join?.(''),
-            contentHistory: undefined,
-            conversationId,
-          };
-          return m;
-        }
-        return msg;
-      });
-    }
+  const { messages, tempConversationName, views, processing } = useMemo(() => {
+    const stream = conversationId ? streams?.[conversationId] : undefined;
+    let newMessages: MessageImpl[] | undefined = conversationId
+      ? conversationMessages[conversationId]
+      : undefined;
+    let p = false;
+    newMessages = newMessages?.filter((m) => !(m.author.role === 'system')) || [];
+    newMessages = newMessages.map((msg, index) => {
+      const { author } = msg;
+      let last = false;
+      if (
+        newMessages &&
+        (index === newMessages.length - 1 ||
+          (index === newMessages.length - 2 && author.role === 'user'))
+      ) {
+        last = true;
+      }
+      const m: MessageImpl = { ...msg, author, conversationId, copied: copied[msg.id], last };
+      if (
+        msg.status &&
+        msg.status !== MessageStatus.Delivered &&
+        msg.status !== MessageStatus.Error
+      ) {
+        p = true;
+      }
+      if (stream?.messageId === msg.id) {
+        m.content = stream.content?.join?.('');
+        m.contentHistory = undefined;
+      }
+      return m;
+    });
+
     const conversationName: string = newMessages?.[0]
       ? getMessageContentAsString(newMessages?.[0])
       : defaultConversationName;
@@ -208,8 +179,20 @@ function Thread({
       ...(conversationSettings?.views || []),
     ];
 
-    return { messages: newMessages, tempConversationName: conversationName, views: viewSettings };
-  }, [streams, conversationId, conversationMessages, defaultConversationName, settings.pages]);
+    return {
+      messages: newMessages,
+      tempConversationName: conversationName,
+      views: viewSettings,
+      processing: p,
+    };
+  }, [
+    copied,
+    conversationMessages,
+    streams,
+    conversationId,
+    defaultConversationName,
+    settings.pages,
+  ]);
 
   const { modelItems, commandManager, assistant, selectedModelId, disabled, model } =
     useMemo(() => {
@@ -478,7 +461,7 @@ function Thread({
   });
 
   const isLoading =
-    messageUpdating.current ||
+    messageUpdating ||
     threadState === StorageState.INIT ||
     threadState === StorageState.LOADING ||
     (conversationId &&
