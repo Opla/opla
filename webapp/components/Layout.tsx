@@ -17,7 +17,7 @@
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import '@/app/globals.css';
-import Sidebar from '@/components/common/Sidebar';
+import Sidebar from '@/features/Sidebar';
 import useBackendContext from '@/hooks/useBackendContext';
 import useRegisterModals from '@/hooks/useRegisterModals';
 import useShortcuts, { ShortcutIds } from '@/hooks/useShortcuts';

@@ -14,6 +14,8 @@
 
 import useTranslation from '@/hooks/useTranslation';
 import { Separator } from '@/components/ui/separator';
+import { isMac } from '@/utils/misc';
+import { cn } from '@/lib/utils';
 import ExplorerList from './ExplorerList';
 import ExplorerGroup from './ExplorerGroup';
 import Searchbar from '../Searchbar';
@@ -43,15 +45,27 @@ export default function Explorer({
 }: ExplorerProps) {
   const { t } = useTranslation();
 
+  const isTitlebarTransparent = isMac();
   return (
     <div className="flex h-full w-full flex-1 items-start border-r-[1px] bg-secondary/70">
       <nav className="flex h-full flex-1 flex-col space-y-1">
         <div className="flex w-full items-center">
-          <div className="flex grow items-center p-2">
+          <div
+            className="overflow:visible h-13 flex grow items-center p-2"
+            data-tauri-drag-region={isTitlebarTransparent}
+          >
             {!isSearching && (
               <>
                 {icon}
-                <h1 className="text-l flex-1 font-extrabold">{t(title)}</h1>
+                <h1
+                  className={cn(
+                    'text-l flex-1 font-extrabold',
+                    isTitlebarTransparent ? 'ml-4' : undefined,
+                  )}
+                  data-tauri-drag-region={isTitlebarTransparent}
+                >
+                  {t(title)}
+                </h1>
                 {toolbar}
               </>
             )}
