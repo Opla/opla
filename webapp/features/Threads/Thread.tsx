@@ -107,9 +107,7 @@ function Thread({
   const selectedConversation = conversations.find((c) => c.id === conversationId);
 
   const { showModal } = useContext(ModalsContext);
-  // const [conversationMessages, setConversationMessages] = useState<Message[]>();
 
-  // const [processing, setProcessing] = useState<boolean>(false);
   const [copied, setCopied] = useState<{ [key: string]: boolean }>({});
 
   const { t } = useTranslation();
@@ -371,11 +369,6 @@ function Thread({
             (m) => m.id !== message.id && m.id !== message.sibling,
           );
           updateConversationMessages(conversationId, updatedMessages);
-          /* if (message.assets) {
-            conversation.assets = getConversationAssets(conversation)?.filter(
-              (a: Asset) => !message.assets?.find((ma: string) => ma === a.id),
-            );
-          } */
         }
       }
     }
@@ -470,7 +463,6 @@ function Thread({
         messagesState[conversationId] === StorageState.INIT ||
         messagesState[conversationId] === StorageState.LOADING));
 
-  // logger.info('isLoading', isLoading, threadState, messagesState, conversationMessages);
   return (
     <ContentView
       header={
