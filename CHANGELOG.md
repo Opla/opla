@@ -1,3 +1,10 @@
+# [1.0.0-alpha.207](https://github.com/Opla/opla/compare/v1.0.0-alpha.206...v1.0.0-alpha.207) (2024-07-31)
+
+
+### Features
+
+* window menu [#1140](https://github.com/Opla/opla/issues/1140) ([#1141](https://github.com/Opla/opla/issues/1141)) ([d575bdd](https://github.com/Opla/opla/commit/d575bdd7f206611f27abb2b24889e085ce185474))
+
 # [1.0.0-alpha.206](https://github.com/Opla/opla/compare/v1.0.0-alpha.205...v1.0.0-alpha.206) (2024-07-30)
 
 
