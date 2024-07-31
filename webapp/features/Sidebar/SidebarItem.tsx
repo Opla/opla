@@ -16,7 +16,7 @@ import Link from 'next/link';
 import { LucideIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ShortcutIds } from '@/hooks/useShortcuts';
-import { ShortcutBadge } from '../ShortCut';
+import { ShortcutBadge } from '../../components/common/ShortCut';
 
 function Content({
   icon,

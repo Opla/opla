@@ -25,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import SidebarItem from './SidebarItem';
-import { ShortcutBadge } from '../ShortCut';
+import { ShortcutBadge } from '../../components/common/ShortCut';
 
 export default function SidebarItems({
   items,

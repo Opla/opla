@@ -39,6 +39,7 @@ import useBackend from '@/hooks/useBackendContext';
 import { Ui } from '@/types';
 import { ShortcutIds } from '@/hooks/useShortcuts';
 import { checkForNewUpdate } from '@/utils/backend/tauri';
+import { isMac } from '@/utils/misc';
 import SidebarItems from './SidebarItems';
 
 const sidebarItems: Array<Ui.Item> = [
@@ -136,6 +137,8 @@ function Sidebar() {
   const { showModal } = useContext(ModalsContext);
   const { settings } = useBackend();
 
+  const isTitlebarTransparent = isMac();
+
   sidebarItems[0].items = (sidebarItems[0].items as Ui.Item[]).map((item) => {
     let { href } = item;
     if (item.page && settings?.selectedPage?.startsWith(item.page)) {
@@ -162,20 +165,16 @@ function Sidebar() {
   };
 
   return (
-    <aside className="flex h-full flex-col border-r-[1px] border-secondary-foreground/5 bg-secondary-foreground/15 p-1">
-      <div className="hidden items-center justify-center border-b p-1">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link className="mb-1 h-8 w-8" href="/">
-              <Image width={32} height={32} className="" src="/logo.png" alt="logo" />
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{t('Dashboard')}</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
-      <ul className="p1 flex h-full flex-1 flex-col pb-4">
+    <aside className="flex h-full flex-col">
+      {isTitlebarTransparent && (
+        <div
+          className="h-14 w-full border-b-[1px] bg-secondary/70 text-secondary/70"
+          data-tauri-drag-region
+        >
+          -
+        </div>
+      )}
+      <ul className="p1 flex h-full flex-1 flex-col border-r-[1px] border-secondary-foreground/5 bg-secondary/70 p-1 pb-4">
         <SidebarItems items={sidebarItems} pathname={pathname} t={t} onModal={handleModal} />
       </ul>
     </aside>

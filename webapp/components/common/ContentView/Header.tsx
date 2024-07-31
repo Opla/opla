@@ -25,19 +25,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { isMac } from '@/utils/misc';
+
 export type ToolbarProps = {
   header: string | React.ReactNode;
   toolbar?: React.ReactNode;
 };
 
 export default function Header({ header, toolbar }: ToolbarProps) {
+  const isTitlebarTransparent = isMac();
+
   return (
-    <div className="flex w-full flex-row items-center justify-between gap-1 bg-secondary/40 p-2 text-sm">
-      <div className="grow flex-row items-center px-2">
+    <div
+      className="flex h-16 w-full flex-row items-center justify-between gap-1 bg-secondary/70 p-2 text-sm"
+      data-tauri-drag-region={isTitlebarTransparent}
+    >
+      <div
+        className="grow flex-row items-center px-2"
+        data-tauri-drag-region={isTitlebarTransparent}
+      >
         {typeof header === 'string' && <span className="truncate px-2">{header}</span>}
         {typeof header !== 'string' && header}
       </div>
-      <div className="flex-1" />
+      <div className="flex-1" data-tauri-drag-region={isTitlebarTransparent} />
       <div className="flex-0 flex-row-reverse items-center gap-4">{toolbar}</div>
     </div>
   );
