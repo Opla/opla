@@ -1,3 +1,10 @@
+# [1.0.0-alpha.208](https://github.com/Opla/opla/compare/v1.0.0-alpha.207...v1.0.0-alpha.208) (2024-07-31)
+
+
+### Features
+
+* hide titlebar on MacOS [#1142](https://github.com/Opla/opla/issues/1142) ([#1143](https://github.com/Opla/opla/issues/1143)) ([03c8dfb](https://github.com/Opla/opla/commit/03c8dfb59fdf1ff1822086f16a0c4f4f8c64943a))
+
 # [1.0.0-alpha.207](https://github.com/Opla/opla/compare/v1.0.0-alpha.206...v1.0.0-alpha.207) (2024-07-31)
 
 
