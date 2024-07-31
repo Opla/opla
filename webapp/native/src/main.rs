@@ -18,6 +18,7 @@ mod local_server;
 mod store;
 mod downloader;
 mod sys;
+mod ui;
 pub mod utils;
 pub mod api;
 pub mod data;
@@ -28,6 +29,7 @@ pub mod commands;
 pub mod engines;
 
 use tokio::{ spawn, sync::Mutex };
+use ui::Ui;
 use std::sync::Arc;
 
 use api::models;
@@ -305,6 +307,7 @@ fn main() {
         downloader: downloader,
         sys: Mutex::new(Sys::new()),
     };
+    let menu = Ui::setup_menu();
     tauri::Builder
         ::default()
         .manage(context)
@@ -370,6 +373,7 @@ fn main() {
                 crate::commands::thread::remove_conversation_messages,
             ]
         )
+        .menu(menu)
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
