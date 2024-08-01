@@ -112,7 +112,7 @@ function Thread({
 
   const { t } = useTranslation();
 
-  const [messageUpdating, setMessageUpdating] = useState<boolean>(true);
+  const [messageUpdating, setMessageUpdating] = useState<boolean>(false);
   useEffect(() => {
     if (conversationId && messagesState[conversationId] !== StorageState.OK) {
       if (!isConversationMessagesLoaded(conversationId)) {
@@ -459,10 +459,8 @@ function Thread({
     threadState === StorageState.INIT ||
     threadState === StorageState.LOADING ||
     (conversationId &&
-      (messagesState[conversationId] === undefined ||
-        messagesState[conversationId] === StorageState.INIT ||
+      (messagesState[conversationId] === StorageState.INIT ||
         messagesState[conversationId] === StorageState.LOADING));
-
   return (
     <ContentView
       header={
