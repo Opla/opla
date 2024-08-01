@@ -1,3 +1,10 @@
+# [1.0.0-alpha.212](https://github.com/Opla/opla/compare/v1.0.0-alpha.211...v1.0.0-alpha.212) (2024-08-01)
+
+
+### Bug Fixes
+
+* can't select prompt template [#1152](https://github.com/Opla/opla/issues/1152) ([#1153](https://github.com/Opla/opla/issues/1153)) ([c3348a1](https://github.com/Opla/opla/commit/c3348a1f42d722fa5683b9049674e6ecf9be7dc6))
+
 # [1.0.0-alpha.211](https://github.com/Opla/opla/compare/v1.0.0-alpha.210...v1.0.0-alpha.211) (2024-08-01)
 
 
