@@ -168,13 +168,13 @@ function Sidebar() {
     <aside className="flex h-full flex-col">
       {isTitlebarTransparent && (
         <div
-          className="h-14 w-full border-b-[1px] bg-secondary/70 text-secondary/70"
+          className="h-11 w-full border-b-[1px] bg-secondary/70 text-secondary/70"
           data-tauri-drag-region
         >
           -
         </div>
       )}
-      <ul className="p1 flex h-full flex-1 flex-col border-r-[1px] border-secondary-foreground/5 bg-secondary/70 p-1 pb-4">
+      <ul className="flex h-full flex-1 flex-col border-r-[1px] border-secondary-foreground/5 bg-secondary/70 p-1 pb-4">
         <SidebarItems items={sidebarItems} pathname={pathname} t={t} onModal={handleModal} />
       </ul>
     </aside>

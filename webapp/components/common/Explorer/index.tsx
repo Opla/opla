@@ -48,10 +48,10 @@ export default function Explorer({
   const isTitlebarTransparent = isMac();
   return (
     <div className="flex h-full w-full flex-1 items-start border-r-[1px] bg-secondary/70">
-      <nav className="flex h-full flex-1 flex-col space-y-1">
+      <nav className="flex h-full flex-1 flex-col">
         <div className="flex w-full items-center">
           <div
-            className="overflow:visible h-13 flex grow items-center p-2"
+            className="overflow:visible flex h-11 grow items-center px-2"
             data-tauri-drag-region={isTitlebarTransparent}
           >
             {!isSearching && (
@@ -60,7 +60,7 @@ export default function Explorer({
                 <h1
                   className={cn(
                     'text-l flex-1 font-extrabold',
-                    isTitlebarTransparent ? 'ml-4' : undefined,
+                    isTitlebarTransparent ? 'ml-6' : undefined,
                   )}
                   data-tauri-drag-region={isTitlebarTransparent}
                 >
