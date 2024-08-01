@@ -1,3 +1,10 @@
+# [1.0.0-alpha.210](https://github.com/Opla/opla/compare/v1.0.0-alpha.209...v1.0.0-alpha.210) (2024-08-01)
+
+
+### Bug Fixes
+
+* loader instead of empty conversation [#1148](https://github.com/Opla/opla/issues/1148) ([#1149](https://github.com/Opla/opla/issues/1149)) ([01d86a5](https://github.com/Opla/opla/commit/01d86a56370e61a4402ea9638fc53120842f2dac))
+
 # [1.0.0-alpha.209](https://github.com/Opla/opla/compare/v1.0.0-alpha.208...v1.0.0-alpha.209) (2024-08-01)
 
 
