@@ -1,3 +1,10 @@
+# [1.0.0-alpha.209](https://github.com/Opla/opla/compare/v1.0.0-alpha.208...v1.0.0-alpha.209) (2024-08-01)
+
+
+### Features
+
+* native menu only for MacOs [#1146](https://github.com/Opla/opla/issues/1146) ([#1147](https://github.com/Opla/opla/issues/1147)) ([79c50f6](https://github.com/Opla/opla/commit/79c50f6e66142bf338f6be404a258dbb9720f64a))
+
 # [1.0.0-alpha.208](https://github.com/Opla/opla/compare/v1.0.0-alpha.207...v1.0.0-alpha.208) (2024-07-31)
 
 
