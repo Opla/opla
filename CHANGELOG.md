@@ -1,3 +1,10 @@
+# [1.0.0-alpha.211](https://github.com/Opla/opla/compare/v1.0.0-alpha.210...v1.0.0-alpha.211) (2024-08-01)
+
+
+### Bug Fixes
+
+* install model from hub isn't working [#1150](https://github.com/Opla/opla/issues/1150) ([#1151](https://github.com/Opla/opla/issues/1151)) ([9c04603](https://github.com/Opla/opla/commit/9c046037240fbf8308f033bafa0b2e6eed405a2a))
+
 # [1.0.0-alpha.210](https://github.com/Opla/opla/compare/v1.0.0-alpha.209...v1.0.0-alpha.210) (2024-08-01)
 
 
