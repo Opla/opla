@@ -26,6 +26,7 @@ mod store;
 mod downloader;
 mod sys;
 mod ui;
+
 pub mod utils;
 pub mod api;
 pub mod data;
@@ -317,8 +318,8 @@ fn main() {
         downloader: downloader,
         sys: Mutex::new(Sys::new()),
     };
-    let menu = Ui::setup_menu();
-    tauri::Builder
+
+    let mut builder = tauri::Builder
         ::default()
         .manage(context)
         .plugin(tauri_plugin_window_state::Builder::default().build())
@@ -387,8 +388,14 @@ fn main() {
                 crate::commands::thread::save_conversation_messages,
                 crate::commands::thread::remove_conversation_messages
             ]
-        )
-        .menu(menu)
-        .run(tauri::generate_context!())
+        );
+
+        #[cfg(target_os = "macos")]
+        {
+            let menu = Ui::setup_menu();
+            builder = builder.menu(menu);
+        }
+
+        builder.run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
