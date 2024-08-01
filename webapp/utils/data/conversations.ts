@@ -61,7 +61,7 @@ export const createConversation = (name: string) => {
 export const getConversation = (
   conversationId: string | undefined,
   conversations: Conversation[],
-) => conversations.find((c) => c.id === conversationId);
+) => deepCopy(conversations.find((c) => c.id === conversationId));
 
 export const updateConversation = (
   conversation: Conversation,

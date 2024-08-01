@@ -15,7 +15,6 @@
 'use client';
 
 import React, { useContext } from 'react';
-import Image from 'next/image';
 import {
   Bot,
   BrainCircuit,
@@ -27,14 +26,12 @@ import {
   Settings,
   Settings2,
 } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { DiscordLogoIcon, GitHubLogoIcon, UpdateIcon } from '@radix-ui/react-icons';
 import useTranslation from '@/hooks/useTranslation';
 import { ModalsContext } from '@/modals/context';
 // import logger from '@/utils/logger';
 import { ModalIds } from '@/modals';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import useBackend from '@/hooks/useBackendContext';
 import { Ui } from '@/types';
 import { ShortcutIds } from '@/hooks/useShortcuts';
