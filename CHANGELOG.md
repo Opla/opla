@@ -1,3 +1,10 @@
+# [1.0.0-alpha.213](https://github.com/Opla/opla/compare/v1.0.0-alpha.212...v1.0.0-alpha.213) (2024-08-01)
+
+
+### Bug Fixes
+
+* can't delete a conversation [#1154](https://github.com/Opla/opla/issues/1154) ([#1155](https://github.com/Opla/opla/issues/1155)) ([87c0959](https://github.com/Opla/opla/commit/87c0959e2d81762883eb1015d775d76597b5b256))
+
 # [1.0.0-alpha.212](https://github.com/Opla/opla/compare/v1.0.0-alpha.211...v1.0.0-alpha.212) (2024-08-01)
 
 
