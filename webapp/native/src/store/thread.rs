@@ -111,6 +111,7 @@ impl ThreadStorage {
                             conversations: store.threads.conversations.clone(),
                         })
                     );
+                    need_emit = true;
                 } else {
                     println!("Error wrong type of value: {} {:?}", payload.key, value);
                 }
