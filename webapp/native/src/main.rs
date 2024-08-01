@@ -14,6 +14,13 @@
 
 #![cfg_attr(all(not(debug_assertions), target_os = "windows"), windows_subsystem = "windows")]
 
+#[cfg(target_os = "macos")]
+extern crate cocoa;
+
+#[cfg(target_os = "macos")]
+#[macro_use]
+extern crate objc;
+
 mod local_server;
 mod store;
 mod downloader;
@@ -39,6 +46,9 @@ use store::Store;
 use local_server::*;
 use sys::Sys;
 use tauri::{ EventLoopMessage, Manager, Runtime, State };
+
+#[cfg(target_os = "macos")]
+mod macos;
 
 pub struct OplaContext {
     pub server: Arc<Mutex<LocalServer>>,
@@ -326,6 +336,11 @@ fn main() {
                 }
             }
 
+            #[cfg(target_os = "macos")]
+            {
+                macos::setup_mac_window(app);
+            }
+
             let mut handle = app.handle();
             tauri::async_runtime::block_on(async {
                 core(&mut handle).await;
@@ -370,7 +385,7 @@ fn main() {
                 crate::commands::llm::llm_call_models,
                 crate::commands::thread::load_conversation_messages,
                 crate::commands::thread::save_conversation_messages,
-                crate::commands::thread::remove_conversation_messages,
+                crate::commands::thread::remove_conversation_messages
             ]
         )
         .menu(menu)
