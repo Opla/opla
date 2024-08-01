@@ -347,7 +347,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     />
   );
 
-  const isLoading = workspaceStorage.isLoading() || threadStorage.isLoading();
+  const isLoading = workspaceStorage.isLoading();
 
   if (isLoading) {
     return <Loading />;
