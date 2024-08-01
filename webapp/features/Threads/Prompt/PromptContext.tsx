@@ -224,6 +224,7 @@ function PromptProvider({
       } else if (prompt?.raw !== '') {
         updatedConversations = conversations.filter((c) => !c.temp);
         let newConversation = createConversation(conversationName);
+
         newConversation.temp = true;
         newConversation.currentPrompt = prompt;
         if (assistant) {

@@ -55,6 +55,7 @@ impl ThreadStorage {
             None => Value::Empty(Empty {}),
         };
         println!("Thread emit state sync: {} {:?}", payload.key, value);
+        let mut key = payload.key;
         let mut need_emit = false;
         let mut emit_value: Option<Value> = None;
         match GlobalAppState::from(payload.key) {
@@ -104,6 +105,12 @@ impl ThreadStorage {
                     let mut store = context.store.lock().await;
                     store.threads.remove_conversation(data);
                     store.save_conversations();
+                    key = GlobalAppState::CONVERSATIONS.into();
+                    emit_value = Some(
+                        Value::Conversations(ValueConversations {
+                            conversations: store.threads.conversations.clone(),
+                        })
+                    );
                 } else {
                     println!("Error wrong type of value: {} {:?}", payload.key, value);
                 }
@@ -209,7 +216,7 @@ impl ThreadStorage {
         if need_emit {
             app_handle
                 .emit_all(STATE_SYNC_EVENT, Payload {
-                    key: payload.key,
+                    key,
                     value: emit_value,
                 })
                 .unwrap();
