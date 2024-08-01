@@ -99,24 +99,8 @@ export default function Settings({
 
   return (
     <div className="scrollbar-trigger flex h-full w-full">
-      <Tabs defaultValue="settings" className="w-full py-3">
-        <div className="px-4">
-          <TabsList className="justify-left w-full gap-4">
-            <TabsTrigger value="settings">
-              <Settings2 className="h-4 w-4" strokeWidth={1.5} />
-            </TabsTrigger>
-            <TabsTrigger value="appearance">
-              <Palette className="h-4 w-4" strokeWidth={1.5} />
-            </TabsTrigger>
-            <TabsTrigger value="documents">
-              <File className="h-4 w-4" strokeWidth={1.5} />
-            </TabsTrigger>
-            <TabsTrigger value="debug">
-              <Bug className="h-4 w-4" strokeWidth={1.5} />
-            </TabsTrigger>
-          </TabsList>
-        </div>
-        <TabsContent value="settings" className="h-full py-4">
+      <Tabs defaultValue="settings" className="flex h-full w-full flex-col">
+        <TabsContent value="settings" className="grow">
           <EditPresets<Conversation>
             presetProperties={selectedConversation as Partial<Preset>}
             provider={provider}
@@ -126,10 +110,10 @@ export default function Settings({
             className="h-full"
           />
         </TabsContent>
-        <TabsContent value="appearance" className="px-4">
+        <TabsContent value="appearance" className="grow px-4">
           {t('Thread / Document view')}
         </TabsContent>
-        <TabsContent value="documents" className="px-4">
+        <TabsContent value="documents" className="grow px-4">
           {selectedConversation?.updatedAt && (
             <div className="w-full p-2 text-sm text-muted-foreground">
               <div className="ellipsis flex w-full flex-row justify-between tabular-nums">
@@ -182,15 +166,15 @@ export default function Settings({
             </div>
           )}
         </TabsContent>
-        <TabsContent value="debug" className="flex w-full items-center justify-between px-4">
-          <span className="text-muted-foreground">{t('Logs')}</span>
-          <CopyToClipBoard
-            title={t('Copy logs to clipboard')}
-            message={t('Logs copied to clipboard')}
-            text={buildLogs()}
-          />
-        </TabsContent>
-        <TabsContent value="debug" className="px-4">
+        <TabsContent value="debug" className="grow px-4">
+          <div className="flex w-full grow items-center justify-between">
+            <span className="text-muted-foreground">{t('Logs')}</span>
+            <CopyToClipBoard
+              title={t('Copy logs to clipboard')}
+              message={t('Logs copied to clipboard')}
+              text={buildLogs()}
+            />
+          </div>
           {errors.map((error) => (
             <div key={error.id} className="p-2 text-xs text-error">
               <p>
@@ -200,6 +184,22 @@ export default function Settings({
             </div>
           ))}
         </TabsContent>
+        <div className="p-4">
+          <TabsList className="justify-left w-full gap-4 p-4">
+            <TabsTrigger value="settings">
+              <Settings2 className="h-4 w-4" strokeWidth={1.5} />
+            </TabsTrigger>
+            <TabsTrigger value="appearance">
+              <Palette className="h-4 w-4" strokeWidth={1.5} />
+            </TabsTrigger>
+            <TabsTrigger value="documents">
+              <File className="h-4 w-4" strokeWidth={1.5} />
+            </TabsTrigger>
+            <TabsTrigger value="debug">
+              <Bug className="h-4 w-4" strokeWidth={1.5} />
+            </TabsTrigger>
+          </TabsList>
+        </div>
       </Tabs>
     </div>
   );
