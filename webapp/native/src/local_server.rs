@@ -15,7 +15,7 @@
 use tokio::sync::Mutex;
 use std::collections::HashMap;
 use std::sync::Arc;
-use crate::engines::llama_cpp::{LLamaCppEngine, LLAMACPP_PARAMETERS_DEFINITIONS};
+use crate::engines::llama_cpp::{ LLamaCppEngine, LLAMACPP_PARAMETERS_DEFINITIONS };
 use crate::store::server::{ ServerConfiguration, ServerStorage };
 use crate::error::Error;
 use sysinfo::System;
@@ -204,7 +204,14 @@ impl LocalServer {
         let wpid = Arc::clone(&self.pid);
         let wstatus = Arc::clone(&self.status);
         let command_child = Arc::clone(&self.command_child);
-        let handle = LLamaCppEngine::start_llama_cpp_server(app, &model_id, arguments, wpid, wstatus, command_child).await?;
+        let handle = LLamaCppEngine::start_llama_cpp_server(
+            app,
+            &model_id,
+            arguments,
+            wpid,
+            wstatus,
+            command_child
+        ).await?;
         self.handle = Some(handle);
         Ok(Payload { status: status_response, message: name })
     }
@@ -304,16 +311,16 @@ impl LocalServer {
         let sys = System::new_all();
         let mut pid: u32 = 0;
         let mut started = false;
-        let mut name;
+
         // This will not work in Apple Macos sandbox
-        for process in sys.processes_by_name("llama.cpp.server") {
+        for process in sys.processes_by_name("llama.cpp.server".as_ref()) {
+            let name = process.name();
             if pid == 0 && !started {
                 pid = process.pid().as_u32();
                 started = true;
-                name = process.name();
-                println!("Opla server previously started {}", name);
+                println!("Opla server previously started {:?}", name);
             }
-            println!("Opla server kill zombie {} / {}", process.pid(), process.name());
+            println!("Opla server kill zombie {} / {:?}", process.pid(), name);
             process.kill();
         }
     }

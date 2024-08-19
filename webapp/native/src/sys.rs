@@ -65,7 +65,7 @@ impl Sys {
                 .iter()
                 .map(|cpu| Cpu { usage: cpu.cpu_usage() })
                 .collect(),
-            global_cpu_percentage: sys.global_cpu_info().cpu_usage() as f64,
+            global_cpu_percentage: sys.global_cpu_usage() as f64,
         };
         Self {
             sys,
@@ -80,7 +80,7 @@ impl Sys {
                 .with_memory(sysinfo::MemoryRefreshKind::everything())
                 .with_cpu(sysinfo::CpuRefreshKind::everything())
         );
-        self.infos.global_cpu_percentage = self.sys.global_cpu_info().cpu_usage() as f64;
+        self.infos.global_cpu_percentage = self.sys.global_cpu_usage() as f64;
         self.infos.used_memory = self.sys.used_memory();
         self.infos.used_swap = self.sys.used_swap();
         self.infos.cpus = self.sys
@@ -92,7 +92,7 @@ impl Sys {
                 return Cpu { usage };
             })
             .collect();
-        self.infos.global_cpu_percentage = self.sys.global_cpu_info().cpu_usage() as f64;
+        self.infos.global_cpu_percentage = self.sys.global_cpu_usage() as f64;
 
         return self.infos.clone();
     }
