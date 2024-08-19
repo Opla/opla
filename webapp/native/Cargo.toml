@@ -19,7 +19,7 @@ tauri = { version = "1.7.1", features = [ "updater", "fs-read-dir", "protocol-as
 tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 sysinfo = { version = "0.31.2", features = ["apple-app-store"] }
 dirs = "5.0.1"
-reqwest = { version = "0.12.5", features = ["json", "stream"] }
+reqwest = { version = "0.12.7", features = ["json", "stream"] }
 chrono = "0.4.38"
 serde_with = { version = "3.9.0", features = ["json"] }
 uuid = { version = "1.10.0", features = ["v4"] }
