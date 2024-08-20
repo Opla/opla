@@ -54,7 +54,7 @@
     "react-keyed-flatten-children": "^3.0.0",
     "react-resizable-panels": "^2.0.20",
     "rehype-highlight": "^7.0.0",
-    "rehype-katex": "^7.0.0",
+    "rehype-katex": "^7.0.1",
     "rehype-react": "^8.0.0",
     "remark-gfm": "^4.0.0",
     "remark-math": "^6.0.0",
