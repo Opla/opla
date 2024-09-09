@@ -1,0 +1,48 @@
+name: update Llama.cpp binaries
+
+on:
+  workflow_dispatch:
+
+env:
+  ASSETS_URL: https://github.com/ggerganov/llama.cpp/releases/download/
+  TAG: b3711
+  MACOS_ARM64_ZIP: macos-arm64.zip
+  MACOS_x86_64_ZIP: macos-x64.zip
+  LINUX_x86_64_ZIP: ubuntu-x64.zip
+  WINDOWS_x86_64_ZIP: win-avx2-x64.zip
+  
+  BINARIES_DIR: webapp/native/binaries/llama.cpp/
+  MACOS_ARM64: llama.cpp.server-aarch64-apple-darwin
+  MACOS_x86_64: llama.cpp.server-x86_64-apple-darwin
+  LINUX_x86_64: llama.cpp.server-x86_64-unknown-linux-gnu
+  WINDOWS_x86_64: llama.cpp.server-x86_64-pc-windows-msvc.exe
+jobs:
+  upload-assets:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: upload Llama.cpp.server files
+        run: |
+          mkdir ./temp
+          cd ./temp
+          curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L -o ./${{ env.MACOS_ARM64_ZIP }} ${{ env.ASSETS_URL }}${{ env.TAG }}/llama-${{ env.TAG }}-bin-${{ env.MACOS_ARM64 }}
+          unzip ./${{ env.MACOS_ARM64_ZIP }}
+          ls ./
+          mv llama-server ../${{ env.BINARIES_DIR }}${{ env.MACOS_ARM64 }}
+          rm -rf ./*
+
+          cd ..
+          rm -rf ./temp
+
+          git add .
+          git update-index --chmod=+x ${{ env.BINARIES_DIR }}${{ env.MACOS_ARM64 }}
+          git update-index --chmod=+x ${{ env.BINARIES_DIR }}${{ env.MACOS_x86_64 }}
+          git update-index --chmod=+x ${{ env.BINARIES_DIR }}${{ env.LINUX_x86_64 }}
+          git update-index --chmod=+x ${{ env.BINARIES_DIR }}${{ env.WINDOWS_x86_64 }}
+
+      - name: add and commit Llama.cpp.server changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: "chore: update llama.cpp.server binaries"
