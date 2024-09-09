@@ -1,4 +1,4 @@
-name: update Llama.cpp binaries
+name: sync Llama.cpp binaries
 
 on:
   workflow_dispatch:
