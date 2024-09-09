@@ -357,3 +357,76 @@ pub fn option_string_or_struct<'de, T, D>(deserializer: D) -> Result<Option<T>, 
 
     deserializer.deserialize_option(OptStringOrStruct(PhantomData))
 }
+
+pub fn f32_or_u32<'de, T, D>(deserializer: D) -> Result<T, D::Error>
+    where T: Deserialize<'de>, D: Deserializer<'de>
+{
+    // This is a Visitor that forwards string types to T's `FromStr` impl and
+    // forwards map types to T's `Deserialize` impl. The `PhantomData` is to
+    // keep the compiler from complaining about T being an unused generic type
+    // parameter. We need T in order to know the Value type for the Visitor
+    // impl.
+    struct F32orU32<T>(PhantomData<fn() -> T>);
+
+    impl<'de, T> Visitor<'de> for F32orU32<T> where T: Deserialize<'de> {
+        type Value = T;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("f32 or u32")
+        }
+
+        /* fn visit_f32<E>(self, value: f32) -> Result<T, E> where E: de::Error {
+            Deserialize::deserialize(de::value::U32Deserializer::new(value.round() as u32))
+        } */
+
+        fn visit_f64<E>(self, value: f64) -> Result<T, E> where E: de::Error {
+            Deserialize::deserialize(de::value::U32Deserializer::new(value.round() as u32))
+        }
+
+        /* fn visit_u32<E>(self, value: u32) -> Result<T, E> where E: de::Error {
+            Deserialize::deserialize(de::value::U32Deserializer::new(value))
+        } */
+
+        fn visit_u64<E>(self, value: u64) -> Result<T, E> where E: de::Error {
+            Deserialize::deserialize(de::value::U32Deserializer::new(value as u32))
+        }
+    }
+
+    deserializer.deserialize_any(F32orU32(PhantomData))
+}
+
+pub fn option_f32_or_u32<'de, T, D>(deserializer: D) -> Result<Option<T>, D::Error>
+    where T: Deserialize<'de>, D: Deserializer<'de>
+{
+    struct OptF32orU32<T>(PhantomData<T>);
+
+    impl<'de, T> Visitor<'de>
+        for OptF32orU32<T>
+        where T: Deserialize<'de>
+    {
+        type Value = Option<T>;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("a null, a u32 or f32")
+        }
+
+        fn visit_none<E>(self) -> Result<Self::Value, E> {
+            Ok(None)
+        }
+
+        fn visit_some<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+            where D: Deserializer<'de>
+        {
+            f32_or_u32(deserializer).map(Some)
+        }
+
+        fn visit_unit<E>(self) -> Result<Self::Value, E>
+        where
+            E: de::Error,
+        {
+            Ok(None)
+        }
+    }
+
+    deserializer.deserialize_option(OptF32orU32(PhantomData))
+}
