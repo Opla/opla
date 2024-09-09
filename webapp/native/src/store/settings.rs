@@ -21,6 +21,7 @@ use tokio::spawn;
 use crate::{
     store::app_state::{ Empty, GlobalAppState, Payload, Value, ValueSettings, STATE_SYNC_EVENT },
     OplaContext,
+    data::option_f32_or_u32
 };
 use super::app_state::STATE_CHANGE_EVENT;
 
@@ -49,7 +50,7 @@ pub struct ViewSettings {
     pub settings_width: f64,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub explorer_groups: Option<Vec<ExplorerGroup>>,
-    #[serde(skip_serializing_if = "Option::is_none", default)]
+    #[serde(skip_serializing_if = "Option::is_none", default, deserialize_with = "option_f32_or_u32")]
     pub scroll_position: Option<u32>,
 }
 
