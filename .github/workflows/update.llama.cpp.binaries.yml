@@ -33,6 +33,12 @@ jobs:
           mv build/bin/llama-server ../${{ env.BINARIES_DIR }}${{ env.MACOS_ARM64 }}
           rm -rf ./*
 
+          curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L -o ./${{ env.MACOS_x86_64_ZIP }} ${{ env.ASSETS_URL }}${{ env.TAG }}/llama-${{ env.TAG }}-bin-${{ env.MACOS_x86_64_ZIP }}
+          unzip ./${{ env.MACOS_x86_64_ZIP }}
+          ls ./
+          mv build/bin/llama-server ../${{ env.BINARIES_DIR }}${{ env.MACOS_x86_64 }}
+          rm -rf ./*
+
           cd ..
           rm -rf ./temp
 
