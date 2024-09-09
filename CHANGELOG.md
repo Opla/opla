@@ -1,3 +1,10 @@
+# [1.0.0-alpha.214](https://github.com/Opla/opla/compare/v1.0.0-alpha.213...v1.0.0-alpha.214) (2024-09-09)
+
+
+### Bug Fixes
+
+* can't load older config.json [#1215](https://github.com/Opla/opla/issues/1215) ([#1216](https://github.com/Opla/opla/issues/1216)) ([8a2e963](https://github.com/Opla/opla/commit/8a2e963f1af9e4a357128680ab76bca304efa068))
+
 # [1.0.0-alpha.213](https://github.com/Opla/opla/compare/v1.0.0-alpha.212...v1.0.0-alpha.213) (2024-08-01)
 
 

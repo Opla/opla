@@ -1,6 +1,6 @@
 {
   "name": "opla",
-  "version": "1.0.0-alpha.213",
+  "version": "1.0.0-alpha.214",
   "private": true,
   "type": "module",
   "scripts": {
@@ -72,7 +72,6 @@
   "devDependencies": {
     "@eslint/compat": "^1.1.1",
     "@eslint/eslintrc": "^3.1.0",
-    "@eslint/js": "^9.7.0",
     "@eslint/js": "^9.9.1",
     "@tauri-apps/cli": "1.6.1",
     "@types/node": "^22",
