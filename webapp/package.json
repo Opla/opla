@@ -51,7 +51,7 @@
     "react-dom": "^18",
     "react-i18next": "^15.0.0",
     "react-katex": "^3.0.1",
-    "react-keyed-flatten-children": "^3.0.0",
+    "react-keyed-flatten-children": "^3.0.2",
     "react-resizable-panels": "^2.0.20",
     "rehype-highlight": "^7.0.0",
     "rehype-katex": "^7.0.1",
