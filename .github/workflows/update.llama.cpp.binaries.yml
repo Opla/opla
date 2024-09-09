@@ -48,7 +48,7 @@ jobs:
           curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -L -o ./${{ env.WINDOWS_x86_64_ZIP }} ${{ env.ASSETS_URL }}${{ env.TAG }}/llama-${{ env.TAG }}-bin-${{ env.WINDOWS_x86_64_ZIP }}
           unzip ./${{ env.WINDOWS_x86_64_ZIP }}
           ls ./
-          mv build/bin/llama-server.exe ../${{ env.BINARIES_DIR }}${{ env.WINDOWS_x86_64 }}
+          mv llama-server.exe ../${{ env.BINARIES_DIR }}${{ env.WINDOWS_x86_64 }}
           rm -rf ./*
 
           cd ..
