@@ -1,3 +1,10 @@
+# [1.0.0-alpha.216](https://github.com/Opla/opla/compare/v1.0.0-alpha.215...v1.0.0-alpha.216) (2024-09-10)
+
+
+### Bug Fixes
+
+* null is not an object eval target[key] [#1233](https://github.com/Opla/opla/issues/1233) ([#1234](https://github.com/Opla/opla/issues/1234)) ([83cff3c](https://github.com/Opla/opla/commit/83cff3cf050aa27c299c1bccc2db93fcb02dab24))
+
 # [1.0.0-alpha.215](https://github.com/Opla/opla/compare/v1.0.0-alpha.214...v1.0.0-alpha.215) (2024-09-10)
 
 
