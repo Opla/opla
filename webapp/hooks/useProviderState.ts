@@ -46,6 +46,7 @@ const useProviderState = (providerId?: string, newProvider?: Provider) => {
     } else if (p && hasParametersChanged) {
       p = deepMerge(p, updatedProvider);
     }
+
     if (p?.type === ProviderType.opla) {
       p.disabled = server.status === ServerStatus.STOPPED;
     }

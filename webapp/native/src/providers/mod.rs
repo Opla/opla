@@ -21,7 +21,7 @@ use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::{
-    data::provider::{Provider, ProviderMetadata, ProviderType}, store::server::{ ServerConfiguration, ServerStorage }, utils::http_client::{ HttpChunk, NewHttpError }, OplaContext, Payload, ServerStatus
+    data::provider::{Provider, ProviderType}, store::server::{ ServerConfiguration, ServerStorage }, utils::http_client::{ HttpChunk, NewHttpError }, OplaContext, Payload, ServerStatus
 };
 
 use self::{
@@ -183,9 +183,7 @@ impl ProvidersManager {
             disabled: Some(false),
             key: None,
             doc_url: Some("https://opla.ai/docs".to_string()),
-            metadata: Option::Some(ProviderMetadata {
-                server: Some(server.clone()),
-            }),
+            metadata: Option::Some(server.configuration.parameters.clone()),
             models: None,
             errors: None,
         }

@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::HashMap;
-
 use tauri::{ Runtime, State };
-use crate::{store::server::ServerParameter, OplaContext, Payload};
+use crate::{data::Metadata, OplaContext, Payload};
 
 #[tauri::command]
 pub async fn get_opla_server_status<R: Runtime>(
@@ -32,12 +30,7 @@ pub async fn start_opla_server<R: Runtime>(
     app: tauri::AppHandle<R>,
     _window: tauri::Window<R>,
     context: State<'_, OplaContext>,
-    parameters: HashMap<String, ServerParameter>,
-    /* port: i32,
-    host: String,
-    context_size: i32,
-    threads: i32,
-    n_gpu_layers: i32 */
+    parameters: Metadata,
 ) -> Result<Payload, String> {
     println!("Opla try to start ");
     let mut store = context.store.lock().await;
