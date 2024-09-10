@@ -17,9 +17,9 @@ use std::fmt;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::{data::option_date_format, store::server::ServerStorage};
+use crate::data::option_date_format;
 
-use super::model::Model;
+use super::{model::Model, Metadata};
 
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -46,11 +46,6 @@ impl fmt::Display for ProviderType {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ProviderMetadata {
-    pub server: Option<ServerStorage>,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Provider {
     pub id: String,
     pub name: String,
@@ -68,7 +63,7 @@ pub struct Provider {
     pub disabled: Option<bool>,
     pub models: Option<Vec<Model>>,
     pub errors: Option<Vec<String>>,
-    pub metadata: Option<ProviderMetadata>,
+    pub metadata: Option<Metadata>,
 }
 
 fn default_url() -> String {

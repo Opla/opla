@@ -100,7 +100,7 @@ export default function ExplorerList<T>({
           const menuItems = menu?.(item as T);
           return (
             <li
-              key={item.id}
+              key={`${item.id}-${item.name}`}
               className={cn(
                 selectedId === item.id ? 'text-foreground' : 'text-muted-foreground',
                 'rounded-md px-2 py-2 transition-colors duration-200 hover:bg-foreground/10',

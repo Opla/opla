@@ -15,6 +15,9 @@
 use std::collections::HashMap;
 use serde::{ Deserialize, Serialize };
 
+use crate::data::{Metadata, MetadataValue};
+
+/*
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum ServerParameter {
@@ -55,7 +58,7 @@ impl ServerParameter {
             _ => default_value,
         }
     }
-}
+} */
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub enum ServerParameterType {
@@ -124,7 +127,7 @@ pub struct ServerParameterDefinition<'a> {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ServerConfiguration {
     pub name: String,
-    pub parameters: HashMap<String, ServerParameter>,
+    pub parameters: Metadata,
 }
 
 impl ServerConfiguration {
@@ -133,7 +136,7 @@ impl ServerConfiguration {
     }
 
     pub fn set_parameter_string(&mut self, key: &str, value: String) {
-        self.parameters.insert(key.to_string(), ServerParameter::String(value));
+        self.parameters.insert(key.to_string(), MetadataValue::String(value));
     }
 
     pub fn get_parameter_string(&self, key: &str, default_value: String) -> String {
@@ -148,7 +151,7 @@ impl ServerConfiguration {
     }
 
     pub fn set_parameter_int(&mut self, key: &str, value: i32) {
-        self.parameters.insert(key.to_string(), ServerParameter::Integer(value));
+        self.parameters.insert(key.to_string(), MetadataValue::Integer(value));
     }
 
     pub fn get_parameter_int(&self, key: &str, default_value: i32) -> i32 {
@@ -267,17 +270,17 @@ pub struct ServerStorage {
 
 impl ServerStorage {
     pub fn default() -> Self {
-        let mut server_parameters: HashMap<String, ServerParameter> = HashMap::new();
-        server_parameters.insert("port".to_string(), ServerParameter::Integer(8081));
+        let mut server_parameters: Metadata = HashMap::new();
+        server_parameters.insert("port".to_string(), MetadataValue::Integer(8081));
         server_parameters.insert(
             "host".to_string(),
-            ServerParameter::String("127.0.0.1".to_string())
+            MetadataValue::String("127.0.0.1".to_string())
         );
-        server_parameters.insert("model_id".to_string(), ServerParameter::Option(None));
-        server_parameters.insert("model_path".to_string(), ServerParameter::Option(None));
-        server_parameters.insert("context_size".to_string(), ServerParameter::Integer(512));
-        server_parameters.insert("threads".to_string(), ServerParameter::Integer(6));
-        server_parameters.insert("n_gpu_layers".to_string(), ServerParameter::Integer(0));
+        server_parameters.insert("model_id".to_string(), MetadataValue::Option(None));
+        server_parameters.insert("model_path".to_string(), MetadataValue::Option(None));
+        server_parameters.insert("context_size".to_string(), MetadataValue::Integer(512));
+        server_parameters.insert("threads".to_string(), MetadataValue::Integer(6));
+        server_parameters.insert("n_gpu_layers".to_string(), MetadataValue::Integer(0));
         ServerStorage {
             launch_at_startup: true,
             binary: String::from("binaries/llama.cpp/llama.cpp.server"),

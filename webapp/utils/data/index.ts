@@ -47,20 +47,25 @@ const createBaseNamedRecord = <T>(name: string, template?: Partial<T>): T => {
 const deepCopy = <T>(obj: T): T =>
   window?.structuredClone ? window.structuredClone(obj) : (JSON.parse(JSON.stringify(obj)) as T);
 
-const deepMerge = <T>(_target: T, source: Partial<T>, copy = false): T => {
-  const target = (copy ? deepCopy<T>(_target) : _target) as Record<string, unknown>;
+const deepMerge = <T>(_target: T, source: Partial<T>, copy = false, depth = 0): T => {
+  let target = (copy ? deepCopy<T>(_target) : _target) as Record<string, unknown>;
   const obj = source as Record<string, unknown>;
   Object.keys(obj).forEach((key: string) => {
     const value = obj[key];
+    // console.log('target', depth, target, value, key, obj);
     if (value !== null && typeof value === 'object') {
+      if (!target) {
+        target = {};
+      }
       if (typeof target[key] !== 'object') {
         target[key] = {};
       }
-      deepMerge(target[key], value);
+      target[key] = deepMerge(target[key], value, copy, depth + 1);
     } else {
       target[key] = value;
     }
   });
+  // console.log('return target', depth, target, source);
   return target as T;
 };
 

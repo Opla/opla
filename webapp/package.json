@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "precommit-lint": "../node_modules/.bin/tsc --noEmit && ../node_modules/.bin/eslint --fix . && npx prettier --write .",
+    "lint:fix": "../node_modules/.bin/tsc --noEmit && ../node_modules/.bin/eslint --fix . && npx prettier --write .",
     "test": "",
     "tauri": "tauri",
     "help": "next -v"

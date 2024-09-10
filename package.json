@@ -8,7 +8,7 @@
         "start": "cd webapp && npm run start",
         "lint": "cd webapp && npm run lint",
         "test": "cd webapp && npm run test",
-        "precommit-lint": "cd webapp && npm run precommit-lint",
+        "lint:fix": "cd webapp && npm run lint:fix",
         "prepare": "husky install",
         "tauri": "cd webapp && npm run tauri",
         "docs": "cd docs && npm run start",

@@ -58,7 +58,7 @@ type ParameterProps = {
   disabled?: boolean;
   className?: string;
   children?: React.ReactNode;
-  onChange?: (name: string, value: ParameterValue) => void;
+  onChange?: (name: string, value: ParameterValue | undefined) => void;
   onAction?: () => void;
 };
 
@@ -113,10 +113,10 @@ export default function Parameter({
               // e.preventDefault();
               // const v = type === 'number' ? parseInt(e.target.value, 10) : e.target.value;
               const v = e.target.value;
-              onChange(
-                name,
-                v.split(',').map((r, i) => ({ id: `name-${i}`, name: r })) as BaseNamedRecord[],
-              );
+              const vv = v
+                .split(',')
+                .map((r, i) => ({ id: `name-${i}`, name: r })) as BaseNamedRecord[];
+              onChange(name, vv);
             }}
           />
         </div>
@@ -179,8 +179,12 @@ export default function Parameter({
             step="any"
             onChange={(e) => {
               // e.preventDefault();
-              const v = type === 'number' ? parseInt(e.target.value, 10) : e.target.value;
-              // const v = e.target.value;
+              let v;
+              if (e.target.value === '') {
+                v = undefined;
+              } else {
+                v = type === 'number' ? parseInt(e.target.value, 10) : e.target.value;
+              }
               onChange(name, v);
             }}
           />

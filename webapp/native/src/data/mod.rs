@@ -40,8 +40,42 @@ pub fn is_false(b: &bool) -> bool {
 pub enum MetadataValue {
     String(String),
     Number(f32),
+    Integer(i32),
     Boolean(bool),
+    Option(Option<String>),
     Metadata(HashMap<String, MetadataValue>),
+}
+
+impl MetadataValue {
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::String(i) => i.to_string(),
+            _ => format!("{:?}", &self),
+        }
+    }
+
+    pub fn to_int(&self, default_value: i32) -> i32 {
+        match self {
+            Self::Integer(i) => *i,
+            Self::Number(f) => *f as i32,
+            _ => default_value,
+        }
+    }
+
+    pub fn to_float(&self, default_value: f32) -> f32 {
+        match self {
+            Self::Integer(i) => *i as f32,
+            Self::Number(f) => *f,
+            _ => default_value,
+        }
+    }
+
+    pub fn to_bool(&self, default_value: bool) -> bool {
+        match self {
+            Self::Boolean(v) => *v,
+            _ => default_value,
+        }
+    }
 }
 
 pub type Metadata = HashMap<String, MetadataValue>;
