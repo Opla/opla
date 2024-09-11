@@ -32,13 +32,11 @@ import {
   ServerParameters,
   AIServiceType,
   Streams,
-  Store,
   OplaServer,
   MessageStatus,
   Message,
   AIService,
 } from '@/types';
-import { getOplaConfig } from '@/utils/backend/commands';
 import Backend, { BackendResult } from '@/utils/backend/Backend';
 import { deepCopy, mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
@@ -60,22 +58,6 @@ const initialBackendContext: OplaContext = {
     stdout: [],
     stderr: [],
   },
-  config: {
-    /* settings: {
-      startApp: false,
-      welcomeSplash: false,
-    }, */
-    server: {
-      name: '',
-      binary: '',
-      parameters: {},
-    },
-    /* models: {
-      items: [],
-      path: '',
-    }, */
-    // services: {},
-  },
 };
 
 type Context = OplaContext & {
@@ -94,7 +76,6 @@ type Context = OplaContext & {
 
 const defaultContext: Context = {
   server: initialBackendContext.server,
-  config: initialBackendContext.config,
   settings: {
     startApp: false,
     welcomeSplash: false,
@@ -116,9 +97,6 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   const [server, saveServer] = useState<OplaServer>(defaultContext.server);
   const serverRef = useRef<OplaServer>(server);
 
-  const [config, saveConfig] = useState<Store>(defaultContext.config);
-  const configRef = useRef<Store>(config);
-
   const [downloads, saveDownloads] = useState<Download[]>();
   const downloadsRef = useRef<Download[] | undefined>(downloads);
   const [streams, saveStreams] = useState<Streams>();
@@ -137,12 +115,6 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     saveServer(updatedServer);
   };
 
-  const updateConfig = (partials: Partial<Store>) => {
-    const updatedConfig: Store = { ...configRef.current, ...partials } as Store;
-    configRef.current = updatedConfig;
-    saveConfig(updatedConfig);
-  };
-
   const updateDownloads = (updatedDownloads: Download[]) => {
     downloadsRef.current = updatedDownloads;
     saveDownloads(updatedDownloads);
@@ -152,12 +124,6 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     streamsRef.current = updatedStreams;
     saveStreams(updatedStreams);
   };
-
-  const updateBackendStore = useCallback(async () => {
-    logger.info('updateBackendStore');
-    const store = await getOplaConfig();
-    updateConfig(store);
-  }, []);
 
   const updateBackendServer = useCallback(async (partials: Partial<OplaServer>) => {
     updateServer(partials);
@@ -296,34 +262,31 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     [activeService, setActiveService],
   );
 
-  const downloadListener = useCallback(
-    async (event: any) => {
-      if (event.event === 'opla-downloader') {
-        const [type, download]: [string, Download] = await mapKeys(event.payload, toCamelCase);
+  const downloadListener = useCallback(async (event: any) => {
+    if (event.event === 'opla-downloader') {
+      const [type, download]: [string, Download] = await mapKeys(event.payload, toCamelCase);
 
-        if (type === 'progress') {
-          const currentDownloads = deepCopy(downloadsRef.current || []);
-          const index = currentDownloads.findIndex((d) => d.id === download.id);
-          if (index === -1) {
-            currentDownloads.push(download);
-          } else {
-            currentDownloads[index] = download;
-          }
-          updateDownloads(currentDownloads);
-        } else if (type === 'finished' || type === 'canceled') {
-          const currentDownloads = downloadsRef.current || [];
-          const index = currentDownloads.findIndex((d) => d.id === download.id);
-          logger.info(`download ${type}`, index, download);
-          if (index !== -1) {
-            currentDownloads.splice(index, 1);
-            updateDownloads(currentDownloads);
-          }
-          updateBackendStore();
+      if (type === 'progress') {
+        const currentDownloads = deepCopy(downloadsRef.current || []);
+        const index = currentDownloads.findIndex((d) => d.id === download.id);
+        if (index === -1) {
+          currentDownloads.push(download);
+        } else {
+          currentDownloads[index] = download;
         }
+        updateDownloads(currentDownloads);
+      } else if (type === 'finished' || type === 'canceled') {
+        const currentDownloads = downloadsRef.current || [];
+        const index = currentDownloads.findIndex((d) => d.id === download.id);
+        logger.info(`download ${type}`, index, download);
+        if (index !== -1) {
+          currentDownloads.splice(index, 1);
+          updateDownloads(currentDownloads);
+        }
+        // updateBackendStore();
       }
-    },
-    [updateBackendStore],
-  );
+    }
+  }, []);
 
   const streamListener = useCallback(async (event: any) => {
     const response = (await mapKeys(event.payload, toCamelCase)) as StreamPayload;
@@ -399,9 +362,9 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     const backendImplContext: OplaContext = await backendImpl.connect(listeners);
     logger.info('connected backend impl', backendImpl);
     updateServer(backendImplContext.server);
-    updateConfig(backendImplContext.config);
+    // updateConfig(backendImplContext.config);
 
-    logger.info('start backend', /* opla.metadata, */ backendImplContext.config.server.parameters);
+    logger.info('start backend' /* opla.metadata, */);
     // const metadata = opla.metadata as Metadata;
     // metadata.server = backendImplContext.config.server as Metadata;
     // setProviders(providers);
@@ -469,7 +432,6 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     () => ({
       server,
       activeService,
-      config,
       downloads,
       streams,
 
@@ -487,7 +449,6 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       server,
-      config,
       downloads,
       streams,
       settings,

@@ -441,12 +441,11 @@ export type Settings = {
 };
 
 export type ServerParameters = {
-  [key: string]: string | number | boolean | undefined;
+  [key: string]: string | number | boolean | ServerParameters | undefined;
 };
 
 export type ServerConfiguration = {
   name: string;
-  binary?: string;
   parameters: ServerParameters;
 };
 
@@ -513,7 +512,7 @@ export type Streams = Record<string, LlmStreamResponse>;
 
 export type OplaContext = Readonly<{
   server: OplaServer;
-  config: Store;
+  // config: Store;
   downloads?: Download[];
   streams?: Streams;
 }>;

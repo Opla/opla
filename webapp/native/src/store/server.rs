@@ -14,51 +14,16 @@
 
 use std::collections::HashMap;
 use serde::{ Deserialize, Serialize };
+use tauri::{ AppHandle, Manager, Runtime };
+use tokio::spawn;
 
-use crate::data::{Metadata, MetadataValue};
+use crate::{
+    data::{ Metadata, MetadataValue },
+    store::app_state::{ Empty, GlobalAppState, Payload, Value, STATE_SYNC_EVENT },
+    OplaContext,
+};
 
-/*
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(untagged)]
-pub enum ServerParameter {
-    String(String),
-    Number(f32),
-    Integer(i32),
-    Boolean(bool),
-    Option(Option<String>),
-}
-
-impl ServerParameter {
-    pub fn to_string(&self) -> String {
-        match self {
-            Self::String(i) => i.to_string(),
-            _ => format!("{:?}", &self),
-        }
-    }
-
-    pub fn to_int(&self, default_value: i32) -> i32 {
-        match self {
-            Self::Integer(i) => *i,
-            Self::Number(f) => *f as i32,
-            _ => default_value,
-        }
-    }
-
-    pub fn to_float(&self, default_value: f32) -> f32 {
-        match self {
-            Self::Integer(i) => *i as f32,
-            Self::Number(f) => *f,
-            _ => default_value,
-        }
-    }
-
-    pub fn to_bool(&self, default_value: bool) -> bool {
-        match self {
-            Self::Boolean(v) => *v,
-            _ => default_value,
-        }
-    }
-} */
+use super::app_state::STATE_CHANGE_EVENT;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub enum ServerParameterType {
@@ -289,5 +254,81 @@ impl ServerStorage {
                 parameters: server_parameters,
             },
         }
+    }
+
+    async fn emit_state_async(payload: Payload, app_handle: AppHandle) {
+        let context = app_handle.state::<OplaContext>();
+        let value = match payload.value {
+            Some(v) => v,
+            None => Value::Empty(Empty {}),
+        };
+        println!("Server emit state sync: {} {:?}", payload.key, value);
+        match GlobalAppState::from(payload.key) {
+            GlobalAppState::SERVER => {
+                let mut store = context.store.lock().await;
+                if let Value::Server(data) = value {
+                    store.server = data.server.clone();
+                    if let Err(error) = store.save() {
+                        println!("Error can't save server store: {:?}", error);
+                    }
+                } else if let Value::Empty(_) = value {
+                } else {
+                    println!("Error wrong type of value: {} {:?}", payload.key, value);
+                    return;
+                }
+
+                app_handle
+                    .emit_all(STATE_SYNC_EVENT, Payload {
+                        key: payload.key,
+                        value: Some(
+                            Value::Server(crate::store::app_state::ValueServer {
+                                server: store.server.clone(),
+                            })
+                        ),
+                    })
+                    .unwrap();
+            }
+            _ => {}
+        }
+    }
+
+
+    pub fn emit_update_all<R: Runtime>(&mut self, app_handle: AppHandle<R>) {
+        let app_handle = app_handle.app_handle();
+        let server = self.clone();
+        spawn(async move { 
+            // Self::emit_state_async(data, app_handle).await 
+            app_handle
+            .emit_all(STATE_SYNC_EVENT, Payload {
+                key: GlobalAppState::SERVER.into(),
+                value: Some(
+                    Value::Server(crate::store::app_state::ValueServer {
+                        server,
+                    })
+                ),
+            })
+            .unwrap();
+        });
+    }
+
+    pub fn subscribe_state_events(&mut self, app_handle: AppHandle) {
+        let app_handle_copy = app_handle.app_handle();
+        let _id = app_handle.listen_global(STATE_CHANGE_EVENT, move |event| {
+            if let Some(payload) = event.payload() {
+                match serde_json::from_str(payload) {
+                    Ok(data) => {
+                        let app_handle = app_handle_copy.app_handle();
+                        spawn(async move { Self::emit_state_async(data, app_handle).await });
+                    }
+                    Err(e) => {
+                        println!("Failed to deserialize payload: {}", e);
+                    }
+                }
+            }
+        });
+    }
+
+    pub fn init(&mut self, app_handle: AppHandle) {
+        self.subscribe_state_events(app_handle.app_handle());
     }
 }

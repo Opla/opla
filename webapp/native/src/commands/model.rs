@@ -276,6 +276,7 @@ pub async fn set_active_model<R: Runtime>(
     let mut store = context.store.lock().await;
     let result = store.models.get_model(model_id.as_str());
     let provider_name: String;
+    let mut status = ServerStatus::Started;
     if result.is_none() && (provider.is_none() || provider.as_deref() == Some("Opla")) {
         return Err(format!("Model not found: {:?}", model_id));
     } else if provider.is_some() {
@@ -287,22 +288,25 @@ pub async fn set_active_model<R: Runtime>(
     }
     if provider_name == "Opla" {
         let server = context.server.lock().await;
-        let status = match server.status.try_lock() {
-            Ok(status) => status,
+        status = match server.status.try_lock() {
+            Ok(s) => s.to_owned(),
             Err(_) => {
                 println!("Opla server error try to read status");
                 return Err("Opla server can't read status".to_string());
             }
         };
         if
-            status.to_owned() != ServerStatus::Started ||
-            status.to_owned() != ServerStatus::Starting
+            status != ServerStatus::Started ||
+            status != ServerStatus::Starting
         {
             store.server.configuration.set_parameter_string("model_id", model_id);
             store.server.configuration.remove_parameter("model_path");
         }
     }
     store.save().map_err(|err| err.to_string())?;
+    if status != ServerStatus::Started || status != ServerStatus::Starting {
+        store.server.emit_update_all(app.app_handle());
+    }
     store.models.emit_update_all(app.app_handle());
 
     Ok(())

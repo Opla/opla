@@ -14,6 +14,7 @@
 
 use std::path::{ Path, PathBuf };
 
+use crate::store::server::ServerStorage;
 use crate::store::{settings::Settings, Store};
 use crate::OplaContext;
 use crate::sys::SysInfos;
@@ -46,6 +47,16 @@ pub async fn get_opla_configuration<R: Runtime>(
 ) -> Result<Store, String> {
     let store = context.store.lock().await;
     Ok(store.clone())
+}
+
+#[tauri::command]
+pub async fn get_server_configuration<R: Runtime>(
+    _app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>
+) -> Result<ServerStorage, String> {
+    let store = context.store.lock().await;
+    Ok(store.server.clone())
 }
 
 #[tauri::command]

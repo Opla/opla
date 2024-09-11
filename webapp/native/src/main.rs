@@ -353,6 +353,7 @@ fn main() {
             tauri::generate_handler![
                 crate::commands::get_sys,
                 crate::commands::get_opla_configuration,
+                crate::commands::get_server_configuration,
                 crate::commands::save_settings,
                 crate::commands::get_config_path,
                 crate::commands::get_data_path,

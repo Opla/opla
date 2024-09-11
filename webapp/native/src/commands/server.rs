@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use tauri::{ Runtime, State };
+use tauri::{ Manager, Runtime, State };
 use crate::{data::Metadata, OplaContext, Payload};
 
 #[tauri::command]
@@ -55,17 +55,11 @@ pub async fn start_opla_server<R: Runtime>(
         }
     };
     store.server.launch_at_startup = true;
-    /* store.server.configuration.set_parameter_int("port", port);
-    store.server.configuration.set_parameter_string("host", host);
-    store.server.configuration.set_parameter_string("model_id", model_id);
-    store.server.configuration.set_parameter_string("model_path", model_path);
-    store.server.configuration.set_parameter_int("context_size", context_size);
-    store.server.configuration.set_parameter_int("threads", threads);
-    store.server.configuration.set_parameter_int("n_gpu_layers", n_gpu_layers); */
     store.server.configuration.parameters = parameters.clone();
     store.server.configuration.set_parameter_string("model_id", model_id);
     store.server.configuration.set_parameter_string("model_path", model_path);
     store.save().map_err(|err| err.to_string())?;
+    store.server.emit_update_all(app.app_handle());
     let mut server = context.server.lock().await;
     server.start(app, &store.server.configuration).await
 }

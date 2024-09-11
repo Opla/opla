@@ -26,7 +26,7 @@ import { Toaster } from '@/components/ui/Toast';
 import logger from '@/utils/logger';
 import { Page } from '@/types/ui';
 import useTheme from '@/hooks/useTheme';
-import { useProviderStore } from '@/stores';
+import { useProviderStore, useServerStore } from '@/stores';
 import Statusbar from './common/Statusbar';
 import { TooltipProvider } from './ui/tooltip';
 import Loading from './common/Loading';
@@ -36,8 +36,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const { providers } = useProviderStore();
   const router = useRouter();
-
-  const { startBackend, disconnectBackend, settings, config, setSettings } = useBackendContext();
+  const { serverConfig: config } = useServerStore();
+  const { startBackend, disconnectBackend, settings, setSettings } = useBackendContext();
 
   const { showModal } = useRegisterModals(Modals);
   const { toggleTheme } = useTheme();
