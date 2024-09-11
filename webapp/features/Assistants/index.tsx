@@ -15,7 +15,7 @@
 import { useEffect, useRef } from 'react';
 import MainView from '@/components/common/MainView';
 import { StorageState } from '@/stores/types';
-import { useAssistantStore, useModelsStore, useProviderStore } from '@/stores';
+import { useAssistantStore, useModelsStore, useProviderStore, useServerStore } from '@/stores';
 import Explorer from './Explorer';
 import Assistant from './Assistant';
 
@@ -27,15 +27,17 @@ export default function Assistants({ selectedAssistantId }: AssistantProps) {
   const { state, loadAssistants } = useAssistantStore();
   const { loadProviders } = useProviderStore();
   const { loadModels } = useModelsStore();
+  const { loadServerConfig } = useServerStore();
   const init = useRef<boolean>(true);
   useEffect(() => {
     if (init.current && state === StorageState.INIT) {
       init.current = false;
+      loadServerConfig();
       loadAssistants();
       loadProviders();
       loadModels();
     }
-  }, [state, loadAssistants, loadModels, loadProviders]);
+  }, [state, loadAssistants, loadModels, loadProviders, loadServerConfig]);
 
   return <MainView selectedId={selectedAssistantId} explorer={Explorer} contentView={Assistant} />;
 }

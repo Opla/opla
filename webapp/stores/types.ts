@@ -36,6 +36,8 @@ export enum GlobalAppState {
   SERVICES = 13,
 
   MODELS = 14,
+
+  SERVER = 16,
 }
 
 export const EVENTS: {

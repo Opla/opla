@@ -153,7 +153,7 @@ export default function useScroll(
               rect: undefined,
             });
           }
-          logger.info('handleResize not scroll', rect, contentRect, currentRect, position);
+          // logger.info('handleResize not scroll', rect, contentRect, currentRect, position);
           return;
         }
         const resizedRect = containerRectToPercentage(

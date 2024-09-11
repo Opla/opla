@@ -24,13 +24,14 @@ import { Sys } from '@/types';
 import { ModalsContext } from '@/modals/context';
 import logger from '@/utils/logger';
 import { findModel } from '@/utils/data/models';
-import { useModelsStore, useUsageStorage } from '@/stores';
+import { useModelsStore, useServerStore, useUsageStorage } from '@/stores';
 
 export default function Statusbar() {
   const router = useRouter();
   const { pathname } = router;
   const { t } = useTranslation();
-  const { server, config, downloads } = useBackend();
+  const { server, downloads } = useBackend();
+  const { serverConfig: config } = useServerStore();
   const models = useModelsStore();
   const { usage } = useUsageStorage();
   const [sys, setSys] = useState<Sys>();
@@ -48,7 +49,7 @@ export default function Statusbar() {
   const running = server.status === 'started';
   const error = server.status === 'error';
 
-  const modelId = config.server.parameters.modelId as string;
+  const modelId = config.parameters.modelId as string;
   const model = findModel(modelId, models.items);
   const download = (downloads ?? [undefined])[0];
 

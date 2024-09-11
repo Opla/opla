@@ -27,28 +27,28 @@ use super::{ services::HttpService, ProviderAdapter, ServerParameters };
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmError {
     pub message: String,
-    pub status: String,
+    pub status: Option<String>,
 }
 
 impl LlmError {
     pub fn new(msg: &str, status: &str) -> LlmError {
-        LlmError { message: msg.to_string(), status: status.to_string() }
+        LlmError { message: msg.to_string(), status: Some(status.to_string()) }
     }
 
     pub fn to_string(&self) -> String {
-        return format!("{}: {}", self.status, self.message);
+        return format!("{:?}: {}", self.status, self.message);
     }
 }
 
 impl NewHttpError for LlmError {
     fn new(msg: &str, status: &str) -> Self {
-        LlmError { message: msg.to_string(), status: status.to_string() }
+        LlmError { message: msg.to_string(), status: Some(status.to_string()) }
     }
 }
 
 impl fmt::Display for LlmError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}: {}", self.status, self.message)
+        write!(f, "{:?}: {}", self.status, self.message)
     }
 }
 
@@ -62,7 +62,7 @@ impl HttpError for LlmError {
     fn to_error(&self, status: String) -> Box<dyn std::error::Error> {
         let error = LlmError {
             message: format!("HTTP error {} : {}", status, self.message.to_string()),
-            status: "http_error".to_string(),
+            status: Some("http_error".to_string()),
         };
         Box::new(error)
     }

@@ -181,7 +181,7 @@ impl HttpError for LlamaCppCompletionResponse {
     fn to_error(&self, status: String) -> Box<dyn std::error::Error> {
         let error = LlmError {
             message: format!("HTTP error {} : {}", status, self.content.to_string()),
-            status: "http_error".to_string(),
+            status: Some("http_error".to_string()),
         };
         Box::new(error)
     }

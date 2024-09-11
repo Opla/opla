@@ -25,7 +25,7 @@ use crate::data::{
     Preset,
 };
 
-use super::{ model::ModelStorage, service::ServiceStorage, settings::Settings };
+use super::{ model::ModelStorage, server::ServerStorage, service::ServiceStorage, settings::Settings };
 
 pub const STATE_CHANGE_EVENT: &str = "state_change_event";
 pub const STATE_SYNC_EVENT: &str = "state_sync_event";
@@ -56,6 +56,8 @@ pub enum GlobalAppState {
     SERVICES = 13,
 
     MODELS = 14,
+
+    SERVER = 16,
 }
 
 impl From<u32> for GlobalAppState {
@@ -76,6 +78,7 @@ impl From<u32> for GlobalAppState {
             13 => GlobalAppState::SERVICES,
             14 => GlobalAppState::MODELS,
             15 => GlobalAppState::ALLCONVERSATIONS,
+            16 => GlobalAppState::SERVER,
             _ => {
                 println!("Not a valid value for the enum GlobalAppState");
                 GlobalAppState::ERROR
@@ -113,6 +116,8 @@ impl Into<u32> for GlobalAppState {
             GlobalAppState::SERVICES => 13,
 
             GlobalAppState::MODELS => 14,
+
+            GlobalAppState::SERVER => 16,
         }
     }
 }
@@ -168,6 +173,11 @@ pub struct ValueConversationMessages {
     pub messages: Option<Vec<Message>>,
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct ValueServer {
+    pub server: ServerStorage,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Value {
@@ -185,8 +195,10 @@ pub enum Value {
     AllConversations(ValueAllConversations),
     ConversationMessages(ValueConversationMessages),
     Conversations(ValueConversations),
+    Server(ValueServer),
     Empty(Empty),
     Messages(HashMap<String, Vec<Message>>),
+
 }
 
 // the payload type must implement `Serialize` and `Clone`.

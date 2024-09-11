@@ -139,6 +139,7 @@ impl Store {
             }
         };
         self.settings.init(app_handle.app_handle());
+        self.server.init(app_handle.app_handle());
         self.models.init(app_handle.app_handle());
         self.services.init(app_handle.app_handle());
         self.threads.init(app_handle.app_handle(), project_path).await;

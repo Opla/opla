@@ -14,7 +14,7 @@
 
 import { useEffect, useRef } from 'react';
 import MainView from '@/components/common/MainView';
-import { useModelsStore, useProviderStore } from '@/stores';
+import { useModelsStore, useProviderStore, useServerStore } from '@/stores';
 import { StorageState } from '@/stores/types';
 import Explorer from './Explorer';
 import ProviderView from './Provider';
@@ -22,14 +22,16 @@ import ProviderView from './Provider';
 export default function Providers({ selectedProviderId }: { selectedProviderId?: string }) {
   const { state, loadProviders } = useProviderStore();
   const { loadModels } = useModelsStore();
+  const { loadServerConfig } = useServerStore();
   const init = useRef<boolean>(true);
   useEffect(() => {
     if (init.current && state === StorageState.INIT) {
       init.current = false;
+      loadServerConfig();
       loadProviders();
       loadModels();
     }
-  }, [state, loadModels, loadProviders]);
+  }, [state, loadModels, loadProviders, loadServerConfig]);
   return (
     <MainView selectedId={selectedProviderId} explorer={Explorer} contentView={ProviderView} />
   );

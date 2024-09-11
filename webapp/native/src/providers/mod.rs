@@ -85,7 +85,7 @@ impl ProviderAdapter {
     {
         match self.interface.deserialize_response(&full) {
             Ok(response) => Ok(D::completion_to(response)),
-            Err(err) => Err(E::new(&err.message, &err.status)),
+            Err(err) => Err(E::new(&err.message, &err.status.unwrap_or_default())),
         }
     }
 
@@ -95,8 +95,8 @@ impl ProviderAdapter {
         match response {
             Ok(full) => {
                 match self.interface.deserialize_response_error(&full) {
-                    Ok(err) => E::new(&err.error.message, &err.error.status),
-                    Err(err) => E::new(&err.message, &err.status),
+                    Ok(err) => E::new(&err.error.message, &err.error.status.unwrap_or_default()),
+                    Err(err) => E::new(&err.message, &err.status.unwrap_or_default()),
                 }
             }
             Err(err) => err,
@@ -108,7 +108,7 @@ impl ProviderAdapter {
     {
         self.interface
             .build_stream_chunk(data, self.created)
-            .map_err(|e| E::new(&e.message, &e.status))
+            .map_err(|e| E::new(&e.message, &e.status.unwrap_or_default()))
     }
 
     pub fn handle_input_response(&mut self) {}
@@ -247,6 +247,7 @@ impl ProvidersManager {
         let mut store = context.store.lock().await;
         store.server.launch_at_startup = true;
         store.server.configuration = config.clone();
+        store.server.emit_update_all(app_handle.app_handle());
         store.save().map_err(|err| err.to_string())?;
         let mut interface = interface.clone();
         let parameters: ServerParameters = ServerParameters {

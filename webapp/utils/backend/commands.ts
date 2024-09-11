@@ -21,6 +21,7 @@ import {
   OplaServer,
   Payload,
   Provider,
+  ServerConfiguration,
   Settings,
   Store,
   Sys,
@@ -50,6 +51,11 @@ export const getOplaServer = async (): Promise<OplaServer> => {
 export const getOplaConfig = async (): Promise<Store> => {
   const store = await invokeTauri<Store>('get_opla_configuration');
   return mapKeys(store, toCamelCase);
+};
+
+export const getServerConfig = async (): Promise<ServerConfiguration> => {
+  const config = await invokeTauri<Store>('get_server_configuration');
+  return mapKeys(config, toCamelCase);
 };
 
 export const setActiveModel = async (modelId: string, provider?: string) => {

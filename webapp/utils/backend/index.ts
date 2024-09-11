@@ -16,16 +16,6 @@ import { OplaContext, ServerStatus } from '@/types';
 import logger from '../logger';
 
 const context: OplaContext = {
-  config: {
-    server: {
-      name: 'None',
-      parameters: {},
-    },
-    /* models: {
-      items: [],
-    }, */
-    // services: {},
-  },
   server: {
     status: ServerStatus.ERROR,
     message: 'no backend',

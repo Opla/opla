@@ -15,7 +15,7 @@
 import { useEffect, useRef } from 'react';
 
 import MainView from '@/components/common/MainView';
-import { useAssistantStore, useModelsStore, useProviderStore } from '@/stores';
+import { useAssistantStore, useModelsStore, useProviderStore, useServerStore } from '@/stores';
 import { StorageState } from '@/stores/types';
 import NewLocalModel from './NewLocalModel';
 import DownloadModel from './DownloadModel';
@@ -26,15 +26,17 @@ export default function Models({ selectedModelId }: { selectedModelId?: string }
   const { loadAssistants } = useAssistantStore();
   const { loadProviders } = useProviderStore();
   const { state, loadModels } = useModelsStore();
+  const { loadServerConfig } = useServerStore();
   const init = useRef<boolean>(true);
   useEffect(() => {
     if (init.current && state === StorageState.INIT) {
       init.current = false;
+      loadServerConfig();
       loadModels();
       loadAssistants();
       loadProviders();
     }
-  }, [state, loadAssistants, loadModels, loadProviders]);
+  }, [state, loadAssistants, loadModels, loadProviders, loadServerConfig]);
 
   return <MainView selectedId={selectedModelId} explorer={Explorer} contentView={ModelView} />;
 }

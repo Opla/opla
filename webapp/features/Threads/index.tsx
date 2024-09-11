@@ -39,6 +39,7 @@ import {
   useAssistantStore,
   useModelsStore,
   useProviderStore,
+  useServerStore,
   useThreadStore,
   useWorkspaceStore,
 } from '@/stores';
@@ -97,7 +98,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
   } = workspaceStorage;
 
   const { loadAllConversations: getAllConversations } = useThreadStore();
-
+  const { loadServerConfig } = useServerStore();
   const initStorage = useRef<boolean>(true);
 
   useEffect(() => {
@@ -106,6 +107,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
       logger.info('loadWorkspace', workspaceState, workspaces, activeWorkspace);
       loadWorkspace(activeWorkspace);
       // settingsStore.loadSettings();
+      loadServerConfig();
       loadProject();
       loadProviders();
       modelStorage.loadModels();
