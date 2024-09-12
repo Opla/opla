@@ -36,7 +36,7 @@ type ConversationListProps = {
   onChangeMessageContent: (m: Message, newContent: string, submit: boolean) => void;
   onStartMessageEdit: (messageId: string, index: number) => void;
   onCopyMessage: (messageId: string, state: boolean) => void;
-  onCancelSending: (messageId: string) => void;
+  onCancelSending: (conversationId: string, messageId: string) => void;
 };
 
 function ConversationList({
@@ -102,7 +102,7 @@ function ConversationList({
               }}
               onCopyMessage={onCopyMessage}
               onCancelSending={() => {
-                onCancelSending(m.id);
+                onCancelSending(conversation.id, m.id);
               }}
             />
           ))}

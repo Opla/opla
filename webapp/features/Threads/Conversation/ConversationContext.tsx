@@ -67,7 +67,7 @@ type Context = {
     submit: boolean,
   ) => Promise<void>;
   handleStartMessageEdit: (messageId: string, index: number) => void;
-  handleCancelSending: (messageId: string) => void;
+  handleCancelSending: (conversationId: string, messageId: string | undefined) => void;
 };
 
 type ConversationProviderProps = {
@@ -110,6 +110,7 @@ function ConversationProvider({
   const {
     conversations,
     messages: messagesCache,
+    updateConversationMessages,
     updateMessagesAndConversation,
   } = useThreadStore();
   const { parseAndValidatePrompt, clearPrompt } = useContext(PromptContext) || {};
@@ -580,37 +581,61 @@ function ConversationProvider({
   );
 
   const handleCancelSending = useCallback(
-    async (messageId: string) => {
-      if (selectedConversation && selectedModelId) {
-        try {
-          await cancelSending(
-            messageId,
-            selectedConversation,
-            selectedModelId,
-            assistant,
-            modelStorage,
-            activeService,
-          );
-        } catch (e) {
-          logger.error(e);
-          const conversationMessages = messagesCache[selectedConversation.id];
-          const previousMessage = conversationMessages.find((m) => m.id === messageId);
-          if (!previousMessage) {
-            logger.error(
-              "Can't find previous message",
-              messageId,
+    async (cId: string, messageId: string | undefined) => {
+      const cancelMessageSending = async (mId: string) => {
+        if (selectedConversation && selectedModelId) {
+          try {
+            await cancelSending(
+              mId,
               selectedConversation,
-              conversationMessages,
+              selectedModelId,
+              assistant,
+              modelStorage,
+              activeService,
             );
-            return;
+          } catch (e) {
+            logger.error(e);
+            const conversationMessages = messagesCache[selectedConversation.id];
+            const previousMessage = conversationMessages.find((m) => m.id === mId);
+            if (!previousMessage) {
+              logger.error(
+                "Can't find previous message",
+                mId,
+                selectedConversation,
+                conversationMessages,
+              );
+              return;
+            }
+            const updatedMessage = changeMessageContent(
+              previousMessage,
+              t('Cancelled'),
+              t('Cancelled'),
+              MessageStatus.Delivered,
+            );
+            await updateConversationMessages(
+              cId,
+              messagesCache[cId].map((m) => (m.id === mId ? updatedMessage : m)),
+            );
           }
-          changeMessageContent(
-            previousMessage,
-            t('Cancelled'),
-            t('Cancelled'),
-            MessageStatus.Delivered,
-          );
         }
+      };
+
+      if (messageId) {
+        await cancelMessageSending(messageId);
+      }
+      if (messagesCache[cId]) {
+        const promises = messagesCache[cId]
+          .map((message) => {
+            if (
+              messageId !== message.id &&
+              (message.status === 'pending' || message.status === 'stream')
+            ) {
+              return cancelMessageSending(message.id);
+            }
+            return undefined;
+          })
+          .filter((p) => !!p);
+        await Promise.all(promises);
       }
     },
     [
@@ -621,6 +646,7 @@ function ConversationProvider({
       selectedModelId,
       t,
       messagesCache,
+      updateConversationMessages,
     ],
   );
 

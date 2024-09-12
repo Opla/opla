@@ -56,7 +56,12 @@ export default function Prompt({
   isModelLoading,
 }: PromptProps) {
   const { t } = useTranslation();
-  const { isProcessing, errorMessages, handleSendMessage: sendMessage } = useConversationContext();
+  const {
+    isProcessing,
+    errorMessages,
+    handleSendMessage: sendMessage,
+    handleCancelSending,
+  } = useConversationContext();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [needFocus, setNeedFocus] = useState(false);
   const { usage, changedPrompt, conversationPrompt, setChangedPrompt, tokenValidator } =
@@ -66,6 +71,11 @@ export default function Prompt({
 
   const { conversations, updateConversations, messages, updateConversationMessages } =
     useThreadStore();
+
+  const handleCancel = (e: MouseEvent) => {
+    e.preventDefault();
+    handleCancelSending(conversationId, undefined);
+  };
 
   const handleSendMessage = (e: MouseEvent) => {
     e.preventDefault();
@@ -172,7 +182,8 @@ export default function Prompt({
     return undefined;
   }
 
-  let isLoading = conversationId ? isProcessing[conversationId] || false : false;
+  const isConnected = conversationId ? isProcessing[conversationId] || false : false;
+  let isLoading = false;
   let placeholder;
   if (isModelLoading || isModelLoading === undefined) {
     isLoading = true;
@@ -228,21 +239,21 @@ export default function Prompt({
               onValueChange={handleValueChange}
               onFocus={handleFocus}
               onKeyDown={handleKeypress}
-              disabled={isLoading || disabled}
+              disabled={isLoading || isConnected || disabled}
             />
           </PromptCommands>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                disabled={isLoading || prompt?.raw?.length === 0}
+                disabled={isLoading || (prompt?.raw?.length === 0 && !isConnected)}
                 type="button"
                 aria-label={t('Send')}
-                onClick={handleSendMessage}
+                onClick={isConnected ? handleCancel : handleSendMessage}
                 className="ml-2"
                 size="icon"
                 variant="outline"
               >
-                {isLoading ? (
+                {isLoading || isConnected ? (
                   <Loader2 strokeWidth={1.5} className="loading-icon h-4 w-4 animate-spin" />
                 ) : (
                   <SendHorizontal className="strokeWidth={1.5} h-4 w-4" />
@@ -250,14 +261,28 @@ export default function Prompt({
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right" sideOffset={12} className="mt-1">
-              <div className="flex w-full flex-row items-center justify-between gap-2 pb-2">
-                <p>{t(shortcutSend.description)}</p>
-                <ShortcutBadge command={shortcutSend.command} />
-              </div>
-              <div className="flex w-full flex-row items-center justify-between gap-2">
-                <p>{t(shortcutNewLine.description)}</p>
-                <ShortcutBadge command={shortcutNewLine.command} />
-              </div>
+              {!isLoading && !isConnected && (
+                <>
+                  <div className="flex w-full flex-row items-center justify-between gap-2 pb-2">
+                    <p>{t(shortcutSend.description)}</p>
+                    <ShortcutBadge command={shortcutSend.command} />
+                  </div>
+                  <div className="flex w-full flex-row items-center justify-between gap-2">
+                    <p>{t(shortcutNewLine.description)}</p>
+                    <ShortcutBadge command={shortcutNewLine.command} />
+                  </div>
+                </>
+              )}
+              {isLoading && (
+                <div className="flex w-full flex-row items-center justify-between gap-2 pb-2">
+                  <p>{t('Please wait...')}</p>
+                </div>
+              )}
+              {isProcessing && (
+                <div className="flex w-full flex-row items-center justify-between gap-2 pb-2">
+                  <p>{t('Cancel')}</p>
+                </div>
+              )}
             </TooltipContent>
           </Tooltip>
         </div>
