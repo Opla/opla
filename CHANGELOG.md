@@ -1,3 +1,10 @@
+# [1.0.0-alpha.218](https://github.com/Opla/opla/compare/v1.0.0-alpha.217...v1.0.0-alpha.218) (2024-09-12)
+
+
+### Features
+
+* error/payload management & typing [#1240](https://github.com/Opla/opla/issues/1240) ([#1241](https://github.com/Opla/opla/issues/1241)) ([5c956f5](https://github.com/Opla/opla/commit/5c956f577cd1f8954d4b17c0032a1f7c1dd07fd2))
+
 # [1.0.0-alpha.217](https://github.com/Opla/opla/compare/v1.0.0-alpha.216...v1.0.0-alpha.217) (2024-09-11)
 
 
