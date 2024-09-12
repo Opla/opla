@@ -27,7 +27,7 @@ import {
   OplaContext,
   ServerStatus,
   Settings,
-  LlmStreamResponse,
+  LlmStream,
   Download,
   ServerParameters,
   AIServiceType,
@@ -36,6 +36,7 @@ import {
   MessageStatus,
   Message,
   AIService,
+  LlmPayload,
 } from '@/types';
 import Backend, { BackendResult } from '@/utils/backend/Backend';
 import { deepCopy, mapKeys } from '@/utils/data';
@@ -46,11 +47,15 @@ import { ParsedPrompt } from '@/utils/parsers';
 import { parseLLamaCppServerParameters } from '@/utils/providers/llama.cpp';
 import { useServiceStore, useSettingsStore, useThreadStore } from '@/stores';
 
-type StreamPayload = {
-  status: 'error' | 'success';
-  content?: string;
-  conversationId?: string;
-};
+type StreamPayload = { status: string } & (
+  | LlmPayload
+  | {
+      status: 'error';
+      message: string;
+      conversationId: string;
+      messageId: string;
+    }
+);
 
 const initialBackendContext: OplaContext = {
   server: {
@@ -179,7 +184,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const afunc = async () => {
       if (streams) {
-        const finished = Object.keys(streams).filter((k) => streams[k].status === 'finished');
+        const finished = Object.keys(streams).filter((k) => streams[k]?.status === 'finished');
         if (finished.length === 1) {
           const stream = streams[finished[0]];
           await updateMessageContent(
@@ -194,7 +199,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
           logger.error('todo multi finished');
         }
 
-        const cancelled = Object.keys(streams).filter((k) => streams[k].status === 'cancel');
+        const cancelled = Object.keys(streams).filter((k) => streams[k]?.status === 'cancel');
         if (cancelled.length === 1) {
           const stream = streams[cancelled[0]];
           let content = stream.content?.join?.('').trim() || '';
@@ -283,39 +288,55 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
           currentDownloads.splice(index, 1);
           updateDownloads(currentDownloads);
         }
-        // updateBackendStore();
       }
     }
   }, []);
 
-  const streamListener = useCallback(async (event: any) => {
-    const response = (await mapKeys(event.payload, toCamelCase)) as StreamPayload;
-    if (response.status === 'error') {
-      logger.error('stream error', response);
-      return;
-    }
-    if (!response.conversationId) {
+  const streamListener = useCallback(async (event: { payload: unknown }) => {
+    const response = mapKeys<StreamPayload>(event.payload, toCamelCase);
+    const currentStreams: Streams = deepCopy(streamsRef.current || {});
+    const { conversationId } = response;
+
+    if (!conversationId) {
       logger.error('stream event without conversationId', response);
       return;
     }
-    const { conversationId } = response;
 
-    const currentStreams: Streams = deepCopy(streamsRef.current || {});
+    if (response.status === 'error') {
+      logger.error('stream error', response, currentStreams[conversationId]);
+      const stream: LlmStream = currentStreams[conversationId] || {
+        ...response,
+      };
+      stream.status = 'error';
+      stream.content = [response.message || 'Error in stream process'];
+      currentStreams[conversationId] = stream;
+      updateStreams(currentStreams);
+      const stderr = deepCopy(serverRef.current.stderr || []);
+      const len = stderr.unshift(response.message);
+      if (len > 50) {
+        stderr.pop();
+      }
+      updateServer({
+        stderr,
+      });
+      return;
+    }
+
     if (response.status === 'success') {
-      const stream = currentStreams[conversationId] || ({} as LlmStreamResponse);
-      if (stream.prevContent !== response.content && response.content) {
-        const content = stream.content || [];
+      const stream = currentStreams[conversationId];
+      if (!stream || (stream.prevContent !== response.content && response.content)) {
+        const content = stream?.content || [];
         content.push(response.content);
         currentStreams[conversationId] = {
           ...response,
           content,
           prevContent: response.content,
-        } as LlmStreamResponse;
+        };
         updateStreams(currentStreams);
       }
       return;
     }
-    if (response.status === 'finished' /* && currentStreams[conversationId] */) {
+    if (response.status === 'finished') {
       let stream = currentStreams[conversationId];
       if (stream) {
         stream.status = 'finished';
@@ -323,12 +344,12 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
         stream = {
           ...response,
           content: [response.content],
-        } as LlmStreamResponse;
+        };
       }
       currentStreams[conversationId] = stream;
       updateStreams(currentStreams);
     }
-    if (response.status === 'cancel' /* && currentStreams[conversationId] */) {
+    if (response.status === 'cancel') {
       let stream = currentStreams[conversationId];
       if (stream) {
         stream.status = 'cancel';
@@ -336,7 +357,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
         stream = {
           ...response,
           content: [response.content],
-        } as LlmStreamResponse;
+        };
       }
       currentStreams[conversationId] = stream;
       updateStreams(currentStreams);
@@ -345,13 +366,6 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const startBackend = useCallback(async () => {
-    /* let opla = providers.find((p) => p.type === ProviderType.opla) as Provider;
-    if (!opla) {
-      const oplaProviderConfig = await getProviderTemplate();
-      const provider = { ...oplaProviderConfig, type: oplaProviderConfig.type };
-      opla = createProvider(OplaProvider.name, provider);
-      providers.splice(0, 0, opla);
-    } */
     const backendImpl = await getBackend();
     backendRef.current = backendImpl as Backend;
     const listeners = {
@@ -362,13 +376,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
     const backendImplContext: OplaContext = await backendImpl.connect(listeners);
     logger.info('connected backend impl', backendImpl);
     updateServer(backendImplContext.server);
-    // updateConfig(backendImplContext.config);
-
-    logger.info('start backend' /* opla.metadata, */);
-    // const metadata = opla.metadata as Metadata;
-    // metadata.server = backendImplContext.config.server as Metadata;
-    // setProviders(providers);
-
+    logger.info('start backend');
     loadSettings();
   }, [backendListener, downloadListener, streamListener, loadSettings]);
 

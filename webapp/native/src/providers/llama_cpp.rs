@@ -160,13 +160,10 @@ pub struct LlamaCppCompletionResponse {
 impl LlamaCppCompletionResponse {
     pub fn to_llm_response(&self) -> LlmCompletionResponse {
         LlmCompletionResponse {
-            created: None,
-            status: Some("finished".to_owned()),
+            created: 0,
+            status: "finished".to_owned(),
             content: self.content.clone(),
-            conversation_id: None,
-            message_id: None,
             usage: Some(self.timings.to_llm_usage()),
-            message: None,
         }
     }
 }
@@ -193,13 +190,10 @@ impl HttpError for LlamaCppCompletionResponse {
 impl HttpResponse<LlmCompletionResponse> for LlamaCppCompletionResponse {
     fn convert_into(&self) -> LlmCompletionResponse {
         LlmCompletionResponse {
-            created: None,
-            status: Some("finished".to_owned()),
+            created: 0,
+            status: "finished".to_owned(),
             content: self.content.clone(),
-            conversation_id: None,
-            message_id: None,
             usage: Some(self.timings.to_llm_usage()),
-            message: None,
         }
     }
 

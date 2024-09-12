@@ -87,41 +87,6 @@ impl<R, E> HttpService<R, E>
                     let data = event.data;
                     let (stop, result) = self.adapter.handle_chunk_response::<R, E>(data);
                     send(result);
-                    /* sender
-                        .send(result).await
-                        .map_err(|err| E::new(&err.to_string(), "http_service"))?; */
-                    /* let chunk = self.adapter.build_stream_chunk::<E>(data, created);
-                    match chunk {
-                        Ok(r) => {
-                            let mut stop = false;
-                            let response = match r {
-                                Some(chunk_content) => {
-                                    content.push_str(chunk_content.as_str());
-                                    R::new(
-                                        chrono::Utc::now().timestamp_millis(),
-                                        "success",
-                                        &chunk_content
-                                    )
-                                }
-                                None => {
-                                    stop = true;
-                                    R::new(
-                                        chrono::Utc::now().timestamp_millis(),
-                                        "finished",
-                                        "done"
-                                    )
-                                }
-                            };
-                            // sender.send(Ok(response)).await?;
-                            sender.send(Ok(response)).await.map_err(|e| e.to_string())?;
-                            if stop {
-                                break;
-                            }
-                        }
-                        Err(e) => {
-                            sender.send(Err(e)).await.map_err(|e| e.to_string())?;
-                        }
-                    } */
                     if stop {
                         break;
                     }
@@ -130,7 +95,9 @@ impl<R, E> HttpService<R, E>
                     let message = format!("Failed to get event: {}", error);
                     println!("{}", message);
                     let err = E::new(&error.to_string(), "http_service");
-                    return Err(err);
+                    let result = Err(err);
+                    send(result.clone());
+                    return result;
                 }
             }
         }

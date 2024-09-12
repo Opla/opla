@@ -26,7 +26,7 @@ use crate::{ data::{ conversation::Conversation, message::Message }, utils::get_
 use super::app_state::{
     Empty,
     GlobalAppState,
-    Payload,
+    EventPayload,
     Value,
     ValueConversationMessages,
     STATE_CHANGE_EVENT,
@@ -48,7 +48,7 @@ impl ThreadStorage {
         }
     }
 
-    async fn emit_state_async(payload: Payload, app_handle: AppHandle) {
+    async fn emit_state_async(payload: EventPayload, app_handle: AppHandle) {
         let context = app_handle.state::<OplaContext>();
         let value = match payload.value {
             Some(v) => v,
@@ -216,7 +216,7 @@ impl ThreadStorage {
         }
         if need_emit {
             app_handle
-                .emit_all(STATE_SYNC_EVENT, Payload {
+                .emit_all(STATE_SYNC_EVENT, EventPayload {
                     key,
                     value: emit_value,
                 })
@@ -226,7 +226,7 @@ impl ThreadStorage {
 
     fn emit_event(app_handle: AppHandle, key: GlobalAppState, value: Value) {
         app_handle
-            .emit_all(STATE_SYNC_EVENT, Payload {
+            .emit_all(STATE_SYNC_EVENT, EventPayload {
                 key: key.into(),
                 value: Some(value),
             })

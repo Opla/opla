@@ -15,6 +15,7 @@
 use tokio::sync::Mutex;
 use std::collections::HashMap;
 use std::sync::Arc;
+use crate::data::{Payload, ServerPayload};
 use crate::engines::llama_cpp::{ LLamaCppEngine, LLAMACPP_PARAMETERS_DEFINITIONS };
 use crate::store::server::{ ServerConfiguration, ServerStorage };
 use crate::error::Error;
@@ -59,12 +60,6 @@ impl ServerStatus {
             ServerStatus::Stderr => "stderr",
         }
     }
-}
-
-#[derive(Clone, Debug, serde::Serialize)]
-pub struct Payload {
-    pub message: String,
-    pub status: String,
 }
 
 impl LocalServer {
@@ -115,10 +110,10 @@ impl LocalServer {
             None => (),
         }
 
-        Ok(Payload {
+        Ok(Payload::Server(ServerPayload {
             status: status.to_string(),
             message,
-        })
+        }))
     }
 
     pub fn set_status(&mut self, status: ServerStatus) -> Result<Payload, String> {
@@ -131,10 +126,10 @@ impl LocalServer {
         };
         *wstatus = status;
         let message = self.configuration.name.clone();
-        Ok(Payload {
+        Ok(Payload::Server(ServerPayload  {
             status: wstatus.as_str().to_string(),
             message,
-        })
+        }))
     }
 
     pub async fn start<R: Runtime>(
@@ -178,10 +173,10 @@ impl LocalServer {
             }
         } else if status == ServerStatus::Started.as_str().to_string() {
             println!("Opla server already started ");
-            return Ok(Payload {
+            return Ok(Payload::Server(ServerPayload  {
                 status: status.to_string(),
                 message: "llama.cpp.server".to_string(),
-            });
+            }));
         }
         println!("Opla try to start {:?}", configuration.get_optional_parameter_string("model_id"));
         let mut wstatus = match self.status.try_lock() {
@@ -194,10 +189,10 @@ impl LocalServer {
         *wstatus = ServerStatus::Starting;
         let status_response = wstatus.as_str().to_string();
         app
-            .emit_all("opla-server", Payload {
+            .emit_all("opla-server", Payload::Server(ServerPayload  {
                 message: format!("{:?}", configuration.get_optional_parameter_string("model_id")),
                 status: "waiting".to_string(),
-            })
+            }))
             .map_err(|err| err.to_string())?;
         drop(wstatus);
 
@@ -213,7 +208,7 @@ impl LocalServer {
             command_child
         ).await?;
         self.handle = Some(handle);
-        Ok(Payload { status: status_response, message: name })
+        Ok(Payload::Server(ServerPayload  { status: status_response, message: name }))
     }
 
     pub async fn stop<R: Runtime>(&mut self, app: &tauri::AppHandle<R>) -> Result<Payload, String> {
@@ -238,10 +233,10 @@ impl LocalServer {
             *wstatus = ServerStatus::Stopping;
             drop(wstatus);
             app
-                .emit_all("opla-server", Payload {
+                .emit_all("opla-server", Payload::Server(ServerPayload {
                     message: format!("Opla server to stop: {} ", "llama.cpp.server"),
                     status: ServerStatus::Stopping.as_str().to_string(),
-                })
+                }))
                 .map_err(|err| err.to_string())?;
 
             /* let sys = System::new_all();
@@ -285,10 +280,10 @@ impl LocalServer {
                 }
             }
             app
-                .emit_all("opla-server", Payload {
+                .emit_all("opla-server", Payload::Server(ServerPayload {
                     message: format!("Opla server killed: {} ", "llama.cpp.server"),
                     status: ServerStatus::Stopped.as_str().to_string(),
-                })
+                }))
                 .map_err(|err| err.to_string())?;
             let mut wstatus = match self.status.try_lock() {
                 Ok(status) => status,
@@ -299,12 +294,12 @@ impl LocalServer {
             };
             *wstatus = ServerStatus::Stopped;
 
-            return Ok(Payload {
+            return Ok(Payload::Server(ServerPayload {
                 status: wstatus.as_str().to_string(),
                 message,
-            });
+            }));
         }
-        Ok(Payload { status: status.to_string(), message })
+        Ok(Payload::Server(ServerPayload { status: status.to_string(), message }))
     }
 
     fn kill_previous_processes(&mut self) {

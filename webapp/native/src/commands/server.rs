@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use tauri::{ Manager, Runtime, State };
-use crate::{data::Metadata, OplaContext, Payload};
+use crate::{data::{Metadata, Payload}, OplaContext};
 
 #[tauri::command]
 pub async fn get_opla_server_status<R: Runtime>(

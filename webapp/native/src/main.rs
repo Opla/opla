@@ -36,6 +36,7 @@ pub mod hash;
 pub mod commands;
 pub mod engines;
 
+use data::{Payload, ServerPayload};
 use tokio::{ spawn, sync::Mutex };
 use ui::Ui;
 use std::sync::Arc;
@@ -216,10 +217,10 @@ async fn opla_setup(app: &mut tauri::AppHandle) -> Result<(), String> {
     store.init(app.app_handle()).await;
 
     app
-        .emit_all("opla-server", Payload {
+        .emit_all("opla-server", Payload::Server(ServerPayload {
             message: "Init Opla backend".into(),
             status: ServerStatus::Init.as_str().to_string(),
-        })
+        }))
         .map_err(|err| err.to_string())?;
     let mut server = context.server.lock().await;
     server.init(store.server.clone());
@@ -242,10 +243,10 @@ async fn opla_setup(app: &mut tauri::AppHandle) -> Result<(), String> {
     if launch_at_startup && has_model {
         drop(server);
         app
-            .emit_all("opla-server", Payload {
+            .emit_all("opla-server", Payload::Server(ServerPayload {
                 message: "Opla server is waiting to start".into(),
                 status: ServerStatus::Wait.as_str().to_string(),
-            })
+            }))
             .map_err(|err| err.to_string())?;
         let res = start_server(app.app_handle(), app.state::<OplaContext>()).await;
         match res {
@@ -254,20 +255,20 @@ async fn opla_setup(app: &mut tauri::AppHandle) -> Result<(), String> {
                 let mut server = context.server.lock().await;
                 server.set_status(ServerStatus::Error).map(|_| "Failed to set server status")?;
                 app
-                    .emit_all("opla-server", Payload {
+                    .emit_all("opla-server", Payload::Server(ServerPayload {
                         message: err.clone(),
                         status: ServerStatus::Error.as_str().to_string(),
-                    })
+                    }))
                     .map_err(|err| err.to_string())?;
             }
         }
     } else {
         server.set_status(ServerStatus::Stopped).map(|_| "Failed to set server status")?;
         app
-            .emit_all("opla-server", Payload {
+            .emit_all("opla-server", Payload::Server(ServerPayload {
                 message: "Not started Opla backend".into(),
                 status: ServerStatus::Stopped.as_str().to_string(),
-            })
+            }))
             .map_err(|err| err.to_string())?;
     }
 

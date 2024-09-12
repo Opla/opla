@@ -31,6 +31,29 @@ pub mod message;
 pub mod conversation;
 pub mod provider;
 
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ServerPayload {
+    pub message: String,
+    pub status: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LLMErrorPayload {
+    pub message: String,
+    pub status: String,
+
+    pub conversation_id: Option<String>,
+    pub message_id: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Payload {
+    Server(ServerPayload),
+    LLMError(LLMErrorPayload),
+}
+
 pub fn is_false(b: &bool) -> bool {
     *b == false
 }

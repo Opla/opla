@@ -25,7 +25,12 @@ use crate::data::{
     Preset,
 };
 
-use super::{ model::ModelStorage, server::ServerStorage, service::ServiceStorage, settings::Settings };
+use super::{
+    model::ModelStorage,
+    server::ServerStorage,
+    service::ServiceStorage,
+    settings::Settings,
+};
 
 pub const STATE_CHANGE_EVENT: &str = "state_change_event";
 pub const STATE_SYNC_EVENT: &str = "state_sync_event";
@@ -198,12 +203,10 @@ pub enum Value {
     Server(ValueServer),
     Empty(Empty),
     Messages(HashMap<String, Vec<Message>>),
-
 }
 
-// the payload type must implement `Serialize` and `Clone`.
 #[derive(Clone, Serialize, Deserialize)]
-pub struct Payload {
+pub struct EventPayload {
     pub key: u32,
     pub value: Option<Value>,
 }

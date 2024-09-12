@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::{ collections::HashMap, sync::Arc };
+use llm::LlmCompletionPayload;
 use serde::Serialize;
 use tauri::{ AppHandle, Manager, Runtime };
 use tokenizer::encode;
@@ -21,7 +22,11 @@ use bytes::Bytes;
 use uuid::Uuid;
 
 use crate::{
-    data::provider::{Provider, ProviderType}, store::server::{ ServerConfiguration, ServerStorage }, utils::http_client::{ HttpChunk, NewHttpError }, OplaContext, Payload, ServerStatus
+    data::{ provider::{ Provider, ProviderType }, LLMErrorPayload, Payload },
+    store::server::{ ServerConfiguration, ServerStorage },
+    utils::http_client::{ HttpChunk, NewHttpError },
+    OplaContext,
+    ServerStatus,
 };
 
 use self::{
@@ -222,9 +227,7 @@ impl ProvidersManager {
         let mut config = server.configuration.clone();
         config.set_parameter_string("model_id", model);
         config.set_parameter_string("model_path", model_path);
-        server
-            .bind::<R>(app.app_handle(), &config).await
-            .map_err(|err| err.to_string())?;
+        server.bind::<R>(app.app_handle(), &config).await.map_err(|err| err.to_string())?;
         Ok(config.clone())
     }
 
@@ -252,7 +255,7 @@ impl ProvidersManager {
         let mut interface = interface.clone();
         let parameters: ServerParameters = ServerParameters {
             host: config.get_parameter_string("host", "127.0.0.1".to_string()),
-            port: config.get_parameter_int("port", 8081)
+            port: config.get_parameter_int("port", 8081),
         };
         interface.set_parameters(parameters);
         Ok(interface)
@@ -281,14 +284,10 @@ impl ProvidersManager {
             let handle = completion_handles.remove(conversation_id);
             println!("Cancel completion {}", conversation_id);
             let _ = app
-                .emit_all("opla-sse", LlmCompletionResponse {
-                    created: None,
-                    status: Some(String::from("cancel")),
-                    content: String::from(""),
-                    conversation_id: Some(conversation_id.to_string()),
-                    message_id: Some(message_id.to_string()),
-                    usage: None,
-                    message: None,
+                .emit_all("opla-sse", LlmCompletionPayload {
+                    response: LlmCompletionResponse::new(0, "cancel", ""),
+                    conversation_id: conversation_id.to_string(),
+                    message_id: message_id.to_string(),
                 })
                 .map_err(|err| err.to_string());
             match handle {
@@ -328,10 +327,15 @@ impl ProvidersManager {
             Ok(service) => service,
             Err(err) => {
                 let e = app
-                    .emit_all("opla-sse", Payload {
-                        message: err.to_string(),
-                        status: ServerStatus::Error.as_str().to_string(),
-                    })
+                    .emit_all(
+                        "opla-sse",
+                        Payload::LLMError(LLMErrorPayload {
+                            conversation_id: Some(conversation_id.to_string()),
+                            message_id: Some(message_id.to_string()),
+                            message: err.to_string(),
+                            status: ServerStatus::Error.as_str().to_string(),
+                        })
+                    )
                     .map_err(|err| err.to_string());
                 if e.is_err() {
                     println!("Send error: {}", e.unwrap_err());
@@ -348,23 +352,28 @@ impl ProvidersManager {
                 let mut finished = false;
                 let result = match response {
                     Ok(response) => {
-                        let mut response = response.clone();
-                        if response.status == Some(String::from("finished")) {
+                        if response.status == String::from("finished") {
                             finished = true;
                         }
-                        response.conversation_id = Some(cid.to_string());
-                        response.message_id = Some(message_id.to_string());
-                        let _ = app
-                            .emit_all("opla-sse", response.clone())
-                            .map_err(|err| err.to_string());
+                        let payload = LlmCompletionPayload {
+                            response: response.clone(),
+                            conversation_id: cid.to_string(),
+                            message_id: message_id.to_string(),
+                        };
+                        let _ = app.emit_all("opla-sse", payload).map_err(|err| err.to_string());
                         Ok(response.clone())
                     }
                     Err(err) => {
                         let _ = app
-                            .emit_all("opla-sse", Payload {
-                                message: err.to_string(),
-                                status: ServerStatus::Error.as_str().to_string(),
-                            })
+                            .emit_all(
+                                "opla-sse",
+                                Payload::LLMError(LLMErrorPayload {
+                                    conversation_id: Some(cid.to_string()),
+                                    message_id: Some(message_id.to_string()),
+                                    message: err.to_string(),
+                                    status: ServerStatus::Error.as_str().to_string(),
+                                })
+                            )
                             .map_err(|err| err.to_string());
                         Err(err.to_string())
                     }
@@ -433,8 +442,6 @@ impl ProvidersManager {
                 &interface.clone()
             ).await;
 
-            // server.set_parameters(Some(parameters));
-
             let mut store = context.store.lock().await;
             store.set_local_active_model_id(&model);
             store.save().map_err(|err| err.to_string())?;
@@ -442,9 +449,7 @@ impl ProvidersManager {
             return Ok(response?);
         }
         if llm_provider_type == "openai" || llm_provider_type == "server" {
-            let conversation_id = query.options.conversation_id.clone();
-            let message_id = query.options.message_id.clone();
-            let mut response = {
+            let response = {
                 let api = format!("{:}", llm_provider.url);
                 let secret_key = match llm_provider.key {
                     Some(k) => { k }
@@ -469,11 +474,14 @@ impl ProvidersManager {
                         Some(|result: Result<LlmCompletionResponse, LlmError>| {
                             match result {
                                 Ok(response) => {
-                                    let mut response = response.clone();
-                                    response.conversation_id = conversation_id.clone();
-                                    response.message_id = message_id.clone();
+                                    // let mut response = response.clone();
+                                    let payload = LlmCompletionPayload {
+                                        response,
+                                        conversation_id: conversation_id.clone(),
+                                        message_id: message_id.clone(),
+                                    };
                                     let _ = app
-                                        .emit_all("opla-sse", response)
+                                        .emit_all("opla-sse", payload)
                                         .map_err(|err| err.to_string());
                                 }
                                 Err(err) => {
@@ -486,9 +494,12 @@ impl ProvidersManager {
                     ).await
                     .map_err(|err| err.to_string())?
             };
-            response.conversation_id = conversation_id.clone();
-            response.message_id = message_id.clone();
-            let _ = app.emit_all("opla-sse", response).map_err(|err| err.to_string());
+            let payload = LlmCompletionPayload {
+                response,
+                conversation_id: conversation_id.clone(),
+                message_id: message_id.clone(),
+            };
+            let _ = app.emit_all("opla-sse", payload).map_err(|err| err.to_string());
             return Ok(());
         }
         return Err(format!("LLM provider not found: {:?}", llm_provider_type));
@@ -503,9 +514,6 @@ impl ProvidersManager {
     ) -> Result<LlmTokenizeResponse, String> {
         let llm_provider_type = provider.r#type;
         if llm_provider_type == "opla" {
-            // let context = app.state::<OplaContext>();
-            // let context_server = Arc::clone(&context.server);
-            // let mut server = context_server.lock().await;
             let client = self.create_interface(
                 app.app_handle(),
                 model.to_string(),
@@ -515,9 +523,7 @@ impl ProvidersManager {
                 .clone()
                 .call_tokenize(&model, text).await
                 .map_err(|err| err.to_string())?;
-            /* let response = server
-                .call_tokenize::<R>(&model, text).await
-                .map_err(|err| err.to_string())?; */
+
             return Ok(response);
         } else if llm_provider_type == "openai" {
             let encoded = match encode(text, model, None) {
