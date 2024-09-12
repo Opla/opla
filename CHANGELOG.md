@@ -1,3 +1,10 @@
+# [1.0.0-alpha.219](https://github.com/Opla/opla/compare/v1.0.0-alpha.218...v1.0.0-alpha.219) (2024-09-12)
+
+
+### Features
+
+* **thread:** cancel using prompt spinning [#1243](https://github.com/Opla/opla/issues/1243) ([#1251](https://github.com/Opla/opla/issues/1251)) ([8a739f4](https://github.com/Opla/opla/commit/8a739f441f04f72854e69660b21ba3f4c88f0a7d))
+
 # [1.0.0-alpha.218](https://github.com/Opla/opla/compare/v1.0.0-alpha.217...v1.0.0-alpha.218) (2024-09-12)
 
 
