@@ -208,24 +208,28 @@ pub trait LlmResponseImpl {
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct LlmCompletionResponse {
-    pub created: Option<i64>,
-    pub status: Option<String>,
+    pub created: i64,
+    pub status: String,
     pub content: String,
-    pub conversation_id: Option<String>,
-    pub message_id: Option<String>,
     pub usage: Option<LlmUsage>,
-    pub message: Option<String>,
 }
+
+#[serde_with::skip_serializing_none]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct LlmCompletionPayload {
+    #[serde(flatten)]
+    pub response: LlmCompletionResponse,
+    pub conversation_id: String,
+    pub message_id: String,
+}
+
 impl HttpChunk for LlmCompletionResponse {
     fn new(created: i64, status: &str, content: &str) -> Self {
         Self {
-            created: Some(created),
-            status: Some(status.to_owned()),
+            created,
+            status: status.to_owned(),
             content: content.to_owned(),
-            conversation_id: None,
-            message_id: None,
             usage: None,
-            message: None,
         }
     }
 }
@@ -233,13 +237,10 @@ impl HttpChunk for LlmCompletionResponse {
 impl LlmCompletionResponse {
     pub fn new(created: i64, status: &str, content: &str) -> Self {
         Self {
-            created: Some(created),
-            status: Some(status.to_owned()),
+            created: created,
+            status: status.to_owned(),
             content: content.to_owned(),
-            conversation_id: None,
-            message_id: None,
             usage: None,
-            message: None,
         }
     }
 }
@@ -247,13 +248,10 @@ impl LlmCompletionResponse {
 impl LlmResponseImpl for LlmCompletionResponse {
     fn new(created: i64, status: &str, content: &str) -> Self {
         Self {
-            created: Some(created),
-            status: Some(status.to_owned()),
+            created,
+            status: status.to_owned(),
             content: content.to_owned(),
-            conversation_id: None,
-            message_id: None,
             usage: None,
-            message: None,
         }
     }
 

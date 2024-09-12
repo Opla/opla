@@ -22,7 +22,7 @@ use crate::store::app_state::STATE_SYNC_EVENT;
 use crate::utils::get_config_directory;
 use crate::OplaContext;
 
-use super::app_state::{ Empty, Payload, GlobalAppState, Value, STATE_CHANGE_EVENT };
+use super::app_state::{ Empty, EventPayload, GlobalAppState, Value, STATE_CHANGE_EVENT };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ProviderStorage {
@@ -36,7 +36,7 @@ impl ProviderStorage {
         }
     }
 
-    async fn emit_state_async(payload: Payload, app_handle: AppHandle) {
+    async fn emit_state_async(payload: EventPayload, app_handle: AppHandle) {
         let context = app_handle.state::<OplaContext>();
         let value = match payload.value {
             Some(v) => v,
@@ -56,7 +56,7 @@ impl ProviderStorage {
                 }
 
                 app_handle
-                    .emit_all(STATE_SYNC_EVENT, Payload {
+                    .emit_all(STATE_SYNC_EVENT, EventPayload {
                         key: payload.key,
                         value: Some(
                             Value::Providers(crate::store::app_state::ValueProviders {

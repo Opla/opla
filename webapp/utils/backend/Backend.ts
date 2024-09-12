@@ -14,7 +14,7 @@
 // import { appWindow } from '@tauri-apps/api/window';
 // import { confirm } from '@tauri-apps/api/dialog';
 // import { listen } from '@tauri-apps/api/event';
-import { LlmStreamResponse, OplaContext, OplaServer, ServerStatus } from '@/types';
+import { LlmStream, OplaContext, OplaServer, ServerStatus } from '@/types';
 import logger from '../logger';
 import {
   restartLLamaCppServer,
@@ -39,7 +39,7 @@ class Backend {
   // private activeModel?: string;
   // private activeService?: AIService;
 
-  private static streams: Record<string, LlmStreamResponse> = {};
+  private static streams: Record<string, LlmStream> = {};
 
   public static getInstance = () => {
     if (!Backend.instance) {
@@ -49,7 +49,7 @@ class Backend {
   };
 
   public connect = async (
-    listeners: Record<string, (event: unknown) => Promise<void>>,
+    listeners: Record<string, (event: { payload: unknown }) => Promise<void>>,
   ): Promise<OplaContext> => {
     const { appWindow } = await import('@tauri-apps/api/window');
     const { listen } = await import('@tauri-apps/api/event');

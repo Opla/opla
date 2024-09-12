@@ -119,7 +119,7 @@ export default function MainThreads({ selectedThreadId, view = ViewName.Recent }
     loadWorkspace,
     activeWorkspace,
     workspaces,
-    // settingsStore,
+    loadServerConfig,
     loadProject,
     loadProviders,
     getAllConversations,

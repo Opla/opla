@@ -508,7 +508,7 @@ export type Download = {
   error?: string;
 };
 
-export type Streams = Record<string, LlmStreamResponse>;
+export type Streams = Record<string, LlmStream>;
 
 export type OplaContext = Readonly<{
   server: OplaServer;
@@ -558,41 +558,22 @@ export type LlmError = {
   message: string;
 };
 
-export type LlmCompletionResponse =
-  | {
-      status: 'success';
-      created?: number;
-      content: string;
-      conversationId: string;
-      messageId: string;
-      usage?: LlmUsage;
-    }
-  | {
-      status: 'finished';
-      content: string;
-      conversationId: string;
-      messageId: string;
-      created: number;
-      usage?: LlmUsage;
-    }
-  | {
-      status: 'cancel';
-      conversationId: string;
-      messageId: string;
-    }
-  | {
-      status: 'error';
-      message: string;
-    };
-
-export type LlmStreamResponse = {
+export type LlmCommon = {
   created: number;
-  status: string;
-  content: string[];
-  prevContent?: string;
   conversationId: string;
   messageId: string;
   usage?: LlmUsage;
+};
+
+export type LlmPayload = LlmCommon & {
+  status: 'success' | 'finished' | 'cancel';
+  content: string;
+};
+
+export type LlmStream = LlmCommon & {
+  status: 'success' | 'finished' | 'cancel' | 'error';
+  content: string[];
+  prevContent?: string;
 };
 
 export type LlmTokenizeResponse = {

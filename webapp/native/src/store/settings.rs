@@ -19,9 +19,16 @@ use tauri::{ AppHandle, Manager };
 use tokio::spawn;
 
 use crate::{
-    store::app_state::{ Empty, GlobalAppState, Payload, Value, ValueSettings, STATE_SYNC_EVENT },
+    store::app_state::{
+        Empty,
+        GlobalAppState,
+        EventPayload,
+        Value,
+        ValueSettings,
+        STATE_SYNC_EVENT,
+    },
     OplaContext,
-    data::option_f32_or_u32
+    data::option_f32_or_u32,
 };
 use super::app_state::STATE_CHANGE_EVENT;
 
@@ -50,7 +57,11 @@ pub struct ViewSettings {
     pub settings_width: f64,
     #[serde(skip_serializing_if = "Option::is_none", default)]
     pub explorer_groups: Option<Vec<ExplorerGroup>>,
-    #[serde(skip_serializing_if = "Option::is_none", default, deserialize_with = "option_f32_or_u32")]
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        default,
+        deserialize_with = "option_f32_or_u32"
+    )]
     pub scroll_position: Option<u32>,
 }
 
@@ -77,7 +88,7 @@ pub struct Settings {
 }
 
 impl Settings {
-    async fn emit_state_async(payload: Payload, app_handle: AppHandle) {
+    async fn emit_state_async(payload: EventPayload, app_handle: AppHandle) {
         let context = app_handle.state::<OplaContext>();
         let value = match payload.value {
             Some(v) => v,
@@ -99,7 +110,7 @@ impl Settings {
                 }
 
                 app_handle
-                    .emit_all(STATE_SYNC_EVENT, Payload {
+                    .emit_all(STATE_SYNC_EVENT, EventPayload {
                         key: payload.key,
                         value: Some(
                             Value::Settings(ValueSettings {

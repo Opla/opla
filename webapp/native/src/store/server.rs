@@ -19,7 +19,7 @@ use tokio::spawn;
 
 use crate::{
     data::{ Metadata, MetadataValue },
-    store::app_state::{ Empty, GlobalAppState, Payload, Value, STATE_SYNC_EVENT },
+    store::app_state::{ Empty, GlobalAppState, EventPayload, Value, STATE_SYNC_EVENT },
     OplaContext,
 };
 
@@ -256,7 +256,7 @@ impl ServerStorage {
         }
     }
 
-    async fn emit_state_async(payload: Payload, app_handle: AppHandle) {
+    async fn emit_state_async(payload: EventPayload, app_handle: AppHandle) {
         let context = app_handle.state::<OplaContext>();
         let value = match payload.value {
             Some(v) => v,
@@ -278,7 +278,7 @@ impl ServerStorage {
                 }
 
                 app_handle
-                    .emit_all(STATE_SYNC_EVENT, Payload {
+                    .emit_all(STATE_SYNC_EVENT, EventPayload {
                         key: payload.key,
                         value: Some(
                             Value::Server(crate::store::app_state::ValueServer {
@@ -292,22 +292,21 @@ impl ServerStorage {
         }
     }
 
-
     pub fn emit_update_all<R: Runtime>(&mut self, app_handle: AppHandle<R>) {
         let app_handle = app_handle.app_handle();
         let server = self.clone();
-        spawn(async move { 
-            // Self::emit_state_async(data, app_handle).await 
+        spawn(async move {
+            // Self::emit_state_async(data, app_handle).await
             app_handle
-            .emit_all(STATE_SYNC_EVENT, Payload {
-                key: GlobalAppState::SERVER.into(),
-                value: Some(
-                    Value::Server(crate::store::app_state::ValueServer {
-                        server,
-                    })
-                ),
-            })
-            .unwrap();
+                .emit_all(STATE_SYNC_EVENT, EventPayload {
+                    key: GlobalAppState::SERVER.into(),
+                    value: Some(
+                        Value::Server(crate::store::app_state::ValueServer {
+                            server,
+                        })
+                    ),
+                })
+                .unwrap();
         });
     }
 

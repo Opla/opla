@@ -28,7 +28,7 @@ use crate::OplaContext;
 
 use super::app_state::{
     GlobalAppState,
-    Payload,
+    EventPayload,
     Empty,
     Value,
     STATE_CHANGE_EVENT,
@@ -201,7 +201,7 @@ impl WorkspaceStorage {
         Ok(project)
     }
 
-    async fn emit_state_async(payload: Payload, app_handle: AppHandle) {
+    async fn emit_state_async(payload: EventPayload, app_handle: AppHandle) {
         let context = app_handle.state::<OplaContext>();
         let value = match payload.value {
             Some(v) => v,
@@ -215,7 +215,7 @@ impl WorkspaceStorage {
                     println!("Set active workspace {:?}", data);
                     store.workspaces.active_workspace_id = Some(data.to_string());
                     app_handle
-                        .emit_all(STATE_SYNC_EVENT, Payload {
+                        .emit_all(STATE_SYNC_EVENT, EventPayload {
                             key: payload.key,
                             value: Some(Value::String(data)),
                         })
@@ -234,7 +234,7 @@ impl WorkspaceStorage {
                         }
                     };
                     app_handle
-                        .emit_all(STATE_SYNC_EVENT, Payload {
+                        .emit_all(STATE_SYNC_EVENT, EventPayload {
                             key: payload.key,
                             value: Some(Value::String(id)),
                         })
@@ -249,7 +249,7 @@ impl WorkspaceStorage {
                     store.workspaces.workspaces.insert(id, data.clone());
                     let _ = store.save().map_err(|err| err.to_string());
                     app_handle
-                        .emit_all(STATE_SYNC_EVENT, Payload {
+                        .emit_all(STATE_SYNC_EVENT, EventPayload {
                             key: payload.key,
                             value: Some(Value::Workspace(data)),
                         })
@@ -270,7 +270,7 @@ impl WorkspaceStorage {
                         Err(error) => {
                             println!("project get error: {:?}", error);
                             app_handle
-                                .emit_all(STATE_SYNC_EVENT, Payload {
+                                .emit_all(STATE_SYNC_EVENT, EventPayload {
                                     key: GlobalAppState::ERROR.into(),
                                     value: Some(Value::String(error)),
                                 })
@@ -324,7 +324,7 @@ impl WorkspaceStorage {
                     Err(error) => {
                         println!("project save error: {:?}", error);
                         app_handle
-                            .emit_all(STATE_SYNC_EVENT, Payload {
+                            .emit_all(STATE_SYNC_EVENT, EventPayload {
                                 key: GlobalAppState::ERROR.into(),
                                 value: Some(Value::String(error)),
                             })
@@ -334,7 +334,7 @@ impl WorkspaceStorage {
                 }
                 let _ = store.save().map_err(|err| err.to_string());
                 app_handle
-                    .emit_all(STATE_SYNC_EVENT, Payload {
+                    .emit_all(STATE_SYNC_EVENT, EventPayload {
                         key: payload.key,
                         value: Some(Value::Project(project)),
                     })
@@ -353,7 +353,7 @@ impl WorkspaceStorage {
         let app_handle_copy = app_handle.app_handle();
         let _id = app_handle.listen_global(STATE_CHANGE_EVENT, move |event| {
             if let Some(payload) = event.payload() {
-                let data: Result<Payload, _> = serde_json::from_str(payload);
+                let data: Result<EventPayload, _> = serde_json::from_str(payload);
                 match data {
                     Ok(data) => {
                         let app_handle = app_handle_copy.app_handle();

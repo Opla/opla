@@ -24,7 +24,7 @@ use crate::store::app_state::ValueModels;
 use crate::utils::{ get_home_directory, get_data_directory };
 
 use crate::{
-    store::app_state::{ Empty, GlobalAppState, Payload, Value, STATE_SYNC_EVENT },
+    store::app_state::{ Empty, GlobalAppState, EventPayload, Value, STATE_SYNC_EVENT },
     OplaContext,
 };
 use super::app_state::STATE_CHANGE_EVENT;
@@ -292,22 +292,22 @@ impl ModelStorage {
     pub fn emit_update_all<R: Runtime>(&mut self, app_handle: AppHandle<R>) {
         let app_handle = app_handle.app_handle();
         let models = self.clone();
-        spawn(async move { 
-            // Self::emit_state_async(data, app_handle).await 
+        spawn(async move {
+            // Self::emit_state_async(data, app_handle).await
             app_handle
-                    .emit_all(STATE_SYNC_EVENT, Payload {
-                        key: GlobalAppState::MODELS.into(),
-                        value: Some(
-                            Value::Models(ValueModels {
-                                models,
-                            })
-                        ),
-                    })
-                    .unwrap();
+                .emit_all(STATE_SYNC_EVENT, EventPayload {
+                    key: GlobalAppState::MODELS.into(),
+                    value: Some(
+                        Value::Models(ValueModels {
+                            models,
+                        })
+                    ),
+                })
+                .unwrap();
         });
     }
 
-    async fn emit_state_async(payload: Payload, app_handle: AppHandle) {
+    async fn emit_state_async(payload: EventPayload, app_handle: AppHandle) {
         let context = app_handle.state::<OplaContext>();
         let value = match payload.value {
             Some(v) => v,
@@ -329,7 +329,7 @@ impl ModelStorage {
                 }
 
                 app_handle
-                    .emit_all(STATE_SYNC_EVENT, Payload {
+                    .emit_all(STATE_SYNC_EVENT, EventPayload {
                         key: payload.key,
                         value: Some(
                             Value::Models(ValueModels {

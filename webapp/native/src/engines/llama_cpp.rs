@@ -15,12 +15,13 @@
 use phf::phf_map;
 use tokio::sync::Mutex;
 use std::sync::Arc;
+use crate::data::{Payload, ServerPayload};
 use crate::store::server::{
     ServerParameterDefinition,
     ServerParameterType,
     ServerParameterValue,
 };
-use crate::{ Payload, ServerStatus };
+use crate::ServerStatus;
 use tauri::{ api::process::CommandChild, async_runtime::JoinHandle };
 use tauri::{ api::process::{ Command, CommandEvent }, Runtime, Manager };
 
@@ -350,10 +351,10 @@ impl LLamaCppEngine {
                     println!("Opla server error: {}", err);
                     if
                         app
-                            .emit_all("opla-server", Payload {
+                            .emit_all("opla-server", Payload::Server(ServerPayload {
                                 message: format!("Opla server error: {}", err),
                                 status: ServerStatus::Error.as_str().to_string(),
-                            })
+                            }))
                             .is_err()
                     {
                         println!("Opla server error: {}", "failed to emit error");
@@ -366,10 +367,10 @@ impl LLamaCppEngine {
             println!("Opla server started:{}", model);
             if
                 app
-                    .emit_all("opla-server", Payload {
+                    .emit_all("opla-server", Payload::Server(ServerPayload {
                         message: format!("{}", model),
                         status: ServerStatus::Starting.as_str().to_string(),
-                    })
+                    }))
                     .is_err()
             {
                 println!("Opla server error: {}", "failed to emit started");
@@ -380,10 +381,10 @@ impl LLamaCppEngine {
                     println!("Opla server error: {}", "failed to get pid");
                     if
                         app
-                            .emit_all("opla-server", Payload {
+                            .emit_all("opla-server", Payload::Server(ServerPayload {
                                 message: format!("Opla server error: {}", "failed to get pid"),
                                 status: ServerStatus::Error.as_str().to_string(),
-                            })
+                            }))
                             .is_err()
                     {
                         println!("Opla server error: {}", "failed to emit error");
@@ -407,10 +408,10 @@ impl LLamaCppEngine {
                         println!("{}", model);
                         if
                             app
-                                .emit_all("opla-server", Payload {
+                                .emit_all("opla-server", Payload::Server(ServerPayload {
                                     message: format!("{}", model),
                                     status: ServerStatus::Started.as_str().to_string(),
-                                })
+                                }))
                                 .is_err()
                         {
                             println!("Opla server error: {}", "failed to emit started");
@@ -420,10 +421,10 @@ impl LLamaCppEngine {
                         *st = ServerStatus::Started;
                     } else if
                         app
-                            .emit_all("opla-server", Payload {
+                            .emit_all("opla-server", Payload::Server(ServerPayload {
                                 message: line.clone(),
                                 status: ServerStatus::Stdout.as_str().to_string(),
-                            })
+                            }))
                             .is_err()
                     {
                         println!("Opla server error: {}", "failed to emit stdout");
@@ -435,10 +436,10 @@ impl LLamaCppEngine {
                         println!("{}", model);
                         if
                             app
-                                .emit_all("opla-server", Payload {
+                                .emit_all("opla-server", Payload::Server(ServerPayload {
                                     message: format!("{}", model),
                                     status: ServerStatus::Started.as_str().to_string(),
-                                })
+                                }))
                                 .is_err()
                         {
                             println!("Opla server error: {}", "failed to emit started");
@@ -452,10 +453,10 @@ impl LLamaCppEngine {
                         println!("Opla server error: {}", line);
                         if
                             app
-                                .emit_all("opla-server", Payload {
+                                .emit_all("opla-server", Payload::Server(ServerPayload {
                                     message: format!("Opla server error: {}", line),
                                     status: ServerStatus::Error.as_str().to_string(),
-                                })
+                                }))
                                 .is_err()
                         {
                             println!("Opla server error: {}", "failed to emit error");
@@ -467,10 +468,10 @@ impl LLamaCppEngine {
 
                     if
                         app
-                            .emit_all("opla-server-stderr", Payload {
+                            .emit_all("opla-server-stderr", Payload::Server(ServerPayload {
                                 message: line.clone(),
                                 status: ServerStatus::Stderr.as_str().to_string(),
-                            })
+                            }))
                             .is_err()
                     {
                         println!("Opla server error: {}", "failed to emit stderr");

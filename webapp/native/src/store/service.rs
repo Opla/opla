@@ -18,7 +18,7 @@ use tokio::spawn;
 
 use crate::{
     data::service::Service,
-    store::app_state::{ Empty, GlobalAppState, Payload, Value, STATE_SYNC_EVENT },
+    store::app_state::{ Empty, GlobalAppState, EventPayload, Value, STATE_SYNC_EVENT },
     OplaContext,
 };
 
@@ -59,7 +59,7 @@ impl ServiceStorage {
         self.active_service.as_ref()
     }
 
-    async fn emit_state_async(payload: Payload, app_handle: AppHandle) {
+    async fn emit_state_async(payload: EventPayload, app_handle: AppHandle) {
         let context = app_handle.state::<OplaContext>();
         let value = match payload.value {
             Some(v) => v,
@@ -81,9 +81,13 @@ impl ServiceStorage {
                 }
 
                 app_handle
-                    .emit_all(STATE_SYNC_EVENT, Payload {
+                    .emit_all(STATE_SYNC_EVENT, EventPayload {
                         key: payload.key,
-                        value: Some(Value::Services(crate::store::app_state::ValueServices { services: store.services.clone() })),
+                        value: Some(
+                            Value::Services(crate::store::app_state::ValueServices {
+                                services: store.services.clone(),
+                            })
+                        ),
                     })
                     .unwrap();
             }
