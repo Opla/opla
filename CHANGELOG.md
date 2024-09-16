@@ -1,3 +1,10 @@
+# [1.0.0-alpha.220](https://github.com/Opla/opla/compare/v1.0.0-alpha.219...v1.0.0-alpha.220) (2024-09-16)
+
+
+### Bug Fixes
+
+* unknown model at start in bottom bar [#1244](https://github.com/Opla/opla/issues/1244) ([#1252](https://github.com/Opla/opla/issues/1252)) ([6135e3d](https://github.com/Opla/opla/commit/6135e3de192b696157ffe7803d601eb3619cfac8))
+
 # [1.0.0-alpha.219](https://github.com/Opla/opla/compare/v1.0.0-alpha.218...v1.0.0-alpha.219) (2024-09-12)
 
 
