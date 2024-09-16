@@ -529,7 +529,7 @@ impl ProvidersManager {
             let encoded = match encode(text, model, None) {
                 Ok(e) => { e }
                 Err(err) => {
-                    return Err(format!("LLM encode error: {:?}", err));
+                    return Err(format!("LLM OpenAI encode error: {:?}", err));
                 }
             };
             let tokens: Vec<u64> = encoded
