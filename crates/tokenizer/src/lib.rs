@@ -27,7 +27,7 @@ pub fn encode_gpt(text: String) -> Result<Vec<Rank>, String> {
 }
 
 pub fn encode(text: String, model: String, encoding: Option<String>) -> Result<Vec<Rank>, String> {
-    if model.starts_with("gpt") {
+    if model.to_lowercase().starts_with("gpt") {
         return encode_gpt(text);
     }
     if encoding.is_some() {
