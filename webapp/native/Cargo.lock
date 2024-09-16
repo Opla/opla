@@ -64,7 +64,7 @@ checksum = "0952808a6c2afd1aa8947271f3a60f1a6763c7b912d210184c5149b5cf147247"
 
 [[package]]
 name = "app"
-version = "1.0.0-alpha.214"
+version = "1.0.0-alpha.221"
 dependencies = [
  "async-trait",
  "bytes",
@@ -2274,7 +2274,7 @@ dependencies = [
 
 [[package]]
 name = "opla_core"
-version = "1.0.0-alpha.214"
+version = "1.0.0-alpha.221"
 dependencies = [
  "anyhow",
  "serde",
@@ -3638,9 +3638,9 @@ checksum = "e1fc403891a21bcfb7c37834ba66a547a8f402146eba7265b5a6d88059c9ff2f"
 
 [[package]]
 name = "tauri"
-version = "1.7.2"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e33e3ba00a3b05eb6c57ef135781717d33728b48acf914bb05629e74d897d29"
+checksum = "570a20223602ad990a30a048f2fdb957ae3e38de3ca9582e04cc09d01e8ccfad"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -3660,12 +3660,15 @@ dependencies = [
  "http 0.2.12",
  "ignore",
  "indexmap 1.9.3",
+ "infer",
+ "log",
  "minisign-verify",
  "objc",
  "once_cell",
  "open",
  "os_pipe",
  "percent-encoding",
+ "plist",
  "rand 0.8.5",
  "raw-window-handle",
  "regex",
@@ -3956,7 +3959,7 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokenizer"
-version = "1.0.0-alpha.214"
+version = "1.0.0-alpha.221"
 dependencies = [
  "anyhow",
  "base64 0.21.7",
