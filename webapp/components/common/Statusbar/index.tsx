@@ -20,11 +20,12 @@ import useBackend from '@/hooks/useBackendContext';
 // import logger from '@/utils/logger';
 import { ModalIds, Page } from '@/types/ui';
 import { cancelDownloadModel, getSys } from '@/utils/backend/commands';
-import { Sys } from '@/types';
+import { ServerStatus, Sys } from '@/types';
 import { ModalsContext } from '@/modals/context';
 import logger from '@/utils/logger';
 import { findModel } from '@/utils/data/models';
 import { useModelsStore, useServerStore, useUsageStorage } from '@/stores';
+import { StorageState } from '@/stores/types';
 
 export default function Statusbar() {
   const router = useRouter();
@@ -49,7 +50,7 @@ export default function Statusbar() {
   const running = server.status === 'started';
   const error = server.status === 'error';
 
-  const modelId = config.parameters.modelId as string;
+  const modelId = (config.parameters.modelId as string) || server.message;
   const model = findModel(modelId, models.items);
   const download = (downloads ?? [undefined])[0];
 
@@ -95,15 +96,16 @@ export default function Statusbar() {
               <AlertTriangle className="h-4 w-4" strokeWidth={1.5} />
             </span>
           )}
-          {(server.status === 'init' ||
-            server.status === 'wait' ||
-            server.status === 'starting') && <span>{t('Server is starting')}</span>}
-          {server.status === 'started' && (
+          {(server.status === ServerStatus.INIT ||
+            server.status === ServerStatus.WAIT ||
+            server.status === ServerStatus.STARTING ||
+            models.state !== StorageState.OK) && <span>{t('Server is starting')}</span>}
+          {server.status === ServerStatus.STARTED && models.state === StorageState.OK && (
             <span>{model?.title || model?.name || t('Model unknown')}</span>
           )}
           {/* (server.status === 'stopping' ||
             server.status === 'stopped') && <span>{t('Server is stopped')}</span> */}
-          {server.status === 'error' && (
+          {server.status === ServerStatus.ERROR && (
             <span className="text-destructive-foreground">{t('Server error')}</span>
           )}
         </button>
