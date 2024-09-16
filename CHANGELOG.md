@@ -1,3 +1,10 @@
+# [1.0.0-alpha.221](https://github.com/Opla/opla/compare/v1.0.0-alpha.220...v1.0.0-alpha.221) (2024-09-16)
+
+
+### Bug Fixes
+
+* tokenize OpenAI encode exception [#1250](https://github.com/Opla/opla/issues/1250) ([#1253](https://github.com/Opla/opla/issues/1253)) ([4f5cc4c](https://github.com/Opla/opla/commit/4f5cc4c664823976a5068f5b0fb918245c022ed8))
+
 # [1.0.0-alpha.220](https://github.com/Opla/opla/compare/v1.0.0-alpha.219...v1.0.0-alpha.220) (2024-09-16)
 
 
