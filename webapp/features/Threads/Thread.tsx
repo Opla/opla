@@ -462,7 +462,6 @@ function Thread({
   const isLoading =
     messageUpdating ||
     threadState === StorageState.INIT ||
-    threadState === StorageState.LOADING ||
     (conversationId &&
       (messagesState[conversationId] === StorageState.INIT ||
         messagesState[conversationId] === StorageState.LOADING));

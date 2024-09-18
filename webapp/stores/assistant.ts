@@ -14,7 +14,13 @@
 
 import { StateCreator } from 'zustand';
 import { Assistant, Model, Preset } from '@/types';
-import { createBaseNamedRecord, createBaseRecord, mapKeys, updateRecord } from '@/utils/data';
+import {
+  createBaseNamedRecord,
+  createBaseRecord,
+  deepEqual,
+  mapKeys,
+  updateRecord,
+} from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
 import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 
@@ -81,14 +87,17 @@ const createAssistantSlice =
     },
     updateAssistant: (newAssistant: Assistant) => {
       const updatedAssistant: Assistant = updateRecord<Assistant>(newAssistant);
-      const assistants = get().assistants.map((a) =>
-        a.id === updatedAssistant.id ? updatedAssistant : a,
-      );
-      set({
-        assistants,
-      });
-      const value = mapKeys({ assistants }, toSnakeCase);
-      emit(GlobalAppState.ASSISTANTS, value);
+      const prevAssistant = get().assistants.find((a) => a.id === updatedAssistant.id);
+      if (!deepEqual(prevAssistant, newAssistant)) {
+        const assistants = get().assistants.map((a) =>
+          a.id === updatedAssistant.id ? updatedAssistant : a,
+        );
+        set({
+          assistants,
+        });
+        const value = mapKeys({ assistants }, toSnakeCase);
+        emit(GlobalAppState.ASSISTANTS, value);
+      }
     },
     deleteAssistant: (id: string) => {
       const assistants = get().assistants.filter((a) => a.id !== id);

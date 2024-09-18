@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { Ui, Model, Provider, ProviderType, ModelState, ModelsConfiguration } from '@/types';
-import { deepMerge, getEntityName, getResourceUrl } from '.';
+import { deepEqual, deepMerge, getEntityName, getResourceUrl } from '.';
 import { getLocalProvider, getProviderState } from './providers';
 import OplaProvider from '../providers/opla';
 import logger from '../logger';
@@ -224,4 +224,18 @@ export const getModelStateAsString = (model: Model | undefined) => {
   }
 
   return state;
+};
+
+export const hasUpdatedModels = (modelsA: Model[], modelsB: Model[]) => {
+  if (modelsA.length === modelsB.length) {
+    return modelsA.every((model, index) => {
+      const modelB = modelsB[index];
+      return (
+        model.id === modelB.id &&
+        model.updatedAt < modelB.updatedAt &&
+        deepEqual({ ...model, createdAt: 0 }, { ...modelB, createdAt: 0 })
+      );
+    });
+  }
+  return false;
 };

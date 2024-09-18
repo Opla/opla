@@ -14,7 +14,7 @@
 
 import { StateCreator } from 'zustand';
 import { Provider } from '@/types';
-import { mapKeys } from '@/utils/data';
+import { deepEqual, mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
 import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 
@@ -48,9 +48,11 @@ const createProviderSlice =
       }
     },
     setProviders: (updatedProviders: Provider[]) => {
-      set({ providers: updatedProviders });
-      const value = mapKeys({ providers: updatedProviders }, toSnakeCase);
-      emit(GlobalAppState.PROVIDERS, value);
+      if (!deepEqual(get().providers, updatedProviders)) {
+        set({ providers: updatedProviders });
+        const value = mapKeys({ providers: updatedProviders }, toSnakeCase);
+        emit(GlobalAppState.PROVIDERS, value);
+      }
     },
   });
 export default createProviderSlice;

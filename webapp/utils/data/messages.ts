@@ -165,3 +165,24 @@ export const changeMessageContent = (
   }
   return message;
 };
+
+export const hasNewMessages = (
+  messagesA: Message[] | undefined,
+  messagesB: Message[] | undefined,
+) => {
+  if (messagesA && messagesA.length === messagesB?.length) {
+    return messagesA.every((message, index) => {
+      const messageB = messagesB[index];
+      return (
+        message.updatedAt < messageB.updatedAt &&
+        message.id === messageB.id &&
+        deepEqual(message.author, messageB.author) &&
+        deepEqual(message.content, messageB.content) &&
+        deepEqual(message.contentHistory, messageB.contentHistory) &&
+        deepEqual(message.sibling, messageB.sibling) &&
+        deepEqual(message.assets, messageB.assets)
+      );
+    });
+  }
+  return false;
+};

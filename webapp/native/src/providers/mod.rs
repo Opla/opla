@@ -248,10 +248,16 @@ impl ProvidersManager {
         let config = self.bind_local_server(app, model).await?;
         let context = app_handle.state::<OplaContext>();
         let mut store = context.store.lock().await;
-        store.server.launch_at_startup = true;
-        store.server.configuration = config.clone();
-        store.server.emit_update_all(app_handle.app_handle());
-        store.save().map_err(|err| err.to_string())?;
+        if
+            !store.server.launch_at_startup ||
+            config.parameters != store.server.configuration.parameters
+        {
+            store.server.launch_at_startup = true;
+            store.server.configuration = config.clone();
+            store.server.emit_update_all(app_handle.app_handle());
+            store.save().map_err(|err| err.to_string())?;
+        }
+
         let mut interface = interface.clone();
         let parameters: ServerParameters = ServerParameters {
             host: config.get_parameter_string("host", "127.0.0.1".to_string()),

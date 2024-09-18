@@ -16,6 +16,7 @@ import { StateCreator } from 'zustand';
 import { Model, ModelsConfiguration } from '@/types';
 import { mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
+import { hasUpdatedModels } from '@/utils/data/models';
 import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 
 type ModelProps = StorageProps & ModelsConfiguration;
@@ -46,10 +47,12 @@ const createModelSlice =
       }
     },
     setModels: (updatedModels: Model[]) => {
-      const models = { ...get(), models: updatedModels };
-      set(models);
-      const value = mapKeys({ models }, toSnakeCase);
-      emit(GlobalAppState.MODELS, value);
+      if (!hasUpdatedModels(get().items, updatedModels)) {
+        const models: ModelSlice = { ...get(), items: updatedModels };
+        set(models);
+        const value = mapKeys({ models }, toSnakeCase);
+        emit(GlobalAppState.MODELS, value);
+      }
     },
   });
 

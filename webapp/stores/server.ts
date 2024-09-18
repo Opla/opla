@@ -14,7 +14,7 @@
 
 import { StateCreator } from 'zustand';
 import { ServerConfiguration } from '@/types';
-import { mapKeys } from '@/utils/data';
+import { deepEqual, mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
 import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 
@@ -51,9 +51,11 @@ const createServerSlice =
       }
     },
     setServerConfig: (server: ServerConfiguration) => {
-      set({ serverConfig: server });
-      const value = mapKeys({ server }, toSnakeCase);
-      emit(GlobalAppState.SERVER, value);
+      if (!deepEqual(get().serverConfig, server)) {
+        set({ serverConfig: server });
+        const value = mapKeys({ server }, toSnakeCase);
+        emit(GlobalAppState.SERVER, value);
+      }
     },
   });
 

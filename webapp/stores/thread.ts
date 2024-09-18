@@ -16,15 +16,16 @@ import { StateCreator } from 'zustand';
 import { Conversation, Message, QueryResponse, QueryResult, QueryResultEntry } from '@/types';
 import { deleteUnusedConversationsDir } from '@/utils/backend/tauri';
 import logger from '@/utils/logger';
-import { deepCopy, deepEqual, mapKeys } from '@/utils/data';
+import { deepCopy, mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
 import {
   loadConversationMessages,
   removeConversationMessages,
   saveConversationMessages,
 } from '@/utils/backend/commands';
-import { getMessageContentAsString, mergeMessages } from '@/utils/data/messages';
+import { hasNewMessages, getMessageContentAsString, mergeMessages } from '@/utils/data/messages';
 import {
+  deepEqualConversations,
   getConversation,
   removeConversation,
   updateOrCreateConversation,
@@ -101,11 +102,10 @@ const createThreadSlice =
     getConversation: (id) =>
       id ? get().conversations.find((conversation) => conversation.id === id) : undefined,
     setConversations: (newConversations) => {
-      if (deepEqual(newConversations, get().conversations)) {
-        return;
+      if (!deepEqualConversations(newConversations, get().conversations)) {
+        const data = mapKeys({ conversations: newConversations }, toSnakeCase);
+        emit(GlobalAppState.CONVERSATIONS, data);
       }
-      const data = mapKeys({ conversations: newConversations }, toSnakeCase);
-      emit(GlobalAppState.CONVERSATIONS, data);
     },
     deleteConversation: async (
       id: string,
@@ -155,10 +155,12 @@ const createThreadSlice =
       id: string | undefined,
       updatedMessages: Message[],
     ): Promise<void> => {
-      if (id && deepEqual(updatedMessages, get().messages[id])) {
-        return;
-      }
-      if (id) {
+      if (
+        get().state !== StorageState.LOADING &&
+        id &&
+        !hasNewMessages(get().messages[id], updatedMessages)
+      ) {
+        set({ state: StorageState.LOADING });
         await saveConversationMessages(id, deepCopy<Message[]>(updatedMessages));
       }
     },
