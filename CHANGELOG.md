@@ -1,3 +1,10 @@
+# [1.0.0-alpha.223](https://github.com/Opla/opla/compare/v1.0.0-alpha.222...v1.0.0-alpha.223) (2024-09-18)
+
+
+### Bug Fixes
+
+* same events are send multiple time [#1245](https://github.com/Opla/opla/issues/1245) ([#1268](https://github.com/Opla/opla/issues/1268)) ([d6f6518](https://github.com/Opla/opla/commit/d6f6518b20283d6a76285bc7c4c559ca626c35a9))
+
 # [1.0.0-alpha.222](https://github.com/Opla/opla/compare/v1.0.0-alpha.221...v1.0.0-alpha.222) (2024-09-18)
 
 
