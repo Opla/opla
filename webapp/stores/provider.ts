@@ -51,7 +51,7 @@ const createProviderSlice =
       if (!deepEqual(get().providers, updatedProviders)) {
         set({ providers: updatedProviders });
         const value = mapKeys({ providers: updatedProviders }, toSnakeCase);
-        emit(GlobalAppState.PROVIDERS, value);  
+        emit(GlobalAppState.PROVIDERS, value);
       }
     },
   });

@@ -230,9 +230,12 @@ export const hasUpdatedModels = (modelsA: Model[], modelsB: Model[]) => {
   if (modelsA.length === modelsB.length) {
     return modelsA.every((model, index) => {
       const modelB = modelsB[index];
-      return (model.id === modelB.id && model.updatedAt < modelB.updatedAt
-        && deepEqual({ ...model, createdAt: 0 }, { ...modelB, createdAt: 0 }))
+      return (
+        model.id === modelB.id &&
+        model.updatedAt < modelB.updatedAt &&
+        deepEqual({ ...model, createdAt: 0 }, { ...modelB, createdAt: 0 })
+      );
     });
   }
   return false;
-}
+};

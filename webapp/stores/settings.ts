@@ -54,7 +54,7 @@ const createSettingsSlice =
       if (!deepEqual(get().settings, updatedSettings)) {
         set({ settings: updatedSettings });
         const value = mapKeys({ settings: updatedSettings }, toSnakeCase);
-        emit(GlobalAppState.SETTINGS, value);  
+        emit(GlobalAppState.SETTINGS, value);
       }
     },
   });

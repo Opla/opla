@@ -14,7 +14,13 @@
 
 import { StateCreator } from 'zustand';
 import { Assistant, Model, Preset } from '@/types';
-import { createBaseNamedRecord, createBaseRecord, deepEqual, mapKeys, updateRecord } from '@/utils/data';
+import {
+  createBaseNamedRecord,
+  createBaseRecord,
+  deepEqual,
+  mapKeys,
+  updateRecord,
+} from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
 import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 

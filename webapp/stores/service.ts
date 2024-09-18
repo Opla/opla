@@ -16,8 +16,8 @@ import { StateCreator } from 'zustand';
 import { AIService, AIServiceType } from '@/types';
 import { setActiveModel as setBackendActiveModel } from '@/utils/backend/commands';
 import logger from '@/utils/logger';
-import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 import { deepEqual } from '@/utils/data';
+import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 
 interface ServiceProps extends StorageProps {
   activeService?: AIService;
@@ -51,11 +51,14 @@ const createServiceSlice =
     },
     setActiveService: (activeService: AIService) => {
       const storage = get();
-      if (!deepEqual(storage.activeService, activeService) || storage.state !== StorageState.OK || storage.error !== undefined) {
+      if (
+        !deepEqual(storage.activeService, activeService) ||
+        storage.state !== StorageState.OK ||
+        storage.error !== undefined
+      ) {
         set({ activeService, state: StorageState.OK, error: undefined });
         emit(GlobalAppState.SERVICES, { services: { activeService } });
       }
-
     },
     getActiveModel: () => {
       const { activeService } = get();
@@ -74,7 +77,11 @@ const createServiceSlice =
         providerIdOrName: provider,
       };
       const storage = get();
-      if (!deepEqual(storage.activeService, activeService) || storage.state !== StorageState.OK || storage.error !== undefined) {
+      if (
+        !deepEqual(storage.activeService, activeService) ||
+        storage.state !== StorageState.OK ||
+        storage.error !== undefined
+      ) {
         set({ activeService, state: StorageState.OK, error: undefined });
         emit(GlobalAppState.SERVICES, { services: { activeService } });
       }

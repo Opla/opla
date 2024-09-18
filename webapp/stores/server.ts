@@ -54,7 +54,7 @@ const createServerSlice =
       if (!deepEqual(get().serverConfig, server)) {
         set({ serverConfig: server });
         const value = mapKeys({ server }, toSnakeCase);
-        emit(GlobalAppState.SERVER, value);  
+        emit(GlobalAppState.SERVER, value);
       }
     },
   });

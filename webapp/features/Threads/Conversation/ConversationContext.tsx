@@ -180,7 +180,7 @@ function ConversationProvider({
       delete updatedErrors[id];
       setErrorMessage(updatedErrors);
     },
-    [onError, errorMessages, isProcessing],
+    [errorMessages, isProcessing],
   );
 
   const updateMessages = useCallback(
