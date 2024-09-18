@@ -114,7 +114,7 @@ function ConversationProvider({
     updateMessagesAndConversation,
   } = useThreadStore();
   const { parseAndValidatePrompt, clearPrompt } = useContext(PromptContext) || {};
-  const { activeService } = useBackend();
+  const { activeService, streams, server, updateBackendServer } = useBackend();
   const { getAssistant } = useAssistantStore();
   const modelStorage = useModelsStore();
   const [selectedMessageId, setSelectedMessageId] = useState<string | undefined>(undefined);
@@ -129,6 +129,41 @@ function ConversationProvider({
     }
   }, [conversationId, processing, isProcessing, setIsProcessing]);
 
+  const handleError = useCallback(
+    (id: string, error: string) => {
+      onError(id, error);
+      setErrorMessage({ ...errorMessages, [id]: error });
+    },
+    [setErrorMessage, onError, errorMessages],
+  );
+
+  useEffect(() => {
+    if (conversationId && streams?.[conversationId]) {
+      const stream = streams[conversationId];
+      if (stream.status === 'error') {
+        const error = stream.content[0];
+        handleError(conversationId, error);
+        const model = modelStorage.items.find((m) => m.id === selectedModelId);
+        if (model) {
+          const stderr = server.stderr || [];
+          const len = stderr.unshift(error);
+          if (len > 50) {
+            stderr.pop();
+          }
+          updateBackendServer({ stderr });
+        }
+      }
+    }
+  }, [
+    conversationId,
+    streams,
+    handleError,
+    modelStorage.items,
+    selectedModelId,
+    server.stderr,
+    updateBackendServer,
+  ]);
+
   const handleProcessing = useCallback(
     (id: string, state = false) => {
       if (isProcessing[id] !== state) {
@@ -138,12 +173,14 @@ function ConversationProvider({
     [isProcessing],
   );
 
-  const handleError = useCallback(
-    (id: string, error: string) => {
-      onError(id, error);
-      setErrorMessage({ ...errorMessages, [id]: error });
+  const startProcessing = useCallback(
+    (id: string) => {
+      setIsProcessing({ ...isProcessing, [id]: true });
+      const updatedErrors = { ...errorMessages };
+      delete updatedErrors[id];
+      setErrorMessage(updatedErrors);
     },
-    [errorMessages, onError],
+    [onError, errorMessages, isProcessing],
   );
 
   const updateMessages = useCallback(
@@ -310,7 +347,7 @@ function ConversationProvider({
       previousMessage?: Message | undefined,
     ) => {
       if (!selectedModelId) {
-        setErrorMessage({ type: 'error', error: 'No model selected' });
+        handleError(conversation.id, 'No model selected');
         return {};
       }
       const result = await preProcessingCommands(
@@ -331,7 +368,7 @@ function ConversationProvider({
         },
       );
       if (result.type === 'error') {
-        setErrorMessage({ ...errorMessages, [conversation.id]: result.error });
+        handleError(conversation.id, result.error);
         return {};
       }
       if (result.type === 'return') {
@@ -339,22 +376,22 @@ function ConversationProvider({
         return {};
       }
       if (result.type === 'imagine') {
-        setIsProcessing({ ...isProcessing, [conversation.id]: true });
+        startProcessing(conversation.id);
         try {
           await handleImageGeneration(prompt, conversation, previousMessage);
         } catch (error) {
-          setErrorMessage({ ...errorMessages, [conversation.id]: `${error}` });
+          handleError(conversation.id, `${error}`);
         }
         setIsProcessing({ ...isProcessing, [conversation.id]: false });
 
         return {};
       }
       if (result.type === 'note') {
-        setIsProcessing({ ...isProcessing, [conversation.id]: true });
+        startProcessing(conversation.id);
         try {
           await handleNote(prompt, conversation, previousMessage);
         } catch (error) {
-          setErrorMessage({ ...errorMessages, [conversation.id]: `${error}` });
+          handleError(conversation.id, `${error}`);
         }
         setIsProcessing({ ...isProcessing, [conversation.id]: false });
 
@@ -377,11 +414,10 @@ function ConversationProvider({
         );
       }
       if (!selectedModel && !selectedAssistant) {
-        setErrorMessage({ ...errorMessages, [conversation.id]: 'Model not found' });
+        handleError(conversation.id, 'Model not found');
         setIsProcessing({ ...isProcessing, [conversation.id]: false });
       } else {
-        setErrorMessage({ ...errorMessages, [conversation.id]: '' });
-        setIsProcessing({ ...isProcessing, [conversation.id]: true });
+        startProcessing(conversation.id);
       }
 
       return { selectedModel, selectedAssistant };
@@ -392,7 +428,6 @@ function ConversationProvider({
       commandManager,
       modelStorage,
       conversations,
-      errorMessages,
       getAssistant,
       messagesCache,
       handleImageGeneration,
@@ -404,6 +439,8 @@ function ConversationProvider({
       t,
       tempConversationName,
       updateMessagesAndConversation,
+      handleError,
+      startProcessing,
     ],
   );
 
@@ -705,7 +742,6 @@ function ConversationProvider({
   const value = useMemo(
     () => ({
       selectedMessageId,
-      errorMessages,
       isProcessing,
       handleProcessing,
       handleSendMessage,
@@ -713,10 +749,10 @@ function ConversationProvider({
       handleChangeMessageContent,
       handleStartMessageEdit,
       handleCancelSending,
+      errorMessages,
     }),
     [
       selectedMessageId,
-      errorMessages,
       handleProcessing,
       handleChangeMessageContent,
       handleResendMessage,
@@ -724,6 +760,7 @@ function ConversationProvider({
       handleStartMessageEdit,
       handleCancelSending,
       isProcessing,
+      errorMessages,
     ],
   );
   return <ConversationContext.Provider value={value}>{children}</ConversationContext.Provider>;
