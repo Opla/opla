@@ -350,6 +350,7 @@ impl ProvidersManager {
         let handle = spawn(async move {
             let send = |response: Result<LlmCompletionResponse, LlmError>| {
                 let mut finished = false;
+                println!("response {:?}", response);
                 let result = match response {
                     Ok(response) => {
                         if response.status == String::from("finished") {
@@ -445,7 +446,7 @@ impl ProvidersManager {
             let mut store = context.store.lock().await;
             store.set_local_active_model_id(&model);
             store.save().map_err(|err| err.to_string())?;
-            // println!("Opla call completion: {:?}", response);
+            println!("Opla call completion: {:?}", response);
             return Ok(response?);
         }
         if llm_provider_type == "openai" || llm_provider_type == "server" {

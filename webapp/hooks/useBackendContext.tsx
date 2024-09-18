@@ -27,7 +27,6 @@ import {
   OplaContext,
   ServerStatus,
   Settings,
-  LlmStream,
   Download,
   ServerParameters,
   AIServiceType,
@@ -301,29 +300,20 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       logger.error('stream event without conversationId', response);
       return;
     }
-
+    let stream = currentStreams[conversationId];
     if (response.status === 'error') {
       logger.error('stream error', response, currentStreams[conversationId]);
-      const stream: LlmStream = currentStreams[conversationId] || {
+      stream = stream || {
         ...response,
       };
       stream.status = 'error';
       stream.content = [response.message || 'Error in stream process'];
       currentStreams[conversationId] = stream;
       updateStreams(currentStreams);
-      const stderr = deepCopy(serverRef.current.stderr || []);
-      const len = stderr.unshift(response.message);
-      if (len > 50) {
-        stderr.pop();
-      }
-      updateServer({
-        stderr,
-      });
       return;
     }
 
-    if (response.status === 'success') {
-      const stream = currentStreams[conversationId];
+    if (response.status === 'success' && stream?.status !== 'error') {
       if (!stream || (stream.prevContent !== response.content && response.content)) {
         const content = stream?.content || [];
         content.push(response.content);
@@ -336,8 +326,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       }
       return;
     }
-    if (response.status === 'finished') {
-      let stream = currentStreams[conversationId];
+    if (response.status === 'finished' && stream?.status !== 'error') {
       if (stream) {
         stream.status = 'finished';
       } else {
@@ -349,8 +338,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       currentStreams[conversationId] = stream;
       updateStreams(currentStreams);
     }
-    if (response.status === 'cancel') {
-      let stream = currentStreams[conversationId];
+    if (response.status === 'cancel' && stream?.status !== 'error') {
       if (stream) {
         stream.status = 'cancel';
       } else {

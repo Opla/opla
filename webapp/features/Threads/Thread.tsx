@@ -159,7 +159,12 @@ function Thread({
         p = true;
       }
       if (stream?.messageId === msg.id) {
-        m.status = MessageStatus.Stream;
+        if (stream.status === MessageStatus.Error) {
+          m.status = MessageStatus.Error;
+          p = false;
+        } else {
+          m.status = MessageStatus.Stream;
+        }
         m.content = stream.content?.join?.('');
         m.contentHistory = undefined;
       }

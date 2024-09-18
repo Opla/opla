@@ -123,7 +123,7 @@ export const sendMessage = async (
       returnedMessage.content = response.content.trim();
     } */
   } catch (e: any) {
-    logger.error('sendMessage', e, typeof e);
+    logger.error('sendMessage', e, typeof e, activeService.provider?.errors);
     const error = String(e);
     /* onError(conversation.id, error);
       setErrorMessage({ ...errorMessage, [conversation.id]: error }); */
@@ -132,7 +132,7 @@ export const sendMessage = async (
     returnedMessage.status = MessageStatus.Error;
     const { provider } = activeService;
     if (provider) {
-      const { errors = [] } = provider || { errors: [] };
+      const errors = provider.errors || [];
       const len = errors.unshift(error);
       if (len > 50) {
         errors.pop();

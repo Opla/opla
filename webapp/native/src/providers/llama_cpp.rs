@@ -94,7 +94,7 @@ impl LlmQueryCompletion {
             prompt.push('\n');
         }
         prompt.push_str("Answer:");
-        println!("prompt: {}", prompt);
+        // println!("prompt: {}", prompt);
         LlamaCppCompletionQuery {
             prompt,
             stream: self.get_parameter_as_boolean("stream"),
