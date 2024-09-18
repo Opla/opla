@@ -14,7 +14,7 @@
 
 import { StateCreator } from 'zustand';
 import { Settings } from '@/types';
-import { mapKeys } from '@/utils/data';
+import { deepEqual, mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
 import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
 
@@ -51,9 +51,11 @@ const createSettingsSlice =
       }
     },
     setSettings: (updatedSettings: Settings) => {
-      set({ settings: updatedSettings });
-      const value = mapKeys({ settings: updatedSettings }, toSnakeCase);
-      emit(GlobalAppState.SETTINGS, value);
+      if (!deepEqual(get().settings, updatedSettings)) {
+        set({ settings: updatedSettings });
+        const value = mapKeys({ settings: updatedSettings }, toSnakeCase);
+        emit(GlobalAppState.SETTINGS, value);  
+      }
     },
   });
 

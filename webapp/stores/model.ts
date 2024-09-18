@@ -17,6 +17,7 @@ import { Model, ModelsConfiguration } from '@/types';
 import { mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
 import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
+import { hasUpdatedModels } from '@/utils/data/models';
 
 type ModelProps = StorageProps & ModelsConfiguration;
 
@@ -35,22 +36,25 @@ const DEFAULT_PROPS: ModelProps = {
 
 const createModelSlice =
   (emit: Emitter, initProps?: Partial<ModelSlice>): StateCreator<ModelSlice> =>
-  (set, get) => ({
-    ...DEFAULT_PROPS,
-    ...initProps,
-    isLoading: () => get().state === StorageState.INIT || get().state === StorageState.LOADING,
-    loadModels: (force = false) => {
-      if (get().state === StorageState.INIT || force) {
-        set({ ...get(), state: StorageState.LOADING });
-        emit(GlobalAppState.MODELS);
-      }
-    },
-    setModels: (updatedModels: Model[]) => {
-      const models = { ...get(), models: updatedModels };
-      set(models);
-      const value = mapKeys({ models }, toSnakeCase);
-      emit(GlobalAppState.MODELS, value);
-    },
-  });
+    (set, get) => ({
+      ...DEFAULT_PROPS,
+      ...initProps,
+      isLoading: () => get().state === StorageState.INIT || get().state === StorageState.LOADING,
+      loadModels: (force = false) => {
+        if (get().state === StorageState.INIT || force) {
+          set({ ...get(), state: StorageState.LOADING });
+          emit(GlobalAppState.MODELS);
+        }
+      },
+      setModels: (updatedModels: Model[]) => {
+        if (!hasUpdatedModels(get().items, updatedModels)) {
+          const models: ModelSlice = { ...get(), items: updatedModels };
+          set(models);
+          const value = mapKeys({ models }, toSnakeCase);
+          emit(GlobalAppState.MODELS, value);
+        }
+
+      },
+    });
 
 export default createModelSlice;

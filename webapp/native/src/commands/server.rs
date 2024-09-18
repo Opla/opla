@@ -54,12 +54,19 @@ pub async fn start_opla_server<R: Runtime>(
             return Err(format!("Opla server not started model not found: {:?}", err));
         }
     };
-    store.server.launch_at_startup = true;
-    store.server.configuration.parameters = parameters.clone();
-    store.server.configuration.set_parameter_string("model_id", model_id);
-    store.server.configuration.set_parameter_string("model_path", model_path);
-    store.save().map_err(|err| err.to_string())?;
-    store.server.emit_update_all(app.app_handle());
+    
+    let mut configuration = store.server.configuration.clone();
+    configuration.parameters = parameters.clone();
+    configuration.set_parameter_string("model_id", model_id);
+    configuration.set_parameter_string("model_path", model_path);
+
+    if (!store.server.launch_at_startup) || configuration.parameters != store.server.configuration.parameters {
+        store.server.launch_at_startup = true;
+        store.server.configuration = configuration;
+        store.save().map_err(|err| err.to_string())?;
+        store.server.emit_update_all(app.app_handle());
+    }
+
     let mut server = context.server.lock().await;
     server.start(app, &store.server.configuration).await
 }

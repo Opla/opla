@@ -123,6 +123,24 @@ export const mergeConversations = (
   return Array.from(conversationMap.values());
 };
 
+export const deepEqualConversations = (conversationsA: Conversation[], conversationsB: Conversation[]) => {
+  if (conversationsA.length === conversationsB.length) {
+    return conversationsA.every((conversation, index) => {
+      const conversationB = conversationsB[index];
+      return (conversation.id === conversationB.id 
+        && deepEqual(conversation.currentPrompt, conversationB.currentPrompt)
+        && deepEqual(conversation.importedFrom, conversationB.importedFrom)
+        && deepEqual(conversation.temp, conversationB.temp)
+        && deepEqual(conversation.usage, conversationB.usage)
+        && deepEqual(conversation.assets, conversationB.assets)
+        && deepEqual(conversation.preset, conversationB.preset)
+        && deepEqual(conversation.model, conversationB.model)
+        && deepEqual(conversation.services, conversationB.services))
+    })
+  }
+  return false;
+}
+
 export const getConversationService = (
   conversation: Conversation,
   serviceType: AIServiceType,

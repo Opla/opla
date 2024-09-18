@@ -31,7 +31,7 @@ const DEFAULT_PROPS: UsageProps = {
 };
 
 const createUsageSlice =
-  (emit: Emitter, initProps?: Partial<UsageSlice>): StateCreator<UsageSlice> =>
+  (_emit: Emitter, initProps?: Partial<UsageSlice>): StateCreator<UsageSlice> =>
   (set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
