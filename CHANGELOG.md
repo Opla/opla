@@ -1,3 +1,10 @@
+# [1.0.0-alpha.222](https://github.com/Opla/opla/compare/v1.0.0-alpha.221...v1.0.0-alpha.222) (2024-09-18)
+
+
+### Bug Fixes
+
+* **thread:** settings logs don't update [#1242](https://github.com/Opla/opla/issues/1242) ([#1267](https://github.com/Opla/opla/issues/1267)) ([a74d337](https://github.com/Opla/opla/commit/a74d3376941cc327fc42f546161887e6574e05c7))
+
 # [1.0.0-alpha.221](https://github.com/Opla/opla/compare/v1.0.0-alpha.220...v1.0.0-alpha.221) (2024-09-16)
 
 
