@@ -65,6 +65,8 @@ export type ContentFull = {
   raw?: string[];
   metadata?: Metadata;
   author?: Author;
+  cancelled?: boolean;
+  error?: string;
 };
 
 export type Content = string | ContentFull;

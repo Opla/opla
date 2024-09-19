@@ -14,14 +14,15 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 
-import { MoreHorizontal, File } from 'lucide-react';
+import { MoreHorizontal, File, TriangleAlert } from 'lucide-react';
 import {
+  getMessageContent,
   getMessageContentAuthorAsString,
   getMessageContentHistoryAsString,
 } from '@/utils/data/messages';
 import useHover from '@/hooks/useHover';
 import useMarkdownProcessor from '@/hooks/useMarkdownProcessor/index';
-import { Asset, Avatar, AvatarRef, MessageImpl, MessageStatus } from '@/types';
+import { Asset, Avatar, AvatarRef, ContentFull, MessageImpl, MessageStatus } from '@/types';
 import useTranslation from '@/hooks/useTranslation';
 import { getFilename } from '@/utils/misc';
 import { cn } from '@/lib/utils';
@@ -79,6 +80,8 @@ function MessageComponent({
         a.name === author.name,
     ) || ({ name: author.name } as Avatar);
   const isUser = author.role === 'user';
+
+  const { cancelled, error } = (getMessageContent(message, current) || {}) as ContentFull;
 
   const content = getMessageContentHistoryAsString(
     message,
@@ -147,7 +150,21 @@ function MessageComponent({
                 <div className="flex flex-col items-start whitespace-pre-wrap break-words">
                   <div className="w-full break-words">
                     {state !== DisplayMessageState.Note && (
-                      <p className="py-1 font-bold capitalize">{avatar.name}</p>
+                      <p className="flex items-center py-1 font-bold capitalize">
+                        {avatar.name}{' '}
+                        {cancelled && (
+                          <>
+                            <TriangleAlert className="ml-2 h-4 w-4 text-muted-foreground" />
+                            <span className="ml-1 font-thin text-muted-foreground">cancelled</span>
+                          </>
+                        )}
+                        {(error || (!cancelled && message.status === MessageStatus.Error)) && (
+                          <>
+                            <TriangleAlert className="ml-2 h-4 w-4 text-error" />
+                            <span className="ml-1 font-thin text-error">{error}</span>
+                          </>
+                        )}
+                      </p>
                     )}
                     {state === DisplayMessageState.FileAsset && (
                       <div className="pointer-events-auto flex w-full cursor-text select-text flex-row items-center px-0 py-2">
