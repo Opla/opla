@@ -1,3 +1,10 @@
+# [1.0.0-alpha.224](https://github.com/Opla/opla/compare/v1.0.0-alpha.223...v1.0.0-alpha.224) (2024-09-19)
+
+
+### Features
+
+* **thread:** display error/cancel messages [#1247](https://github.com/Opla/opla/issues/1247) ([#1269](https://github.com/Opla/opla/issues/1269)) ([6bfa71d](https://github.com/Opla/opla/commit/6bfa71d07183dd1db367c7274c2592e0e32b865c))
+
 # [1.0.0-alpha.223](https://github.com/Opla/opla/compare/v1.0.0-alpha.222...v1.0.0-alpha.223) (2024-09-18)
 
 
