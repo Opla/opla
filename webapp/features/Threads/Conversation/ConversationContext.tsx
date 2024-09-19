@@ -648,6 +648,8 @@ function ConversationProvider({
               t('Cancelled'),
               t('Cancelled'),
               MessageStatus.Delivered,
+              true,
+              undefined,
             );
             await updateConversationMessages(
               cId,

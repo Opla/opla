@@ -31,6 +31,8 @@ const createContentFull = (
   content: string | string[],
   rawContent?: string | string[],
   metadata?: Metadata,
+  cancelled = false,
+  error: string | undefined = undefined,
   type = ContentType.Text,
 ): ContentFull => {
   const parts = createStringArray(content);
@@ -39,15 +41,17 @@ const createContentFull = (
   return textContent;
 };
 
-export const createTextContent = (
+const createTextContent = (
   content: string | string[] | undefined,
   rawContent?: string | string[],
+  cancelled = false,
+  error: string | undefined = undefined,
   metadata?: Metadata,
 ): string | Content | undefined => {
   if (!content || (typeof content === 'string' && !rawContent)) {
     return content;
   }
-  return createContentFull(content, rawContent, metadata);
+  return createContentFull(content, rawContent, metadata, cancelled, error);
 };
 
 export const createContent = (
@@ -115,6 +119,11 @@ export const getMessageContentAsString = (message: Message | undefined): string 
 export const getMessageRawContentAsString = (message: Message | undefined): string =>
   getContentAsString(message?.content);
 
+export const getMessageContent = (message: Message, index = 0): Content | undefined => {
+  const contentHistory = message.contentHistory || [];
+  return index ? contentHistory[index - 1] : message.content;
+};
+
 export const getMessageContentHistoryAsString = (
   message: Message,
   index = 0,
@@ -143,12 +152,14 @@ export const changeMessageContent = (
   previousMessage: Message,
   content: string,
   rawContent = content,
-  status = previousMessage.status,
+  status: MessageStatus | undefined = previousMessage.status,
+  cancelled: boolean = false,
+  error: string | undefined = undefined,
 ): Message => {
   const message: Message = {
     ...previousMessage,
     status,
-    content: createTextContent(content, rawContent),
+    content: createTextContent(content, rawContent, cancelled, error),
   };
   const previousContentText = getMessageContentAsString(previousMessage);
   if (

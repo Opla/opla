@@ -84,6 +84,10 @@ pub struct Content {
     #[serde(skip_serializing_if = "Option::is_none", default)]
     metadata: Option<Metadata>,
     author: Option<Author>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    error: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    cancelled: Option<bool>,
 }
 
 impl FromStr for Content {
@@ -95,6 +99,8 @@ impl FromStr for Content {
             raw: Some([s.to_string()].to_vec()),
             metadata: None,
             author: None,
+            error: None,
+            cancelled: None,
         })
     }
 }
@@ -111,6 +117,10 @@ impl<'de> Deserialize<'de> for Content {
             #[serde(skip_serializing_if = "Option::is_none", default)]
             metadata: Option<Metadata>,
             author: Option<Author>,
+            #[serde(skip_serializing_if = "Option::is_none", default)]
+            error: Option<String>,
+            #[serde(skip_serializing_if = "Option::is_none", default)]
+            cancelled: Option<bool>,
         }
 
         #[derive(Deserialize)]
@@ -164,4 +174,3 @@ impl Message {
         self.author.sanitize_metadata();
     }
 }
-

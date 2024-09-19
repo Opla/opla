@@ -139,7 +139,9 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       content: ParsedPrompt | string,
       conversationId: string,
       tempConversationName: string | undefined,
-      status?: MessageStatus,
+      status: MessageStatus,
+      cancelled: boolean,
+      error: string | undefined = undefined,
     ) => {
       let message = typeof message_or_id !== 'string' ? message_or_id : undefined;
 
@@ -156,7 +158,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
       if (conversation && message?.content) {
         const text = typeof content === 'string' ? content : content.text;
         const raw = typeof content === 'string' ? content : content.raw;
-        const newMessage = changeMessageContent(message, text, raw);
+        const newMessage = changeMessageContent(message, text, raw, status, cancelled, error);
         if (status) {
           newMessage.status = status;
         }
@@ -192,10 +194,29 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
             stream.conversationId,
             undefined,
             MessageStatus.Delivered,
+            false,
+            undefined,
           );
           updateStreams(undefined);
         } else if (finished.length > 1) {
           logger.error('todo multi finished');
+        }
+
+        const errors = Object.keys(streams).filter((k) => streams[k]?.status === 'error');
+        if (errors.length === 1) {
+          const stream = streams[errors[0]];
+          await updateMessageContent(
+            stream.messageId,
+            stream.content.join(''),
+            stream.conversationId,
+            undefined,
+            MessageStatus.Error,
+            false,
+            stream.content[0],
+          );
+          updateStreams(undefined);
+        } else if (errors.length > 1) {
+          logger.error('todo multi errors');
         }
 
         const cancelled = Object.keys(streams).filter((k) => streams[k]?.status === 'cancel');
@@ -211,6 +232,8 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
             stream.conversationId,
             undefined,
             MessageStatus.Delivered,
+            true,
+            undefined,
           );
           updateStreams(undefined);
         } else if (cancelled.length > 1) {
