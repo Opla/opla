@@ -145,7 +145,12 @@ export default function Parameter({
           </a>
         )}
         {disabled && type === 'text' && (
-          <p className={cn(textCss, 'text-muted-foreground w-full min-w-[220px] px-3 py-1 text-left')}>
+          <p
+            className={cn(
+              textCss,
+              'w-full min-w-[220px] px-3 py-1 text-left text-muted-foreground',
+            )}
+          >
             {value as string}
           </p>
         )}

@@ -54,10 +54,11 @@ const restartLLamaCppServer = async (
 const getCommandLineOptions = (model: string, _parameters: ServerParameters) => {
   const parameters = parseLLamaCppServerParameters({ ..._parameters });
 
-  return Object.keys(parameters).reduce((options: string, key: string) => {
-    return `${options} ${LlamaCppOptions[key][0]} ${parameters[key]}`;
-  }, `${LlamaCppOptions['model'][0]} ${model}`);
-}
+  return Object.keys(parameters).reduce(
+    (options: string, key: string) => `${options} ${LlamaCppOptions[key][0]} ${parameters[key]}`,
+    `${LlamaCppOptions['model'][0]} ${model}`,
+  );
+};
 
 export {
   parseLLamaCppServerParameters,
