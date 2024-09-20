@@ -271,7 +271,7 @@ const LllamaCppParameterDefinitions: ParameterDefinition[] = Object.keys(LlamaCp
   }),
 );
 
-const LlamaCppOptions = {
+const LlamaCppOptions: Record<string, Array<string>> = {
   model: ['-m', '--model'],
   host: ['--host'],
   port: ['--port'],

@@ -18,7 +18,7 @@ import { invokeTauri } from '@/utils/backend/tauri';
 import { mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
 import { ServerParameters } from '@/types';
-import { LlamaCppParameters, LlamaCppArgumentsSchema } from './constants';
+import { LlamaCppParameters, LlamaCppArgumentsSchema, LlamaCppOptions } from './constants';
 
 const parseLLamaCppServerParameters = (params: ServerParameters) =>
   LlamaCppArgumentsSchema.parse(params);
@@ -51,9 +51,18 @@ const restartLLamaCppServer = async (
   return startLLamaCppServer(model, parameters, 'start_opla_server');
 };
 
+const getCommandLineOptions = (model: string, _parameters: ServerParameters) => {
+  const parameters = parseLLamaCppServerParameters({ ..._parameters });
+
+  return Object.keys(parameters).reduce((options: string, key: string) => {
+    return `${options} ${LlamaCppOptions[key][0]} ${parameters[key]}`;
+  }, `${LlamaCppOptions['model'][0]} ${model}`);
+}
+
 export {
   parseLLamaCppServerParameters,
   restartLLamaCppServer,
   startLLamaCppServer,
   stopLLamaCppServer,
+  getCommandLineOptions,
 };

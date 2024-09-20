@@ -36,6 +36,7 @@ import { getLocalModels, getLocalModelsAsItems } from '@/utils/data/models';
 import { getServerConfig, setActiveModel } from '@/utils/backend/commands';
 import { LllamaCppParameterDefinitions } from '@/utils/providers/llama.cpp/constants';
 import { useModelsStore, useServerStore } from '@/stores';
+import { getCommandLineOptions } from '@/utils/providers/llama.cpp';
 
 export default function Opla({
   provider,
@@ -90,7 +91,7 @@ export default function Opla({
           <Parameter
             label={t('Inference engine')}
             name="metadata.server.name"
-            value={deepGet(provider, 'metadata.server.name', '')}
+            value={`${deepGet(provider, 'metadata.server.name', 'llama.cpp')} ${getCommandLineOptions(modelPath, provider.metadata?.server.parameters || {})}`}
             disabled
             type="text"
             onChange={onParameterChange}
