@@ -144,6 +144,16 @@ export default function Parameter({
             {value as string}
           </a>
         )}
+        {disabled && type === 'text' && (
+          <p
+            className={cn(
+              textCss,
+              'w-full min-w-[220px] px-3 py-1 text-left text-muted-foreground',
+            )}
+          >
+            {value as string}
+          </p>
+        )}
         {disabled && !onAction && (type === 'file' || type === 'path') && (
           <div className="flex items-center gap-4">
             <Button variant="link" className="text-muted-foreground" onClick={handleShowfile}>
@@ -164,7 +174,7 @@ export default function Parameter({
             }}
           />
         )}
-        {(type === 'text' ||
+        {((type === 'text' && !disabled) ||
           type === 'number' ||
           type === 'password' ||
           (type === 'url' && !disabled)) && (
