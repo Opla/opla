@@ -1,3 +1,10 @@
+# [1.0.0-alpha.225](https://github.com/Opla/opla/compare/v1.0.0-alpha.224...v1.0.0-alpha.225) (2024-09-20)
+
+
+### Features
+
+* **provider:** llamacpp show cmd options [#1249](https://github.com/Opla/opla/issues/1249) ([#1270](https://github.com/Opla/opla/issues/1270)) ([8d8a2ce](https://github.com/Opla/opla/commit/8d8a2ce18f0f84ae2cf9f717d937b0c39982378e))
+
 # [1.0.0-alpha.224](https://github.com/Opla/opla/compare/v1.0.0-alpha.223...v1.0.0-alpha.224) (2024-09-19)
 
 
