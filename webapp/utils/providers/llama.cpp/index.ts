@@ -51,7 +51,10 @@ const restartLLamaCppServer = async (
   return startLLamaCppServer(model, parameters, 'start_opla_server');
 };
 
-const getCommandLineOptions = (model: string, _parameters: ServerParameters) => {
+const getCommandLineOptions = (model: string | undefined, _parameters: ServerParameters) => {
+  if (!model) {
+    return '';
+  }
   const parameters = parseLLamaCppServerParameters({ ..._parameters });
 
   return Object.keys(parameters).reduce(
