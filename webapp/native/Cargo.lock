@@ -64,7 +64,7 @@ checksum = "0952808a6c2afd1aa8947271f3a60f1a6763c7b912d210184c5149b5cf147247"
 
 [[package]]
 name = "app"
-version = "1.0.0-alpha.221"
+version = "1.0.0-alpha.226"
 dependencies = [
  "async-trait",
  "bytes",
@@ -2274,7 +2274,7 @@ dependencies = [
 
 [[package]]
 name = "opla_core"
-version = "1.0.0-alpha.221"
+version = "1.0.0-alpha.226"
 dependencies = [
  "anyhow",
  "serde",
@@ -3760,7 +3760,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-window-state"
 version = "0.1.1"
-source = "git+https://github.com/tauri-apps/plugins-workspace?branch=v1#cf058d5d4a6639b0684339944d9c137a9cddde14"
+source = "git+https://github.com/tauri-apps/plugins-workspace?branch=v1#3b465674f4a46aad0a2b396df6cbe16bdffb75d8"
 dependencies = [
  "bincode",
  "bitflags 2.4.2",
@@ -3959,7 +3959,7 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokenizer"
-version = "1.0.0-alpha.221"
+version = "1.0.0-alpha.226"
 dependencies = [
  "anyhow",
  "base64 0.21.7",
