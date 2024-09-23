@@ -91,7 +91,7 @@ export default function Opla({
           <Parameter
             label={t('Inference engine')}
             name="metadata.server.name"
-            value={`${deepGet(provider, 'metadata.server.name', 'llama.cpp')} ${getCommandLineOptions(modelPath, provider.metadata?.server.parameters || {})}`}
+            value={`${deepGet(provider, 'metadata.server.name', 'llama.cpp')} ${getCommandLineOptions(modelPath, provider.metadata?.server?.parameters || {})}`}
             disabled
             type="text"
             onChange={onParameterChange}
