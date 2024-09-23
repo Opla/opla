@@ -1,3 +1,10 @@
+# [1.0.0-alpha.226](https://github.com/Opla/opla/compare/v1.0.0-alpha.225...v1.0.0-alpha.226) (2024-09-23)
+
+
+### Bug Fixes
+
+* cannot read properties of parameters [#1271](https://github.com/Opla/opla/issues/1271) ([#1272](https://github.com/Opla/opla/issues/1272)) ([8565b34](https://github.com/Opla/opla/commit/8565b3449f0cc65df942b7d9cb66bd70d39e65b4))
+
 # [1.0.0-alpha.225](https://github.com/Opla/opla/compare/v1.0.0-alpha.224...v1.0.0-alpha.225) (2024-09-20)
 
 
