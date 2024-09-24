@@ -168,8 +168,8 @@ export const preProcessingCommands = async (
   conversation: Conversation,
   conversations: Conversation[],
   tempConversationName: string,
-  selectedModelNameOrId: string,
-  previousMessage: Message | undefined,
+  _selectedModelNameOrId: string,
+  _previousMessage: Message | undefined,
   context: {
     changeService: Function;
     getConversationMessages: Function;

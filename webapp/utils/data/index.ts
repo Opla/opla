@@ -133,7 +133,7 @@ export const deepEqual = <T>(a: T, b: T): boolean => {
 export const mapKeys = <TValue>(
   value: TValue | any,
   mapFunc: (key: string, value: TValue) => string,
-  mapValue: (key: string, value: TValue) => TValue = (key, v) => v,
+  mapValue: (key: string, value: TValue) => TValue = (_key, v) => v,
 ): TValue => {
   if (Array.isArray(value)) {
     return value.map((item) => mapKeys(item, mapFunc, mapValue)) as TValue;

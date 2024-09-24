@@ -5,11 +5,13 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { FlatCompat } from '@eslint/eslintrc';
+import { fixupConfigRules } from '@eslint/compat';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 const compat = new FlatCompat({
   baseDirectory: dirname,
+  recommendedConfig: fixupConfigRules(tseslint.config),
 });
 
 const airbnbTypescript = compat.extends('airbnb-typescript');
@@ -23,12 +25,12 @@ delete airbnbTypescript[0].rules['@typescript-eslint/no-implied-eval'];
 delete airbnbTypescript[0].rules['@typescript-eslint/no-throw-literal'];
 delete airbnbTypescript[0].rules['@typescript-eslint/return-await'];
 
-const config = tseslint.config(
+const config = [
   eslint.configs.recommended,
-  ...compat.extends('airbnb'),
-  ...airbnbTypescript,
-  ...compat.extends('airbnb/hooks'),
-  ...compat.extends('next/core-web-vitals'),
+  ...fixupConfigRules(compat.extends('airbnb')),
+  ...fixupConfigRules(airbnbTypescript),
+  ...fixupConfigRules(compat.extends('airbnb/hooks')),
+  ...fixupConfigRules(compat.extends('next/core-web-vitals')),
   // ...tseslint.configs.recommendedTypeChecked,
   eslintConfigPrettier,
   {
@@ -44,14 +46,24 @@ const config = tseslint.config(
 
     rules: {
       'react/require-default-props': 'off',
-      '@typescript-eslint/no-unused-vars': 'warn',
       'jsx-a11y/label-has-associated-control': [
         2,
         {
           assert: 'either',
         },
       ],
-
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          args: 'all',
+          argsIgnorePattern: '^_',
+          caughtErrors: 'all',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        },
+      ],
       'no-underscore-dangle': [
         'error',
         {
@@ -60,6 +72,6 @@ const config = tseslint.config(
       ],
     },
   },
-);
+];
 
 export default config;

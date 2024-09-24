@@ -87,7 +87,7 @@ export const sendMessage = async (
   commandManager: CommandManager,
   modelStorage: ModelsConfiguration,
   storedActiveService: AIService | undefined,
-  onSuccess: (usage: LlmUsage | undefined) => void,
+  _onSuccess: (usage: LlmUsage | undefined) => void,
   onError: (id: string, error: string) => void,
 ) => {
   const returnedMessage = { ...message };

@@ -158,7 +158,7 @@ export default function EditPreset<T>({
     }
   };
 
-  const handleKeepSystemChange = (name: string, value: ParameterValue) => {
+  const handleKeepSystemChange = (_name: string, value: ParameterValue) => {
     if (presetProperties) {
       onChange({ keepSystem: value as boolean } as unknown as Partial<T>);
     }

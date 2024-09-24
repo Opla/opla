@@ -15,7 +15,6 @@
 import { BasicState } from '@/types/ui';
 import { PromptToken, PromptTokenState, PromptTokenType } from '../parsers';
 
-// eslint-disable-next-line import/prefer-default-export
 export const getStateColor = (
   state: BasicState | undefined,
   prefix = 'bg',
