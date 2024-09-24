@@ -1,3 +1,10 @@
+# [1.0.0-alpha.227](https://github.com/Opla/opla/compare/v1.0.0-alpha.226...v1.0.0-alpha.227) (2024-09-24)
+
+
+### Features
+
+* from one state event to multiple specialized [#1287](https://github.com/Opla/opla/issues/1287) ([#1288](https://github.com/Opla/opla/issues/1288)) ([a2f3bef](https://github.com/Opla/opla/commit/a2f3bef691d2dd31b4f9c34606197aa94ad0a016))
+
 # [1.0.0-alpha.226](https://github.com/Opla/opla/compare/v1.0.0-alpha.225...v1.0.0-alpha.226) (2024-09-23)
 
 
