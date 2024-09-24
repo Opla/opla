@@ -30,7 +30,7 @@ import { mapBaseRecord, mapKeys } from '@/utils/data';
 import { toCamelCase } from '@/utils/string';
 import createAssistantSlice, { AssistantSlice } from './assistant';
 import createWorkspaceSlice, { WorkspaceSlice } from './workspace';
-import { EVENTS, Emitter, GlobalAppState, StorageState } from './types';
+import { EVENTS, Emitter, GlobalAppState, StateEvent, StorageState } from './types';
 import createThreadSlice, { ThreadSlice } from './thread';
 import createPresetSlice, { PresetSlice } from './preset';
 import createProviderSlice, { ProviderSlice } from './provider';
@@ -47,9 +47,9 @@ type PayloadEmitter = {
   value: PaylLoadValue;
 };
 
-const emit: Emitter = async (key: number, value: PaylLoadValue) => {
+const emit: Emitter = async (eventName: StateEvent, key: number, value: PaylLoadValue) => {
   const { emit: emitStateEvent } = await import('@tauri-apps/api/event');
-  emitStateEvent(EVENTS.STATE_CHANGE_EVENT, {
+  emitStateEvent(eventName, {
     key,
     value,
   });

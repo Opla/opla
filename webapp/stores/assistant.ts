@@ -22,7 +22,7 @@ import {
   updateRecord,
 } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
-import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
+import { Emitter, GlobalAppState, StateEvent, StorageProps, StorageState } from './types';
 
 interface AssistantProps extends StorageProps {
   assistants: Assistant[];
@@ -68,7 +68,7 @@ const createAssistantSlice =
     loadAssistants: (force = false) => {
       if (get().state === StorageState.INIT || force) {
         set({ ...get(), state: StorageState.LOADING });
-        emit(GlobalAppState.ASSISTANTS);
+        emit(StateEvent.ASSISTANT, GlobalAppState.ASSISTANTS);
       }
     },
     getAllAssistants: () => [OplaAssistant, ...get().assistants.filter((a) => !a.hidden)],
@@ -82,7 +82,7 @@ const createAssistantSlice =
         assistants,
       });
       const value = mapKeys({ assistants }, toSnakeCase);
-      emit(GlobalAppState.ASSISTANTS, value);
+      emit(StateEvent.ASSISTANT, GlobalAppState.ASSISTANTS, value);
       return newAssistant;
     },
     updateAssistant: (newAssistant: Assistant) => {
@@ -96,7 +96,7 @@ const createAssistantSlice =
           assistants,
         });
         const value = mapKeys({ assistants }, toSnakeCase);
-        emit(GlobalAppState.ASSISTANTS, value);
+        emit(StateEvent.ASSISTANT, GlobalAppState.ASSISTANTS, value);
       }
     },
     deleteAssistant: (id: string) => {
@@ -105,7 +105,7 @@ const createAssistantSlice =
         assistants,
       });
       const value = mapKeys({ assistants }, toSnakeCase);
-      emit(GlobalAppState.ASSISTANTS, value);
+      emit(StateEvent.ASSISTANT, GlobalAppState.ASSISTANTS, value);
     },
     createTarget: (template?: Partial<Assistant>) => {
       const newTarget: Preset = createBaseRecord<Preset>(template);
@@ -130,7 +130,7 @@ const createAssistantSlice =
         assistants,
       });
       const value = mapKeys({ assistants }, toSnakeCase);
-      emit(GlobalAppState.ASSISTANTS, value);
+      emit(StateEvent.ASSISTANT, GlobalAppState.ASSISTANTS, value);
     },
     deleteTarget: (assistant: Assistant, targetId: string) => {
       const targets = assistant.targets?.filter((t) => t.id !== targetId);
@@ -145,7 +145,7 @@ const createAssistantSlice =
         assistants,
       });
       const value = mapKeys({ assistants }, toSnakeCase);
-      emit(GlobalAppState.ASSISTANTS, value);
+      emit(StateEvent.ASSISTANT, GlobalAppState.ASSISTANTS, value);
     },
     duplicateTarget: (target: Preset) => {
       const newTarget: Preset = createBaseRecord<Preset>();

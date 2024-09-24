@@ -24,12 +24,7 @@ use crate::OplaContext;
 use crate::{ data::{ conversation::Conversation, message::Message }, utils::get_data_directory };
 
 use super::app_state::{
-    Empty,
-    GlobalAppState,
-    EventPayload,
-    Value,
-    ValueConversationMessages,
-    STATE_CHANGE_EVENT,
+    Empty, EventPayload, GlobalAppState, StateEvent, Value, ValueConversationMessages
 };
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -235,7 +230,7 @@ impl ThreadStorage {
 
     pub fn subscribe_state_events(&mut self, app_handle: AppHandle) {
         let app_handle_copy = app_handle.app_handle();
-        let _id = app_handle.listen_global(STATE_CHANGE_EVENT, move |event| {
+        let _id = app_handle.listen_global(StateEvent::THREAD.to_string(), move |event| {
             if let Some(payload) = event.payload() {
                 match serde_json::from_str(payload) {
                     Ok(data) => {

@@ -16,7 +16,7 @@ import { StateCreator } from 'zustand';
 import { Settings } from '@/types';
 import { deepEqual, mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
-import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
+import { Emitter, GlobalAppState, StateEvent, StorageProps, StorageState } from './types';
 
 interface SettingsProps extends StorageProps {
   settings: Settings;
@@ -47,14 +47,14 @@ const createSettingsSlice =
     loadSettings: (force = false) => {
       if (get().state === StorageState.INIT || force) {
         set({ ...get(), state: StorageState.LOADING });
-        emit(GlobalAppState.SETTINGS);
+        emit(StateEvent.SETTINGS, GlobalAppState.SETTINGS);
       }
     },
     setSettings: (updatedSettings: Settings) => {
       if (!deepEqual(get().settings, updatedSettings)) {
         set({ settings: updatedSettings });
         const value = mapKeys({ settings: updatedSettings }, toSnakeCase);
-        emit(GlobalAppState.SETTINGS, value);
+        emit(StateEvent.SETTINGS, GlobalAppState.SETTINGS, value);
       }
     },
   });

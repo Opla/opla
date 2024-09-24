@@ -30,7 +30,8 @@ use crate::{
     OplaContext,
     data::option_f32_or_u32,
 };
-use super::app_state::STATE_CHANGE_EVENT;
+
+use super::app_state::StateEvent;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WindowSettings {
@@ -126,7 +127,7 @@ impl Settings {
 
     pub fn subscribe_state_events(&mut self, app_handle: AppHandle) {
         let app_handle_copy = app_handle.app_handle();
-        let _id = app_handle.listen_global(STATE_CHANGE_EVENT, move |event| {
+        let _id = app_handle.listen_global(StateEvent::SETTINGS.to_string(), move |event| {
             if let Some(payload) = event.payload() {
                 match serde_json::from_str(payload) {
                     Ok(data) => {
