@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt};
 
 use serde::{ Deserialize, Serialize };
 
@@ -32,7 +32,36 @@ use super::{
     settings::Settings,
 };
 
-pub const STATE_CHANGE_EVENT: &str = "state_change_event";
+// pub const STATE_CHANGE_EVENT: &str = "state_change_event";
+
+pub enum StateEvent {
+    ASSISTANT = 0,
+    MODEL = 1,
+    PRESET = 2,
+    PROVIDER = 3,
+    SERVER = 4,
+    SERVICE = 5,
+    SETTINGS = 6,
+    THREAD = 7,
+    WORKSPACE = 8,
+}
+
+impl fmt::Display for StateEvent {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            StateEvent::ASSISTANT => write!(f, "event_assistant_state_change"),
+            StateEvent::MODEL => write!(f, "event_model_state_change"),
+            StateEvent::PRESET => write!(f, "event_preset_state_change"),
+            StateEvent::PROVIDER => write!(f, "event_provider_state_change"),
+            StateEvent::SERVER => write!(f, "event_server_state_change"),
+            StateEvent::SERVICE => write!(f, "event_service_state_change"),
+            StateEvent::SETTINGS => write!(f, "event_settings_state_change"),
+            StateEvent::THREAD => write!(f, "event_thread_state_change"),
+            StateEvent::WORKSPACE => write!(f, "event_workspace_state_change"),
+        }
+    }
+}
+
 pub const STATE_SYNC_EVENT: &str = "state_sync_event";
 pub enum GlobalAppState {
     ACTIVE = 0,

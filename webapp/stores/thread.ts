@@ -30,7 +30,7 @@ import {
   removeConversation,
   updateOrCreateConversation,
 } from '@/utils/data/conversations';
-import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
+import { Emitter, GlobalAppState, StateEvent, StorageProps, StorageState } from './types';
 
 interface ThreadProps extends StorageProps {
   conversations: Conversation[];
@@ -96,7 +96,7 @@ const createThreadSlice =
     loadAllConversations: (force = false) => {
       if (get().state === StorageState.INIT || force) {
         set({ ...get(), state: StorageState.LOADING });
-        emit(GlobalAppState.ALLCONVERSATIONS);
+        emit(StateEvent.THREAD, GlobalAppState.ALLCONVERSATIONS);
       }
     },
     getConversation: (id) =>
@@ -104,7 +104,7 @@ const createThreadSlice =
     setConversations: (newConversations) => {
       if (!deepEqualConversations(newConversations, get().conversations)) {
         const data = mapKeys({ conversations: newConversations }, toSnakeCase);
-        emit(GlobalAppState.CONVERSATIONS, data);
+        emit(StateEvent.THREAD, GlobalAppState.CONVERSATIONS, data);
       }
     },
     deleteConversation: async (
@@ -116,7 +116,7 @@ const createThreadSlice =
       if (!conversation) {
         logger.info(`deleteConversation conversation doesn't exist : ${id}`);
       } else {
-        await emit(GlobalAppState.DELETECONVERSATION, id);
+        await emit(StateEvent.THREAD, GlobalAppState.DELETECONVERSATION, id);
         // Delete any orphans messages
         await removeConversationMessages(id);
         await cleanup?.(
@@ -141,7 +141,7 @@ const createThreadSlice =
         messagesState: { ...store.messagesState, [id]: StorageState.LOADING },
       });
       const value = mapKeys({ conversationId: id }, toSnakeCase);
-      emit(GlobalAppState.CONVERSATIONMESSAGES, value);
+      emit(StateEvent.THREAD, GlobalAppState.CONVERSATIONMESSAGES, value);
       return true;
     },
     filterConversationMessages: (
@@ -264,12 +264,12 @@ const createThreadSlice =
     },
     setArchives: (newArchives) => {
       const data = mapKeys({ conversations: newArchives }, toSnakeCase);
-      emit(GlobalAppState.ARCHIVES, data);
+      emit(StateEvent.THREAD, GlobalAppState.ARCHIVES, data);
     },
     deleteArchive: async (id: string, cleanup?: (id: string) => Promise<void>) => {
       const updatedArchives = removeConversation(id, get().archives);
       const data = mapKeys(updatedArchives, toSnakeCase);
-      emit(GlobalAppState.ARCHIVES, data);
+      emit(StateEvent.THREAD, GlobalAppState.ARCHIVES, data);
       return cleanup?.(id);
     },
   });

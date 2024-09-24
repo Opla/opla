@@ -27,12 +27,7 @@ use crate::utils::get_data_directory;
 use crate::OplaContext;
 
 use super::app_state::{
-    GlobalAppState,
-    EventPayload,
-    Empty,
-    Value,
-    STATE_CHANGE_EVENT,
-    STATE_SYNC_EVENT,
+    Empty, EventPayload, GlobalAppState, StateEvent, Value, STATE_SYNC_EVENT
 };
 
 pub const DEFAULT_PROJECT_NAME: &str = "project";
@@ -351,7 +346,7 @@ impl WorkspaceStorage {
 
     pub fn subscribe_state_events(&mut self, app_handle: AppHandle) {
         let app_handle_copy = app_handle.app_handle();
-        let _id = app_handle.listen_global(STATE_CHANGE_EVENT, move |event| {
+        let _id = app_handle.listen_global(StateEvent::WORKSPACE.to_string(), move |event| {
             if let Some(payload) = event.payload() {
                 let data: Result<EventPayload, _> = serde_json::from_str(payload);
                 match data {

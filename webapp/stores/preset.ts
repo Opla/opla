@@ -16,7 +16,7 @@ import { StateCreator } from 'zustand';
 import { Preset } from '@/types';
 import { deepEqual, mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
-import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
+import { Emitter, GlobalAppState, StateEvent, StorageProps, StorageState } from './types';
 
 interface PresetProps extends StorageProps {
   presets: Preset[];
@@ -44,14 +44,14 @@ const createPresetSlice =
     loadPresets: (force = false) => {
       if (get().state === StorageState.INIT || force) {
         set({ ...get(), state: StorageState.LOADING });
-        emit(GlobalAppState.PRESETS);
+        emit(StateEvent.PRESET, GlobalAppState.PRESETS);
       }
     },
     setPresets: (updatedPresets: Preset[]) => {
       if (!deepEqual(get().presets, updatedPresets)) {
         set({ presets: updatedPresets });
         const value = mapKeys({ presets: updatedPresets }, toSnakeCase);
-        emit(GlobalAppState.PRESETS, value);
+        emit(StateEvent.PRESET, GlobalAppState.PRESETS, value);
       }
     },
   });

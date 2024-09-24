@@ -48,7 +48,19 @@ export const EVENTS: {
   STATE_SYNC_EVENT: 'state_sync_event',
 };
 
-export type Emitter = (key: number, value?: any) => Promise<void>;
+export enum StateEvent {
+  ASSISTANT = 'event_assistant_state_change',
+  MODEL = 'event_model_state_change',
+  PRESET = 'event_preset_state_change',
+  PROVIDER = 'event_provider_state_change',
+  SERVER = 'event_server_state_change',
+  SERVICE = 'event_service_state_change',
+  SETTINGS = 'event_settings_state_change',
+  THREAD = 'event_thread_state_change',
+  WORKSPACE = 'event_workspace_state_change',
+}
+
+export type Emitter = (eventName: StateEvent, key: number, value?: any) => Promise<void>;
 
 export enum StorageState {
   INIT = 0,

@@ -14,7 +14,7 @@
 
 import { StateCreator } from 'zustand';
 import { Project, Workspace } from '@/types';
-import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
+import { Emitter, GlobalAppState, StateEvent, StorageProps, StorageState } from './types';
 
 interface WorkspaceProps extends StorageProps {
   activeWorkspaceId?: string;
@@ -49,14 +49,14 @@ const createWorkspaceSlice =
     loadWorkspace: (id = get().activeWorkspaceId) => {
       if (get().state !== StorageState.LOADING) {
         set({ ...get(), state: StorageState.LOADING });
-        emit(GlobalAppState.ACTIVE, id);
+        emit(StateEvent.WORKSPACE, GlobalAppState.ACTIVE, id);
       }
       const w = id ? get().workspaces[id] : undefined;
       return w;
     },
     loadProject: (id) => {
       const p = id ? get().projects[id] : undefined;
-      emit(GlobalAppState.PROJECT, p);
+      emit(StateEvent.WORKSPACE, GlobalAppState.PROJECT, p);
       return p;
     },
   });

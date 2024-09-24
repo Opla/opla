@@ -16,7 +16,7 @@ import { StateCreator } from 'zustand';
 import { ServerConfiguration } from '@/types';
 import { deepEqual, mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
-import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
+import { Emitter, GlobalAppState, StateEvent, StorageProps, StorageState } from './types';
 
 interface ServerProps extends StorageProps {
   serverConfig: ServerConfiguration;
@@ -47,14 +47,14 @@ const createServerSlice =
     loadServerConfig: (force = false) => {
       if (get().state === StorageState.INIT || force) {
         set({ ...get(), state: StorageState.LOADING });
-        emit(GlobalAppState.SERVER);
+        emit(StateEvent.SERVER, GlobalAppState.SERVER);
       }
     },
     setServerConfig: (server: ServerConfiguration) => {
       if (!deepEqual(get().serverConfig, server)) {
         set({ serverConfig: server });
         const value = mapKeys({ server }, toSnakeCase);
-        emit(GlobalAppState.SERVER, value);
+        emit(StateEvent.SERVER, GlobalAppState.SERVER, value);
       }
     },
   });

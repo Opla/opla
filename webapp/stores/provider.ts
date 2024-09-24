@@ -16,7 +16,7 @@ import { StateCreator } from 'zustand';
 import { Provider } from '@/types';
 import { deepEqual, mapKeys } from '@/utils/data';
 import { toSnakeCase } from '@/utils/string';
-import { Emitter, GlobalAppState, StorageProps, StorageState } from './types';
+import { Emitter, GlobalAppState, StateEvent, StorageProps, StorageState } from './types';
 
 interface ProviderProps extends StorageProps {
   providers: Provider[];
@@ -44,14 +44,14 @@ const createProviderSlice =
     loadProviders: (force = false) => {
       if (get().state === StorageState.INIT || force) {
         set({ ...get(), state: StorageState.LOADING });
-        emit(GlobalAppState.PROVIDERS);
+        emit(StateEvent.PROVIDER, GlobalAppState.PROVIDERS);
       }
     },
     setProviders: (updatedProviders: Provider[]) => {
       if (!deepEqual(get().providers, updatedProviders)) {
         set({ providers: updatedProviders });
         const value = mapKeys({ providers: updatedProviders }, toSnakeCase);
-        emit(GlobalAppState.PROVIDERS, value);
+        emit(StateEvent.PROVIDER, GlobalAppState.PROVIDERS, value);
       }
     },
   });
