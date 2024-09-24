@@ -31,8 +31,8 @@ const createContentFull = (
   content: string | string[],
   rawContent?: string | string[],
   metadata?: Metadata,
-  cancelled = false,
-  error: string | undefined = undefined,
+  _cancelled = false,
+  _error: string | undefined = undefined,
   type = ContentType.Text,
 ): ContentFull => {
   const parts = createStringArray(content);

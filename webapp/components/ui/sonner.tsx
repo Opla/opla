@@ -28,5 +28,4 @@ function Toaster({ duration = 50000, ...props }: ToasterProps) {
   );
 }
 
-// eslint-disable-next-line import/prefer-default-export
 export { Toaster, toast };

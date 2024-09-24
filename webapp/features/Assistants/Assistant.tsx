@@ -70,7 +70,7 @@ export default function AssistantView({ selectedId: assistantId }: AssistantProp
     }
   };
 
-  const handleUpdateTarget = async (action: string, data: ModalData) => {
+  const handleUpdateTarget = async (_action: string, data: ModalData) => {
     if (assistant) {
       const target = data.item as Preset;
       updateTarget(assistant, target);
