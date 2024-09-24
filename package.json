@@ -19,7 +19,7 @@
         "webapp"
     ],
     "devDependencies": {
-        "eslint": "^8",
+        "eslint": "^9",
         "husky": "^9.1.6",
         "lint-staged": "^15.2.7"
     },
