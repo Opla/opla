@@ -1,3 +1,10 @@
+# [1.0.0-alpha.228](https://github.com/Opla/opla/compare/v1.0.0-alpha.227...v1.0.0-alpha.228) (2024-09-25)
+
+
+### Bug Fixes
+
+* llama.cpp.exe needs llama.dll ggml.dll [#1289](https://github.com/Opla/opla/issues/1289) ([#1291](https://github.com/Opla/opla/issues/1291)) ([f7d08cb](https://github.com/Opla/opla/commit/f7d08cb7ef202a7b3198f3dccd8b90ad6ba4797e))
+
 # [1.0.0-alpha.227](https://github.com/Opla/opla/compare/v1.0.0-alpha.226...v1.0.0-alpha.227) (2024-09-24)
 
 

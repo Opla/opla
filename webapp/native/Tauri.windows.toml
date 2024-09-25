@@ -1,3 +1,7 @@
 # Dirty hack to fix Windows version not fully compatible with semver
 [package]
-version = "1.0.227"
+version = "1.0.228"
+# fix missing dll files for Windows version
+[bundle.resources]
+"binaries/llama.cpp/llama.dll" = "llama.dll"
+"binaries/llama.cpp/ggml.dll" = "ggml.dll"
