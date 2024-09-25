@@ -49,6 +49,8 @@ jobs:
           unzip ./${{ env.WINDOWS_x86_64_ZIP }}
           ls ./
           mv llama-server.exe ../${{ env.BINARIES_DIR }}${{ env.WINDOWS_x86_64 }}
+          mv ggml.dll ../${{ env.BINARIES_DIR }}ggml.dll
+          mv llama.dll ../${{ env.BINARIES_DIR }}llama.dll
           rm -rf ./*
 
           cd ..
@@ -59,6 +61,8 @@ jobs:
           git update-index --chmod=+x ${{ env.BINARIES_DIR }}${{ env.MACOS_x86_64 }}
           git update-index --chmod=+x ${{ env.BINARIES_DIR }}${{ env.LINUX_x86_64 }}
           git update-index --chmod=+x ${{ env.BINARIES_DIR }}${{ env.WINDOWS_x86_64 }}
+          git update-index --chmod=+x ${{ env.BINARIES_DIR }}ggml.dll
+          git update-index --chmod=+x ${{ env.BINARIES_DIR }}llama.dll
 
       - name: add and commit Llama.cpp.server changes
         uses: EndBug/add-and-commit@v9
