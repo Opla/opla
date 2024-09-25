@@ -26,8 +26,8 @@ const tauriWindowsToml =
 version = "${msiVersion}"
 # fix missing dll files for Windows version
 [tauri.bundle.resources]
-"binaries/llama.cpp/llama.dll" = "llama.dll"
-"binaries/llama.cpp/ggml.dll" = "ggml.dll"
+"binaries/llama.cpp/llama.dll" = "./"
+"binaries/llama.cpp/ggml.dll" = "./"
 `;
 await writeFile('./webapp/native/Tauri.windows.toml', tauriWindowsToml);
 
