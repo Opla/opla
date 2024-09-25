@@ -1,3 +1,10 @@
+# [1.0.0-alpha.232](https://github.com/Opla/opla/compare/v1.0.0-alpha.231...v1.0.0-alpha.232) (2024-09-25)
+
+
+### Bug Fixes
+
+* error Message start with "Some("")" [#1294](https://github.com/Opla/opla/issues/1294) ([#1298](https://github.com/Opla/opla/issues/1298)) ([2fed740](https://github.com/Opla/opla/commit/2fed7402acb141e6757f26a73e7808f950d22f4c))
+
 # [1.0.0-alpha.231](https://github.com/Opla/opla/compare/v1.0.0-alpha.230...v1.0.0-alpha.231) (2024-09-25)
 
 
