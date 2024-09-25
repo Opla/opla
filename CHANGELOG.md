@@ -1,3 +1,10 @@
+# [1.0.0-alpha.230](https://github.com/Opla/opla/compare/v1.0.0-alpha.229...v1.0.0-alpha.230) (2024-09-25)
+
+
+### Bug Fixes
+
+* dll path [#1289](https://github.com/Opla/opla/issues/1289) ([4697b07](https://github.com/Opla/opla/commit/4697b073010836b026d33819baaaeda80493125a))
+
 # [1.0.0-alpha.229](https://github.com/Opla/opla/compare/v1.0.0-alpha.228...v1.0.0-alpha.229) (2024-09-25)
 
 
