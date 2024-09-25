@@ -1,3 +1,10 @@
+# [1.0.0-alpha.231](https://github.com/Opla/opla/compare/v1.0.0-alpha.230...v1.0.0-alpha.231) (2024-09-25)
+
+
+### Bug Fixes
+
+* assets not present in windows bundle [#1296](https://github.com/Opla/opla/issues/1296) ([#1297](https://github.com/Opla/opla/issues/1297)) ([40f4ad2](https://github.com/Opla/opla/commit/40f4ad26b24847e7cbb26de57b3fac98cec2ff6c))
+
 # [1.0.0-alpha.230](https://github.com/Opla/opla/compare/v1.0.0-alpha.229...v1.0.0-alpha.230) (2024-09-25)
 
 

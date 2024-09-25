@@ -1,6 +1,6 @@
 # Dirty hack to fix Windows version not fully compatible with semver
 [package]
-version = "1.0.230"
+version = "1.0.231"
 # fix missing dll files for Windows version
 [tauri.bundle.resources]
 "binaries/llama.cpp/llama.dll" = "./"
