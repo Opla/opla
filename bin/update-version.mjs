@@ -28,6 +28,10 @@ version = "${msiVersion}"
 [tauri.bundle.resources]
 "binaries/llama.cpp/llama.dll" = "./"
 "binaries/llama.cpp/ggml.dll" = "./"
+"assets/opla_default_config.json" = "assets/"
+"assets/default_presets.json" = "assets/"
+"assets/default_providers.json" = "assets/"
+"assets/default_assistants.json" = "assets/"
 `;
 await writeFile('./webapp/native/Tauri.windows.toml', tauriWindowsToml);
 
