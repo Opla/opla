@@ -23,7 +23,12 @@ await pkgJson.save();
 const tauriWindowsToml =
 `# Dirty hack to fix Windows version not fully compatible with semver
 [package]
-version = "${msiVersion}"`;
+version = "${msiVersion}"
+# fix missing dll files for Windows version
+[bundle.resources]
+"binaries/llama.cpp/llama.dll" = "llama.dll"
+"binaries/llama.cpp/ggml.dll" = "ggml.dll"
+`;
 await writeFile('./webapp/native/Tauri.windows.toml', tauriWindowsToml);
 
 
