@@ -25,7 +25,7 @@ const tauriWindowsToml =
 [package]
 version = "${msiVersion}"
 # fix missing dll files for Windows version
-[bundle.resources]
+[tauri.bundle.resources]
 "binaries/llama.cpp/llama.dll" = "llama.dll"
 "binaries/llama.cpp/ggml.dll" = "ggml.dll"
 `;
