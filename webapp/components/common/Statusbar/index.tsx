@@ -99,12 +99,11 @@ export default function Statusbar() {
           {(server.status === ServerStatus.INIT ||
             server.status === ServerStatus.WAIT ||
             server.status === ServerStatus.STARTING ||
-            models.state !== StorageState.OK) && <span>{t('Server is starting')}</span>}
+            models.state !== StorageState.OK) &&
+            server.status !== ServerStatus.ERROR && <span>{t('Server is starting')}</span>}
           {server.status === ServerStatus.STARTED && models.state === StorageState.OK && (
             <span>{model?.title || model?.name || t('Model unknown')}</span>
           )}
-          {/* (server.status === 'stopping' ||
-            server.status === 'stopped') && <span>{t('Server is stopped')}</span> */}
           {server.status === ServerStatus.ERROR && (
             <span className="text-destructive-foreground">{t('Server error')}</span>
           )}
