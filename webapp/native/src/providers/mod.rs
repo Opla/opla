@@ -90,7 +90,7 @@ impl ProviderAdapter {
     {
         match self.interface.deserialize_response(&full) {
             Ok(response) => Ok(D::completion_to(response)),
-            Err(err) => Err(E::new(&err.message, &err.status.unwrap_or_default())),
+            Err(err) => Err(E::new(&err.message, &err.status)),
         }
     }
 
@@ -100,8 +100,8 @@ impl ProviderAdapter {
         match response {
             Ok(full) => {
                 match self.interface.deserialize_response_error(&full) {
-                    Ok(err) => E::new(&err.error.message, &err.error.status.unwrap_or_default()),
-                    Err(err) => E::new(&err.message, &err.status.unwrap_or_default()),
+                    Ok(err) => E::new(&err.error.message, &err.error.status),
+                    Err(err) => E::new(&err.message, &err.status),
                 }
             }
             Err(err) => err,
@@ -113,7 +113,7 @@ impl ProviderAdapter {
     {
         self.interface
             .build_stream_chunk(data, self.created)
-            .map_err(|e| E::new(&e.message, &e.status.unwrap_or_default()))
+            .map_err(|e| E::new(&e.message, &e.status))
     }
 
     pub fn handle_input_response(&mut self) {}
