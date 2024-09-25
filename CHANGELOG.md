@@ -1,3 +1,10 @@
+# [1.0.0-alpha.229](https://github.com/Opla/opla/compare/v1.0.0-alpha.228...v1.0.0-alpha.229) (2024-09-25)
+
+
+### Bug Fixes
+
+* tauri.bundle.resources ([6c6cb59](https://github.com/Opla/opla/commit/6c6cb59d7c5e5a2fb841897558b53d607d3a8f3a))
+
 # [1.0.0-alpha.228](https://github.com/Opla/opla/compare/v1.0.0-alpha.227...v1.0.0-alpha.228) (2024-09-25)
 
 
