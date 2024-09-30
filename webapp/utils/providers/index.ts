@@ -30,7 +30,6 @@ import { mapKeys } from '../data';
 import { /* toCamelCase, */ toCamelCase, toSnakeCase } from '../string';
 // import logger from '../logger';
 
-
 export const createLlmMessages = (
   modelName: string,
   providerName: string | undefined,
@@ -94,7 +93,6 @@ export const tokenizeMessages = async (
   const { provider, model } = activeService;
   let response: LlmTokenizeResponse;
   if (model && provider) {
-    const llmParameters: LlmParameters[] = [];
     const preset = findCompatiblePreset(conversation?.preset, presets, model?.name, provider);
     const { parameters: presetParameters, ...completionOptions } = getCompletePresetProperties(
       preset,
