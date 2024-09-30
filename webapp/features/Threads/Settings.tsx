@@ -141,7 +141,12 @@ export default function Settings({
               onChange={handleNoteChange}
             />
           </div>
-
+          {selectedConversation?.usage && (
+            <div className="w-full p-2 text-sm text-muted-foreground">
+              <div className="py-4">{t('Usage')}</div>
+              <div>t('Conversation's tokens'): ${selectedConversation.usage.totalTokens}</div>
+            </div>
+          )}
           {selectedConversation && (
             <div className="w-full p-2 text-sm text-muted-foreground">
               <div className="py-4">{t('Files')}</div>

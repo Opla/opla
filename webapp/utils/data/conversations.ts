@@ -95,7 +95,7 @@ export const updateOrCreateConversation = (
   name = name === defaultName ? conversationName : partial.name || defaultName;
   name = name.trim().substring(0, 200);
   if (conversation) {
-    updatedConversations = updateConversation({ ...conversation, ...partial, name }, conversations);
+    updatedConversations = updateConversation({ ...conversation, ...partial, name, usage: undefined }, conversations);
   } else {
     conversation = createConversation(name);
     updatedConversations = [...conversations, conversation];

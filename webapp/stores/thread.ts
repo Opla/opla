@@ -242,13 +242,13 @@ const createThreadSlice =
       selectedConversationId: string, // = conversationId,
       selectedConversations = get().conversations,
     ) => {
+      const updatedMessages = mergeMessages(conversationMessages, changedMessages);
       const updatedConversations = updateOrCreateConversation(
         selectedConversationId,
         selectedConversations,
         partialConversation,
         getMessageContentAsString(conversationMessages?.[0]),
       );
-      const updatedMessages = mergeMessages(conversationMessages, changedMessages);
       await get().updateConversations(updatedConversations);
       await get().updateConversationMessages(selectedConversationId, updatedMessages);
 

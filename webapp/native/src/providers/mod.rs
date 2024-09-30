@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use std::{ collections::HashMap, sync::Arc };
-use llm::LlmCompletionPayload;
+use llm::{LlmCompletionPayload, LlmMessage};
 use serde::Serialize;
 use tauri::{ AppHandle, Manager, Runtime };
 use tokenizer::encode;
@@ -552,6 +552,26 @@ impl ProvidersManager {
         return Err(format!("LLM provider not found: {:?}", llm_provider_type));
     }
 
+    pub async fn llm_call_tokenize_messages<R: Runtime>(
+        &mut self,
+        app: tauri::AppHandle<R>,
+        model: String,
+        provider: Provider,
+        messages: Vec<LlmMessage>,
+        completion_options: Option<LlmCompletionOptions>
+    ) -> Result<LlmTokenizeResponse, String> {
+        let llm_provider_type = provider.r#type.to_string();
+        let mut text = "";
+        if llm_provider_type == "opla" {
+            // TODO
+            text = "TODO";
+        } else if llm_provider_type == "openai" {
+            text = "TODO";
+        } else {
+            return Err(format!("LLM provider not found: {:?}", llm_provider_type));
+        }
+        return self.llm_call_tokenize(app, model, provider, text.to_string()).await;
+    }
     pub async fn llm_call_image_generation<R: Runtime>(
         &mut self,
         model: Option<String>,
