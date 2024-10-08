@@ -26,7 +26,7 @@ uuid = { version = "1.10.0", features = ["v4"] }
 void = "1.0.2"
 thiserror = "1.0.64"
 eventsource-stream = "0.2.3"
-futures-util = "0.3.30"
+futures-util = "0.3.31"
 tokio = { version = "1.40.0", features = ["sync"] }
 tokenizer = { path = "../../crates/tokenizer"}
 opla_core = { path = "../../crates/core"}
