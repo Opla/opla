@@ -43,7 +43,7 @@
     "i18next-browser-languagedetector": "^8.0.0",
     "lucide-react": "^0.447.0",
     "mermaid": "^11.2.0",
-    "next": "14.2.13",
+    "next": "14.2.14",
     "next-themes": "^0.3.0",
     "pino": "^9.3.2",
     "pino-pretty": "^11.2.2",
