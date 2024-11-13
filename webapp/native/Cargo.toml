@@ -24,7 +24,7 @@ chrono = "0.4.38"
 serde_with = { version = "3.11.0", features = ["json"] }
 uuid = { version = "1.11.0", features = ["v4"] }
 void = "1.0.2"
-thiserror = "1.0.68"
+thiserror = "2.0.3"
 eventsource-stream = "0.2.3"
 futures-util = "0.3.31"
 tokio = { version = "1.41.1", features = ["sync"] }
