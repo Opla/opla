@@ -39,7 +39,7 @@
     "cmdk": "^1.0.0",
     "framer-motion": "^11.11.1",
     "hast": "^1.0.0",
-    "i18next": "^23.15.1",
+    "i18next": "^24.0.2",
     "i18next-browser-languagedetector": "^8.0.0",
     "lucide-react": "^0.461.0",
     "mermaid": "^11.2.0",
