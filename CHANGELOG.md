@@ -1,3 +1,10 @@
+# [1.0.0-alpha.233](https://github.com/Opla/opla/compare/v1.0.0-alpha.232...v1.0.0-alpha.233) (2024-12-10)
+
+
+### Features
+
+* **chore:** migrate to react 19 ([#1418](https://github.com/Opla/opla/issues/1418)) ([8636627](https://github.com/Opla/opla/commit/86366275a92ffd32d48501b338d8cee996913de4))
+
 # [1.0.0-alpha.232](https://github.com/Opla/opla/compare/v1.0.0-alpha.231...v1.0.0-alpha.232) (2024-09-25)
 
 
