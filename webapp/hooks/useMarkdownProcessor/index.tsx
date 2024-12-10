@@ -12,7 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Children, Fragment, createElement, isValidElement, useEffect, useState } from 'react';
+import {
+  Children,
+  Fragment,
+  createElement,
+  isValidElement,
+  useEffect,
+  useState,
+  type JSX,
+} from 'react';
 import { Element, Root } from 'hast';
 import * as prod from 'react/jsx-runtime';
 // import mermaid from 'mermaid';
@@ -32,7 +40,7 @@ import MarkDownContext from './context';
 
 // Inspiration:
 // https://www.skovy.dev/blog/vercel-ai-rendering-markdown?seed=imyoqy
-const rehypeListItemParagraphToDiv: Plugin<[], Root> = () => (tree) => {
+const rehypeListItemParagraphToDiv: Plugin<[], Root> = () => (tree: any) => {
   visit(tree, 'element', (e: unknown) => {
     const element = e as Element;
     if (element.tagName === 'li') {

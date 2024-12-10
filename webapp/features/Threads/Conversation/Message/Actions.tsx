@@ -34,7 +34,7 @@ type ActionsProps = {
   state: DisplayMessageState;
   message: MessageImpl;
   content: string;
-  contentRef: RefObject<HTMLDivElement>;
+  contentRef: RefObject<HTMLDivElement | null>;
   disabled: boolean;
   isUser: boolean;
   isHover: boolean;

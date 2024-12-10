@@ -108,14 +108,14 @@ export default function useScroll(
   React.RefCallback<HTMLDivElement>,
   (scrollPosition: Position2D, forceUpdate?: boolean) => void,
 ] {
-  const previousNode: MutableRefObject<HTMLDivElement | undefined> = useRef();
+  const previousNode: MutableRefObject<HTMLDivElement | undefined> = useRef(undefined);
   const keyedRect = useRef<KeyedScrollPosition>({
     key,
     position: { x: -1, y: -1, width: -1, height: -1 } as Position2D,
   });
   const previousScrollToY = useRef<number | undefined>(undefined);
   const isScrolling = useRef(false);
-  const handler = useRef<ReturnType<typeof setTimeout> | undefined>();
+  const handler = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const isResizing = useRef(true);
 
   const handleResize = useCallback(

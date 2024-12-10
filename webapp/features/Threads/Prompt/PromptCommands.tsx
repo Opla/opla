@@ -28,7 +28,7 @@ import useTranslation from '@/hooks/useTranslation';
 type PromptCommandProps = {
   commandManager: CommandManager;
   prompt: ParsedPrompt | undefined;
-  textareaRef: React.RefObject<HTMLTextAreaElement>;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   children: React.ReactNode;
   onValueChange: (text: string, caretStartIndex: number) => void;
 };

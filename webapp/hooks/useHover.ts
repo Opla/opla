@@ -16,7 +16,7 @@ import React, { useRef, useCallback } from 'react';
 
 export default function useHover(): [(node: HTMLDivElement) => void, boolean] {
   const [hovering, setHovering] = React.useState(false);
-  const previousNode = useRef<HTMLDivElement>();
+  const previousNode = useRef<HTMLDivElement>(undefined);
 
   const handleMouseEnter = useCallback(() => {
     setHovering(true);

@@ -19,21 +19,21 @@ tauri = { version = "1.8.1", features = [ "updater", "fs-read-dir", "protocol-as
 tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 sysinfo = { version = "0.32.0", features = ["apple-app-store"] }
 dirs = "5.0.1"
-reqwest = { version = "0.12.8", features = ["json", "stream"] }
-chrono = "0.4.38"
+reqwest = { version = "0.12.9", features = ["json", "stream"] }
+chrono = "0.4.39"
 serde_with = { version = "3.11.0", features = ["json"] }
-uuid = { version = "1.10.0", features = ["v4"] }
+uuid = { version = "1.11.0", features = ["v4"] }
 void = "1.0.2"
-thiserror = "1.0.65"
+thiserror = "2.0.3"
 eventsource-stream = "0.2.3"
 futures-util = "0.3.31"
-tokio = { version = "1.41.0", features = ["sync"] }
+tokio = { version = "1.42.0", features = ["sync"] }
 tokenizer = { path = "../../crates/tokenizer"}
 opla_core = { path = "../../crates/core"}
 sha2 = "0.10.8"
 async-trait = "0.1.83"
 dyn-clone = "1.0.17"
-bytes = "1.8.0"
+bytes = "1.9.0"
 regex = "1.11.1"
 phf = "0.11.2"
 showfile = "0.1.1"

@@ -111,7 +111,7 @@ function BackendProvider({ children }: { children: React.ReactNode }) {
   const { settings, loadSettings, setSettings } = useSettingsStore();
   const { activeService, getActiveModel, setActiveModel, setActiveService } = useServiceStore();
 
-  const backendRef = useRef<Backend>();
+  const backendRef = useRef<Backend>(undefined);
 
   const updateServer = (partials: Partial<OplaServer>) => {
     const updatedServer: OplaServer = { ...serverRef.current, ...partials } as OplaServer;

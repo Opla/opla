@@ -25,7 +25,10 @@ const ScrollBar = React.forwardRef<
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName;
 
 type ScrollAreaProps = {
-  viewPortRef?: React.RefObject<HTMLDivElement> | ((node: HTMLDivElement) => void) | undefined;
+  viewPortRef?:
+    | React.RefObject<HTMLDivElement | null>
+    | ((node: HTMLDivElement) => void)
+    | undefined;
 } & ScrollAreaPrimitive.ScrollAreaProps;
 
 const ScrollArea = React.forwardRef<

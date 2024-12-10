@@ -14,7 +14,7 @@
 
 import { ShortcutIds } from '@/hooks/useShortcuts';
 import { LucideIcon } from 'lucide-react';
-import React from 'react';
+import React, { type JSX } from 'react';
 
 export enum BasicState {
   disabled = 'disabled',
@@ -29,7 +29,7 @@ export type Item = {
   href?: string;
   page?: string;
   icon?: LucideIcon;
-  renderIcon?: () => React.ReactElement;
+  renderIcon?: () => React.ReactElement<any>;
   items?: Array<Item>;
   flex?: number;
   hidden?: boolean;
