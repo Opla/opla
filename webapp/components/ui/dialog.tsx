@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import React, { LegacyRef, forwardRef, useCallback, useEffect, useRef } from 'react';
+import React, { Ref, forwardRef, useCallback, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
@@ -25,7 +25,7 @@ DialogClose.displayName = 'DialogClose';
 const DialogOverlay = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   (
     { className, ...props }: React.HTMLAttributes<HTMLDivElement>,
-    ref: LegacyRef<HTMLDivElement> | undefined,
+    ref: Ref<HTMLDivElement> | undefined,
   ) => (
     <div
       ref={ref}
@@ -43,7 +43,7 @@ DialogOverlay.displayName = 'DialogOverlay';
 const LegacyDialog = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   (
     { className, children, ...props }: React.HTMLAttributes<HTMLDivElement>,
-    ref: LegacyRef<HTMLDivElement> | undefined,
+    ref: Ref<HTMLDivElement> | undefined,
   ) => (
     <>
       <DialogOverlay />
@@ -203,7 +203,7 @@ DialogContent.displayName = 'DialogContent';
 
 function DialogDescription(
   { className, children, ...props }: React.HTMLAttributes<HTMLDivElement>,
-  ref: LegacyRef<HTMLDivElement> | undefined,
+  ref: Ref<HTMLDivElement> | undefined,
 ) {
   return <div ref={ref} className={cn('text-sm text-muted-foreground', className)} {...props} />;
 }

@@ -23,7 +23,7 @@ function Content({
   renderIcon,
 }: {
   icon: LucideIcon | undefined;
-  renderIcon?: () => React.ReactElement;
+  renderIcon?: () => React.ReactElement<any>;
 }) {
   const Icon = icon;
   return (
@@ -49,7 +49,7 @@ export default function SidebarItem({
   selected: boolean;
   name: string;
   icon?: LucideIcon;
-  renderIcon?: () => React.ReactElement;
+  renderIcon?: () => React.ReactElement<any>;
   shortcut?: ShortcutIds;
   modal?: boolean;
   onModalClick: (href: string) => void;

@@ -14,7 +14,7 @@
 
 import { useEffect, useCallback, RefObject } from 'react';
 
-const useClickOutside = (target: RefObject<HTMLDivElement>, onClose = () => {}) => {
+const useClickOutside = (target: RefObject<HTMLDivElement | null>, onClose = () => {}) => {
   useEffect(() => {
     const handleCloseModal = (e: MouseEvent) => {
       if (

@@ -27,7 +27,7 @@ type PromptInputProps = {
   value?: ParsedPrompt;
   placeholder?: string;
   disabled?: boolean;
-  textareaRef: React.RefObject<HTMLTextAreaElement>;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   onValueChange: (text: string, caretStartIndex: number) => void;
   className?: string;
   onFocus?: (event: ChangeEvent<HTMLTextAreaElement>) => void;

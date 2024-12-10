@@ -31,7 +31,7 @@ function CopyToClipBoard({
   const { t } = useTranslation();
 
   const [copySuccess, setCopySuccess] = useState<CopyState>('idle');
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     if (copySuccess === 'copied' && !timer.current) {

@@ -22,5 +22,5 @@ export default function Portal({
   children: React.ReactNode;
 }) {
   const el = document.querySelector(target as string) as HTMLElement;
-  return createPortal(children, el || document.body) as React.ReactElement;
+  return createPortal(children, el || document.body) as React.ReactElement<any>;
 }
