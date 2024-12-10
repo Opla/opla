@@ -117,7 +117,7 @@ export default function Prompt({
     }
   };
 
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => {
     if ((isModelLoading || isModelLoading === undefined) && !needFocus) {
       setNeedFocus(true);

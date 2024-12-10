@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useContext, useMemo, useRef, useState } from 'react';
+import { useContext, useMemo, useRef, useState, type JSX } from 'react';
 import { Sigma, PieChart } from 'lucide-react';
 import { BlockMath } from 'react-katex';
 import { Element } from 'hast';
