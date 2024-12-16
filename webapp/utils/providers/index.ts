@@ -35,7 +35,7 @@ export const tokenize = async (
   text: string,
 ): Promise<LlmTokenizeResponse | undefined> => {
   const { provider, model } = activeService;
-  let response: LlmTokenizeResponse| undefined;
+  let response: LlmTokenizeResponse | undefined;
   if (model && provider) {
     try {
       response = await invokeTauri<LlmTokenizeResponse>('llm_call_tokenize', {
@@ -44,7 +44,7 @@ export const tokenize = async (
         text,
       });
     } catch (e) {
-      logger.error("tokenizer: ", e);
+      logger.error('tokenizer: ', e);
     }
   }
   return response;
