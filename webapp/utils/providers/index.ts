@@ -28,7 +28,27 @@ import { CommandManager } from '../commands/types';
 import { invokeTauri } from '../backend/tauri';
 import { mapKeys } from '../data';
 import { /* toCamelCase, */ toCamelCase, toSnakeCase } from '../string';
-// import logger from '../logger';
+import logger from '../logger';
+
+export const tokenize = async (
+  activeService: AIImplService,
+  text: string,
+): Promise<LlmTokenizeResponse | undefined> => {
+  const { provider, model } = activeService;
+  let response: LlmTokenizeResponse | undefined;
+  if (model && provider) {
+    try {
+      response = await invokeTauri<LlmTokenizeResponse>('llm_call_tokenize', {
+        model: model.name,
+        provider: mapKeys(provider, toSnakeCase),
+        text,
+      });
+    } catch (e) {
+      logger.error('tokenizer: ', e);
+    }
+  }
+  return response;
+};
 
 export const createLlmMessages = (
   modelName: string,
