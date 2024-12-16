@@ -1,3 +1,10 @@
+# [1.0.0-alpha.234](https://github.com/Opla/opla/compare/v1.0.0-alpha.233...v1.0.0-alpha.234) (2024-12-16)
+
+
+### Bug Fixes
+
+* promptContext crash [#1420](https://github.com/Opla/opla/issues/1420) ([#1422](https://github.com/Opla/opla/issues/1422)) ([30c62c3](https://github.com/Opla/opla/commit/30c62c36fb178d35d70479e2c77aa738725298df))
+
 # [1.0.0-alpha.233](https://github.com/Opla/opla/compare/v1.0.0-alpha.232...v1.0.0-alpha.233) (2024-12-10)
 
 
