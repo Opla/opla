@@ -1,3 +1,10 @@
+# [1.0.0-alpha.235](https://github.com/Opla/opla/compare/v1.0.0-alpha.234...v1.0.0-alpha.235) (2024-12-18)
+
+
+### Bug Fixes
+
+* don't clear changedPrompt [#1419](https://github.com/Opla/opla/issues/1419) ([#1433](https://github.com/Opla/opla/issues/1433)) ([a3ba1c9](https://github.com/Opla/opla/commit/a3ba1c9d04b576eaff9a4a9e807e9cf0f6b8b888))
+
 # [1.0.0-alpha.234](https://github.com/Opla/opla/compare/v1.0.0-alpha.233...v1.0.0-alpha.234) (2024-12-16)
 
 
