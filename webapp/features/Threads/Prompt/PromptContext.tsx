@@ -215,14 +215,14 @@ function PromptProvider({
   const handleUpdatePrompt = useCallback(
     async (prompt: ParsedPrompt | undefined, conversationName = getDefaultConversationName(t)) => {
       if (prompt?.raw === '' && tempConversationId) {
-        setChangedPrompt(undefined);
+        // setChangedPrompt(undefined);
         await updateConversations(conversations.filter((c) => !c.temp));
         onUpdateTempConversation(undefined);
         return;
       }
       const conversation = getConversation(conversationId, conversations) as Conversation;
       if (conversation && comparePrompts(conversation.currentPrompt, prompt)) {
-        setChangedPrompt(undefined);
+        // setChangedPrompt(undefined);
         return;
       }
       let updatedConversations: Conversation[] | undefined;
@@ -252,7 +252,7 @@ function PromptProvider({
       if (updatedConversations) {
         await updateConversations(updatedConversations);
       }
-      setChangedPrompt(undefined);
+      // setChangedPrompt(undefined);
     },
     [
       t,
