@@ -46,7 +46,7 @@ impl Sys {
     pub fn new() -> Self {
         let mut sys = System::new_with_specifics(
             sysinfo::RefreshKind
-                ::new()
+                ::default()
                 .with_memory(sysinfo::MemoryRefreshKind::everything())
                 .with_cpu(sysinfo::CpuRefreshKind::everything())
         );
@@ -55,7 +55,7 @@ impl Sys {
             name: System::name().unwrap_or("Unknown".to_owned()),
             kernel_version: System::kernel_version().unwrap_or("Unknown".to_owned()),
             os_version: System::long_os_version().unwrap_or("Unknown".to_owned()),
-            cpu_arch: System::cpu_arch().unwrap_or("Unknown".to_owned()),
+            cpu_arch: System::cpu_arch(),
             total_memory: sys.total_memory(),
             used_memory: sys.used_memory(),
             total_swap: sys.total_swap(),
@@ -76,7 +76,7 @@ impl Sys {
     pub fn refresh(&mut self) -> SysInfos {
         self.sys.refresh_specifics(
             sysinfo::RefreshKind
-                ::new()
+                ::default()
                 .with_memory(sysinfo::MemoryRefreshKind::everything())
                 .with_cpu(sysinfo::CpuRefreshKind::everything())
         );
