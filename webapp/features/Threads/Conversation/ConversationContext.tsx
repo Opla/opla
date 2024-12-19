@@ -142,6 +142,10 @@ function ConversationProvider({
       const stream = streams[conversationId];
       if (stream.status === 'error') {
         const error = stream.content[0];
+        if (errorMessages[conversationId] === error) {
+          return;
+        }
+
         handleError(conversationId, error);
         const model = modelStorage.items.find((m) => m.id === selectedModelId);
         if (model) {
@@ -162,6 +166,7 @@ function ConversationProvider({
     selectedModelId,
     server.stderr,
     updateBackendServer,
+    errorMessages,
   ]);
 
   const handleProcessing = useCallback(
