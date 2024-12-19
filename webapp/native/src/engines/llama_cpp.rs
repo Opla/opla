@@ -404,7 +404,7 @@ impl LLamaCppEngine {
             while let Some(event) = rx.recv().await {
                 if let CommandEvent::Stdout(line) = event {
                     println!("json={}", line);
-                    if line.contains("HTTP server is listening") {
+                    if line.contains("model loaded") { // line.contains("HTTP server is listening") {
                         println!("{}", model);
                         if
                             app

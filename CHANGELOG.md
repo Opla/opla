@@ -1,3 +1,10 @@
+# [1.0.0-alpha.237](https://github.com/Opla/opla/compare/v1.0.0-alpha.236...v1.0.0-alpha.237) (2024-12-19)
+
+
+### Bug Fixes
+
+* wait loading large model [#1313](https://github.com/Opla/opla/issues/1313) ([#1435](https://github.com/Opla/opla/issues/1435)) ([7fbd73f](https://github.com/Opla/opla/commit/7fbd73fddf7d872952428bdee5c0fd7a3ee0a3ca))
+
 # [1.0.0-alpha.236](https://github.com/Opla/opla/compare/v1.0.0-alpha.235...v1.0.0-alpha.236) (2024-12-19)
 
 
