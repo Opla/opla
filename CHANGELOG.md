@@ -1,3 +1,10 @@
+# [1.0.0-alpha.236](https://github.com/Opla/opla/compare/v1.0.0-alpha.235...v1.0.0-alpha.236) (2024-12-19)
+
+
+### Bug Fixes
+
+* infinite loop error stream [#1421](https://github.com/Opla/opla/issues/1421) ([#1434](https://github.com/Opla/opla/issues/1434)) ([693755b](https://github.com/Opla/opla/commit/693755b2726cdf40f9a1682171342b128c61b58d))
+
 # [1.0.0-alpha.235](https://github.com/Opla/opla/compare/v1.0.0-alpha.234...v1.0.0-alpha.235) (2024-12-18)
 
 
