@@ -1,3 +1,10 @@
+# [1.0.0-alpha.238](https://github.com/Opla/opla/compare/v1.0.0-alpha.237...v1.0.0-alpha.238) (2024-12-20)
+
+
+### Bug Fixes
+
+* openai error messages ([#1436](https://github.com/Opla/opla/issues/1436)) ([06d9929](https://github.com/Opla/opla/commit/06d99299741d43c9c28dac3b3f4d2881f78a0252))
+
 # [1.0.0-alpha.237](https://github.com/Opla/opla/compare/v1.0.0-alpha.236...v1.0.0-alpha.237) (2024-12-19)
 
 
