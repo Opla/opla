@@ -38,6 +38,20 @@ use super::llm::{ LlmImageGenerationResponse, LlmModelsResponse };
 
 #[serde_with::skip_serializing_none]
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct OpenAIError {
+    pub message: String,
+    #[serde(rename = "type")]
+    pub error_type: String,
+}
+
+#[serde_with::skip_serializing_none]
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct OpenAIErrorResponse {
+    pub error: OpenAIError,
+}
+
+#[serde_with::skip_serializing_none]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct OpenAIBodyCompletion {
     pub model: String,
     pub messages: Vec<LlmMessage>,
@@ -187,7 +201,7 @@ impl OpenAIChatCompletion {
                 total_tokens: 0,
             },
             // TODO implement usage
-            // see : https://community.openai.com/t/why-there-is-no-usage-object-returned-with-streaming-api-call/385160/15
+            // see :https://community.openai.com/t/usage-stats-now-available-when-using-streaming-with-the-chat-completions-api-or-completions-api/738156/3
         }
     }
 
@@ -292,7 +306,7 @@ async fn request<R: Runtime>(
     };
     let status = response.status();
     if !status.is_success() {
-        let error = match response.json::<LlmResponseError>().await {
+        let error = match response.json::<OpenAIErrorResponse>().await {
             Ok(t) => t,
             Err(error) => {
                 println!("Failed to dezerialize error response: {}", error);
@@ -300,7 +314,7 @@ async fn request<R: Runtime>(
             }
         };
         println!("Failed to get response: {} {:?}", status, error);
-        return Err(Box::new(error.error));
+        return Err(Box::new(LlmError::new(&error.error.message, status.as_str())));
     }
     let response = match response.json::<OpenAIChatCompletion>().await {
         Ok(r) => r,
@@ -374,7 +388,7 @@ async fn stream_request<R: Runtime>(
     };
     let status = response.status();
     if !status.is_success() {
-        let error = match response.json::<LlmResponseError>().await {
+        let error = match response.json::<OpenAIErrorResponse>().await {
             Ok(t) => t,
             Err(error) => {
                 let message = format!("Failed to deserialize error response: {}", error);
@@ -396,7 +410,7 @@ async fn stream_request<R: Runtime>(
             }
             None => (),
         }
-        return Err(Box::new(error.error));
+        return Err(Box::new(LlmError::new(&error.error.message, status.as_str())));
     }
     let mut stream = response.bytes_stream().eventsource();
     let mut chunks: Vec<OpenAIChatCompletionChunk> = vec![];

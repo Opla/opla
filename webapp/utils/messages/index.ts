@@ -122,11 +122,9 @@ export const sendMessage = async (
       onSuccess(response.usage);
       returnedMessage.content = response.content.trim();
     } */
-  } catch (e: any) {
+  } catch (e: unknown) {
     logger.error('sendMessage', e, typeof e, activeService.provider?.errors);
-    const error = String(e);
-    /* onError(conversation.id, error);
-      setErrorMessage({ ...errorMessage, [conversation.id]: error }); */
+    const error = String(e).replaceAll('"', '');
     onError(conversation.id, error);
     returnedMessage.content = error;
     returnedMessage.status = MessageStatus.Error;
@@ -142,7 +140,7 @@ export const sendMessage = async (
       setProviders(updatedProviders);
     }
 
-    toast.error(String(e));
+    toast.error(error);
   }
   if (returnedMessage.status !== MessageStatus.Error) {
     returnedMessage.status = MessageStatus.Delivered;
