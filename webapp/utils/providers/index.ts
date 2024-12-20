@@ -27,28 +27,9 @@ import { ParsedPrompt } from '../parsers';
 import { CommandManager } from '../commands/types';
 import { invokeTauri } from '../backend/tauri';
 import { mapKeys } from '../data';
-import { /* toCamelCase, */ toCamelCase, toSnakeCase } from '../string';
+import { toCamelCase, toSnakeCase } from '../string';
 import logger from '../logger';
 
-export const tokenize = async (
-  activeService: AIImplService,
-  text: string,
-): Promise<LlmTokenizeResponse | undefined> => {
-  const { provider, model } = activeService;
-  let response: LlmTokenizeResponse | undefined;
-  if (model && provider) {
-    try {
-      response = await invokeTauri<LlmTokenizeResponse>('llm_call_tokenize', {
-        model: model.name,
-        provider: mapKeys(provider, toSnakeCase),
-        text,
-      });
-    } catch (e) {
-      logger.error('tokenizer: ', e);
-    }
-  }
-  return response;
-};
 
 export const createLlmMessages = (
   modelName: string,
@@ -84,6 +65,61 @@ export const createLlmMessages = (
       name: m.author?.role !== 'assistant' ? m.author?.name : sanitizedName,
     }));
   return llmMessages;
+};
+
+export const tokenize = async (
+  activeService: AIImplService,
+  text: string,
+): Promise<LlmTokenizeResponse | undefined> => {
+  const { provider, model } = activeService;
+  let response: LlmTokenizeResponse | undefined;
+  if (model && provider) {
+    try {
+      response = await invokeTauri<LlmTokenizeResponse>('llm_call_tokenize', {
+        model: model.name,
+        provider: mapKeys(provider, toSnakeCase),
+        text,
+      });
+    } catch (e) {
+      logger.error('tokenizer: ', e);
+    }
+  }
+  return response;
+};
+
+export const tokenizeMessages = async (
+  activeService: AIImplService,
+  conversationMessages: Message[],
+  conversation: Conversation,
+  presets: Preset[],
+): Promise<LlmTokenizeResponse | undefined> => {
+  const { provider, model } = activeService;
+  let response: LlmTokenizeResponse;
+  if (model && provider) {
+    const preset = findCompatiblePreset(conversation?.preset, presets, model?.name, provider);
+    const { parameters: presetParameters, ...completionOptions } = getCompletePresetProperties(
+      preset,
+      conversation,
+      presets,
+    );
+    const { contextWindowPolicy = ContextWindowPolicy.None, keepSystem = true } = completionOptions;
+    const messages = createLlmMessages(
+      model.name,
+      provider?.name,
+      conversationMessages,
+      contextWindowPolicy,
+      keepSystem,
+    );
+    response = await invokeTauri<LlmTokenizeResponse>('llm_call_tokenize_messages', {
+      model: model.name,
+      provider: mapKeys(provider, toSnakeCase),
+      messages: mapKeys(messages, toSnakeCase),
+      completionOptions: mapKeys(completionOptions, toSnakeCase),
+    });
+  } else {
+    return undefined;
+  }
+  return response;
 };
 
 export const getCompletionParametersDefinition = (
