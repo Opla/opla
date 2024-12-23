@@ -64,7 +64,7 @@ checksum = "0952808a6c2afd1aa8947271f3a60f1a6763c7b912d210184c5149b5cf147247"
 
 [[package]]
 name = "app"
-version = "1.0.0-alpha.234"
+version = "1.0.0-alpha.238"
 dependencies = [
  "async-trait",
  "bytes",
@@ -2274,7 +2274,7 @@ dependencies = [
 
 [[package]]
 name = "opla_core"
-version = "1.0.0-alpha.234"
+version = "1.0.0-alpha.238"
 dependencies = [
  "anyhow",
  "serde",
@@ -3171,9 +3171,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.133"
+version = "1.0.134"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7fceb2473b9166b2294ef05efcb65a3db80803f0b03ef86a5fc88a2b85ee377"
+checksum = "d00f4175c42ee48b15416f6193a959ba3a0d67fc699a0db9ad12df9f83991c7d"
 dependencies = [
  "indexmap 2.2.5",
  "itoa 1.0.10",
@@ -3979,7 +3979,7 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokenizer"
-version = "1.0.0-alpha.234"
+version = "1.0.0-alpha.238"
 dependencies = [
  "anyhow",
  "base64 0.21.7",
