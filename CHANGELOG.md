@@ -1,3 +1,10 @@
+# [1.0.0-alpha.239](https://github.com/Opla/opla/compare/v1.0.0-alpha.238...v1.0.0-alpha.239) (2025-02-04)
+
+
+### Features
+
+* **chore:** migrate to tailwindcss4 [#1521](https://github.com/Opla/opla/issues/1521) ([#1522](https://github.com/Opla/opla/issues/1522)) ([8effb70](https://github.com/Opla/opla/commit/8effb70cd94de50f8891cabbf37244c36d8df1b1))
+
 # [1.0.0-alpha.238](https://github.com/Opla/opla/compare/v1.0.0-alpha.237...v1.0.0-alpha.238) (2024-12-20)
 
 
