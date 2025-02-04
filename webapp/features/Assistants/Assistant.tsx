@@ -118,7 +118,7 @@ export default function AssistantView({ selectedId: assistantId }: AssistantProp
     return (
       <ContentView className="pb-8">
         <EmptyView
-          icon={<Bot className="h-16 w-16 text-muted" />}
+          icon={<Bot className="text-muted h-16 w-16" />}
           title={
             assistants.length === 0 ? t("You don't have any assistant") : t('Select an assistant')
           }
@@ -255,7 +255,7 @@ export default function AssistantView({ selectedId: assistantId }: AssistantProp
                           <EmptyView
                             title={t('No target associated')}
                             description={t('You have not added any targets. Add one below.')}
-                            icon={<Target className="h-16 w-16 text-muted" />}
+                            icon={<Target className="text-muted h-16 w-16" />}
                             buttonLabel={t('Add a target')}
                             onCreateItem={handleCreateTarget}
                           />

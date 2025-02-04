@@ -8,10 +8,10 @@ const CardButton = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
     <div
       ref={ref}
       className={cn(
-        'flex flex-col rounded-xl border bg-card text-card-foreground shadow',
+        'bg-card text-card-foreground flex flex-col rounded-xl border shadow-sm',
         className,
         onClick
-          ? 'cursor-pointer hover:bg-accent hover:text-accent-foreground'
+          ? 'hover:bg-accent hover:text-accent-foreground cursor-pointer'
           : 'hover:border-primary',
       )}
       {...props}
@@ -24,7 +24,7 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('rounded-xl border bg-card text-card-foreground shadow', className)}
+      className={cn('bg-card text-card-foreground rounded-xl border shadow-sm', className)}
       {...props}
     />
   ),
@@ -40,7 +40,7 @@ CardHeader.displayName = 'CardHeader';
 
 const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
   ({ className, children, ...props }, ref) => (
-    <h3 ref={ref} className={cn('font-semibold leading-none tracking-tight', className)} {...props}>
+    <h3 ref={ref} className={cn('leading-none font-semibold tracking-tight', className)} {...props}>
       {children}
     </h3>
   ),
@@ -51,7 +51,7 @@ const CardDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p ref={ref} className={cn('text-sm text-muted-foreground', className)} {...props} />
+  <p ref={ref} className={cn('text-muted-foreground text-sm', className)} {...props} />
 ));
 CardDescription.displayName = 'CardDescription';
 

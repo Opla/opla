@@ -86,8 +86,8 @@ function CodeBlock({
     }
     return (
       <div className="m-0 flex w-full flex-col p-0">
-        <div className="flex w-full flex-row items-center justify-end gap-1 bg-card">
-          <p className="flex-grow pl-4 text-xs text-card-foreground">{language}</p>
+        <div className="bg-card flex w-full flex-row items-center justify-end gap-1">
+          <p className="text-card-foreground grow pl-4 text-xs">{language}</p>
           <CopyToClipBoard title={t('Copy to clipboard')} message={copyMessage} text={content} />
           {language === 'mermaid' ? (
             <Button
@@ -99,7 +99,7 @@ function CodeBlock({
                 setShowMermaidPreview(!showMermaidPreview);
               }}
             >
-              <PieChart className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+              <PieChart className="text-muted-foreground h-4 w-4" strokeWidth={1.5} />
             </Button>
           ) : null}
           {language === 'math' ? (
@@ -112,11 +112,11 @@ function CodeBlock({
                 setShowLatexPreview(!showLatexPreview);
               }}
             >
-              <Sigma className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+              <Sigma className="text-muted-foreground h-4 w-4" strokeWidth={1.5} />
             </Button>
           ) : null}
         </div>
-        <code ref={ref} className={`${className} ${noHighlight} w-full flex-shrink flex-grow`}>
+        <code ref={ref} className={`${className} ${noHighlight} w-full shrink grow`}>
           {display === 'latex' && <BlockMath math={content} />}
           {display === 'mermaid' && <Mermaid content={children?.toString() ?? ''} />}
           {display === '' && children}

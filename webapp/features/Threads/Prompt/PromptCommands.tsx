@@ -195,14 +195,14 @@ function PromptCommandInput({
     const textarea = textareaRef.current;
     const dropdown = dropdownRef.current;
     textarea?.addEventListener('keydown', handleKeyDown);
-    textarea?.addEventListener('blur', handleBlur);
+    textarea?.addEventListener('blur-sm', handleBlur);
     textarea?.addEventListener('focus', handleFocus);
     document?.addEventListener('selectionchange', handleSelectionChange);
     document?.addEventListener('mousemove', handleMouseMove);
     dropdown?.addEventListener('mousedown', handleMouseDown);
     return () => {
       textarea?.removeEventListener('keydown', handleKeyDown);
-      textarea?.removeEventListener('blur', handleBlur);
+      textarea?.removeEventListener('blur-sm', handleBlur);
       textarea?.removeEventListener('focus', handleFocus);
       document?.removeEventListener('selectionchange', handleSelectionChange);
       document?.removeEventListener('mousemove', handleMouseMove);
@@ -218,12 +218,12 @@ function PromptCommandInput({
       <div
         ref={dropdownRef}
         className={cn(
-          'absolute hidden h-auto min-w-[240px] max-w-[320px] overflow-visible rounded-md border bg-popover p-0 text-popover-foreground shadow',
+          'bg-popover text-popover-foreground absolute hidden h-auto max-w-[320px] min-w-[240px] overflow-visible rounded-md border p-0 shadow-sm',
         )}
       >
         <div className="w-full gap-2">
           {filteredCommands.length === 0 && (
-            <div className="rounded-sm px-2 py-1.5 text-left text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+            <div className="aria-selected:bg-accent aria-selected:text-accent-foreground rounded-sm px-2 py-1.5 text-left text-sm outline-hidden data-disabled:pointer-events-none data-disabled:opacity-50">
               {t(notFound)}
             </div>
           )}
@@ -238,17 +238,17 @@ function PromptCommandInput({
                   handleCommandSelect(item.value as string);
                 }}
                 className={cn(
-                  'ellipsis flex w-full cursor-pointer select-none flex-row-reverse items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+                  'ellipsis aria-selected:bg-accent aria-selected:text-accent-foreground flex w-full cursor-pointer flex-row-reverse items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50',
                   focusIndex !== -1 ? 'hover:bg-transparent' : '',
                 )}
               >
                 <div className="flex w-full flex-row content-between items-center gap-2">
                   {item.avatar && <AvatarView avatar={item.avatar} className="h-4 w-4" />}
                   {!item.avatar && item.group === 'models' && (
-                    <BrainCircuit className="h-4 w-4 text-muted-foreground" />
+                    <BrainCircuit className="text-muted-foreground h-4 w-4" />
                   )}
                   {!item.avatar && item.group === 'assistants' && (
-                    <Bot className="h-4 w-4 text-muted-foreground" />
+                    <Bot className="text-muted-foreground h-4 w-4" />
                   )}
                   <div className="flex-1">{item.label} </div>
                   {item.tag === 'models' && <GrayPill label={t('Model')} />}

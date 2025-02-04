@@ -140,7 +140,7 @@ export default function AssistantsExplorer({
           <EmptyView
             title={t('No assistant')}
             description={t("Let's create one!")}
-            icon={<Bot className="h-12 w-12 text-muted-foreground" strokeWidth={1.5} />}
+            icon={<Bot className="text-muted-foreground h-12 w-12" strokeWidth={1.5} />}
             className="h-full"
           />
         </div>

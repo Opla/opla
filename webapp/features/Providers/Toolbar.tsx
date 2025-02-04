@@ -35,7 +35,7 @@ export default function Toolbar({
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-grow flex-row-reverse items-center gap-4">
+    <div className="flex grow flex-row-reverse items-center gap-4">
       {actions || (
         <Button
           variant="outline"

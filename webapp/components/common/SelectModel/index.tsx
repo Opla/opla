@@ -61,7 +61,7 @@ export default function SelectModel({
         <Button
           variant="outline"
           disabled={(selectedModel && modelItems.length < 2) || disabled}
-          className="flex gap-4 px-2 capitalize text-foreground"
+          className="text-foreground flex gap-4 px-2 capitalize"
         >
           {!selectedModel && <span>{t('Select a model')}</span>}
           {selectedModel && <ModelInfos model={selectedModel} displayIcon />}
@@ -110,7 +110,7 @@ export default function SelectModel({
 
                     <Badge
                       variant="secondary"
-                      className={`ml-4 bg-gray-300 capitalize text-gray-600 ${getStateColor(item.state, 'text', true)}`}
+                      className={`ml-4 bg-gray-300 text-gray-600 capitalize ${getStateColor(item.state, 'text', true)}`}
                     >
                       {item.group && item.group !== 'Opla' ? item.group : 'local'}
                     </Badge>

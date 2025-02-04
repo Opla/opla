@@ -350,13 +350,13 @@ export default function ThreadsExplorer({
         </>
       }
     >
-      <div className="flex-1 flex-col space-y-1 overflow-y-auto overflow-x-hidden p-1 dark:border-white/20">
+      <div className="flex-1 flex-col space-y-1 overflow-x-hidden overflow-y-auto p-1 dark:border-white/20">
         <div className="flex h-full grow flex-col gap-2 pb-2 text-sm">
           {!isSearching && (
             <ResizablePanelGroup direction="vertical">
               {showAssistants && (
                 <>
-                  <ResizablePanel id="assistant" className="!overflow-y-auto pt-2" minSize={4}>
+                  <ResizablePanel id="assistant" className="overflow-y-auto! pt-2" minSize={4}>
                     <AssistantsList
                       closed={closedAssistants}
                       onToggle={() => {
@@ -371,7 +371,7 @@ export default function ThreadsExplorer({
               )}
               {showRecent && (
                 <>
-                  <ResizablePanel id="recent" className="!overflow-y-auto pt-2" minSize={3}>
+                  <ResizablePanel id="recent" className="overflow-y-auto! pt-2" minSize={3}>
                     <ExplorerGroup
                       title={t(ViewName.Recent)}
                       closed={closedRecent}
@@ -409,7 +409,7 @@ export default function ThreadsExplorer({
                             description={t("Don't be shy, say hi!")}
                             icon={
                               <MessageSquareWarning
-                                className="h-12 w-12 text-muted-foreground"
+                                className="text-muted-foreground h-12 w-12"
                                 strokeWidth={1.5}
                               />
                             }
@@ -424,7 +424,7 @@ export default function ThreadsExplorer({
               )}
               {showArchives && (
                 <>
-                  <ResizablePanel id="archives" className="!overflow-y-auto pt-2" minSize={3}>
+                  <ResizablePanel id="archives" className="overflow-y-auto! pt-2" minSize={3}>
                     <ExplorerGroup
                       title={t(ViewName.Archives)}
                       closed={closedArchives}
@@ -460,7 +460,7 @@ export default function ThreadsExplorer({
                             description={t('No conversation in archives')}
                             icon={
                               <Archive
-                                className="h-12 w-12 text-muted-foreground"
+                                className="text-muted-foreground h-12 w-12"
                                 strokeWidth={1.5}
                               />
                             }
