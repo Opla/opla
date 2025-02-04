@@ -46,7 +46,7 @@ function AssistantCard({ assistant, onInstall }: AssistantCardProps) {
         <CardDescription className="line-clamp-5">{assistant.description}</CardDescription>
       </CardContent>
       <CardFooter className="pb-auto flex w-full justify-between">
-        <p className="className='line-clamp-1' text-sm font-thin text-muted-foreground">
+        <p className="className='line-clamp-1' text-muted-foreground text-sm font-thin">
           {assistant.author?.url ? (
             <a href={assistant.author.url} target="_blank">
               {t('by')} {assistant.author?.name}

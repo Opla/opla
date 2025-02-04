@@ -136,7 +136,7 @@ function MessageComponent({
     <MarkDownContext.Provider value={memoizedContent}>
       <div
         ref={disabled ? undefined : ref}
-        className={`group relative w-full dark:hover:bg-secondary/20 ${isUser ? '' : ''}`}
+        className={`group dark:hover:bg-secondary/20 relative w-full ${isUser ? '' : ''}`}
       >
         <div className="m-auto flex w-full gap-4 font-sans text-sm md:max-w-2xl md:gap-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
           <div className="m-auto flex w-full flex-row gap-4 p-4 md:max-w-2xl md:gap-6 md:py-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
@@ -147,27 +147,27 @@ function MessageComponent({
             </div>
             <div className="flex w-[calc(100%-50px)] flex-col gap-1 md:gap-3 lg:w-[calc(100%-115px)]">
               <div className="flex grow flex-col">
-                <div className="flex flex-col items-start whitespace-pre-wrap break-words">
+                <div className="flex flex-col items-start break-words whitespace-pre-wrap">
                   <div className="w-full break-words">
                     {state !== DisplayMessageState.Note && (
                       <p className="flex items-center py-1 font-bold capitalize">
                         {avatar.name}{' '}
                         {cancelled && (
                           <>
-                            <TriangleAlert className="ml-2 h-4 w-4 text-muted-foreground" />
-                            <span className="ml-1 font-thin text-muted-foreground">cancelled</span>
+                            <TriangleAlert className="text-muted-foreground ml-2 h-4 w-4" />
+                            <span className="text-muted-foreground ml-1 font-thin">cancelled</span>
                           </>
                         )}
                         {(error || (!cancelled && message.status === MessageStatus.Error)) && (
                           <>
-                            <TriangleAlert className="ml-2 h-4 w-4 text-error" />
-                            <span className="ml-1 font-thin text-error">{error}</span>
+                            <TriangleAlert className="text-error ml-2 h-4 w-4" />
+                            <span className="text-error ml-1 font-thin">{error}</span>
                           </>
                         )}
                       </p>
                     )}
                     {state === DisplayMessageState.FileAsset && (
-                      <div className="pointer-events-auto flex w-full cursor-text select-text flex-row items-center px-0 py-2">
+                      <div className="pointer-events-auto flex w-full cursor-text flex-row items-center px-0 py-2 select-text">
                         <File className="mr-2 h-4 w-4" strokeWidth={1.5} />
                         <span>
                           {t('Document added')}:{' '}
@@ -186,7 +186,7 @@ function MessageComponent({
                       <div
                         ref={contentRef}
                         className={cn(
-                          'pointer-events-auto w-full cursor-text select-text px-0 py-2',
+                          'pointer-events-auto w-full cursor-text px-0 py-2 select-text',
                           state !== DisplayMessageState.Note ? '' : 'text-muted-foreground',
                         )}
                       >
@@ -194,12 +194,12 @@ function MessageComponent({
                       </div>
                     )}
                     {state === DisplayMessageState.Text && (
-                      <div className="pointer-events-auto w-full cursor-text select-text px-0 py-2">
+                      <div className="pointer-events-auto w-full cursor-text px-0 py-2 select-text">
                         {content}
                       </div>
                     )}
                     {state === DisplayMessageState.Edit && (
-                      <div className="-ml-3 mb-4 p-2">
+                      <div className="mb-4 -ml-3 p-2">
                         <Textarea
                           autoresize
                           autoFocus

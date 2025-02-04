@@ -47,7 +47,7 @@ export default function Explorer({
 
   const isTitlebarTransparent = isMac();
   return (
-    <div className="flex h-full w-full flex-1 items-start border-r-[1px] bg-secondary/70">
+    <div className="bg-secondary/70 flex h-full w-full flex-1 items-start border-r-[1px]">
       <nav className="flex h-full flex-1 flex-col">
         <div className="flex w-full items-center">
           <div

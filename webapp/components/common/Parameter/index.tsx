@@ -148,7 +148,7 @@ export default function Parameter({
           <p
             className={cn(
               textCss,
-              'w-full min-w-[220px] px-3 py-1 text-left text-muted-foreground',
+              'text-muted-foreground w-full min-w-[220px] px-3 py-1 text-left',
             )}
           >
             {value as string}
@@ -160,9 +160,9 @@ export default function Parameter({
               {(value as string) || t('None')}
             </Button>
             {type === 'path' ? (
-              <Folder strokeWidth={1.5} className="m-2.5 h-4 w-4 text-muted" />
+              <Folder strokeWidth={1.5} className="text-muted m-2.5 h-4 w-4" />
             ) : (
-              <File strokeWidth={1.5} className="h-4 w-4 text-muted" />
+              <File strokeWidth={1.5} className="text-muted h-4 w-4" />
             )}
           </div>
         )}
@@ -251,7 +251,7 @@ export default function Parameter({
             {label && (
               <Label className="flex flex-1 flex-col justify-center">
                 <p className="capitalize">{label}</p>
-                <p className="pt-2 text-sm text-muted-foreground">{sublabel}</p>
+                <p className="text-muted-foreground pt-2 text-sm">{sublabel}</p>
               </Label>
             )}
             {component}

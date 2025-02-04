@@ -129,7 +129,7 @@ function AssistantsStore() {
           <h2 className="mx-auto my-2 text-4xl font-extrabold md:text-3xl">
             {t('Assistants Store')}
           </h2>
-          <h3 className="pb-4 text-lg font-normal text-muted-foreground">
+          <h3 className="text-muted-foreground pb-4 text-lg font-normal">
             {t('Discover and use the perfect GPT agent for your needs.')}
           </h3>
           <InputIcon

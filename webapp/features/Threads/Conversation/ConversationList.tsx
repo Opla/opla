@@ -109,12 +109,12 @@ function ConversationList({
         </div>
       </div>
 
-      <div className="z-100 relative w-full">
+      <div className="relative z-100 w-full">
         {scrollPosition !== undefined && scrollPosition < 99 && (
           <Button
             variant="ghost"
             size="icon"
-            className="absolute bottom-4 right-8"
+            className="absolute right-8 bottom-4"
             onClick={
               () =>
                 onScroll({

@@ -45,13 +45,13 @@ export default function Searchbar({
         <Button size="icon" variant="ghost" onClick={onCancel}>
           <ArrowLeft className="h-4 w-4" strokeWidth={1.5} />
         </Button>
-        <div className="flex w-full items-center gap-2 rounded-md border border-input px-2 focus-within:border-transparent focus-within:ring-1 focus-within:ring-ring">
-          <Search strokeWidth={1.5} className="h-4 w-4 text-muted-foreground" />
+        <div className="border-input focus-within:ring-ring flex w-full items-center gap-2 rounded-md border px-2 focus-within:border-transparent focus-within:ring-1">
+          <Search strokeWidth={1.5} className="text-muted-foreground h-4 w-4" />
           <Input
             value={query}
             onChange={handleQuery}
             placeholder={placeholder ? t(placeholder) : undefined}
-            className="focus-visible:ring-none m-0 flex-1 overflow-hidden border-none p-0 shadow-none focus-visible:shadow-none focus-visible:outline-hidden focus-visible:ring-0"
+            className="focus-visible:ring-none m-0 flex-1 overflow-hidden border-none p-0 shadow-none focus-visible:ring-0 focus-visible:shadow-none focus-visible:outline-hidden"
             autoFocus
           />
           <Button size="icon" variant="ghost">

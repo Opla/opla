@@ -22,7 +22,7 @@ function Loading() {
       <Opla className="mb-8 h-10 w-10" />
       <div className="flex">
         <div className={`${circleCommonClasses} mr-1 animate-bounce`} />
-        <div className={`${circleCommonClasses} mr-1 animate-bounce200`} />
+        <div className={`${circleCommonClasses} animate-bounce200 mr-1`} />
         <div className={`${circleCommonClasses} animate-bounce400`} />
       </div>
     </div>

@@ -30,7 +30,7 @@ export default function ButtonCard({
   const container = (
     <div className="flex h-full w-full flex-col gap-2 p-4">
       <div className={`${cssTitle}min-h-[24px] w-full text-xl font-bold`}>{title}</div>
-      <div className={`${cssDesc}aspect-4/3 text-base text-secondary-foreground`}>
+      <div className={`${cssDesc}aspect-4/3 text-secondary-foreground text-base`}>
         <p className="line-clamp-4">{description}</p>
       </div>
     </div>
@@ -50,7 +50,7 @@ export default function ButtonCard({
       onClick={disabled ? undefined : onClick}
       className={`${
         selected ? `${cname} border-2` : `${cname}`
-      } m-2 h-full w-full overflow-hidden rounded bg-muted`}
+      } bg-muted m-2 h-full w-full overflow-hidden rounded`}
     >
       {container}
     </div>

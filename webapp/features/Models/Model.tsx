@@ -331,7 +331,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     return (
       <ContentView className="pb-8">
         <EmptyView
-          icon={<BrainCircuit className="h-16 w-16 text-muted" />}
+          icon={<BrainCircuit className="text-muted h-16 w-16" />}
           title={models.length > 0 ? t('Local models') : t("You don't have any models")}
           description={t(
             'You could add some local models by installing a featured model, or directly a gguf file from you machine.',
@@ -346,7 +346,7 @@ function ModelView({ selectedId: selectedModelId }: ModelViewProps) {
     <ContentView
       header={
         <div className="mx-3 flex h-7 grow flex-row items-center px-2">
-          <span className="gap-1 py-1 capitalize text-neutral-700 dark:text-neutral-500">
+          <span className="gap-1 py-1 text-neutral-700 capitalize dark:text-neutral-500">
             {`${model.creator || getEntityName(model.author) || t('Local')}`}
           </span>
           <span className="pl-2">/</span>
