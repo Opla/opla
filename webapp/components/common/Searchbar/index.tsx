@@ -51,7 +51,7 @@ export default function Searchbar({
             value={query}
             onChange={handleQuery}
             placeholder={placeholder ? t(placeholder) : undefined}
-            className="focus-visible:ring-none m-0 flex-1 overflow-hidden border-none p-0 shadow-none focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-0"
+            className="focus-visible:ring-none m-0 flex-1 overflow-hidden border-none p-0 shadow-none focus-visible:shadow-none focus-visible:outline-hidden focus-visible:ring-0"
             autoFocus
           />
           <Button size="icon" variant="ghost">

@@ -193,7 +193,7 @@ export default function Prompt({
   }
 
   return (
-    <div className="w-full grow-0 !bg-transparent">
+    <div className="w-full grow-0 bg-transparent!">
       <form className="mx-2 flex flex-col gap-2 last:mb-2">
         {(errorMessage || usage) && (
           <div className="m-1 flex w-full items-center justify-between gap-2">

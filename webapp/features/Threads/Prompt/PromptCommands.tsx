@@ -195,14 +195,14 @@ function PromptCommandInput({
     const textarea = textareaRef.current;
     const dropdown = dropdownRef.current;
     textarea?.addEventListener('keydown', handleKeyDown);
-    textarea?.addEventListener('blur', handleBlur);
+    textarea?.addEventListener('blur-sm', handleBlur);
     textarea?.addEventListener('focus', handleFocus);
     document?.addEventListener('selectionchange', handleSelectionChange);
     document?.addEventListener('mousemove', handleMouseMove);
     dropdown?.addEventListener('mousedown', handleMouseDown);
     return () => {
       textarea?.removeEventListener('keydown', handleKeyDown);
-      textarea?.removeEventListener('blur', handleBlur);
+      textarea?.removeEventListener('blur-sm', handleBlur);
       textarea?.removeEventListener('focus', handleFocus);
       document?.removeEventListener('selectionchange', handleSelectionChange);
       document?.removeEventListener('mousemove', handleMouseMove);
@@ -218,12 +218,12 @@ function PromptCommandInput({
       <div
         ref={dropdownRef}
         className={cn(
-          'absolute hidden h-auto min-w-[240px] max-w-[320px] overflow-visible rounded-md border bg-popover p-0 text-popover-foreground shadow',
+          'absolute hidden h-auto min-w-[240px] max-w-[320px] overflow-visible rounded-md border bg-popover p-0 text-popover-foreground shadow-sm',
         )}
       >
         <div className="w-full gap-2">
           {filteredCommands.length === 0 && (
-            <div className="rounded-sm px-2 py-1.5 text-left text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+            <div className="rounded-sm px-2 py-1.5 text-left text-sm outline-hidden aria-selected:bg-accent aria-selected:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50">
               {t(notFound)}
             </div>
           )}
@@ -238,7 +238,7 @@ function PromptCommandInput({
                   handleCommandSelect(item.value as string);
                 }}
                 className={cn(
-                  'ellipsis flex w-full cursor-pointer select-none flex-row-reverse items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+                  'ellipsis flex w-full cursor-pointer select-none flex-row-reverse items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-hidden aria-selected:bg-accent aria-selected:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50',
                   focusIndex !== -1 ? 'hover:bg-transparent' : '',
                 )}
               >

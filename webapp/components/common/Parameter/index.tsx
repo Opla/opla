@@ -245,7 +245,7 @@ export default function Parameter({
 
   return (
     <div className={cn(boxCss, className)}>
-      <div className="flex w-full flex-grow flex-col justify-center">
+      <div className="flex w-full grow flex-col justify-center">
         <div className="flex w-full flex-row items-center justify-between">
           <div className={`flex grow flex-row ${flex}`}>
             {label && (

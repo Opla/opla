@@ -86,7 +86,7 @@ export default function AssistantTitle({
         <Button
           variant="outline"
           disabled={targetItems.length < 2}
-          className="flex gap-4 px-3 capitalize text-foreground !opacity-100"
+          className="flex gap-4 px-3 capitalize text-foreground opacity-100!"
         >
           {assistant && (
             <AvatarView

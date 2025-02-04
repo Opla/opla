@@ -136,7 +136,7 @@ function MessageComponent({
     <MarkDownContext.Provider value={memoizedContent}>
       <div
         ref={disabled ? undefined : ref}
-        className={`group relative w-full hover:dark:bg-secondary/20 ${isUser ? '' : ''}`}
+        className={`group relative w-full dark:hover:bg-secondary/20 ${isUser ? '' : ''}`}
       >
         <div className="m-auto flex w-full gap-4 font-sans text-sm md:max-w-2xl md:gap-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
           <div className="m-auto flex w-full flex-row gap-4 p-4 md:max-w-2xl md:gap-6 md:py-6 lg:max-w-xl lg:px-0 xl:max-w-3xl">
@@ -146,7 +146,7 @@ function MessageComponent({
               </div>
             </div>
             <div className="flex w-[calc(100%-50px)] flex-col gap-1 md:gap-3 lg:w-[calc(100%-115px)]">
-              <div className="flex flex-grow flex-col">
+              <div className="flex grow flex-col">
                 <div className="flex flex-col items-start whitespace-pre-wrap break-words">
                   <div className="w-full break-words">
                     {state !== DisplayMessageState.Note && (

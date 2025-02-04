@@ -170,7 +170,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
       }
     >
       <ResizablePanelGroup direction="vertical">
-        <ResizablePanel id="models" className="!overflow-y-auto pt-2" minSize={4}>
+        <ResizablePanel id="models" className="overflow-y-auto! pt-2" minSize={4}>
           <ExplorerGroup
             title={t('Local models')}
             className="h-full"
@@ -245,7 +245,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
           </ExplorerGroup>
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel id="cloud" className="!overflow-y-auto pt-2" minSize={3}>
+        <ResizablePanel id="cloud" className="overflow-y-auto! pt-2" minSize={3}>
           <ExplorerGroup
             title={t('Cloud models')}
             className="h-full pb-8"
@@ -270,7 +270,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
           </ExplorerGroup>
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel id="featured" className="!overflow-y-auto pt-2" minSize={3}>
+        <ResizablePanel id="featured" className="overflow-y-auto! pt-2" minSize={3}>
           <ExplorerGroup
             title={t('Featured models')}
             className="h-full pb-8"

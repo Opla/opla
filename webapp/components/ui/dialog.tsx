@@ -162,7 +162,7 @@ function Dialog({
       onCancel={onClose}
       className={cn(
         cssSize,
-        `backdrop:secondary-foreground/20 relative rounded-lg bg-card shadow-lg transition-all backdrop:backdrop-blur-sm`,
+        `backdrop:secondary-foreground/20 relative rounded-lg bg-card shadow-lg transition-all backdrop:backdrop-blur-xs`,
       )}
     >
       {title && <div>{title}</div>}
@@ -182,7 +182,7 @@ function DialogHeader({ className, children, ...props }: React.HTMLAttributes<HT
 DialogHeader.displayName = 'DialogHeader';
 
 function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('flex flex-shrink-0 flex-row-reverse gap-3', className)} {...props} />;
+  return <div className={cn('flex shrink-0 flex-row-reverse gap-3', className)} {...props} />;
 }
 DialogFooter.displayName = 'DialogFooter';
 

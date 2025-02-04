@@ -30,7 +30,7 @@ const InputIcon = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div
         className={cn(
-          'disabled-within:opacity-50 flex w-full items-center rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-within:outline-none focus-within:ring-1 focus-within:ring-ring',
+          'disabled-within:opacity-50 flex w-full items-center rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-within:outline-hidden focus-within:ring-1 focus-within:ring-ring',
           className,
         )}
       >
@@ -38,7 +38,7 @@ const InputIcon = React.forwardRef<HTMLInputElement, InputProps>(
         <input
           type={type}
           className={cn(
-            'focus-visible:ring-none flex h-9 w-full bg-transparent file:border-0 file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:caret-primary focus-visible:outline-none disabled:cursor-not-allowed',
+            'focus-visible:ring-none flex h-9 w-full bg-transparent file:border-0 file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:caret-primary focus-visible:outline-hidden disabled:cursor-not-allowed',
             startIcon ? 'pl-4' : '',
             endIcon ? 'pr-4' : '',
             classNameInput,

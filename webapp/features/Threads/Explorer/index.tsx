@@ -356,7 +356,7 @@ export default function ThreadsExplorer({
             <ResizablePanelGroup direction="vertical">
               {showAssistants && (
                 <>
-                  <ResizablePanel id="assistant" className="!overflow-y-auto pt-2" minSize={4}>
+                  <ResizablePanel id="assistant" className="overflow-y-auto! pt-2" minSize={4}>
                     <AssistantsList
                       closed={closedAssistants}
                       onToggle={() => {
@@ -371,7 +371,7 @@ export default function ThreadsExplorer({
               )}
               {showRecent && (
                 <>
-                  <ResizablePanel id="recent" className="!overflow-y-auto pt-2" minSize={3}>
+                  <ResizablePanel id="recent" className="overflow-y-auto! pt-2" minSize={3}>
                     <ExplorerGroup
                       title={t(ViewName.Recent)}
                       closed={closedRecent}
@@ -424,7 +424,7 @@ export default function ThreadsExplorer({
               )}
               {showArchives && (
                 <>
-                  <ResizablePanel id="archives" className="!overflow-y-auto pt-2" minSize={3}>
+                  <ResizablePanel id="archives" className="overflow-y-auto! pt-2" minSize={3}>
                     <ExplorerGroup
                       title={t(ViewName.Archives)}
                       closed={closedArchives}
