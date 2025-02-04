@@ -70,7 +70,7 @@ const production = {
     ),
     h1: ({ children, id }: JSX.IntrinsicElements['h1']) => (
       <h1
-        className="mb-6 mt-6 font-sans text-2xl font-semibold text-neutral-950 dark:text-neutral-100"
+        className="mt-6 mb-6 font-sans text-2xl font-semibold text-neutral-950 dark:text-neutral-100"
         id={id}
       >
         {children}
@@ -78,7 +78,7 @@ const production = {
     ),
     h2: ({ children, id }: JSX.IntrinsicElements['h2']) => (
       <h2
-        className="mb-6 mt-6 font-sans text-2xl font-medium text-neutral-950 dark:text-neutral-100"
+        className="mt-6 mb-6 font-sans text-2xl font-medium text-neutral-950 dark:text-neutral-100"
         id={id}
       >
         {children}
@@ -86,7 +86,7 @@ const production = {
     ),
     h3: ({ children, id }: JSX.IntrinsicElements['h3']) => (
       <h3
-        className="mb-6 mt-2 font-sans text-xl font-semibold text-neutral-950 dark:text-neutral-100"
+        className="mt-2 mb-6 font-sans text-xl font-semibold text-neutral-950 dark:text-neutral-100"
         id={id}
       >
         {children}
@@ -182,7 +182,7 @@ const production = {
       </td>
     ),
     blockquote: ({ children }: JSX.IntrinsicElements['blockquote']) => (
-      <blockquote className="border-l-4 border-neutral-200 pl-2 italic text-neutral-900 dark:text-neutral-100">
+      <blockquote className="border-l-4 border-neutral-200 pl-2 text-neutral-900 italic dark:text-neutral-100">
         {children}
       </blockquote>
     ),

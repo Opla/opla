@@ -86,7 +86,7 @@ export default function AssistantTitle({
         <Button
           variant="outline"
           disabled={targetItems.length < 2}
-          className="flex gap-4 px-3 capitalize text-foreground !opacity-100"
+          className="text-foreground flex gap-4 px-3 capitalize opacity-100!"
         >
           {assistant && (
             <AvatarView
@@ -125,7 +125,7 @@ export default function AssistantTitle({
                   <span className="capitalize">{item.label}</span>
                   <Badge
                     variant="secondary"
-                    className={`ml-4 bg-gray-300 capitalize text-gray-600 ${getStateColor(item.state, 'text', true)}`}
+                    className={`ml-4 bg-gray-300 text-gray-600 capitalize ${getStateColor(item.state, 'text', true)}`}
                   >
                     {item.group || 'local'}
                   </Badge>

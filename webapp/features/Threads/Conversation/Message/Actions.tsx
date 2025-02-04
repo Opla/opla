@@ -25,7 +25,7 @@ import { DisplayMessageState } from './types';
 function DeleteButton({ onDeleteMessage }: { onDeleteMessage: () => void }) {
   return (
     <Button variant="ghost" size="sm" onClick={onDeleteMessage}>
-      <Trash2 className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+      <Trash2 className="text-muted-foreground h-4 w-4" strokeWidth={1.5} />
     </Button>
   );
 }
@@ -73,15 +73,15 @@ function Actions({
   return (
     <>
       {state === DisplayMessageState.FileAsset && isHover && (
-        <div className="left-34 absolute bottom-0 flex flex-row items-center">
+        <div className="absolute bottom-0 left-34 flex flex-row items-center">
           <DeleteButton onDeleteMessage={onDeleteAssets} />
         </div>
       )}
       {(state === DisplayMessageState.Pending || state === DisplayMessageState.Streaming) &&
         isHover && (
-          <div className="left-34 absolute bottom-0 flex flex-row items-center">
+          <div className="absolute bottom-0 left-34 flex flex-row items-center">
             <Button variant="ghost" size="sm" onClick={onCancelSending}>
-              <X className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+              <X className="text-muted-foreground h-4 w-4" strokeWidth={1.5} />
             </Button>
           </div>
         )}
@@ -89,7 +89,7 @@ function Actions({
         state === DisplayMessageState.Note ||
         state === DisplayMessageState.Text) &&
         isHover && (
-          <div className="left-34 absolute bottom-0 flex flex-row items-center">
+          <div className="absolute bottom-0 left-34 flex flex-row items-center">
             {message.contentHistory && message.contentHistory.length > 0 && (
               <div className="flex flex-row items-center pt-0 text-xs">
                 <Button
@@ -101,7 +101,7 @@ function Actions({
                   }}
                   className="h-5 w-5 p-1"
                 >
-                  <ChevronLeft className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                  <ChevronLeft className="text-muted-foreground h-4 w-4" strokeWidth={1.5} />
                 </Button>
                 <span className="tabular-nums">
                   {' '}
@@ -117,7 +117,7 @@ function Actions({
                   }}
                   className="h-5 w-5 p-1"
                 >
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                  <ChevronRight className="text-muted-foreground h-4 w-4" strokeWidth={1.5} />
                 </Button>
               </div>
             )}
@@ -129,7 +129,7 @@ function Actions({
                 title={`${t('Resend message')}  ${message.last ? shortcutAsText(ShortcutIds.RESEND_MESSAGE) : ''} `}
                 onClick={onResendMessage}
               >
-                <RotateCcw className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                <RotateCcw className="text-muted-foreground h-4 w-4" strokeWidth={1.5} />
               </Button>
             )}
             <CopyToClipBoard
@@ -148,7 +148,7 @@ function Actions({
                 size="sm"
                 onClick={onEdit}
               >
-                <Pencil className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                <Pencil className="text-muted-foreground h-4 w-4" strokeWidth={1.5} />
               </Button>
             )}
             <Button
@@ -158,12 +158,12 @@ function Actions({
               size="sm"
               onClick={onDeleteMessage}
             >
-              <Trash2 className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+              <Trash2 className="text-muted-foreground h-4 w-4" strokeWidth={1.5} />
             </Button>
           </div>
         )}
       {state === DisplayMessageState.Edit && (
-        <div className="left-30 absolute -bottom-2 flex flex-row gap-2">
+        <div className="absolute -bottom-2 left-30 flex flex-row gap-2">
           <Button size="sm" onClick={onSave} disabled={disabled} className="my-2 h-[28px] py-2">
             {isUser ? t('Save & submit') : t('Save')}
           </Button>

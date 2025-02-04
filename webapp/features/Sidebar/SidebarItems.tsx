@@ -64,7 +64,7 @@ export default function SidebarItems({
           <li key={name} className={className}>
             <DropdownMenu open={open} onOpenChange={setOpen}>
               <DropdownMenuTrigger>
-                <div className="h-5 w-5 p-0 hover:text-primary">
+                <div className="hover:text-primary h-5 w-5 p-0">
                   <Icon size="28px" strokeWidth={1.5} />
                 </div>
               </DropdownMenuTrigger>

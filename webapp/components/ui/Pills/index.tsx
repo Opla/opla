@@ -23,7 +23,7 @@ export function Pill({ label, className }: PillsProps) {
   return (
     <span
       className={cn(
-        'line-clamp-1 rounded border-0 px-2.5 py-0.5 text-2xs font-extrabold leading-3',
+        'text-2xs line-clamp-1 rounded border-0 px-2.5 py-0.5 leading-3 font-extrabold',
         className,
       )}
     >

@@ -10,7 +10,7 @@ function DialogClose({ className, onClose }: { className?: string; onClose: () =
       variant="ghost"
       aria-label="Close"
       className={cn(
-        'absolute right-2 top-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground',
+        'data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-2 right-2 disabled:pointer-events-none',
         className,
       )}
       type="button"
@@ -30,7 +30,7 @@ const DialogOverlay = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEle
     <div
       ref={ref}
       className={cn(
-        'fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80',
         className,
       )}
       {...props}
@@ -50,7 +50,7 @@ const LegacyDialog = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElem
       <div
         ref={ref}
         className={cn(
-          'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg',
+          'bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] fixed top-[50%] left-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border p-6 shadow-lg duration-200 sm:rounded-lg',
           className,
         )}
         {...props}
@@ -162,7 +162,7 @@ function Dialog({
       onCancel={onClose}
       className={cn(
         cssSize,
-        `backdrop:secondary-foreground/20 relative rounded-lg bg-card shadow-lg transition-all backdrop:backdrop-blur-sm`,
+        `backdrop:secondary-foreground/20 bg-card relative rounded-lg shadow-lg transition-all backdrop:backdrop-blur-xs`,
       )}
     >
       {title && <div>{title}</div>}
@@ -182,14 +182,14 @@ function DialogHeader({ className, children, ...props }: React.HTMLAttributes<HT
 DialogHeader.displayName = 'DialogHeader';
 
 function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('flex flex-shrink-0 flex-row-reverse gap-3', className)} {...props} />;
+  return <div className={cn('flex shrink-0 flex-row-reverse gap-3', className)} {...props} />;
 }
 DialogFooter.displayName = 'DialogFooter';
 
 function DialogTitle({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('pb-4 text-lg font-semibold leading-none tracking-tight', className)}
+      className={cn('pb-4 text-lg leading-none font-semibold tracking-tight', className)}
       {...props}
     />
   );
@@ -205,7 +205,7 @@ function DialogDescription(
   { className, children, ...props }: React.HTMLAttributes<HTMLDivElement>,
   ref: Ref<HTMLDivElement> | undefined,
 ) {
-  return <div ref={ref} className={cn('text-sm text-muted-foreground', className)} {...props} />;
+  return <div ref={ref} className={cn('text-muted-foreground text-sm', className)} {...props} />;
 }
 DialogDescription.displayName = 'DialogDescription';
 

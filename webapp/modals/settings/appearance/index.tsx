@@ -87,7 +87,7 @@ export default function Appearance() {
         label={t('Accent color')}
         sublabel={t('Choose the accent color used in app')}
       >
-        <Pill label="--" className="border-2 bg-primary leading-10 text-primary" />
+        <Pill label="--" className="bg-primary text-primary border-2 leading-10" />
       </Parameter>
       <Parameter name="theme" label={t('Theme')} sublabel={t('Change the theme')}>
         Default

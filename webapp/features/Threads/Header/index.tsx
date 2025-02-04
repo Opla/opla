@@ -115,14 +115,14 @@ export default function ThreadHeader({
   } else if (modelItems.length === 0 && !selectedConversationId) {
     return (
       <div className="flex w-full flex-col items-start justify-between px-4 py-0 sm:flex-row sm:items-center">
-        <div className="flex grow items-center justify-between p-2 text-sm font-extrabold leading-none">
+        <div className="flex grow items-center justify-between p-2 text-sm leading-none font-extrabold">
           {t('Welcome to Opla')}
         </div>
       </div>
     );
   } else {
     title = (
-      <div className="flex items-center justify-between rounded-md border p-2 text-sm font-medium leading-none text-error">
+      <div className="text-error flex items-center justify-between rounded-md border p-2 text-sm leading-none font-medium">
         <AlertTriangle className="mr-4 h-4 w-4" strokeWidth={1.5} />
         <span>
           {t('No local model found.')}{' '}

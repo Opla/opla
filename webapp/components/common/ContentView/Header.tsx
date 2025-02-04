@@ -37,7 +37,7 @@ export default function Header({ header, toolbar }: ToolbarProps) {
 
   return (
     <div
-      className="flex h-11 w-full flex-row items-center justify-between gap-1 bg-secondary/70 p-2 text-sm"
+      className="bg-secondary/70 flex h-11 w-full flex-row items-center justify-between gap-1 p-2 text-sm"
       data-tauri-drag-region={isTitlebarTransparent}
     >
       <div

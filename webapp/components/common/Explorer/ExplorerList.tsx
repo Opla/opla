@@ -92,7 +92,7 @@ export default function ExplorerList<T>({
     <ScrollArea className="h-full">
       <ul
         className={cn(
-          'flex flex-col break-all rounded-md px-1 py-3 text-sm dark:border-white/20',
+          'flex flex-col rounded-md px-1 py-3 text-sm break-all dark:border-white/20',
           className,
         )}
       >
@@ -103,7 +103,7 @@ export default function ExplorerList<T>({
               key={`${item.id}-${item.name}`}
               className={cn(
                 selectedId === item.id ? 'text-foreground' : 'text-muted-foreground',
-                'rounded-md px-2 py-2 transition-colors duration-200 hover:bg-foreground/10',
+                'hover:bg-foreground/10 rounded-md px-2 py-2 transition-colors duration-200',
               )}
             >
               {menuItems && menuItems.length > 0 ? (

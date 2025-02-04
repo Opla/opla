@@ -137,7 +137,7 @@ export default function AssistantsList({
             description={t(
               'Opt for a specialized AI agent or GPT to navigate and enhance your daily activities. These assistants can utilize both local models and external services like OpenAI, offering versatile support.',
             )}
-            icon={<Bot className="h-12 w-12 text-muted-foreground" strokeWidth={1.5} />}
+            icon={<Bot className="text-muted-foreground h-12 w-12" strokeWidth={1.5} />}
             className="h-full p-4"
           >
             {!store && StoreButton}
