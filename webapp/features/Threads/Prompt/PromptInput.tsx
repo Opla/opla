@@ -72,7 +72,7 @@ function PromptInput({
       autoCorrect="off"
       className={cn(
         className,
-        'overflow-hidden border-none whitespace-pre-wrap text-transparent shadow-none focus-visible:border-none focus-visible:ring-0 focus-visible:shadow-none focus-visible:outline-hidden',
+        'overflow-hidden border-none whitespace-pre-wrap text-transparent shadow-none focus-visible:border-none focus-visible:shadow-none focus-visible:ring-0 focus-visible:outline-hidden',
       )}
       value={value?.raw || ''}
       placeholder={placeholder}
