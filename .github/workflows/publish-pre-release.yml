@@ -30,7 +30,7 @@ jobs:
       - run: cargo install cargo-edit
     
       - name: Install dependencies
-        run: npm clean-install
+        run: npm install
       - name: Release
         id: release
         env:
