@@ -102,6 +102,8 @@ impl FromStr for ParsedPrompt {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct ConversationUsage {
+    #[serde(skip_serializing_if = "Option::is_none", alias = "conversationSize", default)]
+    conversation_size: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "promptTokens", default)]
     prompt_tokens: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none", alias = "completionTokens", default)]
