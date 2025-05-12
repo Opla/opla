@@ -41,13 +41,13 @@ function Mermaid({ content }: { content: string }) {
     return (
       <div className="flex items-center gap-2">
         <Loader2 className="h-4 w-4 animate-spin" />
-        <p className="font-sans text-sm text-muted"> Rendering diagram...</p>
+        <p className="text-muted font-sans text-sm"> Rendering diagram...</p>
       </div>
     );
   }
   if (diagram === false) {
     return (
-      <p className="font-sans text-sm text-muted">
+      <p className="text-muted font-sans text-sm">
         Unable to render this diagram.Try copying it into the{' '}
         <Link href="https://mermaid.live/edit" className={ANCHOR_CLASS_NAME} target="_blank">
           Mermaid Live Editor

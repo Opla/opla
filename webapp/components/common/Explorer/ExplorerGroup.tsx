@@ -49,9 +49,9 @@ function ExplorerGroup({
               strokeWidth={1.5}
             />
           </Button>
-          <div className="flex w-full flex-grow items-center justify-between gap-1 overflow-hidden p-0 pl-2">
+          <div className="flex w-full grow items-center justify-between gap-1 overflow-hidden p-0 pl-2">
             {typeof title === 'string' && (
-              <div className="line-clamp-1 text-ellipsis break-all text-sm capitalize text-muted-foreground">
+              <div className="text-muted-foreground line-clamp-1 text-sm break-all text-ellipsis capitalize">
                 {t(title)}
               </div>
             )}

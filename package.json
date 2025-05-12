@@ -1,6 +1,6 @@
 {
     "name": "opla",
-    "version": "1.0.0-alpha.237",
+    "version": "1.0.0-alpha.239",
     "private": true,
     "scripts": {
         "dev": "cd webapp && npm run dev",
@@ -24,6 +24,6 @@
         "lint-staged": "^15.2.7"
     },
     "dependencies": {
-        "@npmcli/package-json": "^6.0.0"
+        "@npmcli/package-json": "^6.1.1"
     }
 }

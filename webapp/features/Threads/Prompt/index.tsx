@@ -193,19 +193,19 @@ export default function Prompt({
   }
 
   return (
-    <div className="w-full grow-0 !bg-transparent">
+    <div className="w-full grow-0 bg-transparent!">
       <form className="mx-2 flex flex-col gap-2 last:mb-2">
         {(errorMessage || usage) && (
           <div className="m-1 flex w-full items-center justify-between gap-2">
             {errorMessage && (
               <div className="flex w-full items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-error" />
-                <span className="text-xs text-error">{errorMessage}</span>
+                <AlertTriangle className="text-error h-4 w-4" />
+                <span className="text-error text-xs">{errorMessage}</span>
               </div>
             )}
             {usage && usage.tokenCount > 0 && usage.activeService && usage.activeService.model && (
               <div className="flex w-full flex-row-reverse items-center gap-2 pr-4">
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   {usage.activeService.model.title || usage.activeService.model.name} /{' '}
                   {usage.tokenCount} {t('tokens')}
                 </span>
@@ -213,7 +213,7 @@ export default function Prompt({
             )}
           </div>
         )}
-        <div className="flex w-full flex-row items-center rounded-md border border-input p-3 focus-within:border-transparent focus-within:ring-1 focus-within:ring-ring">
+        <div className="border-input focus-within:ring-ring flex w-full flex-row items-center rounded-md border p-3 focus-within:border-transparent focus-within:ring-1">
           <Button
             disabled={disabled || isLoading}
             type="button"

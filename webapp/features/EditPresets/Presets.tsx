@@ -127,7 +127,7 @@ export default function Presets({
                     {p?.name}
                     <AlertTriangle
                       className={cn(
-                        'ml-auto h-4 w-4 text-destructive',
+                        'text-destructive ml-auto h-4 w-4',
                         compatibles[p.id] ? 'opacity-0' : 'opacity-100',
                       )}
                     />

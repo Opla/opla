@@ -33,7 +33,7 @@ export default function ContentView({
 }: ContentViewProps) {
   // const { t } = useTranslation();
   return (
-    <div className={cn('flex h-full flex-col bg-secondary/20', className)}>
+    <div className={cn('bg-secondary/20 flex h-full flex-col', className)}>
       {(header || toolbar) && <Header header={header || selectedId || ''} toolbar={toolbar} />}
       {children}
     </div>

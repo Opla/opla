@@ -1,6 +1,6 @@
 [package]
 name = "app"
-version = "1.0.0-alpha.237"
+version = "1.0.0-alpha.239"
 description = "A Tauri App"
 authors = ["you"]
 license = ""
@@ -17,25 +17,25 @@ serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "1.8.1", features = [ "updater", "fs-read-dir", "protocol-asset", "fs-remove-file", "fs-create-dir", "fs-remove-dir", "fs-read-file", "fs-write-file", "fs-exists", "http-all", "dialog-all", "path-all", "shell-execute", "shell-open", "shell-sidecar", "window-all"] }
 tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
-sysinfo = { version = "0.33.0", features = ["apple-app-store"] }
-dirs = "5.0.1"
-reqwest = { version = "0.12.9", features = ["json", "stream"] }
-chrono = "0.4.39"
-serde_with = { version = "3.11.0", features = ["json"] }
-uuid = { version = "1.11.0", features = ["v4"] }
+sysinfo = { version = "0.33.1", features = ["apple-app-store"] }
+dirs = "6.0.0"
+reqwest = { version = "0.12.15", features = ["json", "stream"] }
+chrono = "0.4.41"
+serde_with = { version = "3.12.0", features = ["json"] }
+uuid = { version = "1.16.0", features = ["v4"] }
 void = "1.0.2"
-thiserror = "2.0.7"
+thiserror = "2.0.12"
 eventsource-stream = "0.2.3"
 futures-util = "0.3.31"
-tokio = { version = "1.42.0", features = ["sync"] }
+tokio = { version = "1.44.2", features = ["sync"] }
 tokenizer = { path = "../../crates/tokenizer"}
 opla_core = { path = "../../crates/core"}
-sha2 = "0.10.8"
-async-trait = "0.1.83"
-dyn-clone = "1.0.17"
-bytes = "1.9.0"
+sha2 = "0.10.9"
+async-trait = "0.1.88"
+bytes = "1.10.1"
+dyn-clone = "1.0.19"
 regex = "1.11.1"
-phf = "0.11.2"
+phf = "0.11.3"
 showfile = "0.1.1"
 
 [target.'cfg(target_os = "macos")'.dependencies]

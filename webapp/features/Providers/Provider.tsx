@@ -145,7 +145,7 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
                 disabled={emptyLogs}
                 onClick={handleClearLogs}
               >
-                <Trash className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                <Trash className="text-muted-foreground h-4 w-4" strokeWidth={1.5} />
               </Button>
               <CopyToClipBoard
                 title={t('Copy logs to clipboard')}
@@ -159,7 +159,7 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
                   <>
                     {server.status === ServerStatus.ERROR && (
                       <div className="w-full text-sm">
-                        <div className="break-all pb-2 text-error dark:text-destructive">
+                        <div className="text-error dark:text-destructive pb-2 break-all">
                           {t('Server Error')} : {server.message}
                         </div>
                       </div>
@@ -170,7 +170,7 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
                         .map((log) => (
                           <div
                             key={log.id}
-                            className="break-all pb-2 text-neutral-400 dark:text-neutral-600"
+                            className="pb-2 break-all text-neutral-400 dark:text-neutral-600"
                           >
                             {log.log}
                           </div>
@@ -180,7 +180,7 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
                       {server.stderr
                         ?.map((log, index) => ({ id: index, log }))
                         .map((log) => (
-                          <div key={log.id} className="break-all text-error dark:text-destructive">
+                          <div key={log.id} className="text-error dark:text-destructive break-all">
                             {log.log}
                           </div>
                         ))}
@@ -192,7 +192,7 @@ function ProviderView({ selectedId: selectedProviderId }: ProviderViewProps) {
                     {provider.errors
                       ?.map((log, index) => ({ id: index, log }))
                       .map((log) => (
-                        <div key={log.id} className="break-all text-error dark:text-destructive">
+                        <div key={log.id} className="text-error dark:text-destructive break-all">
                           {log.log}
                         </div>
                       ))}

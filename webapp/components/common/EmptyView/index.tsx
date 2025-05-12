@@ -73,7 +73,7 @@ function EmptyView({
       <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
         {icon}
         <h3 className="mt-4 text-lg font-extrabold">{title}</h3>
-        <p className="mb-4 mt-2 text-sm text-muted-foreground">{description}</p>
+        <p className="text-muted-foreground mt-2 mb-4 text-sm">{description}</p>
         {buttonLabel && <Button onClick={onCreateItem}>{buttonLabel}</Button>}
         {actions && (
           <div className="flex gap-2">{actions.map((action) => renderAction(action))}</div>

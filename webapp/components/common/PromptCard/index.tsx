@@ -45,7 +45,7 @@ export default function PromptCard({
     <div className="m-2 flex flex-col gap-2 p-3">
       <div className={`${cssTitle} w-full text-sm font-bold`}>{prompt.title}</div>
       <p
-        className={`${cssDesc} dark:text-muted-foreground-dark line-clamp-3 w-full text-balance text-xs text-muted-foreground`}
+        className={`${cssDesc} dark:text-muted-foreground-dark text-muted-foreground line-clamp-3 w-full text-xs text-balance`}
       >
         {prompt.description}
       </p>
@@ -56,15 +56,15 @@ export default function PromptCard({
       asChild
       variant="outline"
       onClick={onSelect}
-      className="m-2 h-full w-full cursor-pointer overflow-hidden bg-muted"
+      className="bg-muted m-2 h-full w-full cursor-pointer overflow-hidden"
     >
       {container}
     </Button>
   ) : (
     <div
       className={`${
-        selected ? 'border border-primary' : ''
-      } m-2 h-full w-full overflow-hidden rounded border border-muted`}
+        selected ? 'border-primary border' : ''
+      } border-muted m-2 h-full w-full overflow-hidden rounded border`}
     >
       {container}
     </div>

@@ -58,7 +58,7 @@ export default function SearchPanel({ query, onSelectResult = () => {} }: Search
   return (
     <div className="flex w-full flex-col gap-2 p-2">
       {results && results?.length > 0 && (
-        <div className="px-4 pb-4 text-sm text-muted-foreground">
+        <div className="text-muted-foreground px-4 pb-4 text-sm">
           {t('result', { count })} {t('')} {t('in_conversation', { count: results.length })}{' '}
         </div>
       )}
@@ -78,7 +78,7 @@ export default function SearchPanel({ query, onSelectResult = () => {} }: Search
             {result.entries.map((entry) => (
               <div
                 key={entry.id}
-                className="m-2 line-clamp-1 text-ellipsis break-all text-sm text-muted-foreground"
+                className="text-muted-foreground m-2 line-clamp-1 text-sm break-all text-ellipsis"
               >
                 <span>{entry.previousText}</span>
                 <span className="bg-orange-800">{entry.match}</span>
@@ -92,7 +92,7 @@ export default function SearchPanel({ query, onSelectResult = () => {} }: Search
         <EmptyView
           title={t('No results')}
           description={t('the query is not present in conversations.')}
-          icon={<Search className="h-16 w-16 text-muted" />}
+          icon={<Search className="text-muted h-16 w-16" />}
           className="h-full"
         />
       )}

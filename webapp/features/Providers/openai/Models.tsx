@@ -109,7 +109,7 @@ export default function OpenAIModels({
   };
 
   return (
-    <div className={cn('h-full pb-16 pt-4', containerClassName)}>
+    <div className={cn('h-full pt-4 pb-16', containerClassName)}>
       {models.length > 0 && (
         <form className={cn('h-full w-full items-start gap-6 pt-8', formClassName)}>
           <fieldset className="grid h-full gap-6 rounded-lg border p-4">
@@ -118,7 +118,7 @@ export default function OpenAIModels({
               className=""
               containerClassname={cn('overflow-y-scroll', className || 'h-[400px]')}
             >
-              <TableHeader className="sticky top-0 z-50 bg-secondary">
+              <TableHeader className="bg-secondary sticky top-0 z-50">
                 <TableRow>
                   <TableHead className="w-1/7 px-2 py-1">{t('Select')}</TableHead>
                   <TableHead className="w-2/7 px-2 py-1">{t('Model')}</TableHead>

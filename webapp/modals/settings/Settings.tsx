@@ -53,16 +53,16 @@ export default function Settings({
       <div className="flex h-full w-full">
         <div className="navSettings">
           <NavContainer>
-            <div className="text-l text-ellipsis break-all p-3 font-semibold">{t('Settings')}</div>
+            <div className="text-l p-3 font-semibold break-all text-ellipsis">{t('Settings')}</div>
             <ul className="flex flex-1 flex-col gap-1 p-1">
               {menu.map((item) => (
                 <li key={item.id}>
                   <div
                     className={cn(
                       item.href === tab || item.hrefAlias === tab
-                        ? 'text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+                        ? 'text-foreground focus-visible:ring-ring focus-visible:ring-1 focus-visible:outline-none'
                         : 'text-muted-foreground',
-                      'flex cursor-pointer flex-row items-center break-all rounded-md px-2 py-2 transition-colors duration-200 hover:text-accent-foreground',
+                      'hover:text-accent-foreground flex cursor-pointer flex-row items-center rounded-md px-2 py-2 break-all transition-colors duration-200',
                     )}
                     role="button"
                     tabIndex={0}
@@ -74,7 +74,7 @@ export default function Settings({
                       onTabChanged(item.href);
                     }}
                   >
-                    <div className="relative flex-1 overflow-hidden text-ellipsis break-all">
+                    <div className="relative flex-1 overflow-hidden break-all text-ellipsis">
                       {t(item.name)}
                     </div>
                   </div>
@@ -87,7 +87,7 @@ export default function Settings({
           <div className="flex h-full flex-col pt-8">{children}</div>
         </div>
       </div>
-      <div className="flex w-full items-center gap-2 p-2 text-xs text-muted-foreground">
+      <div className="text-muted-foreground flex w-full items-center gap-2 p-2 text-xs">
         <span>Opla version: {process.env.NEXT_PUBLIC_SENTRY_RELEASE}</span>{' '}
         <Separator orientation="vertical" />
         <span>{process.env.NODE_ENV}</span>

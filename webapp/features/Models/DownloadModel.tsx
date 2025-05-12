@@ -74,14 +74,14 @@ function DownloadModel({ className, download, onAction }: DownloadModelProps) {
         title={t('No downloads')}
         description=""
         icon={<CloudDownload />}
-        className="h-full text-muted-foreground"
+        className="text-muted-foreground h-full"
       />
     );
   }
 
   return (
     <div className={cn('flex flex-row items-center gap-3', className)}>
-      <File className="h-12 w-12 p-2 text-primary" strokeWidth={1.5} />
+      <File className="text-primary h-12 w-12 p-2" strokeWidth={1.5} />
       <div className="flex w-full flex-col gap-2">
         <p className="text-sm">{model?.name}</p>
 
@@ -89,21 +89,21 @@ function DownloadModel({ className, download, onAction }: DownloadModelProps) {
           <>
             <Progress value={download?.percentage ?? 0} className="w-full" />
             {download && (
-              <div className="flex h-3 w-full items-center gap-2 text-xs tabular-nums text-muted-foreground">
+              <div className="text-muted-foreground flex h-3 w-full items-center gap-2 text-xs tabular-nums">
                 {formatFileSize(download.transfered)} {t('of')} {formatFileSize(download.fileSize)}{' '}
                 <Separator orientation="vertical" className="bg-muted-foreground" />(
                 {formatFileSize(download.transferRate)}/sec)
               </div>
             )}
             {!download && (
-              <div className="flex h-3 w-full items-center gap-2 text-xs text-muted-foreground">
+              <div className="text-muted-foreground flex h-3 w-full items-center gap-2 text-xs">
                 {t('Starting...')}
               </div>
             )}
           </>
         )}
         {!download && model && (
-          <div className="flex h-3 w-full items-center gap-2 text-xs text-muted-foreground">
+          <div className="text-muted-foreground flex h-3 w-full items-center gap-2 text-xs">
             {t(getModelStateAsString(model))}{' '}
             <Separator orientation="vertical" className="bg-muted-foreground" />{' '}
             {formatFileSize(model?.size ?? 0)}
@@ -122,7 +122,7 @@ function DownloadModel({ className, download, onAction }: DownloadModelProps) {
         >
           {state === 'downloading' && <X className="h-4 w-4" strokeWidth={1.5} />}
           {state === 'ok' && <Search className="h-4 w-4" strokeWidth={1.5} />}
-          {state === 'error' && <TriangleAlert className="h-4 w-4 text-error" strokeWidth={1.5} />}
+          {state === 'error' && <TriangleAlert className="text-error h-4 w-4" strokeWidth={1.5} />}
         </Button>
       )}
     </div>

@@ -170,7 +170,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
       }
     >
       <ResizablePanelGroup direction="vertical">
-        <ResizablePanel id="models" className="!overflow-y-auto pt-2" minSize={4}>
+        <ResizablePanel id="models" className="overflow-y-auto! pt-2" minSize={4}>
           <ExplorerGroup
             title={t('Local models')}
             className="h-full"
@@ -197,7 +197,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
                       <div className="flex w-full grow flex-row items-center justify-between overflow-hidden pl-0">
                         <div
                           className={cn(
-                            'flex-1 text-ellipsis break-all pr-1',
+                            'flex-1 pr-1 break-all text-ellipsis',
                             model.state === ModelState.Error || model.state === ModelState.NotFound
                               ? 'text-error'
                               : '',
@@ -215,7 +215,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
                           title={model.title || model.name}
                           editable
                           className={cn(
-                            'line-clamp-1 h-auto w-full flex-1 overflow-hidden text-ellipsis break-all px-0 py-1',
+                            'line-clamp-1 h-auto w-full flex-1 overflow-hidden px-0 py-1 break-all text-ellipsis',
                             model.state === ModelState.Error || model.state === ModelState.NotFound
                               ? 'text-error'
                               : '',
@@ -236,7 +236,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
                   title={t('No models')}
                   description={t("Let's add one!")}
                   icon={
-                    <BrainCircuit className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} />
+                    <BrainCircuit className="text-muted-foreground h-8 w-8" strokeWidth={1.5} />
                   }
                   className="h-full"
                 />
@@ -245,7 +245,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
           </ExplorerGroup>
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel id="cloud" className="!overflow-y-auto pt-2" minSize={3}>
+        <ResizablePanel id="cloud" className="overflow-y-auto! pt-2" minSize={3}>
           <ExplorerGroup
             title={t('Cloud models')}
             className="h-full pb-8"
@@ -260,7 +260,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
                 <ModelIcon
                   icon={m.icon}
                   name={m.name}
-                  className="h-4 w-4 text-muted-foreground"
+                  className="text-muted-foreground h-4 w-4"
                   providerName={m.creator}
                 />
               )}
@@ -270,7 +270,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
           </ExplorerGroup>
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel id="featured" className="!overflow-y-auto pt-2" minSize={3}>
+        <ResizablePanel id="featured" className="overflow-y-auto! pt-2" minSize={3}>
           <ExplorerGroup
             title={t('Featured models')}
             className="h-full pb-8"
@@ -285,7 +285,7 @@ function ModelsExplorer({ selectedId: selectedModelId }: ModelsExplorerProps) {
                 <ModelIcon
                   icon={m.icon}
                   name={m.name}
-                  className="h-4 w-4 text-muted-foreground"
+                  className="text-muted-foreground h-4 w-4"
                   providerName={m.creator}
                 />
               )}

@@ -115,10 +115,10 @@ export default function Settings({
         </TabsContent>
         <TabsContent value="documents" className="grow px-4">
           {selectedConversation?.updatedAt && (
-            <div className="w-full p-2 text-sm text-muted-foreground">
+            <div className="text-muted-foreground w-full p-2 text-sm">
               <div className="ellipsis flex w-full flex-row justify-between tabular-nums">
                 <div className="line-clamp-1 text-xs">{t('ID')}:</div>
-                <div className="ellipsis mb-4 line-clamp-1 break-all text-xs">
+                <div className="ellipsis mb-4 line-clamp-1 text-xs break-all">
                   {selectedConversation.id}
                 </div>
               </div>
@@ -150,7 +150,7 @@ export default function Settings({
             </div>
           )}
           {selectedConversation && (
-            <div className="w-full p-2 text-sm text-muted-foreground">
+            <div className="text-muted-foreground w-full p-2 text-sm">
               <div className="py-4">{t('Files')}</div>
               {getConversationAssets(selectedConversation)?.map((asset, index) => (
                 <div className="flex w-full flex-row items-center p-1 text-xs" key={asset.id}>
@@ -166,7 +166,7 @@ export default function Settings({
                       deleteConversationAsset(index);
                     }}
                   >
-                    <X className="h-4 w-4 text-destructive" strokeWidth={1.5} />
+                    <X className="text-destructive h-4 w-4" strokeWidth={1.5} />
                   </Button>
                 </div>
               ))}
@@ -183,9 +183,9 @@ export default function Settings({
             />
           </div>
           {errors.map((error) => (
-            <div key={error.id} className="p-2 text-xs text-error">
+            <div key={error.id} className="text-error p-2 text-xs">
               <p>
-                <AlertTriangle className="mr-2 inline-flex h-4 w-4 text-error" />
+                <AlertTriangle className="text-error mr-2 inline-flex h-4 w-4" />
                 <span>{error.message}</span>
               </p>
             </div>

@@ -30,15 +30,15 @@ const InputIcon = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div
         className={cn(
-          'disabled-within:opacity-50 flex w-full items-center rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-within:outline-none focus-within:ring-1 focus-within:ring-ring',
+          'disabled-within:opacity-50 border-input focus-within:ring-ring flex w-full items-center rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-within:ring-1 focus-within:outline-hidden',
           className,
         )}
       >
-        {StartIcon && <StartIcon className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />}
+        {StartIcon && <StartIcon className="text-muted-foreground h-4 w-4" strokeWidth={1.5} />}
         <input
           type={type}
           className={cn(
-            'focus-visible:ring-none flex h-9 w-full bg-transparent file:border-0 file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:caret-primary focus-visible:outline-none disabled:cursor-not-allowed',
+            'focus-visible:ring-none placeholder:text-muted-foreground focus-visible:caret-primary flex h-9 w-full bg-transparent file:border-0 file:text-sm file:font-medium focus-visible:outline-hidden disabled:cursor-not-allowed',
             startIcon ? 'pl-4' : '',
             endIcon ? 'pr-4' : '',
             classNameInput,
@@ -47,7 +47,7 @@ const InputIcon = React.forwardRef<HTMLInputElement, InputProps>(
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...props}
         />
-        {EndIcon && <EndIcon className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />}
+        {EndIcon && <EndIcon className="text-muted-foreground h-4 w-4" strokeWidth={1.5} />}
       </div>
     );
   },
