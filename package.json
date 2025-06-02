@@ -21,7 +21,7 @@
     "devDependencies": {
         "eslint": "^9",
         "husky": "^9.1.6",
-        "lint-staged": "^15.2.7"
+        "lint-staged": "^16.0.0"
     },
     "dependencies": {
         "@npmcli/package-json": "^6.1.1"
