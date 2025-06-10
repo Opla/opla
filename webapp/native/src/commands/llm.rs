@@ -17,12 +17,7 @@ use tauri::{ Runtime, State };
 use crate::{
     data::provider::Provider,
     providers::llm::{
-        LlmCompletionOptions,
-        LlmImageGenerationResponse,
-        LlmModelsResponse,
-        LlmQuery,
-        LlmQueryCompletion,
-        LlmTokenizeResponse,
+        LlmCompletionOptions, LlmImageGenerationResponse, LlmMessage, LlmModelsResponse, LlmQuery, LlmQueryCompletion, LlmTokenizeResponse
     },
     OplaContext,
 };
@@ -65,6 +60,20 @@ pub async fn llm_call_tokenize<R: Runtime>(
 ) -> Result<LlmTokenizeResponse, String> {
     let mut manager = context.providers_manager.lock().await;
     manager.llm_call_tokenize::<R>(app, model, provider, text).await
+}
+
+#[tauri::command]
+pub async fn llm_call_tokenize_messages<R: Runtime>(
+    app: tauri::AppHandle<R>,
+    _window: tauri::Window<R>,
+    context: State<'_, OplaContext>,
+    model: String,
+    provider: Provider,
+    messages: Vec<LlmMessage>,
+    completion_options: Option<LlmCompletionOptions>
+) -> Result<LlmTokenizeResponse, String> {
+    let mut manager = context.providers_manager.lock().await;
+    manager.llm_call_tokenize_messages::<R>(app, model, provider, messages, completion_options).await
 }
 
 #[tauri::command]
