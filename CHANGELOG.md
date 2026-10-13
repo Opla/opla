@@ -1,17 +1,3 @@
-# [1.0.0-alpha.241](https://github.com/Opla/opla/compare/v1.0.0-alpha.240...v1.0.0-alpha.241) (2026-10-13)
-
-
-### Reverts
-
-* Revert "feat: add Opla Demo plugin marketplace" ([9a5540b](https://github.com/Opla/opla/commit/9a5540b6733832fdea8c085902d0d5b49e2ee16c))
-
-# [1.0.0-alpha.240](https://github.com/Opla/opla/compare/v1.0.0-alpha.239...v1.0.0-alpha.240) (2026-10-13)
-
-
-### Features
-
-* add Opla Demo plugin marketplace ([9d4ac84](https://github.com/Opla/opla/commit/9d4ac8499c10ccb6e4cf7fc431cfe097076a28b6))
-
 # [1.0.0-alpha.239](https://github.com/Opla/opla/compare/v1.0.0-alpha.238...v1.0.0-alpha.239) (2025-02-04)
 
 
