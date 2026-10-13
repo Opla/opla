@@ -1,0 +1,31 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "opla-demo",
+  "version": "0.1.4",
+  "description": "Use Opla Demo to validate email and six-digit passcode onboarding through the hosted Opla MCP app.",
+  "author": {
+    "name": "Opla",
+    "url": "https://opla.ai"
+  },
+  "homepage": "https://opla.ai",
+  "repository": "https://github.com/Opla/opla",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Opla Demo",
+        "shortDescription": "Test Opla onboarding",
+        "longDescription": "Connect to Opla's hosted MCP app and validate sign-in with an email address and six-digit passcode.",
+        "developerName": "Opla",
+        "category": "Developer Tools",
+        "capabilities": [
+          "Authentication",
+          "Interactive"
+        ],
+        "defaultPrompt": "Run Opla Demo and show the onboarding result.",
+        "logo": "./assets/opla.png",
+        "composerIcon": "./assets/opla.png",
+        "brandColor": "#000000"
+      }
+    }
+  }
+}

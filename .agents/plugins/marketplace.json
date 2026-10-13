@@ -1,0 +1,20 @@
+{
+  "name": "opla",
+  "interface": {
+    "displayName": "Opla"
+  },
+  "plugins": [
+    {
+      "name": "opla-demo",
+      "source": {
+        "source": "local",
+        "path": "./plugins/opla-demo"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

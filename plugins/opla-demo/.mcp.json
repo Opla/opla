@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "opla": {
+      "type": "streamable-http",
+      "url": "https://mcp.opla.fr/mcp",
+      "headers": {},
+      "extensions": {
+        "com.openai": {
+          "auth": {
+            "type": "oauth",
+            "client": {
+              "mode": "dcr"
+            },
+            "baseScopes": [
+              "opla:demo"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
